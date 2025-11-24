@@ -11,71 +11,131 @@ from datetime import datetime
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-# Comprehensive EMOJI_MAP for all portfolio holdings
-EMOJI_MAP = {
+# Portfolio symbols mapping: eToro symbol -> Yahoo Finance ticker
+PORTFOLIO_TICKERS = {
     # ETFs
-    '$.SPXEXC': '🪙',
-    'VWCE.L': '🌐',
-    'ITPB': '🏦',
-    'IQQL.DE': '🔥',
-    'IEMB': '🌍',
+    'SX7PEX.DE': 'SX7PEX.DE',      # iShares S&P 500 UCITS ETF
+    'VWCE.L': 'VWCE.L',            # Vanguard FTSE All-World UCITS ETF
+    'IEUR': 'IEUR.L',              # iShares Core MSCI Europe UCITS ETF
+    'IQQL.DE': 'IQQL.DE',          # iShares MSCI World Quality Factor UCITS ETF
+    'IEMG': 'IEMG',                # iShares Core MSCI Emerging Markets ETF
+    'WDEF.L': 'WDEF.L',            # WisdomTree Europe Equity Income UCITS ETF
     
     # Healthcare & Pharmaceuticals
-    'AZUL.L': '💊',
-    'ABTL': '🏥',
+    'AZN.L': 'AZN.L',              # AstraZeneca (London)
+    'ABT': 'ABT',                  # Abbott Laboratories
+    'ABBV': 'ABBV',                # AbbVie
+    'LLY': 'LLY',                  # Eli Lilly
+    'NOVO-B': 'NVO',               # Novo Nordisk (US ADR)
+    'HUM': 'HUM',                  # Humana
+    
+    # Technology & Semiconductors
+    'AVGO': 'AVGO',                # Broadcom
+    'NVDA': 'NVDA',                # NVIDIA
+    'TSM': 'TSM',                  # Taiwan Semiconductor
+    'MSFT': 'MSFT',                # Microsoft
+    'SNPS': 'SNPS',                # Synopsys
+    'AMZN': 'AMZN',                # Amazon
+    'GOOG': 'GOOGL',               # Google/Alphabet
+    'PLTR': 'PLTR',                # Palantir
+    'NET': 'NET',                  # Cloudflare
+    
+    # Energy & Nuclear
+    'CCJ': 'CCJ',                  # Cameco
+    'ENEL.MI': 'ENEL.MI',          # Enel (Milan)
+    
+    # Crypto
+    'TRX': 'TRX-USD',              # TRON
+    'ETOR': 'BTC-USD',             # Bitcoin (assuming ETOR is Bitcoin ETN)
+    
+    # Financial Services & Others
+    'DB1.DE': 'DB1.DE',            # Xtrackers MSCI World Momentum UCITS ETF
+    'TRIG.L': 'TRIG.L',            # Trig PLC
+    'BHPL': 'BHP',                 # BHP Group (US ADR)
+    'PRY.MI': 'PRY.MI',            # Prysmian (Milan)
+    'RACE': 'RACE',                # Ferrari
+    'VOW3': 'VOW3.DE',             # Volkswagen
+    'MELI': 'MELI',                # MercadoLibre
+    'PYPL': 'PYPL',                # PayPal
+    'GLEN': 'GLEN.L',              # Glencore (London)
+    '1919.HK': '1919.HK',          # COSCO SHIPPING Holdings (Hong Kong)
+    '2318.HK': '2318.HK',          # Ping An Insurance (Hong Kong)
+}
+
+# Emoji mapping for each eToro symbol
+EMOJI_MAP = {
+    # ETFs
+    'SX7PEX.DE': '🪙',
+    'VWCE.L': '🌐',
+    'IEUR': '🏦',
+    'IQQL.DE': '🔥',
+    'IEMB': '🌍',
+    'WDEF.L': '💼',
+    
+    # Healthcare & Pharmaceuticals
+    'AZN.L': '💊',
+    'ABT': '🏥',
     'ABBV': '💉',
     'LLY': '🧬',
     'NOVO-B': '💉',
-    'HBM': '🧪',
+    'HUM': '🏥',
     
     # Technology & Semiconductors
     'AVGO': '🔧',
     'NVDA': '🤖',
     'TSM': '🏭',
-    'MSTF': '💻',
-    'SMCI': '🖥️',
+    'MSFT': '💻',
+    'SNPS': '🖥️',
     'AMZN': '📦',
-    'GOOGL': '🔍',
+    'GOOG': '🔍',
+    'PLTR': '🔮',
+    'NET': '☁️',
     
     # Energy & Nuclear
-    'CEG': '⚡',
-    'NRG': '🔋',
-    'ENBL.MU': '🔋',
+    'CCJ': '⚡',
+    'ENEL.MI': '🔋',
     
     # Crypto
     'TRX': '🪙',
-    'NET': '💰',
+    'ETOR': '₿',
     
-    # Financial Services
-    'BLK.DE': '📈',
-    'V': '💳',
-    'DBLM.DE': '📊',
+    # Financial Services & Others
+    'DB1.DE': '📊',
+    'TRIG.L': '🔺',
+    'BHPL': '⛏️',
+    'PRY.MI': '🔌',
+    'RACE': '🏎️',
+    'VOW3': '🚗',
+    'MELI': '🛒',
+    'PYPL': '💳',
+    'GLEN': '⛏️',
+    '1919.HK': '🚢',
     '2318.HK': '🏦',
 }
 
-def get_emoji(symbol):
-    """Get emoji for a given symbol"""
-    return EMOJI_MAP.get(symbol, '📊')
+def get_emoji(etoro_symbol):
+    """Get emoji for a given eToro symbol"""
+    return EMOJI_MAP.get(etoro_symbol, '📊')
 
-def get_yfinance_data(symbols):
+def get_yfinance_data(portfolio_tickers):
     """
     Get stock data from yfinance for all symbols
     Returns daily, monthly, and yearly performance
     """
-    print(f"Fetching yfinance data for {len(symbols)} symbols...")
+    print(f"Fetching yfinance data for {len(portfolio_tickers)} symbols...")
     
     stock_data = {}
     
-    for symbol in symbols:
+    for etoro_symbol, yahoo_ticker in portfolio_tickers.items():
         try:
             # Download historical data
-            ticker = yf.Ticker(symbol)
+            ticker = yf.Ticker(yahoo_ticker)
             
             # Get 1 year of data to calculate all periods
             hist = ticker.history(period='1y')
             
             if len(hist) < 2:
-                print(f"Insufficient data for {symbol}")
+                print(f"Insufficient data for {etoro_symbol} ({yahoo_ticker})")
                 continue
             
             # Current price
@@ -102,17 +162,18 @@ def get_yfinance_data(symbols):
             else:
                 yearly_change = 0.0
             
-            stock_data[symbol] = {
+            stock_data[etoro_symbol] = {
+                'yahoo_ticker': yahoo_ticker,
                 'price': current_price,
                 'daily_change': daily_change,
                 'monthly_change': monthly_change,
                 'yearly_change': yearly_change
             }
             
-            print(f"{symbol}: Daily {daily_change:.2f}%, Monthly {monthly_change:.2f}%, Yearly {yearly_change:.2f}%")
+            print(f"{etoro_symbol} ({yahoo_ticker}): Daily {daily_change:.2f}%, Monthly {monthly_change:.2f}%, Yearly {yearly_change:.2f}%")
             
         except Exception as e:
-            print(f"Error fetching data for {symbol}: {e}")
+            print(f"Error fetching data for {etoro_symbol} ({yahoo_ticker}): {e}")
             continue
     
     return stock_data
@@ -204,19 +265,19 @@ def generate_recap(stock_data, five_year_return):
 🔝 Top 5 Giornalieri:
 """
     
-    for symbol, data in daily_sorted:
-        emoji = get_emoji(symbol)
-        recap += f"{emoji} {symbol}: {data['daily_change']:+.2f}%\n"
+    for etoro_symbol, data in daily_sorted:
+        emoji = get_emoji(etoro_symbol)
+        recap += f"{emoji} {etoro_symbol}: {data['daily_change']:+.2f}%\n"
     
     recap += "\n🔝 Top 3 Mensili:\n"
-    for symbol, data in monthly_sorted:
-        emoji = get_emoji(symbol)
-        recap += f"{emoji} {symbol}: {data['monthly_change']:+.2f}%\n"
+    for etoro_symbol, data in monthly_sorted:
+        emoji = get_emoji(etoro_symbol)
+        recap += f"{emoji} {etoro_symbol}: {data['monthly_change']:+.2f}%\n"
     
     recap += "\n🔝 Top 3 Annuali:\n"
-    for symbol, data in yearly_sorted:
-        emoji = get_emoji(symbol)
-        recap += f"{emoji} {symbol}: {data['yearly_change']:+.2f}%\n"
+    for etoro_symbol, data in yearly_sorted:
+        emoji = get_emoji(etoro_symbol)
+        recap += f"{emoji} {etoro_symbol}: {data['yearly_change']:+.2f}%\n"
     
     recap += f"""
 📈 Performance 5 Anni: {five_year_return:.2f}%
@@ -234,12 +295,11 @@ def main():
     print("=" * 50)
     
     # Get list of all portfolio symbols
-    symbols = list(EMOJI_MAP.keys())
-    print(f"Portfolio contains {len(symbols)} positions")
+    print(f"Portfolio contains {len(PORTFOLIO_TICKERS)} positions")
     print("=" * 50)
     
     # Step 1: Get yfinance data for all symbols
-    stock_data = get_yfinance_data(symbols)
+    stock_data = get_yfinance_data(PORTFOLIO_TICKERS)
     print(f"Successfully fetched data for {len(stock_data)} symbols")
     print("=" * 50)
     
