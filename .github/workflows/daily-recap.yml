@@ -6,8 +6,8 @@ on:
     - cron: '0 16 * * *'
   workflow_dispatch:  # Allows manual trigger
 
-  permissions:
-  contents: write
+permissions:
+    contents: write
 
 jobs:
   generate-recap:
