@@ -36,7 +36,7 @@ jobs:
           python src/data_collector.py
       
       - name: Upload recap as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@43
         with:
           name: daily-recap
           path: output/recap.txt
