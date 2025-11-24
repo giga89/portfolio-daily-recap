@@ -12,7 +12,7 @@ permissions:
 jobs:
   generate-recap:
     runs-on: ubuntu-latest
-      environment: Etoro
+    environment: Etoro
     
     steps:
       - name: Checkout repository
