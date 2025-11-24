@@ -11,12 +11,10 @@ def get_emoji(etoro_symbol):
     return EMOJI_MAP.get(etoro_symbol, '📊')
 
 
-def format_ticker_with_link(etoro_symbol, company_name, performance):
+def format_ticker(etoro_symbol, company_name, performance):
     """Format a ticker line with eToro link and performance"""
     emoji = get_emoji(etoro_symbol)
-    # Convert symbol to lowercase for eToro URL
-    etoro_url_symbol = etoro_symbol.lower().replace('.', '')
-    return f"{emoji} [${etoro_symbol} ({company_name})](https://www.etoro.com/markets/{etoro_url_symbol}) {performance:+.2f}%"
+    return f"{emoji} [${etoro_symbol} ({company_name})] {performance:+.2f}%"
 
 
 def generate_recap(stock_data, portfolio_daily, sheets_data):
@@ -52,15 +50,15 @@ TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
 """
     
     for etoro_symbol, data in daily_sorted:
-        recap += format_ticker_with_link(etoro_symbol, data['company_name'], data['daily_change']) + "\n"
+        recap += format_ticker(etoro_symbol, data['company_name'], data['daily_change']) + "\n"
     
     recap += "\nTOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈\n"
     for etoro_symbol, data in monthly_sorted:
-        recap += format_ticker_with_link(etoro_symbol, data['company_name'], data['monthly_change']) + "\n"
+        recap += format_ticker(etoro_symbol, data['company_name'], data['monthly_change']) + "\n"
     
     recap += "\nTOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈\n"
     for etoro_symbol, data in yearly_sorted:
-        recap += format_ticker_with_link(etoro_symbol, data['company_name'], data['yearly_change']) + "\n"
+        recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change']) + "\n"
     
     recap += "\n@AndreaRavalli\n"
     
