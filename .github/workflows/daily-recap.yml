@@ -47,8 +47,8 @@ jobs:
       - name: Display recap
         run: cat output/recap.txt
 
-            - name: Commit and push recap
-      run: |
+      - name: Commit and push recap
+        run:
               git config --local user.email "github-actions[bot]@users.noreply.github.com"
               git config --local user.name "github-actions[bot]"
               git add output/recap.txt
