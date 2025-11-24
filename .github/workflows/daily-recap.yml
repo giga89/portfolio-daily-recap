@@ -1,0 +1,45 @@
+name: Daily Portfolio Recap
+
+on:
+  schedule:
+    # Runs at 16:00 UTC (17:00 CET) every day
+    - cron: '0 16 * * *'
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  generate-recap:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Install Playwright browsers
+        run: playwright install chromium
+      
+      - name: Collect data and generate recap
+        env:
+          GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+          ETORO_USERNAME: ${{ secrets.ETORO_USERNAME }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+        run: |
+          python src/data_collector.py
+      
+      - name: Upload recap as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: daily-recap
+          path: output/recap.txt
+      
+      - name: Display recap
+        run: cat output/recap.txt
