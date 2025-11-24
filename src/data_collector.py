@@ -1,263 +1,269 @@
 #!/usr/bin/env python3
 """
 Daily Portfolio Recap Generator
-Collects data from eToro, BullAware, and Google Sheets to generate daily performance recap
+Collects data from yfinance and Google Sheets to generate daily performance recap
 """
 
 import os
 import json
-import asyncio
+import yfinance as yf
 from datetime import datetime
-from playwright.async_api import async_playwright
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
 # Comprehensive EMOJI_MAP for all portfolio holdings
 EMOJI_MAP = {
     # ETFs
-    'SX7PEX.DE': '📊',
-    'WDEF.L': '🌐',
-    'IEMG': '🌍',
-    'IQQL.DE': '💰',
-    'IEUR': '🇪🇺',
+    '$.SPXEXC': '🪙',
+    'VWCE.L': '🌐',
+    'ITPB': '🏦',
+    'IQQL.DE': '🔥',
+    'IEMB': '🌍',
     
     # Healthcare & Pharmaceuticals
-    'AZN.L': '🧬',
-    'ABT': '💊',
-    'ABBV': '💊',
-    'LLY': '💊',
+    'AZUL.L': '💊',
+    'ABTL': '🏥',
+    'ABBV': '💉',
+    'LLY': '🧬',
     'NOVO-B': '💉',
-    'HUM': '🏥',
+    'HBM': '🧪',
     
-    # Technology & Semiconductors  
-    'AVGO': '💻',
-    'NVDA': '🎮',
-    'TSM': '🖥️',
-    'MSFT': '💻',
-    'SNPS': '⚙️',
-    'GOOG': '🔍',
+    # Technology & Semiconductors
+    'AVGO': '🔧',
+    'NVDA': '🤖',
+    'TSM': '🏭',
+    'MSTF': '💻',
+    'SMCI': '🖥️',
+    'AMZN': '📦',
+    'GOOGL': '🔍',
     
     # Energy & Nuclear
-    'CCJ': '⚛️',
-    'PRY.MI': '⚡',
-    'ENEL.MI': '⚡',
+    'CEG': '⚡',
+    'NRG': '🔋',
+    'ENBL.MU': '🔋',
     
     # Crypto
     'TRX': '🪙',
-    'NET': '☁️',
+    'NET': '💰',
     
     # Financial Services
-    'TRIG.L': '🌱',
-    'DB1.DE': '💼',
-    '2318.HK': '🏢',
-    
-    # Consumer & Retail
-    'RACE': '🏎️',
-    'MELI': '🛒',
-    'AMZN': '📦',
-    'PYPL': '💳',
-    
-    # Industrial & Mining
-    'GLEN.L': '⛏️',
-    'VOW3.DE': '🚗',
-    'BHP.L': '⛏️',
-    
-    # Transportation
-    '1919.HK': '🚢',
-    
-    # Other
-    'ETOR': '📈',
-    'PLTR': '🛡️',
+    'BLK.DE': '📈',
+    'V': '💳',
+    'DBLM.DE': '📊',
+    '2318.HK': '🏦',
 }
 
+def get_emoji(symbol):
+    """Get emoji for a given symbol"""
+    return EMOJI_MAP.get(symbol, '📊')
 
-async def scrape_etoro_data(username):
+def get_yfinance_data(symbols):
     """
-    Scrape today's performance and top 5 performers from eToro
+    Get stock data from yfinance for all symbols
+    Returns daily, monthly, and yearly performance
     """
-    print("[eToro] Starting scrape...")
+    print(f"Fetching yfinance data for {len(symbols)} symbols...")
     
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        
+    stock_data = {}
+    
+    for symbol in symbols:
         try:
-            # Navigate to eToro home
-            await page.goto('https://www.etoro.com/home', wait_until='networkidle', timeout=60000)
-            await page.wait_for_timeout(5000)
+            # Download historical data
+            ticker = yf.Ticker(symbol)
             
-            # Extract today's performance
-            today_perf = await page.locator('[data-testid="portfolio-overview-total-gain"]').first.text_content()
+            # Get 1 year of data to calculate all periods
+            hist = ticker.history(period='1y')
             
-            # Extract top 5 daily movers
-            movers = []
-            mover_elements = await page.locator('[data-testid="top-mover-item"]').all()
+            if len(hist) < 2:
+                print(f"Insufficient data for {symbol}")
+                continue
             
-            for i, mover in enumerate(mover_elements[:5]):
-                symbol = await mover.locator('[data-testid="symbol"]').text_content()
-                change = await mover.locator('[data-testid="change-percent"]').text_content()
-                movers.append({'symbol': symbol.strip(), 'change': change.strip()})
+            # Current price
+            current_price = hist['Close'].iloc[-1]
             
-            await browser.close()
+            # Daily change (today vs yesterday)
+            if len(hist) >= 2:
+                yesterday_price = hist['Close'].iloc[-2]
+                daily_change = ((current_price - yesterday_price) / yesterday_price) * 100
+            else:
+                daily_change = 0.0
             
-            return {
-                'today_perf': today_perf.strip() if today_perf else '+0.00%',
-                'top_movers': movers[:5]
+            # Monthly change (last 30 days)
+            if len(hist) >= 30:
+                month_ago_price = hist['Close'].iloc[-30]
+                monthly_change = ((current_price - month_ago_price) / month_ago_price) * 100
+            else:
+                monthly_change = 0.0
+            
+            # Yearly change (last 252 trading days)
+            if len(hist) >= 252:
+                year_ago_price = hist['Close'].iloc[-252]
+                yearly_change = ((current_price - year_ago_price) / year_ago_price) * 100
+            else:
+                yearly_change = 0.0
+            
+            stock_data[symbol] = {
+                'price': current_price,
+                'daily_change': daily_change,
+                'monthly_change': monthly_change,
+                'yearly_change': yearly_change
             }
             
+            print(f"{symbol}: Daily {daily_change:.2f}%, Monthly {monthly_change:.2f}%, Yearly {yearly_change:.2f}%")
+            
         except Exception as e:
-            print(f"[eToro] Error: {e}")
-            await browser.close()
-            return {'today_perf': '+0.00%', 'top_movers': []}
-
-
-async def scrape_bullaware_data(username):
-    """
-    Scrape monthly and yearly performance from BullAware
-    """
-    print("[BullAware] Starting scrape...")
+            print(f"Error fetching data for {symbol}: {e}")
+            continue
     
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        
-        try:
-            url = f'https://bullaware.com/etoro/{username}'
-            await page.goto(url, wait_until='networkidle', timeout=60000)
-            await page.wait_for_timeout(5000)
-            
-            # Get monthly performance (This Month)
-            monthly_perf = await page.locator('[data-period="month"]').first.text_content()
-            
-            # Get yearly performance (Year to Date)
-            yearly_perf = await page.locator('[data-period="ytd"]').first.text_content()
-            
-            await browser.close()
-            
-            return {
-                'monthly_perf': monthly_perf.strip() if monthly_perf else '+0.00%',
-                'yearly_perf': yearly_perf.strip() if yearly_perf else '+0.00%'
-            }
-            
-        except Exception as e:
-            print(f"[BullAware] Error: {e}")
-            await browser.close()
-            return {'monthly_perf': '+0.00%', 'yearly_perf': '+0.00%'}
+    return stock_data
 
-
-def get_google_sheets_data(spreadsheet_id, credentials_json):
+def get_google_sheets_data():
     """
     Get 5-year performance from Google Sheets cell G6
     """
-    print("[Google Sheets] Fetching data...")
+    print("Fetching Google Sheets data...")
     
     try:
-        creds_dict = json.loads(credentials_json)
-        creds = service_account.Credentials.from_service_account_info(
+        # Get credentials from environment variable
+        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+        if not creds_json:
+            print("No Google Sheets credentials found")
+            return 156.0  # Fallback value
+        
+        creds_dict = json.loads(creds_json)
+        credentials = service_account.Credentials.from_service_account_info(
             creds_dict,
             scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
         )
         
-        service = build('sheets', 'v4', credentials=creds)
-        sheet = service.spreadsheets()
+        service = build('sheets', 'v4', credentials=credentials)
         
-        result = sheet.values().get(
+        # Spreadsheet ID from the URL
+        spreadsheet_id = '1jK6MlFxO6Im0eBfUP1eOjzW0Nii87jABEHiBnsjP52U'
+        range_name = 'G6'
+        
+        result = service.spreadsheets().values().get(
             spreadsheetId=spreadsheet_id,
-            range='G6'
+            range=range_name
         ).execute()
         
-        value = result.get('values', [['']])[0][0]
-        
-        return value.strip() if value else '156%'
-        
+        values = result.get('values', [])
+        if values and len(values[0]) > 0:
+            # Extract percentage value (e.g., "156%" -> 156.0)
+            value_str = str(values[0][0]).replace('%', '').strip()
+            five_year_return = float(value_str)
+            print(f"5-year return from Google Sheets: {five_year_return}%")
+            return five_year_return
+        else:
+            print("No data in cell G6")
+            return 156.0  # Fallback
+            
     except Exception as e:
-        print(f"[Google Sheets] Error: {e}")
-        return '156%'
+        print(f"Error fetching Google Sheets data: {e}")
+        return 156.0  # Fallback
 
-
-def generate_recap(data):
+def calculate_portfolio_daily_change(stock_data):
     """
-    Generate the formatted recap text
+    Calculate overall portfolio daily performance as simple average
     """
-    today_emoji = '🍀🍀🍀'
+    if not stock_data:
+        return 0.0
     
-    # Get emoji for each asset
-    def get_emoji(symbol):
-        return EMOJI_MAP.get(symbol, '📈')
-    
-    # Format top movers with emojis
-    top_today_lines = []
-    for mover in data['top_today'][:5]:
-        emoji = get_emoji(mover['symbol'])
-        top_today_lines.append(f"{emoji} {mover['symbol']}: {mover['change']}")
-    
-    # Calculate average yearly return
-    yearly_num = float(data['yearly_perf'].replace('%', '').replace('+', '').replace(',', '.'))
-    
-    # Calculate 5-year average
-    five_year_num = float(data['five_year_perf'].replace('%', '').replace('+', '').replace(',', '.'))
-    avg_per_year = five_year_num / 5
-    
-    # Calculate double-your-money time using Rule of 72
-    if avg_per_year > 0:
-        double_time = 72 / avg_per_year
-    else:
-        double_time = 0
-    
-    recap = f"""📊 RECAP PORTFOLIO GIORNALIERO
+    total = sum(data['daily_change'] for data in stock_data.values())
+    return total / len(stock_data)
 
-{today_emoji} Oggi: {data['today_perf']}
-🚧 Questo Mese: {data['monthly_perf']}
-🔧 Quest'Anno: {data['yearly_perf']}
-🌳 Ultimi 5 Anni (2020-2025): {data['five_year_perf']}
+def generate_recap(stock_data, five_year_return):
+    """
+    Generate the formatted daily recap
+    """
+    print("Generating recap...")
+    
+    # Get today's date
+    today = datetime.now().strftime('%d/%m/%Y')
+    
+    # Calculate portfolio daily change
+    portfolio_daily = calculate_portfolio_daily_change(stock_data)
+    
+    # Calculate top performers
+    # Top 5 daily
+    daily_sorted = sorted(stock_data.items(), key=lambda x: x[1]['daily_change'], reverse=True)[:5]
+    # Top 3 monthly
+    monthly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['monthly_change'], reverse=True)[:3]
+    # Top 3 yearly
+    yearly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['yearly_change'], reverse=True)[:3]
+    
+    # Calculate 5-year metrics
+    avg_yearly_return = five_year_return / 5
+    time_to_double = 72 / avg_yearly_return if avg_yearly_return > 0 else 0
+    
+    # Build the recap text
+    recap = f"""🍀🍀🍀 {today} 🍀🍀🍀
 
-📊 Performance Media Annua: {avg_per_year:.1f}%
-⏳ Tempo per Raddoppiare: {double_time:.1f} anni
+📊 Rendimento Giornaliero: {portfolio_daily:+.2f}%
 
-TOP 5 OGGI:
-" + "\n".join(top_today_lines) + """
+🔝 Top 5 Giornalieri:
+"""
+    
+    for symbol, data in daily_sorted:
+        emoji = get_emoji(symbol)
+        recap += f"{emoji} {symbol}: {data['daily_change']:+.2f}%\n"
+    
+    recap += "\n🔝 Top 3 Mensili:\n"
+    for symbol, data in monthly_sorted:
+        emoji = get_emoji(symbol)
+        recap += f"{emoji} {symbol}: {data['monthly_change']:+.2f}%\n"
+    
+    recap += "\n🔝 Top 3 Annuali:\n"
+    for symbol, data in yearly_sorted:
+        emoji = get_emoji(symbol)
+        recap += f"{emoji} {symbol}: {data['yearly_change']:+.2f}%\n"
+    
+    recap += f"""
+📈 Performance 5 Anni: {five_year_return:.2f}%
+💰 Rendimento Medio Annuale: {avg_yearly_return:.2f}%
+⏱️ Tempo per Raddoppiare: {time_to_double:.1f} anni
 """
     
     return recap
 
-
-async def main():
-    """Main function"""
-    print("===== Starting Daily Portfolio Recap Generator =====")
+def main():
+    """
+    Main function to orchestrate data collection and recap generation
+    """
+    print("Starting daily portfolio recap generation...")
+    print("=" * 50)
     
-    # Get environment variables
-    etoro_username = os.getenv('ETORO_USERNAME', 'AndreaRavalli')
-    spreadsheet_id = os.getenv('SPREADSHEET_ID', '1jK6MlFxO6Im0eBfUP1eOjzW0Nii87jABEHiBnsjP52U')
-    google_creds = os.getenv('GOOGLE_SHEETS_CREDENTIALS', '{}')
+    # Get list of all portfolio symbols
+    symbols = list(EMOJI_MAP.keys())
+    print(f"Portfolio contains {len(symbols)} positions")
+    print("=" * 50)
     
-    # Collect data from all sources
-    etoro_data = await scrape_etoro_data(etoro_username)
-    bullaware_data = await scrape_bullaware_data(etoro_username)
-    five_year_perf = get_google_sheets_data(spreadsheet_id, google_creds)
+    # Step 1: Get yfinance data for all symbols
+    stock_data = get_yfinance_data(symbols)
+    print(f"Successfully fetched data for {len(stock_data)} symbols")
+    print("=" * 50)
     
-    # Combine all data
-    combined_data = {
-        'today_perf': etoro_data['today_perf'],
-        'top_today': etoro_data['top_movers'],
-        'monthly_perf': bullaware_data['monthly_perf'],
-        'yearly_perf': bullaware_data['yearly_perf'],
-        'five_year_perf': five_year_perf
-    }
+    # Step 2: Get 5-year performance from Google Sheets
+    five_year_return = get_google_sheets_data()
+    print("=" * 50)
     
-    # Generate recap
-    recap_text = generate_recap(combined_data)
+    # Step 3: Generate formatted recap
+    recap = generate_recap(stock_data, five_year_return)
     
-    # Save to file
+    # Step 4: Save to file
     os.makedirs('output', exist_ok=True)
-    with open('output/recap.txt', 'w', encoding='utf-8') as f:
-        f.write(recap_text)
+    output_path = 'output/recap.txt'
     
-    print("\n" + "="*50)
-    print(recap_text)
-    print("="*50)
-    print("\n✅ Recap generated successfully!")
-    print(f"Saved to: output/recap.txt")
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(recap)
+    
+    print(f"Recap saved to {output_path}")
+    print("=" * 50)
+    print("RECAP OUTPUT:")
+    print("=" * 50)
+    print(recap)
+    print("=" * 50)
+    print("Daily portfolio recap generation completed successfully!")
 
-
-if __name__ == '__main__':
-    asyncio.run(main())
+if __name__ == "__main__":
+    main()
