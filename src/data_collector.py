@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import finance_fetcher
 import sheets_fetcher
 import formatter
+import telegram_sender
 
 def main():
     """
@@ -53,6 +54,12 @@ def main():
     print(recap)
     print("=" * 50)
     print("Daily portfolio recap generation completed successfully!")
+
+    # Step 6: Send to Telegram
+    print("=" * 50)
+    print("Sending recap to Telegram...")
+    telegram_sender.send_recap_to_telegram(output_path)
+    print("=" * 50)
 
 if __name__ == '__main__':
     main()
