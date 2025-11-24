@@ -3,8 +3,8 @@ name: Daily Portfolio Recap
 on:
   schedule:
     # Runs at 16:00 UTC (17:00 CET) every day
-    - cron: '0 16 * * *'
-  workflow_dispatch:  # Allows manual trigger
+    - cron: '0 15 * * *'  # 16:00 CET (15:00 UTC)
+    - cron: '0 21 * * *'  # 22:00 CET (21:00 UTC)  workflow_dispatch:  # Allows manual trigger
 
 permissions:
     contents: write
@@ -35,6 +35,8 @@ jobs:
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
           ETORO_USERNAME: ${{ secrets.ETORO_USERNAME }}
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+                  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python src/data_collector.py
       
