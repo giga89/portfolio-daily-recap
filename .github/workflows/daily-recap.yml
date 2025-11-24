@@ -6,6 +6,9 @@ on:
     - cron: '0 16 * * *'
   workflow_dispatch:  # Allows manual trigger
 
+  permissions:
+  contents: write
+
 jobs:
   generate-recap:
     runs-on: ubuntu-latest
