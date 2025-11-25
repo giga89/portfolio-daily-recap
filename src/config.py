@@ -37,10 +37,10 @@ PORTFOLIO_TICKERS = {
     
     # Crypto
     'TRX': ('TRX-USD', 'TRON'),
-    'ETOR': ('BTC-USD', 'Bitcoin'),
+    'ETOR': ('ETOR', 'Etoro'),
     
     # Financial Services & Others
-    'DB1.DE': ('DB1.DE', 'Xtrackers MSCI World Momentum UCITS ETF'),
+    'DB1.DE': ('DB1.DE', 'Deutsche Börse AG'),
     'TRIG.L': ('TRIG.L', 'Trig PLC'),
     'BHPL': ('BHP', 'BHP Group'),
     'PRY.MI': ('PRY.MI', 'Prysmian'),
