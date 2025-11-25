@@ -33,7 +33,7 @@ jobs:
       
       - name: Collect data and generate recap
 
-          - name: Determine market session
+      - name: Determine market session
       id: market_session
       run: |
         HOUR=$(date -u +%H)
