@@ -2,9 +2,9 @@ name: Daily Portfolio Recap
 
 on:
   schedule:
-    - cron: '0 15 0 10 * * 1-5'  # 11:00 CET (10:00 UTC) - European market open (monday-friday)
-    - cron: '0 21 * 0 15 * * 1-5'  # 16:00 CET (15:00 UTC) - U.S. market open (monday-friday)
-    - cron: '0 22 * * 1-5'  # 23:00 CET (22:00 UTC) - U.S. market close (monday-friday)
+    - cron: '0 10 * * 1-5'  # 11:00 CET (10:00 UTC) - European market open (monday-friday)
+    - cron: '0 16 * * 1-5'  # 16:00 CET (15:00 UTC) - U.S. market open (monday-friday)
+    - cron: '0 23 * * 1-5'  # 23:00 CET (22:00 UTC) - U.S. market close (monday-friday)
   workflow_dispatch:  # Allows manual trigger
 permissions:
     contents: write
@@ -34,16 +34,24 @@ jobs:
 
       - name: Determine market session
         id: market_session
+        run: |
+          # Ottiene l'ora corrente in UTC (00-23)
           HOUR=$(date -u +%H)
+          
+          # Controlla quale ora schedulata ha attivato l'azione
+          SESSION_NAME="Daily recap"
           if [ $HOUR -eq 10 ]; then
-            echo "session=European market open" >> $GITHUB_OUTPUT
+            SESSION_NAME="European market open"
           elif [ $HOUR -eq 15 ]; then
-            echo "session=U.S. market open" >> $GITHUB_OUTPUT
+            SESSION_NAME="U.S. market open"
           elif [ $HOUR -eq 22 ]; then
-            echo "session=U.S. market close" >> $GITHUB_OUTPUT
-          else
-            echo "session=Daily recap" >> $GITHUB_OUTPUT
+            SESSION_NAME="U.S. market close"
           fi
+          
+          # Imposta la variabile di output
+          echo "session=$SESSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "Market Session detected: $SESSION_NAME (UTC Hour: $HOUR)"
+                
       - name: Collect data and generate recap
 
         env:
