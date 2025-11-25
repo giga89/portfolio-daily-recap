@@ -14,10 +14,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import time
 
+
 def fetch_bullaware_data_selenium(etoro_symbol):
     """
-    Fetch YTD data from BullAware using Selenium to interact with the page
-    Clicks on "Year to Date" timeframe and scrapes individual stock YTD from treemap
+    Fetch YTD data from BullAware using Selenium
+    Clicks on Time Period dropdown and selects Year to Date for treemap
     Returns dict with 'yearly_change' or None if failed
     """
     driver = None
@@ -29,94 +30,82 @@ def fetch_bullaware_data_selenium(etoro_symbol):
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--window-size=1920,1080')
+        chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
         
         driver = webdriver.Chrome(options=chrome_options)
         
         # Navigate to BullAware portfolio page
         url = "https://bullaware.com/etoro/AndreaRavalli"
-        print(f"Loading BullAware page for {etoro_symbol}...")
+        print(f"Loading BullAware for {etoro_symbol}...")
         driver.get(url)
         
-        # Wait for page to load
-        time.sleep(3)
+        # Wait for page to load completely
+        time.sleep(6)
         
-        # Click on the "Time Period" dropdown to select "Year to Date"
+        # Click on "Time Period" dropdown to open the menu
         try:
-            # Find the dropdown button (might be a div with role="button" or a select element)
-            time_period_dropdown = WebDriverWait(driver, 10).until(
+            # Find the dropdown button by text content
+            dropdown_btn = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, "//div[contains(text(), 'Time Period')]"))
             )
-            time_period_dropdown.click()
+            dropdown_btn.click()
+            print("Clicked on Time Period dropdown")
             time.sleep(1)
             
-            # Click on "Year to Date" option
+            # Click on "Year to Date" option in the menu
             ytd_option = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, "//div[contains(text(), 'Year to Date')]"))
+                EC.element_to_be_clickable((By.XPATH, "//div[text()='Year to Date']"))
             )
             ytd_option.click()
-            time.sleep(2)  # Wait for treemap to update
-            
-            print(f"Switched to Year to Date view for {etoro_symbol}")
+            print("Selected Year to Date from dropdown")
+            time.sleep(3)  # Wait for treemap to update with YTD data
             
         except Exception as e:
             print(f"Could not switch to YTD view: {e}")
-            # Try to proceed anyway, might already be on YTD view
+            # Continue anyway - might already be on YTD or we'll try to scrape current view
         
-        # Now scrape the treemap for the specific symbol's YTD
+        # Get page source after interaction
         page_source = driver.page_source
         soup = BeautifulSoup(page_source, 'html.parser')
         
-        # Strategy 1: Look for treemap tiles with aria-label containing symbol and percentage
-        elements = soup.find_all(attrs={'aria-label': re.compile(f'.*{re.escape(etoro_symbol)}.*', re.IGNORECASE)})
-        for elem in elements:
-            label = elem.get('aria-label', '')
-            # Extract percentage from aria-label (should be YTD now)
-            match = re.search(r'(-?\d+\.?\d*)%', label)
-            if match:
-                ytd_value = float(match.group(1))
-                print(f"✓ Found BullAware YTD for {etoro_symbol}: {ytd_value}% (from aria-label)")
-                return {'yearly_change': ytd_value}
-        
-        # Strategy 2: Look in the treemap SVG or text content
-        # Find all text nodes that contain the symbol
+        # Strategy 1: Find symbol in text and get percentage from next lines
         page_text = soup.get_text()
-        lines = page_text.split('\n')
+        lines = [line.strip() for line in page_text.split('\n') if line.strip()]
         
-        # Look for the symbol in the treemap area (skip first 100 lines to avoid summary)
-        for i in range(100, len(lines)):
-            line = lines[i].strip()
-            # Exact match for symbol
-            if line == etoro_symbol:
-                # Look for percentage in next few lines
-                for j in range(i + 1, min(i + 10, len(lines))):
-                    next_line = lines[j].strip()
-                    # Match standalone percentage
+        for i, line in enumerate(lines):
+            # Exact match for symbol (case-insensitive)
+            if line.upper() == etoro_symbol.upper():
+                # Look for percentage in next 5 lines
+                for j in range(i + 1, min(i + 5, len(lines))):
+                    next_line = lines[j]
+                    # Match standalone percentage (YTD value)
                     if re.match(r'^-?\d+\.?\d*%$', next_line):
-                        perc_match = re.search(r'^(-?\d+\.?\d*)%$', next_line)
-                        if perc_match:
-                            ytd_value = float(perc_match.group(1))
-                            print(f"✓ Found BullAware YTD for {etoro_symbol}: {ytd_value}%")
-                            return {'yearly_change': ytd_value}
+                        ytd_str = next_line.rstrip('%')
+                        ytd_value = float(ytd_str)
+                        print(f"✓ Found BullAware YTD for {etoro_symbol}: {ytd_value}%")
+                        return {'yearly_change': ytd_value}
         
-        # Strategy 3: Look for div/span elements in treemap with data attributes
-        treemap_elements = soup.find_all(['div', 'span'], string=re.compile(etoro_symbol, re.IGNORECASE))
-        for elem in treemap_elements:
-            # Look for sibling or child elements with percentage
+        # Strategy 2: Search for symbol in elements and find nearby percentage
+        all_elements = soup.find_all(text=re.compile(etoro_symbol, re.IGNORECASE))
+        for elem in all_elements:
             parent = elem.parent
             if parent:
-                text = parent.get_text(strip=True)
-                # Extract percentage that follows the symbol
-                pattern = rf'{re.escape(etoro_symbol)}[^\d]*(-?\d+\.?\d*)%'
-                match = re.search(pattern, text, re.IGNORECASE)
+                # Get all text from parent and siblings
+                parent_text = parent.get_text(strip=True)
+                # Look for percentage right after symbol
+                pattern = rf'{re.escape(etoro_symbol)}[^\d\-]*(-?\d+\.?\d*)%'
+                match = re.search(pattern, parent_text, re.IGNORECASE)
                 if match:
                     ytd_value = float(match.group(1))
-                    print(f"✓ Found BullAware YTD for {etoro_symbol}: {ytd_value}%")
+                    print(f"✓ Found BullAware YTD for {etoro_symbol}: {ytd_value}% (from parent)")
                     return {'yearly_change': ytd_value}
         
         print(f"Could not find YTD for {etoro_symbol} in BullAware treemap")
         
     except Exception as e:
         print(f"BullAware Selenium error for {etoro_symbol}: {e}")
+        import traceback
+        traceback.print_exc()
     
     finally:
         if driver:
