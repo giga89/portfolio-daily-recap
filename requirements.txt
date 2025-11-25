@@ -9,3 +9,4 @@ yfinance
 requests
 beautifulsoup4==4.12.3
 selenium==4.15.2
+webdriver-manager

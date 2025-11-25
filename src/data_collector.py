@@ -28,7 +28,7 @@ def main():
     print(f"Successfully fetched data for {len(stock_data)} symbols")
     print("=" * 50)
     
-    # Step 2: Calculate portfolio daily performance
+    # Step 2: Calculate portfolio daily performance (will auto-fetch weights from BullAware)
     portfolio_daily = finance_fetcher.calculate_portfolio_daily_change(stock_data)
     print(f"Portfolio daily performance: {portfolio_daily:.2f}%")
     print("=" * 50)
