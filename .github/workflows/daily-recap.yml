@@ -53,7 +53,7 @@ jobs:
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-                MARKET_SESSION: ${{ steps.market_session.outputs.session }}
+          MARKET_SESSION: ${{ steps.market_session.outputs.session }}
         run: |
           python src/data_collector.py
       
