@@ -31,11 +31,9 @@ jobs:
       - name: Install Playwright browsers
         run: playwright install chromium
       
-      - name: Collect data and generate recap
 
       - name: Determine market session
         id: market_session
-        run: |
           HOUR=$(date -u +%H)
           if [ $HOUR -eq 10 ]; then
             echo "session=European market open" >> $GITHUB_OUTPUT
@@ -46,6 +44,8 @@ jobs:
           else
             echo "session=Daily recap" >> $GITHUB_OUTPUT
           fi
+
+                - name: Collect data and generate recap
 
         env:
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
