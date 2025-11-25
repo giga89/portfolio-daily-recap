@@ -44,8 +44,7 @@ jobs:
           else
             echo "session=Daily recap" >> $GITHUB_OUTPUT
           fi
-
-                - name: Collect data and generate recap
+      - name: Collect data and generate recap
 
         env:
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
