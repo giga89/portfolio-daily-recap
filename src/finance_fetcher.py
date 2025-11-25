@@ -103,13 +103,15 @@ def fetch_portfolio_weights_from_bullaware():
                     print(f"❌ Could not switch to table view: {e2}")
                     print("⚠ Will try to extract from current view")
 
-                            # Try to extract weights from table view
+            # Try to extract weights from table view
+            # QUESTO BLOCCO DEVE ESSERE FUORI DALL'EXCEPT SOPRA
             print("📊 Extracting portfolio weights from table...")
             try:
                 # Find all table rows
-                table_rows = driver.find_elements(By.XPATH, "//tr[contains(@class, 'css-')]")  
+                # Assicurati che 'weights' sia stata inizializzata prima di questo blocco (e.g., weights = {})
+                table_rows = driver.find_elements(By.XPATH, "//tr[contains(@class, 'css-')]")
                 print(f"Found {len(table_rows)} table rows")
-                
+
                 for row in table_rows:
                     try:
                         # Get all cells in the row
@@ -118,35 +120,42 @@ def fetch_portfolio_weights_from_bullaware():
                             # First cell usually contains the instrument name/ticker
                             instrument_cell = cells[0]
                             ticker_text = instrument_cell.text.strip()
-                            
+
                             # Portfolio Value is typically the 4th column (index 3)
                             portfolio_value_cell = cells[3]
                             weight_text = portfolio_value_cell.text.strip()
-                            
+
                             # Extract ticker from "BUY SYMBOL" format
                             if 'BUY ' in ticker_text:
                                 ticker = ticker_text.replace('BUY ', '').strip()
-                                
+
                                 # Extract percentage (e.g., "13.30%" -> 13.30)
                                 if '%' in weight_text:
                                     weight_str = weight_text.replace('%', '').strip()
                                     weight = abs(float(weight_str))  # Use abs to ensure positive
-                                    
+
                                     if 0 < weight < 50:  # Sanity check
+                                        # Assicurati che 'weights' sia accessibile (inizializzata esternamente)
                                         weights[ticker] = weight
                                         print(f"  {ticker}: {weight}%")
                     except Exception as e:
+                        # Questo catch è per errori all'interno del loop su una singola riga
                         continue  # Skip rows that don't match expected format
-                        
+
                 if weights:
                     print(f"✓ Successfully extracted {len(weights)} portfolio weights from table")
                 else:
                     print("⚠ No weights found in table, falling back to alternative methods")
+
+            except Exception as e:
+                # Questo catch è per errori nell'estrazione della tabella in generale
+                print(f"❌ Error extracting from table: {e}")
+                print("⚠ Falling back to alternative extraction methods")
+
+        except Exception as e_outer:
+            # Questo catch è per errori di navigazione o altri errori non gestiti
+            print(f"An unexpected outer error occurred: {e_outer}")
                     
-        except Exception as e:
-            print(f"❌ Error extracting from table: {e}")
-            print("⚠ Falling back to alternative extraction methods")
-            
         # Fallback: Try treemap extraction if table extraction failed
         if not weights:
             # The treemap/bubble elements contain the data
