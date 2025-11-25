@@ -3,8 +3,9 @@ name: Daily Portfolio Recap
 on:
   schedule:
     # Runs at 16:00 UTC (17:00 CET) every day
-    - cron: '0 15 * * *'  # 16:00 CET (15:00 UTC)
-    - cron: '0 21 * * *'  # 22:00 CET (21:00 UTC)  
+    - cron: '0 15'0 10 * * *'  # 11:00 CET (10:00 UTC) - European market open
+    - cron: '0 21 *'0 15 * * *'  # 16:00 CET (15:00 UTC) - U.S. market open
+    - cron: '0 22 * * *'  # 23:00 CET (22:00 UTC) - U.S. market close
   workflow_dispatch:  # Allows manual trigger
 permissions:
     contents: write
@@ -32,12 +33,28 @@ jobs:
         run: playwright install chromium
       
       - name: Collect data and generate recap
+
+          - name: Determine market session
+      id: market_session
+      run: |
+        HOUR=$(date -u +%H)
+        if [ $HOUR -eq 10 ]; then
+          echo "session=European market open" >> $GITHUB_OUTPUT
+        elif [ $HOUR -eq 15 ]; then
+          echo "session=U.S. market open" >> $GITHUB_OUTPUT
+        elif [ $HOUR -eq 22 ]; then
+          echo "session=U.S. market close" >> $GITHUB_OUTPUT
+        else
+          echo "session=Daily recap" >> $GITHUB_OUTPUT
+        fi
+
         env:
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
           ETORO_USERNAME: ${{ secrets.ETORO_USERNAME }}
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+                MARKET_SESSION: ${{ steps.market_session.outputs.session }}
         run: |
           python src/data_collector.py
       
