@@ -7,3 +7,4 @@ google-auth-oauthlib==1.2.1
 google-auth-httplib2==0.2.0
 yfinance
 requests
+beautifulsoup4==4.12.3
