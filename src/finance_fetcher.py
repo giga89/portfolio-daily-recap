@@ -4,6 +4,29 @@ Fetch stock data from Yahoo Finance using yfinance
 
 import yfinance as yf
 from config import PORTFOLIO_TICKERS
+import requests
+
+
+def fetch_bullaware_data(etoro_symbol):
+    """
+    Fetch MTD and YTD data from BullAware API as fallback
+    Returns dict with 'monthly_change' and 'yearly_change' or None if failed
+    """
+    try:
+        # BullAware API endpoint - adjust based on actual API
+        url = f"https://api.bullaware.com/v1/stocks/{etoro_symbol}/performance"
+        response = requests.get(url, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                'monthly_change': data.get('mtd_change', 0.0),
+                'yearly_change': data.get('ytd_change', 0.0)
+            }
+    except Exception as e:
+        print(f"BullAware API error for {etoro_symbol}: {e}")
+    
+    return None
 
 
 def fetch_stock_data():
@@ -50,6 +73,17 @@ def fetch_stock_data():
                 yearly_change = ((current_price - year_ago_price) / year_ago_price) * 100
             else:
                 yearly_change = 0.0
+
+                        # Fallback to BullAware if monthly or yearly change is zero
+            if monthly_change == 0.0 or yearly_change == 0.0:
+                bullaware_data = fetch_bullaware_data(etoro_symbol)
+                if bullaware_data:
+                    if monthly_change == 0.0 and bullaware_data['monthly_change'] != 0.0:
+                        monthly_change = bullaware_data['monthly_change']
+                        print(f"Using BullAware MTD for {etoro_symbol}: {monthly_change:.2f}%")
+                    if yearly_change == 0.0 and bullaware_data['yearly_change'] != 0.0:
+                        yearly_change = bullaware_data['yearly_change']
+                        print(f"Using BullAware YTD for {etoro_symbol}: {yearly_change:.2f}%")
             
             stock_data[etoro_symbol] = {
                 'yahoo_ticker': yahoo_ticker,
