@@ -5,9 +5,9 @@ Configuration file for portfolio ticker mappings, company names, and emoji
 # Portfolio symbols mapping: eToro symbol -> (Yahoo Finance ticker, Company Name)
 PORTFOLIO_TICKERS = {
     # ETFs
-    'SX7PEX.DE': ('SX7PEX.DE', 'iShares S&P 500 UCITS ETF'),
-    'VWCE.L': ('VWCE.L', 'Vanguard FTSE All-World UCITS ETF'),
-    'IEUR': ('IEUR.L', 'iShares Core MSCI Europe UCITS ETF'),
+    'SX7PEX.DE': ('EXV1.DE', 'iShares STOXX Europe 600 Banks UCITS ETF'),
+    'VWCE.L': ('VWCE.DE', 'Vanguard FTSE All-World UCITS ETF'),
+    'IEUR': ('IEUR', 'iShares Core MSCI Europe UCITS ETF'),
     'IQQL.DE': ('IQQL.DE', 'iShares MSCI World Quality Factor UCITS ETF'),
     'IEMG': ('IEMG', 'iShares Core MSCI Emerging Markets ETF'),
     'WDEF.L': ('WDEF.L', 'WisdomTree Europe Equity Income UCITS ETF'),
