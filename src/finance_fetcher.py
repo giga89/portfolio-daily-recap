@@ -56,6 +56,11 @@ def fetch_stock_data():
     """
     Get stock data from yfinance for all symbols
     Returns daily, monthly, and yearly performance
+    
+    Logic:
+    - Daily: For US stocks, only use during 16:00 and 22:00 sessions
+    - Monthly: Always use for all stocks
+    - Yearly (YTD): Always use for all stocks, with BullAware fallback if ~0
     """
     print(f"Fetching yfinance data for {len(PORTFOLIO_TICKERS)} symbols...")
     
@@ -65,7 +70,7 @@ def fetch_stock_data():
     market_session = os.getenv('MARKET_SESSION', 'Daily recap')
     is_us_session = market_session in ['16:00', '22:00']
     
-    print(f"Market session: {market_session}, US session: {is_us_session}")
+    print(f"Market session: {market_session}, US session active: {is_us_session}")
     
     # US exchanges
     us_exchanges = ['NASDAQ', 'NYSE', 'AMEX', 'NMS', 'NYQ', 'NAS']
@@ -93,26 +98,28 @@ def fetch_stock_data():
             except:
                 # If we can't get info, assume non-US for safety
                 is_us_stock = False
+                print(f"Could not determine exchange for {etoro_symbol}, assuming non-US")
             
             # Daily change (today vs yesterday)
-            # For US stocks, only use if session is 16:00 or 22:00
+            # ONLY skip for US stocks outside 16:00/22:00 sessions
             if is_us_stock and not is_us_session:
                 daily_change = 0.0
-                print(f"Skipping daily for US stock {etoro_symbol} - not during US session")
+                print(f"⏸ Skipping daily for US stock {etoro_symbol} ({exchange}) - market not yet closed")
             elif len(hist) >= 2:
                 yesterday_price = hist['Close'].iloc[-2]
                 daily_change = ((current_price - yesterday_price) / yesterday_price) * 100
             else:
                 daily_change = 0.0
             
-            # Monthly change (last 30 days)
+            # Monthly change (last 30 days) - ALWAYS calculate
             if len(hist) >= 30:
                 month_ago_price = hist['Close'].iloc[-30]
                 monthly_change = ((current_price - month_ago_price) / month_ago_price) * 100
             else:
                 monthly_change = 0.0
             
-            # Yearly change (last 252 trading days)
+            # Yearly change (last 252 trading days) - ALWAYS calculate
+            # YTD applies to ALL stocks regardless of session time
             if len(hist) >= 252:
                 year_ago_price = hist['Close'].iloc[-252]
                 yearly_change = ((current_price - year_ago_price) / year_ago_price) * 100
@@ -120,6 +127,7 @@ def fetch_stock_data():
                 yearly_change = 0.0
             
             # Fallback to BullAware if yearly change is zero or very close to zero
+            # This applies to ALL stocks (US and non-US)
             if abs(yearly_change) < 0.01:
                 print(f"YTD for {etoro_symbol} is ~0, trying BullAware fallback...")
                 bullaware_data = fetch_bullaware_data(etoro_symbol)
