@@ -7,111 +7,36 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import re
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-import time
+from datetime import datetime
 
-
-def fetch_bullaware_data_selenium(etoro_symbol):
+def fetch_portfolio_ytd_from_bullaware():
     """
-    Fetch YTD data from BullAware using Selenium
-    Clicks on Time Period dropdown and selects Year to Date for treemap
-    Returns dict with 'yearly_change' or None if failed
+    Fetch portfolio aggregate YTD from BullAware (simple requests, no Selenium)
+    Returns the overall portfolio YTD percentage for Google Sheets
     """
-    driver = None
     try:
-        # Setup headless Chrome
-        chrome_options = Options()
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument('--disable-gpu')
-        chrome_options.add_argument('--window-size=1920,1080')
-        chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
-        
-        driver = webdriver.Chrome(options=chrome_options)
-        
-        # Navigate to BullAware portfolio page
         url = "https://bullaware.com/etoro/AndreaRavalli"
-        print(f"Loading BullAware for {etoro_symbol}...")
-        driver.get(url)
+        response = requests.get(url, timeout=10)
+        soup = BeautifulSoup(response.content, 'html.parser')
         
-        # Wait for page to load completely
-        time.sleep(6)
-        
-        # Click on "Time Period" dropdown to open the menu
-        try:
-            # Find the dropdown button by text content
-            dropdown_btn = WebDriverWait(driver, 10).until(
-                                    EC.element_to_be_clickable((By.XPATH, "//*[contains(text(), 'Time Period')]"))
-            )
-            dropdown_btn.click()
-            print("Clicked on Time Period dropdown")
-            time.sleep(1)
-            
-            # Click on "Year to Date" option in the menu
-            ytd_option = WebDriverWait(driver, 10).until(
-                                    EC.element_to_be_clickable((By.XPATH, "//*[contains(text(), 'Year to Date')]"))
-            )
-            ytd_option.click()
-            print("Selected Year to Date from dropdown")
-            time.sleep(3)  # Wait for treemap to update with YTD data
-            
-        except Exception as e:
-            print(f"Could not switch to YTD view: {e}")
-            # Continue anyway - might already be on YTD or we'll try to scrape current view
-        
-        # Get page source after interaction
-        page_source = driver.page_source
-        soup = BeautifulSoup(page_source, 'html.parser')
-        
-        # Strategy 1: Find symbol in text and get percentage from next lines
+        # Find the YTD percentage in the page
         page_text = soup.get_text()
-        lines = [line.strip() for line in page_text.split('\n') if line.strip()]
         
-        for i, line in enumerate(lines):
-            # Exact match for symbol (case-insensitive)
-            if line.upper() == etoro_symbol.upper():
-                # Look for percentage in next 5 lines
-                for j in range(i + 1, min(i + 5, len(lines))):
-                    next_line = lines[j]
-                    # Match standalone percentage (YTD value)
-                    if re.match(r'^-?\d+\.?\d*%$', next_line):
-                        ytd_str = next_line.rstrip('%')
-                        ytd_value = float(ytd_str)
-                        print(f"✓ Found BullAware YTD for {etoro_symbol}: {ytd_value}%")
-                        return {'yearly_change': ytd_value}
+        # Look for "Year to Date" or "YTD" followed by percentage
+        ytd_pattern = r'Year to Date[:\s]+(-?\d+\.?\d*)%'
+        match = re.search(ytd_pattern, page_text, re.IGNORECASE)
         
-        # Strategy 2: Search for symbol in elements and find nearby percentage
-        all_elements = soup.find_all(text=re.compile(etoro_symbol, re.IGNORECASE))
-        for elem in all_elements:
-            parent = elem.parent
-            if parent:
-                # Get all text from parent and siblings
-                parent_text = parent.get_text(strip=True)
-                # Look for percentage right after symbol
-                pattern = rf'{re.escape(etoro_symbol)}[^\d\-]*(-?\d+\.?\d*)%'
-                match = re.search(pattern, parent_text, re.IGNORECASE)
-                if match:
-                    ytd_value = float(match.group(1))
-                    print(f"✓ Found BullAware YTD for {etoro_symbol}: {ytd_value}% (from parent)")
-                    return {'yearly_change': ytd_value}
+        if match:
+            ytd_value = float(match.group(1))
+            print(f"✓ Found BullAware portfolio YTD: {ytd_value}%")
+            return ytd_value
         
-        print(f"Could not find YTD for {etoro_symbol} in BullAware treemap")
+        print("Could not find portfolio YTD in BullAware page")
+        return None
         
     except Exception as e:
-        print(f"BullAware Selenium error for {etoro_symbol}: {e}")
-        import traceback
-        traceback.print_exc()
-    
-    finally:
-        if driver:
-            driver.quit()
-    
-    return None
+        print(f"BullAware portfolio YTD fetch error: {e}")
+        return None
 
 def fetch_stock_data():
     """
@@ -121,7 +46,7 @@ def fetch_stock_data():
     Logic:
     - Daily: For US stocks, only use during 16:00 and 22:00 sessions
     - Monthly: Always use for all stocks
-    - Yearly (YTD): Always use for all stocks, with BullAware Selenium fallback if ~0
+    - Yearly (YTD): Calculate from January 1st of current year
     """
     print(f"Fetching yfinance data for {len(PORTFOLIO_TICKERS)} symbols...")
     
@@ -157,12 +82,10 @@ def fetch_stock_data():
                 exchange = info.get('exchange', '')
                 is_us_stock = exchange in us_exchanges
             except:
-                # If we can't get info, assume non-US for safety
                 is_us_stock = False
                 print(f"Could not determine exchange for {etoro_symbol}, assuming non-US")
             
             # Daily change (today vs yesterday)
-            # ONLY skip for US stocks outside 16:00/22:00 sessions
             if is_us_stock and not is_us_session:
                 daily_change = 0.0
                 print(f"⏸ Skipping daily for US stock {etoro_symbol} ({exchange}) - market not yet closed")
@@ -172,30 +95,35 @@ def fetch_stock_data():
             else:
                 daily_change = 0.0
             
-            # Monthly change (last 30 days) - ALWAYS calculate
+            # Monthly change (last 30 days)
             if len(hist) >= 30:
                 month_ago_price = hist['Close'].iloc[-30]
                 monthly_change = ((current_price - month_ago_price) / month_ago_price) * 100
             else:
                 monthly_change = 0.0
             
-            # Yearly change (last 252 trading days) - ALWAYS calculate
-            # YTD applies to ALL stocks regardless of session time
-            if len(hist) >= 252:
-                year_ago_price = hist['Close'].iloc[-252]
-                yearly_change = ((current_price - year_ago_price) / year_ago_price) * 100
-            else:
-                yearly_change = 0.0
+            # Calculate true YTD (Year to Date) - from January 1st of current year
+            current_year = datetime.now().year
+            ytd_start = datetime(current_year, 1, 1)
             
-            # Fallback to BullAware Selenium if yearly change is zero or very close to zero
-            # This applies to ALL stocks (US and non-US)
-            # IMPORTANT: Get individual stock YTD, not portfolio YTD
-            if abs(yearly_change) < 0.01:
-                print(f"YTD for {etoro_symbol} is ~0, trying BullAware Selenium fallback...")
-                bullaware_data = fetch_bullaware_data_selenium(etoro_symbol)
-                if bullaware_data and abs(bullaware_data['yearly_change']) > 0.01:
-                    yearly_change = bullaware_data['yearly_change']
-                    print(f"✓ Using BullAware YTD for {etoro_symbol}: {yearly_change:.2f}%")
+            try:
+                # Get historical data from YTD start to now
+                ytd_hist = ticker.history(start=ytd_start)
+                if len(ytd_hist) >= 2:
+                    ytd_start_price = ytd_hist['Close'].iloc[0]
+                    yearly_change = ((current_price - ytd_start_price) / ytd_start_price) * 100
+                    print(f"✓ Calculated YTD for {etoro_symbol} from {ytd_start.date()}: {yearly_change:.2f}%")
+                else:
+                    # Fallback to 252 trading days if YTD data not available
+                    if len(hist) >= 252:
+                        year_ago_price = hist['Close'].iloc[-252]
+                        yearly_change = ((current_price - year_ago_price) / year_ago_price) * 100
+                        print(f"ℹ Using 252-day calculation for {etoro_symbol}: {yearly_change:.2f}%")
+                    else:
+                        yearly_change = 0.0
+            except Exception as e:
+                print(f"YTD calculation error for {etoro_symbol}: {e}")
+                yearly_change = 0.0
             
             stock_data[etoro_symbol] = {
                 'yahoo_ticker': yahoo_ticker,
@@ -207,7 +135,7 @@ def fetch_stock_data():
             }
             
             print(f"{etoro_symbol} ({yahoo_ticker}): Daily {daily_change:.2f}%, Monthly {monthly_change:.2f}%, Yearly {yearly_change:.2f}%")
-        
+            
         except Exception as e:
             print(f"Error fetching data for {etoro_symbol} ({yahoo_ticker}): {e}")
             continue
