@@ -42,9 +42,8 @@ US stock daily performance is **only reported at 22:00** to ensure accurate end-
 
 Formatted Telegram message with:
 - 🏆 **Top 5 daily performers** (today's winners)
-- 📉 **Bottom 3 monthly performers** (this month's losers)
+- 📉 **Top 3 monthly performers** (this month's winners)
 - 📈 **Top 3 yearly performers** (YTD leaders)
-- 🔝 **Top 5 holdings by yearly performance**
 
 Each entry includes emoji, ticker, company name, and performance percentage.
 
@@ -143,24 +142,31 @@ The workflow is triggered automatically by schedule. You can also trigger manual
 
 ## 📊 Sample Output
 ```
-🌟✨ EUROPEAN MARKET OPEN PORTFOLIO 🏆⚡
+✨✨✨EUROPEAN MARKET OPEN PORTFOLIO ✨✨✨
 
-⚡ 🔥 TODAY PERFORMANCE: 🔥 ⚡
+    💀 💀 💀 TODAY PERFORMANCE -0.02% 💀 💀 💀
+    
+161% SINCE CHANGE OF STRATEGY (2020) 🚀🚀🚀
+32% PER YEAR (DOUBLE YOUR MONEY IN 2.24 YEARS)
 
-👑 [$X7PEX.DE] (iShares Core MSCI Emerging Markets ETF) +1.77%
-🎯 [$LLYY] (Eli Lilly & Co) +1.02%
-📈 [$GLEN.L] (Glencore) +0.93%
+TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
+🏦 [$2318.HK (Ping An Insurance)] +1.77%
+💼 [$WDEF.L (WisdomTree Europe Equity Income UCITS ETF)] +1.22%
+🌍 [$IEMG (iShares Core MSCI Emerging Markets ETF)] +1.02%
+⛏️ [$GLEN (Glencore)] +0.32%
+📊 [$DB1.DE (Xtrackers MSCI World Momentum UCITS ETF)] +0.23%
 
-📊 ☁️ MONTHLY PERFORMANCE 📅 ☁️
+TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
+💊 [$LLY (Eli Lilly & Co)] +31.93%
+🔍 [$GOOG (Alphabet)] +29.79%
+🧬 [$AZN.L (AstraZeneca)] +9.92%
 
-📉 [$GOOGL] (Alphabet) -0.60%
-📉 [$IEUR] (iShares Core MSCI Europe UCITS ETF) -2.23%
-📉 [$VWCE.DE] (Vanguard FTSE All-World UCITS ETF) -12.25%
+TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
+🛡️ [$PLTR (Palantir Technologies Inc)] +115.79%
+☁️ [$NET (Cloudflare)] +72.37%
+🔍 [$GOOG (Alphabet)] +68.73%
 
-🏆 ⚡ TOP 5 YEARLY PERFORMANCE OF PORTFOLIO 📈
-
-🥇 [$X7PEX.DE] (iShares Core MSCI Emerging Markets ETF) +1.90%
-🥈 [$TRIQ.L] (Trig PLC) +6.37%
+@AndreaRavalli
 ...
 ```
 
