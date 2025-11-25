@@ -34,18 +34,18 @@ jobs:
       - name: Collect data and generate recap
 
       - name: Determine market session
-      id: market_session
-      run: |
-        HOUR=$(date -u +%H)
-        if [ $HOUR -eq 10 ]; then
-          echo "session=European market open" >> $GITHUB_OUTPUT
-        elif [ $HOUR -eq 15 ]; then
-          echo "session=U.S. market open" >> $GITHUB_OUTPUT
-        elif [ $HOUR -eq 22 ]; then
-          echo "session=U.S. market close" >> $GITHUB_OUTPUT
-        else
-          echo "session=Daily recap" >> $GITHUB_OUTPUT
-        fi
+        id: market_session
+        run: |
+          HOUR=$(date -u +%H)
+          if [ $HOUR -eq 10 ]; then
+            echo "session=European market open" >> $GITHUB_OUTPUT
+          elif [ $HOUR -eq 15 ]; then
+            echo "session=U.S. market open" >> $GITHUB_OUTPUT
+          elif [ $HOUR -eq 22 ]; then
+            echo "session=U.S. market close" >> $GITHUB_OUTPUT
+          else
+            echo "session=Daily recap" >> $GITHUB_OUTPUT
+          fi
 
         env:
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
