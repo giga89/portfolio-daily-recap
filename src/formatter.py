@@ -43,7 +43,7 @@ def generate_recap(stock_data, portfolio_daily, sheets_data):
     market_session = os.getenv('MARKET_SESSION', 'Daily recap')
     
     # Build the recap text
-        performance_emoji = "🍀" if portfolio_daily >= 0 else "💀"
+    performance_emoji = "🍀" if portfolio_daily >= 0 else "💀"
 
     recap = f"""✨✨✨{market_session.upper()} PORTFOLIO ✨✨✨
 
