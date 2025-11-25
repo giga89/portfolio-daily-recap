@@ -2,9 +2,8 @@ name: Daily Portfolio Recap
 
 on:
   schedule:
-    # Runs at 16:00 UTC (17:00 CET) every day
-    - cron: '0 15'0 10 * * *'  # 11:00 CET (10:00 UTC) - European market open
-    - cron: '0 21 *'0 15 * * *'  # 16:00 CET (15:00 UTC) - U.S. market open
+    - cron: '0 15 0 10 * * *'  # 11:00 CET (10:00 UTC) - European market open
+    - cron: '0 21 * 0 15 * * *'  # 16:00 CET (15:00 UTC) - U.S. market open
     - cron: '0 22 * * *'  # 23:00 CET (22:00 UTC) - U.S. market close
   workflow_dispatch:  # Allows manual trigger
 permissions:
