@@ -71,6 +71,7 @@ def fetch_portfolio_weights_from_bullaware():
         driver = webdriver.Chrome(service=service, options=chrome_options)
         
         weights = {}
+        page_source = "" # Initialize page_source for later use
         
         try:
             # Navigate to BullAware portfolio page
@@ -104,11 +105,9 @@ def fetch_portfolio_weights_from_bullaware():
                     print("⚠ Will try to extract from current view")
 
             # Try to extract weights from table view
-            # QUESTO BLOCCO DEVE ESSERE FUORI DALL'EXCEPT SOPRA
             print("📊 Extracting portfolio weights from table...")
             try:
                 # Find all table rows
-                # Assicurati che 'weights' sia stata inizializzata prima di questo blocco (e.g., weights = {})
                 table_rows = driver.find_elements(By.XPATH, "//tr[contains(@class, 'css-')]")
                 print(f"Found {len(table_rows)} table rows")
 
@@ -135,9 +134,8 @@ def fetch_portfolio_weights_from_bullaware():
                                     weight = abs(float(weight_str))  # Use abs to ensure positive
 
                                     if 0 < weight < 50:  # Sanity check
-                                        # Assicurati che 'weights' sia accessibile (inizializzata esternamente)
                                         weights[ticker] = weight
-                                        print(f"  {ticker}: {weight}%")
+                                        print(f"   {ticker}: {weight}%")
                     except Exception as e:
                         # Questo catch è per errori all'interno del loop su una singola riga
                         continue  # Skip rows that don't match expected format
@@ -152,64 +150,49 @@ def fetch_portfolio_weights_from_bullaware():
                 print(f"❌ Error extracting from table: {e}")
                 print("⚠ Falling back to alternative extraction methods")
 
+            # Now fetch the page source for the fallback method
+            page_source = driver.page_source
+
         except Exception as e_outer:
             # Questo catch è per errori di navigazione o altri errori non gestiti
             print(f"An unexpected outer error occurred: {e_outer}")
-                    
-        # Fallback: Try treemap extraction if table extraction failed
-        if not weights:
-            # The treemap/bubble elements contain the data
-            # Look for elements with stock symbols and their weights
-            # Based on the HTML structure we saw, find all instrument elements
-            
-            # Try to find elements in the treemap (they usually have specific attributes)
-            page_source = driver.page_source
-            
-            # Extract using regex from page source (as treemap data is in JS)
-            # Pattern to find ticker and portfolio value percentage
-            pattern = r'"?([A-Z0-9]+\.?[A-Z]*)"?\s*:\s*"?(\d+\.?\d*)%?"?'
-            
-            # Also try to extract from visible text elements
-            elements = driver.find_elements(By.CSS_SELECTOR, '[class*="treemap"], [class*="bubble"], [class*="portfolio"]')
+
+        # Fallback: Try treemap extraction if table extraction failed or returned few weights
+        if not weights or len(weights) < 5:
+            print("   Trying alternative extraction method...")
             
             # Parse the visible treemap items
-            treemap_items = driver.find_elements(By.XPATH, "//*[contains(text(), '%')]")
-            
-            for item in treemap_items:
-                text = item.text.strip()
-                # Look for pattern like "NVDA\n-3.08%\n" or "CCJ\n4.79%"
-                lines = [line.strip() for line in text.split('\n') if line.strip()]
-                
-                if len(lines) >= 2:
-                    ticker = lines[0]
-                    # Find line with percentage
-                    for line in lines[1:]:
-                        if '%' in line:
-                            try:
-                                # Extract the percentage value
-                                weight_str = line.replace('%', '').strip()
-                                # Remove any +/- signs (those are daily changes, not weights)
-                                # Weight is always positive
-                                if weight_str.replace('+', '').replace('-', '').replace('.', '').isdigit():
-                                    weight = abs(float(weight_str.replace('+', '').replace('-', '')))
-                                    if 0 < weight < 50:  # Sanity check (individual weights should be < 50%)
-                                        weights[ticker] = weight
-                                        break
-                            except ValueError:
-                                continue
-            
-            # Alternative: Extract from specific Portfolio Value elements if they exist
+            # This block was previously incorrectly aligned under the `except e_outer` block
             try:
-                portfolio_value_elements = driver.find_elements(By.XPATH, "//*[contains(@class, 'portfolio-value') or contains(@aria-label, 'Portfolio Value')]")
-                for elem in portfolio_value_elements:
-                    # Extract ticker and value from attributes or text
-                    pass
-            except:
-                pass
-            
-            # If we got very few weights, try parsing the page source directly
-            if len(weights) < 5:
-                print("   Trying alternative extraction method...")
+                treemap_items = driver.find_elements(By.XPATH, "//*[contains(text(), '%')]")
+                
+                for item in treemap_items:
+                    text = item.text.strip()
+                    # Look for pattern like "NVDA\n-3.08%\n" or "CCJ\n4.79%"
+                    lines = [line.strip() for line in text.split('\n') if line.strip()]
+                    
+                    if len(lines) >= 2:
+                        ticker = lines[0]
+                        # Find line with percentage
+                        for line in lines[1:]:
+                            if '%' in line:
+                                try:
+                                    # Extract the percentage value
+                                    weight_str = line.replace('%', '').strip()
+                                    # Remove any +/- signs (those are daily changes, not weights)
+                                    # Weight is always positive
+                                    if weight_str.replace('+', '').replace('-', '').replace('.', '').isdigit():
+                                        weight = abs(float(weight_str.replace('+', '').replace('-', '')))
+                                        if 0 < weight < 50:  # Sanity check (individual weights should be < 50%)
+                                            weights[ticker] = weight
+                                            break
+                                except ValueError:
+                                    continue
+            except Exception as e:
+                print(f"   Error during treemap extraction: {e}")
+
+            # Fallback 2: Direct regex from page source (if page_source was fetched successfully)
+            if page_source and len(weights) < 5:
                 # Look for data in JavaScript objects in page source
                 import re
                 # Find patterns like {'symbol': 'NVDA', 'portfolioValue': 3.08}
@@ -220,25 +203,21 @@ def fetch_portfolio_weights_from_bullaware():
                         weights[symbol] = float(value)
                     except ValueError:
                         pass
-            
-            driver.quit()
-            
-            if weights:
-                print(f"✓ Successfully fetched weights for {len(weights)} instruments")
-                # Sort by weight descending for logging
-                sorted_weights = dict(sorted(weights.items(), key=lambda x: x[1], reverse=True))
-                for ticker, weight in list(sorted_weights.items())[:5]:
-                    print(f"   {ticker}: {weight}%")
-                if len(sorted_weights) > 5:
-                    print(f"   ... and {len(sorted_weights) - 5} more")
-                return weights
-            else:
-                print("⚠️  Could not extract weights from BullAware, using fallback")
-                return {}
-                
-        except Exception as e:
-            print(f"⚠️  Error during weight extraction: {e}")
-            driver.quit()
+        
+        # Cleanup and return
+        driver.quit()
+        
+        if weights:
+            print(f"✓ Successfully fetched weights for {len(weights)} instruments")
+            # Sort by weight descending for logging
+            sorted_weights = dict(sorted(weights.items(), key=lambda x: x[1], reverse=True))
+            for ticker, weight in list(sorted_weights.items())[:5]:
+                print(f"   {ticker}: {weight}%")
+            if len(sorted_weights) > 5:
+                print(f"   ... and {len(sorted_weights) - 5} more")
+            return weights
+        else:
+            print("⚠️  Could not extract weights from BullAware, using fallback")
             return {}
             
     except ImportError:
@@ -333,7 +312,7 @@ def calculate_portfolio_daily_change(stock_data, portfolio_weights=None):
     Args:
         stock_data: dict with stock data including 'daily_change' for each ticker
         portfolio_weights: dict with {ticker: weight_percentage} (e.g., {'NVDA': 3.08, 'PLTR': 0.71})
-                          If None, will fetch fresh weights from BullAware
+                           If None, will fetch fresh weights from BullAware
     
     Returns:
         float: weighted portfolio daily performance as percentage
