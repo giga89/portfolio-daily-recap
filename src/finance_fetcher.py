@@ -77,7 +77,78 @@ def fetch_portfolio_weights_from_bullaware():
             driver.get("https://bullaware.com/etoro/AndreaRavalli")
             print("   Waiting for page to load...")
             time.sleep(5)  # Wait for dynamic content to load
+
+            # Switch to table view to extract portfolio weights
+            print("📊 Switching to table view...")
+            try:
+                # Find and click the table view button (second icon in the controls)
+                table_button = driver.find_element(By.XPATH, "//button[@aria-label='Switch to table view']")
+                table_button.click()
+                print("✓ Switched to table view")
+                time.sleep(2)  # Wait for table to load
+            except Exception as e:
+                print(f"⚠ Could not find table button with aria-label, trying alternative selector: {e}")
+                try:
+                    # Alternative: Find by SVG or button position (it's typically the second button in the controls)
+                    table_buttons = driver.find_elements(By.XPATH, "//button[contains(@class, 'chakra-button')]")
+                    # Look for the table/grid icon button - usually has viewBox or specific path
+                    for btn in table_buttons:
+                        svg = btn.find_elements(By.TAG_NAME, 'svg')
+                        if svg and 'M3 4' in btn.get_attribute('innerHTML'):  # Grid icon pattern
+                            btn.click()
+                            print("✓ Switched to table view using alternative method")
+                            time.sleep(2)
+                            break
+                except Exception as e2:
+                    print(f"❌ Could not switch to table view: {e2}")
+                    print("⚠ Will try to extract from current view")
+
+                            # Try to extract weights from table view
+            print("📊 Extracting portfolio weights from table...")
+            try:
+                # Find all table rows
+                table_rows = driver.find_elements(By.XPATH, "//tr[contains(@class, 'css-')]")  
+                print(f"Found {len(table_rows)} table rows")
+                
+                for row in table_rows:
+                    try:
+                        # Get all cells in the row
+                        cells = row.find_elements(By.TAG_NAME, 'td')
+                        if len(cells) >= 4:  # Need at least: Instrument, Net Profit, Profit Today, Portfolio Value
+                            # First cell usually contains the instrument name/ticker
+                            instrument_cell = cells[0]
+                            ticker_text = instrument_cell.text.strip()
+                            
+                            # Portfolio Value is typically the 4th column (index 3)
+                            portfolio_value_cell = cells[3]
+                            weight_text = portfolio_value_cell.text.strip()
+                            
+                            # Extract ticker from "BUY SYMBOL" format
+                            if 'BUY ' in ticker_text:
+                                ticker = ticker_text.replace('BUY ', '').strip()
+                                
+                                # Extract percentage (e.g., "13.30%" -> 13.30)
+                                if '%' in weight_text:
+                                    weight_str = weight_text.replace('%', '').strip()
+                                    weight = abs(float(weight_str))  # Use abs to ensure positive
+                                    
+                                    if 0 < weight < 50:  # Sanity check
+                                        weights[ticker] = weight
+                                        print(f"  {ticker}: {weight}%")
+                    except Exception as e:
+                        continue  # Skip rows that don't match expected format
+                        
+                if weights:
+                    print(f"✓ Successfully extracted {len(weights)} portfolio weights from table")
+                else:
+                    print("⚠ No weights found in table, falling back to alternative methods")
+                    
+        except Exception as e:
+            print(f"❌ Error extracting from table: {e}")
+            print("⚠ Falling back to alternative extraction methods")
             
+        # Fallback: Try treemap extraction if table extraction failed
+        if not weights:
             # The treemap/bubble elements contain the data
             # Look for elements with stock symbols and their weights
             # Based on the HTML structure we saw, find all instrument elements
