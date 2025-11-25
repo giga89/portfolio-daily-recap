@@ -46,7 +46,7 @@ def fetch_bullaware_data_selenium(etoro_symbol):
         try:
             # Find the dropdown button by text content
             dropdown_btn = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, "//div[contains(text(), 'Time Period')]"))
+                                    EC.element_to_be_clickable((By.XPATH, "//*[contains(text(), 'Time Period')]"))
             )
             dropdown_btn.click()
             print("Clicked on Time Period dropdown")
@@ -54,7 +54,7 @@ def fetch_bullaware_data_selenium(etoro_symbol):
             
             # Click on "Year to Date" option in the menu
             ytd_option = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, "//div[text()='Year to Date']"))
+                                    EC.element_to_be_clickable((By.XPATH, "//*[contains(text(), 'Year to Date')]"))
             )
             ytd_option.click()
             print("Selected Year to Date from dropdown")
