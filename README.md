@@ -88,7 +88,7 @@ Edit `src/config.py` to customize:
 - Assign emojis to each holding for visual representation
 
 ## 📁 Project Structure
-
+```
 portfolio-daily-recap/
 ├── .github/
 │ └── workflows/
@@ -104,7 +104,7 @@ portfolio-daily-recap/
 │ └── recap.txt # Generated report (committed to repo)
 ├── requirements.txt # Python dependencies
 └── README.md # This file
-
+```
 
 ## 🔧 Key Components
 
@@ -142,7 +142,7 @@ The workflow is triggered automatically by schedule. You can also trigger manual
 4. Choose the session time (16:00 or 22:00)
 
 ## 📊 Sample Output
-
+```
 🌟✨ EUROPEAN MARKET OPEN PORTFOLIO 🏆⚡
 
 ⚡ 🔥 TODAY PERFORMANCE: 🔥 ⚡
@@ -162,7 +162,7 @@ The workflow is triggered automatically by schedule. You can also trigger manual
 🥇 [$X7PEX.DE] (iShares Core MSCI Emerging Markets ETF) +1.90%
 🥈 [$TRIQ.L] (Trig PLC) +6.37%
 ...
-
+```
 
 ## 🔐 Security
 
