@@ -4,6 +4,7 @@ Format the recap output in a nice readable format
 
 from datetime import datetime
 from config import EMOJI_MAP
+import os
 
 
 def get_emoji(etoro_symbol):
@@ -37,9 +38,12 @@ def generate_recap(stock_data, portfolio_daily, sheets_data):
     daily_sorted = sorted(stock_data.items(), key=lambda x: x[1]['daily_change'], reverse=True)[:5]
     monthly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['monthly_change'], reverse=True)[:3]
     yearly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['yearly_change'], reverse=True)[:3]
+
+        # Get market session from environment variable
+    market_session = os.getenv('MARKET_SESSION', 'Daily recap')
     
     # Build the recap text
-    recap = f"""✨✨✨ TODAY RECAP FOR PORTFOLIO ✨✨✨
+    recap = f"""✨✨✨{market_session.upper()} PORTFOLIO ✨✨✨
 
     TODAY PERFORMANCE {{portfolio_daily:+.2f}}% {performance_emoji} {performance_emoji} {performance_emoji}
     # Choose emoji based on performance
