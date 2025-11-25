@@ -1,33 +1,56 @@
 """
 Fetch stock data from Yahoo Finance using yfinance
 """
-
 import yfinance as yf
 from config import PORTFOLIO_TICKERS
 import requests
-
+from bs4 import BeautifulSoup
+import os
+import re
 
 def fetch_bullaware_data(etoro_symbol):
     """
-    Fetch MTD and YTD data from BullAware API as fallback
-    Returns dict with 'monthly_change' and 'yearly_change' or None if failed
+    Fetch YTD data from BullAware web page by scraping the treemap
+    Returns dict with 'yearly_change' or None if failed
     """
     try:
-        # BullAware API endpoint - adjust based on actual API
-        url = f"https://api.bullaware.com/v1/stocks/{etoro_symbol}/performance"
-        response = requests.get(url, timeout=10)
+        # BullAware portfolio page
+        url = "https://bullaware.com/etoro/AndreaRavalli"
+        response = requests.get(url, timeout=15)
         
         if response.status_code == 200:
-            data = response.json()
-            return {
-                'monthly_change': data.get('mtd_change', 0.0),
-                'yearly_change': data.get('ytd_change', 0.0)
-            }
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Find all text content in the page
+            page_text = soup.get_text()
+            
+            # Look for the symbol followed by a percentage
+            # Pattern: Symbol name followed by percentage (e.g., "PLTR 140.88%" or "PLTR\n140.88%")
+            pattern = rf'{re.escape(etoro_symbol)}[\s\n]+(-?\d+\.?\d*)%'
+            match = re.search(pattern, page_text, re.IGNORECASE)
+            
+            if match:
+                ytd_value = float(match.group(1))
+                print(f"Found BullAware YTD for {etoro_symbol}: {ytd_value}%")
+                return {'yearly_change': ytd_value}
+            
+            # Alternative: try to find just the percentage near the symbol
+            # Split text and look for symbol + percentage pattern
+            lines = page_text.split('\n')
+            for i, line in enumerate(lines):
+                if etoro_symbol in line:
+                    # Check current line and next few lines for percentage
+                    for j in range(i, min(i + 5, len(lines))):
+                        perc_match = re.search(r'(-?\d+\.?\d*)%', lines[j])
+                        if perc_match:
+                            ytd_value = float(perc_match.group(1))
+                            print(f"Found BullAware YTD for {etoro_symbol}: {ytd_value}%")
+                            return {'yearly_change': ytd_value}
+    
     except Exception as e:
-        print(f"BullAware API error for {etoro_symbol}: {e}")
+        print(f"BullAware scraping error for {etoro_symbol}: {e}")
     
     return None
-
 
 def fetch_stock_data():
     """
@@ -37,6 +60,15 @@ def fetch_stock_data():
     print(f"Fetching yfinance data for {len(PORTFOLIO_TICKERS)} symbols...")
     
     stock_data = {}
+    
+    # Get market session from environment (16:00 or 22:00)
+    market_session = os.getenv('MARKET_SESSION', 'Daily recap')
+    is_us_session = market_session in ['16:00', '22:00']
+    
+    print(f"Market session: {market_session}, US session: {is_us_session}")
+    
+    # US exchanges
+    us_exchanges = ['NASDAQ', 'NYSE', 'AMEX', 'NMS', 'NYQ', 'NAS']
     
     for etoro_symbol, (yahoo_ticker, company_name) in PORTFOLIO_TICKERS.items():
         try:
@@ -53,8 +85,21 @@ def fetch_stock_data():
             # Current price
             current_price = hist['Close'].iloc[-1]
             
+            # Determine if this is a US stock
+            try:
+                info = ticker.info
+                exchange = info.get('exchange', '')
+                is_us_stock = exchange in us_exchanges
+            except:
+                # If we can't get info, assume non-US for safety
+                is_us_stock = False
+            
             # Daily change (today vs yesterday)
-            if len(hist) >= 2:
+            # For US stocks, only use if session is 16:00 or 22:00
+            if is_us_stock and not is_us_session:
+                daily_change = 0.0
+                print(f"Skipping daily for US stock {etoro_symbol} - not during US session")
+            elif len(hist) >= 2:
                 yesterday_price = hist['Close'].iloc[-2]
                 daily_change = ((current_price - yesterday_price) / yesterday_price) * 100
             else:
@@ -73,17 +118,14 @@ def fetch_stock_data():
                 yearly_change = ((current_price - year_ago_price) / year_ago_price) * 100
             else:
                 yearly_change = 0.0
-
-                        # Fallback to BullAware if monthly or yearly change is zero
-            if monthly_change == 0.0 or yearly_change == 0.0:
+            
+            # Fallback to BullAware if yearly change is zero or very close to zero
+            if abs(yearly_change) < 0.01:
+                print(f"YTD for {etoro_symbol} is ~0, trying BullAware fallback...")
                 bullaware_data = fetch_bullaware_data(etoro_symbol)
-                if bullaware_data:
-                    if monthly_change == 0.0 and bullaware_data['monthly_change'] != 0.0:
-                        monthly_change = bullaware_data['monthly_change']
-                        print(f"Using BullAware MTD for {etoro_symbol}: {monthly_change:.2f}%")
-                    if yearly_change == 0.0 and bullaware_data['yearly_change'] != 0.0:
-                        yearly_change = bullaware_data['yearly_change']
-                        print(f"Using BullAware YTD for {etoro_symbol}: {yearly_change:.2f}%")
+                if bullaware_data and abs(bullaware_data['yearly_change']) > 0.01:
+                    yearly_change = bullaware_data['yearly_change']
+                    print(f"✓ Using BullAware YTD for {etoro_symbol}: {yearly_change:.2f}%")
             
             stock_data[etoro_symbol] = {
                 'yahoo_ticker': yahoo_ticker,
@@ -95,13 +137,12 @@ def fetch_stock_data():
             }
             
             print(f"{etoro_symbol} ({yahoo_ticker}): Daily {daily_change:.2f}%, Monthly {monthly_change:.2f}%, Yearly {yearly_change:.2f}%")
-            
+        
         except Exception as e:
             print(f"Error fetching data for {etoro_symbol} ({yahoo_ticker}): {e}")
             continue
     
     return stock_data
-
 
 def calculate_portfolio_daily_change(stock_data):
     """
