@@ -41,8 +41,10 @@ def generate_recap(stock_data, portfolio_daily, sheets_data):
     # Build the recap text
     recap = f"""✨✨✨ TODAY RECAP FOR PORTFOLIO ✨✨✨
 
-🍀🍀🍀 TODAY PERFORMANCE {portfolio_daily:+.2f}% 🍀🍀🍀
-
+    TODAY PERFORMANCE {{portfolio_daily:+.2f}}% {performance_emoji} {performance_emoji} {performance_emoji}
+    # Choose emoji based on performance
+    performance_emoji = "🍀" if portfolio_daily >= 0 else "💀"
+    
 {five_year_return:.0f}% SINCE CHANGE OF STRATEGY (2020) 🚀🚀🚀
 {avg_yearly_return:.0f}% PER YEAR (DOUBLE YOUR MONEY IN {time_to_double:.2f} YEARS)
 
