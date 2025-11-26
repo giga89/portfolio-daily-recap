@@ -15,7 +15,7 @@ def get_emoji(etoro_symbol):
 def format_ticker(etoro_symbol, company_name, performance):
     """Format a ticker line with eToro link and performance"""
     emoji = get_emoji(etoro_symbol)
-    return f"{emoji} [${etoro_symbol} ({company_name})] {performance:+.2f}%"
+    return f"{emoji} ${etoro_symbol} {performance:+.2f}%"
 
 
 def generate_recap(stock_data, portfolio_daily, sheets_data):
@@ -47,7 +47,7 @@ def generate_recap(stock_data, portfolio_daily, sheets_data):
 
     recap = f"""✨✨✨{market_session.upper()} PORTFOLIO ✨✨✨
 
-    {performance_emoji} {performance_emoji} {performance_emoji} TODAY PERFORMANCE {portfolio_daily:+.2f}% {performance_emoji} {performance_emoji} {performance_emoji}
+{performance_emoji} {performance_emoji} {performance_emoji} TODAY PERFORMANCE {portfolio_daily:+.2f}% {performance_emoji} {performance_emoji} {performance_emoji}
     
 {five_year_return:.0f}% SINCE CHANGE OF STRATEGY (2020) 🚀🚀🚀
 {avg_yearly_return:.0f}% PER YEAR (DOUBLE YOUR MONEY IN {time_to_double:.2f} YEARS)
