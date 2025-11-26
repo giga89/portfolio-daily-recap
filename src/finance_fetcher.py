@@ -10,6 +10,16 @@ import os
 import re
 from datetime import datetime
 import json
+import pytz
+
+# Fuso orario USA (New York)
+NY_TZ = pytz.timezone('America/New_York')
+
+# Orario di apertura e chiusura della borsa USA (9:30 AM a 4:00 PM ET)
+US_OPEN_HOUR = 9
+US_OPEN_MINUTE = 30
+US_CLOSE_HOUR = 16
+US_CLOSE_MINUTE = 00
 
 def fetch_portfolio_ytd_from_bullaware():
     """
@@ -244,6 +254,14 @@ def fetch_stock_data():
             stock = yf.Ticker(yahoo_ticker)
             info = stock.info
             
+            # 1. Ottieni l'orario corrente a New York
+            now_ny = datetime.datetime.now(NY_TZ)
+            
+            # 2. Determina se siamo in orario PRE-MARKET (prima delle 9:30 AM ET)
+            # L'orario di apertura è fissato alle 9:30 AM ET.
+            is_pre_market_hours = now_ny.hour < US_OPEN_HOUR or \
+                                (now_ny.hour == US_OPEN_HOUR and now_ny.minute < US_OPEN_MINUTE)
+
             # Get company name
             company_name = info.get('longName', info.get('shortName', yahoo_ticker))
             
@@ -287,6 +305,14 @@ def fetch_stock_data():
                 print(f"YTD calculation error for {etoro_symbol}: {e}")
                 yearly_change = 0.0
             
+            exchange = info.get('exchange', '')
+            us_exchanges = ['NASDAQ', 'NYSE', 'AMEX', 'NMS', 'NYQ', 'NAS']
+            is_us_stock = exchange in us_exchanges
+
+            if is_us_stock and is_pre_market_hours:
+                print(f"Day not yet started for {etoro_symbol}")
+                daily_change = 0.0
+
             stock_data[etoro_symbol] = {
                 'yahoo_ticker': yahoo_ticker,
                 'company_name': company_name,
@@ -320,7 +346,6 @@ def calculate_portfolio_daily_change(stock_data, portfolio_weights=None):
     """
     if not stock_data:
         return 0.0
-    
     # Fetch fresh weights from BullAware if not provided
     if portfolio_weights is None:
         portfolio_weights = fetch_portfolio_weights_from_bullaware()
