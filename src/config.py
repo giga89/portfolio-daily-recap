@@ -6,7 +6,6 @@ Configuration file for portfolio ticker mappings, company names, and emoji
 PORTFOLIO_TICKERS = {
     # ETFs
     'SX7PEX.DE': ('EXV1.DE', 'iShares STOXX Europe 600 Banks UCITS ETF'),
-    'VWCE.L': ('VWCE.DE', 'Vanguard FTSE All-World UCITS ETF'),
     'IEUR': ('IEUR', 'iShares Core MSCI Europe UCITS ETF'),
     'IQQL.DE': ('IQQL.DE', 'iShares MSCI World Quality Factor UCITS ETF'),
     'IEMG': ('IEMG', 'iShares Core MSCI Emerging Markets ETF'),
