@@ -255,7 +255,7 @@ def fetch_stock_data():
             info = stock.info
             
             # 1. Ottieni l'orario corrente a New York
-            now_ny = datetime.datetime.now(NY_TZ)
+            now_ny = datetime.now(NY_TZ)
             
             # 2. Determina se siamo in orario PRE-MARKET (prima delle 9:30 AM ET)
             # L'orario di apertura è fissato alle 9:30 AM ET.
