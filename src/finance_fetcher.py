@@ -234,9 +234,9 @@ def fetch_stock_data():
     """
     stock_data = {}
     
-    for etoro_symbol in PORTFOLIO_TICKERS:
-        yahoo_ticker = etoro_symbol  # Use eToro symbol as-is for Yahoo Finance
-        company_name = etoro_symbol  # Default to symbol
+    for ticker, (yahoo_ticker, descr) in PORTFOLIO_TICKERS.items():
+        yahoo_ticker = yahoo_ticker  # Use eToro symbol as-is for Yahoo Finance
+        company_name = descr  # Default to symbol
         
         try:
             # Fetch stock info
