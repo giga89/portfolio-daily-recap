@@ -116,18 +116,25 @@ def fetch_portfolio_weights_from_bullaware():
                             time.sleep(2)
                             break
                 except Exception as e2:
-                    print(f"❌ Could not switch to table view: {e2}")
-                    print("⚠ Will try to extract from current view")
-
-            # Try to extract weights from table view
-            print("📊 Extracting portfolio weights from table...")
-            try:
-                # Find all table rows
-                table_rows = driver.find_elements(By.XPATH, "//tr[contains(@class, 'css-')]")
-                print(f"Found {len(table_rows)} table rows")
-
-                for row in table_rows:
-                    try:
+                        # Use JavaScript to click the table view button (more reliable than Selenium selectors)
+            script = """
+            // Find all buttons in the treemap controls area
+            const buttons = document.querySelectorAll('button.chakra-button');
+            // The table view button is typically the 2nd icon button after the treemap controls
+            // Look for buttons with SVG children (icon buttons)
+            const iconButtons = Array.from(buttons).filter(btn => btn.querySelector('svg'));
+            if (iconButtons.length >= 2) {
+                iconButtons[1].click();  // Click the 2nd icon button (table view)
+                return 'clicked';
+            }
+            return 'not_found';
+            """ 
+            result = driver.execute_script(script)
+            if result == 'clicked':
+                print("✅ Switched to table view using JavaScript")
+                time.sleep(3)  # Wait for table to load
+            else:
+                print(f"⚠️ Could not find table button with JavaScript")        try:
                         # Get all cells in the row
                         cells = row.find_elements(By.TAG_NAME, 'td')
                         if len(cells) >= 4:  # Need at least: Instrument, Net Profit, Profit Today, Portfolio Value
