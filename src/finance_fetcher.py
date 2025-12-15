@@ -108,7 +108,7 @@ def fetch_portfolio_weights_from_bullaware():
                 print("✅ Switched to table view using JavaScript")
                 time.sleep(3)  # Wait for table to load
             else:
-                print(f"⚠️ Could not find table button with JavaScript")        try:
+                print(f"⚠️ Could not find table button with JavaScript")
                         # Get all cells in the row
                         cells = row.find_elements(By.TAG_NAME, 'td')
                         if len(cells) >= 4:  # Need at least: Instrument, Net Profit, Profit Today, Portfolio Value
