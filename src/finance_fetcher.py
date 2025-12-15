@@ -141,6 +141,7 @@ def fetch_portfolio_weights_from_bullaware():
                     print(f"✓ Successfully extracted {len(weights)} portfolio weights from table")
                 else:
                     print("⚠ No weights found in table, falling back to alternative methods")
+                                try:
 
             except Exception as e:
                 # Questo catch è per errori nell'estrazione della tabella in generale
