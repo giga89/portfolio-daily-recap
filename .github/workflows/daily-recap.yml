@@ -28,16 +28,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Install Chrome and ChromeDriver
-        run: |
-          # Install Chrome
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          
-          # ChromeDriver is installed automatically by Selenium Manager
-          # No need to install separately
+
       - name: Determine market session
         id: market_session
         run: |
@@ -50,6 +41,13 @@ jobs:
             SESSION_NAME="European market open"
           elif [ $HOUR -eq 15 ]; then
             SESSION_NAME="U.S. market open"
+          elif [ $HOUR -eq 22 ]; then
+            SESSION_NAME="U.S. market close"
+          fi
+          
+          # Imposta la variabile di output
+          echo "session=$SESSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "Market Session detected: $SESSION_NAME (UTC Hour: $HOUR)"
       - name: Collect data and generate recap
 
         env:
