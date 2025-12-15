@@ -133,9 +133,9 @@ def fetch_portfolio_weights_from_bullaware():
                                 if 0 < weight < 50:  # Sanity check
                                     weights[ticker] = weight
                                     print(f"   {ticker}: {weight}%")
-                    except Exception as e:
-                        # Questo catch è per errori all'interno del loop su una singola riga
-                        continue  # Skip rows that don't match expected format
+                except Exception as e:
+                    # Questo catch è per errori all'interno del loop su una singola riga
+                    continue  # Skip rows that don't match expected format
 
                 if weights:
                     print(f"✓ Successfully extracted {len(weights)} portfolio weights from table")
