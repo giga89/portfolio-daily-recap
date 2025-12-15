@@ -93,20 +93,15 @@ def fetch_portfolio_weights_from_bullaware():
             print("📊 Switching to table view...")
             try:
                 # Find and click the table view button (second icon in the controls)
-                table_buttons = driver.find_elements(By.XPATH, "//button[contains(@class, 'chakra-button')]")
-                # Look for the table/grid icon button - it's typically the second iconbutton after treemap controls
-                # Find buttons with grid/table icon pattern - look for svg paths that indicate a table/grid layout
-                for btn in table_buttons:
-                    try:
-                        # Check if button contains SVG with grid/table pattern (M3 h4 v4 pattern or rect elements)
-                        svg_elements = btn.find_elements(By.TAG_NAME, 'rect')
-                        if len(svg_elements) >= 4:  # Grid icons typically have multiple rect elements
-                            btn.click()
-                            print("✅ Switched to table view using grid icon button")
-                            time.sleep(2)
-                            break
-                    except:
-                        continue
+                table_bu                # Try simpler approach: find buttons near treemap and click the 2nd one (table view icon)
+                buttons = driver.find_elements(By.XPATH, "//button[contains(@class, 'chakra-button')]/svg")
+                if len(buttons) >= 2:
+                    # Click parent button of the 2nd SVG icon (which should be the table view)
+                    buttons[1].find_element(By.XPATH, "..").click()
+                    print("✅ Switched to table view using 2nd icon button")
+                    time.sleep(3)  # Wait longer for table to load
+                else:
+                    print(f"Found {len(buttons)} icon buttons, expected at least 2")continue
                     table_button.click()
                     print("✓ Switched to table view")
                 time.sleep(2)  # Wait for table to load
