@@ -102,9 +102,6 @@ def fetch_portfolio_weights_from_bullaware():
                     time.sleep(3)  # Wait longer for table to load
                 else:
                     print(f"Found {len(buttons)} icon buttons, expected at least 2")
-                    table_button.click()
-                    print("✓ Switched to table view")
-                time.sleep(2)  # Wait for table to load
             except Exception as e:
                 print(f"⚠ Could not find table button with aria-label, trying alternative selector: {e}")
                 try:
