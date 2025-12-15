@@ -91,32 +91,6 @@ def fetch_portfolio_weights_from_bullaware():
 
             # Switch to table view to extract portfolio weights
             print("📊 Switching to table view...")
-            try:
-                # Find and click the table view button (second icon in the controls)
-                # Try simpler approach: find buttons near treemap and click the 2nd one (table view icon)
-                buttons = driver.find_elements(By.XPATH, "//button[contains(@class, 'chakra-button')]/svg")
-                if len(buttons) >= 2:
-                    # Click parent button of the 2nd SVG icon (which should be the table view)
-                    buttons[1].find_element(By.XPATH, "..").click()
-                    print("✅ Switched to table view using 2nd icon button")
-                    time.sleep(3)  # Wait longer for table to load
-                else:
-                    print(f"Found {len(buttons)} icon buttons, expected at least 2")
-            except Exception as e:
-                print(f"⚠ Could not find table button with aria-label, trying alternative selector: {e}")
-                try:
-                    # Alternative: Find by SVG or button position (it's typically the second button in the controls)
-                    table_buttons = driver.find_elements(By.XPATH, "//button[contains(@class, 'chakra-button')]")
-                    # Look for the table/grid icon button - usually has viewBox or specific path
-                    for btn in table_buttons:
-                        svg = btn.find_elements(By.TAG_NAME, 'svg')
-                        if svg and 'M3 4' in btn.get_attribute('innerHTML'):  # Grid icon pattern
-                            btn.click()
-                            print("✓ Switched to table view using alternative method")
-                            time.sleep(2)
-                            break
-                except Exception as e2:
-                        # Use JavaScript to click the table view button (more reliable than Selenium selectors)
             script = """
             // Find all buttons in the treemap controls area
             const buttons = document.querySelectorAll('button.chakra-button');
