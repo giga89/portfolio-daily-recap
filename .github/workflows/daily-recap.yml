@@ -58,6 +58,19 @@ jobs:
           echo "session=$SESSION_NAME" >> "$GITHUB_OUTPUT"
           echo "Market Session detected: $SESSION_NAME (UTC Hour: $HOUR)"
                 
+      - name: Debug Environment Variables
+        env:
+          MARKET_SESSION: ${{ steps.market_session.outputs.session }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          echo "=== DEBUG VARIABLES ==="
+          echo "MARKET_SESSION: $MARKET_SESSION"
+          echo "SPREADSHEET_ID: $SPREADSHEET_ID"
+          echo "TELEGRAM_CHAT_ID: $TELEGRAM_CHAT_ID"
+          echo "Checking GOOGLE_SHEETS_CREDENTIALS length: ${#SECRETS_GOOGLE_SHEETS_CREDENTIALS}"
+          echo "======================="
+
       - name: Collect data and generate recap
 
         env:
