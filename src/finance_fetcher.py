@@ -101,7 +101,7 @@ def fetch_portfolio_weights_from_bullaware():
                     print("✅ Switched to table view using 2nd icon button")
                     time.sleep(3)  # Wait longer for table to load
                 else:
-                    print(f"Found {len(buttons)} icon buttons, expected at least 2")continue
+                    print(f"Found {len(buttons)} icon buttons, expected at least 2")
                     table_button.click()
                     print("✓ Switched to table view")
                 time.sleep(2)  # Wait for table to load
