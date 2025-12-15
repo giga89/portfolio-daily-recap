@@ -92,10 +92,22 @@ def fetch_portfolio_weights_from_bullaware():
             # Switch to table view to extract portfolio weights
             print("📊 Switching to table view...")
             try:
-                # Find and click the table view button (second icon in the controls)
-                table_button = driver.find_element(By.XPATH, "//button[@aria-label='Switch to table view']")
-                table_button.click()
-                print("✓ Switched to table view")
+        # Find and click the table view button (second icon in the controls)
+        table_buttons = driver.find_elements(By.XPATH, "//button[contains(@class, 'chakra-button')]")
+                        # Look for the table/grid icon button - it's typically the second iconbutton after treemap controls
+                                        # Find buttons with grid/table icon pattern - look for svg paths that indicate a table/grid layout
+                                                        for btn in table_buttons:
+                                                                                try:
+                                                                                                            # Check if button contains SVG with grid/table pattern (M3 h4 v4 pattern or rect elements)
+                                                                                                                                    svg_elements = btn.find_elements(By.TAG_NAME, 'rect')
+                                                                                                                                                            if len(svg_elements) >= 4:  # Grid icons typically have multiple rect elements
+                                                                                                                                                                                        btn.click()
+                                                                                                                                                                                                                    print("✅ Switched to table view using grid icon button")
+                                                                                                                                                                                                                                                time.sleep(2)
+                                                                                                                                                                                                                                                                            break
+                                                                                                                                                                                                                                                                                                except:
+                                                                                                                                                                                                                                                                                                                            continue                table_button.click()
+        print("✓ Switched to table view")
                 time.sleep(2)  # Wait for table to load
             except Exception as e:
                 print(f"⚠ Could not find table button with aria-label, trying alternative selector: {e}")
