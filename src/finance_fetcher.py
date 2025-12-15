@@ -109,29 +109,30 @@ def fetch_portfolio_weights_from_bullaware():
                 time.sleep(3)  # Wait for table to load
             else:
                 print(f"⚠️ Could not find table button with JavaScript")
-                        # Get all cells in the row
-                        cells = row.find_elements(By.TAG_NAME, 'td')
-                        if len(cells) >= 4:  # Need at least: Instrument, Net Profit, Profit Today, Portfolio Value
-                            # First cell usually contains the instrument name/ticker
-                            instrument_cell = cells[0]
-                            ticker_text = instrument_cell.text.strip()
+                try:
+                    # Get all cells in the row
+                    cells = row.find_elements(By.TAG_NAME, 'td')
+                    if len(cells) >= 4:  # Need at least: Instrument, Net Profit, Profit Today, Portfolio Value
+                        # First cell usually contains the instrument name/ticker
+                        instrument_cell = cells[0]
+                        ticker_text = instrument_cell.text.strip()
 
-                            # Portfolio Value is typically the 4th column (index 3)
-                            portfolio_value_cell = cells[3]
-                            weight_text = portfolio_value_cell.text.strip()
+                        # Portfolio Value is typically the 4th column (index 3)
+                        portfolio_value_cell = cells[3]
+                        weight_text = portfolio_value_cell.text.strip()
 
-                            # Extract ticker from "BUY SYMBOL" format
-                            if 'BUY ' in ticker_text:
-                                ticker = ticker_text.replace('BUY ', '').strip()
+                        # Extract ticker from "BUY SYMBOL" format
+                        if 'BUY ' in ticker_text:
+                            ticker = ticker_text.replace('BUY ', '').strip()
 
-                                # Extract percentage (e.g., "13.30%" -> 13.30)
-                                if '%' in weight_text:
-                                    weight_str = weight_text.replace('%', '').strip()
-                                    weight = abs(float(weight_str))  # Use abs to ensure positive
+                            # Extract percentage (e.g., "13.30%" -> 13.30)
+                            if '%' in weight_text:
+                                weight_str = weight_text.replace('%', '').strip()
+                                weight = abs(float(weight_str))  # Use abs to ensure positive
 
-                                    if 0 < weight < 50:  # Sanity check
-                                        weights[ticker] = weight
-                                        print(f"   {ticker}: {weight}%")
+                                if 0 < weight < 50:  # Sanity check
+                                    weights[ticker] = weight
+                                    print(f"   {ticker}: {weight}%")
                     except Exception as e:
                         # Questo catch è per errori all'interno del loop su una singola riga
                         continue  # Skip rows that don't match expected format
