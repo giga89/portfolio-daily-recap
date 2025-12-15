@@ -16,7 +16,7 @@ PORTFOLIO_TICKERS = {
     'ABT': ('ABT', 'Abbott Laboratories'),
     'ABBV': ('ABBV', 'AbbVie'),
     'LLY': ('LLY', 'Eli Lilly & Co'),
-    'NOVO-B': ('NVO', 'Novo Nordisk'),
+    'NOVO-B.CO': ('NOVO-B.CO', 'Novo Nordisk'),
     'HUM': ('HUM', 'Humana'),
     
     # Technology & Semiconductors
@@ -41,14 +41,14 @@ PORTFOLIO_TICKERS = {
     # Financial Services & Others
     'DB1.DE': ('DB1.DE', 'Deutsche Börse AG'),
     'TRIG.L': ('TRIG.L', 'Trig PLC'),
-    'BHPL': ('BHP', 'BHP Group'),
+    'BHPL': ('BHP.L', 'BHP Group'),
     'PRY.MI': ('PRY.MI', 'Prysmian'),
     'RACE': ('RACE', 'Ferrari'),
-    'VOW3': ('VOW3.DE', 'Volkswagen'),
+    'VOW3.DE': ('VOW3.DE', 'Volkswagen'),
     'MELI': ('MELI', 'MercadoLibre'),
     'PYPL': ('PYPL', 'PayPal'),
-    'GLEN': ('GLEN.L', 'Glencore'),
-    '1919.HK': ('1919.HK', 'COSCO SHIPPING Holdings'),
+    'GLEN.L': ('GLEN.L', 'Glencore'),
+    '1919.HK': ('1919.HK', 'COSCO SHIPPING Holdings'), 
     '2318.HK': ('2318.HK', 'Ping An Insurance'),
 }
 
