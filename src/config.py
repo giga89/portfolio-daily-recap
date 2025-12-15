@@ -27,7 +27,7 @@ PORTFOLIO_TICKERS = {
     'SNPS': ('SNPS', 'Synopsys'),
     'AMZN': ('AMZN', 'Amazon'),
     'GOOG': ('GOOGL', 'Alphabet'),
-    'PLTR': ('PLTR', 'Palantir Technologies Inc'),
+    'PLTR': ('PLTR', 'Palantir Technologies Inc'), 
     'NET': ('NET', 'Cloudflare'),
     
     # Energy & Nuclear
@@ -41,7 +41,7 @@ PORTFOLIO_TICKERS = {
     # Financial Services & Others
     'DB1.DE': ('DB1.DE', 'Deutsche Börse AG'),
     'TRIG.L': ('TRIG.L', 'Trig PLC'),
-    'BHPL': ('BHP.L', 'BHP Group'),
+    'BHP.L': ('BHP.L', 'BHP Group'),
     'PRY.MI': ('PRY.MI', 'Prysmian'),
     'RACE': ('RACE', 'Ferrari'),
     'VOW3.DE': ('VOW3.DE', 'Volkswagen'),
