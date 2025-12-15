@@ -93,7 +93,7 @@ def fetch_portfolio_weights_from_bullaware():
             print("📊 Switching to table view...")
             try:
                 # Find and click the table view button (second icon in the controls)
-                table_bu                # Try simpler approach: find buttons near treemap and click the 2nd one (table view icon)
+                # Try simpler approach: find buttons near treemap and click the 2nd one (table view icon)
                 buttons = driver.find_elements(By.XPATH, "//button[contains(@class, 'chakra-button')]/svg")
                 if len(buttons) >= 2:
                     # Click parent button of the 2nd SVG icon (which should be the table view)
