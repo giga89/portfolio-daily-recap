@@ -40,7 +40,8 @@ def fetch_portfolio_ytd_from_bullaware():
         page_text = soup.get_text()
         
         # Look for percentage followed by "Year To Date"
-        ytd_pattern = r'([+-]?\d+\.?\d*)%Year To Date'
+        # Allows optional whitespace between percentage and "Year To Date"
+        ytd_pattern = r'([+-]?\d+\.?\d*)%\s*Year To Date'
         match = re.search(ytd_pattern, page_text, re.IGNORECASE)
         
         if match:

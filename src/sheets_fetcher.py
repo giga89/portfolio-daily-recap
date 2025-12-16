@@ -91,6 +91,8 @@ def update_yearly_performance(value):
             scopes=['https://www.googleapis.com/auth/spreadsheets']
         )
         
+        print(f"   Authenticated as: {credentials.service_account_email}")
+        
         service = build('sheets', 'v4', credentials=credentials)
         
         body = {
@@ -104,7 +106,9 @@ def update_yearly_performance(value):
             body=body
         ).execute()
         
-        print("✓ Successfully updated Google Sheets")
+        print(f"✓ Successfully updated Google Sheets cell {YEARLY_PERFORMANCE_CELL}")
         
     except Exception as e:
-        print(f"Error updating Google Sheets: {e}")
+        print(f"❌ Error updating Google Sheets: {e}")
+        if "403" in str(e):
+             print("   (This is likely a permission error. Share the sheet with the email above as 'Editor')")
