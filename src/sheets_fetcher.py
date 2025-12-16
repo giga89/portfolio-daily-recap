@@ -31,7 +31,7 @@ def fetch_google_sheets_data():
         creds_dict = json.loads(creds_json)
         credentials = service_account.Credentials.from_service_account_info(
             creds_dict,
-            scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
+            scopes=['https://www.googleapis.com/auth/spreadsheets']
         )
         
         service = build('sheets', 'v4', credentials=credentials)
@@ -52,9 +52,9 @@ def fetch_google_sheets_data():
         
         return {
             'five_year_return': five_year_return,
-            'monthly_performance': None,  # Add fetching logic if needed
-            'yearly_performance': None,   # Add fetching logic if needed
-            'dividend': None              # Add fetching logic if needed
+            'monthly_performance': None,
+            'yearly_performance': None,
+            'dividend': None
         }
             
     except Exception as e:
@@ -65,3 +65,46 @@ def fetch_google_sheets_data():
             'yearly_performance': None,
             'dividend': None
         }
+
+def update_yearly_performance(value):
+    """
+    Update the yearly performance cell in Google Sheets
+    """
+    if value is None:
+        print("No YTD value to update in Sheets")
+        return
+
+    print(f"Updating yearly performance in Google Sheets to: {value}%...")
+    
+    try:
+        from config import YEARLY_PERFORMANCE_CELL
+        
+        # Get credentials from environment variable
+        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+        if not creds_json:
+            print("No Google Sheets credentials found, cannot update")
+            return
+        
+        creds_dict = json.loads(creds_json)
+        credentials = service_account.Credentials.from_service_account_info(
+            creds_dict,
+            scopes=['https://www.googleapis.com/auth/spreadsheets']
+        )
+        
+        service = build('sheets', 'v4', credentials=credentials)
+        
+        body = {
+            'values': [[f"{value}%"]]
+        }
+        
+        service.spreadsheets().values().update(
+            spreadsheetId=GOOGLE_SHEETS_ID,
+            range=YEARLY_PERFORMANCE_CELL,
+            valueInputOption='USER_ENTERED',
+            body=body
+        ).execute()
+        
+        print("✓ Successfully updated Google Sheets")
+        
+    except Exception as e:
+        print(f"Error updating Google Sheets: {e}")

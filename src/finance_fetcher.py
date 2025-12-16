@@ -28,14 +28,19 @@ def fetch_portfolio_ytd_from_bullaware():
     """
     try:
         url = "https://bullaware.com/etoro/AndreaRavalli"
-        response = requests.get(url, timeout=10)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.content, 'html.parser')
         
         # Find the YTD percentage in the page
+        # Based on structure: <div><span>+26.48%</span></div><div>Year To Date</div>
+        # get_text() produces something like "+26.48%Year To Date"
         page_text = soup.get_text()
         
-        # Look for "Year to Date" or "YTD" followed by percentage
-        ytd_pattern = r'Year to Date[:\s]+([+-]?\d+\.?\d*)\s*%'
+        # Look for percentage followed by "Year To Date"
+        ytd_pattern = r'([+-]?\d+\.?\d*)%Year To Date'
         match = re.search(ytd_pattern, page_text, re.IGNORECASE)
         
         if match:

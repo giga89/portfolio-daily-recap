@@ -28,6 +28,15 @@ def main():
     print(f"Successfully fetched data for {len(stock_data)} symbols")
     print("=" * 50)
     
+    # Step 1b: Fetch Portfolio YTD from Bullaware and update Google Sheets
+    print("Fetching Portfolio YTD from Bullaware...")
+    portfolio_ytd = finance_fetcher.fetch_portfolio_ytd_from_bullaware()
+    if portfolio_ytd is not None:
+        sheets_fetcher.update_yearly_performance(portfolio_ytd)
+    else:
+        print("⚠️  Skipping Google Sheets update for YTD (could not fetch)")
+    print("=" * 50)
+    
     # Step 2: Calculate portfolio daily performance (will auto-fetch weights from BullAware)
     portfolio_daily = finance_fetcher.calculate_portfolio_daily_change(stock_data)
     print(f"Portfolio daily performance: {portfolio_daily:.2f}%")
