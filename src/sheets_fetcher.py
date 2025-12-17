@@ -77,8 +77,18 @@ def update_yearly_performance(value):
     print(f"Updating yearly performance in Google Sheets to: {value}%...")
     
     try:
-        from config import YEARLY_PERFORMANCE_CELL
+        from config import YTD_COLUMN, YTD_START_ROW, YTD_START_YEAR
+        from datetime import datetime
         
+        # Calculate target cell based on current year
+        # 2025 -> Row 8, 2026 -> Row 9, etc.
+        current_year = datetime.now().year
+        row_offset = current_year - YTD_START_YEAR
+        target_row = YTD_START_ROW + row_offset
+        target_cell = f"{YTD_COLUMN}{target_row}"
+        
+        print(f"   Targeting cell {target_cell} for year {current_year}")
+
         # Get credentials from environment variable
         creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
         if not creds_json:
@@ -101,12 +111,12 @@ def update_yearly_performance(value):
         
         service.spreadsheets().values().update(
             spreadsheetId=GOOGLE_SHEETS_ID,
-            range=YEARLY_PERFORMANCE_CELL,
+            range=target_cell,
             valueInputOption='USER_ENTERED',
             body=body
         ).execute()
         
-        print(f"✓ Successfully updated Google Sheets cell {YEARLY_PERFORMANCE_CELL}")
+        print(f"✓ Successfully updated Google Sheets cell {target_cell}")
         
     except Exception as e:
         print(f"❌ Error updating Google Sheets: {e}")

@@ -107,5 +107,8 @@ EMOJI_MAP = {
 GOOGLE_SHEETS_ID = '1jK6MlFxO6Im0eBfUP1eOjzW0Nii87jABEHiBnsjP52U'
 FIVE_YEAR_CELL = 'G6'
 MONTHLY_PERFORMANCE_CELL = 'G7'  # Add if you have monthly data
-YEARLY_PERFORMANCE_CELL = 'G8'   # Add if you have yearly data
+# Yearly performance cell configuration (Automatic calculation)
+YTD_COLUMN = 'B'
+YTD_START_ROW = 8
+YTD_START_YEAR = 2025
 DIVIDEND_CELL = 'G9'              # Add if you have dividend data

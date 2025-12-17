@@ -7,7 +7,8 @@ from googleapiclient.discovery import build
 
 # Add src to path
 sys.path.insert(0, 'src')
-from config import GOOGLE_SHEETS_ID, YEARLY_PERFORMANCE_CELL
+from config import GOOGLE_SHEETS_ID, YTD_COLUMN, YTD_START_ROW, YTD_START_YEAR
+from datetime import datetime
 
 def test_update():
     print("Testing Google Sheets update...")
@@ -18,6 +19,14 @@ def test_update():
         return
 
     try:
+        # Calculate target cell
+        current_year = datetime.now().year
+        row_offset = current_year - YTD_START_YEAR
+        target_row = YTD_START_ROW + row_offset
+        target_cell = f"{YTD_COLUMN}{target_row}"
+        
+        print(f"Calculated target cell: {target_cell} (Year: {current_year})")
+
         creds_dict = json.loads(creds_json)
         credentials = service_account.Credentials.from_service_account_info(
             creds_dict,
@@ -31,11 +40,11 @@ def test_update():
             'values': [[test_value]]
         }
         
-        print(f"Attempting to write '{test_value}' to cell {YEARLY_PERFORMANCE_CELL}...")
+        print(f"Attempting to write '{test_value}' to cell {target_cell}...")
         
         result = service.spreadsheets().values().update(
             spreadsheetId=GOOGLE_SHEETS_ID,
-            range=YEARLY_PERFORMANCE_CELL,
+            range=target_cell,
             valueInputOption='USER_ENTERED',
             body=body
         ).execute()
