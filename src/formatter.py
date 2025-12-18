@@ -49,9 +49,6 @@ def generate_recap(stock_data, portfolio_daily, sheets_data):
     recap = f"""✨✨✨{market_session.upper()} PORTFOLIO ✨✨✨
 
 {performance_emoji} {performance_emoji} {performance_emoji} TODAY PERFORMANCE {portfolio_daily:+.2f}% {performance_emoji} {performance_emoji} {performance_emoji}
-    
-{five_year_return:.0f}% SINCE CHANGE OF STRATEGY (2020) 🚀🚀🚀
-{avg_yearly_return:.0f}% PER YEAR (DOUBLE YOUR MONEY IN {time_to_double:.2f} YEARS)
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
 """
@@ -75,8 +72,11 @@ TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
     if ai_news:
         recap += ai_news
     
-    # Add fixed "why copy" message
-    recap += ai_news_generator.get_why_copy_message()
+    # Add fixed "why copy" message with performance data
+    recap += ai_news_generator.get_why_copy_message(
+        five_year_return=five_year_return,
+        avg_yearly_return=avg_yearly_return
+    )
     
     return recap
 

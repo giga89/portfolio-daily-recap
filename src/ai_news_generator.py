@@ -117,27 +117,42 @@ Output format:
 
 
 
-def get_why_copy_message():
+def get_why_copy_message(five_year_return=161, avg_yearly_return=32):
     """
     Returns the fixed message explaining why to copy this portfolio
     
+    Args:
+        five_year_return: Total return since strategy change (default 161%)
+        avg_yearly_return: Average yearly return (default 32%)
+    
     Returns:
-        str: Formatted fixed message
+        str: Formatted fixed message with performance data
     """
-    message = """
+    # Calculate years to double using Rule of 72
+    time_to_double = 72 / avg_yearly_return if avg_yearly_return > 0 else 0
+    
+    message = f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 PERCHÉ COPIARE QUESTO PORTAFOGLIO?
+💡 WHY COPY THIS PORTFOLIO?
 
-✅ +161% dal 2020 (cambio strategia)
-✅ Media +32% annuo (raddoppi in ~2 anni)
-✅ Diversificazione intelligente su 3 continenti
-✅ Focus su megatrend: AI, Healthcare, Energy
-✅ Mix ETF + singoli titoli ad alto potenziale
-✅ Gestione attiva e trasparente
+📈 TRACK RECORD:
++{five_year_return:.0f}% since strategy change (2020)
+~{avg_yearly_return:.0f}% average annual return
+Double your money in ~{time_to_double:.1f} years
 
-📊 Performance migliore dell'S&P500 e MSCI World
-🎯 Strategia long-term basata su fondamentali solidi
-🔄 Ribilanciamento periodico per ottimizzare risk/reward
+✅ STRATEGY HIGHLIGHTS:
+• Smart diversification across 3 continents
+• Focus on megatrends: AI, Healthcare, Energy
+• Mix of ETFs + high-potential individual stocks
+• Active and transparent management
+
+📊 PERFORMANCE vs. BENCHMARKS:
+✓ Outperforming S&P500
+✓ Outperforming MSCI World
+✓ Outperforming Euro Stoxx 50
+
+🎯 Long-term strategy based on solid fundamentals
+🔄 Periodic rebalancing to optimize risk/reward
 
 @AndreaRavalli
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
