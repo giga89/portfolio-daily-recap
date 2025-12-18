@@ -35,11 +35,13 @@ def generate_market_news_recap():
         return ""
     
     # List of models to try (in order of preference)
-    # All models are FREE tier with generous quotas
+    # Trying various names to fix the 404 error
     models_to_try = [
-        'models/gemini-1.5-flash',      # Stable, fast, 15 RPM, 1500/day
-        'models/gemini-1.5-flash-8b',   # Lighter version, 15 RPM, 1500/day  
-        'models/gemini-1.0-pro',        # Older but reliable, 15 RPM, 1500/day
+        'gemini-1.5-flash',      # Standard stable
+        'gemini-1.5-flash-8b',   # Lighter stable
+        'gemini-2.0-flash-exp',  # Experimental 2.0
+        'gemini-1.0-pro',        # Older stable
+        'gemini-pro',            # Old alias
     ]
     
     try:
