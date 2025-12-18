@@ -43,12 +43,38 @@ def generate_recap(stock_data, portfolio_daily, sheets_data):
         # Get market session from environment variable
     market_session = os.getenv('MARKET_SESSION', 'Daily recap')
     
-    # Build the recap text
-    performance_emoji = "🍀" if portfolio_daily >= 0 else "💀"
+    # Determine dynamic header based on session
+    session_upper = market_session.upper()
+    if "OPEN" in session_upper:
+        header = f"🌅 {session_upper} 📊"
+    elif "RECAP" in session_upper:
+        header = f"🌠 {session_upper} 🌙"
+    else:
+        header = f"✨ {session_upper} ✨"
 
-    recap = f"""✨✨✨{market_session.upper()} PORTFOLIO ✨✨✨
+    # Determine dynamic performance line
+    if portfolio_daily > 2.0:
+        perf_text = "🚀 TO THE MOON"
+        perf_emoji = "🔥"
+    elif portfolio_daily > 0.5:
+        perf_text = "🍀 GREAT GREEN DAY"
+        perf_emoji = "✅"
+    elif portfolio_daily >= 0:
+        perf_text = "🌿 SLIGHT GAINS"
+        perf_emoji = "🌱"
+    elif portfolio_daily > -0.5:
+        perf_text = "📉 MINOR DIP"
+        perf_emoji = "⚖️"
+    elif portfolio_daily > -2.0:
+        perf_text = "💀 ROUGH DAY"
+        perf_emoji = "🩸"
+    else:
+        perf_text = "🧨 MARKET CRASH"
+        perf_emoji = "🆘"
 
-{performance_emoji} {performance_emoji} {performance_emoji} TODAY PERFORMANCE {portfolio_daily:+.2f}% {performance_emoji} {performance_emoji} {performance_emoji}
+    recap = f"""{header}
+
+{perf_emoji} {perf_emoji} {perf_emoji} {perf_text}: {portfolio_daily:+.2f}% {perf_emoji} {perf_emoji} {perf_emoji}
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
 """

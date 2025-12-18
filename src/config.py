@@ -87,7 +87,7 @@ EMOJI_MAP = {
     
     # Crypto
     'TRX': '🪙',
-    'ETOR': '₿',
+    'ETOR': '🏛️',
     
     # Financial Services & Others
     'DB1.DE': '📊',
