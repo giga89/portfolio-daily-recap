@@ -37,9 +37,9 @@ def generate_market_news_recap():
     # List of models to try (in order of preference)
     # All models are FREE tier with generous quotas
     models_to_try = [
-        'gemini-1.5-flash',      # Stable, fast, 15 RPM, 1500/day
-        'gemini-1.5-flash-8b',   # Lighter version, 15 RPM, 1500/day  
-        'gemini-1.0-pro',        # Older but reliable, 15 RPM, 1500/day
+        'models/gemini-1.5-flash',      # Stable, fast, 15 RPM, 1500/day
+        'models/gemini-1.5-flash-8b',   # Lighter version, 15 RPM, 1500/day  
+        'models/gemini-1.0-pro',        # Older but reliable, 15 RPM, 1500/day
     ]
     
     try:
