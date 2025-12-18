@@ -35,13 +35,13 @@ def generate_market_news_recap():
         return ""
     
     # List of models to try (in order of preference)
-    # Trying various names to fix the 404 error
+    # Using exact names found in the debug list
     models_to_try = [
-        'gemini-1.5-flash',      # Standard stable
-        'gemini-1.5-flash-8b',   # Lighter stable
-        'gemini-2.0-flash-exp',  # Experimental 2.0
-        'gemini-1.0-pro',        # Older stable
-        'gemini-pro',            # Old alias
+        'gemini-2.0-flash',       # Stable 2.0
+        'gemini-flash-latest',    # Alias for latest 1.5 flash
+        'gemini-pro-latest',     # Alias for latest 1.5 pro
+        'gemini-2.5-flash',      # Futuristic 2.5?
+        'gemini-2.0-flash-exp',   # Experimental 2.0 (fallback)
     ]
     
     try:
