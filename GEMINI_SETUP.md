@@ -36,12 +36,22 @@ Apri il browser e vai su: **[Google AI Studio](https://makersuite.google.com/app
 
 Google Gemini offre un generoso free tier:
 
-- ✅ **60 richieste al minuto**
-- ✅ **1500 richieste al giorno**
+- ✅ **15 richieste al minuto** (per modello)
+- ✅ **1500 richieste al giorno** (per modello)
 - ✅ **100% gratis** per uso personale
 - ✅ Nessuna carta di credito richiesta
 
 Per il nostro caso d'uso (2-3 chiamate al giorno), è più che sufficiente!
+
+## 🛡️ Sistema di Fallback Intelligente
+
+Il nostro sistema usa **3 modelli diversi** per garantire massima affidabilità:
+
+1. **gemini-1.5-flash** (principale - veloce e accurato)
+2. **gemini-1.5-flash-8b** (fallback 1 - più leggero)
+3. **gemini-1.0-pro** (fallback 2 - affidabile)
+
+Se un modello ha la quota esaurita, prova automaticamente il successivo. **Non ti devi preoccupare di nulla!**
 
 ## Test Locale (Opzionale)
 

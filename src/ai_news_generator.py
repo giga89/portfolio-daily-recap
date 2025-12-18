@@ -19,6 +19,7 @@ from config import PORTFOLIO_TICKERS
 def generate_market_news_recap():
     """
     Generate AI-powered market news recap for USA, CHINA, and EU markets
+    Uses multiple model fallbacks to handle quota limits gracefully
     
     Returns:
         str: Formatted news recap or empty string if API key not set
@@ -32,6 +33,14 @@ def generate_market_news_recap():
     if not api_key:
         print("⚠️  Warning: GEMINI_API_KEY not set, skipping AI news generation")
         return ""
+    
+    # List of models to try (in order of preference)
+    # All models are FREE tier with generous quotas
+    models_to_try = [
+        'gemini-1.5-flash',      # Stable, fast, 15 RPM, 1500/day
+        'gemini-1.5-flash-8b',   # Lighter version, 15 RPM, 1500/day  
+        'gemini-1.0-pro',        # Older but reliable, 15 RPM, 1500/day
+    ]
     
     try:
         # Configure Gemini client
@@ -64,18 +73,42 @@ Output format:
         
         print("🤖 Generating AI market news recap...")
         
-        # Generate content using the new API
-        response = client.models.generate_content(
-            model='gemini-2.0-flash-exp',
-            contents=prompt
-        )
+        # Try each model until one works
+        last_error = None
+        for model_name in models_to_try:
+            try:
+                print(f"   Trying model: {model_name}...")
+                
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt
+                )
+                
+                if response and response.text:
+                    print(f"✅ AI news recap generated successfully using {model_name}!")
+                    return "\n" + response.text.strip() + "\n"
+                else:
+                    print(f"⚠️  Empty response from {model_name}, trying next model...")
+                    continue
+                    
+            except Exception as model_error:
+                error_msg = str(model_error).lower()
+                print(f"⚠️  Model {model_name} failed: {model_error}")
+                
+                # Check if it's a quota error
+                if 'quota' in error_msg or 'resource_exhausted' in error_msg or '429' in error_msg:
+                    print(f"   Quota exceeded for {model_name}, trying next model...")
+                    last_error = model_error
+                    continue
+                else:
+                    # Other error, try next model anyway
+                    last_error = model_error
+                    continue
         
-        if response and response.text:
-            print("✅ AI news recap generated successfully!")
-            return "\n" + response.text.strip() + "\n"
-        else:
-            print("⚠️  AI response was empty")
-            return ""
+        # All models failed
+        print(f"❌ All models failed. Last error: {last_error}")
+        print("💡 Tip: Wait a few minutes for quota reset, or check your API key at https://makersuite.google.com/")
+        return ""
             
     except Exception as e:
         print(f"❌ Error generating AI news recap: {e}")
