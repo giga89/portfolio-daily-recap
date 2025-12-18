@@ -12,6 +12,8 @@ Automated daily portfolio performance recap generator with GitHub Actions. Colle
 - 🌍 **US market handling**: Smart session detection for US stocks (only reports daily changes after market close)
 - 📁 **Google Sheets integration**: Syncs 5-year portfolio returns data
 - 🚀 **Fast and reliable**: Uses yfinance API for accurate, real-time YTD calculations
+- 🤖 **AI Market News**: AI-generated daily recap of USA, CHINA, and EU markets using Google Gemini
+- 💡 **Fixed promotional message**: Explains portfolio strategy and performance benefits
 
 ## 📋 How It Works
 
@@ -74,6 +76,7 @@ Add these secrets to your GitHub repository (`Settings > Secrets and variables >
 - `TELEGRAM_CHAT_ID`: Your Telegram chat ID (get from [@userinfobot](https://t.me/userinfobot))
 - `GOOGLE_CREDENTIALS_JSON`: Your Google Cloud service account credentials (JSON format)
 - `GOOGLE_SHEET_ID`: Your Google Sheets document ID
+- `GEMINI_API_KEY`: Your Google Gemini API key (get from [Google AI Studio](https://makersuite.google.com/app/apikey))
 
 ### Configuration
 

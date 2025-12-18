@@ -5,6 +5,7 @@ Format the recap output in a nice readable format
 from datetime import datetime
 from config import EMOJI_MAP
 import os
+import ai_news_generator
 
 
 def get_emoji(etoro_symbol):
@@ -68,4 +69,14 @@ TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
     
     recap += "\n@AndreaRavalli\n"
     
+    # Add AI-generated market news recap
+    print("Generating AI market news...")
+    ai_news = ai_news_generator.generate_market_news_recap()
+    if ai_news:
+        recap += ai_news
+    
+    # Add fixed "why copy" message
+    recap += ai_news_generator.get_why_copy_message()
+    
     return recap
+
