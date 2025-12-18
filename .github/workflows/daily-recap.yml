@@ -71,8 +71,13 @@ jobs:
           echo "Checking GOOGLE_SHEETS_CREDENTIALS length: ${#SECRETS_GOOGLE_SHEETS_CREDENTIALS}"
           echo "======================="
 
-      - name: Collect data and generate recap
+      - name: List Available Gemini Models (Debug)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python -c "from google import genai; client = genai.Client(api_key='${GEMINI_API_KEY}'); [print(f'Model: {m.name}') for m in client.models.list()]" || echo 'Failed to list models'
 
+      - name: Collect data and generate recap
         env:
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
           ORO_USERNAME: ${{ secrets.ETORO_USERNAME }}
