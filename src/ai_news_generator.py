@@ -119,13 +119,14 @@ Output format:
 
 
 
-def get_why_copy_message(five_year_return=161, avg_yearly_return=32):
+def get_why_copy_message(five_year_return=161, avg_yearly_return=32, benchmark_performance=None):
     """
     Returns the fixed message explaining why to copy this portfolio
     
     Args:
         five_year_return: Total return since strategy change (default 161%)
         avg_yearly_return: Average yearly return (default 32%)
+        benchmark_performance: Dict of {etoro_ticker: performance_value}
     
     Returns:
         str: Formatted fixed message with performance data
@@ -133,6 +134,16 @@ def get_why_copy_message(five_year_return=161, avg_yearly_return=32):
     # Calculate years to double using Rule of 72
     time_to_double = 72 / avg_yearly_return if avg_yearly_return > 0 else 0
     
+    benchmark_lines = ""
+    if benchmark_performance:
+        for ticker, perf in benchmark_performance.items():
+            # Calculate the difference (delta) between our return and benchmark
+            delta = five_year_return - perf
+            benchmark_lines += f"✓ VS ${ticker} : {delta:+.0f}% (outperformance)\n"
+    else:
+        # Fallback if no data
+        benchmark_lines = "✓ Outperforming S&P500\n✓ Outperforming MSCI World\n✓ Outperforming Euro Stoxx 50"
+
     message = f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -148,10 +159,8 @@ Double your money in ~{time_to_double:.1f} years
 • Mix of ETFs + high-potential individual stocks
 • Active and transparent management
 
-📊 PERFORMANCE vs. BENCHMARKS:
-✓ Outperforming S&P500
-✓ Outperforming MSCI World
-✓ Outperforming Euro Stoxx 50
+📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
+{benchmark_lines.strip()}
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward

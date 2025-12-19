@@ -37,8 +37,12 @@ def main():
     sheets_data = sheets_fetcher.fetch_google_sheets_data()
     print("=" * 50)
     
-    # Step 4: Generate formatted recap
-    recap = formatter.generate_recap(stock_data, portfolio_daily, sheets_data)
+    # Step 4: Get benchmark comparison data
+    benchmark_data = finance_fetcher.fetch_benchmarks_performance(start_date='2020-01-01')
+    print("=" * 50)
+    
+    # Step 5: Generate formatted recap
+    recap = formatter.generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data)
     
     # Step 5: Save to file
     os.makedirs('output', exist_ok=True)

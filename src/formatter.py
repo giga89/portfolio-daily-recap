@@ -19,7 +19,7 @@ def format_ticker(etoro_symbol, company_name, performance):
     return f"{emoji} ${etoro_symbol} {performance:+.2f}%"
 
 
-def generate_recap(stock_data, portfolio_daily, sheets_data):
+def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None):
     """
     Generate the formatted daily recap matching the desired output format
     """
@@ -33,7 +33,6 @@ def generate_recap(stock_data, portfolio_daily, sheets_data):
     
     # Calculate 5-year metrics
     avg_yearly_return = five_year_return / 5
-    time_to_double = 72 / avg_yearly_return if avg_yearly_return > 0 else 0
     
     # Calculate top performers
     daily_sorted = sorted(stock_data.items(), key=lambda x: x[1]['daily_change'], reverse=True)[:5]
@@ -90,8 +89,6 @@ TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
     for etoro_symbol, data in yearly_sorted:
         recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change']) + "\n"
     
-    recap += "\n@AndreaRavalli\n"
-    
     # Add AI-generated market news recap
     print("Generating AI market news...")
     ai_news = ai_news_generator.generate_market_news_recap()
@@ -101,7 +98,8 @@ TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
     # Add fixed "why copy" message with performance data
     recap += ai_news_generator.get_why_copy_message(
         five_year_return=five_year_return,
-        avg_yearly_return=avg_yearly_return
+        avg_yearly_return=avg_yearly_return,
+        benchmark_performance=benchmark_data
     )
     
     return recap

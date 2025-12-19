@@ -3,7 +3,7 @@ Fetch stock data from Yahoo Finance using yfinance
 """
 
 import yfinance as yf
-from config import PORTFOLIO_TICKERS
+from config import PORTFOLIO_TICKERS, BENCHMARKS
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -387,3 +387,32 @@ def calculate_portfolio_daily_change(stock_data, portfolio_weights=None):
     print(f"📊 Weighted Portfolio Daily Change: {weighted_performance:.2f}% (based on {len(stock_data)} positions)")
     
     return weighted_performance
+
+
+def fetch_benchmarks_performance(start_date='2020-01-01'):
+    """
+    Fetch historical performance for benchmarks starting from a specific date.
+    Returns a dictionary of cumulative returns for each benchmark.
+    """
+    print(f"📈 Fetching benchmark performance since {start_date}...")
+    bench_data = {}
+    
+    for etoro_ticker, yahoo_ticker in BENCHMARKS.items():
+        try:
+            stock = yf.Ticker(yahoo_ticker)
+            # Fetch historical data
+            hist = stock.history(start=start_date)
+            
+            if not hist.empty:
+                start_price = hist['Close'].iloc[0]
+                current_price = hist['Close'].iloc[-1]
+                total_return = ((current_price - start_price) / start_price) * 100
+                bench_data[etoro_ticker] = total_return
+                print(f"   {etoro_ticker}: {total_return:+.2f}%")
+            else:
+                print(f"   ⚠️ No data for {etoro_ticker} ({yahoo_ticker})")
+                
+        except Exception as e:
+            print(f"   ❌ Error fetching benchmark {etoro_ticker}: {e}")
+            
+    return bench_data
