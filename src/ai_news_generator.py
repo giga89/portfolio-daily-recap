@@ -5,6 +5,7 @@ Generates market news recap using Google Gemini API
 """
 
 import os
+from datetime import datetime
 try:
     from google import genai
     from google.genai import types
@@ -40,7 +41,6 @@ def generate_market_news_recap():
         'gemini-2.0-flash',       # Stable 2.0
         'gemini-flash-latest',    # Alias for latest 1.5 flash
         'gemini-pro-latest',     # Alias for latest 1.5 pro
-        'gemini-2.5-flash',      # Futuristic 2.5?
         'gemini-2.0-flash-exp',   # Experimental 2.0 (fallback)
     ]
     
@@ -48,29 +48,42 @@ def generate_market_news_recap():
         # Configure Gemini client
         client = genai.Client(api_key=api_key)
         
-        # Extract portfolio context
+        # Extract portfolio context - Use all tickers as requested
         portfolio_symbols = list(PORTFOLIO_TICKERS.keys())
-        portfolio_context = ", ".join(portfolio_symbols[:15])  # First 15 tickers
+        portfolio_context = ", ".join(portfolio_symbols)
         
-        # Create prompt
-        prompt = f"""You are a financial market analyst. Generate a brief, concise daily market recap for investors.
+        # Create prompt with strict daily focus and separated sections
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        prompt = f"""You are a senior financial market analyst. Generate a concise daily market recap for today ({current_date}).
 
-Focus on these 3 markets: USA, CHINA, EU
+CRITICAL REQUIREMENT: Focus ONLY on events from the last 24 hours. Do not include old news.
 
-Portfolio context (my holdings include): {portfolio_context}
+Structure your response in two distinct sections:
 
-Requirements:
-- Keep it VERY SHORT (max 5-6 sentences total)
-- Highlight TODAY's most important market movements
-- Mention key sectors: Tech, Healthcare, Energy, Financials if relevant
-- Use a professional but engaging tone
-- Include specific indices if relevant (S&P500, Nasdaq, Shanghai Composite, Euro Stoxx)
-- Format for Telegram (plain text, use emoji sparingly)
+1. 🌍 MARKET OVERVIEW
+- Summarize the most important movements TODAY in USA, CHINA, and EU markets.
+- Mention specific indices (S&P500, Nasdaq, Shanghai Composite, Euro Stoxx) only if they had significant moves today.
+- Limit to 3-4 concise sentences.
+
+2. 💼 PORTFOLIO FOCUS
+- Provide specific updates, catalysts, or performance drivers for these holdings: {portfolio_context}
+- Focus exclusively on news affecting these specific tickers in the last 24 hours.
+- If no specific news is available for these tickers today, briefly mention the sector trends impacting them.
+- Limit to 4-5 concise sentences.
+
+Rules:
+- Professional, objective, and engaging tone.
+- Format for Telegram (plain text, use emoji sparingly).
+- Use bold text for key tickers or index names.
 
 Output format:
 🌍 MARKET NEWS RECAP
 
-[Your 5-6 sentence recap here covering USA, CHINA, EU markets]
+[Market Overview section]
+
+💼 PORTFOLIO FOCUS
+
+[Portfolio Focus section]
 """
         
         print("🤖 Generating AI market news recap...")
