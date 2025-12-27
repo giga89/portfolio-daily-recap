@@ -118,7 +118,8 @@ Structure your response in TWO distinct sections:
 Rules:
 - Professional, objective, and engaging tone.
 - Format for Telegram (plain text, use emoji sparingly).
-- Use **bold text** for key tickers or index names.
+- DO NOT use bold text (**) for tickers or indices.
+- Always use the $ prefix for tickers (e.g., $NVDA, $AAPL, $SP500) so they can be tagged on eToro.
 - Ensure the news is FRESH and relevant to today.
 
 Output format:

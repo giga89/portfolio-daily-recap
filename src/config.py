@@ -41,7 +41,7 @@ PORTFOLIO_TICKERS = {
     # Financial Services & Others
     'DB1.DE': ('DB1.DE', 'Deutsche Börse AG'),
     'TRIG.L': ('TRIG.L', 'Trig PLC'),
-    'BHPL': ('BHP', 'BHP Group'),
+    'BHP.L': ('BHP', 'BHP Group'),
     'PRY.MI': ('PRY.MI', 'Prysmian'),
     'RACE': ('RACE', 'Ferrari'),
     'VOW3.DE': ('VOW3.DE', 'Volkswagen'),
