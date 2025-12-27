@@ -5,6 +5,7 @@ Generates market news recap using Google Gemini API
 """
 
 import os
+import json
 from datetime import datetime
 try:
     from google import genai
@@ -15,6 +16,37 @@ except ImportError:
     print("⚠️  google-genai not installed, AI news generation will be disabled")
 
 from config import PORTFOLIO_TICKERS
+
+# Path for storing recap history to avoid repetition
+HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "recap_history.json")
+
+def _load_history():
+    """Load previous news recaps to avoid repetition"""
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"⚠️ Error loading history file: {e}")
+            return []
+    return []
+
+def _save_to_history(recap_text):
+    """Save the current recap to history"""
+    try:
+        history = _load_history()
+        # Keep only the last 5 recaps to provide context without hitting token limits
+        history.append({
+            "timestamp": datetime.now().isoformat(),
+            "content": recap_text[:1000] # Store the first 1000 chars for context
+        })
+        history = history[-5:]
+        
+        os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
+        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+            json.dump(history, f, indent=2)
+    except Exception as e:
+        print(f"⚠️ Error saving to history file: {e}")
 
 
 def generate_market_news_recap():
@@ -52,29 +84,42 @@ def generate_market_news_recap():
         portfolio_symbols = list(PORTFOLIO_TICKERS.keys())
         portfolio_context = ", ".join(portfolio_symbols)
         
+        # Load previous history to avoid repetition
+        history = _load_history()
+        previous_topics_str = ""
+        if history:
+            previous_topics_str = "\nCRITICAL: DO NOT REPEAT the following news which were already reported recently:\n"
+            for entry in history:
+                # Extract a mini-summary if possible or just part of the text
+                previous_topics_str += f"- {entry['content'][:300]}...\n"
+        
         # Create prompt with strict daily focus and separated sections
         current_date = datetime.now().strftime('%Y-%m-%d')
         prompt = f"""You are a senior financial market analyst. Generate a concise daily market recap for today ({current_date}).
 
-CRITICAL REQUIREMENT: Focus ONLY on events from the last 24 hours. Do not include old news.
+CRITICAL REQUIREMENT: Focus ONLY on events from the last 24 hours. Use your search tool to find the most recent news.
 
-Structure your response in two distinct sections:
+{previous_topics_str}
+
+Structure your response in TWO distinct sections:
 
 1. 🌍 MARKET OVERVIEW
 - Summarize the most important movements TODAY in USA, CHINA, and EU markets.
 - Mention specific indices (S&P500, Nasdaq, Shanghai Composite, Euro Stoxx) only if they had significant moves today.
-- Limit to 3-4 concise sentences.
+- Include specific data points (percentages, levels) if available.
+- Limit to 3-4 concise, high-impact sentences.
 
 2. 💼 PORTFOLIO FOCUS
 - Provide specific updates, catalysts, or performance drivers for these holdings: {portfolio_context}
 - Focus exclusively on news affecting these specific tickers in the last 24 hours.
-- If no specific news is available for these tickers today, briefly mention the sector trends impacting them.
-- Limit to 4-5 concise sentences.
+- If no specific news is available for these tickers today, briefly mention the sector trends (e.g., AI, Healthcare, Energy) impacting them right now.
+- Limit to 4-5 concise, high-impact sentences.
 
 Rules:
 - Professional, objective, and engaging tone.
 - Format for Telegram (plain text, use emoji sparingly).
-- Use bold text for key tickers or index names.
+- Use **bold text** for key tickers or index names.
+- Ensure the news is FRESH and relevant to today.
 
 Output format:
 🌍 MARKET NEWS RECAP
@@ -88,6 +133,17 @@ Output format:
         
         print("🤖 Generating AI market news recap...")
         
+        # Configure search tool if available in the SDK
+        config = None
+        try:
+            config = types.GenerateContentConfig(
+                tools=[types.Tool(google_search=types.GoogleSearch())],
+                temperature=0.7
+            )
+        except Exception as config_err:
+            print(f"⚠️ Could not initialize Google Search tool: {config_err}")
+            config = types.GenerateContentConfig(temperature=0.7)
+
         # Try each model until one works
         last_error = None
         for model_name in models_to_try:
@@ -96,12 +152,16 @@ Output format:
                 
                 response = client.models.generate_content(
                     model=model_name,
-                    contents=prompt
+                    contents=prompt,
+                    config=config
                 )
                 
                 if response and response.text:
                     print(f"✅ AI news recap generated successfully using {model_name}!")
-                    return "\n" + response.text.strip() + "\n"
+                    recap_text = response.text.strip()
+                    # Save to history to avoid repetition next time
+                    _save_to_history(recap_text)
+                    return "\n" + recap_text + "\n"
                 else:
                     print(f"⚠️  Empty response from {model_name}, trying next model...")
                     continue
@@ -110,7 +170,22 @@ Output format:
                 error_msg = str(model_error).lower()
                 print(f"⚠️  Model {model_name} failed: {model_error}")
                 
-                # Check if it's a quota error
+                # Check if it's a quota error or something that might be fixed by removing tools
+                if 'not supported' in error_msg or 'invalid' in error_msg:
+                    print(f"   Model {model_name} might not support search tools, trying without...")
+                    try:
+                        response = client.models.generate_content(
+                            model=model_name,
+                            contents=prompt
+                        )
+                        if response and response.text:
+                            print(f"✅ AI news recap generated successfully (without tools) using {model_name}!")
+                            recap_text = response.text.strip()
+                            _save_to_history(recap_text)
+                            return "\n" + recap_text + "\n"
+                    except Exception as e2:
+                        print(f"   Retry failed: {e2}")
+                
                 if 'quota' in error_msg or 'resource_exhausted' in error_msg or '429' in error_msg:
                     print(f"   Quota exceeded for {model_name}, trying next model...")
                     last_error = model_error
@@ -152,7 +227,8 @@ def get_why_copy_message(five_year_return=161, avg_yearly_return=32, benchmark_p
         for ticker, perf in benchmark_performance.items():
             # Calculate the difference (delta) between our return and benchmark
             delta = five_year_return - perf
-            benchmark_lines += f"✓ VS ${ticker} : {delta:+.0f}% (outperformance)\n"
+            perf_label = "(outperformance)" if delta >= 0 else "(underperformance)"
+            benchmark_lines += f"✓ VS ${ticker} : {delta:+.0f}% {perf_label}\n"
     else:
         # Fallback if no data
         benchmark_lines = "✓ Outperforming S&P500\n✓ Outperforming MSCI World\n✓ Outperforming Euro Stoxx 50"

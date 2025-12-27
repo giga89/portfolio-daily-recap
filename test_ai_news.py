@@ -22,7 +22,21 @@ def test_ai_news():
     print("-" * 60)
     fixed_msg = get_why_copy_message()
     print(fixed_msg)
-    print("✅ Fixed message generated successfully!")
+    print("✅ Fixed message (fallback) generated successfully!")
+
+    print("\n📝 Test 1b: 'Why Copy' Message with custom benchmarks (Bug Fix test)")
+    print("-" * 60)
+    mock_benchmarks = {
+        "SPX500": 100,      # Delta: 161 - 100 = +61 (outperformance)
+        "NSDQ100": 200,     # Delta: 161 - 200 = -39 (underperformance)
+        "CHINA50": 50       # Delta: 161 - 50 = +111 (outperformance)
+    }
+    bug_fix_msg = get_why_copy_message(benchmark_performance=mock_benchmarks)
+    print(bug_fix_msg)
+    if "VS $NSDQ100 : -39% (underperformance)" in bug_fix_msg:
+        print("✅ Bug fix verified: Negative delta correctly labeled as (underperformance)!")
+    else:
+        print("❌ Bug fix failed: Negative delta not correctly labeled!")
     
     # Test 2: AI news (depends on API key)
     print("\n🤖 Test 2: AI Market News (requires GEMINI_API_KEY)")
