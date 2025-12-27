@@ -1,0 +1,859 @@
+﻿generate-recap	Set up job	´╗┐2025-12-27T10:24:04.7172098Z Current runner version: '2.330.0'
+generate-recap	Set up job	2025-12-27T10:24:04.7212381Z ##[group]Runner Image Provisioner
+generate-recap	Set up job	2025-12-27T10:24:04.7214343Z Hosted Compute Agent
+generate-recap	Set up job	2025-12-27T10:24:04.7215829Z Version: 20251211.462
+generate-recap	Set up job	2025-12-27T10:24:04.7217261Z Commit: 6cbad8c2bb55d58165063d031ccabf57e2d2db61
+generate-recap	Set up job	2025-12-27T10:24:04.7219210Z Build Date: 2025-12-11T16:28:49Z
+generate-recap	Set up job	2025-12-27T10:24:04.7221137Z Worker ID: ***31156a4a-7e2a-41a1-95a9-046f4e402ca0***
+generate-recap	Set up job	2025-12-27T10:24:04.7222795Z ##[endgroup]
+generate-recap	Set up job	2025-12-27T10:24:04.7224194Z ##[group]Operating System
+generate-recap	Set up job	2025-12-27T10:24:04.7225031Z Ubuntu
+generate-recap	Set up job	2025-12-27T10:24:04.7225788Z 24.04.3
+generate-recap	Set up job	2025-12-27T10:24:04.7226546Z LTS
+generate-recap	Set up job	2025-12-27T10:24:04.7227289Z ##[endgroup]
+generate-recap	Set up job	2025-12-27T10:24:04.7228026Z ##[group]Runner Image
+generate-recap	Set up job	2025-12-27T10:24:04.7228908Z Image: ubuntu-24.04
+generate-recap	Set up job	2025-12-27T10:24:04.7229687Z Version: 20251215.174.1
+generate-recap	Set up job	2025-12-27T10:24:04.7231396Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20251215.174/images/ubuntu/Ubuntu2404-Readme.md
+generate-recap	Set up job	2025-12-27T10:24:04.7233134Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20251215.174
+generate-recap	Set up job	2025-12-27T10:24:04.7234658Z ##[endgroup]
+generate-recap	Set up job	2025-12-27T10:24:04.7236164Z ##[group]GITHUB_TOKEN Permissions
+generate-recap	Set up job	2025-12-27T10:24:04.7238584Z Contents: write
+generate-recap	Set up job	2025-12-27T10:24:04.7239458Z Metadata: read
+generate-recap	Set up job	2025-12-27T10:24:04.7240182Z ##[endgroup]
+generate-recap	Set up job	2025-12-27T10:24:04.7242905Z Secret source: Actions
+generate-recap	Set up job	2025-12-27T10:24:04.7244187Z Prepare workflow directory
+generate-recap	Set up job	2025-12-27T10:24:04.7610782Z Prepare all required actions
+generate-recap	Set up job	2025-12-27T10:24:04.7667240Z Getting action download info
+generate-recap	Set up job	2025-12-27T10:24:05.1196674Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+generate-recap	Set up job	2025-12-27T10:24:05.2376614Z Download action repository 'actions/setup-python@v4' (SHA:7f4fc3e22c37d6ff65e88745f38bd3157c663f7c)
+generate-recap	Set up job	2025-12-27T10:24:05.3472340Z Download action repository 'actions/upload-artifact@v5.0.0' (SHA:330a01c490aca151604b8cf639adc76d48f6c5d4)
+generate-recap	Set up job	2025-12-27T10:24:05.8736615Z Complete job name: generate-recap
+generate-recap	Checkout repository	´╗┐2025-12-27T10:24:05.9558276Z ##[group]Run actions/checkout@v4
+generate-recap	Checkout repository	2025-12-27T10:24:05.9559522Z with:
+generate-recap	Checkout repository	2025-12-27T10:24:05.9560696Z   repository: giga89/portfolio-daily-recap
+generate-recap	Checkout repository	2025-12-27T10:24:05.9562475Z   token: ***
+generate-recap	Checkout repository	2025-12-27T10:24:05.9563465Z   ssh-strict: true
+generate-recap	Checkout repository	2025-12-27T10:24:05.9564531Z   ssh-user: git
+generate-recap	Checkout repository	2025-12-27T10:24:05.9565618Z   persist-credentials: true
+generate-recap	Checkout repository	2025-12-27T10:24:05.9566438Z   clean: true
+generate-recap	Checkout repository	2025-12-27T10:24:05.9567146Z   sparse-checkout-cone-mode: true
+generate-recap	Checkout repository	2025-12-27T10:24:05.9568074Z   fetch-depth: 1
+generate-recap	Checkout repository	2025-12-27T10:24:05.9568750Z   fetch-tags: false
+generate-recap	Checkout repository	2025-12-27T10:24:05.9569489Z   show-progress: true
+generate-recap	Checkout repository	2025-12-27T10:24:05.9570372Z   lfs: false
+generate-recap	Checkout repository	2025-12-27T10:24:05.9571358Z   submodules: false
+generate-recap	Checkout repository	2025-12-27T10:24:05.9572279Z   set-safe-directory: true
+generate-recap	Checkout repository	2025-12-27T10:24:05.9573410Z ##[endgroup]
+generate-recap	Checkout repository	2025-12-27T10:24:06.0699249Z Syncing repository: giga89/portfolio-daily-recap
+generate-recap	Checkout repository	2025-12-27T10:24:06.0703597Z ##[group]Getting Git version info
+generate-recap	Checkout repository	2025-12-27T10:24:06.0706222Z Working directory is '/home/runner/work/portfolio-daily-recap/portfolio-daily-recap'
+generate-recap	Checkout repository	2025-12-27T10:24:06.0709992Z [command]/usr/bin/git version
+generate-recap	Checkout repository	2025-12-27T10:24:06.0798741Z git version 2.52.0
+generate-recap	Checkout repository	2025-12-27T10:24:06.0829104Z ##[endgroup]
+generate-recap	Checkout repository	2025-12-27T10:24:06.0845548Z Temporarily overriding HOME='/home/runner/work/_temp/67391bac-e8bf-4123-926c-22852119fd5d' before making global git config changes
+generate-recap	Checkout repository	2025-12-27T10:24:06.0848588Z Adding repository directory to the temporary git global config as a safe directory
+generate-recap	Checkout repository	2025-12-27T10:24:06.0860415Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/portfolio-daily-recap/portfolio-daily-recap
+generate-recap	Checkout repository	2025-12-27T10:24:06.0905454Z Deleting the contents of '/home/runner/work/portfolio-daily-recap/portfolio-daily-recap'
+generate-recap	Checkout repository	2025-12-27T10:24:06.0909443Z ##[group]Initializing the repository
+generate-recap	Checkout repository	2025-12-27T10:24:06.0914792Z [command]/usr/bin/git init /home/runner/work/portfolio-daily-recap/portfolio-daily-recap
+generate-recap	Checkout repository	2025-12-27T10:24:06.1035782Z hint: Using 'master' as the name for the initial branch. This default branch name
+generate-recap	Checkout repository	2025-12-27T10:24:06.1037859Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+generate-recap	Checkout repository	2025-12-27T10:24:06.1040211Z hint: to use in all of your new repositories, which will suppress this warning,
+generate-recap	Checkout repository	2025-12-27T10:24:06.1121009Z hint: call:
+generate-recap	Checkout repository	2025-12-27T10:24:06.1122510Z hint:
+generate-recap	Checkout repository	2025-12-27T10:24:06.1123960Z hint: 	git config --global init.defaultBranch <name>
+generate-recap	Checkout repository	2025-12-27T10:24:06.1125272Z hint:
+generate-recap	Checkout repository	2025-12-27T10:24:06.1126258Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+generate-recap	Checkout repository	2025-12-27T10:24:06.1128194Z hint: 'development'. The just-created branch can be renamed via this command:
+generate-recap	Checkout repository	2025-12-27T10:24:06.1129479Z hint:
+generate-recap	Checkout repository	2025-12-27T10:24:06.1130127Z hint: 	git branch -m <name>
+generate-recap	Checkout repository	2025-12-27T10:24:06.1131546Z hint:
+generate-recap	Checkout repository	2025-12-27T10:24:06.1132616Z hint: Disable this message with "git config set advice.defaultBranchName false"
+generate-recap	Checkout repository	2025-12-27T10:24:06.1134801Z Initialized empty Git repository in /home/runner/work/portfolio-daily-recap/portfolio-daily-recap/.git/
+generate-recap	Checkout repository	2025-12-27T10:24:06.1138550Z [command]/usr/bin/git remote add origin https://github.com/giga89/portfolio-daily-recap
+generate-recap	Checkout repository	2025-12-27T10:24:06.1141595Z ##[endgroup]
+generate-recap	Checkout repository	2025-12-27T10:24:06.1142812Z ##[group]Disabling automatic garbage collection
+generate-recap	Checkout repository	2025-12-27T10:24:06.1143892Z [command]/usr/bin/git config --local gc.auto 0
+generate-recap	Checkout repository	2025-12-27T10:24:06.1146392Z ##[endgroup]
+generate-recap	Checkout repository	2025-12-27T10:24:06.1147483Z ##[group]Setting up auth
+generate-recap	Checkout repository	2025-12-27T10:24:06.1148738Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+generate-recap	Checkout repository	2025-12-27T10:24:06.1170452Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+generate-recap	Checkout repository	2025-12-27T10:24:06.1562511Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+generate-recap	Checkout repository	2025-12-27T10:24:06.1595624Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+generate-recap	Checkout repository	2025-12-27T10:24:06.1818755Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+generate-recap	Checkout repository	2025-12-27T10:24:06.1853211Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+generate-recap	Checkout repository	2025-12-27T10:24:06.2089605Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+generate-recap	Checkout repository	2025-12-27T10:24:06.2126647Z ##[endgroup]
+generate-recap	Checkout repository	2025-12-27T10:24:06.2127920Z ##[group]Fetching the repository
+generate-recap	Checkout repository	2025-12-27T10:24:06.2135932Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +e2e1c6567ae967975c8517420f9f0f377dc6e8df:refs/remotes/origin/main
+generate-recap	Checkout repository	2025-12-27T10:24:06.4934738Z From https://github.com/giga89/portfolio-daily-recap
+generate-recap	Checkout repository	2025-12-27T10:24:06.4936621Z  * [new ref]         e2e1c6567ae967975c8517420f9f0f377dc6e8df -> origin/main
+generate-recap	Checkout repository	2025-12-27T10:24:06.4971615Z ##[endgroup]
+generate-recap	Checkout repository	2025-12-27T10:24:06.4973400Z ##[group]Determining the checkout info
+generate-recap	Checkout repository	2025-12-27T10:24:06.4975324Z ##[endgroup]
+generate-recap	Checkout repository	2025-12-27T10:24:06.4978644Z [command]/usr/bin/git sparse-checkout disable
+generate-recap	Checkout repository	2025-12-27T10:24:06.5024091Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+generate-recap	Checkout repository	2025-12-27T10:24:06.5052491Z ##[group]Checking out the ref
+generate-recap	Checkout repository	2025-12-27T10:24:06.5055734Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+generate-recap	Checkout repository	2025-12-27T10:24:06.5124717Z Switched to a new branch 'main'
+generate-recap	Checkout repository	2025-12-27T10:24:06.5127220Z branch 'main' set up to track 'origin/main'.
+generate-recap	Checkout repository	2025-12-27T10:24:06.5137562Z ##[endgroup]
+generate-recap	Checkout repository	2025-12-27T10:24:06.5169740Z [command]/usr/bin/git log -1 --format=%H
+generate-recap	Checkout repository	2025-12-27T10:24:06.5192797Z e2e1c6567ae967975c8517420f9f0f377dc6e8df
+generate-recap	Set up Python	´╗┐2025-12-27T10:24:06.5516655Z ##[group]Run actions/setup-python@v4
+generate-recap	Set up Python	2025-12-27T10:24:06.5518144Z with:
+generate-recap	Set up Python	2025-12-27T10:24:06.5519283Z   python-version: 3.11
+generate-recap	Set up Python	2025-12-27T10:24:06.5520683Z   check-latest: false
+generate-recap	Set up Python	2025-12-27T10:24:06.5522160Z   token: ***
+generate-recap	Set up Python	2025-12-27T10:24:06.5523347Z   update-environment: true
+generate-recap	Set up Python	2025-12-27T10:24:06.5524682Z   allow-prereleases: false
+generate-recap	Set up Python	2025-12-27T10:24:06.5526312Z ##[endgroup]
+generate-recap	Set up Python	2025-12-27T10:24:06.7308311Z ##[group]Installed versions
+generate-recap	Set up Python	2025-12-27T10:24:06.7439392Z Successfully set up CPython (3.11.14)
+generate-recap	Set up Python	2025-12-27T10:24:06.7443382Z ##[endgroup]
+generate-recap	Install dependencies	´╗┐2025-12-27T10:24:06.7641827Z ##[group]Run python -m pip install --upgrade pip
+generate-recap	Install dependencies	2025-12-27T10:24:06.7644695Z [36;1mpython -m pip install --upgrade pip[0m
+generate-recap	Install dependencies	2025-12-27T10:24:06.7647295Z [36;1mpip install -r requirements.txt[0m
+generate-recap	Install dependencies	2025-12-27T10:24:06.7718255Z shell: /usr/bin/bash -e ***0***
+generate-recap	Install dependencies	2025-12-27T10:24:06.7719636Z env:
+generate-recap	Install dependencies	2025-12-27T10:24:06.7721275Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Install dependencies	2025-12-27T10:24:06.7723366Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+generate-recap	Install dependencies	2025-12-27T10:24:06.7725391Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Install dependencies	2025-12-27T10:24:06.7727191Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Install dependencies	2025-12-27T10:24:06.7728945Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Install dependencies	2025-12-27T10:24:06.7730863Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+generate-recap	Install dependencies	2025-12-27T10:24:06.7732431Z ##[endgroup]
+generate-recap	Install dependencies	2025-12-27T10:24:07.6034450Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (25.3)
+generate-recap	Install dependencies	2025-12-27T10:24:08.3911662Z Collecting playwright==1.45.0 (from -r requirements.txt (line 1))
+generate-recap	Install dependencies	2025-12-27T10:24:08.4873309Z   Downloading playwright-1.45.0-py3-none-manylinux1_x86_64.whl.metadata (3.5 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:08.5180831Z Collecting beautifulsoup4==4.12.3 (from -r requirements.txt (line 2))
+generate-recap	Install dependencies	2025-12-27T10:24:08.5321031Z   Downloading beautifulsoup4-4.12.3-py3-none-any.whl.metadata (3.8 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:08.5723104Z Collecting requests==2.31.0 (from -r requirements.txt (line 3))
+generate-recap	Install dependencies	2025-12-27T10:24:08.5859879Z   Downloading requests-2.31.0-py3-none-any.whl.metadata (4.6 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:08.6622635Z Collecting google-api-python-client==2.140.0 (from -r requirements.txt (line 4))
+generate-recap	Install dependencies	2025-12-27T10:24:08.6778085Z   Downloading google_api_python_client-2.140.0-py2.py3-none-any.whl.metadata (6.7 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:08.7264260Z Collecting google-auth==2.33.0 (from -r requirements.txt (line 5))
+generate-recap	Install dependencies	2025-12-27T10:24:08.7419430Z   Downloading google_auth-2.33.0-py2.py3-none-any.whl.metadata (4.7 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:08.7689513Z Collecting google-auth-oauthlib==1.2.1 (from -r requirements.txt (line 6))
+generate-recap	Install dependencies	2025-12-27T10:24:08.7826609Z   Downloading google_auth_oauthlib-1.2.1-py2.py3-none-any.whl.metadata (2.7 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:08.8044632Z Collecting google-auth-httplib2==0.2.0 (from -r requirements.txt (line 7))
+generate-recap	Install dependencies	2025-12-27T10:24:08.8177016Z   Downloading google_auth_httplib2-0.2.0-py2.py3-none-any.whl.metadata (2.2 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:08.8524622Z Collecting google-genai>=0.2.0 (from -r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:08.8659353Z   Downloading google_genai-1.56.0-py3-none-any.whl.metadata (53 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:08.9214509Z Collecting yfinance (from -r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:08.9360725Z   Downloading yfinance-1.0-py2.py3-none-any.whl.metadata (6.0 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:08.9786377Z Collecting selenium==4.15.2 (from -r requirements.txt (line 12))
+generate-recap	Install dependencies	2025-12-27T10:24:08.9935475Z   Downloading selenium-4.15.2-py3-none-any.whl.metadata (6.9 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.0238705Z Collecting webdriver-manager (from -r requirements.txt (line 13))
+generate-recap	Install dependencies	2025-12-27T10:24:09.0374436Z   Downloading webdriver_manager-4.0.2-py2.py3-none-any.whl.metadata (12 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.1737177Z Collecting greenlet==3.0.3 (from playwright==1.45.0->-r requirements.txt (line 1))
+generate-recap	Install dependencies	2025-12-27T10:24:09.1884387Z   Downloading greenlet-3.0.3-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.2174668Z Collecting pyee==11.1.0 (from playwright==1.45.0->-r requirements.txt (line 1))
+generate-recap	Install dependencies	2025-12-27T10:24:09.2311509Z   Downloading pyee-11.1.0-py3-none-any.whl.metadata (2.8 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.2616709Z Collecting soupsieve>1.2 (from beautifulsoup4==4.12.3->-r requirements.txt (line 2))
+generate-recap	Install dependencies	2025-12-27T10:24:09.2750444Z   Downloading soupsieve-2.8.1-py3-none-any.whl.metadata (4.6 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.3684301Z Collecting charset-normalizer<4,>=2 (from requests==2.31.0->-r requirements.txt (line 3))
+generate-recap	Install dependencies	2025-12-27T10:24:09.3825349Z   Downloading charset_normalizer-3.4.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (37 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.4138823Z Collecting idna<4,>=2.5 (from requests==2.31.0->-r requirements.txt (line 3))
+generate-recap	Install dependencies	2025-12-27T10:24:09.4278551Z   Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.4664101Z Collecting urllib3<3,>=1.21.1 (from requests==2.31.0->-r requirements.txt (line 3))
+generate-recap	Install dependencies	2025-12-27T10:24:09.4798849Z   Downloading urllib3-2.6.2-py3-none-any.whl.metadata (6.6 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.5202565Z Collecting certifi>=2017.4.17 (from requests==2.31.0->-r requirements.txt (line 3))
+generate-recap	Install dependencies	2025-12-27T10:24:09.5338985Z   Downloading certifi-2025.11.12-py3-none-any.whl.metadata (2.5 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.5610851Z Collecting httplib2<1.dev0,>=0.19.0 (from google-api-python-client==2.140.0->-r requirements.txt (line 4))
+generate-recap	Install dependencies	2025-12-27T10:24:09.5745302Z   Downloading httplib2-0.31.0-py3-none-any.whl.metadata (2.2 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.6782635Z Collecting google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0.dev0,>=1.31.5 (from google-api-python-client==2.140.0->-r requirements.txt (line 4))
+generate-recap	Install dependencies	2025-12-27T10:24:09.6918847Z   Downloading google_api_core-2.28.1-py3-none-any.whl.metadata (3.3 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.7182094Z Collecting uritemplate<5,>=3.0.1 (from google-api-python-client==2.140.0->-r requirements.txt (line 4))
+generate-recap	Install dependencies	2025-12-27T10:24:09.7326029Z   Downloading uritemplate-4.2.0-py3-none-any.whl.metadata (2.6 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.7647405Z Collecting cachetools<6.0,>=2.0.0 (from google-auth==2.33.0->-r requirements.txt (line 5))
+generate-recap	Install dependencies	2025-12-27T10:24:09.7783807Z   Downloading cachetools-5.5.2-py3-none-any.whl.metadata (5.4 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.8155479Z Collecting pyasn1-modules>=0.2.1 (from google-auth==2.33.0->-r requirements.txt (line 5))
+generate-recap	Install dependencies	2025-12-27T10:24:09.8291383Z   Downloading pyasn1_modules-0.4.2-py3-none-any.whl.metadata (3.5 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.8564747Z Collecting rsa<5,>=3.1.4 (from google-auth==2.33.0->-r requirements.txt (line 5))
+generate-recap	Install dependencies	2025-12-27T10:24:09.8696510Z   Downloading rsa-4.9.1-py3-none-any.whl.metadata (5.6 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.9165632Z Collecting requests-oauthlib>=0.7.0 (from google-auth-oauthlib==1.2.1->-r requirements.txt (line 6))
+generate-recap	Install dependencies	2025-12-27T10:24:09.9300148Z   Downloading requests_oauthlib-2.0.0-py2.py3-none-any.whl.metadata (11 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:09.9719757Z Collecting trio~=0.17 (from selenium==4.15.2->-r requirements.txt (line 12))
+generate-recap	Install dependencies	2025-12-27T10:24:09.9855791Z   Downloading trio-0.32.0-py3-none-any.whl.metadata (8.5 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.0104873Z Collecting trio-websocket~=0.9 (from selenium==4.15.2->-r requirements.txt (line 12))
+generate-recap	Install dependencies	2025-12-27T10:24:10.0237935Z   Downloading trio_websocket-0.12.2-py3-none-any.whl.metadata (5.1 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.0601443Z Collecting typing-extensions (from pyee==11.1.0->playwright==1.45.0->-r requirements.txt (line 1))
+generate-recap	Install dependencies	2025-12-27T10:24:10.0736543Z   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.1069943Z Collecting googleapis-common-protos<2.0.0,>=1.56.2 (from google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0.dev0,>=1.31.5->google-api-python-client==2.140.0->-r requirements.txt (line 4))
+generate-recap	Install dependencies	2025-12-27T10:24:10.1204187Z   Downloading googleapis_common_protos-1.72.0-py3-none-any.whl.metadata (9.4 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.3408094Z Collecting protobuf!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<7.0.0,>=3.19.5 (from google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0.dev0,>=1.31.5->google-api-python-client==2.140.0->-r requirements.txt (line 4))
+generate-recap	Install dependencies	2025-12-27T10:24:10.3545315Z   Downloading protobuf-6.33.2-cp39-abi3-manylinux2014_x86_64.whl.metadata (593 bytes)
+generate-recap	Install dependencies	2025-12-27T10:24:10.3835922Z Collecting proto-plus<2.0.0,>=1.22.3 (from google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0.dev0,>=1.31.5->google-api-python-client==2.140.0->-r requirements.txt (line 4))
+generate-recap	Install dependencies	2025-12-27T10:24:10.3970760Z   Downloading proto_plus-1.27.0-py3-none-any.whl.metadata (2.2 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.5254995Z Collecting pyparsing<4,>=3.0.4 (from httplib2<1.dev0,>=0.19.0->google-api-python-client==2.140.0->-r requirements.txt (line 4))
+generate-recap	Install dependencies	2025-12-27T10:24:10.5393347Z   Downloading pyparsing-3.3.1-py3-none-any.whl.metadata (5.6 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.6354008Z Collecting pyasn1>=0.1.3 (from rsa<5,>=3.1.4->google-auth==2.33.0->-r requirements.txt (line 5))
+generate-recap	Install dependencies	2025-12-27T10:24:10.6493475Z   Downloading pyasn1-0.6.1-py3-none-any.whl.metadata (8.4 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.6766367Z Collecting attrs>=23.2.0 (from trio~=0.17->selenium==4.15.2->-r requirements.txt (line 12))
+generate-recap	Install dependencies	2025-12-27T10:24:10.6906839Z   Downloading attrs-25.4.0-py3-none-any.whl.metadata (10 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.7160982Z Collecting sortedcontainers (from trio~=0.17->selenium==4.15.2->-r requirements.txt (line 12))
+generate-recap	Install dependencies	2025-12-27T10:24:10.7313148Z   Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl.metadata (10 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.7555940Z Collecting outcome (from trio~=0.17->selenium==4.15.2->-r requirements.txt (line 12))
+generate-recap	Install dependencies	2025-12-27T10:24:10.7693193Z   Downloading outcome-1.3.0.post0-py2.py3-none-any.whl.metadata (2.6 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.7908300Z Collecting sniffio>=1.3.0 (from trio~=0.17->selenium==4.15.2->-r requirements.txt (line 12))
+generate-recap	Install dependencies	2025-12-27T10:24:10.8042715Z   Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.8355976Z Collecting wsproto>=0.14 (from trio-websocket~=0.9->selenium==4.15.2->-r requirements.txt (line 12))
+generate-recap	Install dependencies	2025-12-27T10:24:10.8492562Z   Downloading wsproto-1.3.2-py3-none-any.whl.metadata (5.2 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.8759887Z Collecting pysocks!=1.5.7,<2.0,>=1.5.6 (from urllib3[socks]<3,>=1.26->selenium==4.15.2->-r requirements.txt (line 12))
+generate-recap	Install dependencies	2025-12-27T10:24:10.8897260Z   Downloading PySocks-1.7.1-py3-none-any.whl.metadata (13 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.9236110Z Collecting anyio<5.0.0,>=4.8.0 (from google-genai>=0.2.0->-r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:10.9374276Z   Downloading anyio-4.12.0-py3-none-any.whl.metadata (4.3 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:10.9596858Z INFO: pip is looking at multiple versions of google-genai to determine which version is compatible with other requirements. This could take a while.
+generate-recap	Install dependencies	2025-12-27T10:24:10.9600935Z Collecting google-genai>=0.2.0 (from -r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:10.9738062Z   Downloading google_genai-1.55.0-py3-none-any.whl.metadata (47 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:11.0113633Z Collecting httpx<1.0.0,>=0.28.1 (from google-genai>=0.2.0->-r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:11.0249729Z   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:11.1587010Z Collecting pydantic<3.0.0,>=2.9.0 (from google-genai>=0.2.0->-r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:11.1727693Z   Downloading pydantic-2.12.5-py3-none-any.whl.metadata (90 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:11.4164437Z Collecting tenacity<9.2.0,>=8.2.3 (from google-genai>=0.2.0->-r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:11.4302971Z   Downloading tenacity-9.1.2-py3-none-any.whl.metadata (1.2 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:12.0546441Z Collecting websockets<15.1.0,>=13.0.0 (from google-genai>=0.2.0->-r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:12.0687148Z   Downloading websockets-15.0.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.8 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:12.7198893Z Collecting distro<2,>=1.7.0 (from google-genai>=0.2.0->-r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:12.7335714Z   Downloading distro-1.9.0-py3-none-any.whl.metadata (6.8 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:12.8198991Z Collecting httpcore==1.* (from httpx<1.0.0,>=0.28.1->google-genai>=0.2.0->-r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:12.8334670Z   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:12.8639321Z Collecting h11>=0.16 (from httpcore==1.*->httpx<1.0.0,>=0.28.1->google-genai>=0.2.0->-r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:12.8786320Z   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:12.9033735Z Collecting annotated-types>=0.6.0 (from pydantic<3.0.0,>=2.9.0->google-genai>=0.2.0->-r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:12.9167548Z   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:13.6011605Z Collecting pydantic-core==2.41.5 (from pydantic<3.0.0,>=2.9.0->google-genai>=0.2.0->-r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:13.6151636Z   Downloading pydantic_core-2.41.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:13.6445551Z Collecting typing-inspection>=0.4.2 (from pydantic<3.0.0,>=2.9.0->google-genai>=0.2.0->-r requirements.txt (line 8))
+generate-recap	Install dependencies	2025-12-27T10:24:13.6579597Z   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:13.7822539Z Collecting pandas>=1.3.0 (from yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:13.7960845Z   Downloading pandas-2.3.3-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:14.0705476Z Collecting numpy>=1.16.5 (from yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:14.0844960Z   Downloading numpy-2.4.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:14.1219131Z Collecting multitasking>=0.0.7 (from yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:14.1353039Z   Downloading multitasking-0.0.12.tar.gz (19 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:14.1444708Z   Installing build dependencies: started
+generate-recap	Install dependencies	2025-12-27T10:24:15.1697146Z   Installing build dependencies: finished with status 'done'
+generate-recap	Install dependencies	2025-12-27T10:24:15.1704030Z   Getting requirements to build wheel: started
+generate-recap	Install dependencies	2025-12-27T10:24:15.4924769Z   Getting requirements to build wheel: finished with status 'done'
+generate-recap	Install dependencies	2025-12-27T10:24:15.4933094Z   Preparing metadata (pyproject.toml): started
+generate-recap	Install dependencies	2025-12-27T10:24:15.6599634Z   Preparing metadata (pyproject.toml): finished with status 'done'
+generate-recap	Install dependencies	2025-12-27T10:24:15.6892411Z Collecting platformdirs>=2.0.0 (from yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:15.7031596Z   Downloading platformdirs-4.5.1-py3-none-any.whl.metadata (12 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:15.7514378Z Collecting pytz>=2022.5 (from yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:15.7656448Z   Downloading pytz-2025.2-py2.py3-none-any.whl.metadata (22 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:15.8225414Z Collecting frozendict>=2.3.4 (from yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:15.8362681Z   Downloading frozendict-2.4.7-py3-none-any.whl.metadata (23 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:15.8688448Z Collecting peewee>=3.16.2 (from yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:15.8838003Z   Downloading peewee-3.18.3.tar.gz (3.0 MB)
+generate-recap	Install dependencies	2025-12-27T10:24:15.9391351Z      ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü 3.0/3.0 MB 68.3 MB/s  0:00:00
+generate-recap	Install dependencies	2025-12-27T10:24:16.1041394Z   Installing build dependencies: started
+generate-recap	Install dependencies	2025-12-27T10:24:16.9830078Z   Installing build dependencies: finished with status 'done'
+generate-recap	Install dependencies	2025-12-27T10:24:16.9835941Z   Getting requirements to build wheel: started
+generate-recap	Install dependencies	2025-12-27T10:24:18.0968976Z   Getting requirements to build wheel: finished with status 'done'
+generate-recap	Install dependencies	2025-12-27T10:24:18.0978323Z   Preparing metadata (pyproject.toml): started
+generate-recap	Install dependencies	2025-12-27T10:24:18.3053690Z   Preparing metadata (pyproject.toml): finished with status 'done'
+generate-recap	Install dependencies	2025-12-27T10:24:18.3665743Z Collecting curl_cffi<0.14,>=0.7 (from yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:18.3817323Z   Downloading curl_cffi-0.13.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (13 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:18.5004580Z Collecting cffi>=1.12.0 (from curl_cffi<0.14,>=0.7->yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:18.5139986Z   Downloading cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:18.5508780Z Collecting python-dotenv (from webdriver-manager->-r requirements.txt (line 13))
+generate-recap	Install dependencies	2025-12-27T10:24:18.5643762Z   Downloading python_dotenv-1.2.1-py3-none-any.whl.metadata (25 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:18.5949521Z Collecting packaging (from webdriver-manager->-r requirements.txt (line 13))
+generate-recap	Install dependencies	2025-12-27T10:24:18.6083999Z   Downloading packaging-25.0-py3-none-any.whl.metadata (3.3 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:18.6365960Z Collecting pycparser (from cffi>=1.12.0->curl_cffi<0.14,>=0.7->yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:18.6501442Z   Downloading pycparser-2.23-py3-none-any.whl.metadata (993 bytes)
+generate-recap	Install dependencies	2025-12-27T10:24:18.6941475Z Collecting python-dateutil>=2.8.2 (from pandas>=1.3.0->yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:18.7098663Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:18.7432417Z Collecting tzdata>=2022.7 (from pandas>=1.3.0->yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:18.7571065Z   Downloading tzdata-2025.3-py2.py3-none-any.whl.metadata (1.4 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:18.7937626Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas>=1.3.0->yfinance->-r requirements.txt (line 9))
+generate-recap	Install dependencies	2025-12-27T10:24:18.8075005Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:18.8366751Z Collecting oauthlib>=3.0.0 (from requests-oauthlib>=0.7.0->google-auth-oauthlib==1.2.1->-r requirements.txt (line 6))
+generate-recap	Install dependencies	2025-12-27T10:24:18.8502630Z   Downloading oauthlib-3.3.1-py3-none-any.whl.metadata (7.9 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:18.9039450Z Downloading playwright-1.45.0-py3-none-manylinux1_x86_64.whl (37.9 MB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.0937637Z    ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü 37.9/37.9 MB 201.7 MB/s  0:00:00
+generate-recap	Install dependencies	2025-12-27T10:24:19.1079010Z Downloading beautifulsoup4-4.12.3-py3-none-any.whl (147 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.1251336Z Downloading requests-2.31.0-py3-none-any.whl (62 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.1426859Z Downloading google_api_python_client-2.140.0-py2.py3-none-any.whl (12.1 MB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.2037621Z    ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü 12.1/12.1 MB 203.4 MB/s  0:00:00
+generate-recap	Install dependencies	2025-12-27T10:24:19.2206598Z Downloading google_auth-2.33.0-py2.py3-none-any.whl (200 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.2379019Z Downloading google_auth_httplib2-0.2.0-py2.py3-none-any.whl (9.3 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.2544411Z Downloading google_auth_oauthlib-1.2.1-py2.py3-none-any.whl (24 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.2749704Z Downloading selenium-4.15.2-py3-none-any.whl (10.2 MB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.3318324Z    ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü 10.2/10.2 MB 184.4 MB/s  0:00:00
+generate-recap	Install dependencies	2025-12-27T10:24:19.3463370Z Downloading greenlet-3.0.3-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (620 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.3527335Z    ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü 620.0/620.0 kB 87.0 MB/s  0:00:00
+generate-recap	Install dependencies	2025-12-27T10:24:19.3665423Z Downloading pyee-11.1.0-py3-none-any.whl (15 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.3822195Z Downloading cachetools-5.5.2-py3-none-any.whl (10 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.3984738Z Downloading charset_normalizer-3.4.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (151 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.4147667Z Downloading google_api_core-2.28.1-py3-none-any.whl (173 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.4314060Z Downloading googleapis_common_protos-1.72.0-py3-none-any.whl (297 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.4501969Z Downloading httplib2-0.31.0-py3-none-any.whl (91 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.4668917Z Downloading idna-3.11-py3-none-any.whl (71 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.4834806Z Downloading proto_plus-1.27.0-py3-none-any.whl (50 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.4995820Z Downloading protobuf-6.33.2-cp39-abi3-manylinux2014_x86_64.whl (323 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.5170040Z Downloading pyparsing-3.3.1-py3-none-any.whl (121 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.5334508Z Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.5499552Z Downloading trio-0.32.0-py3-none-any.whl (512 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.5682251Z Downloading trio_websocket-0.12.2-py3-none-any.whl (21 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.5838136Z Downloading uritemplate-4.2.0-py3-none-any.whl (11 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.6004349Z Downloading urllib3-2.6.2-py3-none-any.whl (131 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.6167976Z Downloading PySocks-1.7.1-py3-none-any.whl (16 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.6325290Z Downloading google_genai-1.55.0-py3-none-any.whl (703 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.6405793Z    ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü 703.4/703.4 kB 86.5 MB/s  0:00:00
+generate-recap	Install dependencies	2025-12-27T10:24:19.6537501Z Downloading anyio-4.12.0-py3-none-any.whl (113 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.6705591Z Downloading distro-1.9.0-py3-none-any.whl (20 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.6862082Z Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.7021319Z Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.7174792Z Downloading pydantic-2.12.5-py3-none-any.whl (463 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.7358154Z Downloading pydantic_core-2.41.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.7489594Z    ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü 2.1/2.1 MB 167.7 MB/s  0:00:00
+generate-recap	Install dependencies	2025-12-27T10:24:19.7625524Z Downloading tenacity-9.1.2-py3-none-any.whl (28 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.7784688Z Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.7951016Z Downloading websockets-15.0.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (182 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.8111818Z Downloading yfinance-1.0-py2.py3-none-any.whl (127 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.8301208Z Downloading curl_cffi-0.13.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (8.3 MB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.8720903Z    ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü 8.3/8.3 MB 203.7 MB/s  0:00:00
+generate-recap	Install dependencies	2025-12-27T10:24:19.8857872Z Downloading webdriver_manager-4.0.2-py2.py3-none-any.whl (27 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.9014908Z Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.9172560Z Downloading attrs-25.4.0-py3-none-any.whl (67 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.9328871Z Downloading certifi-2025.11.12-py3-none-any.whl (159 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.9490571Z Downloading cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (215 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.9657703Z Downloading frozendict-2.4.7-py3-none-any.whl (16 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.9812935Z Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:19.9974194Z Downloading numpy-2.4.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.0835729Z    ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü 16.6/16.6 MB 198.7 MB/s  0:00:00
+generate-recap	Install dependencies	2025-12-27T10:24:20.0972178Z Downloading outcome-1.3.0.post0-py2.py3-none-any.whl (10 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.1128778Z Downloading pandas-2.3.3-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.8 MB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.1794552Z    ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü 12.8/12.8 MB 195.4 MB/s  0:00:00
+generate-recap	Install dependencies	2025-12-27T10:24:20.1931234Z Downloading platformdirs-4.5.1-py3-none-any.whl (18 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.2087645Z Downloading pyasn1-0.6.1-py3-none-any.whl (83 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.2254315Z Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.2425313Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.2596208Z Downloading pytz-2025.2-py2.py3-none-any.whl (509 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.2785733Z Downloading requests_oauthlib-2.0.0-py2.py3-none-any.whl (24 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.2951181Z Downloading oauthlib-3.3.1-py3-none-any.whl (160 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.3121071Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.3276379Z Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.3431613Z Downloading soupsieve-2.8.1-py3-none-any.whl (36 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.3594665Z Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.3753042Z Downloading tzdata-2025.3-py2.py3-none-any.whl (348 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.3937104Z Downloading wsproto-1.3.2-py3-none-any.whl (24 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.4095126Z Downloading packaging-25.0-py3-none-any.whl (66 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.4251728Z Downloading pycparser-2.23-py3-none-any.whl (118 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.4410793Z Downloading python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.4578799Z Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl (29 kB)
+generate-recap	Install dependencies	2025-12-27T10:24:20.5999559Z Building wheels for collected packages: multitasking, peewee
+generate-recap	Install dependencies	2025-12-27T10:24:20.6007543Z   Building wheel for multitasking (pyproject.toml): started
+generate-recap	Install dependencies	2025-12-27T10:24:20.7969396Z   Building wheel for multitasking (pyproject.toml): finished with status 'done'
+generate-recap	Install dependencies	2025-12-27T10:24:20.7974893Z   Created wheel for multitasking: filename=multitasking-0.0.12-py3-none-any.whl size=15636 sha256=7dac4b07a05259a20d4db9c8815c04fbcb38f39e91aa2bcf952a1cf5a3d0205a
+generate-recap	Install dependencies	2025-12-27T10:24:20.7976506Z   Stored in directory: /home/runner/.cache/pip/wheels/42/d6/84/bf57a755f4569494cd00de4bb46ef064874823f4d19c82e960
+generate-recap	Install dependencies	2025-12-27T10:24:20.8007339Z   Building wheel for peewee (pyproject.toml): started
+generate-recap	Install dependencies	2025-12-27T10:24:33.3121362Z   Building wheel for peewee (pyproject.toml): finished with status 'done'
+generate-recap	Install dependencies	2025-12-27T10:24:33.3135671Z   Created wheel for peewee: filename=peewee-3.18.3-cp311-cp311-linux_x86_64.whl size=1064052 sha256=1d23883544e42aaabaf0e029bcf1da3d5e9d98e6ddf6c8ec33715362ea4f6ad2
+generate-recap	Install dependencies	2025-12-27T10:24:33.3137840Z   Stored in directory: /home/runner/.cache/pip/wheels/05/dc/94/4ba26d23cac9aee7481d3dfcc7e99ce2cc5731230ec10f7ec1
+generate-recap	Install dependencies	2025-12-27T10:24:33.3157470Z Successfully built multitasking peewee
+generate-recap	Install dependencies	2025-12-27T10:24:33.4350792Z Installing collected packages: sortedcontainers, pytz, peewee, multitasking, websockets, urllib3, uritemplate, tzdata, typing-extensions, tenacity, soupsieve, sniffio, six, python-dotenv, pysocks, pyparsing, pycparser, pyasn1, protobuf, platformdirs, packaging, oauthlib, numpy, idna, h11, greenlet, frozendict, distro, charset-normalizer, certifi, cachetools, attrs, annotated-types, wsproto, typing-inspection, rsa, requests, python-dateutil, pyee, pydantic-core, pyasn1-modules, proto-plus, outcome, httplib2, httpcore, googleapis-common-protos, cffi, beautifulsoup4, anyio, webdriver-manager, trio, requests-oauthlib, pydantic, playwright, pandas, httpx, google-auth, curl_cffi, yfinance, trio-websocket, google-auth-oauthlib, google-auth-httplib2, google-api-core, selenium, google-genai, google-api-python-client
+generate-recap	Install dependencies	2025-12-27T10:24:44.6159215Z 
+generate-recap	Install dependencies	2025-12-27T10:24:44.6197448Z Successfully installed annotated-types-0.7.0 anyio-4.12.0 attrs-25.4.0 beautifulsoup4-4.12.3 cachetools-5.5.2 certifi-2025.11.12 cffi-2.0.0 charset-normalizer-3.4.4 curl_cffi-0.13.0 distro-1.9.0 frozendict-2.4.7 google-api-core-2.28.1 google-api-python-client-2.140.0 google-auth-2.33.0 google-auth-httplib2-0.2.0 google-auth-oauthlib-1.2.1 google-genai-1.55.0 googleapis-common-protos-1.72.0 greenlet-3.0.3 h11-0.16.0 httpcore-1.0.9 httplib2-0.31.0 httpx-0.28.1 idna-3.11 multitasking-0.0.12 numpy-2.4.0 oauthlib-3.3.1 outcome-1.3.0.post0 packaging-25.0 pandas-2.3.3 peewee-3.18.3 platformdirs-4.5.1 playwright-1.45.0 proto-plus-1.27.0 protobuf-6.33.2 pyasn1-0.6.1 pyasn1-modules-0.4.2 pycparser-2.23 pydantic-2.12.5 pydantic-core-2.41.5 pyee-11.1.0 pyparsing-3.3.1 pysocks-1.7.1 python-dateutil-2.9.0.post0 python-dotenv-1.2.1 pytz-2025.2 requests-2.31.0 requests-oauthlib-2.0.0 rsa-4.9.1 selenium-4.15.2 six-1.17.0 sniffio-1.3.1 sortedcontainers-2.4.0 soupsieve-2.8.1 tenacity-9.1.2 trio-0.32.0 trio-websocket-0.12.2 typing-extensions-4.15.0 typing-inspection-0.4.2 tzdata-2025.3 uritemplate-4.2.0 urllib3-2.6.2 webdriver-manager-4.0.2 websockets-15.0.1 wsproto-1.3.2 yfinance-1.0
+generate-recap	Install Chrome and ChromeDriver	´╗┐2025-12-27T10:24:45.0763279Z ##[group]Run # Install Chrome
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0763779Z [36;1m# Install Chrome[0m
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0764316Z [36;1mwget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -[0m
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0765150Z [36;1msudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'[0m
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0765758Z [36;1msudo apt-get update[0m
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0766116Z [36;1msudo apt-get install -y google-chrome-stable[0m
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0766470Z [36;1m[0m
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0766820Z [36;1m# ChromeDriver is installed automatically by Selenium Manager[0m
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0767267Z [36;1m# No need to install separately[0m
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0802787Z shell: /usr/bin/bash -e ***0***
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0803130Z env:
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0803463Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0804168Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0804712Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0805165Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0805614Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0806061Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.0806453Z ##[endgroup]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:45.1917596Z Warning: apt-key is deprecated. Manage keyring files in trusted.gpg.d instead (see apt-key(8)).
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.2905775Z OK
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.3873020Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.4263460Z Hit:6 https://packages.microsoft.com/repos/azure-cli noble InRelease
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.4266899Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.5144281Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.5161155Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.5196990Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.5218344Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.5429332Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [58.9 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.5533949Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [11.4 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.5613637Z Get:10 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [77.4 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.6102251Z Get:11 http://dl.google.com/linux/chrome/deb stable InRelease [1825 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.6452208Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1684 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.6574622Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [311 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.6609751Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [175 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.6636860Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 c-n-f Metadata [15.8 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.6651754Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1506 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.6758353Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [306 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.6792023Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [377 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.6828407Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 c-n-f Metadata [31.4 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.6843841Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [2413 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7051530Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [550 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7454709Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7467787Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 c-n-f Metadata [516 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7481197Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [30.3 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7491142Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [6048 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7503741Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7514922Z Get:27 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 c-n-f Metadata [488 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7568382Z Get:28 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [40.4 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7573831Z Get:29 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7304 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7575348Z Get:30 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 c-n-f Metadata [368 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7584584Z Get:31 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [29.5 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7591716Z Get:32 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe Translation-en [17.9 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7612633Z Get:33 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [10.5 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7632506Z Get:34 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 c-n-f Metadata [1444 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.7642484Z Get:35 http://azure.archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [216 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.8093339Z Get:36 http://azure.archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.8113686Z Get:37 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [225 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.8137383Z Get:38 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Components [21.5 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.8147669Z Get:39 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 c-n-f Metadata [9504 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.8162883Z Get:40 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Components [71.4 kB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.8178513Z Get:41 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:46.8193193Z Get:42 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [208 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:47.4257890Z Get:43 http://dl.google.com/linux/chrome/deb stable/main amd64 Packages [1214 B]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:55.5698161Z Fetched 8378 kB in 1s (7383 kB/s)
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:56.3452681Z Reading package lists...
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:56.3803775Z Reading package lists...
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:56.5606780Z Building dependency tree...
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:56.5614242Z Reading state information...
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:56.7569273Z The following packages will be upgraded:
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:56.7575329Z   google-chrome-stable
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:57.7163704Z 1 upgraded, 0 newly installed, 0 to remove and 69 not upgraded.
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:57.7164395Z Need to get 118 MB of archives.
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:57.7164845Z After this operation, 182 kB disk space will be freed.
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:57.7165620Z Get:1 http://dl.google.com/linux/chrome/deb stable/main amd64 google-chrome-stable amd64 143.0.7499.169-1 [118 MB]
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7187285Z Fetched 118 MB in 2s (69.7 MB/s)
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7830884Z (Reading database ... 
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7831663Z (Reading database ... 5%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7832389Z (Reading database ... 10%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7832944Z (Reading database ... 15%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7833348Z (Reading database ... 20%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7833749Z (Reading database ... 25%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7834147Z (Reading database ... 30%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7834549Z (Reading database ... 35%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7834952Z (Reading database ... 40%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7835441Z (Reading database ... 45%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7835849Z (Reading database ... 50%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.7963959Z (Reading database ... 55%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:58.9592527Z (Reading database ... 60%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:59.0524740Z (Reading database ... 65%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:59.1209448Z (Reading database ... 70%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:59.1985772Z (Reading database ... 75%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:59.4097278Z (Reading database ... 80%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:59.5604529Z (Reading database ... 85%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:59.7942053Z (Reading database ... 90%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:59.9552920Z (Reading database ... 95%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:59.9553455Z (Reading database ... 100%
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:59.9554046Z (Reading database ... 217374 files and directories currently installed.)
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:59.9601647Z Preparing to unpack .../google-chrome-stable_143.0.7499.169-1_amd64.deb ...
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:24:59.9716180Z Unpacking google-chrome-stable (143.0.7499.169-1) over (143.0.7499.109-1) ...
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:06.2288990Z Setting up google-chrome-stable (143.0.7499.169-1) ...
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:06.3799109Z Processing triggers for man-db (2.12.0-4build2) ...
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:06.3837064Z Not building database; man-db/auto-update is not 'true'.
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:07.0731270Z 
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:07.0731940Z Running kernel seems to be up-to-date.
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:07.0732355Z 
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:07.0732591Z No services need to be restarted.
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:07.0733034Z 
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:07.0734408Z No containers need to be restarted.
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:07.0734839Z 
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:07.0735103Z No user sessions are running outdated binaries.
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:07.0735506Z 
+generate-recap	Install Chrome and ChromeDriver	2025-12-27T10:25:07.0735871Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+generate-recap	Determine market session	´╗┐2025-12-27T10:25:08.0589769Z ##[group]Run # Ottiene l'ora corrente in UTC (00-23)
+generate-recap	Determine market session	2025-12-27T10:25:08.0590559Z [36;1m# Ottiene l'ora corrente in UTC (00-23)[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0591000Z [36;1mHOUR=$(date -u +%H)[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0591300Z [36;1m[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0591643Z [36;1m# Controlla quale ora schedulata ha attivato l'azione[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0592056Z [36;1mSESSION_NAME="Daily recap"[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0592386Z [36;1mif [ $HOUR -eq 10 ]; then[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0592748Z [36;1m  SESSION_NAME="European market open"[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0593126Z [36;1melif [ $HOUR -eq 15 ]; then[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0593479Z [36;1m  SESSION_NAME="U.S. market open"[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0593838Z [36;1melif [ $HOUR -eq 22 ]; then[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0594186Z [36;1m  SESSION_NAME="U.S. market close"[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0594508Z [36;1mfi[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0594750Z [36;1m[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0595022Z [36;1m# Imposta la variabile di output[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0595420Z [36;1mecho "session=$SESSION_NAME" >> "$GITHUB_OUTPUT"[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0595929Z [36;1mecho "Market Session detected: $SESSION_NAME (UTC Hour: $HOUR)"[0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0596346Z [36;1m      [0m
+generate-recap	Determine market session	2025-12-27T10:25:08.0629652Z shell: /usr/bin/bash -e ***0***
+generate-recap	Determine market session	2025-12-27T10:25:08.0630000Z env:
+generate-recap	Determine market session	2025-12-27T10:25:08.0630593Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Determine market session	2025-12-27T10:25:08.0631112Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+generate-recap	Determine market session	2025-12-27T10:25:08.0631627Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Determine market session	2025-12-27T10:25:08.0632071Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Determine market session	2025-12-27T10:25:08.0632523Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Determine market session	2025-12-27T10:25:08.0632975Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+generate-recap	Determine market session	2025-12-27T10:25:08.0633356Z ##[endgroup]
+generate-recap	Determine market session	2025-12-27T10:25:08.0700975Z Market Session detected: European market open (UTC Hour: 10)
+generate-recap	Debug Environment Variables	´╗┐2025-12-27T10:25:08.0755045Z ##[group]Run echo "=== DEBUG VARIABLES ==="
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0755496Z [36;1mecho "=== DEBUG VARIABLES ==="[0m
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0755911Z [36;1mecho "MARKET_SESSION: $MARKET_SESSION"[0m
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0756306Z [36;1mecho "SPREADSHEET_ID: $SPREADSHEET_ID"[0m
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0756714Z [36;1mecho "TELEGRAM_CHAT_ID: $TELEGRAM_CHAT_ID"[0m
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0757317Z [36;1mecho "Checking GOOGLE_SHEETS_CREDENTIALS length: $***#SECRETS_GOOGLE_SHEETS_CREDENTIALS***"[0m
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0757839Z [36;1mecho "======================="[0m
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0789526Z shell: /usr/bin/bash -e ***0***
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0789862Z env:
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0790199Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0790914Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0791437Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0791892Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0792369Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0792818Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0793232Z   MARKET_SESSION: European market open
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0793681Z   SPREADSHEET_ID: ***
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0794205Z   TELEGRAM_CHAT_ID: ***
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0794488Z ##[endgroup]
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0846671Z === DEBUG VARIABLES ===
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0847409Z MARKET_SESSION: European market open
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0848436Z SPREADSHEET_ID: ***
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0849105Z TELEGRAM_CHAT_ID: ***
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0849820Z Checking GOOGLE_SHEETS_CREDENTIALS length: 0
+generate-recap	Debug Environment Variables	2025-12-27T10:25:08.0850872Z =======================
+generate-recap	Collect data and generate recap	´╗┐2025-12-27T10:25:08.0891051Z ##[group]Run python src/data_collector.py
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0891503Z [36;1mpython src/data_collector.py[0m
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0922176Z shell: /usr/bin/bash -e ***0***
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0922517Z env:
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0922873Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0923392Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0923887Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0924339Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0924812Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0925263Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0935433Z   GOOGLE_SHEETS_CREDENTIALS: ***
+generate-recap	Collect data and generate recap	
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0935807Z   ORO_USERNAME: ***
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0936282Z   SPREADSHEET_ID: ***
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0936709Z   TELEGRAM_BOT_TOKEN: ***
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0937026Z   TELEGRAM_CHAT_ID: ***
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0937356Z   MARKET_SESSION: European market open
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0937771Z   GEMINI_API_KEY: ***
+generate-recap	Collect data and generate recap	2025-12-27T10:25:08.0938042Z ##[endgroup]
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7414745Z Starting daily portfolio recap generation...~
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7416607Z ==================================================
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7417584Z SX7PEX.DE (EXV1.DE): Daily 0.24%, Monthly 7.53%, Yearly 74.50%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7418453Z IEUR (IEUR): Daily 0.30%, Monthly 3.45%, Yearly 36.66%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7419196Z IQQL.DE (IQQL.DE): Daily 0.46%, Monthly 0.81%, Yearly -11.94%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7419971Z IEMG (IEMG): Daily 0.67%, Monthly 1.17%, Yearly 33.13%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7420987Z WDEF.L (WDEF.L): Daily -0.16%, Monthly -3.95%, Yearly 15.94%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7421683Z AZN.L (AZN.L): Daily -0.45%, Monthly 1.33%, Yearly 28.66%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7422252Z Day not yet started for ABT
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7422788Z ABT (ABT): Daily 0.00%, Monthly -3.42%, Yearly 12.13%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7423354Z Day not yet started for ABBV
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7423926Z ABBV (ABBV): Daily 0.00%, Monthly -0.99%, Yearly 32.65%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7424506Z Day not yet started for LLY
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7425022Z LLY (LLY): Daily 0.00%, Monthly 5.52%, Yearly 39.55%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7425569Z Day not yet started for NOVO-B
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7426200Z NOVO-B (NVO): Daily 0.00%, Monthly 6.59%, Yearly -38.48%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7426857Z Day not yet started for HUM
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7427429Z HUM (HUM): Daily 0.00%, Monthly 9.71%, Yearly 3.88%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7428064Z Day not yet started for AVGO
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7428635Z AVGO (AVGO): Daily 0.00%, Monthly 3.77%, Yearly 53.16%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7429229Z Day not yet started for NVDA
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7429778Z NVDA (NVDA): Daily 0.00%, Monthly 1.97%, Yearly 37.79%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7430467Z Day not yet started for TSM
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7430848Z TSM (TSM): Daily 0.00%, Monthly 7.60%, Yearly 52.26%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7431205Z Day not yet started for MSFT
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7431587Z MSFT (MSFT): Daily 0.00%, Monthly -2.91%, Yearly 17.37%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7432149Z Day not yet started for SNPS
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7432703Z SNPS (SNPS): Daily 0.00%, Monthly 21.12%, Yearly -1.16%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7433293Z Day not yet started for AMZN
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7433839Z AMZN (AMZN): Daily 0.00%, Monthly -2.13%, Yearly 5.59%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7434446Z Day not yet started for GOOG
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7435056Z GOOG (GOOGL): Daily 0.00%, Monthly 12.62%, Yearly 66.15%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7435637Z Day not yet started for PLTR
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7436267Z PLTR (PLTR): Daily 0.00%, Monthly 9.63%, Yearly 150.98%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7436652Z Day not yet started for NET
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7436998Z NET (NET): Daily 0.00%, Monthly -5.22%, Yearly 79.84%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7437452Z Day not yet started for CCJ
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7437796Z CCJ (CCJ): Daily 0.00%, Monthly 8.19%, Yearly 78.34%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7438214Z ENEL.MI (ENEL.MI): Daily 0.76%, Monthly -1.89%, Yearly 32.97%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7438897Z TRX (TRX-USD): Daily -0.32%, Monthly -0.89%, Yearly 9.12%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7439288Z Day not yet started for ETOR
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7439643Z ETOR (ETOR): Daily 0.00%, Monthly -8.66%, Yearly -31.04%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7440050Z DB1.DE (DB1.DE): Daily 0.86%, Monthly 6.93%, Yearly 1.45%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7440738Z TRIG.L (TRIG.L): Daily -0.15%, Monthly -4.20%, Yearly -21.03%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7441130Z Day not yet started for BHP.L
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7441476Z BHP.L (BHP): Daily 0.00%, Monthly 10.62%, Yearly 28.30%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7441902Z PRY.MI (PRY.MI): Daily 0.09%, Monthly 0.80%, Yearly 38.75%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7442275Z Day not yet started for RACE
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7442623Z RACE (RACE): Daily 0.00%, Monthly -9.50%, Yearly -8.47%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7443041Z VOW3.DE (VOW3.DE): Daily -0.38%, Monthly 5.22%, Yearly 26.59%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7443414Z Day not yet started for MELI
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7443750Z MELI (MELI): Daily 0.00%, Monthly -1.25%, Yearly 13.64%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7444170Z Day not yet started for PYPL
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7444519Z PYPL (PYPL): Daily 0.00%, Monthly -7.99%, Yearly -30.25%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7444926Z GLEN (GLEN.L): Daily 0.10%, Monthly 5.68%, Yearly 8.76%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7445342Z 1919.HK (1919.HK): Daily -0.36%, Monthly -3.48%, Yearly 25.39%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7445755Z 2318.HK (2318.HK): Daily 0.68%, Monthly 8.94%, Yearly 58.66%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7446148Z Successfully fetched data for 35 symbols
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7446507Z ==================================================
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7447135Z ­ƒôè Fetching portfolio weights from BullAware...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7447602Z    Waiting for page to load...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7448228Z ­ƒôè Switching to table view...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7449541Z ÔÜá Could not find table button with aria-label, trying alternative selector: Message: no such element: Unable to locate element: ***"method":"xpath","selector":"//button[@aria-label='Switch to table view']"***
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7451134Z   (Session info: chrome=143.0.7499.169); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7451947Z Stacktrace:
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7452219Z #0 0x5616d576161a <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7452515Z #1 0x5616d51de20b <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7452803Z #2 0x5616d522f90f <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7453089Z #3 0x5616d522fb51 <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7453367Z #4 0x5616d527dd84 <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7453645Z #5 0x5616d527b20e <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7453944Z #6 0x5616d5222232 <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7454222Z #7 0x5616d5222ee1 <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7454502Z #8 0x5616d572a3f9 <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7454783Z #9 0x5616d572d34d <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7455066Z #10 0x5616d5713122 <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7455362Z #11 0x5616d572df2b <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7455657Z #12 0x5616d56f9c30 <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7455942Z #13 0x5616d574ed78 <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7456243Z #14 0x5616d574ef4c <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7456525Z #15 0x5616d5760973 <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7456822Z #16 0x7f25afe9caa4 <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7457113Z #17 0x7f25aff29c6c <unknown>
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7457291Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7457503Z ­ƒôè Extracting portfolio weights from table...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7457855Z Found 0 table rows
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7458261Z ÔÜá No weights found in table, falling back to alternative methods
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7458731Z  ┬á Trying alternative extraction method...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7459388Z ÔÜá´©Å  Could not extract weights from BullAware, using fallback
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7459915Z ÔÜá´©Å  No portfolio weights available. Using equal weight fallback.
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7460699Z    This will give INACCURATE results! Portfolio performance should be weighted by position size.
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7461268Z Portfolio daily performance: 0.07%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7461606Z ==================================================
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7461962Z Fetching Google Sheets data...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7462459Z 5-year return from Google Sheets: 170.0%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7462801Z ==================================================
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7463244Z ­ƒôê Fetching benchmark performance since 2020-01-01...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7463607Z    SPX500: +112.72%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7463873Z    NSDQ100: +189.04%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7464149Z    SWDA.L: +101.49%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7464404Z    EUSTX50: +52.28%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7464663Z    CHINA50: -0.55%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7464941Z ==================================================
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7465281Z Generating recap...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7465559Z Generating AI market news...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7465926Z ­ƒñû Generating AI market news recap...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7466263Z    Trying model: gemini-2.0-flash...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7473770Z ÔÜá´©Å  Model gemini-2.0-flash failed: 429 RESOURCE_EXHAUSTED. ***'error': ***'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash\nPlease retry in 19.626830238s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [***'@type': 'type.googleapis.com/google.rpc.Help', 'links': [***'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'***]***, ***'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [***'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': ***'location': 'global', 'model': 'gemini-2.0-flash'***, ***'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': ***'location': 'global', 'model': 'gemini-2.0-flash'***, ***'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_input_token_count', 'quotaId': 'GenerateContentInputTokensPerModelPerMinute-FreeTier', 'quotaDimensions': ***'location': 'global', 'model': 'gemini-2.0-flash'***]***, ***'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '19s'***]***
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7482299Z    Quota exceeded for gemini-2.0-flash, trying next model...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7482733Z    Trying model: gemini-flash-latest...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7483317Z Ô£à AI news recap generated successfully using gemini-flash-latest!
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7483741Z Recap saved to output/recap.txt
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7484080Z ==================================================
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7484417Z RECAP OUTPUT:
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7484687Z ==================================================
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7485062Z ­ƒîà EUROPEAN MARKET OPEN ­ƒôè
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7485258Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7485434Z ­ƒî▒ ­ƒî▒ ­ƒî▒ ­ƒî┐ SLIGHT GAINS: +0.07% ­ƒî▒ ­ƒî▒ ­ƒî▒
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7485653Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7485832Z TOP 5 TODAY PERFORMANCE OF PORTFOLIO ­ƒôê
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7486181Z ­ƒôè $DB1.DE +0.86%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7486475Z ­ƒöï $ENEL.MI +0.76%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7486966Z ­ƒÅª $2318.HK +0.68%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7487244Z ­ƒîì $IEMG +0.67%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7487527Z ­ƒöÑ $IQQL.DE +0.46%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7487676Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7487861Z TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO ­ƒôê
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7488226Z ­ƒûÑ´©Å $SNPS +21.12%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7488514Z ­ƒöì $GOOG +12.62%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7488793Z ­ƒôè $BHP.L +10.62%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7488940Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7489138Z TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO ­ƒôê
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7489669Z ­ƒøí´©Å $PLTR +150.98%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7489955Z Ôÿü´©Å $NET +79.84%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7490473Z ÔÜí $CCJ +78.34%
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7490646Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7490790Z ­ƒîì MARKET OVERVIEW
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7490946Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7492503Z US markets ended the holiday-shortened week slightly lower in extremely light trading volume, with the $SP500 falling less than 0.1% and the Nasdaq Composite down 0.1% on Friday. European markets, including the Euro Stoxx, remained largely closed for the extended Christmas holiday. The China $ShanghaiComposite continued its recent rally, edging up 0.10% to mark its eighth consecutive daily gain. Overall trading was muted globally as institutional investors closed out positions ahead of the year-end.
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7494139Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7494281Z ­ƒÆ╝ PORTFOLIO FOCUS
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7494441Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7496999Z The AI and Semiconductor space saw continued momentum, with $NVDA and $TSM benefiting from "insane" AI-driven demand and $AVGO being highlighted for potential doubling of its AI business revenue in 2026. $GOOG strengthened its AI infrastructure, announcing the acquisition of data center and energy provider Intersect for $4.75 billion. $MSFT and $AMZN remain underpinned by robust growth in their respective Cloud segments, with $SNPS, $PLTR, and $NET participating in the broader cloud and AI software ecosystem. In Pharma, $LLY and $NOVO-B are driven by the ongoing GLP-1 drug narrative, while $ABBV and $ABT are supported by their strong immunology and MedTech pipelines. Commodity-linked holdings $CCJ and $BHP.L were boosted by a sharp rise in silver and gold prices, with miners posting solid gains on safe-haven demand and supply constraints.
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7499601Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7499760Z ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7500095Z ­ƒÆí WHY COPY THIS PORTFOLIO?
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7500469Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7500609Z ­ƒôê TRACK RECORD:
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7500891Z +170% since strategy change (2020)
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7501243Z ~34% average annual return
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7501539Z Double your money in ~2.1 years
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7501736Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7501886Z Ô£à STRATEGY HIGHLIGHTS:
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7502256Z ÔÇó Smart diversification across 3 continents
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7502685Z ÔÇó Focus on megatrends: AI, Healthcare, Energy
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7503107Z ÔÇó Mix of ETFs + high-potential individual stocks
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7503512Z ÔÇó Active and transparent management
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7503724Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7503937Z ­ƒôè PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7504351Z Ô£ô VS $SPX500 : +57% (outperformance)
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7504722Z Ô£ô VS $NSDQ100 : -19% (underperformance)
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7505090Z Ô£ô VS $SWDA.L : +69% (outperformance)
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7505481Z Ô£ô VS $EUSTX50 : +118% (outperformance)
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7505847Z Ô£ô VS $CHINA50 : +171% (outperformance)
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7506056Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7506260Z ­ƒÄ» Long-term strategy based on solid fundamentals
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7506712Z ­ƒöä Periodic rebalancing to optimize risk/reward
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7506955Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7507091Z @***
+generate-recap	Collect data and generate recap	2025-12-27T10:25:55.7507380Z ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2508490Z 
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2509004Z ==================================================
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2509588Z Daily portfolio recap generation completed successfully!
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2510075Z ==================================================
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2511077Z Sending recap to Telegram...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2511790Z ­ƒôé Reading recap file: output/recap.txt
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2512415Z ­ƒôä Recap file read successfully (2522 characters)
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2512954Z ==================================================
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2513441Z ­ƒöì DEBUG: Checking Telegram configuration...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2513856Z Bot token present: True
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2514202Z Chat ID present: True
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2514558Z Bot token length: 46 characters
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2516873Z Bot token starts with: 7579768284...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2517383Z Chat ID value: ***
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2517712Z ==================================================
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2518262Z ­ƒôí Attempting to send message to Telegram API...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2518805Z API URL: https://api.telegram.org/bot7579768284:AAGAFtQX256...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2519438Z ­ƒöä Sending POST request to Telegram...
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2519840Z Response status code: 200
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2521420Z Response content: ***"ok":true,"result":***"message_id":116,"sender_chat":***"id":***,"title":"*** Etoro","username":"***","type":"channel"***,"chat":***"id":***,"title":"*** E
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2522449Z Ô£à Message sent to Telegram successfully!
+generate-recap	Collect data and generate recap	2025-12-27T10:25:56.2522951Z ==================================================
+generate-recap	Upload recap as artifact	´╗┐2025-12-27T10:25:56.4937841Z ##[group]Run actions/upload-artifact@v5.0.0
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4938230Z with:
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4938491Z   name: daily-recap
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4938771Z   path: output/recap.txt
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4939097Z   if-no-files-found: warn
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4939423Z   compression-level: 6
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4939703Z   overwrite: false
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4939988Z   include-hidden-files: false
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4940455Z env:
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4940776Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4941266Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4941752Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4942226Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4942663Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4943100Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.4943474Z ##[endgroup]
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.7063555Z With the provided path, there will be 1 file uploaded
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.7068464Z Artifact name is valid!
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.7069840Z Root directory input is valid!
+generate-recap	Upload recap as artifact	2025-12-27T10:25:56.8523765Z Beginning upload of artifact content to blob storage
+generate-recap	Upload recap as artifact	2025-12-27T10:25:57.0162540Z Uploaded bytes 1683
+generate-recap	Upload recap as artifact	2025-12-27T10:25:57.0610631Z Finished uploading artifact content to blob storage!
+generate-recap	Upload recap as artifact	2025-12-27T10:25:57.0613917Z SHA256 digest of uploaded artifact zip is 822a6bc6365760d9f9ca7ad5454c857f27f7b7d74aae2350eb7b83606f8cfa75
+generate-recap	Upload recap as artifact	2025-12-27T10:25:57.0615744Z Finalizing artifact upload
+generate-recap	Upload recap as artifact	2025-12-27T10:25:57.1576854Z Artifact daily-recap.zip successfully finalized. Artifact ID 4974832004
+generate-recap	Upload recap as artifact	2025-12-27T10:25:57.1580584Z Artifact daily-recap has been successfully uploaded! Final size is 1683 bytes. Artifact ID is 4974832004
+generate-recap	Upload recap as artifact	2025-12-27T10:25:57.1586253Z Artifact download URL: https://github.com/giga89/portfolio-daily-recap/actions/runs/20537822735/artifacts/4974832004
+generate-recap	Display recap	´╗┐2025-12-27T10:25:57.1685714Z ##[group]Run cat output/recap.txt
+generate-recap	Display recap	2025-12-27T10:25:57.1686124Z [36;1mcat output/recap.txt[0m
+generate-recap	Display recap	2025-12-27T10:25:57.1718832Z shell: /usr/bin/bash -e ***0***
+generate-recap	Display recap	2025-12-27T10:25:57.1719177Z env:
+generate-recap	Display recap	2025-12-27T10:25:57.1719526Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Display recap	2025-12-27T10:25:57.1720054Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+generate-recap	Display recap	2025-12-27T10:25:57.1720819Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Display recap	2025-12-27T10:25:57.1721288Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Display recap	2025-12-27T10:25:57.1721751Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Display recap	2025-12-27T10:25:57.1722210Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+generate-recap	Display recap	2025-12-27T10:25:57.1722625Z ##[endgroup]
+generate-recap	Display recap	2025-12-27T10:25:57.1797666Z ­ƒîà EUROPEAN MARKET OPEN ­ƒôè
+generate-recap	Display recap	2025-12-27T10:25:57.1798024Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1798342Z ­ƒî▒ ­ƒî▒ ­ƒî▒ ­ƒî┐ SLIGHT GAINS: +0.07% ­ƒî▒ ­ƒî▒ ­ƒî▒
+generate-recap	Display recap	2025-12-27T10:25:57.1798718Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1799033Z TOP 5 TODAY PERFORMANCE OF PORTFOLIO ­ƒôê
+generate-recap	Display recap	2025-12-27T10:25:57.1799705Z ­ƒôè $DB1.DE +0.86%
+generate-recap	Display recap	2025-12-27T10:25:57.1800190Z ­ƒöï $ENEL.MI +0.76%
+generate-recap	Display recap	2025-12-27T10:25:57.1801036Z ­ƒÅª $2318.HK +0.68%
+generate-recap	Display recap	2025-12-27T10:25:57.1801402Z ­ƒîì $IEMG +0.67%
+generate-recap	Display recap	2025-12-27T10:25:57.1801747Z ­ƒöÑ $IQQL.DE +0.46%
+generate-recap	Display recap	2025-12-27T10:25:57.1801911Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1802111Z TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO ­ƒôê
+generate-recap	Display recap	2025-12-27T10:25:57.1802500Z ­ƒûÑ´©Å $SNPS +21.12%
+generate-recap	Display recap	2025-12-27T10:25:57.1802795Z ­ƒöì $GOOG +12.62%
+generate-recap	Display recap	2025-12-27T10:25:57.1803093Z ­ƒôè $BHP.L +10.62%
+generate-recap	Display recap	2025-12-27T10:25:57.1803249Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1803449Z TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO ­ƒôê
+generate-recap	Display recap	2025-12-27T10:25:57.1803845Z ­ƒøí´©Å $PLTR +150.98%
+generate-recap	Display recap	2025-12-27T10:25:57.1804129Z Ôÿü´©Å $NET +79.84%
+generate-recap	Display recap	2025-12-27T10:25:57.1804432Z ÔÜí $CCJ +78.34%
+generate-recap	Display recap	2025-12-27T10:25:57.1804584Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1804723Z ­ƒîì MARKET OVERVIEW
+generate-recap	Display recap	2025-12-27T10:25:57.1804883Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1806477Z US markets ended the holiday-shortened week slightly lower in extremely light trading volume, with the $SP500 falling less than 0.1% and the Nasdaq Composite down 0.1% on Friday. European markets, including the Euro Stoxx, remained largely closed for the extended Christmas holiday. The China $ShanghaiComposite continued its recent rally, edging up 0.10% to mark its eighth consecutive daily gain. Overall trading was muted globally as institutional investors closed out positions ahead of the year-end.
+generate-recap	Display recap	2025-12-27T10:25:57.1808141Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1808286Z ­ƒÆ╝ PORTFOLIO FOCUS
+generate-recap	Display recap	2025-12-27T10:25:57.1808457Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1811227Z The AI and Semiconductor space saw continued momentum, with $NVDA and $TSM benefiting from "insane" AI-driven demand and $AVGO being highlighted for potential doubling of its AI business revenue in 2026. $GOOG strengthened its AI infrastructure, announcing the acquisition of data center and energy provider Intersect for $4.75 billion. $MSFT and $AMZN remain underpinned by robust growth in their respective Cloud segments, with $SNPS, $PLTR, and $NET participating in the broader cloud and AI software ecosystem. In Pharma, $LLY and $NOVO-B are driven by the ongoing GLP-1 drug narrative, while $ABBV and $ABT are supported by their strong immunology and MedTech pipelines. Commodity-linked holdings $CCJ and $BHP.L were boosted by a sharp rise in silver and gold prices, with miners posting solid gains on safe-haven demand and supply constraints.
+generate-recap	Display recap	2025-12-27T10:25:57.1813872Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1814050Z ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü
+generate-recap	Display recap	2025-12-27T10:25:57.1814399Z ­ƒÆí WHY COPY THIS PORTFOLIO?
+generate-recap	Display recap	2025-12-27T10:25:57.1814589Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1814728Z ­ƒôê TRACK RECORD:
+generate-recap	Display recap	2025-12-27T10:25:57.1815024Z +170% since strategy change (2020)
+generate-recap	Display recap	2025-12-27T10:25:57.1815363Z ~34% average annual return
+generate-recap	Display recap	2025-12-27T10:25:57.1815666Z Double your money in ~2.1 years
+generate-recap	Display recap	2025-12-27T10:25:57.1816199Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1816363Z Ô£à STRATEGY HIGHLIGHTS:
+generate-recap	Display recap	2025-12-27T10:25:57.1816731Z ÔÇó Smart diversification across 3 continents
+generate-recap	Display recap	2025-12-27T10:25:57.1817165Z ÔÇó Focus on megatrends: AI, Healthcare, Energy
+generate-recap	Display recap	2025-12-27T10:25:57.1817606Z ÔÇó Mix of ETFs + high-potential individual stocks
+generate-recap	Display recap	2025-12-27T10:25:57.1818225Z ÔÇó Active and transparent management
+generate-recap	Display recap	2025-12-27T10:25:57.1818457Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1818669Z ­ƒôè PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
+generate-recap	Display recap	2025-12-27T10:25:57.1819087Z Ô£ô VS $SPX500 : +57% (outperformance)
+generate-recap	Display recap	2025-12-27T10:25:57.1819481Z Ô£ô VS $NSDQ100 : -19% (underperformance)
+generate-recap	Display recap	2025-12-27T10:25:57.1819878Z Ô£ô VS $SWDA.L : +69% (outperformance)
+generate-recap	Display recap	2025-12-27T10:25:57.1820445Z Ô£ô VS $EUSTX50 : +118% (outperformance)
+generate-recap	Display recap	2025-12-27T10:25:57.1820888Z Ô£ô VS $CHINA50 : +171% (outperformance)
+generate-recap	Display recap	2025-12-27T10:25:57.1821100Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1821307Z ­ƒÄ» Long-term strategy based on solid fundamentals
+generate-recap	Display recap	2025-12-27T10:25:57.1821750Z ­ƒöä Periodic rebalancing to optimize risk/reward
+generate-recap	Display recap	2025-12-27T10:25:57.1822016Z 
+generate-recap	Display recap	2025-12-27T10:25:57.1822152Z @***
+generate-recap	Display recap	2025-12-27T10:25:57.1822450Z ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü
+generate-recap	Commit and push recap	´╗┐2025-12-27T10:25:57.1846280Z ##[group]Run git config --local user.email "github-actions[bot]@users.noreply.github.com" git config --local user.name "github-actions[bot]" git add output/recap.txt data/recap_history.json git commit -m "Update daily recap and history" || echo "No changes to commit" git push
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1848049Z [36;1mgit config --local user.email "github-actions[bot]@users.noreply.github.com" git config --local user.name "github-actions[bot]" git add output/recap.txt data/recap_history.json git commit -m "Update daily recap and history" || echo "No changes to commit" git push[0m
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1877991Z shell: /usr/bin/bash -e ***0***
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1878334Z env:
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1878679Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1879192Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1879707Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1880153Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1880932Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1881394Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1881782Z ##[endgroup]
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1944151Z error: no action specified
+generate-recap	Commit and push recap	2025-12-27T10:25:57.1946860Z No changes to commit git push
+generate-recap	Post Set up Python	´╗┐2025-12-27T10:25:57.1995724Z Post job cleanup.
+generate-recap	Post Checkout repository	´╗┐2025-12-27T10:25:57.3619803Z Post job cleanup.
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.4573709Z [command]/usr/bin/git version
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.4610688Z git version 2.52.0
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.4653783Z Temporarily overriding HOME='/home/runner/work/_temp/42567780-9a48-4e17-870e-37a7d9d69a54' before making global git config changes
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.4655357Z Adding repository directory to the temporary git global config as a safe directory
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.4659765Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/portfolio-daily-recap/portfolio-daily-recap
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.4701097Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.4736361Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.4996809Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.5021717Z http.https://github.com/.extraheader
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.5035296Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.5069104Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.5315128Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+generate-recap	Post Checkout repository	2025-12-27T10:25:57.5346458Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+generate-recap	Complete job	´╗┐2025-12-27T10:25:57.5687184Z Cleaning up orphan processes
