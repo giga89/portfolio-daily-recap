@@ -1,31 +1,39 @@
-🌠 DAILY RECAP 🌙
+🌅 EUROPEAN MARKET OPEN 📊
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.23% 🌱 🌱 🌱
+🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.07% 🌱 🌱 🌱
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-🔌 $PRY.MI +2.93%
-💼 $WDEF.L +2.39%
-⛏️ $GLEN +2.07%
-🔥 $IQQL.DE +1.56%
-📊 $SX7PEX.DE +1.14%
+📊 $DB1.DE +0.86%
+🔋 $ENEL.MI +0.76%
+🏦 $2318.HK +0.68%
+🌍 $IEMG +0.67%
+🔥 $IQQL.DE +0.46%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +15.65%
-💊 $LLY +12.91%
-📊 $SX7PEX.DE +10.82%
+🖥️ $SNPS +21.12%
+🔍 $GOOG +12.62%
+📊 $BHP.L +10.62%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🛡️ $PLTR +146.96%
-📊 $SX7PEX.DE +72.72%
-☁️ $NET +72.23%
+🛡️ $PLTR +150.98%
+☁️ $NET +79.84%
+⚡ $CCJ +78.34%
+
+🌍 MARKET NEWS RECAP
+
+USA markets saw a marginal pullback on Friday in holiday-thinned trading, with the $SPX closing down less than 0.1% at 6,929.94 and the $NDAQ slipping 0.1% as investors took profits following recent record highs. Precious metals, however, extended their year-long rally, with Gold and Silver surging to fresh all-time highs on geopolitical uncertainty and expectations of further Fed rate cuts. Meanwhile, the Shanghai Composite in China edged up 0.1% to 3,963.68, while most major European indices, including the Euro Stoxx, were closed for the Christmas holiday.
+
+💼 PORTFOLIO FOCUS
+
+The AI and Technology sector, including $NVDA, $MSFT, $AVGO, $AMZN, and $GOOG, remains a primary market driver with generative AI becoming mainstream for business automation and efficiency. Healthcare holdings like $LLY, $NOVO-B, $ABBV, and $AZN.L are positioned for a robust period, driven by renewed market momentum and the accelerated adoption of AI in diagnostics and drug discovery. The Energy complex, impacting $BHP.L, $GLEN, and $CCJ, is navigating a complex landscape where the rapid growth in AI power demand is reviving interest in nuclear power and increasing commodity allocation. $PLTR and $NET benefit from the broader trend of enterprise AI adoption, while $PYPL and $DB1.DE are in a finance sector seeing high AI implementation for efficiency and innovation.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
 
 📈 TRACK RECORD:
-+156% since strategy change (2020)
-~31% average annual return
-Double your money in ~2.3 years
++170% since strategy change (2020)
+~34% average annual return
+Double your money in ~2.1 years
 
 ✅ STRATEGY HIGHLIGHTS:
 • Smart diversification across 3 continents
@@ -34,11 +42,11 @@ Double your money in ~2.3 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS $SPX500: +48% (outperformance)
-✓ VS $NSDQ100: -26% (outperformance)
-✓ VS $SWDA.L: +55% (outperformance)
-✓ VS $EUSTX50: +104% (outperformance)
-✓ VS $CHINA50: +158% (outperformance)
+✓ VS $SPX500 : +57% (outperformance)
+✓ VS $NSDQ100 : -19% (underperformance)
+✓ VS $SWDA.L : +69% (outperformance)
+✓ VS $EUSTX50 : +118% (outperformance)
+✓ VS $CHINA50 : +171% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
