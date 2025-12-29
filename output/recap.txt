@@ -1,18 +1,18 @@
-🌅 EUROPEAN MARKET OPEN 📊
+🌠 DAILY RECAP 🌙
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.07% 🌱 🌱 🌱
+🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.02% 🌱 🌱 🌱
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-📊 $DB1.DE +0.86%
-🔋 $ENEL.MI +0.76%
-🏦 $2318.HK +0.68%
+⛏️ $GLEN +1.22%
 🌍 $IEMG +0.67%
-🔥 $IQQL.DE +0.46%
+🧬 $AZN.L +0.61%
+📊 $DB1.DE +0.40%
+🚢 $1919.HK +0.36%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
 🖥️ $SNPS +21.12%
 🔍 $GOOG +12.62%
-📊 $BHP.L +10.62%
+🏦 $2318.HK +10.76%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
 🛡️ $PLTR +150.98%
@@ -21,11 +21,11 @@ TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
 
 🌍 MARKET NEWS RECAP
 
-USA markets saw a marginal pullback on Friday in holiday-thinned trading, with the $SPX closing down less than 0.1% at 6,929.94 and the $NDAQ slipping 0.1% as investors took profits following recent record highs. Precious metals, however, extended their year-long rally, with Gold and Silver surging to fresh all-time highs on geopolitical uncertainty and expectations of further Fed rate cuts. Meanwhile, the Shanghai Composite in China edged up 0.1% to 3,963.68, while most major European indices, including the Euro Stoxx, were closed for the Christmas holiday.
+**🌍 MARKET OVERVIEW**
+Asian markets were mixed in quiet trading, though China's $Shanghai Composite posted a modest gain of 0.3% despite rising geopolitical tensions related to military drills near Taiwan. European stock futures are pointing slightly higher as the region resumes trading for a shortened holiday week, with the $Euro Stoxx 50 expected to open with a positive bias. US equity futures are largely flat in thin pre-market trade, following the previous week's record highs. In commodities, crude oil advanced, with Brent crude topping $60 per barrel, while silver continued its recent rally with a 3% jump.
 
-💼 PORTFOLIO FOCUS
-
-The AI and Technology sector, including $NVDA, $MSFT, $AVGO, $AMZN, and $GOOG, remains a primary market driver with generative AI becoming mainstream for business automation and efficiency. Healthcare holdings like $LLY, $NOVO-B, $ABBV, and $AZN.L are positioned for a robust period, driven by renewed market momentum and the accelerated adoption of AI in diagnostics and drug discovery. The Energy complex, impacting $BHP.L, $GLEN, and $CCJ, is navigating a complex landscape where the rapid growth in AI power demand is reviving interest in nuclear power and increasing commodity allocation. $PLTR and $NET benefit from the broader trend of enterprise AI adoption, while $PYPL and $DB1.DE are in a finance sector seeing high AI implementation for efficiency and innovation.
+**💼 PORTFOLIO FOCUS**
+The AI/Semiconductor sector remains a key driver, with SEMI projecting global equipment sales to reach a record $133 billion in 2025, providing a strong tailwind for $NVDA, $TSM, $AVGO, and $SNPS. $TSM is specifically highlighted as a critical and well-positioned 'neutral' supplier in the AI build-out, expected to benefit from massive data center spending through 2030. Healthcare companies $LLY and $NOVO-B face new policy-driven pricing pressure on their GLP-1 therapies in the US, following announced agreements to sharply reduce costs for Medicare and Medicaid patients. Miners $BHP.L and $GLEN are benefiting from strong commodity trends as copper nears record highs and iron ore prices advance on improving Chinese demand expectations. Chinese financial stocks $1919.HK and $2318.HK saw modest gains, supported by a general improvement in China's full-year 2025 GDP growth forecasts toward 5%.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -44,7 +44,7 @@ Double your money in ~2.1 years
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
 ✓ VS $SPX500 : +57% (outperformance)
 ✓ VS $NSDQ100 : -19% (underperformance)
-✓ VS $SWDA.L : +69% (outperformance)
+✓ VS $SWDA.L : +68% (outperformance)
 ✓ VS $EUSTX50 : +118% (outperformance)
 ✓ VS $CHINA50 : +171% (outperformance)
 
