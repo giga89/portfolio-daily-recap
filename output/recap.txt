@@ -1,13 +1,13 @@
 🌠 DAILY RECAP 🌙
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.08% 🌱 🌱 🌱
+🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.04% 🌱 🌱 🌱
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-⛏️ $GLEN +1.57%
-🔺 $TRIG.L +0.88%
-🧬 $AZN.L +0.69%
+⛏️ $GLEN +1.08%
 🌍 $IEMG +0.67%
+🧬 $AZN.L +0.57%
 🚢 $1919.HK +0.36%
+🏦 $IEUR +0.30%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
 🖥️ $SNPS +21.12%
@@ -21,11 +21,11 @@ TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
 
 🌍 MARKET NEWS RECAP
 
-USA markets are poised for a quiet open with $S&P 500 futures little changed and $NDAQ 100 futures slipping 0.2% in holiday-thinned trading following last week's rally. Asian equities were mixed, but China's $Shanghai Composite posted a modest gain of 0.4% as year-end flows continued. European stock futures point to a slightly higher open, with $Euro Stoxx 50 futures up 0.3%. The commodity sector saw dramatic movement as silver surged to a new all-time high, while gold pulled back more than 1% after reaching a fresh peak in the prior session.
+**🌍 MARKET OVERVIEW**
+Global equities are muted in holiday-thinned trading as the year-end "Santa Claus rally" takes a pause. US stock futures are slightly lower, with $NDAQ 100 futures slipping 0.2% after a strong run last week, while $S&P 500 futures remain little changed. European markets are pointing cautiously higher as $Euro Stoxx 50 futures advanced 0.3% in early trading. In Asia, the $Shanghai Composite was virtually unchanged, but the broader MSCI Asia Pacific Index rose 0.3%, boosted by tech and industrials.
 
-💼 PORTFOLIO FOCUS
-
-Semiconductor and AI-related stocks remain a central focus, with $TSM hitting a record high today after reports indicated the contract chipmaker will raise prices for its high-end chips starting January 1st due to tight global supply. The long-term outlook for the sector is exceptionally strong, with Bank of America forecasting a 30% jump in global semiconductor revenue in 2026, driven by AI infrastructure that benefits key holdings like $NVDA and $AVGO. While $MSFT, $AMZN, and $GOOG continue to dominate AI cloud, the narrative is expanding to AI software and data platforms, suggesting stocks like $PLTR and $NET may see a breakout year in 2026 as enterprises scale their solutions. In Healthcare, the broader GLP-1 drug trend continues to be a structural tailwind for major pharma names like $LLY and $NOVO-B, even as other defensive sectors like European Banks ($SX7PEX.DE) are expected to remain strong winners into next year.
+**💼 PORTFOLIO FOCUS**
+The AI/Semiconductor complex remains a key focus, with $AVGO reporting a backlog for its AI switches exceeding $10 billion, driven by record demand for its latest Tomahawk 6 chip. $NVDA is also in the spotlight following a new strategic, non-exclusive license agreement with AI chipmaker Groq, a move valued up to $20 billion to integrate Groq’s inference technology and enhance its position in the AI ecosystem. For the healthcare holdings, the trend continues to favor the pharmaceutical sector's exposure to the emerging GLP-1 therapies and domestic markets over US pricing pressures, which impacts $LLY, $NOVO-B, $ABT, $ABBV, $AZN.L, and $HUM. European banking exposure via $SX7PEX.DE is supported by analysts maintaining a positive outlook on the sector's valuation and capital positions. The broader AI-driven boom in digital infrastructure continues to provide tailwinds for enterprise tech names like $MSFT, $GOOG, $AMZN, $PLTR, and $NET.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
