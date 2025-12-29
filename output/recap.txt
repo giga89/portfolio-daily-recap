@@ -1,12 +1,12 @@
 🌠 DAILY RECAP 🌙
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.02% 🌱 🌱 🌱
+🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.08% 🌱 🌱 🌱
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-⛏️ $GLEN +1.22%
+⛏️ $GLEN +1.57%
+🔺 $TRIG.L +0.88%
+🧬 $AZN.L +0.69%
 🌍 $IEMG +0.67%
-🧬 $AZN.L +0.61%
-📊 $DB1.DE +0.40%
 🚢 $1919.HK +0.36%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
@@ -21,11 +21,11 @@ TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
 
 🌍 MARKET NEWS RECAP
 
-**🌍 MARKET OVERVIEW**
-Asian markets were mixed in quiet trading, though China's $Shanghai Composite posted a modest gain of 0.3% despite rising geopolitical tensions related to military drills near Taiwan. European stock futures are pointing slightly higher as the region resumes trading for a shortened holiday week, with the $Euro Stoxx 50 expected to open with a positive bias. US equity futures are largely flat in thin pre-market trade, following the previous week's record highs. In commodities, crude oil advanced, with Brent crude topping $60 per barrel, while silver continued its recent rally with a 3% jump.
+USA markets are poised for a quiet open with $S&P 500 futures little changed and $NDAQ 100 futures slipping 0.2% in holiday-thinned trading following last week's rally. Asian equities were mixed, but China's $Shanghai Composite posted a modest gain of 0.4% as year-end flows continued. European stock futures point to a slightly higher open, with $Euro Stoxx 50 futures up 0.3%. The commodity sector saw dramatic movement as silver surged to a new all-time high, while gold pulled back more than 1% after reaching a fresh peak in the prior session.
 
-**💼 PORTFOLIO FOCUS**
-The AI/Semiconductor sector remains a key driver, with SEMI projecting global equipment sales to reach a record $133 billion in 2025, providing a strong tailwind for $NVDA, $TSM, $AVGO, and $SNPS. $TSM is specifically highlighted as a critical and well-positioned 'neutral' supplier in the AI build-out, expected to benefit from massive data center spending through 2030. Healthcare companies $LLY and $NOVO-B face new policy-driven pricing pressure on their GLP-1 therapies in the US, following announced agreements to sharply reduce costs for Medicare and Medicaid patients. Miners $BHP.L and $GLEN are benefiting from strong commodity trends as copper nears record highs and iron ore prices advance on improving Chinese demand expectations. Chinese financial stocks $1919.HK and $2318.HK saw modest gains, supported by a general improvement in China's full-year 2025 GDP growth forecasts toward 5%.
+💼 PORTFOLIO FOCUS
+
+Semiconductor and AI-related stocks remain a central focus, with $TSM hitting a record high today after reports indicated the contract chipmaker will raise prices for its high-end chips starting January 1st due to tight global supply. The long-term outlook for the sector is exceptionally strong, with Bank of America forecasting a 30% jump in global semiconductor revenue in 2026, driven by AI infrastructure that benefits key holdings like $NVDA and $AVGO. While $MSFT, $AMZN, and $GOOG continue to dominate AI cloud, the narrative is expanding to AI software and data platforms, suggesting stocks like $PLTR and $NET may see a breakout year in 2026 as enterprises scale their solutions. In Healthcare, the broader GLP-1 drug trend continues to be a structural tailwind for major pharma names like $LLY and $NOVO-B, even as other defensive sectors like European Banks ($SX7PEX.DE) are expected to remain strong winners into next year.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
