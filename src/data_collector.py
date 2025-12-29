@@ -37,9 +37,15 @@ def main():
     print(f"Portfolio daily performance: {portfolio_daily:.2f}%")
     print("=" * 50)
     
-    # Step 2b: Calculate and update manual Portfolio YTD (Annual Yield)
-    print("📈 Calculating portfolio YTD (Annual Yield)...")
-    portfolio_ytd = finance_fetcher.calculate_portfolio_ytd(stock_data, portfolio_weights)
+    # Step 2b: Get reliable Portfolio YTD (Annual Yield) from BullAware
+    # The user manual check at eToro stats confirms BullAware is highly accurate
+    print("📈 Fetching reliable Portfolio YTD from BullAware...")
+    portfolio_ytd = finance_fetcher.fetch_portfolio_ytd_from_bullaware()
+    
+    # Fallback to calculated YTD if BullAware fails
+    if portfolio_ytd is None:
+        print("⚠️ Falling back to calculated YTD from market data...")
+        portfolio_ytd = finance_fetcher.calculate_portfolio_ytd(stock_data, portfolio_weights)
     
     # Step 2c: Update Google Sheets with the new YTD value
     from config import YEARLY_PERFORMANCE_CELL

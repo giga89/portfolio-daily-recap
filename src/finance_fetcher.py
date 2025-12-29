@@ -23,33 +23,47 @@ US_CLOSE_MINUTE = 00
 
 def fetch_portfolio_ytd_from_bullaware():
     """
-    Fetch portfolio aggregate YTD from BullAware (simple requests, no Selenium)
-    Returns the overall portfolio YTD percentage for Google Sheets
+    Fetch portfolio aggregate YTD from BullAware by compounding monthly returns
+    found in the highly reliable JSON data embedded in the page.
     """
     try:
         url = "https://bullaware.com/etoro/AndreaRavalli"
         response = requests.get(url, timeout=10)
         content = response.text
         
-        # Try finding in the HTML with more robust regex (handles <!-- --> spacers)
-        # Look for the "Year to Date" pattern in the raw HTML
+        # 1. Try to find the monthly returns block
+        # The block usually contains contiguous months like "2025-1":3.59,"2025-2":-2.47...
+        current_year = datetime.now().year
+        # Search for the block starting with January of the current year
+        block_pattern = rf'\\?["\']{current_year}-1\\?["\']:\s*[+-]?\d+\.?\d*.*?[}}]'
+        match_block = re.search(block_pattern, content)
+        
+        if match_block:
+            block_content = match_block.group(0)
+            # Now extract all months from this specific block
+            monthly_pattern = rf'\\?["\']{current_year}-(\d+)\\?["\']:\s*([+-]?\d+\.?\d*)'
+            matches = re.findall(monthly_pattern, block_content)
+            
+            if matches:
+                # Sort by month index (1 to 12)
+                monthly_data = sorted([(int(m), float(v)) for m, v in matches], key=lambda x: x[0])
+                print(f"   Found {len(monthly_data)} months of data for {current_year}")
+                
+                # Compound the monthly returns
+                compounded_return = 1.0
+                for month, return_val in monthly_data:
+                    compounded_return *= (1 + (return_val / 100.0))
+                
+                ytd_value = (compounded_return - 1.0) * 100.0
+                print(f"✓ Calculated BullAware portfolio YTD (compounded): {ytd_value:.2f}%")
+                return ytd_value
+            
+        # 2. Fallback to direct "Year to Date" string
         ytd_pattern = r'Year to Date.*?([+-]?\d+\.?\d*)<!-- -->%'
         match = re.search(ytd_pattern, content, re.IGNORECASE | re.DOTALL)
-        
         if match:
             ytd_value = float(match.group(1))
             print(f"✓ Found BullAware portfolio YTD (regex): {ytd_value}%")
-            return ytd_value
-            
-        # Fallback to simple text search
-        soup = BeautifulSoup(response.content, 'html.parser')
-        page_text = soup.get_text()
-        ytd_pattern_simple = r'Year to Date[:\s]+([+-]?\d+\.?\d*)\s*%'
-        match_simple = re.search(ytd_pattern_simple, page_text, re.IGNORECASE)
-        
-        if match_simple:
-            ytd_value = float(match_simple.group(1))
-            print(f"✓ Found BullAware portfolio YTD (text): {ytd_value}%")
             return ytd_value
             
         print("Could not find portfolio YTD in BullAware page")
