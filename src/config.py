@@ -16,7 +16,7 @@ PORTFOLIO_TICKERS = {
     'ABT': ('ABT', 'Abbott Laboratories'),
     'ABBV': ('ABBV', 'AbbVie'),
     'LLY': ('LLY', 'Eli Lilly & Co'),
-    'NOVO-B': ('NVO', 'Novo Nordisk'),
+    'NOVO-B.CO': ('NVO', 'Novo Nordisk'),
     'HUM': ('HUM', 'Humana'),
     
     # Technology & Semiconductors
