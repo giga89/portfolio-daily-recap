@@ -1,31 +1,31 @@
-🌅 U.S. MARKET OPEN 📊
+✨ U.S. MARKET CLOSE ✨
 
-⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.34% ⚖️ ⚖️ ⚖️
+⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.19% ⚖️ ⚖️ ⚖️
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-⛏️ $GLEN +1.41%
-🛒 $MELI +0.99%
+🛢️ $MAU.PA +2.16%
 🔺 $TRIG.L +0.88%
-💉 $ABBV +0.73%
-🏥 $ABT +0.48%
+⛏️ $GLEN.L +0.56%
+🧬 $AZN.L +0.54%
+🔋 $ENEL.MI +0.51%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +22.57%
-🔍 $GOOG +12.64%
+🖥️ $SNPS +22.87%
+🔍 $GOOG +13.51%
 🏦 $2318.HK +10.76%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🛡️ $PLTR +144.93%
-☁️ $NET +78.10%
-⚡ $CCJ +77.73%
+🛡️ $PLTR +144.95%
+⚡ $CCJ +78.34%
+☁️ $NET +78.34%
 
 🌍 MARKET NEWS RECAP
 
-US stock futures are pointing lower to begin the holiday-shortened week, with $S&P 500 futures down 0.3% and $NDAQ 100 futures slipping 0.5% as investors lock in recent gains. European markets were muted and mixed in quiet trading, with the FTSE 100 up slightly while the $DAX 40 remained flat. In China, the government announced it will lower provisional import tariff rates on 935 products, including advanced materials and medical goods, starting in 2026 to boost high-quality domestic supply.
+**🌍 MARKET OVERVIEW**
+US markets are consolidating, with both the $S&P 500 and $Nasdaq 100 trading down about -0.24% as investors booked profits in megacap technology stocks. European markets were marginally positive, with the $Euro Stoxx 50 up around +0.15% in quiet, holiday-thinned trading. China's $Shanghai Composite posted a modest gain of +0.04%, marking its ninth straight day of gains following a government pledge for broader fiscal spending in the new year. Crude oil futures surged over 2%, lifting the broader Energy sector.
 
-💼 PORTFOLIO FOCUS
-
-The Technology sector is seeing profit-taking, with AI leader $NVDA pulling back about 2% in early trading, alongside modest declines for other mega-cap and semiconductor names like $AVGO and $TSM. The Healthcare sector remains in focus as $LLY and $NOVO-B.CO continue to dominate headlines regarding GLP-1 drug competition and oral delivery innovation. Mining and resources giants $BHP.L and $GLEN are supported by rising copper and iron ore prices, driven by supply constraints and long-term demand from electrification projects. Chinese stocks, including $1919.HK and $2318.HK, may see tailwinds from the government's decision to lower import tariffs on advanced materials and medical goods from January 2026. Oil prices are surging more than 2% amid heightening geopolitical tensions between the US and Venezuela, impacting energy-exposed holdings like $GLEN.
+**💼 PORTFOLIO FOCUS**
+Megacap Technology and AI holdings, including $NVDA, $MSFT, $AMZN, and $GOOG, are seeing a slight pullback, driving the broader US index weakness today. The Uranium and Nuclear sector, including $CCJ, is maintaining bullish momentum as futures trade above $80/lb, supported by strong peer production updates and global nuclear demand projections. Diversified miner $GLEN.L is receiving a tailwind from the more than 2% rise in crude oil prices, which is supporting the commodities complex. The Healthcare sector, including $LLY, $NOVO-B.CO, $ABT, and $ABBV, continues to be underpinned by the high-growth narrative surrounding GLP-1 weight-loss drugs. European and emerging market holdings like $ENEL.MI, $RACE, and $IEMG are seeing muted activity in line with the quiet global trading environment.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -43,8 +43,8 @@ Double your money in ~2.1 years
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
 ✓ VS $SPX500 : +60% (outperformance)
-✓ VS $NSDQ100 : -15% (underperformance)
-✓ VS $SWDA.L : +71% (outperformance)
+✓ VS $NSDQ100 : -16% (underperformance)
+✓ VS $SWDA.L : +70% (outperformance)
 ✓ VS $EUSTX50 : +120% (outperformance)
 ✓ VS $CHINA50 : +174% (outperformance)
 
