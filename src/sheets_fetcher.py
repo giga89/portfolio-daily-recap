@@ -89,8 +89,10 @@ def update_google_sheets_cell(cell_range, value):
         service = build('sheets', 'v4', credentials=credentials)
         
         # Prepare the value update
+        # Format with comma as decimal separator (Italian style)
+        value_str = f"{value:.2f}%".replace('.', ',')
         body = {
-            'values': [[f"{value:.2f}%"]]
+            'values': [[value_str]]
         }
         
         result = service.spreadsheets().values().update(
