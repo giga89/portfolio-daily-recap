@@ -41,13 +41,13 @@ PORTFOLIO_TICKERS = {
     # Financial Services & Others
     'DB1.DE': ('DB1.DE', 'Deutsche Börse AG'),
     'TRIG.L': ('TRIG.L', 'Trig PLC'),
-    'BHP.L': ('BHP', 'BHP Group'),
+    'MAU.PA': ('MAU.PA', 'Etablissements Maurel & Prom SA'),
     'PRY.MI': ('PRY.MI', 'Prysmian'),
     'RACE': ('RACE', 'Ferrari'),
     'VOW3.DE': ('VOW3.DE', 'Volkswagen'),
     'MELI': ('MELI', 'MercadoLibre'),
     'PYPL': ('PYPL', 'PayPal'),
-    'GLEN': ('GLEN.L', 'Glencore'),
+    'GLEN.L': ('GLEN.L', 'Glencore'),
     '1919.HK': ('1919.HK', 'COSCO SHIPPING Holdings'),
     '2318.HK': ('2318.HK', 'Ping An Insurance'),
 }
@@ -92,13 +92,13 @@ EMOJI_MAP = {
     # Financial Services & Others
     'DB1.DE': '📊',
     'TRIG.L': '🔺',
-    'BHPL': '⛏️',
+    'MAU.PA': '🛢️',
     'PRY.MI': '🔌',
     'RACE': '🏎️',
     'VOW3.DE': '🚗',
     'MELI': '🛒',
     'PYPL': '💳',
-    'GLEN': '⛏️',
+    'GLEN.L': '⛏️',
     '1919.HK': '🚢',
     '2318.HK': '🏦',
 }
