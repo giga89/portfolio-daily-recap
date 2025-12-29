@@ -29,18 +29,27 @@ def fetch_portfolio_ytd_from_bullaware():
     try:
         url = "https://bullaware.com/etoro/AndreaRavalli"
         response = requests.get(url, timeout=10)
-        soup = BeautifulSoup(response.content, 'html.parser')
+        content = response.text
         
-        # Find the YTD percentage in the page
-        page_text = soup.get_text()
-        
-        # Look for "Year to Date" or "YTD" followed by percentage
-        ytd_pattern = r'Year to Date[:\s]+([+-]?\d+\.?\d*)\s*%'
-        match = re.search(ytd_pattern, page_text, re.IGNORECASE)
+        # Try finding in the HTML with more robust regex (handles <!-- --> spacers)
+        # Look for the "Year to Date" pattern in the raw HTML
+        ytd_pattern = r'Year to Date.*?([+-]?\d+\.?\d*)<!-- -->%'
+        match = re.search(ytd_pattern, content, re.IGNORECASE | re.DOTALL)
         
         if match:
             ytd_value = float(match.group(1))
-            print(f"✓ Found BullAware portfolio YTD: {ytd_value}%")
+            print(f"✓ Found BullAware portfolio YTD (regex): {ytd_value}%")
+            return ytd_value
+            
+        # Fallback to simple text search
+        soup = BeautifulSoup(response.content, 'html.parser')
+        page_text = soup.get_text()
+        ytd_pattern_simple = r'Year to Date[:\s]+([+-]?\d+\.?\d*)\s*%'
+        match_simple = re.search(ytd_pattern_simple, page_text, re.IGNORECASE)
+        
+        if match_simple:
+            ytd_value = float(match_simple.group(1))
+            print(f"✓ Found BullAware portfolio YTD (text): {ytd_value}%")
             return ytd_value
             
         print("Could not find portfolio YTD in BullAware page")
@@ -49,6 +58,45 @@ def fetch_portfolio_ytd_from_bullaware():
     except Exception as e:
         print(f"BullAware portfolio YTD fetch error: {e}")
         return None
+
+
+def calculate_portfolio_ytd(stock_data, portfolio_weights=None):
+    """
+    Calculate overall portfolio YTD performance as WEIGHTED average
+    
+    Args:
+        stock_data: dict with stock data including 'yearly_change' for each ticker
+        portfolio_weights: dict with {ticker: weight_percentage}
+    
+    Returns:
+        float: weighted portfolio YTD performance as percentage
+    """
+    if not stock_data:
+        return 0.0
+        
+    # Fetch fresh weights from BullAware if not provided
+    if portfolio_weights is None:
+        portfolio_weights = fetch_portfolio_weights_from_bullaware()
+        
+    if not portfolio_weights:
+        print("⚠️ No portfolio weights available for YTD calculation. Using equal weight fallback.")
+        total = sum(data['yearly_change'] for data in stock_data.values())
+        return total / len(stock_data)
+        
+    weighted_sum = 0.0
+    total_weight = 0.0
+    
+    for ticker, data in stock_data.items():
+        if ticker in portfolio_weights:
+            weight = portfolio_weights[ticker] / 100.0
+            weighted_sum += data['yearly_change'] * weight
+            total_weight += weight
+            
+    if total_weight == 0:
+        return 0.0
+        
+    print(f"📊 Calculated Portfolio YTD: {weighted_sum:.2f}%")
+    return weighted_sum
 
 
 def fetch_portfolio_weights_from_bullaware():

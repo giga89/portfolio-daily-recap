@@ -31,7 +31,7 @@ def fetch_google_sheets_data():
         creds_dict = json.loads(creds_json)
         credentials = service_account.Credentials.from_service_account_info(
             creds_dict,
-            scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
+            scopes=['https://www.googleapis.com/auth/spreadsheets']
         )
         
         service = build('sheets', 'v4', credentials=credentials)
@@ -65,3 +65,44 @@ def fetch_google_sheets_data():
             'yearly_performance': None,
             'dividend': None
         }
+
+
+def update_google_sheets_cell(cell_range, value):
+    """
+    Update a specific cell in Google Sheets with a value
+    """
+    print(f"Updating Google Sheets cell {cell_range} with value: {value}...")
+    
+    try:
+        # Get credentials from environment variable
+        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+        if not creds_json:
+            print("No Google Sheets credentials found, cannot update")
+            return False
+            
+        creds_dict = json.loads(creds_json)
+        credentials = service_account.Credentials.from_service_account_info(
+            creds_dict,
+            scopes=['https://www.googleapis.com/auth/spreadsheets']
+        )
+        
+        service = build('sheets', 'v4', credentials=credentials)
+        
+        # Prepare the value update
+        body = {
+            'values': [[f"{value:.2f}%"]]
+        }
+        
+        result = service.spreadsheets().values().update(
+            spreadsheetId=GOOGLE_SHEETS_ID,
+            range=cell_range,
+            valueInputOption='USER_ENTERED',
+            body=body
+        ).execute()
+        
+        print(f"✓ Successfully updated cell {cell_range}: {result.get('updatedCells')} cells updated")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error updating Google Sheets: {e}")
+        return False

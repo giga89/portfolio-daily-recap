@@ -29,8 +29,21 @@ def main():
     print("=" * 50)
     
     # Step 2: Calculate portfolio daily performance (will auto-fetch weights from BullAware)
-    portfolio_daily = finance_fetcher.calculate_portfolio_daily_change(stock_data)
+    # We fetch weights once to reuse them for both Daily and YTD calculations
+    print("📊 Fetching portfolio weights...")
+    portfolio_weights = finance_fetcher.fetch_portfolio_weights_from_bullaware()
+    
+    portfolio_daily = finance_fetcher.calculate_portfolio_daily_change(stock_data, portfolio_weights)
     print(f"Portfolio daily performance: {portfolio_daily:.2f}%")
+    print("=" * 50)
+    
+    # Step 2b: Calculate and update manual Portfolio YTD (Annual Yield)
+    print("📈 Calculating portfolio YTD (Annual Yield)...")
+    portfolio_ytd = finance_fetcher.calculate_portfolio_ytd(stock_data, portfolio_weights)
+    
+    # Step 2c: Update Google Sheets with the new YTD value
+    from config import YEARLY_PERFORMANCE_CELL
+    sheets_fetcher.update_google_sheets_cell(YEARLY_PERFORMANCE_CELL, portfolio_ytd)
     print("=" * 50)
     
     # Step 3: Get data from Google Sheets
