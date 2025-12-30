@@ -1,18 +1,18 @@
-✨ U.S. MARKET CLOSE ✨
+🌅 EUROPEAN MARKET OPEN 📊
 
-⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.19% ⚖️ ⚖️ ⚖️
+🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.09% 🌱 🌱 🌱
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-🛢️ $MAU.PA +2.16%
-🔺 $TRIG.L +0.88%
-⛏️ $GLEN.L +0.56%
-🧬 $AZN.L +0.54%
-🔋 $ENEL.MI +0.51%
+⛏️ $GLEN.L +1.83%
+🛢️ $MAU.PA +1.29%
+📊 $SX7PEX.DE +0.92%
+🚗 $VOW3.DE +0.53%
+🚢 $1919.HK +0.50%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
 🖥️ $SNPS +22.87%
 🔍 $GOOG +13.51%
-🏦 $2318.HK +10.76%
+⛏️ $GLEN.L +10.97%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
 🛡️ $PLTR +144.95%
@@ -21,17 +21,17 @@ TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
 
 🌍 MARKET NEWS RECAP
 
-**🌍 MARKET OVERVIEW**
-US markets are consolidating, with both the $S&P 500 and $Nasdaq 100 trading down about -0.24% as investors booked profits in megacap technology stocks. European markets were marginally positive, with the $Euro Stoxx 50 up around +0.15% in quiet, holiday-thinned trading. China's $Shanghai Composite posted a modest gain of +0.04%, marking its ninth straight day of gains following a government pledge for broader fiscal spending in the new year. Crude oil futures surged over 2%, lifting the broader Energy sector.
+Global markets ended the day with mixed results, characterized by a US pullback contrasting with modest gains in Asia and neutral European trade. The $S&P 500 fell 0.35% and the $Nasdaq Composite declined 0.50% as investors engaged in profit-taking, particularly in high-flying technology stocks. European equities showed resilience in the face of US weakness, with the pan-European $Euro Stoxx 600 closing relatively unchanged after trading near its intraday record high. Asia was slightly positive, with the $Shanghai Composite posting a modest gain of 0.16% as investors awaited the release of the Federal Reserve's December meeting minutes.
 
-**💼 PORTFOLIO FOCUS**
-Megacap Technology and AI holdings, including $NVDA, $MSFT, $AMZN, and $GOOG, are seeing a slight pullback, driving the broader US index weakness today. The Uranium and Nuclear sector, including $CCJ, is maintaining bullish momentum as futures trade above $80/lb, supported by strong peer production updates and global nuclear demand projections. Diversified miner $GLEN.L is receiving a tailwind from the more than 2% rise in crude oil prices, which is supporting the commodities complex. The Healthcare sector, including $LLY, $NOVO-B.CO, $ABT, and $ABBV, continues to be underpinned by the high-growth narrative surrounding GLP-1 weight-loss drugs. European and emerging market holdings like $ENEL.MI, $RACE, and $IEMG are seeing muted activity in line with the quiet global trading environment.
+💼 PORTFOLIO FOCUS
+
+The AI-driven megacap sector experienced a wave of profit-taking, with $NVDA falling over 1.21%, alongside $AMZN, $GOOG, $MSFT, and $TSM, which all saw mild declines, signaling a slight consolidation after a strong annual run. The nuclear energy thesis remains robust as Uranium spot prices rebounded 0.68% to $81.95/Lbs, providing tailwinds for producers like $CCJ. In Europe, utility $ENEL.MI continues to push its strategic plan, committing over €38 billion to grid modernization and adding 12 GW of new renewables capacity through 2027. Hong Kong-listed $1919.HK (COSCO Shipping Holdings) announced a share buyback on December 29 for 3.46 million shares worth 47.9 million HKD, a move often viewed positively by the market. Meanwhile, the broader industrial metal complex provides support for miners like $GLEN.L, as copper is heading for its longest winning run since 2017.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
 
 📈 TRACK RECORD:
-+172% since strategy change (2020)
++171% since strategy change (2020)
 ~34% average annual return
 Double your money in ~2.1 years
 
@@ -42,11 +42,11 @@ Double your money in ~2.1 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS $SPX500 : +60% (outperformance)
-✓ VS $NSDQ100 : -16% (underperformance)
-✓ VS $SWDA.L : +70% (outperformance)
-✓ VS $EUSTX50 : +120% (outperformance)
-✓ VS $CHINA50 : +174% (outperformance)
+✓ VS $SPX500 : +59% (outperformance)
+✓ VS $NSDQ100 : -17% (underperformance)
+✓ VS $SWDA.L : +69% (outperformance)
+✓ VS $EUSTX50 : +118% (outperformance)
+✓ VS $CHINA50 : +173% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
