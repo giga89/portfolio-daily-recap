@@ -1,31 +1,31 @@
-🌅 EUROPEAN MARKET OPEN 📊
+🌅 U.S. MARKET OPEN 📊
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.09% 🌱 🌱 🌱
+🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.19% 🌱 🌱 🌱
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-⛏️ $GLEN.L +1.83%
+⛏️ $GLEN.L +2.30%
 🛢️ $MAU.PA +1.29%
-📊 $SX7PEX.DE +0.92%
-🚗 $VOW3.DE +0.53%
-🚢 $1919.HK +0.50%
+📊 $SX7PEX.DE +1.25%
+🏛️ $ETOR +0.77%
+💼 $WDEF.L +0.76%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +22.87%
-🔍 $GOOG +13.51%
-⛏️ $GLEN.L +10.97%
+🖥️ $SNPS +22.33%
+⚡ $CCJ +11.68%
+⛏️ $GLEN.L +11.47%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🛡️ $PLTR +144.95%
-⚡ $CCJ +78.34%
-☁️ $NET +78.34%
+🛡️ $PLTR +143.45%
+⚡ $CCJ +77.78%
+☁️ $NET +77.66%
 
 🌍 MARKET NEWS RECAP
 
-Global markets ended the day with mixed results, characterized by a US pullback contrasting with modest gains in Asia and neutral European trade. The $S&P 500 fell 0.35% and the $Nasdaq Composite declined 0.50% as investors engaged in profit-taking, particularly in high-flying technology stocks. European equities showed resilience in the face of US weakness, with the pan-European $Euro Stoxx 600 closing relatively unchanged after trading near its intraday record high. Asia was slightly positive, with the $Shanghai Composite posting a modest gain of 0.16% as investors awaited the release of the Federal Reserve's December meeting minutes.
+Global equities closed the year-end on a mixed note amid thin holiday volumes and profit-taking in the US. The $S&P 500 and $Nasdaq Composite both slipped around 0.3% and 0.5% respectively, primarily driven by declines in major technology names. European markets, led by the $Euro Stoxx 600, showed resilience, closing marginally higher or relatively unchanged as banking stocks saw modest gains. Asia was mixed, with China's $Shanghai Composite holding steady while Hong Kong's $Hang Seng index climbed 0.9% on regional strength.
 
 💼 PORTFOLIO FOCUS
 
-The AI-driven megacap sector experienced a wave of profit-taking, with $NVDA falling over 1.21%, alongside $AMZN, $GOOG, $MSFT, and $TSM, which all saw mild declines, signaling a slight consolidation after a strong annual run. The nuclear energy thesis remains robust as Uranium spot prices rebounded 0.68% to $81.95/Lbs, providing tailwinds for producers like $CCJ. In Europe, utility $ENEL.MI continues to push its strategic plan, committing over €38 billion to grid modernization and adding 12 GW of new renewables capacity through 2027. Hong Kong-listed $1919.HK (COSCO Shipping Holdings) announced a share buyback on December 29 for 3.46 million shares worth 47.9 million HKD, a move often viewed positively by the market. Meanwhile, the broader industrial metal complex provides support for miners like $GLEN.L, as copper is heading for its longest winning run since 2017.
+The AI/Tech sector is consolidating, with $NVDA and $MSFT under pressure from profit-taking, while major news saw $GOOG agree to purchase Intersect Power for $4.75 billion to secure energy capacity for its expanding cloud and AI infrastructure. In Healthcare, the GLP-1 competition remains a focus as $LLY faces continuing competitive pressure following the recent approval of an oral version of $NOVO-B.CO's Wegovy, giving the Danish firm a head start in the pill-based obesity market. Uranium stock $CCJ is supported by fresh analyst coverage highlighting its role as a key Western supplier ramping up Tier 1 assets to meet nuclear demand fueled by AI data centers and energy security. Finally, the European banking ETF $SX7PEX.DE is trading ex-dividend today, while other Financials like $DB1.DE and $PYPL are trading in line with the quiet, mixed European and US markets.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -43,10 +43,10 @@ Double your money in ~2.1 years
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
 ✓ VS $SPX500 : +59% (outperformance)
-✓ VS $NSDQ100 : -17% (underperformance)
+✓ VS $NSDQ100 : -16% (underperformance)
 ✓ VS $SWDA.L : +69% (outperformance)
-✓ VS $EUSTX50 : +118% (outperformance)
-✓ VS $CHINA50 : +173% (outperformance)
+✓ VS $EUSTX50 : +117% (outperformance)
+✓ VS $CHINA50 : +172% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
