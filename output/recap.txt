@@ -1,31 +1,31 @@
-🌅 EUROPEAN MARKET OPEN 📊
+🌅 U.S. MARKET OPEN 📊
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.28% 🌱 🌱 🌱
+🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.18% 🌱 🌱 🌱
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-🛢️ $MAU.PA +9.30%
+🛢️ $MAU.PA +8.12%
+🏭 $TSM +2.24%
 📊 $SX7PEX.DE +1.25%
 🔋 $ENEL.MI +0.71%
 🔌 $PRY.MI +0.70%
-🚗 $VOW3.DE +0.49%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +21.59%
-⛏️ $GLEN.L +14.55%
-🛢️ $MAU.PA +13.89%
+🖥️ $SNPS +22.77%
+⛏️ $GLEN.L +14.31%
+🛢️ $MAU.PA +12.66%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🛡️ $PLTR +140.51%
-☁️ $NET +77.38%
-📊 $SX7PEX.DE +76.05%
+🛡️ $PLTR +139.76%
+☁️ $NET +78.02%
+⚡ $CCJ +76.36%
 
 🌍 MARKET NEWS RECAP
 
-European markets provided a strong counter-narrative to the US pullback, with the $DAX Index advancing 0.57% and the $Euro Stoxx 50 gaining 0.77% in a robust year-end close. US markets saw a continuation of marginal profit-taking in the final session, with the $S&P 500 easing 0.14% and the $Nasdaq Composite slipping 0.24%. Asian indices opened mixed, with the Shanghai Composite seeing minimal movement while the Hang Seng Index retreated over 1% on the last day of trading.
+Global markets traded with a modest year-end pullback amid extremely thin holiday volumes, with US $S&P 500 and $Nasdaq 100 futures signaling a soft open, down 0.2% and 0.3% respectively. European bourses were similarly muted, as the Stoxx Europe 600 fell 0.1% and France's CAC 40 declined 0.4% in early trading. In Asia, the $Shanghai Composite managed a marginal gain of 0.1%, contrasting with a 0.9% drop in the Hang Seng index, as investors booked profits on the final trading day of the year.
 
 💼 PORTFOLIO FOCUS
 
-The megacap technology sector saw continued year-end profit-taking, impacting major holdings like $NVDA, $MSFT, and $AMZN, as investors locked in gains from the AI-driven rally that fueled the $Nasdaq slip. Healthcare names $LLY and $NOVO-B.CO are consolidating after their strong run, with market attention shifting to 2026 pipeline developments and regulatory clarity. European exchange operator $DB1.DE and luxury auto firm $RACE may benefit from the regional strength seen in the $DAX close. Chinese financials $2318.HK and $1919.HK are under pressure following the morning decline in the Hang Seng Index, reflecting cautious sentiment in the region.
+The AI and chip sector, which includes $NVDA, $AVGO, $TSM, $MSFT, and $SNPS, saw a major catalyst with news of $NVDA's potential $20 billion acquisition of Groq's AI inferencing technology, positioning it for the next growth phase in AI adoption. In the GLP-1 space, $NOVO-B.CO submitted a New Drug Application (NDA) to the FDA for its once-weekly CagriSema combination for weight management, intensifying competition with $LLY. Separately, a new FDA-approved motion sickness drug is being developed to treat the nausea side effects of GLP-1 agonists, a development that could improve patient adherence for $LLY and $NOVO-B.CO products. Holdings in the broader Industrial, Financial ($DB1.DE, $PYPL, $MELI), and Energy ($CCJ, $GLEN.L, $ENEL.MI) sectors traded largely in line with their respective regional index movements in the quiet year-end session.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -42,11 +42,11 @@ Double your money in ~2.1 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS $SPX500 : +59% (outperformance)
-✓ VS $NSDQ100 : -16% (underperformance)
+✓ VS $SPX500 : +60% (outperformance)
+✓ VS $NSDQ100 : -15% (underperformance)
 ✓ VS $SWDA.L : +69% (outperformance)
 ✓ VS $EUSTX50 : +117% (outperformance)
-✓ VS $CHINA50 : +172% (outperformance)
+✓ VS $CHINA50 : +173% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
