@@ -1,31 +1,31 @@
-🌅 U.S. MARKET OPEN 📊
+✨ U.S. MARKET CLOSE ✨
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.18% 🌱 🌱 🌱
+⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.15% ⚖️ ⚖️ ⚖️
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
 🛢️ $MAU.PA +8.12%
-🏭 $TSM +2.24%
+🏭 $TSM +1.44%
 📊 $SX7PEX.DE +1.25%
 🔋 $ENEL.MI +0.71%
 🔌 $PRY.MI +0.70%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +22.77%
+🖥️ $SNPS +22.38%
 ⛏️ $GLEN.L +14.31%
 🛢️ $MAU.PA +12.66%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🛡️ $PLTR +139.76%
-☁️ $NET +78.02%
-⚡ $CCJ +76.36%
+🛡️ $PLTR +136.40%
+📊 $SX7PEX.DE +76.05%
+⚡ $CCJ +75.74%
 
 🌍 MARKET NEWS RECAP
 
-Global markets traded with a modest year-end pullback amid extremely thin holiday volumes, with US $S&P 500 and $Nasdaq 100 futures signaling a soft open, down 0.2% and 0.3% respectively. European bourses were similarly muted, as the Stoxx Europe 600 fell 0.1% and France's CAC 40 declined 0.4% in early trading. In Asia, the $Shanghai Composite managed a marginal gain of 0.1%, contrasting with a 0.9% drop in the Hang Seng index, as investors booked profits on the final trading day of the year.
+Global markets closed out the final trading day of the year on a soft note amid extremely thin holiday volumes. US indices declined, with the $S&P 500 falling 0.33% and the $Nasdaq 100 down 0.34%, primarily driven by weakness in chip and data storage stocks. European stocks were also slightly lower, with the Euro Stoxx 50 easing 0.08%, while China's Shanghai Composite showed resilience, climbing 0.1% following stronger-than-expected December Manufacturing and Non-Manufacturing PMI data. The unexpected drop in US weekly jobless claims to a one-month low was a hawkish factor contributing to higher bond yields and pressure on equities.
 
 💼 PORTFOLIO FOCUS
 
-The AI and chip sector, which includes $NVDA, $AVGO, $TSM, $MSFT, and $SNPS, saw a major catalyst with news of $NVDA's potential $20 billion acquisition of Groq's AI inferencing technology, positioning it for the next growth phase in AI adoption. In the GLP-1 space, $NOVO-B.CO submitted a New Drug Application (NDA) to the FDA for its once-weekly CagriSema combination for weight management, intensifying competition with $LLY. Separately, a new FDA-approved motion sickness drug is being developed to treat the nausea side effects of GLP-1 agonists, a development that could improve patient adherence for $LLY and $NOVO-B.CO products. Holdings in the broader Industrial, Financial ($DB1.DE, $PYPL, $MELI), and Energy ($CCJ, $GLEN.L, $ENEL.MI) sectors traded largely in line with their respective regional index movements in the quiet year-end session.
+The AI and Semiconductor cohort, including $NVDA, $TSM, $AVGO, $MSFT, $SNPS, $AMZN, and $GOOG, faced selling pressure, as chip stocks led the broader $Nasdaq decline. The Healthcare sector, featuring $LLY and $NOVO-B.CO, continued to be driven by the prevailing narrative of $LLY's dominance in the GLP-1 weight-loss drug market, sustaining investor focus on the long-term growth story. The Uranium and Nuclear power theme, which impacts $CCJ and $TRIG.L, remains a significant catalyst, supported by the ongoing demand for energy from AI data centers. European Financials and Chinese H-Shares, including $SX7PEX.DE, $DB1.DE, $1919.HK, and $2318.HK, traded in muted year-end volumes, while other holdings like $RACE, $MELI, and $PYPL consolidated recent gains.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -42,10 +42,10 @@ Double your money in ~2.1 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS $SPX500 : +60% (outperformance)
-✓ VS $NSDQ100 : -15% (underperformance)
+✓ VS $SPX500 : +61% (outperformance)
+✓ VS $NSDQ100 : -14% (underperformance)
 ✓ VS $SWDA.L : +69% (outperformance)
-✓ VS $EUSTX50 : +117% (outperformance)
+✓ VS $EUSTX50 : +118% (outperformance)
 ✓ VS $CHINA50 : +173% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
