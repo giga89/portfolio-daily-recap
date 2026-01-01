@@ -1,13 +1,13 @@
-🌅 EUROPEAN MARKET OPEN 📊
+🌅 U.S. MARKET OPEN 📊
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.24% 🌱 🌱 🌱
+⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.13% ⚖️ ⚖️ ⚖️
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
 🛢️ $MAU.PA +8.12%
+🏭 $TSM +1.44%
 📊 $SX7PEX.DE +1.25%
 🔋 $ENEL.MI +0.71%
 🔌 $PRY.MI +0.70%
-🚗 $VOW3.DE +0.49%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
 🖥️ $SNPS +22.38%
@@ -21,19 +21,19 @@ TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
 
 🌍 MARKET NEWS RECAP
 
-Global financial markets were universally closed today for the New Year's Day holiday, resulting in no trading activity for major indices including the $S&P 500, $Nasdaq, and the $Euro Stoxx. The focus has entirely shifted to policy announcements and economic forecasts for the year ahead, with all eyes now on the first trading session of 2026 tomorrow. Asian markets, including the Shanghai Composite, also observed the holiday, leaving volume at negligible levels worldwide. The lack of trading volume has led analysts to issue numerous sector outlooks, setting the stage for tomorrow’s open.
+Global financial markets, including the $S&P 500, $Nasdaq, and $Euro Stoxx, were universally closed today for the New Year's Day holiday, resulting in extremely limited trading activity. A key European policy event saw Bulgaria officially adopt the euro, becoming the 21st country to join the single currency. In trade news, China announced it will impose additional 55% tariffs on beef imports from key global suppliers, including the US and Australia, effective today.
 
 💼 PORTFOLIO FOCUS
 
-With markets closed, attention is on the 2026 outlook for key sectors. The Healthcare cohort, including $AZN.L, $ABT, $ABBV, $LLY, and $NOVO-B.CO, is poised for continued growth based on new product pipelines and a strong M&A environment, with particular momentum expected in obesity and immunology treatments. AI and Semiconductor names like $NVDA, $TSM, $MSFT, $AVGO, and $SNPS are projected to remain secular growth leaders, with a fresh round of analyst upgrades highlighting sustained enterprise AI adoption. European utilities and infrastructure holdings, such as $ENEL.MI, $TRIG.L, and $SX7PEX.DE, are receiving positive outlooks based on stable dividend yields and government-backed green transition spending.
+With no major company-specific news during the holiday, the focus remains on macro drivers for the portfolio's core holdings. The AI/Cloud infrastructure sector, including $NVDA, $AVGO, $MSFT, and $GOOG, enters the new year with strong momentum following $GOOG's best year since 2009 due to strengthening AI sentiment. Healthcare and Pharma holdings ($LLY, $NOVO-B.CO, $ABBV) are centered on upcoming Q4 earnings and continued legislative uncertainty regarding drug pricing. China's new tariffs on beef imports could increase trade friction, which is a macro headwind for global commodity traders like $GLEN.L and the Asian financial sector ($1919.HK, $2318.HK). The auto sector ($RACE, $VOW3.DE) is watching for new EV sales data and the impact of the EU's policy shift on the energy transition, which also impacts $ENEL.MI and $TRIG.L.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
 
 📈 TRACK RECORD:
-+110% since strategy change (2020)
-~22% average annual return
-Double your money in ~3.3 years
++113% since strategy change (2020)
+~23% average annual return
+Double your money in ~3.2 years
 
 ✅ STRATEGY HIGHLIGHTS:
 • Smart diversification across 3 continents
@@ -42,11 +42,11 @@ Double your money in ~3.3 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS $SPX500 : -0% (underperformance)
-✓ VS $NSDQ100 : -75% (underperformance)
-✓ VS $SWDA.L : +8% (outperformance)
-✓ VS $EUSTX50 : +57% (outperformance)
-✓ VS $CHINA50 : +112% (outperformance)
+✓ VS $SPX500 : +3% (outperformance)
+✓ VS $NSDQ100 : -72% (underperformance)
+✓ VS $SWDA.L : +11% (outperformance)
+✓ VS $EUSTX50 : +60% (outperformance)
+✓ VS $CHINA50 : +115% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
