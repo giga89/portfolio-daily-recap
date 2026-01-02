@@ -39,18 +39,26 @@ def _get_all_portfolio_tags():
     return [symbol.replace('.', '') for symbol in PORTFOLIO_TICKERS.keys()]
 
 
-def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST):
+def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
     """
     Select tags for the current post with rotation to ensure variety.
     
+    Args:
+        max_tags: Maximum number of tags to select
+        excluded_tags: List of tags to exclude (e.g. already used in this post)
+    
     Returns:
-        list: List of selected tags (max 5)
+        list: List of selected tags
     """
     all_tags = _get_all_portfolio_tags()
     
-    if not GIST_STORAGE_AVAILABLE:
-        # Fallback: just return first N tags
-        return all_tags[:max_tags]
+    if excluded_tags:
+        # Remove excluded tags from candidates
+        excluded_normalized = [t.replace('.', '').upper() for t in excluded_tags]
+        all_tags = [t for t in all_tags if t.replace('.', '').upper() not in excluded_normalized]
+    
+    if max_tags <= 0:
+        return []
     
     try:
         data = load_data()
@@ -146,11 +154,14 @@ def _remove_market_section_tags(text):
     return text
 
 
-def generate_market_news_recap():
+def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
     """
     Generate AI-powered market news recap for USA, CHINA, and EU markets
-    Uses multiple model fallbacks to handle quota limits gracefully
     
+    Args:
+        max_tags: Maximum number of $ tags allowed in the AI output
+        excluded_tags: List of tags already used elsewhere in the post
+        
     Returns:
         str: Formatted news recap or empty string if API key not set
     """
@@ -177,8 +188,22 @@ def generate_market_news_recap():
         client = genai.Client(api_key=api_key)
         
         # Select tags for this post (with rotation)
-        selected_tags = _select_tags_for_rotation(MAX_TAGS_PER_POST)
-        selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags])
+        # Select tags for this post (with rotation)
+        selected_tags = []
+        tag_instruction = ""
+        
+        if max_tags > 0:
+            selected_tags = _select_tags_for_rotation(max_tags, excluded_tags)
+            selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags])
+            tag_instruction = f"""
+- IMPORTANT: You MUST use ONLY these $ tags in this section (max {max_tags}): {selected_tags_str}
+- Only use these exact tags, no other $ symbols.
+"""
+        else:
+            tag_instruction = """
+- IMPORTANT: Do NOT use any $ tags in this section.
+- Write all ticker symbols as plain text (e.g. NVDA, MSFT) without the $ prefix.
+"""
         
         # Get all portfolio tickers for context
         portfolio_symbols = list(PORTFOLIO_TICKERS.keys())
@@ -210,12 +235,10 @@ Structure your response in TWO distinct sections:
 - IMPORTANT: Do NOT use any $ tags in this section. Write index and market names as plain text.
 
 2. 💼 PORTFOLIO FOCUS
-- Provide specific updates, catalysts, or performance drivers for these holdings: {portfolio_context}
 - Focus exclusively on news affecting these specific tickers in the last 24 hours.
 - If no specific news is available for these tickers today, briefly mention the sector trends impacting them.
 - Limit to 4-5 concise, high-impact sentences.
-- IMPORTANT: You MUST use ONLY these $ tags in this section (max 5): {selected_tags_str}
-- Only use these exact tags, no other $ symbols.
+{tag_instruction}
 
 Rules:
 - Professional, objective, and engaging tone.
@@ -347,7 +370,7 @@ def get_why_copy_message(five_year_return=161, avg_yearly_return=32, benchmark_p
             # Calculate the difference (delta) between our return and benchmark
             delta = five_year_return - perf
             perf_label = "(outperformance)" if delta >= 0 else "(underperformance)"
-            benchmark_lines += f"✓ VS ${ticker} : {delta:+.0f}% {perf_label}\n"
+            benchmark_lines += f"✓ VS {ticker} : {delta:+.0f}% {perf_label}\n"
     else:
         # Fallback if no data
         benchmark_lines = "✓ Outperforming S&P500\n✓ Outperforming MSCI World\n✓ Outperforming Euro Stoxx 50"

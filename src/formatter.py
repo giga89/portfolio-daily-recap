@@ -13,10 +13,11 @@ def get_emoji(etoro_symbol):
     return EMOJI_MAP.get(etoro_symbol, '📊')
 
 
-def format_ticker(etoro_symbol, company_name, performance):
+def format_ticker(etoro_symbol, company_name, performance, use_tag=False):
     """Format a ticker line with eToro link and performance"""
     emoji = get_emoji(etoro_symbol)
-    return f"{emoji} ${etoro_symbol} {performance:+.2f}%"
+    symbol_str = f"${etoro_symbol}" if use_tag else etoro_symbol
+    return f"{emoji} {symbol_str} {performance:+.2f}%"
 
 
 def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None):
@@ -78,20 +79,29 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
 """
     
+    # Track used tags to enforce limit
+    # We prioritize the Top 5 Daily for tagging
+    daily_symbols = [item[0] for item in daily_sorted]
+    used_tags = set(daily_symbols)
+    tag_budget_remaining = 5 - len(used_tags)
+    if tag_budget_remaining < 0:
+        tag_budget_remaining = 0
+
     for etoro_symbol, data in daily_sorted:
-        recap += format_ticker(etoro_symbol, data['company_name'], data['daily_change']) + "\n"
+        recap += format_ticker(etoro_symbol, data['company_name'], data['daily_change'], use_tag=True) + "\n"
     
     recap += "\nTOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈\n"
     for etoro_symbol, data in monthly_sorted:
-        recap += format_ticker(etoro_symbol, data['company_name'], data['monthly_change']) + "\n"
+        # Do not use tags for monthly/yearly to save budget and keep clean
+        recap += format_ticker(etoro_symbol, data['company_name'], data['monthly_change'], use_tag=False) + "\n"
     
     recap += "\nTOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈\n"
     for etoro_symbol, data in yearly_sorted:
-        recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change']) + "\n"
+        recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change'], use_tag=False) + "\n"
     
     # Add AI-generated market news recap
-    print("Generating AI market news...")
-    ai_news = ai_news_generator.generate_market_news_recap()
+    print(f"Generating AI market news (Budget for tags: {tag_budget_remaining})...")
+    ai_news = ai_news_generator.generate_market_news_recap(max_tags=tag_budget_remaining, excluded_tags=list(used_tags))
     if ai_news:
         recap += ai_news
     
