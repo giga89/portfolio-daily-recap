@@ -154,6 +154,37 @@ def _remove_market_section_tags(text):
     return text
 
 
+
+def update_rotation_history(new_tags):
+    """
+    Update the list of used tags in Gist storage.
+    Call this when tags are used outside of this module (e.g. in formatter).
+    """
+    if not GIST_STORAGE_AVAILABLE or not new_tags:
+        return
+
+    try:
+        # Normalize tags
+        normalized_new = [t.replace('$', '').replace('.', '').upper() for t in new_tags]
+        
+        data = load_data()
+        used_tags = data.get('used_tags', [])
+        
+        # Add new tags
+        updated_used = used_tags + normalized_new
+        
+        # Keep history limited (e.g. 20 items)
+        all_tickers = _get_all_portfolio_tags()
+        max_history = len(all_tickers) * 2
+        
+        data['used_tags'] = updated_used[-max_history:] if len(updated_used) > max_history else updated_used
+        save_data(data)
+        print(f"🔄 Updated tag rotation history with: {normalized_new}")
+            
+    except Exception as e:
+        print(f"⚠️ Error updating tag rotation: {e}")
+
+
 def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
     """
     Generate AI-powered market news recap for USA, CHINA, and EU markets
@@ -188,8 +219,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         client = genai.Client(api_key=api_key)
         
         # Select tags for this post (with rotation)
-        # Select tags for this post (with rotation)
         selected_tags = []
+        selected_tags_str = "None" # Fix UnboundLocalError
         tag_instruction = ""
         
         if max_tags > 0:

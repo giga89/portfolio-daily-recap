@@ -99,6 +99,10 @@ TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
     for etoro_symbol, data in yearly_sorted:
         recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change'], use_tag=False) + "\n"
     
+    # Update rotation history with tags used in Top 5
+    if used_tags:
+        ai_news_generator.update_rotation_history(list(used_tags))
+
     # Add AI-generated market news recap
     print(f"Generating AI market news (Budget for tags: {tag_budget_remaining})...")
     ai_news = ai_news_generator.generate_market_news_recap(max_tags=tag_budget_remaining, excluded_tags=list(used_tags))
