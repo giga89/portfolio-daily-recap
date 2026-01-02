@@ -1,18 +1,18 @@
-✨ U.S. MARKET CLOSE ✨
+🌅 EUROPEAN MARKET OPEN 📊
 
-⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.11% ⚖️ ⚖️ ⚖️
+🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.37% 🌱 🌱 🌱
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-🛢️ $MAU.PA +8.12%
-🏭 $TSM +1.44%
-📊 $SX7PEX.DE +1.25%
-🔋 $ENEL.MI +0.71%
-🔌 $PRY.MI +0.70%
+💼 $WDEF.L +2.43%
+🏦 $2318.HK +2.30%
+🔌 $PRY.MI +2.11%
+🛢️ $MAU.PA +1.81%
+🚗 $VOW3.DE +1.79%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
 🖥️ $SNPS +22.38%
-⛏️ $GLEN.L +14.31%
-🛢️ $MAU.PA +12.66%
+⛏️ $GLEN.L +17.20%
+🛢️ $MAU.PA +14.98%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
 📊 $SX7PEX.DE +0.00%
@@ -21,18 +21,18 @@ TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
 
 🌍 MARKET NEWS RECAP
 
-Global financial markets were largely closed for the New Year's Day holiday, severely limiting major index trading in the US and Europe. The $S&P 500 and $Euro Stoxx saw no activity, with attention shifting to overnight commodity moves. The $Shanghai Composite, however, provided a final data point, managing a slight gain, closing up 0.1% at 3,968.84. Gold prices remain a macro focus after recording an astonishing annual gain of approximately 64% in 2025, while oil prices ended the year down nearly 20%.
+US markets began the new year with a strong open, as $S&P 500 futures rose 0.52% and $Nasdaq 100 futures surged 0.92% early in the session, supported by a stronger-than-expected labor market report showing US initial unemployment claims unexpectedly fell to a one-month low. Asia saw a significant rally on the first trading day, with Hong Kong's Hang Seng Index jumping over 2.5% driven by a surge in technology and AI-related stocks. European indexes opened mostly higher, though $Euro Stoxx 50 futures indicated a weaker start for the region.
 
 💼 PORTFOLIO FOCUS
 
-The AI/Semiconductor complex, including $NVDA and $TSM, is poised for a strong start to 2026 following reports that $NVDA is ramping up production for its H200 AI chips in a dramatic push to meet Chinese orders exceeding 2 million units for the year. Broader AI-driven demand for high-bandwidth memory chips is expected to accelerate a supply crunch, potentially driving consumer electronics prices up by 5% to 20% in 2026. In Healthcare, $ABT, $ABBV, $LLY, and $HUM face new policy dynamics as Medicare's first negotiated drug prices under the Inflation Reduction Act take effect today for ten high-cost drugs, alongside tightened prior authorization rules for Medicare Advantage plans. The Uranium sector, anchored by $CCJ, is supported by Bank of America's $135/lb uranium price target for 2026, driven by rising nuclear demand from the $AI revolution's massive power needs. European utilities, including $ENEL.MI, are set to benefit from the new EU Grids Package, an initiative to accelerate grid modernization and cross-border energy highway projects.
+The AI and Chip sector is dominating the new year's open, providing a tailwind for major holdings like $NVDA, $AVGO, $TSM, $MSFT, $SNPS, $AMZN, and $GOOG, as a regional technology gauge rose to a record high on strong investor optimism. The tech-heavy $IQQL.DE ETF is benefiting directly from this strength, while other holdings like $PLTR and $NET will track the broader internet and cloud infrastructure sentiment. In the commodities space, $CCJ and $GLEN.L are supported by a strong start for precious metals, with spot gold and silver advancing significantly on the day, alongside a rise in WTI crude oil prices. European financials represented by $SX7PEX.DE remain sensitive to the mixed regional open, while the core Pharma holdings $LLY, $NOVO-B.CO, $ABT, $ABBV, $AZN.L, and $HUM are tracking general sector trends in the absence of major corporate news.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
 
 📈 TRACK RECORD:
-+113% since strategy change (2020)
-~23% average annual return
++111% since strategy change (2020)
+~22% average annual return
 Double your money in ~3.2 years
 
 ✅ STRATEGY HIGHLIGHTS:
@@ -42,11 +42,11 @@ Double your money in ~3.2 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS $SPX500 : +3% (outperformance)
-✓ VS $NSDQ100 : -72% (underperformance)
-✓ VS $SWDA.L : +11% (outperformance)
-✓ VS $EUSTX50 : +60% (outperformance)
-✓ VS $CHINA50 : +115% (outperformance)
+✓ VS $SPX500 : +1% (outperformance)
+✓ VS $NSDQ100 : -74% (underperformance)
+✓ VS $SWDA.L : +9% (outperformance)
+✓ VS $EUSTX50 : +58% (outperformance)
+✓ VS $CHINA50 : +113% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
