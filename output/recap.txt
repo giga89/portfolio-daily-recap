@@ -1,23 +1,31 @@
 🌠 DAILY RECAP 🌙
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.44% 🌱 🌱 🌱
+✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.83% ✅ ✅ ✅
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-💼 $WDEF.L +2.82%
-🏦 $2318.HK +2.30%
-⛏️ $GLEN.L +2.30%
-🔌 $PRY.MI +2.08%
-🛢️ $MAU.PA +1.99%
+⚡ $CCJ +7.39%
+🏭 $TSM +4.75%
+🔌 $PRY.MI +4.05%
+💼 $WDEF.L +3.27%
+🏥 $HUM +2.85%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +22.38%
-⛏️ $GLEN.L +17.85%
-🛢️ $MAU.PA +15.19%
+🖥️ $SNPS +22.91%
+🛢️ $MAU.PA +16.01%
+⛏️ $GLEN.L +15.84%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
+🪙 $TRX +0.09%
 📊 $SX7PEX.DE +0.00%
 🏦 $IEUR +0.00%
-🔥 $IQQL.DE +0.00%
+
+🌍 MARKET NEWS RECAP
+
+Global markets began the new year on an optimistic note, with major indices extending the AI-driven tech rally from 2025. The Nasdaq Composite climbed 1% and the S&P 500 rose 0.4% in early US trade, although the Dow Jones saw a slight initial decline. European markets surged, with the Euro Stoxx 600 hitting a new record high and the FTSE 100 surpassing the 10,000 level for the first time. In Asia, the Shanghai Composite posted a marginal gain of 0.09%, while Hong Kong's Hang Seng Index rallied over 2% on strong tech news.
+
+💼 PORTFOLIO FOCUS
+
+The AI-driven rally provided a strong lift to tech holdings, with NVDA and GOOG surging over 2% on AI optimism, directly benefiting $IQQLDE (Nasdaq 100 exposure). Strong European market performance, with the Euro Stoxx 600 hitting a record high, bolstered $IEUR and $SX7PEXDE, while a massive analyst upgrade for ASML signaled strong future demand for TSM. The healthcare sector remains in focus as NOVO-B.CO and LLY continue to capitalize on GLP-1 drug momentum, with ABBV and AZN.L poised for favorable growth in 2026. Miners like GLEN.L and TRX received a major boost from the rally in precious metals, with silver jumping nearly 5% and gold gaining 1.4%. Emerging market exposure $IEMG was supported by positive Chinese manufacturing data and a strong rally in the Hong Kong market, contributing to the overall positive sentiment captured by $WDEFL.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -35,10 +43,10 @@ Double your money in ~3.2 years
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
 ✓ VS $SPX500 : +1% (outperformance)
-✓ VS $NSDQ100 : -74% (underperformance)
-✓ VS $SWDA.L : +9% (outperformance)
-✓ VS $EUSTX50 : +58% (outperformance)
-✓ VS $CHINA50 : +113% (outperformance)
+✓ VS $NSDQ100 : -73% (underperformance)
+✓ VS $SWDA.L : +10% (outperformance)
+✓ VS $EUSTX50 : +56% (outperformance)
+✓ VS $CHINA50 : +109% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
