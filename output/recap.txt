@@ -1,31 +1,33 @@
-🌅 U.S. MARKET OPEN 📊
+🌠 DAILY RECAP 🌙
 
-✅ ✅ ✅ 🍀 GREAT GREEN DAY: +1.12% ✅ ✅ ✅
+✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.74% ✅ ✅ ✅
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-⚡ $CCJ +6.31%
-🏭 $TSM +4.66%
-🔌 $PRY.MI +3.94%
-💻 $AVGO +3.41%
-🖥️ $SNPS +3.08%
+⚡ $CCJ +7.04%
+🏭 $TSM +4.76%
+🔌 $PRY.MI +4.05%
+💼 $WDEF.L +3.27%
+🚗 $VOW3.DE +2.80%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +25.34%
-⛏️ $GLEN.L +18.01%
-🛢️ $MAU.PA +15.29%
+🖥️ $SNPS +22.88%
+🛢️ $MAU.PA +16.01%
+⛏️ $GLEN.L +15.84%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
+🪙 $TRX +0.10%
 📊 $SX7PEX.DE +0.00%
 🏦 $IEUR +0.00%
-🔥 $IQQL.DE +0.00%
 
 🌍 MARKET NEWS RECAP
 
-Global markets kicked off the new year with a broad risk-on rally, led by a strong resurgence in technology and growth stocks. US indices rebounded from a four-day losing streak, with the $Nasdaq Composite jumping over 1% and the $S&P 500 gaining about 0.5% in early trading. European equities hit a fresh record high, as the pan-European $Euro Stoxx 600 climbed 0.6% and the UK's FTSE 100 surpassed the symbolic 10,000 level for the first time. While Mainland China markets were closed, the Hong Kong Hang Seng Index (HSI) soared 2.76%, driven by renewed optimism in the domestic AI sector.
+**1. 🌍 MARKET OVERVIEW**
 
-💼 PORTFOLIO FOCUS
+Global markets began the new year with a broad risk-on rally, driven by optimism over AI and technology stocks as US markets reopened after the holiday. The $Nasdaq and $S&P 500 futures signaled a strong open, up 0.92% and 0.52% respectively, with US indices continuing that momentum in early trading. European indices surged, with the $FTSE 100 hitting an intraday record after crossing the 10,000 mark for the first time, while the $DAX and $CAC 40 gained around 0.5% to 0.8%. Trading in Mainland China ($Shanghai Composite) was closed, but the Hong Kong $Hang Seng Index jumped over 2.6% on a strong rally in local tech shares.
 
-The Healthcare sector saw major catalysts as $NOVO-B.CO surged 4.5% following positive Phase 2 trial data for its experimental weight-loss/diabetes drug, amycretin. $AZN.L also gained 2% after its drug Imfinzi received US approval for use in combination therapy for early-stage gastric and gastroesophageal junction cancers. Sentiment for the AI and Semiconductor sector was firmly positive, with bellwethers like $NVDA and $AVGO seeing pre-market gains that contributed to the $Nasdaq's strong open. Chinese technology names, including those held in $IEMG, experienced a significant tailwind from the Hang Seng's massive rally, which was fueled by AI optimism and news of Baidu's $GOOG-rivaling Kunlunxin chip unit spin-off plan. Financial stocks like $DB1.DE and $PYPL, along with European defense and basic resource holdings, were supported by the overall positive sentiment and inflows into the record-breaking $Euro Stoxx 600.
+**2. 💼 PORTFOLIO FOCUS**
+
+The AI and semiconductor complex led the charge, with major holdings like $NVDA and $GOOG climbing more than 2% in early trading, fueling the strong performance of tech-focused ETFs like $IQQL.DE. The European rally provided an immediate tailwind for $IEUR, while the $FTSE 100’s record high was partly supported by a surge in precious metals miners, a positive signal for $GLEN.L. In the BioPharma space, $LLY and $NOVO-B.CO remain a primary focus as the market anticipates key 2026 catalysts, including a potential FDA decision on $NOVO-B.CO's Wegovy pill. The strong tech-led advance in Hong Kong provides a favorable backdrop for HK-listed holdings like $1919.HK and $2318.HK, despite the $Shanghai Composite holiday closure.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -43,10 +45,10 @@ Double your money in ~3.2 years
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
 ✓ VS $SPX500 : +1% (outperformance)
-✓ VS $NSDQ100 : -76% (underperformance)
-✓ VS $SWDA.L : +9% (outperformance)
-✓ VS $EUSTX50 : +58% (outperformance)
-✓ VS $CHINA50 : +110% (outperformance)
+✓ VS $NSDQ100 : -72% (underperformance)
+✓ VS $SWDA.L : +10% (outperformance)
+✓ VS $EUSTX50 : +56% (outperformance)
+✓ VS $CHINA50 : +109% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
