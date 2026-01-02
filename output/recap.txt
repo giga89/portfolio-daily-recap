@@ -1,18 +1,18 @@
-🌅 EUROPEAN MARKET OPEN 📊
+🌅 U.S. MARKET OPEN 📊
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.37% 🌱 🌱 🌱
+✅ ✅ ✅ 🍀 GREAT GREEN DAY: +1.12% ✅ ✅ ✅
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-💼 $WDEF.L +2.43%
-🏦 $2318.HK +2.30%
-🔌 $PRY.MI +2.11%
-🛢️ $MAU.PA +1.81%
-🚗 $VOW3.DE +1.79%
+⚡ $CCJ +6.31%
+🏭 $TSM +4.66%
+🔌 $PRY.MI +3.94%
+💻 $AVGO +3.41%
+🖥️ $SNPS +3.08%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +22.38%
-⛏️ $GLEN.L +17.20%
-🛢️ $MAU.PA +14.98%
+🖥️ $SNPS +25.34%
+⛏️ $GLEN.L +18.01%
+🛢️ $MAU.PA +15.29%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
 📊 $SX7PEX.DE +0.00%
@@ -21,11 +21,11 @@ TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
 
 🌍 MARKET NEWS RECAP
 
-US markets began the new year with a strong open, as $S&P 500 futures rose 0.52% and $Nasdaq 100 futures surged 0.92% early in the session, supported by a stronger-than-expected labor market report showing US initial unemployment claims unexpectedly fell to a one-month low. Asia saw a significant rally on the first trading day, with Hong Kong's Hang Seng Index jumping over 2.5% driven by a surge in technology and AI-related stocks. European indexes opened mostly higher, though $Euro Stoxx 50 futures indicated a weaker start for the region.
+Global markets kicked off the new year with a broad risk-on rally, led by a strong resurgence in technology and growth stocks. US indices rebounded from a four-day losing streak, with the $Nasdaq Composite jumping over 1% and the $S&P 500 gaining about 0.5% in early trading. European equities hit a fresh record high, as the pan-European $Euro Stoxx 600 climbed 0.6% and the UK's FTSE 100 surpassed the symbolic 10,000 level for the first time. While Mainland China markets were closed, the Hong Kong Hang Seng Index (HSI) soared 2.76%, driven by renewed optimism in the domestic AI sector.
 
 💼 PORTFOLIO FOCUS
 
-The AI and Chip sector is dominating the new year's open, providing a tailwind for major holdings like $NVDA, $AVGO, $TSM, $MSFT, $SNPS, $AMZN, and $GOOG, as a regional technology gauge rose to a record high on strong investor optimism. The tech-heavy $IQQL.DE ETF is benefiting directly from this strength, while other holdings like $PLTR and $NET will track the broader internet and cloud infrastructure sentiment. In the commodities space, $CCJ and $GLEN.L are supported by a strong start for precious metals, with spot gold and silver advancing significantly on the day, alongside a rise in WTI crude oil prices. European financials represented by $SX7PEX.DE remain sensitive to the mixed regional open, while the core Pharma holdings $LLY, $NOVO-B.CO, $ABT, $ABBV, $AZN.L, and $HUM are tracking general sector trends in the absence of major corporate news.
+The Healthcare sector saw major catalysts as $NOVO-B.CO surged 4.5% following positive Phase 2 trial data for its experimental weight-loss/diabetes drug, amycretin. $AZN.L also gained 2% after its drug Imfinzi received US approval for use in combination therapy for early-stage gastric and gastroesophageal junction cancers. Sentiment for the AI and Semiconductor sector was firmly positive, with bellwethers like $NVDA and $AVGO seeing pre-market gains that contributed to the $Nasdaq's strong open. Chinese technology names, including those held in $IEMG, experienced a significant tailwind from the Hang Seng's massive rally, which was fueled by AI optimism and news of Baidu's $GOOG-rivaling Kunlunxin chip unit spin-off plan. Financial stocks like $DB1.DE and $PYPL, along with European defense and basic resource holdings, were supported by the overall positive sentiment and inflows into the record-breaking $Euro Stoxx 600.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -43,10 +43,10 @@ Double your money in ~3.2 years
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
 ✓ VS $SPX500 : +1% (outperformance)
-✓ VS $NSDQ100 : -74% (underperformance)
+✓ VS $NSDQ100 : -76% (underperformance)
 ✓ VS $SWDA.L : +9% (outperformance)
 ✓ VS $EUSTX50 : +58% (outperformance)
-✓ VS $CHINA50 : +113% (outperformance)
+✓ VS $CHINA50 : +110% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
