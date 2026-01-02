@@ -79,17 +79,36 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
 """
     
-    # Track used tags to enforce limit
-    # We prioritize the Top 5 Daily for tagging
+    # Track used tags to enforce limit and rotation
+    # We prioritize the Top 5 Daily, BUT ONLY IF they haven't been used recently
     daily_symbols = [item[0] for item in daily_sorted]
-    used_tags = set(daily_symbols)
-    tag_budget_remaining = 5 - len(used_tags)
+    
+    # Get last 15 tags (covers roughly the last 3 runs/24h)
+    # This prevents repeating the same Top 5 tags 3 times a day
+    recent_history = ai_news_generator.get_recent_tags(limit=15)
+    normalized_history = [t.replace('$', '').upper() for t in recent_history]
+    
+    tags_applied_in_list = []
+    
+    for etoro_symbol, data in daily_sorted:
+        # Check if we should tag this symbol
+        should_tag = False
+        
+        # Criteria:
+        # 1. We haven't reached the limit of 5 for this run yet
+        # 2. This symbol wasn't tagged recently (rotation)
+        if len(tags_applied_in_list) < 5:
+            if etoro_symbol.upper() not in normalized_history:
+                should_tag = True
+                tags_applied_in_list.append(etoro_symbol)
+        
+        recap += format_ticker(etoro_symbol, data['company_name'], data['daily_change'], use_tag=should_tag) + "\n"
+    
+    # Calculate remaining budget for AI
+    tag_budget_remaining = 5 - len(tags_applied_in_list)
     if tag_budget_remaining < 0:
         tag_budget_remaining = 0
 
-    for etoro_symbol, data in daily_sorted:
-        recap += format_ticker(etoro_symbol, data['company_name'], data['daily_change'], use_tag=True) + "\n"
-    
     recap += "\nTOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈\n"
     for etoro_symbol, data in monthly_sorted:
         # Do not use tags for monthly/yearly to save budget and keep clean
@@ -99,13 +118,17 @@ TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
     for etoro_symbol, data in yearly_sorted:
         recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change'], use_tag=False) + "\n"
     
-    # Update rotation history with tags used in Top 5
-    if used_tags:
-        ai_news_generator.update_rotation_history(list(used_tags))
+    # Update rotation history with tags used in Top 5 (this run)
+    if tags_applied_in_list:
+        ai_news_generator.update_rotation_history(tags_applied_in_list)
 
     # Add AI-generated market news recap
+    # We pass the recently used tags + the ones showing in the list as "excluded"
+    # so the AI doesn't repeat what we just showed OR what was shown recently
+    current_exclusions = list(set(recent_history + tags_applied_in_list))
+    
     print(f"Generating AI market news (Budget for tags: {tag_budget_remaining})...")
-    ai_news = ai_news_generator.generate_market_news_recap(max_tags=tag_budget_remaining, excluded_tags=list(used_tags))
+    ai_news = ai_news_generator.generate_market_news_recap(max_tags=tag_budget_remaining, excluded_tags=current_exclusions)
     if ai_news:
         recap += ai_news
     

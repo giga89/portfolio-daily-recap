@@ -155,6 +155,25 @@ def _remove_market_section_tags(text):
 
 
 
+def get_recent_tags(limit=None):
+    """
+    Get list of recently used tags from storage.
+    Args:
+        limit: Return only the last N tags. If None, return all history.
+    """
+    if not GIST_STORAGE_AVAILABLE:
+        return []
+    
+    try:
+        data = load_data()
+        tags = data.get('used_tags', [])
+        if limit:
+            return tags[-limit:]
+        return tags
+    except Exception:
+        return []
+
+
 def update_rotation_history(new_tags):
     """
     Update the list of used tags in Gist storage.
