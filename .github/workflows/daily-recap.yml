@@ -104,4 +104,5 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add output/recap.txt
           git commit -m "Update daily recap" || echo "No changes to commit"
+          git pull --rebase
           git push
