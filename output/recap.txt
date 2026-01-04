@@ -1,31 +1,33 @@
 🌠 DAILY RECAP 🌙
 
-✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.95% ✅ ✅ ✅
+✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.53% ✅ ✅ ✅
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-⚡ $CCJ +7.73%
-🏭 $TSM +5.17%
 🔌 $PRY.MI +4.05%
-💼 $WDEF.L +3.27%
-🏥 $HUM +3.26%
+💼 WDEF.L +3.27%
+🚗 $VOW3.DE +2.80%
+🛢️ MAU.PA +2.71%
+🌍 IEMG +2.65%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
 🖥️ $SNPS +24.36%
-🛢️ $MAU.PA +16.01%
-🏥 $HUM +15.94%
+🛢️ MAU.PA +16.01%
+🏥 HUM +15.94%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🪙 $TRX +0.53%
+🪙 $TRX +2.51%
 📊 $SX7PEX.DE +0.00%
-🏦 $IEUR +0.00%
+🏦 IEUR +0.00%
 
 🌍 MARKET NEWS RECAP
 
-Global markets saw a mixed and volatile start to the new year, with US indices giving up early gains to close lower while European markets continued their rally. The $S&P 500 fell -0.74% and the $Nasdaq 100 lost -0.84%, sliding to 1.5-week lows on weakness in megacap technology stocks and rising bond yields. US initial unemployment claims unexpectedly fell to a one-month low of 199,000, which drove the 10-year Treasury yield higher, acting as a headwind for equities. Conversely, the $Euro Stoxx 50 rallied to a new all-time high, with the $FTSE 100 also hitting an intraday record, buoyed by broad optimism. In Asia, China's December Manufacturing PMI rose to 50.1, signaling the fastest expansion in nine months, though the $Shanghai Composite saw only a marginal gain of +0.09%.
+**1. 🌍 MARKET OVERVIEW**
 
-💼 PORTFOLIO FOCUS
+US markets ended the first trading week of the year mixed, with the S&P 500 posting a modest gain of 0.19% while the Nasdaq Composite was nearly flat, reflecting a rotation out of some high-growth technology names. European indices showed strength, with the FTSE 100 hitting an intraday record and the Euro Stoxx-tracking benchmarks like Germany's DAX and France's CAC 40 advancing 0.5% to 0.8% on the first trading day of the new year. Asian trading was supported by a strong rally in tech shares, notably in Hong Kong, although the Shanghai Composite remained closed for the holiday. Analyst sentiment published today points toward continued optimism for the S&P 500 in 2026, with some institutional investors positioning for a potential 15% rally.
 
-The AI and Semiconductor space was highly volatile; chip makers like $NVDA and $GOOG initially surged over 2% on AI optimism, but this was offset by a late-day pullback. Megacap tech names, including $MSFT and $AMZN, notably dropped 2-5% on concerns and scrutiny over exaggerated capital expenditure pledges in AI infrastructure. European-focused holdings like $SX7PEX.DE (European Banks ETF) and $IEUR benefited from the $Euro Stoxx 50's all-time high and a rise in European bond yields, with the 10-year German bund yield climbing to a 1.5-week high. Hong Kong-listed stocks, including $1919.HK and $2318.HK, saw a strong rally as the Hang Seng jumped 2.8%, with e-commerce giants climbing over 4%. Additionally, mining and materials stocks like $GLEN.L were supported by a surge in precious metals miners, which helped propel the $FTSE 100 to an intraday record.
+**2. 💼 PORTFOLIO FOCUS**
+
+Nvidia (NVDA) is a key focus today, with analysts reiterating a bullish stance and a median target price implying a 32% upside for the stock in the new year, driven by its dominance in the AI data center market. Microsoft (MSFT) saw mixed activity, with a major institutional investor increasing its stake in the third quarter, even as recent insider selling has been noted; Wall Street remains broadly bullish on MSFT, citing AI monetization and cloud durability as primary drivers. JPMorgan (JPM) is positioned within a broader financial sector that analysts expect to outperform this year as the market rotation continues, a theme that could see regional banks and core financial institutions lead gains. The technology sector as a whole is seeing a divergence, with semiconductor and chip stocks continuing to surge on AI demand while certain software names have come under pressure.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -42,11 +44,11 @@ Double your money in ~2.1 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS $SPX500 : +60% (outperformance)
-✓ VS $NSDQ100 : -13% (underperformance)
-✓ VS $SWDA.L : +70% (outperformance)
-✓ VS $EUSTX50 : +116% (outperformance)
-✓ VS $CHINA50 : +169% (outperformance)
+✓ VS SPX500 : +60% (outperformance)
+✓ VS NSDQ100 : -13% (underperformance)
+✓ VS SWDA.L : +70% (outperformance)
+✓ VS EUSTX50 : +116% (outperformance)
+✓ VS CHINA50 : +169% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
