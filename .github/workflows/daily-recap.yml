@@ -69,6 +69,7 @@ jobs:
           echo "SPREADSHEET_ID: $SPREADSHEET_ID"
           echo "TELEGRAM_CHAT_ID: $TELEGRAM_CHAT_ID"
           echo "Checking GOOGLE_SHEETS_CREDENTIALS length: ${#SECRETS_GOOGLE_SHEETS_CREDENTIALS}"
+          echo "GIST_ID configured: ${{ secrets.GIST_ID != '' }}"
           echo "======================="
 
       - name: Collect data and generate recap
@@ -80,6 +81,9 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           MARKET_SESSION: ${{ steps.market_session.outputs.session }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Gist storage configuration
+          GITHUB_GIST_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
         run: |
           python src/data_collector.py
       
@@ -92,10 +96,13 @@ jobs:
       - name: Display recap
         run: cat output/recap.txt
 
+      # Note: We no longer commit recap_history.json to the repo
+      # Data is now stored in GitHub Gist for cleaner repo
       - name: Commit and push recap
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add output/recap.txt data/recap_history.json
-          git commit -m "Update daily recap and history" || echo "No changes to commit"
+          git add output/recap.txt
+          git commit -m "Update daily recap" || echo "No changes to commit"
+          git pull --rebase
           git push
