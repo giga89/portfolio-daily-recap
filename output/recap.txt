@@ -1,33 +1,31 @@
 🌠 DAILY RECAP 🌙
 
-✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.53% ✅ ✅ ✅
+✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.54% ✅ ✅ ✅
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-🔌 $PRY.MI +4.05%
-💼 WDEF.L +3.27%
+🔌 PRY.MI +4.05%
+💼 $WDEF.L +3.27%
 🚗 $VOW3.DE +2.80%
-🛢️ MAU.PA +2.71%
+🛢️ $MAU.PA +2.71%
 🌍 IEMG +2.65%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
 🖥️ $SNPS +24.36%
-🛢️ MAU.PA +16.01%
+🛢️ $MAU.PA +16.01%
 🏥 HUM +15.94%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🪙 $TRX +2.51%
-📊 $SX7PEX.DE +0.00%
+🪙 $TRX +2.63%
+📊 SX7PEX.DE +0.00%
 🏦 IEUR +0.00%
 
 🌍 MARKET NEWS RECAP
 
-**1. 🌍 MARKET OVERVIEW**
+Major global markets are closed for the weekend, with investor focus shifting to key economic releases next week, including the US Non-Farm Payrolls report. The primary weekend event is today's OPEC+ meeting, which will set the tone for energy markets on Monday's open. In trade policy news, the US announced a one-year delay on a planned tariff increase for certain furniture and cabinet imports from China and Vietnam, keeping the current 25% duties in place. This weekend also confirmed that China's BYD officially surpassed Tesla as the world's largest electric vehicle manufacturer in 2025 by total sales volume.
 
-US markets ended the first trading week of the year mixed, with the S&P 500 posting a modest gain of 0.19% while the Nasdaq Composite was nearly flat, reflecting a rotation out of some high-growth technology names. European indices showed strength, with the FTSE 100 hitting an intraday record and the Euro Stoxx-tracking benchmarks like Germany's DAX and France's CAC 40 advancing 0.5% to 0.8% on the first trading day of the new year. Asian trading was supported by a strong rally in tech shares, notably in Hong Kong, although the Shanghai Composite remained closed for the holiday. Analyst sentiment published today points toward continued optimism for the S&P 500 in 2026, with some institutional investors positioning for a potential 15% rally.
+💼 PORTFOLIO FOCUS
 
-**2. 💼 PORTFOLIO FOCUS**
-
-Nvidia (NVDA) is a key focus today, with analysts reiterating a bullish stance and a median target price implying a 32% upside for the stock in the new year, driven by its dominance in the AI data center market. Microsoft (MSFT) saw mixed activity, with a major institutional investor increasing its stake in the third quarter, even as recent insider selling has been noted; Wall Street remains broadly bullish on MSFT, citing AI monetization and cloud durability as primary drivers. JPMorgan (JPM) is positioned within a broader financial sector that analysts expect to outperform this year as the market rotation continues, a theme that could see regional banks and core financial institutions lead gains. The technology sector as a whole is seeing a divergence, with semiconductor and chip stocks continuing to surge on AI demand while certain software names have come under pressure.
+Nvidia has a major catalyst on the horizon as CEO Jensen Huang is scheduled to deliver a keynote at CES 2026 on Monday, January 5th. The chipmaker is also moving forward with plans to begin shipping its new H200 chips to approved Chinese customers by mid-February, a positive signal for its crucial Asian market. Tesla's latest Model 3 Standard and Model Y Standard lease deals debuted with surprisingly high effective monthly costs, which could temper sales momentum following the company's loss of the global EV sales crown. Microsoft continues to benefit from the aggressive AI infrastructure spending trend, with its Azure cloud business remaining a key driver of growth as companies scale their large language model deployments. Apple is positioned for a major AI push in 2026 with rumors circulating about a much smarter, LLM-based Siri and a refreshed MacBook Pro lineup featuring the new M5 Pro and M5 Max chips. Alibaba's Cloud and AI segment remains the most credible growth engine for the Chinese tech giant as it repositions itself as a broader technology platform.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
