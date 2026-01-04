@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    volumes:
+      - ./output:/app/output
+      - ./data:/app/data
+    environment:
+      - GOOGLE_SHEETS_CREDENTIALS=${GOOGLE_SHEETS_CREDENTIALS}
+      - ORO_USERNAME=${ORO_USERNAME}
+      - SPREADSHEET_ID=${SPREADSHEET_ID}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - MARKET_SESSION=${MARKET_SESSION:-Daily recap}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GITHUB_GIST_TOKEN=${GITHUB_GIST_TOKEN}
+      - GIST_ID=${GIST_ID}
