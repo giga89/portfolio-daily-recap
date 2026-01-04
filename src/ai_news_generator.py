@@ -5,7 +5,7 @@ Generates market news recap using Google Gemini API
 """
 
 import os
-import json
+import re
 from datetime import datetime
 try:
     from google import genai
@@ -17,43 +17,201 @@ except ImportError:
 
 from config import PORTFOLIO_TICKERS
 
-# Path for storing recap history to avoid repetition
-HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "recap_history.json")
+# Import Gist storage module
+try:
+    from gist_storage import load_data, save_data, load_recap_history, save_to_history
+    GIST_STORAGE_AVAILABLE = True
+except ImportError:
+    GIST_STORAGE_AVAILABLE = False
+    print("⚠️  gist_storage module not available, using fallback")
 
-def _load_history():
-    """Load previous news recaps to avoid repetition"""
-    if os.path.exists(HISTORY_FILE):
-        try:
-            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"⚠️ Error loading history file: {e}")
-            return []
-    return []
+# Maximum number of $ tags per post
+MAX_TAGS_PER_POST = 5
 
-def _save_to_history(recap_text):
-    """Save the current recap to history"""
+# Valid eToro symbols for tagging (only use these in posts)
+# These are confirmed to exist on eToro platform
+ETORO_VALID_SYMBOLS = list(PORTFOLIO_TICKERS.keys())
+
+
+def _get_all_portfolio_tags():
+    """Get all valid portfolio ticker tags for eToro"""
+    # Map to eToro symbols (keys of PORTFOLIO_TICKERS)
+    return [symbol.replace('.', '') for symbol in PORTFOLIO_TICKERS.keys()]
+
+
+def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
+    """
+    Select tags for the current post with rotation to ensure variety.
+    
+    Args:
+        max_tags: Maximum number of tags to select
+        excluded_tags: List of tags to exclude (e.g. already used in this post)
+    
+    Returns:
+        list: List of selected tags
+    """
+    all_tags = _get_all_portfolio_tags()
+    
+    if excluded_tags:
+        # Remove excluded tags from candidates
+        excluded_normalized = [t.replace('.', '').upper() for t in excluded_tags]
+        all_tags = [t for t in all_tags if t.replace('.', '').upper() not in excluded_normalized]
+    
+    if max_tags <= 0:
+        return []
+    
     try:
-        history = _load_history()
-        # Keep only the last 5 recaps to provide context without hitting token limits
-        history.append({
-            "timestamp": datetime.now().isoformat(),
-            "content": recap_text[:1000] # Store the first 1000 chars for context
-        })
-        history = history[-5:]
+        data = load_data()
+        used_tags = data.get('used_tags', [])
         
-        os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
-        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-            json.dump(history, f, indent=2)
+        # Prioritize tags that haven't been used recently
+        unused_tags = [tag for tag in all_tags if tag not in used_tags]
+        
+        # If all tags have been used, start fresh
+        if len(unused_tags) < max_tags:
+            # Reset rotation - take from unused first, then from start of all_tags
+            selected = unused_tags + all_tags[:max_tags - len(unused_tags)]
+        else:
+            selected = unused_tags[:max_tags]
+        
+        # Update used tags list (keep track of last 2 rounds worth)
+        new_used = used_tags + selected
+        # Keep only the most recent ones (about 2 rounds)
+        max_history = len(all_tags) * 2
+        data['used_tags'] = new_used[-max_history:] if len(new_used) > max_history else new_used
+        
+        save_data(data)
+        
+        return selected
+        
     except Exception as e:
-        print(f"⚠️ Error saving to history file: {e}")
+        print(f"⚠️ Error in tag rotation: {e}")
+        return all_tags[:max_tags]
 
 
-def generate_market_news_recap():
+def _limit_tags_in_text(text, allowed_tags, max_tags=MAX_TAGS_PER_POST):
+    """
+    Ensure text has at most max_tags $ symbols, and only uses allowed tags.
+    
+    Args:
+        text: The generated text
+        allowed_tags: List of allowed tag symbols (without $)
+        max_tags: Maximum number of tags to keep
+    
+    Returns:
+        str: Text with limited and validated tags
+    """
+    # Find all $ tags in the text
+    tag_pattern = r'\$([A-Za-z0-9\-\.]+)'
+    
+    tags_found = []
+    def tag_replacer(match):
+        tag = match.group(1)
+        # Normalize tag (remove dots for comparison)
+        tag_normalized = tag.replace('.', '').replace('-', '')
+        
+        # Check if this tag is in our allowed list
+        allowed_normalized = [t.replace('.', '').replace('-', '') for t in allowed_tags]
+        
+        if tag_normalized.upper() in [t.upper() for t in allowed_normalized]:
+            if len(tags_found) < max_tags:
+                tags_found.append(tag)
+                return f'${tag}'
+            else:
+                # Exceeded max tags, remove the $ prefix
+                return tag
+        else:
+            # Not an allowed tag, remove the $ prefix
+            return tag
+    
+    return re.sub(tag_pattern, tag_replacer, text)
+
+
+def _remove_market_section_tags(text):
+    """
+    Remove all $ tags from the MARKET OVERVIEW section.
+    Keep tags only in PORTFOLIO FOCUS section.
+    
+    Args:
+        text: The full recap text
+    
+    Returns:
+        str: Text with tags removed from market section
+    """
+    # Split into sections
+    sections = text.split('💼 PORTFOLIO FOCUS')
+    
+    if len(sections) == 2:
+        market_section = sections[0]
+        portfolio_section = sections[1]
+        
+        # Remove all $ tags from market section
+        tag_pattern = r'\$([A-Za-z0-9\-\.]+)'
+        market_section_clean = re.sub(tag_pattern, r'\1', market_section)
+        
+        return market_section_clean + '💼 PORTFOLIO FOCUS' + portfolio_section
+    
+    return text
+
+
+
+def get_recent_tags(limit=None):
+    """
+    Get list of recently used tags from storage.
+    Args:
+        limit: Return only the last N tags. If None, return all history.
+    """
+    if not GIST_STORAGE_AVAILABLE:
+        return []
+    
+    try:
+        data = load_data()
+        tags = data.get('used_tags', [])
+        if limit:
+            return tags[-limit:]
+        return tags
+    except Exception:
+        return []
+
+
+def update_rotation_history(new_tags):
+    """
+    Update the list of used tags in Gist storage.
+    Call this when tags are used outside of this module (e.g. in formatter).
+    """
+    if not GIST_STORAGE_AVAILABLE or not new_tags:
+        return
+
+    try:
+        # Normalize tags
+        normalized_new = [t.replace('$', '').replace('.', '').upper() for t in new_tags]
+        
+        data = load_data()
+        used_tags = data.get('used_tags', [])
+        
+        # Add new tags
+        updated_used = used_tags + normalized_new
+        
+        # Keep history limited (e.g. 20 items)
+        all_tickers = _get_all_portfolio_tags()
+        max_history = len(all_tickers) * 2
+        
+        data['used_tags'] = updated_used[-max_history:] if len(updated_used) > max_history else updated_used
+        save_data(data)
+        print(f"🔄 Updated tag rotation history with: {normalized_new}")
+            
+    except Exception as e:
+        print(f"⚠️ Error updating tag rotation: {e}")
+
+
+def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
     """
     Generate AI-powered market news recap for USA, CHINA, and EU markets
-    Uses multiple model fallbacks to handle quota limits gracefully
     
+    Args:
+        max_tags: Maximum number of $ tags allowed in the AI output
+        excluded_tags: List of tags already used elsewhere in the post
+        
     Returns:
         str: Formatted news recap or empty string if API key not set
     """
@@ -68,29 +226,45 @@ def generate_market_news_recap():
         return ""
     
     # List of models to try (in order of preference)
-    # Using exact names found in the debug list
     models_to_try = [
-        'gemini-2.0-flash',       # Stable 2.0
-        'gemini-flash-latest',    # Alias for latest 1.5 flash
-        'gemini-pro-latest',     # Alias for latest 1.5 pro
-        'gemini-2.0-flash-exp',   # Experimental 2.0 (fallback)
+        'gemini-2.0-flash',
+        'gemini-flash-latest',
+        'gemini-pro-latest',
+        'gemini-2.0-flash-exp',
     ]
     
     try:
         # Configure Gemini client
         client = genai.Client(api_key=api_key)
         
-        # Extract portfolio context - Use all tickers as requested
+        # Select tags for this post (with rotation)
+        selected_tags = []
+        selected_tags_str = "None" # Fix UnboundLocalError
+        tag_instruction = ""
+        
+        if max_tags > 0:
+            selected_tags = _select_tags_for_rotation(max_tags, excluded_tags)
+            selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags])
+            tag_instruction = f"""
+- IMPORTANT: You MUST use ONLY these $ tags in this section (max {max_tags}): {selected_tags_str}
+- Only use these exact tags, no other $ symbols.
+"""
+        else:
+            tag_instruction = """
+- IMPORTANT: Do NOT use any $ tags in this section.
+- Write all ticker symbols as plain text (e.g. NVDA, MSFT) without the $ prefix.
+"""
+        
+        # Get all portfolio tickers for context
         portfolio_symbols = list(PORTFOLIO_TICKERS.keys())
         portfolio_context = ", ".join(portfolio_symbols)
         
         # Load previous history to avoid repetition
-        history = _load_history()
+        history = load_recap_history() if GIST_STORAGE_AVAILABLE else []
         previous_topics_str = ""
         if history:
             previous_topics_str = "\nCRITICAL: DO NOT REPEAT the following news which were already reported recently:\n"
             for entry in history:
-                # Extract a mini-summary if possible or just part of the text
                 previous_topics_str += f"- {entry['content'][:300]}...\n"
         
         # Create prompt with strict daily focus and separated sections
@@ -108,31 +282,34 @@ Structure your response in TWO distinct sections:
 - Mention specific indices (S&P500, Nasdaq, Shanghai Composite, Euro Stoxx) only if they had significant moves today.
 - Include specific data points (percentages, levels) if available.
 - Limit to 3-4 concise, high-impact sentences.
+- IMPORTANT: Do NOT use any $ tags in this section. Write index and market names as plain text.
 
 2. 💼 PORTFOLIO FOCUS
-- Provide specific updates, catalysts, or performance drivers for these holdings: {portfolio_context}
 - Focus exclusively on news affecting these specific tickers in the last 24 hours.
-- If no specific news is available for these tickers today, briefly mention the sector trends (e.g., AI, Healthcare, Energy) impacting them right now.
+- If no specific news is available for these tickers today, briefly mention the sector trends impacting them.
 - Limit to 4-5 concise, high-impact sentences.
+{tag_instruction}
 
 Rules:
 - Professional, objective, and engaging tone.
 - Format for Telegram (plain text, use emoji sparingly).
 - DO NOT use bold text (**) for tickers or indices.
-- Always use the $ prefix for tickers (e.g., $NVDA, $AAPL, $SP500) so they can be tagged on eToro.
+- Use $ prefix ONLY for the allowed tags listed above, and ONLY in the Portfolio Focus section.
+- Maximum {MAX_TAGS_PER_POST} $ tags in the entire post.
 - Ensure the news is FRESH and relevant to today.
 
 Output format:
 🌍 MARKET NEWS RECAP
 
-[Market Overview section]
+[Market Overview section - NO $ tags here]
 
 💼 PORTFOLIO FOCUS
 
-[Portfolio Focus section]
+[Portfolio Focus section - use ONLY the allowed $ tags here]
 """
         
         print("🤖 Generating AI market news recap...")
+        print(f"   Selected tags for this post: {selected_tags_str}")
         
         # Configure search tool if available in the SDK
         config = None
@@ -160,8 +337,17 @@ Output format:
                 if response and response.text:
                     print(f"✅ AI news recap generated successfully using {model_name}!")
                     recap_text = response.text.strip()
-                    # Save to history to avoid repetition next time
-                    _save_to_history(recap_text)
+                    
+                    # Post-process: remove any $ tags from market section
+                    recap_text = _remove_market_section_tags(recap_text)
+                    
+                    # Post-process: ensure only allowed tags are used and limit count
+                    recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                    
+                    # Save to history (using Gist storage)
+                    if GIST_STORAGE_AVAILABLE:
+                        save_to_history(recap_text)
+                    
                     return "\n" + recap_text + "\n"
                 else:
                     print(f"⚠️  Empty response from {model_name}, trying next model...")
@@ -182,7 +368,13 @@ Output format:
                         if response and response.text:
                             print(f"✅ AI news recap generated successfully (without tools) using {model_name}!")
                             recap_text = response.text.strip()
-                            _save_to_history(recap_text)
+                            
+                            # Post-process
+                            recap_text = _remove_market_section_tags(recap_text)
+                            recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                            
+                            if GIST_STORAGE_AVAILABLE:
+                                save_to_history(recap_text)
                             return "\n" + recap_text + "\n"
                     except Exception as e2:
                         print(f"   Retry failed: {e2}")
@@ -192,7 +384,6 @@ Output format:
                     last_error = model_error
                     continue
                 else:
-                    # Other error, try next model anyway
                     last_error = model_error
                     continue
         
@@ -229,7 +420,7 @@ def get_why_copy_message(five_year_return=161, avg_yearly_return=32, benchmark_p
             # Calculate the difference (delta) between our return and benchmark
             delta = five_year_return - perf
             perf_label = "(outperformance)" if delta >= 0 else "(underperformance)"
-            benchmark_lines += f"✓ VS ${ticker} : {delta:+.0f}% {perf_label}\n"
+            benchmark_lines += f"✓ VS {ticker} : {delta:+.0f}% {perf_label}\n"
     else:
         # Fallback if no data
         benchmark_lines = "✓ Outperforming S&P500\n✓ Outperforming MSCI World\n✓ Outperforming Euro Stoxx 50"
