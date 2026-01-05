@@ -1,33 +1,33 @@
-🌅 U.S. MARKET OPEN 📊
+✨ U.S. MARKET CLOSE ✨
 
-✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.98% ✅ ✅ ✅
+✅ ✅ ✅ 🍀 GREAT GREEN DAY: +1.48% ✅ ✅ ✅
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-🛒 MELI +7.91%
-🛢️ $MAU.PA +5.37%
-💼 $WDEF.L +4.60%
-🛡️ $PLTR +3.53%
-⛏️ $GLEN.L +3.24%
+🛒 MELI +8.86%
+🛢️ $MAU.PA +7.22%
+📊 NOVO-B.CO +5.19%
+💼 $WDEF.L +5.13%
+🏥 $HUM +4.28%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +28.52%
-🏥 HUM +21.24%
-⛏️ $GLEN.L +20.91%
+🖥️ $SNPS +28.16%
+🏥 $HUM +23.94%
+⚡ $CCJ +22.43%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🛒 MELI +7.91%
-🛢️ $MAU.PA +5.37%
-💼 $WDEF.L +4.60%
+🛒 MELI +8.86%
+🛢️ $MAU.PA +7.22%
+📊 NOVO-B.CO +5.19%
 
 🌍 MARKET NEWS RECAP
 
 **1. 🌍 MARKET OVERVIEW**
 
-European markets began the week strongly, with the Stoxx Europe 600 climbing 0.5% in morning trading, driven by broad-based gains and a positive start to the new year. Asia also showed momentum, as the Shanghai Composite advanced 1.4%, while Japan's Nikkei 225 surged over 3.0% amid a general "January effect" optimism. US futures for the S&P 500 indicated a higher open, up 0.3%, following a modest 0.19% gain for the index in the previous session. Geopolitical tensions in Venezuela, following a US raid, provided a tailwind for defense and mining stocks globally, though oil prices remained stable.
+European markets led the global rally, with the Euro Stoxx 50 index gaining over 1.0% to hit a new record high, driven by strength in the technology and industrial sectors. In Asia, the Shanghai Composite index surged 1.1% to cross the key 4,000-point level for the first time in three months, led by a strong rally in semiconductor shares. US stocks traded mixed after the open, with the S&P 500 posting a modest gain of 0.19% while the Nasdaq Composite was largely flat, as investors digested a softer-than-expected ISM Manufacturing PMI reading of 47.9.
 
 **2. 💼 PORTFOLIO FOCUS**
 
-The artificial intelligence sector showed renewed strength, providing a boost to major tech names. Nvidia neared its all-time high of 191 per share as AI stocks experienced a resurgence and the Nasdaq climbed. Microsoft and Amazon, as part of the "Magnificent 7," are projected to collectively invest over 500 billion into hyperscaling AI this year, underscoring their commitment to the technology. Apple's supply chain received positive news as Foxconn, a key iPhone assembler, reported a 22% surge in its most recent quarterly revenue, surpassing analyst estimates. Tesla, while lacking specific fresh company news, is trading within the broader technology sector trend, where the focus remains on the profitability and growth realization from massive AI capital expenditures.
+The semiconductor and Artificial Intelligence (AI) theme remains robust, with UBS reiterating a "Buy" rating on NVDA shares ahead of a scheduled keynote address. The broader tech sector buoyancy, especially in AI-related infrastructure, helped support the overall trend in the S&P 500 and Nasdaq 100, which continues to benefit MSFT and AMZN as major cloud and enterprise service providers. While no direct news was available for TSLA, the energy sector saw a lift, with related oil infrastructure stocks rallying on geopolitical developments, a trend which could indirectly affect the EV sector's input costs. Outside of Big Tech, Coinbase (COIN) received an analyst upgrade from Goldman Sachs to a "Buy," citing an attractive valuation following recent underperformance.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -45,10 +45,10 @@ Double your money in ~2.1 years
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
 ✓ VS SPX500 : +59% (outperformance)
-✓ VS NSDQ100 : -16% (underperformance)
+✓ VS NSDQ100 : -15% (underperformance)
 ✓ VS SWDA.L : +69% (outperformance)
-✓ VS EUSTX50 : +115% (outperformance)
-✓ VS CHINA50 : +171% (outperformance)
+✓ VS EUSTX50 : +114% (outperformance)
+✓ VS CHINA50 : +169% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
