@@ -1,33 +1,31 @@
-✨ U.S. MARKET CLOSE ✨
+🌅 EUROPEAN MARKET OPEN 📊
 
-✅ ✅ ✅ 🍀 GREAT GREEN DAY: +1.48% ✅ ✅ ✅
+🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.19% 🌱 🌱 🌱
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-🛒 MELI +8.86%
-🛢️ $MAU.PA +7.22%
-📊 NOVO-B.CO +5.19%
-💼 $WDEF.L +5.13%
-🏥 $HUM +4.28%
+🏦 $2318.HK +4.96%
+🧬 AZN.L +1.29%
+🌍 IEMG +1.01%
+🏦 $IEUR +0.91%
+⛏️ GLEN.L +0.67%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
 🖥️ $SNPS +28.16%
-🏥 $HUM +23.94%
-⚡ $CCJ +22.43%
+🛢️ $MAU.PA +26.98%
+🏦 $2318.HK +26.54%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🛒 MELI +8.86%
-🛢️ $MAU.PA +7.22%
-📊 NOVO-B.CO +5.19%
+🛒 $MELI +8.86%
+🏦 $2318.HK +7.78%
+🛢️ $MAU.PA +7.40%
 
 🌍 MARKET NEWS RECAP
 
-**1. 🌍 MARKET OVERVIEW**
+Global equities began the new year with a strong risk-on tone. The US market closed Monday's session with the Dow Jones Industrial Average hitting a fresh record, rising 1.2%, while the S&P 500 and Nasdaq Composite both gained around 0.65% on the day. European markets continued their rally, with the Euro Stoxx 600 breaking the 600 level for the first time and inching up another 0.2% on Tuesday to a new all-time high. In Asia, the Shanghai Composite Index surged 1.5% to 4084 points, its highest level in a decade, fueled by optimism in the technology sector.
 
-European markets led the global rally, with the Euro Stoxx 50 index gaining over 1.0% to hit a new record high, driven by strength in the technology and industrial sectors. In Asia, the Shanghai Composite index surged 1.1% to cross the key 4,000-point level for the first time in three months, led by a strong rally in semiconductor shares. US stocks traded mixed after the open, with the S&P 500 posting a modest gain of 0.19% while the Nasdaq Composite was largely flat, as investors digested a softer-than-expected ISM Manufacturing PMI reading of 47.9.
+💼 PORTFOLIO FOCUS
 
-**2. 💼 PORTFOLIO FOCUS**
-
-The semiconductor and Artificial Intelligence (AI) theme remains robust, with UBS reiterating a "Buy" rating on NVDA shares ahead of a scheduled keynote address. The broader tech sector buoyancy, especially in AI-related infrastructure, helped support the overall trend in the S&P 500 and Nasdaq 100, which continues to benefit MSFT and AMZN as major cloud and enterprise service providers. While no direct news was available for TSLA, the energy sector saw a lift, with related oil infrastructure stocks rallying on geopolitical developments, a trend which could indirectly affect the EV sector's input costs. Outside of Big Tech, Coinbase (COIN) received an analyst upgrade from Goldman Sachs to a "Buy," citing an attractive valuation following recent underperformance.
+The technology sector remains a key focus, with NVDA trading slightly lower in pre-market action as investors absorb new product announcements from the Consumer Electronics Show (CES), including updates on its Vera Rubin AI chips and robotics roadmap. MSFT, a leader in the AI buildout, continues to be impacted by the broader market theme of aggressive AI-related capital expenditure, a trend which analysts warn could fuel a resurgence in inflation. In financials, JPM is seeing significant institutional activity, with large January call option blocks being placed ahead of the upcoming quarterly earnings season and further clarity on the Federal Reserve's monetary policy path. The financial sector overall has been rising following a strong finish to the prior trading day.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -47,7 +45,7 @@ Double your money in ~2.1 years
 ✓ VS SPX500 : +59% (outperformance)
 ✓ VS NSDQ100 : -15% (underperformance)
 ✓ VS SWDA.L : +69% (outperformance)
-✓ VS EUSTX50 : +114% (outperformance)
+✓ VS EUSTX50 : +115% (outperformance)
 ✓ VS CHINA50 : +169% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
