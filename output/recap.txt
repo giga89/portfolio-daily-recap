@@ -1,31 +1,31 @@
-🌅 EUROPEAN MARKET OPEN 📊
+🌅 U.S. MARKET OPEN 📊
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.19% 🌱 🌱 🌱
+✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.78% ✅ ✅ ✅
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
 🏦 $2318.HK +4.96%
-🧬 AZN.L +1.29%
-🌍 IEMG +1.01%
-🏦 $IEUR +0.91%
-⛏️ GLEN.L +0.67%
+📊 NOVO-B.CO +4.86%
+🛒 $MELI +3.39%
+🧬 $AZN.L +3.03%
+🏭 TSM +2.95%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +28.16%
-🛢️ $MAU.PA +26.98%
-🏦 $2318.HK +26.54%
+🖥️ $SNPS +28.37%
+⚡ $CCJ +27.21%
+⛏️ GLEN.L +27.18%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🛒 $MELI +8.86%
+🛒 $MELI +12.55%
+📊 NOVO-B.CO +10.30%
 🏦 $2318.HK +7.78%
-🛢️ $MAU.PA +7.40%
 
 🌍 MARKET NEWS RECAP
 
-Global equities began the new year with a strong risk-on tone. The US market closed Monday's session with the Dow Jones Industrial Average hitting a fresh record, rising 1.2%, while the S&P 500 and Nasdaq Composite both gained around 0.65% on the day. European markets continued their rally, with the Euro Stoxx 600 breaking the 600 level for the first time and inching up another 0.2% on Tuesday to a new all-time high. In Asia, the Shanghai Composite Index surged 1.5% to 4084 points, its highest level in a decade, fueled by optimism in the technology sector.
+**1. 🌍 MARKET OVERVIEW**
+US markets closed a strong session with the S&P 500 gaining 0.6% and the Nasdaq Composite rising 0.7%, driven by broad gains across energy and bank sectors. Asian equities saw a strong rally, with the Shanghai Composite surging 1.5% to hit its highest level in four years, while Hong Kong's Hang Seng also climbed 1.4%. European bourses traded mixed in early hours, with Germany's DAX edging 0.1% higher and the French CAC 40 slipping 0.3%.
 
-💼 PORTFOLIO FOCUS
-
-The technology sector remains a key focus, with NVDA trading slightly lower in pre-market action as investors absorb new product announcements from the Consumer Electronics Show (CES), including updates on its Vera Rubin AI chips and robotics roadmap. MSFT, a leader in the AI buildout, continues to be impacted by the broader market theme of aggressive AI-related capital expenditure, a trend which analysts warn could fuel a resurgence in inflation. In financials, JPM is seeing significant institutional activity, with large January call option blocks being placed ahead of the upcoming quarterly earnings season and further clarity on the Federal Reserve's monetary policy path. The financial sector overall has been rising following a strong finish to the prior trading day.
+**2. 💼 PORTFOLIO FOCUS**
+Artificial Intelligence infrastructure was the central theme for big tech today, with NVDA gaining 2.0% as it confirmed a production ramp for its next-gen Rubin architecture at CES. Analyst commentary on NVDA and MSFT was highly bullish, with Wedbush arguing the market is underestimating the AI boom's true value for both companies. The firm called fiscal 2026 the "true inflection point for AI growth" for MSFT as corporate CIO budgets for AI deployments ramp up. GOOGL and other hyperscalers were noted as key drivers of NVDA's predicted explosive demand for advanced AI chips.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -42,11 +42,11 @@ Double your money in ~2.1 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS SPX500 : +59% (outperformance)
-✓ VS NSDQ100 : -15% (underperformance)
-✓ VS SWDA.L : +69% (outperformance)
-✓ VS EUSTX50 : +115% (outperformance)
-✓ VS CHINA50 : +169% (outperformance)
+✓ VS SPX500 : +58% (outperformance)
+✓ VS NSDQ100 : -17% (underperformance)
+✓ VS SWDA.L : +68% (outperformance)
+✓ VS EUSTX50 : +114% (outperformance)
+✓ VS CHINA50 : +168% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
