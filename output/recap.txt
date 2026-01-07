@@ -1,41 +1,41 @@
-✨ U.S. MARKET CLOSE ✨
+🌅 EUROPEAN MARKET OPEN 📊
 
-✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.85% ✅ ✅ ✅
+⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.02% ⚖️ ⚖️ ⚖️
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-🏦 $2318.HK +4.96%
-🧬 $AZN.L +4.87%
-📦 AMZN +3.38%
-🛡️ PLTR +3.26%
-🖥️ $SNPS +2.95%
+🔋 $ENEL.MI +1.76%
+💼 $WDEF.L +1.41%
+🧬 $AZN.L +0.97%
+🌍 IEMG +0.76%
+🔌 PRY.MI +0.37%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
 🖥️ $SNPS +31.00%
 ⚡ CCJ +28.76%
-⛏️ $GLEN.L +27.97%
+🏦 $2318.HK +25.73%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🛒 $MELI +10.81%
-🏦 $2318.HK +7.78%
+🛒 MELI +10.81%
 📊 NOVO-B.CO +7.39%
+💼 $WDEF.L +7.25%
 
 🌍 MARKET NEWS RECAP
 
-**1. 🌍 MARKET OVERVIEW**
+1. 🌍 MARKET OVERVIEW
 
-US markets continued their upward trajectory, with the S&P 500 climbing 0.61% to a new record close and the Nasdaq Composite advancing 0.63%, both boosted by optimism in the artificial intelligence sector. In Asia, the Shanghai Composite surged 1.5% to reach its highest level in a decade, fueled by strong investor sentiment for technology and hopes for an economic recovery. European equities also posted gains, with the pan-European Stoxx 600 rising 0.58% to an all-time high, as Germany’s DAX and the UK’s FTSE 100 also closed at record levels. The broad global rally largely overlooked persistent geopolitical tensions and mixed economic data.
+US markets extended their record run, with the S&P 500 and Nasdaq Composite advancing over 0.6% on broad tech-led gains and optimism surrounding the Consumer Electronics Show. European markets were mixed, with the Stoxx Europe 600 posting modest gains despite the UK's FTSE 100 facing a slight decline. In Asia, the Shanghai Composite closed marginally higher, but the region was generally mixed as investors digested geopolitical developments. Oil prices eased on reports of potential US control over sanctioned Venezuelan crude, while the US 10-year Treasury yield declined slightly.
 
-**2. 💼 PORTFOLIO FOCUS**
+2. 💼 PORTFOLIO FOCUS
 
-Nvidia was in the spotlight, announcing the launch of its next-generation Vera Rubin superchip at the CES 2026 trade show, further solidifying its dominant position in the AI hardware race. Tesla shares experienced a significant decline of 4.4% today, a notable move against the broader market's strength. Microsoft and Meta Platforms, while lacking specific single-day company news, participated in the wider rally among major technology companies. The entire technology and semiconductor sector saw strong momentum, with memory and data storage stocks in particular leading the charge following the AI chip announcements.
+The technology sector's strength, driven by Artificial Intelligence (AI) optimism, continues to influence major tech stocks. NVDA was highlighted by analysts as a top AI pick for 2026 following its presentation at CES, underscoring its dominance in the GPU space for data center workloads. MSFT is gaining attention due to its Azure cloud platform's growth potential, with commentators advising investors to "Ignore the Noise" on short-term concerns. AAPL's stock is being watched for its capacity to monetize its "invisible AI" strategy, with its CEO expected to oversee key AI projects for the coming years.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
 
 📈 TRACK RECORD:
-+171% since strategy change (2020)
-~34% average annual return
-Double your money in ~2.1 years
++179% since strategy change (2020)
+~36% average annual return
+Double your money in ~2.0 years
 
 ✅ STRATEGY HIGHLIGHTS:
 • Smart diversification across 3 continents
@@ -44,11 +44,11 @@ Double your money in ~2.1 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS SPX500 : +58% (outperformance)
-✓ VS NSDQ100 : -18% (underperformance)
-✓ VS SWDA.L : +68% (outperformance)
-✓ VS EUSTX50 : +114% (outperformance)
-✓ VS CHINA50 : +169% (outperformance)
+✓ VS SPX500 : +66% (outperformance)
+✓ VS NSDQ100 : -10% (underperformance)
+✓ VS SWDA.L : +76% (outperformance)
+✓ VS EUSTX50 : +122% (outperformance)
+✓ VS CHINA50 : +177% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
