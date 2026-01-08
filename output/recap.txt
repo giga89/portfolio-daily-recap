@@ -1,31 +1,28 @@
-🌅 EUROPEAN MARKET OPEN 📊
+🌅 U.S. MARKET OPEN 📊
 
-⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.32% ⚖️ ⚖️ ⚖️
+⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.49% ⚖️ ⚖️ ⚖️
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-💼 WDEF.L +1.06%
-📊 $SX7PEX.DE +0.30%
-🏥 $ABT +0.00%
-💉 ABBV +0.00%
-💊 $LLY +0.00%
+🏥 $HUM +1.80%
+💼 $WDEF.L +1.75%
+📊 $NOVO-B.CO +1.57%
+📦 $AMZN +1.15%
+🔍 GOOG +1.07%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ SNPS +28.44%
-📊 NOVO-B.CO +25.79%
-⚡ $CCJ +24.96%
+🖥️ $SNPS +27.67%
+💼 $WDEF.L +22.72%
+📊 $NOVO-B.CO +22.10%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-💼 WDEF.L +11.24%
-🛒 $MELI +9.57%
-🛡️ PLTR +8.23%
+💼 $WDEF.L +12.01%
+🛒 MELI +10.55%
+📊 $NOVO-B.CO +9.68%
 
-🌍 MARKET NEWS RECAP
-
-The US market closed mixed, with the S&P 500 falling 0.3% and the Dow Jones Industrial Average dropping nearly 1.0% from their recent highs, largely due to weakness in defense and data storage stocks. The tech-heavy Nasdaq Composite, however, managed a modest 0.2% gain, supported by strength in chip and AI-related names. European markets were mixed, as the Euro Stoxx 50 edged down 0.14%, while the German DAX climbed 0.92%. In Asia, the Shanghai Composite index slipped a marginal 0.1% today, contrasting with broader regional weakness.
-
-💼 PORTFOLIO FOCUS
-
-The technology sector saw a renewed appetite for risk, driven by the continued Artificial Intelligence boom. NVIDIA (NVDA) stock is positioned for significant upside following the US government's decision to permit sales of its advanced H200 AI chips to approved customers in the Chinese market. Analysts project this policy change could generate 40 billion in revenue for the chipmaker in 2026 alone. NVIDIA is also actively developing its quantum computing platform, CUDA-Q, to secure its position at the intersection of GPU and quantum technologies. Microsoft (MSFT) is also listed among the key blue-chip stocks benefiting from the AI rally, leveraging its strong Azure cloud and Microsoft 365 platforms.
+New search plan:
+1. Search for global market recap for January 8, 2026, including S&P 500, Nasdaq, Shanghai Composite, and Euro Stoxx performance.
+2. Search for specific news for NVDA, MSFT, TSLA, and AAPL in the last 24 hours.
+3. Synthesize the information to create the recap.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -43,9 +40,9 @@ Double your money in ~2.0 years
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
 ✓ VS SPX500 : +68% (outperformance)
-✓ VS NSDQ100 : -9% (underperformance)
+✓ VS NSDQ100 : -7% (underperformance)
 ✓ VS SWDA.L : +77% (outperformance)
-✓ VS EUSTX50 : +123% (outperformance)
+✓ VS EUSTX50 : +124% (outperformance)
 ✓ VS CHINA50 : +180% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
