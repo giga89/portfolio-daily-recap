@@ -1,28 +1,31 @@
-🌅 U.S. MARKET OPEN 📊
+✨ U.S. MARKET CLOSE ✨
 
-⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.49% ⚖️ ⚖️ ⚖️
+🩸 🩸 🩸 💀 ROUGH DAY: -0.80% 🩸 🩸 🩸
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-🏥 $HUM +1.80%
-💼 $WDEF.L +1.75%
-📊 $NOVO-B.CO +1.57%
-📦 $AMZN +1.15%
-🔍 GOOG +1.07%
+📦 AMZN +1.96%
+⚡ $CCJ +1.75%
+📊 $NOVO-B.CO +1.36%
+🏎️ $RACE +1.10%
+💼 WDEF.L +1.10%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +27.67%
-💼 $WDEF.L +22.72%
-📊 $NOVO-B.CO +22.10%
+🖥️ $SNPS +28.11%
+🏦 2318.HK +21.98%
+💼 WDEF.L +21.93%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-💼 $WDEF.L +12.01%
-🛒 MELI +10.55%
-📊 $NOVO-B.CO +9.68%
+💼 WDEF.L +11.29%
+🛒 $MELI +10.44%
+📊 $NOVO-B.CO +9.45%
 
-New search plan:
-1. Search for global market recap for January 8, 2026, including S&P 500, Nasdaq, Shanghai Composite, and Euro Stoxx performance.
-2. Search for specific news for NVDA, MSFT, TSLA, and AAPL in the last 24 hours.
-3. Synthesize the information to create the recap.
+🌍 MARKET NEWS RECAP
+
+Global markets traded mixed today as the early-year rally cooled, with the S&P 500 index falling 0.3% while the Nasdaq composite managed a modest gain of 0.2%. European bourses were broadly lower, with the Euro Stoxx 50 index declining 0.22% amid weaker economic confidence data. In Asia, the Shanghai Composite index edged down nearly 0.1%, while technology stocks led a sharp 1.6% drop in Japan's Nikkei 225.
+
+💼 PORTFOLIO FOCUS
+
+The technology sector saw a notable rotation today, with Alphabet (GOOGL) shares surging approximately 2.5% on optimism surrounding its AI-driven growth, briefly pushing its market value past Apple (AAPL). Apple (AAPL) extended its slide, retreating further from its recent high as investors weighed surging component costs and a shift out of high-valuation growth names. Chipmaker Nvidia (NVDA) remained resilient, gaining around 1.0% and benefiting from its position as a primary supplier in the face of ongoing memory shortages. Microsoft (MSFT) dipped as some investors began demanding more concrete returns on its massive artificial intelligence capital expenditures. Tesla (TSLA) traded with elevated volatility as the electric vehicle sector continued to be impacted by the broader rotation away from high-momentum growth stocks.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -41,9 +44,9 @@ Double your money in ~2.0 years
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
 ✓ VS SPX500 : +68% (outperformance)
 ✓ VS NSDQ100 : -7% (underperformance)
-✓ VS SWDA.L : +77% (outperformance)
+✓ VS SWDA.L : +76% (outperformance)
 ✓ VS EUSTX50 : +124% (outperformance)
-✓ VS CHINA50 : +180% (outperformance)
+✓ VS CHINA50 : +179% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
