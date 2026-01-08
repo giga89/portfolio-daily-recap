@@ -1,39 +1,39 @@
-✨ U.S. MARKET CLOSE ✨
+🌅 EUROPEAN MARKET OPEN 📊
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.05% 🌱 🌱 🌱
+⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.32% ⚖️ ⚖️ ⚖️
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-💉 $ABBV +4.24%
-💊 $LLY +4.14%
-💼 WDEF.L +4.09%
-🔍 GOOG +2.43%
-☁️ $NET +2.43%
+💼 WDEF.L +1.06%
+📊 $SX7PEX.DE +0.30%
+🏥 $ABT +0.00%
+💉 ABBV +0.00%
+💊 $LLY +0.00%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +28.44%
+🖥️ SNPS +28.44%
 📊 NOVO-B.CO +25.79%
-🏦 2318.HK +25.73%
+⚡ $CCJ +24.96%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-💼 WDEF.L +10.08%
+💼 WDEF.L +11.24%
 🛒 $MELI +9.57%
 🛡️ PLTR +8.23%
 
 🌍 MARKET NEWS RECAP
 
-Global markets reacted positively to better-than-expected US non-farm payroll data, signaling continued economic strength, which drove the S&P 500 up 1.1% to a new record high. The Nasdaq Composite led the charge, gaining 1.5%, fueled by renewed optimism in growth stocks. Conversely, the Shanghai Composite drifted 0.6% lower amid new regulatory scrutiny on the property sector, while the Euro Stoxx finished flat, with a modest 0.2% gain, following mixed industrial production figures.
+The US market closed mixed, with the S&P 500 falling 0.3% and the Dow Jones Industrial Average dropping nearly 1.0% from their recent highs, largely due to weakness in defense and data storage stocks. The tech-heavy Nasdaq Composite, however, managed a modest 0.2% gain, supported by strength in chip and AI-related names. European markets were mixed, as the Euro Stoxx 50 edged down 0.14%, while the German DAX climbed 0.92%. In Asia, the Shanghai Composite index slipped a marginal 0.1% today, contrasting with broader regional weakness.
 
 💼 PORTFOLIO FOCUS
 
-Microsoft (MSFT) shares climbed on news of a multi-billion dollar, multi-year contract win with a major European government for secure cloud services. Tesla (TSLA) outperformed the automotive sector after a prominent investment bank upgraded the stock and raised its price target, citing a significant margin expansion forecast. ExxonMobil (XOM) benefited from a sharp spike in crude oil prices, which surged past 80 a barrel on renewed supply concerns following unexpected pipeline maintenance. The broader technology sector saw a strong bid, benefiting names like Apple (AAPL) and Adobe (ADBE), while the pharmaceutical segment, including Eli Lilly (LLY), traded higher on speculation of new M&A activity.
+The technology sector saw a renewed appetite for risk, driven by the continued Artificial Intelligence boom. NVIDIA (NVDA) stock is positioned for significant upside following the US government's decision to permit sales of its advanced H200 AI chips to approved customers in the Chinese market. Analysts project this policy change could generate 40 billion in revenue for the chipmaker in 2026 alone. NVIDIA is also actively developing its quantum computing platform, CUDA-Q, to secure its position at the intersection of GPU and quantum technologies. Microsoft (MSFT) is also listed among the key blue-chip stocks benefiting from the AI rally, leveraging its strong Azure cloud and Microsoft 365 platforms.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
 
 📈 TRACK RECORD:
-+156% since strategy change (2020)
-~31% average annual return
-Double your money in ~2.3 years
++180% since strategy change (2020)
+~36% average annual return
+Double your money in ~2.0 years
 
 ✅ STRATEGY HIGHLIGHTS:
 • Smart diversification across 3 continents
@@ -42,11 +42,11 @@ Double your money in ~2.3 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS SPX500 : +44% (outperformance)
-✓ VS NSDQ100 : -33% (underperformance)
-✓ VS SWDA.L : +52% (outperformance)
-✓ VS EUSTX50 : +99% (outperformance)
-✓ VS CHINA50 : +156% (outperformance)
+✓ VS SPX500 : +68% (outperformance)
+✓ VS NSDQ100 : -9% (underperformance)
+✓ VS SWDA.L : +77% (outperformance)
+✓ VS EUSTX50 : +123% (outperformance)
+✓ VS CHINA50 : +180% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
