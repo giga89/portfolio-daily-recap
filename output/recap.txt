@@ -1,37 +1,37 @@
-✨ U.S. MARKET CLOSE ✨
+🌅 EUROPEAN MARKET OPEN 📊
 
-🩸 🩸 🩸 💀 ROUGH DAY: -0.80% 🩸 🩸 🩸
+🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.32% 🌱 🌱 🌱
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-📦 AMZN +1.96%
-⚡ $CCJ +1.75%
-📊 $NOVO-B.CO +1.36%
-🏎️ $RACE +1.10%
-💼 WDEF.L +1.10%
+⛏️ GLEN.L +8.43%
+🛢️ $MAU.PA +2.79%
+🚗 $VOW3.DE +2.21%
+🚢 $1919.HK +0.95%
+🔥 IQQL.DE +0.24%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
 🖥️ $SNPS +28.11%
-🏦 2318.HK +21.98%
-💼 WDEF.L +21.93%
+⛏️ GLEN.L +27.92%
+🛢️ $MAU.PA +23.43%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-💼 WDEF.L +11.29%
-🛒 $MELI +10.44%
-📊 $NOVO-B.CO +9.45%
+💼 $WDEF.L +11.37%
+🛒 MELI +10.44%
+⛏️ GLEN.L +9.54%
 
 🌍 MARKET NEWS RECAP
 
-Global markets traded mixed today as the early-year rally cooled, with the S&P 500 index falling 0.3% while the Nasdaq composite managed a modest gain of 0.2%. European bourses were broadly lower, with the Euro Stoxx 50 index declining 0.22% amid weaker economic confidence data. In Asia, the Shanghai Composite index edged down nearly 0.1%, while technology stocks led a sharp 1.6% drop in Japan's Nikkei 225.
+Global markets traded mixed, driven by a rotation out of mega-cap technology and into cyclical and defense sectors. US indices closed with the S&P 500 flat and the Nasdaq Composite falling 0.44%, while the Dow Jones rose 0.55% on Thursday. In Asia, the Shanghai Composite advanced 0.9% after official data showed China's consumer inflation picked up in December to its fastest pace in nearly three years, suggesting improved domestic demand. European markets were mixed, with the Euro Stoxx 50 closing down 0.32% on Thursday, although morning trade saw a modest recovery as investors digested positive Eurozone unemployment data.
 
 💼 PORTFOLIO FOCUS
 
-The technology sector saw a notable rotation today, with Alphabet (GOOGL) shares surging approximately 2.5% on optimism surrounding its AI-driven growth, briefly pushing its market value past Apple (AAPL). Apple (AAPL) extended its slide, retreating further from its recent high as investors weighed surging component costs and a shift out of high-valuation growth names. Chipmaker Nvidia (NVDA) remained resilient, gaining around 1.0% and benefiting from its position as a primary supplier in the face of ongoing memory shortages. Microsoft (MSFT) dipped as some investors began demanding more concrete returns on its massive artificial intelligence capital expenditures. Tesla (TSLA) traded with elevated volatility as the electric vehicle sector continued to be impacted by the broader rotation away from high-momentum growth stocks.
+The technology sector faced continued pressure, with high-growth AI-linked stocks seeing profit-taking and a rotation of capital; NVDA shares, for example, fell over 2% amid renewed scrutiny over AI-related capital expenditures and talk of limits on high-end chip orders. In contrast, the defense sector saw a strong rally, with names like Lockheed Martin and Northrop Grumman posting significant gains on speculation of a substantial increase to the US military budget. The basic materials sector was a major focus in Europe following reports of potential mega-merger talks between Rio Tinto and Glencore, sending Glencore shares up 7.5% in morning trading. This sectoral shift drove the mixed performance across the US market, with the S&P 500 barely moving while the Nasdaq underperformed. The Shanghai Composite, however, was boosted by the domestic inflation data.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
 
 📈 TRACK RECORD:
-+180% since strategy change (2020)
++178% since strategy change (2020)
 ~36% average annual return
 Double your money in ~2.0 years
 
@@ -42,11 +42,11 @@ Double your money in ~2.0 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS SPX500 : +68% (outperformance)
-✓ VS NSDQ100 : -7% (underperformance)
-✓ VS SWDA.L : +76% (outperformance)
-✓ VS EUSTX50 : +124% (outperformance)
-✓ VS CHINA50 : +179% (outperformance)
+✓ VS SPX500 : +66% (outperformance)
+✓ VS NSDQ100 : -9% (underperformance)
+✓ VS SWDA.L : +74% (outperformance)
+✓ VS EUSTX50 : +120% (outperformance)
+✓ VS CHINA50 : +177% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
