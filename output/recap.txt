@@ -1,40 +1,40 @@
-🌅 U.S. MARKET OPEN 📊
+✨ U.S. MARKET CLOSE ✨
 
-✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.83% ✅ ✅ ✅
+✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.74% ✅ ✅ ✅
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-⛏️ $GLEN.L +10.04%
-⚡ CCJ +5.45%
-📊 $NOVO-B.CO +5.22%
+⛏️ $GLEN.L +9.60%
 🛢️ $MAU.PA +4.62%
-🚗 $VOW3.DE +2.95%
+💻 $AVGO +3.76%
+📊 NOVO-B.CO +2.56%
+🖥️ $SNPS +2.08%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-⛏️ $GLEN.L +29.82%
-⚡ CCJ +25.82%
-🖥️ SNPS +25.67%
+⛏️ $GLEN.L +29.31%
+🖥️ $SNPS +28.19%
+🛢️ $MAU.PA +25.63%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-📊 $NOVO-B.CO +15.16%
-⚡ CCJ +13.15%
-💼 $WDEF.L +12.84%
+💼 $WDEF.L +12.97%
+📊 NOVO-B.CO +12.25%
+⛏️ $GLEN.L +10.73%
 
 🌍 MARKET NEWS RECAP
 
 **1. 🌍 MARKET OVERVIEW**
 
-US indices closed mixed as a rotation out of high-growth technology continued, leaving the Nasdaq Composite down 0.44% while the S&P 500 was marginally higher. European markets, including the Euro Stoxx 50, traded slightly lower by about 0.3% as investors cooled off after recent record highs and digested fresh geopolitical news. In Asia, the Shanghai Composite was a strong performer, climbing 0.9% following data showing China's December inflation rate picked up to a near three-year high, signaling a modest recovery in domestic demand. International crude oil prices continued their rebound, accelerated by geopolitical supply disruption concerns, with WTI crude closing up over 3.6%.
+US equities closed mixed as investors rotated out of high-flying technology stocks, though the S&P 500 still managed to hit a new all-time high on the back of a resilient jobs report. The Nasdaq Composite fell 0.44% as investors digested new rate-cut timing expectations and a cooling in the AI hardware trade. In Europe, the Euro Stoxx 50 closed slightly lower, down 0.3%, as markets took a breather after setting record highs earlier in the week. Conversely, the Shanghai Composite rallied sharply, climbing 0.9% to close at a 10.5-year high following positive domestic inflation data suggesting an improvement in demand.
 
 **2. 💼 PORTFOLIO FOCUS**
 
-Nvidia was under pressure, falling over 2% yesterday, as the broader AI hardware trade cooled and investors rotated into other sectors. The company announced the hiring of its first Chief Marketing Officer, Alison Wagonfeld, signaling a strategic push to boost brand awareness beyond the core tech space. Microsoft remains a key player in the AI infrastructure war, with the market monitoring its massive capital expenditure and the planned ramp-up of its custom Maia 200 and Cobalt 100 silicon to reduce reliance on third-party chips. Chinese tech giant Alibaba surged more than 5% on news that China is planning to approve certain imports of advanced H200 chips, a significant catalyst that supports the company’s aggressive domestic AI development efforts.
+The AI hardware trade saw a notable deceleration, with Nvidia (NVDA) falling over 2% amid cooling sentiment and new talks about potential limits on H200 chip orders. Financials are in focus as JPMorgan Chase (JPM) prepares to kick off bank earnings next week, with the bank's results expected to test the "soft landing" narrative. JPMorgan's report will also carry a 2.2 billion provision for credit losses related to its forward purchase commitment of the Apple (AAPL) Card portfolio. Meanwhile, Tesla (TSLA) was a strong performer, gaining nearly 2% as capital rotated into cyclicals and away from the dominant technology names. Microsoft (MSFT) remains a key stock to watch as the market scrutinizes guidance on AI infrastructure spending during the upcoming tech earnings season.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
 
 📈 TRACK RECORD:
-+177% since strategy change (2020)
-~35% average annual return
++178% since strategy change (2020)
+~36% average annual return
 Double your money in ~2.0 years
 
 ✅ STRATEGY HIGHLIGHTS:
@@ -44,9 +44,9 @@ Double your money in ~2.0 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS SPX500 : +65% (outperformance)
-✓ VS NSDQ100 : -11% (underperformance)
-✓ VS SWDA.L : +72% (outperformance)
+✓ VS SPX500 : +64% (outperformance)
+✓ VS NSDQ100 : -12% (underperformance)
+✓ VS SWDA.L : +73% (outperformance)
 ✓ VS EUSTX50 : +119% (outperformance)
 ✓ VS CHINA50 : +177% (outperformance)
 
