@@ -1,38 +1,40 @@
-🌅 EUROPEAN MARKET OPEN 📊
+🌅 U.S. MARKET OPEN 📊
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.32% 🌱 🌱 🌱
+✅ ✅ ✅ 🍀 GREAT GREEN DAY: +0.83% ✅ ✅ ✅
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-⛏️ GLEN.L +8.43%
-🛢️ $MAU.PA +2.79%
-🚗 $VOW3.DE +2.21%
-🚢 $1919.HK +0.95%
-🔥 IQQL.DE +0.24%
+⛏️ $GLEN.L +10.04%
+⚡ CCJ +5.45%
+📊 $NOVO-B.CO +5.22%
+🛢️ $MAU.PA +4.62%
+🚗 $VOW3.DE +2.95%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +28.11%
-⛏️ GLEN.L +27.92%
-🛢️ $MAU.PA +23.43%
+⛏️ $GLEN.L +29.82%
+⚡ CCJ +25.82%
+🖥️ SNPS +25.67%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-💼 $WDEF.L +11.37%
-🛒 MELI +10.44%
-⛏️ GLEN.L +9.54%
+📊 $NOVO-B.CO +15.16%
+⚡ CCJ +13.15%
+💼 $WDEF.L +12.84%
 
 🌍 MARKET NEWS RECAP
 
-Global markets traded mixed, driven by a rotation out of mega-cap technology and into cyclical and defense sectors. US indices closed with the S&P 500 flat and the Nasdaq Composite falling 0.44%, while the Dow Jones rose 0.55% on Thursday. In Asia, the Shanghai Composite advanced 0.9% after official data showed China's consumer inflation picked up in December to its fastest pace in nearly three years, suggesting improved domestic demand. European markets were mixed, with the Euro Stoxx 50 closing down 0.32% on Thursday, although morning trade saw a modest recovery as investors digested positive Eurozone unemployment data.
+**1. 🌍 MARKET OVERVIEW**
 
-💼 PORTFOLIO FOCUS
+US indices closed mixed as a rotation out of high-growth technology continued, leaving the Nasdaq Composite down 0.44% while the S&P 500 was marginally higher. European markets, including the Euro Stoxx 50, traded slightly lower by about 0.3% as investors cooled off after recent record highs and digested fresh geopolitical news. In Asia, the Shanghai Composite was a strong performer, climbing 0.9% following data showing China's December inflation rate picked up to a near three-year high, signaling a modest recovery in domestic demand. International crude oil prices continued their rebound, accelerated by geopolitical supply disruption concerns, with WTI crude closing up over 3.6%.
 
-The technology sector faced continued pressure, with high-growth AI-linked stocks seeing profit-taking and a rotation of capital; NVDA shares, for example, fell over 2% amid renewed scrutiny over AI-related capital expenditures and talk of limits on high-end chip orders. In contrast, the defense sector saw a strong rally, with names like Lockheed Martin and Northrop Grumman posting significant gains on speculation of a substantial increase to the US military budget. The basic materials sector was a major focus in Europe following reports of potential mega-merger talks between Rio Tinto and Glencore, sending Glencore shares up 7.5% in morning trading. This sectoral shift drove the mixed performance across the US market, with the S&P 500 barely moving while the Nasdaq underperformed. The Shanghai Composite, however, was boosted by the domestic inflation data.
+**2. 💼 PORTFOLIO FOCUS**
+
+Nvidia was under pressure, falling over 2% yesterday, as the broader AI hardware trade cooled and investors rotated into other sectors. The company announced the hiring of its first Chief Marketing Officer, Alison Wagonfeld, signaling a strategic push to boost brand awareness beyond the core tech space. Microsoft remains a key player in the AI infrastructure war, with the market monitoring its massive capital expenditure and the planned ramp-up of its custom Maia 200 and Cobalt 100 silicon to reduce reliance on third-party chips. Chinese tech giant Alibaba surged more than 5% on news that China is planning to approve certain imports of advanced H200 chips, a significant catalyst that supports the company’s aggressive domestic AI development efforts.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
 
 📈 TRACK RECORD:
-+178% since strategy change (2020)
-~36% average annual return
++177% since strategy change (2020)
+~35% average annual return
 Double your money in ~2.0 years
 
 ✅ STRATEGY HIGHLIGHTS:
@@ -42,10 +44,10 @@ Double your money in ~2.0 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS SPX500 : +66% (outperformance)
-✓ VS NSDQ100 : -9% (underperformance)
-✓ VS SWDA.L : +74% (outperformance)
-✓ VS EUSTX50 : +120% (outperformance)
+✓ VS SPX500 : +65% (outperformance)
+✓ VS NSDQ100 : -11% (underperformance)
+✓ VS SWDA.L : +72% (outperformance)
+✓ VS EUSTX50 : +119% (outperformance)
 ✓ VS CHINA50 : +177% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
