@@ -8,6 +8,11 @@ on:
     - cron: '0 9 * * 6'     # 10:00 CET (09:00 UTC) - Weekly recap (Saturday)
     - cron: '0 21 * * 0'    # 22:00 CET (21:00 UTC) - Weekly recap (Sunday)
   workflow_dispatch:  # Allows manual trigger
+    inputs:
+      force_session:
+        description: 'Force Session Name (e.g. "Weekly recap (Sat)")'
+        required: false
+        type: string
 
 jobs:
   generate-recap:
@@ -50,8 +55,12 @@ jobs:
           
           # Controlla quale ora schedulata ha attivato l'azione
           SESSION_NAME="Daily recap"
+          FORCED_SESSION="${{ inputs.force_session }}"
           
-          if [ "$DAY" -eq 6 ] && [ "$HOUR" -eq 9 ]; then
+          if [ -n "$FORCED_SESSION" ]; then
+             SESSION_NAME="$FORCED_SESSION"
+             echo "🔒 Session forced to: $SESSION_NAME"
+          elif [ "$DAY" -eq 6 ] && [ "$HOUR" -eq 9 ]; then
              SESSION_NAME="Weekly recap (Sat)"
           elif [ "$DAY" -eq 7 ] && [ "$HOUR" -eq 21 ]; then
              SESSION_NAME="Weekly recap (Sun)"
