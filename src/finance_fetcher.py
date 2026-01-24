@@ -380,9 +380,19 @@ def fetch_stock_data():
                 'company_name': company_name,
                 'price': current_price,
                 'daily_change': daily_change,
+                'weekly_change': 0.0,
                 'monthly_change': monthly_change,
                 'yearly_change': yearly_change
             }
+
+            # Calculate weekly change (last 5 trading days)
+            if len(hist) >= 5:
+                current = hist['Close'].iloc[-1]
+                week_ago = hist['Close'].iloc[-5]
+                weekly_change = ((current - week_ago) / week_ago) * 100
+                stock_data[etoro_symbol]['weekly_change'] = weekly_change
+            else:
+                 stock_data[etoro_symbol]['weekly_change'] = 0.0
             
             print(f"{etoro_symbol} ({yahoo_ticker}): Daily {daily_change:.2f}%, Monthly {monthly_change:.2f}%, Yearly {yearly_change:.2f}%")
             
@@ -393,18 +403,25 @@ def fetch_stock_data():
     return stock_data
 
 
+
 def calculate_portfolio_daily_change(stock_data, portfolio_weights=None):
     """
-    Calculate overall portfolio daily performance as WEIGHTED average
-    Uses portfolio weights to properly calculate performance based on position sizes
+    Wrapper for backward compatibility. Calculates weighted daily change.
+    """
+    return calculate_portfolio_weighted_change(stock_data, portfolio_weights, metric='daily_change')
+
+
+def calculate_portfolio_weighted_change(stock_data, portfolio_weights=None, metric='daily_change'):
+    """
+    Calculate overall portfolio performance for a specific metric as WEIGHTED average
     
     Args:
-        stock_data: dict with stock data including 'daily_change' for each ticker
-        portfolio_weights: dict with {ticker: weight_percentage} (e.g., {'NVDA': 3.08, 'PLTR': 0.71})
-                           If None, will fetch fresh weights from BullAware
+        stock_data: dict with stock data
+        portfolio_weights: dict with {ticker: weight_percentage}
+        metric: string key to use from stock_data (e.g. 'daily_change', 'weekly_change')
     
     Returns:
-        float: weighted portfolio daily performance as percentage
+        float: weighted portfolio performance as percentage
     """
     if not stock_data:
         return 0.0
@@ -415,8 +432,7 @@ def calculate_portfolio_daily_change(stock_data, portfolio_weights=None):
     # If still no weights, fallback to equal weights with warning
     if not portfolio_weights:
         print("⚠️  No portfolio weights available. Using equal weight fallback.")
-        print("   This will give INACCURATE results! Portfolio performance should be weighted by position size.")
-        total = sum(data['daily_change'] for data in stock_data.values())
+        total = sum(data[metric] for data in stock_data.values())
         return total / len(stock_data)
     
     # Calculate weighted average
@@ -427,7 +443,7 @@ def calculate_portfolio_daily_change(stock_data, portfolio_weights=None):
     for ticker, data in stock_data.items():
         if ticker in portfolio_weights:
             weight = portfolio_weights[ticker] / 100.0  # Convert percentage to decimal
-            weighted_sum += data['daily_change'] * weight
+            weighted_sum += data[metric] * weight
             total_weight += weight
         else:
             missing_weights.append(ticker)
@@ -438,17 +454,16 @@ def calculate_portfolio_daily_change(stock_data, portfolio_weights=None):
     
     if total_weight == 0:
         print("⚠️  Total weight is zero. Using equal weight fallback.")
-        total = sum(data['daily_change'] for data in stock_data.values())
+        total = sum(data[metric] for data in stock_data.values())
         return total / len(stock_data)
     
     # Calculate weighted performance
-    # We don't normalize by total_weight here because weights are already in percentage terms
-    # and we want the actual portfolio daily change
     weighted_performance = weighted_sum
     
-    print(f"📊 Weighted Portfolio Daily Change: {weighted_performance:.2f}% (based on {len(stock_data)} positions)")
+    print(f"📊 Weighted Portfolio {metric} Change: {weighted_performance:.2f}%")
     
     return weighted_performance
+
 
 
 def fetch_benchmarks_performance(start_date='2020-01-01'):
