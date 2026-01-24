@@ -21,7 +21,7 @@ def format_ticker(etoro_symbol, company_name, performance, use_tag=False):
     return f"{emoji} {symbol_str} {performance:+.2f}%"
 
 
-def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None):
+def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None, portfolio_weekly=None):
     """
     Generate the formatted daily recap matching the desired output format
     """
@@ -36,17 +36,26 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     # Calculate 5-year metrics
     avg_yearly_return = five_year_return / 5
     
+    # Get market session from environment variable
+    market_session = os.getenv('MARKET_SESSION', 'Daily recap')
+    is_weekly = "WEEKLY" in market_session.upper()
+    
     # Calculate top performers
-    daily_sorted = sorted(stock_data.items(), key=lambda x: x[1]['daily_change'], reverse=True)[:5]
+    # If weekly, we use weekly_change for the "TOP 5" section
+    if is_weekly:
+        daily_sorted = sorted(stock_data.items(), key=lambda x: x[1]['weekly_change'], reverse=True)[:5]
+    else:
+        daily_sorted = sorted(stock_data.items(), key=lambda x: x[1]['daily_change'], reverse=True)[:5]
+        
     monthly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['monthly_change'], reverse=True)[:3]
     yearly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['yearly_change'], reverse=True)[:3]
 
-        # Get market session from environment variable
-    market_session = os.getenv('MARKET_SESSION', 'Daily recap')
     
     # Determine dynamic header based on session
     session_upper = market_session.upper()
-    if "OPEN" in session_upper:
+    if "WEEKLY" in session_upper:
+         header = f"📅 {session_upper} 📆"
+    elif "OPEN" in session_upper:
         header = f"🌅 {session_upper} 📊"
     elif "RECAP" in session_upper:
         header = f"🌠 {session_upper} 🌙"
@@ -54,20 +63,23 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         header = f"✨ {session_upper} ✨"
 
     # Determine dynamic performance line
-    if portfolio_daily > 2.0:
+    # Use weekly performance if this is a weekly recap
+    current_perf = portfolio_weekly if (is_weekly and portfolio_weekly is not None) else portfolio_daily
+    
+    if current_perf > 2.0:
         perf_text = "🚀 TO THE MOON"
         perf_emoji = "🔥"
-    elif portfolio_daily > 0.5:
-        perf_text = "🍀 GREAT GREEN DAY"
+    elif current_perf > 0.5:
+        perf_text = "🍀 GREAT GREEN" # Removed "DAY" to be generic
         perf_emoji = "✅"
-    elif portfolio_daily >= 0:
+    elif current_perf >= 0:
         perf_text = "🌿 SLIGHT GAINS"
         perf_emoji = "🌱"
-    elif portfolio_daily > -0.5:
+    elif current_perf > -0.5:
         perf_text = "📉 MINOR DIP"
         perf_emoji = "⚖️"
-    elif portfolio_daily > -2.0:
-        perf_text = "💀 ROUGH DAY"
+    elif current_perf > -2.0:
+        perf_text = "💀 ROUGH" # Removed "DAY"
         perf_emoji = "🩸"
     else:
         perf_text = "🧨 MARKET CRASH"
@@ -75,9 +87,9 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
 
     recap = f"""{header}
 
-{perf_emoji} {perf_emoji} {perf_emoji} {perf_text}: {portfolio_daily:+.2f}% {perf_emoji} {perf_emoji} {perf_emoji}
+{perf_emoji} {perf_emoji} {perf_emoji} {perf_text}: {current_perf:+.2f}% {perf_emoji} {perf_emoji} {perf_emoji}
 
-TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
+TOP 5 {"WEEKLY" if is_weekly else "TODAY"} PERFORMANCE OF PORTFOLIO 📈
 """
     
     # --- TAG SELECTION LOGIC ---
@@ -126,7 +138,8 @@ TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
     
     for etoro_symbol, data in daily_sorted:
         should_tag = etoro_symbol in tags_selected_map
-        recap += format_ticker(etoro_symbol, data['company_name'], data['daily_change'], use_tag=should_tag) + "\n"
+        performance = data['weekly_change'] if is_weekly else data['daily_change']
+        recap += format_ticker(etoro_symbol, data['company_name'], performance, use_tag=should_tag) + "\n"
     
     recap += "\nTOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈\n"
     for etoro_symbol, data in monthly_sorted:
