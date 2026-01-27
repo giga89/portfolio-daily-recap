@@ -33,7 +33,7 @@ def test_ai_news():
     }
     bug_fix_msg = get_why_copy_message(benchmark_performance=mock_benchmarks)
     print(bug_fix_msg)
-    if "VS $NSDQ100 : -39% (underperformance)" in bug_fix_msg:
+    if "VS NSDQ100 : -39% (underperformance)" in bug_fix_msg:
         print("✅ Bug fix verified: Negative delta correctly labeled as (underperformance)!")
     else:
         print("❌ Bug fix failed: Negative delta not correctly labeled!")

@@ -5,6 +5,7 @@ Generates market news recap using Google Gemini API
 """
 
 import os
+import time
 import re
 from datetime import datetime
 try:
@@ -227,10 +228,10 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
     
     # List of models to try (in order of preference)
     models_to_try = [
+        'gemini-2.0-flash-lite',
         'gemini-2.0-flash',
+        'gemini-2.5-flash',
         'gemini-flash-latest',
-        'gemini-pro-latest',
-        'gemini-2.0-flash-exp',
     ]
     
     try:
@@ -356,6 +357,7 @@ Output format:
             except Exception as model_error:
                 error_msg = str(model_error).lower()
                 print(f"⚠️  Model {model_name} failed: {model_error}")
+                time.sleep(2)
                 
                 # Check if it's a quota error or something that might be fixed by removing tools
                 if 'not supported' in error_msg or 'invalid' in error_msg:

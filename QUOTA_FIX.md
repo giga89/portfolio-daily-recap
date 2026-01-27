@@ -12,12 +12,13 @@ Ho aggiornato il codice per gestire automaticamente i limiti di quota dell'API G
 - Nessun fallback
 
 ### Ora (Soluzione):
-- **Sistema di fallback intelligente** con 3 modelli:
-  1. `gemini-1.5-flash` (stabile, veloce, 15 req/min, 1500/giorno)
-  2. `gemini-1.5-flash-8b` (più leggero, stessi limiti)
-  3. `gemini-1.0-pro` (backup affidabile)
-- Se un modello ha quota finita → prova automaticamente il successivo
-- Logging dettagliato per capire quale modello funziona
+- **Sistema di fallback intelligente** con 4 modelli verificati:
+  1. `gemini-2.0-flash-lite` (Lightweight, efficiente)
+  2. `gemini-2.0-flash` (Standard)
+  3. `gemini-2.5-flash` (Nuovo modello, potenziale quota separata)
+  4. `gemini-flash-latest` (Fallback stabile)
+- Se un modello ha quota finita (429) o non viene trovato (404) → prova automaticamente il successivo
+- Delay automatico di 2 secondi tra i tentativi per evitare ban temporanei
 
 ## 📊 Quote dei Modelli FREE
 
