@@ -434,6 +434,19 @@ def calculate_portfolio_weighted_change(stock_data, portfolio_weights=None, metr
         print("⚠️  No portfolio weights available. Using equal weight fallback.")
         total = sum(data[metric] for data in stock_data.values())
         return total / len(stock_data)
+
+    # AUTO-SYNC: Update local config based on fetched weights
+    try:
+        from portfolio_manager import sync_portfolio
+        # Update JSON config (add new, remove old)
+        port_tickers = sync_portfolio(portfolio_weights)
+        
+        # RELOAD CONFIG: Update the global variable in config module so subsequent calls use it
+        import config
+        config.PORTFOLIO_TICKERS = port_tickers
+        
+    except Exception as e:
+        print(f"Error during portfolio sync: {e}")
     
     # Calculate weighted average
     weighted_sum = 0.0
