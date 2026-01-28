@@ -1,0 +1,182 @@
+{
+    "emojis": {
+        "1919.HK": "\ud83d\udea2",
+        "2318.HK": "\ud83c\udfe6",
+        "ABBV": "\ud83d\udc89",
+        "ABT": "\ud83c\udfe5",
+        "AMZN": "\ud83d\udce6",
+        "AVGO": "\ud83d\udcbb",
+        "AZN.L": "\ud83e\uddec",
+        "CCJ": "\u26a1",
+        "DB1.DE": "\ud83d\udcca",
+        "ENEL.MI": "\ud83d\udd0b",
+        "ETOR": "\ud83c\udfdb\ufe0f",
+        "GLEN.L": "\u26cf\ufe0f",
+        "GOOG": "\ud83d\udd0d",
+        "HUM": "\ud83c\udfe5",
+        "IEMG": "\ud83c\udf0d",
+        "IEUR": "\ud83c\udfe6",
+        "IQQL.DE": "\ud83d\udd25",
+        "LLY": "\ud83d\udc8a",
+        "MAU.PA": "\ud83d\udee2\ufe0f",
+        "MELI": "\ud83d\uded2",
+        "MSFT": "\ud83d\udcbb",
+        "NET": "\u2601\ufe0f",
+        "NOVO-B": "\ud83d\udc89",
+        "NVDA": "\ud83e\udd16",
+        "PLTR": "\ud83d\udee1\ufe0f",
+        "PRY.MI": "\ud83d\udd0c",
+        "PYPL": "\ud83d\udcb3",
+        "RACE": "\ud83c\udfce\ufe0f",
+        "SNPS": "\ud83d\udda5\ufe0f",
+        "SX7PEX.DE": "\ud83d\udcca",
+        "TRIG.L": "\ud83d\udd3a",
+        "TRX": "\ud83e\ude99",
+        "TSM": "\ud83c\udfed",
+        "VOW3.DE": "\ud83d\ude97",
+        "VWCE.L": "\ud83c\udf10",
+        "WDEF.L": "\ud83d\udcbc"
+    },
+    "tickers": {
+        "1919.HK": [
+            "1919.HK",
+            "COSCO SHIPPING Holdings"
+        ],
+        "2318.HK": [
+            "2318.HK",
+            "Ping An Insurance"
+        ],
+        "ABBV": [
+            "ABBV",
+            "AbbVie"
+        ],
+        "ABT": [
+            "ABT",
+            "Abbott Laboratories"
+        ],
+        "AMZN": [
+            "AMZN",
+            "Amazon"
+        ],
+        "AVGO": [
+            "AVGO",
+            "Broadcom Inc"
+        ],
+        "AZN.L": [
+            "AZN.L",
+            "AstraZeneca"
+        ],
+        "CCJ": [
+            "CCJ",
+            "Cameco"
+        ],
+        "DB1.DE": [
+            "DB1.DE",
+            "Deutsche B\u00f6rse AG"
+        ],
+        "ENEL.MI": [
+            "ENEL.MI",
+            "Enel"
+        ],
+        "ETOR": [
+            "ETOR",
+            "Etoro"
+        ],
+        "GLEN.L": [
+            "GLEN.L",
+            "Glencore"
+        ],
+        "GOOG": [
+            "GOOGL",
+            "Alphabet"
+        ],
+        "HUM": [
+            "HUM",
+            "Humana"
+        ],
+        "IEMG": [
+            "IEMG",
+            "iShares Core MSCI Emerging Markets ETF"
+        ],
+        "IEUR": [
+            "IEUR",
+            "iShares Core MSCI Europe UCITS ETF"
+        ],
+        "IQQL.DE": [
+            "IQQL.DE",
+            "iShares MSCI World Quality Factor UCITS ETF"
+        ],
+        "LLY": [
+            "LLY",
+            "Eli Lilly & Co"
+        ],
+        "MAU.PA": [
+            "MAU.PA",
+            "Etablissements Maurel & Prom SA"
+        ],
+        "MELI": [
+            "MELI",
+            "MercadoLibre"
+        ],
+        "MSFT": [
+            "MSFT",
+            "Microsoft"
+        ],
+        "NET": [
+            "NET",
+            "Cloudflare"
+        ],
+        "NOVO-B.CO": [
+            "NVO",
+            "Novo Nordisk"
+        ],
+        "NVDA": [
+            "NVDA",
+            "NVIDIA"
+        ],
+        "PLTR": [
+            "PLTR",
+            "Palantir Technologies Inc"
+        ],
+        "PRY.MI": [
+            "PRY.MI",
+            "Prysmian"
+        ],
+        "PYPL": [
+            "PYPL",
+            "PayPal"
+        ],
+        "RACE": [
+            "RACE",
+            "Ferrari"
+        ],
+        "SNPS": [
+            "SNPS",
+            "Synopsys"
+        ],
+        "SX7PEX.DE": [
+            "EXV1.DE",
+            "iShares STOXX Europe 600 Banks UCITS ETF"
+        ],
+        "TRIG.L": [
+            "TRIG.L",
+            "Trig PLC"
+        ],
+        "TRX": [
+            "TRX-USD",
+            "TRON"
+        ],
+        "TSM": [
+            "TSM",
+            "Taiwan Semiconductor"
+        ],
+        "VOW3.DE": [
+            "VOW3.DE",
+            "Volkswagen"
+        ],
+        "WDEF.L": [
+            "WDEF.L",
+            "WisdomTree Europe Equity Income UCITS ETF"
+        ]
+    }
+}
