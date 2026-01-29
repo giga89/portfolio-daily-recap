@@ -41,12 +41,16 @@ def _get_headers():
     """Get authorization headers for GitHub API"""
     token = os.environ.get('GIST_ACCESS_TOKEN') or os.environ.get('GITHUB_GIST_TOKEN') or os.environ.get('GITHUB_TOKEN')
     if not token:
+        # Debug: print only if we really can't find anything
+        # print("Debug: No token found in env vars")
         return None
-        
-    # Optional: Verify permissions once on cold start? 
-    # For now, we trust the token until it fails.
     
+    # Simple check to warn if using potential default token without gist scope
+    if not os.environ.get('GIST_ACCESS_TOKEN') and not os.environ.get('GITHUB_GIST_TOKEN'):
+        print("ℹ️  Using default GITHUB_TOKEN (might lack gist permissions)")
+        
     return {
+        'Authorization': f'token {token}',
         'Accept': 'application/vnd.github.v3+json'
     }
 
@@ -205,6 +209,11 @@ def save_data(data):
             print(f"❌ Error saving to Gist: 403 - Forbidden.")
             print("   👉 Check that your GIST_ID is correct (if set).")
             print("   👉 If using GITHUB_TOKEN in Actions, it may lack 'gist' permissions.")
+            return False
+        elif response.status_code == 401:
+            print(f"❌ Error saving to Gist: 401 - Unauthorized.")
+            print("   👉 The token provided is invalid or expired.")
+            print("   👉 If using GIST_ACCESS_TOKEN, check if you copied it correctly.")
             return False
         else:
             print(f"❌ Error saving to Gist: {response.status_code} - {response.text}")
