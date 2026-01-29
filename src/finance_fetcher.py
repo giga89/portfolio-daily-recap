@@ -28,7 +28,25 @@ def fetch_portfolio_ytd_from_bullaware():
     """
     try:
         url = "https://bullaware.com/etoro/AndreaRavalli"
-        response = requests.get(url, timeout=10)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        # Simple retry loop
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                print(f"   Values fetch attempt {attempt+1}/{max_retries}...")
+                response = requests.get(url, headers=headers, timeout=30)
+                response.raise_for_status()
+                break # Success
+            except requests.exceptions.RequestException as e:
+                if attempt == max_retries - 1:
+                    raise e # Re-raise on last attempt
+                print(f"   ⚠️ Timeout or error, retrying: {e}")
+                import time
+                time.sleep(2) # Wait a bit before retry
+
         content = response.text
         
         # 1. Try to find the monthly returns block
@@ -128,8 +146,24 @@ def fetch_portfolio_weights_from_bullaware():
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
         
-        response = requests.get(url, headers=headers, timeout=15)
-        response.raise_for_status()
+        # Simple retry loop for weights
+        max_retries = 3
+        response = None
+        
+        for attempt in range(max_retries):
+            try:
+                print(f"   Weights fetch attempt {attempt+1}/{max_retries}...")
+                response = requests.get(url, headers=headers, timeout=30)
+                response.raise_for_status()
+                break # Success
+            except requests.exceptions.RequestException as e:
+                if attempt == max_retries - 1:
+                    print(f"❌ Failed to fetch after {max_retries} attempts: {e}")
+                    return {}
+                print(f"   ⚠️ Timeout or error, retrying: {e}")
+                import time
+                time.sleep(2)
+
         content = response.text
         
         # Regex to find the "positions" array in the JSON structure
