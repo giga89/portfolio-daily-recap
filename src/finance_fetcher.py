@@ -115,188 +115,89 @@ def calculate_portfolio_ytd(stock_data, portfolio_weights=None):
 
 def fetch_portfolio_weights_from_bullaware():
     """
-    Fetch individual stock/ETF portfolio weights from BullAware using Selenium
-    Extracts the "Portfolio Value" percentage for each instrument from the treemap/bubble view
+    Fetch individual stock/ETF portfolio weights from BullAware using direct HTTP and Regex.
+    Extracts the 'positions' JSON data embedded in the Next.js page.
     Returns dict with {ticker: weight_percentage}
     """
     print("📊 Fetching portfolio weights from BullAware...")
     
     try:
-        from selenium import webdriver
-        from selenium.webdriver.chrome.options import Options
-        from selenium.webdriver.chrome.service import Service
-        from selenium.webdriver.common.by import By
-        from selenium.webdriver.support.ui import WebDriverWait
-        from selenium.webdriver.support import expected_conditions as EC
-        from webdriver_manager.chrome import ChromeDriverManager
-        import time
+        url = "https://bullaware.com/etoro/AndreaRavalli"
+        # Mimic a browser to avoid potential blocking (though usually not needed for public pages)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
         
-        # Setup headless Chrome
-        chrome_options = Options()
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument('--disable-gpu')
+        response = requests.get(url, headers=headers, timeout=15)
+        response.raise_for_status()
+        content = response.text
         
-        # Initialize driver
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+        # Regex to find the "positions" array in the JSON structure
+        # The JSON is often inside a JS string, so quotes might be escaped as \"
+        # We handle both "positions" and \"positions\"
+        # We also handle the following comma and "copies" or \"copies\"
+        pattern = r'\\?"positions\\?":\s*(\[.*?\]),\s*\\?"copies'
         
-        weights = {}
-        page_source = "" # Initialize page_source for later use
+        match = re.search(pattern, content)
+        if not match:
+             # Fallback: maybe copies is not after?
+             pattern = r'\\?"positions\\?":\s*(\[\{.*?\}\])'
+             match = re.search(pattern, content)
         
-        try:
-            # Navigate to BullAware portfolio page
-            driver.get("https://bullaware.com/etoro/AndreaRavalli")
-            print("   Waiting for page to load...")
-            time.sleep(5)  # Wait for dynamic content to load
-
-            # Switch to table view to extract portfolio weights
-            print("📊 Switching to table view...")
-            try:
-                # Find and click the table view button (second icon in the controls)
-                table_button = driver.find_element(By.XPATH, "//button[@aria-label='Switch to table view']")
-                table_button.click()
-                print("✓ Switched to table view")
-                time.sleep(2)  # Wait for table to load
-            except Exception as e:
-                print(f"⚠ Could not find table button with aria-label, trying alternative selector: {e}")
-                try:
-                    # Alternative: Find by SVG or button position (it's typically the second button in the controls)
-                    table_buttons = driver.find_elements(By.XPATH, "//button[contains(@class, 'chakra-button')]")
-                    # Look for the table/grid icon button - usually has viewBox or specific path
-                    for btn in table_buttons:
-                        svg = btn.find_elements(By.TAG_NAME, 'svg')
-                        if svg and 'M3 4' in btn.get_attribute('innerHTML'):  # Grid icon pattern
-                            btn.click()
-                            print("✓ Switched to table view using alternative method")
-                            time.sleep(2)
-                            break
-                except Exception as e2:
-                    print(f"❌ Could not switch to table view: {e2}")
-                    print("⚠ Will try to extract from current view")
-
-            # Try to extract weights from table view
-            print("📊 Extracting portfolio weights from table...")
-            try:
-                # Find all table rows
-                table_rows = driver.find_elements(By.XPATH, "//tr[contains(@class, 'css-')]")
-                print(f"Found {len(table_rows)} table rows")
-
-                for row in table_rows:
-                    try:
-                        # Get all cells in the row
-                        cells = row.find_elements(By.TAG_NAME, 'td')
-                        if len(cells) >= 4:  # Need at least: Instrument, Net Profit, Profit Today, Portfolio Value
-                            # First cell usually contains the instrument name/ticker
-                            instrument_cell = cells[0]
-                            ticker_text = instrument_cell.text.strip()
-
-                            # Portfolio Value is typically the 4th column (index 3)
-                            portfolio_value_cell = cells[3]
-                            weight_text = portfolio_value_cell.text.strip()
-
-                            # Extract ticker from "BUY SYMBOL" format
-                            if 'BUY ' in ticker_text:
-                                ticker = ticker_text.replace('BUY ', '').strip()
-
-                                # Extract percentage (e.g., "13.30%" -> 13.30)
-                                if '%' in weight_text:
-                                    weight_str = weight_text.replace('%', '').strip()
-                                    weight = abs(float(weight_str))  # Use abs to ensure positive
-
-                                    if 0 < weight < 50:  # Sanity check
-                                        weights[ticker] = weight
-                                        print(f"   {ticker}: {weight}%")
-                    except Exception as e:
-                        # Questo catch è per errori all'interno del loop su una singola riga
-                        continue  # Skip rows that don't match expected format
-
-                if weights:
-                    print(f"✓ Successfully extracted {len(weights)} portfolio weights from table")
-                else:
-                    print("⚠ No weights found in table, falling back to alternative methods")
-
-            except Exception as e:
-                # Questo catch è per errori nell'estrazione della tabella in generale
-                print(f"❌ Error extracting from table: {e}")
-                print("⚠ Falling back to alternative extraction methods")
-
-            # Now fetch the page source for the fallback method
-            page_source = driver.page_source
-
-        except Exception as e_outer:
-            # Questo catch è per errori di navigazione o altri errori non gestiti
-            print(f"An unexpected outer error occurred: {e_outer}")
-
-        # Fallback: Try treemap extraction if table extraction failed or returned few weights
-        if not weights or len(weights) < 5:
-            print("   Trying alternative extraction method...")
-            
-            # Parse the visible treemap items
-            # This block was previously incorrectly aligned under the `except e_outer` block
-            try:
-                treemap_items = driver.find_elements(By.XPATH, "//*[contains(text(), '%')]")
+        if match:
+            positions_json = match.group(1)
+            # If the extracted string contains escaped quotes like \", we need to unescape them
+            # because json.loads expects standard quotes "".
+            # However, usually json.loads can't handle \" unless it's a string value.
+            # But here we extracted the *list* string: [{\"symbol\":\"TRX\"...}]
+            # If we just pass this to json.loads, it will fail if it has \" keys.
+            # We can try to replace \" with " globally in the string if it looks escaped.
+            if '\\"' in positions_json:
+                positions_json = positions_json.replace('\\"', '"')
                 
-                for item in treemap_items:
-                    text = item.text.strip()
-                    # Look for pattern like "NVDA\n-3.08%\n" or "CCJ\n4.79%"
-                    lines = [line.strip() for line in text.split('\n') if line.strip()]
+            try:
+                positions = json.loads(positions_json)
+                
+                weights = {}
+                for pos in positions:
+                    symbol = pos.get('symbol')
+                    value = pos.get('value') # This represents the portfolio allocation percentage (0-100)
                     
-                    if len(lines) >= 2:
-                        ticker = lines[0]
-                        # Find line with percentage
-                        for line in lines[1:]:
-                            if '%' in line:
-                                try:
-                                    # Extract the percentage value
-                                    weight_str = line.replace('%', '').strip()
-                                    # Remove any +/- signs (those are daily changes, not weights)
-                                    # Weight is always positive
-                                    if weight_str.replace('+', '').replace('-', '').replace('.', '').isdigit():
-                                        weight = abs(float(weight_str.replace('+', '').replace('-', '')))
-                                        if 0 < weight < 50:  # Sanity check (individual weights should be < 50%)
-                                            weights[ticker] = weight
-                                            break
-                                except ValueError:
-                                    continue
-            except Exception as e:
-                print(f"   Error during treemap extraction: {e}")
-
-            # Fallback 2: Direct regex from page source (if page_source was fetched successfully)
-            if page_source and len(weights) < 5:
-                # Look for data in JavaScript objects in page source
-                import re
-                # Find patterns like {'symbol': 'NVDA', 'portfolioValue': 3.08}
-                js_pattern = r"['\"]symbol['\"]:\s*['\"]([A-Z0-9.]+)['\"].*?['\"]portfolioValue['\"]:\s*(\d+\.?\d*)"
-                matches = re.findall(js_pattern, page_source, re.DOTALL)
-                for symbol, value in matches:
-                    try:
-                        weights[symbol] = float(value)
-                    except ValueError:
-                        pass
-        
-        # Cleanup and return
-        driver.quit()
-        
-        if weights:
-            print(f"✓ Successfully fetched weights for {len(weights)} instruments")
-            # Sort by weight descending for logging
-            sorted_weights = dict(sorted(weights.items(), key=lambda x: x[1], reverse=True))
-            for ticker, weight in list(sorted_weights.items())[:5]:
-                print(f"   {ticker}: {weight}%")
-            if len(sorted_weights) > 5:
-                print(f"   ... and {len(sorted_weights) - 5} more")
-            return weights
-        else:
-            print("⚠️  Could not extract weights from BullAware, using fallback")
-            return {}
+                    if symbol and value is not None:
+                        # Ensure value is treated as a float
+                        try:
+                            weight = float(value)
+                            # Sanity check: weight should be between 0 and 100
+                            if 0 < weight <= 100:
+                                weights[symbol] = weight
+                        except ValueError:
+                            continue
+                            
+                if weights:
+                    print(f"✓ Successfully extracted {len(weights)} portfolio weights")
+                    
+                    # Sort by weight descending for logging
+                    sorted_weights = dict(sorted(weights.items(), key=lambda x: x[1], reverse=True))
+                    for ticker, weight in list(sorted_weights.items())[:5]:
+                        print(f"   {ticker}: {weight:.2f}%")
+                    if len(sorted_weights) > 5:
+                        print(f"   ... and {len(sorted_weights) - 5} more")
+                        
+                    return weights
+                else:
+                     print("⚠️ Valid positions JSON found but no valid weights extracted")
             
-    except ImportError:
-        print("⚠️  Selenium not installed. Install with: pip install selenium webdriver-manager")
+            except json.JSONDecodeError as e:
+                print(f"❌ Error extracting JSON from regex match: {e}")
+        else:
+            print("❌ Could not find 'positions' JSON block in BullAware page source")
+            # Debug: save content to file if needed
+            # with open("bullaware_debug.html", "w") as f: f.write(content)
+
         return {}
+
     except Exception as e:
-        print(f"⚠️  Could not fetch portfolio weights from BullAware: {e}")
+        print(f"⚠️ Could not fetch portfolio weights from BullAware: {e}")
         return {}
 
 

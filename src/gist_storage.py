@@ -180,6 +180,13 @@ def save_data(data):
             else:
                 print(f"✅ Data saved to Gist (ID: {new_gist_id[:8]}...)")
             return True
+
+        elif response.status_code == 403:
+            print(f"❌ Error saving to Gist: 403 - Forbidden.")
+            print("   👉 Check that your GIST_ID is correct (if set).")
+            print("   👉 If using GITHUB_TOKEN in Actions, it may lack 'gist' permissions.")
+            print("   👉 Create a PAT with 'gist' scope and set it as GITHUB_GIST_TOKEN.")
+            return False
         else:
             print(f"❌ Error saving to Gist: {response.status_code} - {response.text}")
             return False

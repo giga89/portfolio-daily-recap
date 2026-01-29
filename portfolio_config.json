@@ -28,7 +28,6 @@
         "PRY.MI": "\ud83d\udd0c",
         "PYPL": "\ud83d\udcb3",
         "RACE": "\ud83c\udfce\ufe0f",
-        "SNPS": "\ud83d\udda5\ufe0f",
         "SX7PEX.DE": "\ud83d\udcca",
         "TRIG.L": "\ud83d\udd3a",
         "TRX": "\ud83e\ude99",
@@ -149,10 +148,6 @@
         "RACE": [
             "RACE",
             "Ferrari"
-        ],
-        "SNPS": [
-            "SNPS",
-            "Synopsys"
         ],
         "SX7PEX.DE": [
             "EXV1.DE",
