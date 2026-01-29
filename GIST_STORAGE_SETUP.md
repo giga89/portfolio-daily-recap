@@ -16,8 +16,21 @@ After the first run:
 3. Add a new secret named `GIST_ID` with the value from the logs
 
 ### 3. Token Permissions
+The workflow requires a token with `gist` permissions.
+- In **GitHub Actions**, the default `GITHUB_TOKEN` might not have `gist` scope by default. You may need to create a Personal Access Token (PAT) with `gist` scope and add it as `GITHUB_GIST_TOKEN` secret.
+- For **Local development**, you must export `GITHUB_GIST_TOKEN`.
 
-The workflow uses `GITHUB_TOKEN` which is automatically provided by GitHub Actions. No additional token setup is required.
+## Manual Setup (Alternative)
+
+If automatic creation fails (e.g. 403 Forbidden), you can create the Gist manually:
+
+1. Go to https://gist.github.com
+2. Create a new Gist (Secret).
+3. Filename: `portfolio_recap_data.json`
+4. Content: `{}` (an empty JSON object)
+5. Save the Gist.
+6. Copy the Gist ID from the browser URL (the alphanumeric string at the end).
+7. Add this ID as the `GIST_ID` secret/environment variable.
 
 ## What's Stored in the Gist
 
