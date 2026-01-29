@@ -253,3 +253,15 @@ def save_used_tags(tags):
     data = load_data()
     data['used_tags'] = tags
     save_data(data)
+
+def get_portfolio_config():
+    """Get portfolio items (tickers) from Gist"""
+    data = load_data()
+    return data.get('portfolio_config', {}), data.get('portfolio_emojis', {})
+
+def save_portfolio_config(tickers, emojis):
+    """Save portfolio items (tickers) and emojis to Gist"""
+    data = load_data()
+    data['portfolio_config'] = tickers
+    data['portfolio_emojis'] = emojis
+    save_data(data)

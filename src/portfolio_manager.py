@@ -105,32 +105,74 @@ DEFAULT_EMOJIS = {
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../portfolio_config.json')
 
+from gist_storage import get_portfolio_config, save_portfolio_config as save_gist_config
+
 def load_config():
-    """Load portfolio configuration from JSON, migrating from defaults if needed."""
-    if not os.path.exists(CONFIG_FILE):
-        return migrate_from_defaults()
+    """
+    Load portfolio configuration, prioritizing Gist storage.
+    Migration path:
+    1. Try Gist: If valid config found, use it.
+    2. Try Local File: If Gist empty/fail, load local JSON.
+    3. Fallback: Use Defaults.
     
+    If loaded from local/defaults but Gist was empty, we SAVE to Gist to sync it.
+    """
+    # 1. Try Gist
     try:
-        with open(CONFIG_FILE, 'r') as f:
-            return json.load(f)
+        gist_tickers, gist_emojis = get_portfolio_config()
+        if gist_tickers:
+            print("✅ Loaded portfolio config from Gist")
+            return {
+                "tickers": gist_tickers,
+                "emojis": gist_emojis
+            }
     except Exception as e:
-        print(f"Error loading config file: {e}")
-        return migrate_from_defaults()
+        print(f"⚠️ Failed to load config from Gist: {e}")
+
+    # 2. Try Local File
+    if os.path.exists(CONFIG_FILE):
+        print("ℹ️ Verify local config fallback...")
+        try:
+            with open(CONFIG_FILE, 'r') as f:
+                local_data = json.load(f)
+                # If we are here, it means Gist was empty or failed. 
+                # We should try to push this local data to Gist to initialize it.
+                print("📤 Initializing Gist config from local file...")
+                save_gist_config(local_data.get('tickers', {}), local_data.get('emojis', {}))
+                return local_data
+        except Exception as e:
+            print(f"Error loading config file: {e}")
+
+    # 3. Defaults
+    return migrate_from_defaults()
 
 def migrate_from_defaults():
     """Create JSON config from the defaults."""
+    print("⚠️ Using hardcoded defaults")
     config_data = {
         "tickers": DEFAULT_TICKERS,
         "emojis": DEFAULT_EMOJIS
     }
-    save_config(config_data)
+    # Try to save to both Gist and Local
+    save_config(config_data) 
     return config_data
 
 def save_config(data):
-    """Save configuration to JSON."""
-    with open(CONFIG_FILE, 'w') as f:
-        json.dump(data, f, indent=4, sort_keys=True)
-    print(f"✅ Portfolio configuration saved to {CONFIG_FILE}")
+    """Save configuration to BOTH Gist and local JSON."""
+    # 1. Local Save
+    try:
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(data, f, indent=4, sort_keys=True)
+        print(f"✅ Portfolio configuration saved to {CONFIG_FILE}")
+    except Exception as e:
+        print(f"❌ Error saving local config: {e}")
+
+    # 2. Gist Save
+    try:
+        save_gist_config(data.get('tickers', {}), data.get('emojis', {}))
+        print("✅ Portfolio configuration sync to Gist")
+    except Exception as e:
+        print(f"❌ Error syncing config to Gist: {e}")
 
 def get_tickers():
     """Get the active tickers dictionary."""
