@@ -100,7 +100,9 @@ jobs:
           MARKET_SESSION: ${{ steps.market_session.outputs.session }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           # Gist storage configuration
-          GITHUB_GIST_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Gist storage configuration
+          GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
         run: |
           python src/data_collector.py
