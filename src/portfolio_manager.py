@@ -25,7 +25,7 @@ DEFAULT_TICKERS = {
     'NVDA': ('NVDA', 'NVIDIA'),
     'TSM': ('TSM', 'Taiwan Semiconductor'),
     'MSFT': ('MSFT', 'Microsoft'),
-    'SNPS': ('SNPS', 'Synopsys'),
+
     'AMZN': ('AMZN', 'Amazon'),
     'GOOG': ('GOOGL', 'Alphabet'),
     'PLTR': ('PLTR', 'Palantir Technologies Inc'),
@@ -75,7 +75,7 @@ DEFAULT_EMOJIS = {
     'NVDA': '🤖',
     'TSM': '🏭',
     'MSFT': '💻',
-    'SNPS': '🖥️',
+
     'AMZN': '📦',
     'GOOG': '🔍',
     'PLTR': '🛡️',
