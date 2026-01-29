@@ -9,5 +9,3 @@ google-genai>=0.2.0
 yfinance
 requests
 beautifulsoup4==4.12.3
-selenium==4.15.2
-webdriver-manager
