@@ -42,10 +42,30 @@ def _get_headers():
     token = os.environ.get('GITHUB_GIST_TOKEN') or os.environ.get('GITHUB_TOKEN')
     if not token:
         return None
+        
+    # Optional: Verify permissions once on cold start? 
+    # For now, we trust the token until it fails.
+    
     return {
-        'Authorization': f'token {token}',
         'Accept': 'application/vnd.github.v3+json'
     }
+
+def verify_token_permissions(token):
+    """Verify if the token has 'gist' scope"""
+    try:
+        headers = {
+            'Authorization': f'token {token}',
+            'Accept': 'application/vnd.github.v3+json'
+        }
+        response = requests.get('https://api.github.com/user', headers=headers, timeout=5)
+        if 'X-OAuth-Scopes' in response.headers:
+            scopes = response.headers['X-OAuth-Scopes']
+            if 'gist' not in scopes.split(', '):
+                print(f"⚠️  WARNING: Token scopes are: {scopes}. Missing 'gist' scope!")
+                return False
+        return True
+    except Exception:
+        return True # Assume ok if check fails to avoid blocking
 
 def _get_default_data():
     """Return default data structure, migrating local history if available"""
@@ -185,7 +205,6 @@ def save_data(data):
             print(f"❌ Error saving to Gist: 403 - Forbidden.")
             print("   👉 Check that your GIST_ID is correct (if set).")
             print("   👉 If using GITHUB_TOKEN in Actions, it may lack 'gist' permissions.")
-            print("   👉 Create a PAT with 'gist' scope and set it as GITHUB_GIST_TOKEN.")
             return False
         else:
             print(f"❌ Error saving to Gist: {response.status_code} - {response.text}")
