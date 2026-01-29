@@ -39,7 +39,7 @@ LEGACY_HISTORY = [
 
 def _get_headers():
     """Get authorization headers for GitHub API"""
-    token = os.environ.get('GITHUB_GIST_TOKEN') or os.environ.get('GITHUB_TOKEN')
+    token = os.environ.get('GIST_ACCESS_TOKEN') or os.environ.get('GITHUB_GIST_TOKEN') or os.environ.get('GITHUB_TOKEN')
     if not token:
         return None
         

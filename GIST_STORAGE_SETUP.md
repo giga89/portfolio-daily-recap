@@ -17,8 +17,8 @@ After the first run:
 
 ### 3. Token Permissions
 The workflow requires a token with `gist` permissions.
-- In **GitHub Actions**, the default `GITHUB_TOKEN` might not have `gist` scope by default. You may need to create a Personal Access Token (PAT) with `gist` scope and add it as `GITHUB_GIST_TOKEN` secret.
-- For **Local development**, you must export `GITHUB_GIST_TOKEN`.
+- In **GitHub Actions**, the default `GITHUB_TOKEN` might not have `gist` scope by default. You may need to create a Personal Access Token (PAT) with `gist` scope and add it as `GIST_ACCESS_TOKEN` secret.
+- For **Local development**, you must export `GIST_ACCESS_TOKEN`.
 
 ## Manual Setup (Alternative)
 

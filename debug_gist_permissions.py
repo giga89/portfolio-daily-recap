@@ -10,12 +10,12 @@ def mask(s):
 print("🔍 Debugging Gist Permissions...\n")
 
 # 1. Check Environment Variables
-param_gist_token = os.environ.get('GITHUB_GIST_TOKEN')
+param_gist_token = os.environ.get('GIST_ACCESS_TOKEN') or os.environ.get('GITHUB_GIST_TOKEN')
 param_github_token = os.environ.get('GITHUB_TOKEN')
 gist_id = os.environ.get('GIST_ID')
 
 print(f"1️⃣  Environment Variables:")
-print(f"   - GITHUB_GIST_TOKEN: {'SET (' + mask(param_gist_token) + ')' if param_gist_token else 'NOT SET'}")
+print(f"   - GIST_ACCESS_TOKEN: {'SET (' + mask(param_gist_token) + ')' if param_gist_token else 'NOT SET'}")
 print(f"   - GITHUB_TOKEN:      {'SET (' + mask(param_github_token) + ')' if param_github_token else 'NOT SET'}")
 print(f"   - GIST_ID:           {gist_id if gist_id else 'NOT SET'}")
 
