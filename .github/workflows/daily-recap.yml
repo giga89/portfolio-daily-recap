@@ -33,16 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Install Chrome and ChromeDriver
-        run: |
-          # Install Chrome
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          
-          # ChromeDriver is installed automatically by Selenium Manager
-          # No need to install separately
+
       - name: Determine market session
         id: market_session
         run: |
@@ -100,7 +91,9 @@ jobs:
           MARKET_SESSION: ${{ steps.market_session.outputs.session }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           # Gist storage configuration
-          GITHUB_GIST_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Gist storage configuration
+          GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
         run: |
           python src/data_collector.py

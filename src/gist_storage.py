@@ -39,13 +39,37 @@ LEGACY_HISTORY = [
 
 def _get_headers():
     """Get authorization headers for GitHub API"""
-    token = os.environ.get('GITHUB_GIST_TOKEN') or os.environ.get('GITHUB_TOKEN')
+    token = os.environ.get('GIST_ACCESS_TOKEN') or os.environ.get('GITHUB_GIST_TOKEN') or os.environ.get('GITHUB_TOKEN')
     if not token:
+        # Debug: print only if we really can't find anything
+        # print("Debug: No token found in env vars")
         return None
+    
+    # Simple check to warn if using potential default token without gist scope
+    if not os.environ.get('GIST_ACCESS_TOKEN') and not os.environ.get('GITHUB_GIST_TOKEN'):
+        print("ℹ️  Using default GITHUB_TOKEN (might lack gist permissions)")
+        
     return {
         'Authorization': f'token {token}',
         'Accept': 'application/vnd.github.v3+json'
     }
+
+def verify_token_permissions(token):
+    """Verify if the token has 'gist' scope"""
+    try:
+        headers = {
+            'Authorization': f'token {token}',
+            'Accept': 'application/vnd.github.v3+json'
+        }
+        response = requests.get('https://api.github.com/user', headers=headers, timeout=5)
+        if 'X-OAuth-Scopes' in response.headers:
+            scopes = response.headers['X-OAuth-Scopes']
+            if 'gist' not in scopes.split(', '):
+                print(f"⚠️  WARNING: Token scopes are: {scopes}. Missing 'gist' scope!")
+                return False
+        return True
+    except Exception:
+        return True # Assume ok if check fails to avoid blocking
 
 def _get_default_data():
     """Return default data structure, migrating local history if available"""
@@ -180,6 +204,17 @@ def save_data(data):
             else:
                 print(f"✅ Data saved to Gist (ID: {new_gist_id[:8]}...)")
             return True
+
+        elif response.status_code == 403:
+            print(f"❌ Error saving to Gist: 403 - Forbidden.")
+            print("   👉 Check that your GIST_ID is correct (if set).")
+            print("   👉 If using GITHUB_TOKEN in Actions, it may lack 'gist' permissions.")
+            return False
+        elif response.status_code == 401:
+            print(f"❌ Error saving to Gist: 401 - Unauthorized.")
+            print("   👉 The token provided is invalid or expired.")
+            print("   👉 If using GIST_ACCESS_TOKEN, check if you copied it correctly.")
+            return False
         else:
             print(f"❌ Error saving to Gist: {response.status_code} - {response.text}")
             return False
@@ -217,4 +252,16 @@ def save_used_tags(tags):
     """Save the list of used tags for rotation"""
     data = load_data()
     data['used_tags'] = tags
+    save_data(data)
+
+def get_portfolio_config():
+    """Get portfolio items (tickers) from Gist"""
+    data = load_data()
+    return data.get('portfolio_config', {}), data.get('portfolio_emojis', {})
+
+def save_portfolio_config(tickers, emojis):
+    """Save portfolio items (tickers) and emojis to Gist"""
+    data = load_data()
+    data['portfolio_config'] = tickers
+    data['portfolio_emojis'] = emojis
     save_data(data)
