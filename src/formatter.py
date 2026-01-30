@@ -41,11 +41,17 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     is_weekly = "WEEKLY" in market_session.upper()
     
     # Calculate top performers
+    # Filter for active trading today for the "Daily" list
+    stock_data_active = {k: v for k, v in stock_data.items() if v.get('has_traded_today', True)}
+    
     # If weekly, we use weekly_change for the "TOP 5" section
     if is_weekly:
         daily_sorted = sorted(stock_data.items(), key=lambda x: x[1]['weekly_change'], reverse=True)[:5]
     else:
-        daily_sorted = sorted(stock_data.items(), key=lambda x: x[1]['daily_change'], reverse=True)[:5]
+        # For daily, only show those that traded
+        daily_sorted = sorted(stock_data_active.items(), key=lambda x: x[1]['daily_change'], reverse=True)[:5]
+        
+    print(f"Active assets today: {len(stock_data_active)}/{len(stock_data)}")
         
     monthly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['monthly_change'], reverse=True)[:3]
     yearly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['yearly_change'], reverse=True)[:3]

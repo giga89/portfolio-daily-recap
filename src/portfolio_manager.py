@@ -146,6 +146,10 @@ def load_config():
     # 3. Defaults
     return migrate_from_defaults()
 
+def get_added_dates():
+    """Get the dictionary of when tickers were added."""
+    return load_config().get('added_dates', {})
+
 def migrate_from_defaults():
     """Create JSON config from the defaults."""
     print("⚠️ Using hardcoded defaults")
@@ -242,18 +246,49 @@ def sync_portfolio(bullaware_weights):
     to_add = bullaware_keys - config_keys
     if to_add:
         print(f"🆕 Discovered {len(to_add)} new assets. Attempting to auto-configure...")
+        from datetime import date
+        today_iso = date.today().isoformat()
+        
+        # Initialize added_dates if not present
+        if 'added_dates' not in current_config:
+            current_config['added_dates'] = {}
+            
         for k in to_add:
             yahoo_ticker, name = lookup_ticker_info(k)
             current_tickers[k] = [yahoo_ticker, name] # Use list for JSON compatibility
             # Try to assign a default emoji
             current_emojis[k] = "🆕" 
+            current_config['added_dates'][k] = today_iso
             
-    # Save if changes were made
-    if to_remove or to_add:
-        current_config['tickers'] = current_tickers
-        current_config['emojis'] = current_emojis
-        save_config(current_config)
-    else:
-        print("✅ Portfolio config is already in sync.")
+    # 3. MAINTENANCE: Check for expired "New" icons (older than 7 days)
+    # This runs every sync to keep icons clean
+    if 'added_dates' in current_config:
+        from datetime import date, datetime
+        today_date = date.today()
+        
+        for k, added_str in current_config['added_dates'].items():
+            if k in current_emojis and current_emojis[k] == "🆕":
+                try:
+                    added_date = datetime.fromisoformat(added_str).date()
+                    delta = (today_date - added_date).days
+                    if delta > 7:
+                        print(f"🕒 Asset {k} is no longer new ({delta} days). Resetting emoji.")
+                        # Reset to a default logic or generic chart
+                        # We can try to match against DEFAULT_EMOJIS if available, or just use generic
+                        if k in DEFAULT_EMOJIS:
+                            current_emojis[k] = DEFAULT_EMOJIS[k]
+                        else:
+                            current_emojis[k] = "📊"
+                except Exception as e:
+                    print(f"Error checking date for {k}: {e}")
+
+    # Save if changes were made or maintenance happened
+    # We always save to ensure added_dates are persisted locally and in Gist (if we update Gist schema support)
+    current_config['tickers'] = current_tickers
+    current_config['emojis'] = current_emojis
+    # Note: added_dates is currently stored in local JSON structure. 
+    # Gist storage might filter it out if not updated to support it, 
+    # but currently saving the whole dict to local file preserves it.
+    save_config(current_config)
 
     return current_tickers

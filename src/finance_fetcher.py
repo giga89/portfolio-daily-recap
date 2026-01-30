@@ -304,13 +304,27 @@ def fetch_stock_data():
                 print(f"YTD calculation error for {etoro_symbol}: {e}")
                 yearly_change = 0.0
             
+            
             exchange = info.get('exchange', '')
-            us_exchanges = ['NASDAQ', 'NYSE', 'AMEX', 'NMS', 'NYQ', 'NAS']
-            is_us_stock = exchange in us_exchanges
+            # Expanded US exchanges list including NYSE Arca (PCX), Pink Sheets (PNK), BATS, etc.
+            us_exchanges = ['NASDAQ', 'NYSE', 'AMEX', 'NMS', 'NYQ', 'NAS', 'NGM', 'PCX', 'PNK', 'BTS', 'NCM']
+            is_us_stock = exchange in us_exchanges or 'USD' in yahoo_ticker
 
+            # Check if the asset has actually traded today
+            # If it's a US stock and it is pre-market, it has NOT traded effectively for "Today's" session.
+            # Even if it has pre-market volume, for a "Daily Recap" usually implies the main session or closed session.
+            # For "Morning Recap" (10:00 CET), US stocks are pre-market.
+            
+            has_traded_today = True
+            
             if is_us_stock and is_pre_market_hours:
-                print(f"Day not yet started for {etoro_symbol}")
+                print(f"Day not yet started for {etoro_symbol} (Pre-market)")
                 daily_change = 0.0
+                has_traded_today = False
+            
+            # Additional safety: if daily_change is exactly 0.0 and volume is 0?
+            # yfinance sometimes attributes prev close to current.
+            # We explicitly flag it.
 
             stock_data[etoro_symbol] = {
                 'yahoo_ticker': yahoo_ticker,
@@ -319,7 +333,9 @@ def fetch_stock_data():
                 'daily_change': daily_change,
                 'weekly_change': 0.0,
                 'monthly_change': monthly_change,
-                'yearly_change': yearly_change
+                'yearly_change': yearly_change,
+                'has_traded_today': has_traded_today,
+                'is_us_stock': is_us_stock
             }
 
             # Calculate weekly change (last 5 trading days)
