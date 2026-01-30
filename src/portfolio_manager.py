@@ -59,9 +59,9 @@ DEFAULT_TICKERS = {
 
 DEFAULT_EMOJIS = {
     # ETFs
-    'SX7PEX.DE': '📊',
+    'SX7PEX.DE': '🏛️', # Banking
     'VWCE.L': '🌐',
-    'IEUR': '🏦',
+    'IEUR': '�🇺',     # Europe
     'IQQL.DE': '🔥',
     'IEMG': '🌍',
     'IEMG': '🌍',
@@ -99,7 +99,7 @@ DEFAULT_EMOJIS = {
     
     # Financial Services & Others
     'DB1.DE': '📊',
-    'TRIG.L': '🔺',
+    'TRIG.L': '🌬️',    # Renewables (Wind/Solar)
     'MAU.PA': '🛢️',
     'PRY.MI': '🔌',
     'RACE': '🏎️',
