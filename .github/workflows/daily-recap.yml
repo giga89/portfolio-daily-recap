@@ -102,7 +102,9 @@ jobs:
         uses: actions/upload-artifact@v5.0.0
         with:
           name: daily-recap
-          path: output/recap.txt
+          path: |
+            output/recap.txt
+            output/performance_chart.png
       
       - name: Display recap
         run: cat output/recap.txt

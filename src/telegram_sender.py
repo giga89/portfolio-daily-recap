@@ -72,8 +72,39 @@ def send_telegram_message(message: str) -> bool:
             print(f"Error response status: {e.response.status_code}")
             print(f"Error response body: {e.response.text}")
         return False
+        return False
 
-def send_recap_to_telegram(recap_file_path: str) -> bool:
+def send_telegram_photo(image_path: str, caption: str = None) -> bool:
+    """
+    Send a photo to Telegram bot
+    """
+    bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID')
+    
+    if not bot_token or not chat_id:
+        print("⚠️  Telegram credentials missing, skipping photo.")
+        return False
+        
+    url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
+    
+    try:
+        with open(image_path, 'rb') as f:
+            files = {'photo': f}
+            data = {'chat_id': chat_id}
+            if caption:
+                data['caption'] = caption
+                data['parse_mode'] = 'HTML'
+                
+            print(f"📸 Sending photo to Telegram: {image_path}...")
+            response = requests.post(url, data=data, files=files, timeout=30)
+            response.raise_for_status()
+            print("✅ Photo sent successfully!")
+            return True
+    except Exception as e:
+        print(f"❌ Failed to send photo: {e}")
+        return False
+
+def send_recap_to_telegram(recap_file_path: str, image_path: str = None) -> bool:
     """
     Read recap from file and send to Telegram
     
@@ -90,7 +121,16 @@ def send_recap_to_telegram(recap_file_path: str) -> bool:
             message = f.read()
         
         print(f"📄 Recap file read successfully ({len(message)} characters)")
-        return send_telegram_message(message)
+        print(f"📄 Recap file read successfully ({len(message)} characters)")
+        
+        # Send text message first
+        success = send_telegram_message(message)
+        
+        # Then send image if provided
+        if success and image_path and os.path.exists(image_path):
+            send_telegram_photo(image_path, caption="📈 Performance Chart (Click to zoom)")
+            
+        return success
     except FileNotFoundError:
         print(f"❌ Recap file not found: {recap_file_path}")
         return False

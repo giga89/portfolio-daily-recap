@@ -14,6 +14,7 @@ import finance_fetcher
 import sheets_fetcher
 import formatter
 import telegram_sender
+import chart_generator
 
 def main():
     """
@@ -70,7 +71,26 @@ def main():
         portfolio_weekly = finance_fetcher.calculate_portfolio_weighted_change(stock_data, portfolio_weights, metric='weekly_change')
         print("=" * 50)
     
-    # Step 5: Generate formatted recap
+    
+    # Step 5: Generate Performance Chart (New Feature)
+    print("📈 Generating performance comparison chart...")
+    chart_path = None
+    try:
+        # Fetch history
+        port_hist = finance_fetcher.fetch_portfolio_history_from_bullaware(start_year=2020)
+        bench_hist = finance_fetcher.fetch_benchmarks_history(start_date='2020-01-01')
+        
+        if port_hist is not None and not bench_hist.empty:
+            chart_path = chart_generator.generate_performance_chart(port_hist, bench_hist)
+        else:
+            print("⚠️ Skipping chart generation due to missing data")
+            
+    except Exception as e:
+        print(f"❌ Error generating chart: {e}")
+        import traceback
+        traceback.print_exc()
+
+    # Step 6: Generate formatted recap
     recap = formatter.generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data, portfolio_weekly=portfolio_weekly)
     
     # Step 5: Save to file
@@ -91,7 +111,8 @@ def main():
     # Step 6: Send to Telegram
     print("=" * 50)
     print("Sending recap to Telegram...")
-    telegram_sender.send_recap_to_telegram(output_path)
+    print("Sending recap to Telegram...")
+    telegram_sender.send_recap_to_telegram(output_path, image_path=chart_path)
     print("=" * 50)
 
 if __name__ == '__main__':
