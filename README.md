@@ -11,6 +11,7 @@ Automated daily portfolio performance recap generator with GitHub Actions. It co
 - 🤖 **Telegram Notifications**: Sends beautiful, emoji-enriched reports with dynamic headers and performance indicators.
 - 📊 **Benchmark Comparison**: Automatically compares your strategy performance since 2020 against S&P 500, Nasdaq 100, MSCI World, and Euro Stoxx 50.
 - 💡 **Strategic Insights**: Includes a "Why Copy This Portfolio" section with long-term metrics and strategy highlights.
+- 📉 **Performance Chart**: Generates a beautiful "dark mode" line chart comparing cumulative portfolio return vs. benchmarks since 2020.
 - 🚀 **Fast and Reliable**: Direct API access via `yfinance` and `google-genai`, with smart session detection for US markets.
 
 ## 📋 How It Works
@@ -40,6 +41,7 @@ portfolio-daily-recap/
 │   ├── ai_news_generator.py  # Gemini AI news & strategy recap
 │   ├── config.py             # Tickers mapping & emoji settings
 │   ├── data_collector.py     # Main orchestrator (entry point)
+│   ├── chart_generator.py    # Performance chart visualization (matplotlib)
 │   ├── finance_fetcher.py    # Yahoo Finance & BullAware logic
 │   ├── formatter.py          # Message formatting & logic
 │   ├── sheets_fetcher.py     # Google Sheets API integration
@@ -109,6 +111,8 @@ NVIDIA ($NVDA) saw increased volume following reports of new AI chip orders...
 - **Gemini 2.0 Integration**: Uses latest AI models for market analysis.
 - **Zero Selenium Dependency for YTD**: Faster runs by using direct ticker history.
 - **Flexible Sessions**: Smart handling of European vs US market hours.
+- **Visual Charts**: Added automated performance comparison chart sent as an image on Telegram.
+- **Robust Benchmarking**: Improved historical data alignment for global indices.
 
 ## 🤝 Contributing
 Feel free to fork and submit PRs for new features or improvements.
