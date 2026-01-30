@@ -10,7 +10,11 @@ DEFAULT_TICKERS = {
     'IEUR': ('IEUR', 'iShares Core MSCI Europe UCITS ETF'),
     'IQQL.DE': ('IQQL.DE', 'iShares MSCI World Quality Factor UCITS ETF'),
     'IEMG': ('IEMG', 'iShares Core MSCI Emerging Markets ETF'),
+    'IEMG': ('IEMG', 'iShares Core MSCI Emerging Markets ETF'),
     'WDEF.L': ('WDEF.L', 'WisdomTree Europe Equity Income UCITS ETF'),
+    'INDO.PA': ('INDO.PA', 'Amundi MSCI Indonesia UCITS ETF Acc'),
+    'MNODL.L': ('MNODL.L', 'Mondi PLC'),
+    'NVTKL.L': ('NVTKL.L', 'Novatek'),
     
     # Healthcare & Pharmaceuticals
     'AZN.L': ('AZN.L', 'AstraZeneca'),
@@ -60,7 +64,11 @@ DEFAULT_EMOJIS = {
     'IEUR': '🏦',
     'IQQL.DE': '🔥',
     'IEMG': '🌍',
+    'IEMG': '🌍',
     'WDEF.L': '💼',
+    'INDO.PA': '🇮🇩',
+    'MNODL.L': '📦',
+    'NVTKL.L': '🔥',
     
     # Healthcare & Pharmaceuticals
     'AZN.L': '🧬',
