@@ -11,6 +11,8 @@ import re
 from datetime import datetime
 import json
 import pytz
+import pandas as pd
+import numpy as np
 
 # Fuso orario USA (New York)
 NY_TZ = pytz.timezone('America/New_York')
@@ -414,30 +416,143 @@ def calculate_portfolio_weighted_change(stock_data, portfolio_weights=None, metr
 
 
 
+    return bench_data
+
+
+def fetch_portfolio_history_from_bullaware(start_year=2020):
+    """
+    Fetch historical monthly returns from BullAware page and calculate cumulative return.
+    Returns a pandas Series of cumulative performance (percentage) indexed by date.
+    """
+    print("📊 Fetching portfolio history from BullAware...")
+    try:
+        url = "https://bullaware.com/etoro/AndreaRavalli"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+        content = response.text
+        
+        # Extract monthlyReturns JSON block
+        # Pattern: "monthlyReturns":{"2018-1":-5.13,...} or \"monthlyReturns\":{...}
+        # We also need to capture until the closing brace. Since it is a flat dict of numbers, 
+        # it should end with '}', or '\}' if escaped depending on context.
+        # But usually the valid JSON ends with }
+        
+        pattern = r'\\?"monthlyReturns\\?":\s*(\{.*?\})'
+        match = re.search(pattern, content)
+        if not match:
+             # Try simpler pattern or check if content is different
+            print(f"❌ Could not find monthlyReturns in BullAware page. Content length: {len(content)}")
+            # Debug: look for near matches
+            if "monthlyReturns" in content:
+                 print("   'monthlyReturns' string IS present in content.")
+            else:
+                 print("   'monthlyReturns' string IS NOT present.")
+            return None
+            
+        monthly_returns_json = match.group(1)
+        
+        # Clean up escaped quotes if present in the captured group
+        if '\\"' in monthly_returns_json:
+            monthly_returns_json = monthly_returns_json.replace('\\"', '"')
+            
+        monthly_returns = json.loads(monthly_returns_json)
+        
+        # Convert to DataFrame
+        data = []
+        for key, value in monthly_returns.items():
+            year, month = map(int, key.split('-'))
+            if year >= start_year:
+                # Use end of month date roughly
+                date = pd.Timestamp(year=year, month=month, day=1) + pd.offsets.MonthEnd(0)
+                data.append({'Date': date, 'Monthly_Return': float(value)})
+                
+        if not data:
+            print(f"⚠️ No data found from year {start_year}")
+            return None
+            
+        df = pd.DataFrame(data).sort_values('Date')
+        df.set_index('Date', inplace=True)
+        
+        # Calculate Cumulative Return
+        # Formula: (1 + r1)*(1 + r2)*... - 1
+        # Convert percentage to decimal
+        df['Return_Decimal'] = df['Monthly_Return'] / 100.0
+        df['Cumulative_Return'] = ((1 + df['Return_Decimal']).cumprod() - 1) * 100.0
+        
+        # Add a starting point (0% at start_year-01-01) if desired, but monthly data starts at end of Jan.
+        # We can prepend a 0 point.
+        start_date = pd.Timestamp(f"{start_year}-01-01")
+        if start_date < df.index[0]:
+             # Create a 0 row
+             start_row = pd.DataFrame({'Monthly_Return': [0.0], 'Return_Decimal': [0.0], 'Cumulative_Return': [0.0]}, index=[start_date])
+             df = pd.concat([start_row, df])
+
+        return df['Cumulative_Return']
+        
+    except Exception as e:
+        print(f"❌ Error fetching portfolio history: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
+def fetch_benchmarks_history(start_date='2020-01-01'):
+    """
+    Fetch historical daily closing data for benchmarks.
+    Returns a DataFrame with columns for each benchmark's cumulative return (%).
+    """
+    print(f"📈 Fetching benchmark history since {start_date}...")
+    bench_history = pd.DataFrame()
+    
+    for etoro_ticker, yahoo_ticker in BENCHMARKS.items():
+        try:
+            stock = yf.Ticker(yahoo_ticker)
+            hist = stock.history(start=start_date)
+            
+            if not hist.empty:
+                # Normalize index to be timezone-naive for alignment across markets
+                hist.index = hist.index.tz_localize(None).normalize()
+                
+                # Calculate cumulative return
+                start_price = hist['Close'].iloc[0]
+                # (Price / Start_Price - 1) * 100
+                cum_return = ((hist['Close'] / start_price) - 1) * 100
+                
+                # Handle potential duplicate indices if any (rare for daily data but good safety)
+                if not cum_return.index.is_unique:
+                    cum_return = cum_return.groupby(cum_return.index).last()
+                
+                bench_history[etoro_ticker] = cum_return
+            else:
+                print(f"   ⚠️ No history for {etoro_ticker}")
+                
+        except Exception as e:
+            print(f"   ❌ Error fetching history for {etoro_ticker}: {e}")
+            
+    return bench_history
+
+
 def fetch_benchmarks_performance(start_date='2020-01-01'):
     """
     Fetch historical performance for benchmarks starting from a specific date.
     Returns a dictionary of cumulative returns for each benchmark.
     """
-    print(f"📈 Fetching benchmark performance since {start_date}...")
+    history = fetch_benchmarks_history(start_date)
     bench_data = {}
     
-    for etoro_ticker, yahoo_ticker in BENCHMARKS.items():
-        try:
-            stock = yf.Ticker(yahoo_ticker)
-            # Fetch historical data
-            hist = stock.history(start=start_date)
-            
-            if not hist.empty:
-                start_price = hist['Close'].iloc[0]
-                current_price = hist['Close'].iloc[-1]
-                total_return = ((current_price - start_price) / start_price) * 100
-                bench_data[etoro_ticker] = total_return
-                print(f"   {etoro_ticker}: {total_return:+.2f}%")
+    if not history.empty:
+        # Get the last valid value for each column
+        for col in history.columns:
+            clean_series = history[col].dropna()
+            if not clean_series.empty:
+                last_valid = clean_series.iloc[-1]
+                bench_data[col] = last_valid
+                print(f"   {col}: {last_valid:+.2f}%")
             else:
-                print(f"   ⚠️ No data for {etoro_ticker} ({yahoo_ticker})")
-                
-        except Exception as e:
-            print(f"   ❌ Error fetching benchmark {etoro_ticker}: {e}")
+                print(f"   ⚠️ No valid data for {col}")
             
     return bench_data

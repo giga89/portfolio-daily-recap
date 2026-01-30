@@ -1,23 +1,23 @@
 🌠 DAILY RECAP 🌙
 
-🌱 🌱 🌱 🌿 SLIGHT GAINS: +0.23% 🌱 🌱 🌱
+⚖️ ⚖️ ⚖️ 📉 MINOR DIP: -0.22% ⚖️ ⚖️ ⚖️
 
 TOP 5 TODAY PERFORMANCE OF PORTFOLIO 📈
-🔌 $PRY.MI +2.93%
-💼 $WDEF.L +2.39%
-⛏️ $GLEN +2.07%
-🔥 $IQQL.DE +1.56%
-📊 $SX7PEX.DE +1.14%
+📊 $SX7PEX.DE +1.20%
+📊 $DB1.DE +1.05%
+🔌 PRY.MI +0.89%
+🏦 $IEUR +0.55%
+💼 WDEF.L +0.43%
 
 TOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈
-🖥️ $SNPS +15.65%
-💊 $LLY +12.91%
-📊 $SX7PEX.DE +10.82%
+⚡ $CCJ +53.56%
+🛢️ $MAU.PA +40.00%
+⛏️ GLEN.L +30.43%
 
 TOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈
-🛡️ $PLTR +146.96%
-📊 $SX7PEX.DE +72.72%
-☁️ $NET +72.23%
+⚡ $CCJ +35.62%
+⛏️ GLEN.L +20.91%
+🛢️ $MAU.PA +18.41%
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 WHY COPY THIS PORTFOLIO?
@@ -34,11 +34,9 @@ Double your money in ~2.3 years
 • Active and transparent management
 
 📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
-✓ VS $SPX500: +48% (outperformance)
-✓ VS $NSDQ100: -26% (outperformance)
-✓ VS $SWDA.L: +55% (outperformance)
-✓ VS $EUSTX50: +104% (outperformance)
-✓ VS $CHINA50: +158% (outperformance)
+✓ VS SPX500 : +42% (outperformance)
+✓ VS NSDQ100 : -36% (underperformance)
+✓ VS CHINA50 : +152% (outperformance)
 
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
