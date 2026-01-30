@@ -514,10 +514,18 @@ def fetch_benchmarks_history(start_date='2020-01-01'):
             hist = stock.history(start=start_date)
             
             if not hist.empty:
+                # Normalize index to be timezone-naive for alignment across markets
+                hist.index = hist.index.tz_localize(None).normalize()
+                
                 # Calculate cumulative return
                 start_price = hist['Close'].iloc[0]
                 # (Price / Start_Price - 1) * 100
                 cum_return = ((hist['Close'] / start_price) - 1) * 100
+                
+                # Handle potential duplicate indices if any (rare for daily data but good safety)
+                if not cum_return.index.is_unique:
+                    cum_return = cum_return.groupby(cum_return.index).last()
+                
                 bench_history[etoro_ticker] = cum_return
             else:
                 print(f"   ⚠️ No history for {etoro_ticker}")
