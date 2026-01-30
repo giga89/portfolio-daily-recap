@@ -539,8 +539,12 @@ def fetch_benchmarks_performance(start_date='2020-01-01'):
     if not history.empty:
         # Get the last valid value for each column
         for col in history.columns:
-            last_valid = history[col].dropna().iloc[-1]
-            bench_data[col] = last_valid
-            print(f"   {col}: {last_valid:+.2f}%")
+            clean_series = history[col].dropna()
+            if not clean_series.empty:
+                last_valid = clean_series.iloc[-1]
+                bench_data[col] = last_valid
+                print(f"   {col}: {last_valid:+.2f}%")
+            else:
+                print(f"   ⚠️ No valid data for {col}")
             
     return bench_data

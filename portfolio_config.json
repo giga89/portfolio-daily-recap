@@ -2,13 +2,13 @@
     "emojis": {
         "1919.HK": "\ud83d\udea2",
         "2318.HK": "\ud83c\udfe6",
+        "9618.HK": "\ud83c\udd95",
         "ABBV": "\ud83d\udc89",
         "ABT": "\ud83c\udfe5",
         "AMZN": "\ud83d\udce6",
         "AVGO": "\ud83d\udcbb",
         "AZN.L": "\ud83e\uddec",
         "CCJ": "\u26a1",
-        "DB1.DE": "\ud83d\udcca",
         "ENEL.MI": "\ud83d\udd0b",
         "ETOR": "\ud83c\udfdb\ufe0f",
         "GLEN.L": "\u26cf\ufe0f",
@@ -16,14 +16,17 @@
         "HUM": "\ud83c\udfe5",
         "IEMG": "\ud83c\udf0d",
         "IEUR": "\ud83c\udfe6",
+        "INDO.PA": "\ud83c\udd95",
         "IQQL.DE": "\ud83d\udd25",
         "LLY": "\ud83d\udc8a",
         "MAU.PA": "\ud83d\udee2\ufe0f",
         "MELI": "\ud83d\uded2",
+        "MNODL.L": "\ud83c\udd95",
         "MSFT": "\ud83d\udcbb",
         "NET": "\u2601\ufe0f",
         "NOVO-B": "\ud83d\udc89",
         "NVDA": "\ud83e\udd16",
+        "NVTKL.L": "\ud83c\udd95",
         "PLTR": "\ud83d\udee1\ufe0f",
         "PRY.MI": "\ud83d\udd0c",
         "PYPL": "\ud83d\udcb3",
@@ -44,6 +47,10 @@
         "2318.HK": [
             "2318.HK",
             "Ping An Insurance"
+        ],
+        "9618.HK": [
+            "9618.HK",
+            "JD.com, Inc."
         ],
         "ABBV": [
             "ABBV",
@@ -68,10 +75,6 @@
         "CCJ": [
             "CCJ",
             "Cameco"
-        ],
-        "DB1.DE": [
-            "DB1.DE",
-            "Deutsche B\u00f6rse AG"
         ],
         "ENEL.MI": [
             "ENEL.MI",
@@ -101,6 +104,10 @@
             "IEUR",
             "iShares Core MSCI Europe UCITS ETF"
         ],
+        "INDO.PA": [
+            "INDO.PA",
+            "Amundi MSCI Indonesia UCITS ETF Acc"
+        ],
         "IQQL.DE": [
             "IQQL.DE",
             "iShares MSCI World Quality Factor UCITS ETF"
@@ -117,6 +124,10 @@
             "MELI",
             "MercadoLibre"
         ],
+        "MNODL.L": [
+            "MNODL.L",
+            "MNODL.L"
+        ],
         "MSFT": [
             "MSFT",
             "Microsoft"
@@ -132,6 +143,10 @@
         "NVDA": [
             "NVDA",
             "NVIDIA"
+        ],
+        "NVTKL.L": [
+            "NVTKL.L",
+            "NVTKL.L"
         ],
         "PLTR": [
             "PLTR",
