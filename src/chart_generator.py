@@ -16,9 +16,16 @@ def generate_performance_chart(portfolio_series, benchmark_df, output_path='outp
     """
     print("📊 Generating performance chart...")
     
-    # Set style
+    # Set dark theme
+    plt.style.use('dark_background')
     sns.set_theme(style="darkgrid")
-    plt.figure(figsize=(12, 7))
+    
+    fig = plt.figure(figsize=(12, 7), facecolor='#0a0a0a')
+    ax = plt.gca()
+    ax.set_facecolor('#0f0f0f')
+    
+    # Customize grid for dark theme
+    ax.grid(True, alpha=0.15, color='#333333', linestyle='-', linewidth=0.5)
     
     # Plot Portfolio - Make it stand out!
     if portfolio_series is not None and not portfolio_series.empty:
@@ -42,8 +49,8 @@ def generate_performance_chart(portfolio_series, benchmark_df, output_path='outp
         last_val = portfolio_series.iloc[-1]
         plt.annotate(f'{last_val:.1f}%', xy=(last_date, last_val), 
                      xytext=(10, 0), textcoords='offset points', 
-                     color='#00C805', fontweight='bold', fontsize=13,
-                     bbox=dict(boxstyle='round,pad=0.5', facecolor='white', edgecolor='#00C805', alpha=0.8))
+                     color='#00FF00', fontweight='bold', fontsize=13,
+                     bbox=dict(boxstyle='round,pad=0.5', facecolor='#1a1a1a', edgecolor='#00FF00', alpha=0.95))
 
     # Plot Benchmarks - Uniform dashed style for all
     if benchmark_df is not None and not benchmark_df.empty:
@@ -73,20 +80,22 @@ def generate_performance_chart(portfolio_series, benchmark_df, output_path='outp
             # plt.text(last_date_b, last_val_b, f' {col}', fontsize=8, verticalalignment='center')
 
     # Formatting of the chart
-    plt.title('Performance Comparison (Since 2020)', fontsize=16, fontweight='bold', pad=20)
-    plt.xlabel('Date', fontsize=12)
-    plt.ylabel('Cumulative Return (%)', fontsize=12)
-    plt.legend(loc='upper left', fontsize=10, frameon=True, shadow=True)
+    plt.title('Performance Comparison (Since 2020)', fontsize=16, fontweight='bold', pad=20, color='white')
+    plt.xlabel('Date', fontsize=12, color='#cccccc')
+    plt.ylabel('Cumulative Return (%)', fontsize=12, color='#cccccc')
+    
+    # Style the legend for dark theme
+    legend = plt.legend(loc='upper left', fontsize=10, frameon=True, shadow=False, 
+                       facecolor='#1a1a1a', edgecolor='#333333')
+    plt.setp(legend.get_texts(), color='white')
     
     # Format X axis
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
-    plt.gca().xaxis.set_major_locator(mdates.YearLocator())
-    
-    # Add grid
-    plt.grid(True, alpha=0.3)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+    ax.xaxis.set_major_locator(mdates.YearLocator())
+    ax.tick_params(colors='#cccccc')
     
     # Add y=0 line
-    plt.axhline(0, color='black', linewidth=1, alpha=0.5)
+    plt.axhline(0, color='#555555', linewidth=1, alpha=0.7, linestyle='--')
     
     # Tight layout
     plt.tight_layout()
