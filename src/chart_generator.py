@@ -20,31 +20,37 @@ def generate_performance_chart(portfolio_series, benchmark_df, output_path='outp
     sns.set_theme(style="darkgrid")
     plt.figure(figsize=(12, 7))
     
-    # Plot Portfolio
+    # Plot Portfolio - Make it stand out!
     if portfolio_series is not None and not portfolio_series.empty:
-        # Resample portfolio to daily if it is monthly, using forward fill for step-like or interpolation
-        # Actually linear interpolation might be misleading if we only have month-end.
-        # But for visual comparison, simple line plot is fine.
         # Ensure index is datetime
         portfolio_series.index = pd.to_datetime(portfolio_series.index)
         
+        # Bold, prominent line for portfolio with higher z-order to be on top
         plt.plot(portfolio_series.index, portfolio_series.values, 
-                 label='My Portfolio', linewidth=3, color='#00C805', marker='o', markersize=4)
+                 label='💼 My Portfolio', 
+                 linewidth=5, 
+                 color='#00C805', 
+                 marker='o', 
+                 markersize=6,
+                 markeredgewidth=2,
+                 markeredgecolor='white',
+                 zorder=10,  # Ensure it's drawn on top
+                 alpha=1.0)
         
         # Add annotation for latest value
         last_date = portfolio_series.index[-1]
         last_val = portfolio_series.iloc[-1]
         plt.annotate(f'{last_val:.1f}%', xy=(last_date, last_val), 
                      xytext=(10, 0), textcoords='offset points', 
-                     color='#00C805', fontweight='bold', fontsize=12)
+                     color='#00C805', fontweight='bold', fontsize=13,
+                     bbox=dict(boxstyle='round,pad=0.5', facecolor='white', edgecolor='#00C805', alpha=0.8))
 
-    # Plot Benchmarks
+    # Plot Benchmarks - Uniform dashed style for all
     if benchmark_df is not None and not benchmark_df.empty:
         benchmark_df.index = pd.to_datetime(benchmark_df.index)
         
-        # Define some colors for common benchmarks if needed, or let seaborn handle it
-        # Try to match eToro colors if possible, or distinct ones
-        palette = sns.color_palette("husl", len(benchmark_df.columns))
+        # Use a muted color palette for benchmarks
+        palette = sns.color_palette("muted", len(benchmark_df.columns))
         
         for i, col in enumerate(benchmark_df.columns):
             # Drop NaNs to plot what we have
@@ -52,12 +58,14 @@ def generate_performance_chart(portfolio_series, benchmark_df, output_path='outp
             if series.empty:
                 continue
                 
-            # Differentiate line styles
-            linestyle = '-'
-            if 'SPX' in col or 'NSDQ' in col:
-                linestyle = '--' # Dashed for major indices
-                
-            plt.plot(series.index, series.values, label=col, linewidth=2, linestyle=linestyle, alpha=0.8)
+            # All benchmarks use dashed lines with uniform styling
+            plt.plot(series.index, series.values, 
+                     label=col, 
+                     linewidth=1.5, 
+                     linestyle='--',  # All dashed
+                     alpha=0.6,  # More transparent
+                     color=palette[i],
+                     zorder=5)  # Behind the portfolio line
             
             # Label at the end of line
             # last_date_b = series.index[-1]

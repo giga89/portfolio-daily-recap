@@ -3,5 +3,11 @@ venv/*
 temp_artifact/*
 bullaware_dump.html
 .env
-output/performance_chart.png
-output/recap.txt
+.env.local
+.DS_Store
+
+# Generated Output & Reports
+output/
+recap.txt
+performance_chart.png
+*.log
