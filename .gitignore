@@ -2,3 +2,6 @@ src/__pycache__/*
 venv/*
 temp_artifact/*
 bullaware_dump.html
+.env
+output/performance_chart.png
+output/recap.txt
