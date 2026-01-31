@@ -7,6 +7,7 @@ on:
     - cron: '0 22 * * 1-5'  # 23:00 CET (22:00 UTC) - U.S. market close (monday-friday)
     - cron: '0 9 * * 6'     # 10:00 CET (09:00 UTC) - Weekly recap (Saturday)
     - cron: '0 21 * * 0'    # 22:00 CET (21:00 UTC) - Weekly recap (Sunday)
+    - cron: '0 20 28-31 * *'  # 21:00 CET (20:00 UTC) - Monthly recap check (last day of month)
   workflow_dispatch:  # Allows manual trigger
     inputs:
       force_session:
@@ -51,6 +52,13 @@ jobs:
           if [ -n "$FORCED_SESSION" ]; then
              SESSION_NAME="$FORCED_SESSION"
              echo "🔒 Session forced to: $SESSION_NAME"
+          # Check if it's the last day of the month (tomorrow is day 1)
+          elif [ "$HOUR" -eq 20 ]; then
+             TOMORROW=$(date -u -d "+1 day" +%d)
+             if [ "$TOMORROW" == "01" ]; then
+               SESSION_NAME="Monthly recap"
+               echo "📅 Last day of month detected - Monthly recap"
+             fi
           elif [ "$DAY" -eq 6 ] && [ "$HOUR" -eq 9 ]; then
              SESSION_NAME="Weekly recap (Sat)"
           elif [ "$DAY" -eq 7 ] && [ "$HOUR" -eq 21 ]; then

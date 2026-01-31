@@ -39,13 +39,17 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     # Get market session from environment variable
     market_session = os.getenv('MARKET_SESSION', 'Daily recap')
     is_weekly = "WEEKLY" in market_session.upper()
+    is_monthly = "MONTHLY" in market_session.upper()
     
     # Calculate top performers
     # Filter for active trading today for the "Daily" list
     stock_data_active = {k: v for k, v in stock_data.items() if v.get('has_traded_today', True)}
     
     # If weekly, we use weekly_change for the "TOP 5" section
-    if is_weekly:
+    # If monthly, we skip the daily/weekly section entirely
+    if is_monthly:
+        daily_sorted = []  # Skip daily performance for monthly recap
+    elif is_weekly:
         daily_sorted = sorted(stock_data.items(), key=lambda x: x[1]['weekly_change'], reverse=True)[:5]
     else:
         # For daily, only show those that traded
@@ -53,13 +57,15 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         
     print(f"Active assets today: {len(stock_data_active)}/{len(stock_data)}")
         
-    monthly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['monthly_change'], reverse=True)[:3]
-    yearly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['yearly_change'], reverse=True)[:3]
+    monthly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['monthly_change'], reverse=True)[:5 if is_monthly else 3]
+    yearly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['yearly_change'], reverse=True)[:5 if is_monthly else 3]
 
     
     # Determine dynamic header based on session
     session_upper = market_session.upper()
-    if "WEEKLY" in session_upper:
+    if "MONTHLY" in session_upper:
+         header = f"📅 {session_upper} 🗓️"
+    elif "WEEKLY" in session_upper:
          header = f"📅 {session_upper} 📆"
     elif "OPEN" in session_upper:
         header = f"🌅 {session_upper} 📊"
@@ -69,8 +75,16 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         header = f"✨ {session_upper} ✨"
 
     # Determine dynamic performance line
-    # Use weekly performance if this is a weekly recap
-    current_perf = portfolio_weekly if (is_weekly and portfolio_weekly is not None) else portfolio_daily
+    # Use monthly performance if this is a monthly recap, weekly if weekly, else daily
+    if is_monthly:
+        current_perf = portfolio_daily  # Monthly change (from stock_data monthly_change aggregated)
+        perf_period = "MONTHLY"
+    elif is_weekly and portfolio_weekly is not None:
+        current_perf = portfolio_weekly
+        perf_period = "WEEKLY"
+    else:
+        current_perf = portfolio_daily
+        perf_period = "DAILY"
     
     if current_perf > 2.0:
         perf_text = "🚀 TO THE MOON"
@@ -95,7 +109,11 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
 
 {perf_emoji} {perf_emoji} {perf_emoji} {perf_text}: {current_perf:+.2f}% {perf_emoji} {perf_emoji} {perf_emoji}
 
-TOP 5 {"WEEKLY" if is_weekly else "TODAY"} PERFORMANCE OF PORTFOLIO 📈
+"""
+    
+    # Only add daily/weekly section if NOT monthly
+    if not is_monthly:
+        recap += f"""TOP 5 {"WEEKLY" if is_weekly else "TODAY"} PERFORMANCE OF PORTFOLIO 📈
 """
     
     # --- TAG SELECTION LOGIC ---
@@ -106,9 +124,10 @@ TOP 5 {"WEEKLY" if is_weekly else "TODAY"} PERFORMANCE OF PORTFOLIO 📈
     candidates = []
     # Store as tuples: (symbol, category_priority) 
     # Using simple set later to avoid duplicates if a stock appears in multiple lists
-    for item in daily_sorted: candidates.append(item[0])   # Top 5 Daily
-    for item in monthly_sorted: candidates.append(item[0]) # Top 3 Monthly
-    for item in yearly_sorted: candidates.append(item[0])  # Top 3 Yearly
+    if not is_monthly:  # Only include daily if not monthly recap
+        for item in daily_sorted: candidates.append(item[0])   # Top 5 Daily/Weekly
+    for item in monthly_sorted: candidates.append(item[0]) # Top 3-5 Monthly
+    for item in yearly_sorted: candidates.append(item[0])  # Top 3-5 Yearly
     
     # Remove duplicates while preserving order
     unique_candidates = list(dict.fromkeys(candidates))
@@ -142,17 +161,20 @@ TOP 5 {"WEEKLY" if is_weekly else "TODAY"} PERFORMANCE OF PORTFOLIO 📈
     
     # --- FORMATTING WITH TAGS ---
     
-    for etoro_symbol, data in daily_sorted:
-        should_tag = etoro_symbol in tags_selected_map
-        performance = data['weekly_change'] if is_weekly else data['daily_change']
-        recap += format_ticker(etoro_symbol, data['company_name'], performance, use_tag=should_tag) + "\n"
+    # Only show daily/weekly performance if not monthly recap
+    if not is_monthly and daily_sorted:
+        for etoro_symbol, data in daily_sorted:
+            should_tag = etoro_symbol in tags_selected_map
+            performance = data['weekly_change'] if is_weekly else data['daily_change']
+            recap += format_ticker(etoro_symbol, data['company_name'], performance, use_tag=should_tag) + "\n"
+        recap += "\n"
     
-    recap += "\nTOP 3 MONTHLY PERFORMANCE OF PORTFOLIO 📈\n"
+    recap += f"TOP {len(monthly_sorted)} MONTHLY PERFORMANCE OF PORTFOLIO 📈\n"
     for etoro_symbol, data in monthly_sorted:
         should_tag = etoro_symbol in tags_selected_map
         recap += format_ticker(etoro_symbol, data['company_name'], data['monthly_change'], use_tag=should_tag) + "\n"
     
-    recap += "\nTOP 3 HOLDING YEARLY PERFORMANCE OF PORTFOLIO 📈\n"
+    recap += f"\nTOP {len(yearly_sorted)} {'YEARLY' if is_monthly else 'HOLDING YEARLY'} PERFORMANCE OF PORTFOLIO 📈\n"
     for etoro_symbol, data in yearly_sorted:
         should_tag = etoro_symbol in tags_selected_map
         recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change'], use_tag=should_tag) + "\n"
@@ -173,8 +195,14 @@ TOP 5 {"WEEKLY" if is_weekly else "TODAY"} PERFORMANCE OF PORTFOLIO 📈
     # This forces AI to find truly fresh news/tickers if possible
     current_exclusions = list(set(recent_history + list(tags_selected_map)))
     
-    print(f"Generating AI market news (Budget for tags: {tag_budget_remaining})...")
-    ai_news = ai_news_generator.generate_market_news_recap(max_tags=tag_budget_remaining, excluded_tags=current_exclusions)
+    # Use monthly AI recap for monthly sessions, daily for others
+    if is_monthly:
+        print(f"Generating monthly AI recap (Budget for tags: {tag_budget_remaining})...")
+        ai_news = ai_news_generator.generate_monthly_ai_recap(max_tags=tag_budget_remaining, excluded_tags=current_exclusions)
+    else:
+        print(f"Generating AI market news (Budget for tags: {tag_budget_remaining})...")
+        ai_news = ai_news_generator.generate_market_news_recap(max_tags=tag_budget_remaining, excluded_tags=current_exclusions)
+    
     if ai_news:
         recap += ai_news
     

@@ -205,6 +205,173 @@ def update_rotation_history(new_tags):
         print(f"⚠️ Error updating tag rotation: {e}")
 
 
+def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
+    """
+    Generate AI-powered monthly market recap summarizing major events over the past month
+    
+    Args:
+        max_tags: Maximum number of $ tags allowed in the AI output
+        excluded_tags: List of tags already used elsewhere in the post
+        
+    Returns:
+        str: Formatted monthly recap or empty string if API key not set
+    """
+    if not GENAI_AVAILABLE:
+        print("⚠️  google-genai package not available, skipping AI monthly recap")
+        return ""
+    
+    api_key = os.environ.get('GEMINI_API_KEY')
+    
+    if not api_key:
+        print("⚠️  Warning: GEMINI_API_KEY not set, skipping AI monthly recap")
+        return ""
+    
+    # List of models to try
+    models_to_try = [
+        'gemini-2.0-flash-lite',
+        'gemini-2.0-flash',
+        'gemini-2.5-flash',
+        'gemini-flash-latest',
+    ]
+    
+    try:
+        client = genai.Client(api_key=api_key)
+        
+        # Select tags for this post (with rotation)
+        selected_tags = []
+        selected_tags_str = "None"
+        tag_instruction = ""
+        
+        if max_tags > 0:
+            selected_tags = _select_tags_for_rotation(max_tags, excluded_tags)
+            selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags])
+            tag_instruction = f"""
+- You MUST use ONLY these $ tags (max {max_tags}): {selected_tags_str}
+- Only use these exact tags, no other $ symbols.
+"""
+        else:
+            tag_instruction = """
+- Do NOT use any $ tags in this section.
+"""
+        
+        # Get current month/year for context
+        now = datetime.now()
+        current_month = now.strftime('%B %Y')  # e.g., "January 2026"
+        
+        prompt = f"""You are a senior financial analyst. Generate a comprehensive MONTHLY MARKET RECAP for {current_month}.
+
+Use your search tool to find the MAJOR EVENTS and TRENDS that defined this month across:
+1. USA Markets (S&P500, Nasdaq, Dow Jones)
+2. European Markets (Euro Stoxx, DAX, FTSE)
+3. Asian Markets (Shanghai, Nikkei, Hang Seng)
+4. Key Economic Data (inflation, employment, GDP, central bank decisions)
+5. Major Corporate News (earnings, M&A, product launches)
+6. Geopolitical Events (if market-relevant)
+
+Structure your response in TWO sections:
+
+1. 🌍 MONTHLY MARKET OVERVIEW
+- Summarize the 3-5 most significant market-moving events of {current_month}
+- Include specific data points (index changes, key decisions, major announcements)
+- Professional, objective tone
+- 5-7 sentences maximum
+- IMPORTANT: Do NOT use any $ tags in this section
+
+2. 💼 PORTFOLIO IMPACT & OUTLOOK
+- How did these events specifically impact key sectors and stocks
+- Forward-looking perspective for next month
+- 4-5 sentences maximum
+{tag_instruction}
+
+Rules:
+- Focus on HIGH-IMPACT events that shaped the month
+- Professional and engaging tone for investors
+- Format for Telegram (plain text, minimal emojis)
+- DO NOT use bold text (**)
+- Use $ prefix ONLY for allowed tags in Portfolio Impact section
+- Maximum {MAX_TAGS_PER_POST} $ tags total
+
+Output format:
+🌍 MONTHLY MARKET OVERVIEW
+
+[Overview section - NO $ tags]
+
+💼 PORTFOLIO IMPACT & OUTLOOK
+
+[Impact section - use ONLY allowed $ tags]
+"""
+        
+        print(f"🤖 Generating monthly AI recap for {current_month}...")
+        print(f"   Selected tags: {selected_tags_str}")
+        
+        # Configure with search tool
+        config = None
+        try:
+            config = types.GenerateContentConfig(
+                tools=[types.Tool(google_search=types.GoogleSearch())],
+                temperature=0.7
+            )
+        except Exception as config_err:
+            print(f"⚠️ Search tool unavailable: {config_err}")
+            config = types.GenerateContentConfig(temperature=0.7)
+        
+        # Try models
+        for model_name in models_to_try:
+            try:
+                print(f"   Trying model: {model_name}...")
+                
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config
+                )
+                
+                if response and response.text:
+                    print(f"✅ Monthly recap generated using {model_name}!")
+                    recap_text = response.text.strip()
+                    
+                    # Post-process: remove tags from overview section
+                    recap_text = _remove_market_section_tags(recap_text)
+                    
+                    # Limit tags
+                    recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                    
+                    return "\n" + recap_text + "\n"
+                else:
+                    print(f"⚠️  Empty response from {model_name}")
+                    continue
+                    
+            except Exception as model_error:
+                error_msg = str(model_error).lower()
+                print(f"⚠️  Model {model_name} failed: {model_error}")
+                time.sleep(2)
+                
+                # Try without tools if not supported
+                if 'not supported' in error_msg or 'invalid' in error_msg:
+                    try:
+                        response = client.models.generate_content(
+                            model=model_name,
+                            contents=prompt
+                        )
+                        if response and response.text:
+                            print(f"✅ Monthly recap generated (no tools) using {model_name}!")
+                            recap_text = response.text.strip()
+                            recap_text = _remove_market_section_tags(recap_text)
+                            recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                            return "\n" + recap_text + "\n"
+                    except Exception as e2:
+                        print(f"   Retry failed: {e2}")
+                
+                continue
+        
+        print("❌ All models failed for monthly recap")
+        return ""
+        
+    except Exception as e:
+        print(f"❌ Error generating monthly recap: {e}")
+        return ""
+
+
 def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
     """
     Generate AI-powered market news recap for USA, CHINA, and EU markets
