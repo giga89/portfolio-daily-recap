@@ -21,7 +21,7 @@ def format_ticker(etoro_symbol, company_name, performance, use_tag=False):
     return f"{emoji} {symbol_str} {performance:+.2f}%"
 
 
-def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None, portfolio_weekly=None):
+def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None, portfolio_weekly=None, portfolio_monthly=None):
     """
     Generate the formatted daily recap matching the desired output format
     """
@@ -41,6 +41,11 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     is_weekly = "WEEKLY" in market_session.upper()
     is_monthly = "MONTHLY" in market_session.upper()
     
+    # Check if we're in January (for special handling)
+    from datetime import datetime
+    current_month = datetime.now().month
+    is_january = (current_month == 1)
+    
     # Calculate top performers
     # Filter for active trading today for the "Daily" list
     stock_data_active = {k: v for k, v in stock_data.items() if v.get('has_traded_today', True)}
@@ -56,9 +61,16 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         daily_sorted = sorted(stock_data_active.items(), key=lambda x: x[1]['daily_change'], reverse=True)[:5]
         
     print(f"Active assets today: {len(stock_data_active)}/{len(stock_data)}")
-        
-    monthly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['monthly_change'], reverse=True)[:5 if is_monthly else 3]
-    yearly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['yearly_change'], reverse=True)[:5 if is_monthly else 3]
+    
+    # For monthly recap in January, show only YTD (since monthly = yearly)
+    # Otherwise show both monthly and yearly
+    if is_monthly and is_january:
+        # In January, show only YTD (don't duplicate)
+        monthly_sorted = []  # Skip monthly
+        yearly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['yearly_change'], reverse=True)[:5]
+    else:
+        monthly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['monthly_change'], reverse=True)[:5 if is_monthly else 3]
+        yearly_sorted = sorted(stock_data.items(), key=lambda x: x[1]['yearly_change'], reverse=True)[:5 if is_monthly else 3]
 
     
     # Determine dynamic header based on session
@@ -77,20 +89,20 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     # Determine dynamic performance line
     # Use monthly performance if this is a monthly recap, weekly if weekly, else daily
     if is_monthly:
-        current_perf = portfolio_daily  # Monthly change (from stock_data monthly_change aggregated)
+        current_perf = portfolio_monthly if portfolio_monthly is not None else portfolio_daily
         perf_period = "MONTHLY"
     elif is_weekly and portfolio_weekly is not None:
         current_perf = portfolio_weekly
         perf_period = "WEEKLY"
     else:
         current_perf = portfolio_daily
-        perf_period = "DAILY"
+        perf_period = ""  # No prefix for daily
     
     if current_perf > 2.0:
         perf_text = "🚀 TO THE MOON"
         perf_emoji = "🔥"
     elif current_perf > 0.5:
-        perf_text = "🍀 GREAT GREEN" # Removed "DAY" to be generic
+        perf_text = "🍀 GREAT GREEN"
         perf_emoji = "✅"
     elif current_perf >= 0:
         perf_text = "🌿 SLIGHT GAINS"
@@ -99,11 +111,15 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         perf_text = "📉 MINOR DIP"
         perf_emoji = "⚖️"
     elif current_perf > -2.0:
-        perf_text = "💀 ROUGH" # Removed "DAY"
+        perf_text = "💀 ROUGH"
         perf_emoji = "🩸"
     else:
         perf_text = "🧨 MARKET CRASH"
         perf_emoji = "🆘"
+    
+    # Add period prefix for weekly/monthly
+    if perf_period:
+        perf_text = f"{perf_period} {perf_text}"
 
     recap = f"""{header}
 
@@ -169,15 +185,22 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
             recap += format_ticker(etoro_symbol, data['company_name'], performance, use_tag=should_tag) + "\n"
         recap += "\n"
     
-    recap += f"TOP {len(monthly_sorted)} MONTHLY PERFORMANCE OF PORTFOLIO 📈\n"
-    for etoro_symbol, data in monthly_sorted:
-        should_tag = etoro_symbol in tags_selected_map
-        recap += format_ticker(etoro_symbol, data['company_name'], data['monthly_change'], use_tag=should_tag) + "\n"
+    # Show monthly performance (skip in January for monthly recap since it equals YTD)
+    if monthly_sorted:
+        recap += f"TOP {len(monthly_sorted)} MONTHLY PERFORMANCE OF PORTFOLIO 📈\n"
+        for etoro_symbol, data in monthly_sorted:
+            should_tag = etoro_symbol in tags_selected_map
+            recap += format_ticker(etoro_symbol, data['company_name'], data['monthly_change'], use_tag=should_tag) + "\n"
+        recap += "\n"
     
-    recap += f"\nTOP {len(yearly_sorted)} {'YEARLY' if is_monthly else 'HOLDING YEARLY'} PERFORMANCE OF PORTFOLIO 📈\n"
-    for etoro_symbol, data in yearly_sorted:
-        should_tag = etoro_symbol in tags_selected_map
-        recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change'], use_tag=should_tag) + "\n"
+    # Show yearly performance (always show for monthly recap, otherwise top 3)
+    if yearly_sorted:
+        # In January monthly recap, this is the only section (YTD)
+        yearly_label = "YTD" if (is_monthly and is_january) else ("YEARLY" if is_monthly else "HOLDING YEARLY")
+        recap += f"TOP {len(yearly_sorted)} {yearly_label} PERFORMANCE OF PORTFOLIO 📈\n"
+        for etoro_symbol, data in yearly_sorted:
+            should_tag = etoro_symbol in tags_selected_map
+            recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change'], use_tag=should_tag) + "\n"
     
     # Calculate used count and remaining budget
     tags_used_count = len(tags_selected_map)

@@ -61,14 +61,22 @@ def main():
     benchmark_data = finance_fetcher.fetch_benchmarks_performance(start_date='2020-01-01')
     print("=" * 50)
     
-    # Step 4b: Calculate weekly performance if needed
+    # Step 4b: Calculate weekly/monthly performance if needed
     market_session = os.getenv('MARKET_SESSION', 'Daily recap')
     is_weekly = "WEEKLY" in market_session.upper()
+    is_monthly = "MONTHLY" in market_session.upper()
     
     portfolio_weekly = None
+    portfolio_monthly = None
+    
     if is_weekly:
         print("📊 Calculating WEEKLY portfolio performance...")
         portfolio_weekly = finance_fetcher.calculate_portfolio_weighted_change(stock_data, portfolio_weights, metric='weekly_change')
+        print("=" * 50)
+    
+    if is_monthly:
+        print("📊 Calculating MONTHLY portfolio performance...")
+        portfolio_monthly = finance_fetcher.calculate_portfolio_weighted_change(stock_data, portfolio_weights, metric='monthly_change')
         print("=" * 50)
     
     
@@ -91,7 +99,14 @@ def main():
         traceback.print_exc()
 
     # Step 6: Generate formatted recap
-    recap = formatter.generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data, portfolio_weekly=portfolio_weekly)
+    recap = formatter.generate_recap(
+        stock_data, 
+        portfolio_daily, 
+        sheets_data, 
+        benchmark_data, 
+        portfolio_weekly=portfolio_weekly,
+        portfolio_monthly=portfolio_monthly
+    )
     
     # Step 5: Save to file
     os.makedirs('output', exist_ok=True)
