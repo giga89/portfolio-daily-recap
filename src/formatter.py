@@ -42,7 +42,6 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     is_monthly = "MONTHLY" in market_session.upper()
     
     # Check if we're in January (for special handling)
-    from datetime import datetime
     current_month = datetime.now().month
     is_january = (current_month == 1)
     
