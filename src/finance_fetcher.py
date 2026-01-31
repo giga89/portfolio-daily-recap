@@ -282,12 +282,20 @@ def fetch_stock_data():
             else:
                 daily_change = 0.0
             
-            # Calculate monthly change (last 30 days)
-            if len(hist) >= 30:
-                current = hist['Close'].iloc[-1]
-                month_ago = hist['Close'].iloc[-30]
-                monthly_change = ((current - month_ago) / month_ago) * 100
-            else:
+            # Calculate monthly change (MTD - Month-To-Date from start of current month)
+            # This ensures that in January, monthly = YTD
+            current_year = datetime.now().year
+            current_month = datetime.now().month
+            try:
+                mtd_hist = stock.history(start=f'{current_year}-{current_month:02d}-01')
+                if len(mtd_hist) >= 2:
+                    mtd_start = mtd_hist['Close'].iloc[0]
+                    mtd_current = mtd_hist['Close'].iloc[-1]
+                    monthly_change = ((mtd_current - mtd_start) / mtd_start) * 100
+                else:
+                    monthly_change = 0.0
+            except Exception as e:
+                print(f"MTD calculation error for {etoro_symbol}: {e}")
                 monthly_change = 0.0
             
             # Calculate YTD change (from January 1st of current year)
