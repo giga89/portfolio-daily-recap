@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  portfolio-recap:
+    build: .
+    container_name: portfolio-recap
+    volumes:
+      - ./output:/app/output
+      - ./data:/app/data
+    env_file:
+      - .env
+    # Optional: Keep container running to debug
+    # command: tail -f /dev/null
