@@ -11,3 +11,5 @@ output/
 recap.txt
 performance_chart.png
 *.log
+output/performance_chart.png
+output/recap.txt
