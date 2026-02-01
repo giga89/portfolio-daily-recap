@@ -26,6 +26,14 @@ except ImportError:
     GIST_STORAGE_AVAILABLE = False
     print("⚠️  gist_storage module not available, using fallback")
 
+# Import API usage tracker
+try:
+    from api_usage_tracker import log_api_request, save_usage_report
+    API_TRACKER_AVAILABLE = True
+except ImportError:
+    API_TRACKER_AVAILABLE = False
+    print("⚠️  api_usage_tracker module not available, usage tracking disabled")
+
 # Maximum number of $ tags per post
 MAX_TAGS_PER_POST = 5
 
@@ -258,6 +266,10 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         now = datetime.now()
         current_month = now.strftime('%B %Y')  # e.g., "January 2026"
         
+        # Get all portfolio tickers for context
+        portfolio_symbols = list(PORTFOLIO_TICKERS.keys())
+        portfolio_context = ", ".join(portfolio_symbols)
+        
         prompt = f"""You are a senior financial analyst. Generate a comprehensive MONTHLY MARKET RECAP for {current_month}.
 
 Use your search tool to find the MAJOR EVENTS and TRENDS that defined this month across:
@@ -268,37 +280,61 @@ Use your search tool to find the MAJOR EVENTS and TRENDS that defined this month
 5. Major Corporate News (earnings, M&A, product launches)
 6. Geopolitical Events (if market-relevant)
 
-Structure your response in TWO sections:
+PORTFOLIO CONTEXT:
+These are the tickers in the portfolio you should focus on for the PORTFOLIO IMPACT section:
+{portfolio_context}
+
+Structure your response in TWO sections with a TOPIC-BASED FORMAT:
 
 1. 🌍 MONTHLY MARKET OVERVIEW
-- Summarize the 3-5 most significant market-moving events of {current_month}
-- Include specific data points (index changes, key decisions, major announcements)
-- Professional, objective tone
-- 5-7 sentences maximum
+Organize this section into MAX 5 MAJOR TOPICS/THEMES that defined {current_month}.
+For each topic:
+- Use 3 relevant emojis at the start (e.g., 🏛️💵🔔 for Fed decisions, 📊📈💹 for market trends, etc.)
+- Write the topic title
+- Write a 2-3 sentence summary with specific data points
 - IMPORTANT: Do NOT use any $ tags in this section
 
+Example format:
+🏛️💵🔔 Fed Rate Decision
+The Federal Reserve cut rates by 25bps to 4.25-4.50%, signaling a more dovish stance...
+
 2. 💼 PORTFOLIO IMPACT & OUTLOOK
-- How did these events specifically impact key sectors and stocks
-- Forward-looking perspective for next month
-- 4-5 sentences maximum
+Organize this section into MAX 5 TOPICS showing how the month's events impacted PORTFOLIO STOCKS listed above.
+IMPORTANT: Focus EXCLUSIVELY on the tickers from the portfolio context provided above.
+For each topic, if you have available tags from this list: {selected_tags_str}:
+- Use 3 relevant emojis + $TAG (e.g., 🤖💡🚀 $NVDA)
+- Write a 2-3 sentence summary about impact and outlook
+- If no tags available, just use emojis without tags
 {tag_instruction}
 
-Rules:
+Example format (when tag is available):
+🤖💡🚀 $NVDA
+NVIDIA's new AI chip announcement drove 15% gains this month. Looking ahead to strong Q1 earnings...
+
+STRICT LIMITS:
+- MAXIMUM 5 topics per section (total 10 topics max)
+- MAXIMUM {MAX_TAGS_PER_POST} $ tags TOTAL across both sections
+- Use $ prefix ONLY for the allowed tags listed above
 - Focus on HIGH-IMPACT events that shaped the month
-- Professional and engaging tone for investors
-- Format for Telegram (plain text, minimal emojis)
-- DO NOT use bold text (**)
-- Use $ prefix ONLY for allowed tags in Portfolio Impact section
-- Maximum {MAX_TAGS_PER_POST} $ tags total
+- Total character count must stay under 2200 for this AI section
+- FOCUS ON PORTFOLIO TICKERS in the Portfolio Impact section
 
 Output format:
 🌍 MONTHLY MARKET OVERVIEW
 
-[Overview section - NO $ tags]
+[emoji emoji emoji] Topic Title
+Brief summary with data points...
+
+[emoji emoji emoji] Topic Title
+Brief summary with data points...
 
 💼 PORTFOLIO IMPACT & OUTLOOK
 
-[Impact section - use ONLY allowed $ tags]
+[emoji emoji emoji] $TAG (if available)
+Impact and outlook summary...
+
+[emoji emoji emoji] Topic Title
+Impact and outlook summary...
 """
         
         print(f"🤖 Generating monthly AI recap for {current_month}...")
@@ -329,6 +365,10 @@ Output format:
                 if response and response.text:
                     print(f"✅ Monthly recap generated using {model_name}!")
                     recap_text = response.text.strip()
+                    
+                    # Log successful API usage
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "monthly_recap")
                     
                     # Post-process: remove tags from overview section
                     recap_text = _remove_market_section_tags(recap_text)
@@ -435,7 +475,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
             for entry in history:
                 previous_topics_str += f"- {entry['content'][:300]}...\n"
         
-        # Create prompt with strict daily focus and separated sections
+        # Create prompt with strict daily focus and topic-organized format
         current_date = datetime.now().strftime('%Y-%m-%d')
         prompt = f"""You are a senior financial market analyst. Generate a concise daily market recap for today ({current_date}).
 
@@ -443,37 +483,60 @@ CRITICAL REQUIREMENT: Focus ONLY on events from the last 24 hours. Use your sear
 
 {previous_topics_str}
 
-Structure your response in TWO distinct sections:
+PORTFOLIO CONTEXT:
+These are the tickers in the portfolio you should focus on for the PORTFOLIO FOCUS section:
+{portfolio_context}
+
+Structure your response in TWO distinct sections with a TOPIC-BASED FORMAT:
 
 1. 🌍 MARKET OVERVIEW
-- Summarize the most important movements TODAY in USA, CHINA, and EU markets.
-- Mention specific indices (S&P500, Nasdaq, Shanghai Composite, Euro Stoxx) only if they had significant moves today.
-- Include specific data points (percentages, levels) if available.
-- Limit to 3-4 concise, high-impact sentences.
-- IMPORTANT: Do NOT use any $ tags in this section. Write index and market names as plain text.
+Organize this section into MAX 5 TOPICS/THEMES from today's markets.
+For each topic:
+- Use 3 relevant emojis at the start (e.g., 📊📈💹 for market trends, 🏛️💵🔔 for Fed decisions, etc.)
+- Write a 1-2 sentence summary of that specific topic
+- IMPORTANT: Do NOT use any $ tags in this section
+
+Example format:
+📊📈💹 S&P500 Rally
+The S&P 500 surged 1.2% today driven by strong tech earnings...
 
 2. 💼 PORTFOLIO FOCUS
-- Focus exclusively on news affecting these specific tickers in the last 24 hours.
-- If no specific news is available for these tickers today, briefly mention the sector trends impacting them.
-- Limit to 4-5 concise, high-impact sentences.
+Organize this section into MAX 5 TOPICS related to the PORTFOLIO STOCKS listed above.
+IMPORTANT: Focus EXCLUSIVELY on the tickers from the portfolio context provided above.
+For each topic, if you have available tags from this list: {selected_tags_str}:
+- Use 3 relevant emojis + $TAG (e.g., 📦📦📦 $AMZN)
+- Write a 1-2 sentence summary about that stock/sector
+- If no tags available, just use emojis without tags
 {tag_instruction}
 
-Rules:
-- Professional, objective, and engaging tone.
-- Format for Telegram (plain text, use emoji sparingly).
-- DO NOT use bold text (**) for tickers or indices.
-- Use $ prefix ONLY for the allowed tags listed above, and ONLY in the Portfolio Focus section.
-- Maximum {MAX_TAGS_PER_POST} $ tags in the entire post.
-- Ensure the news is FRESH and relevant to today.
+Example format (when tag is available):
+📦📦📦 $AMZN
+Amazon announced new AI-powered logistics system...
+
+STRICT LIMITS:
+- MAXIMUM 5 topics per section (total 10 topics max)
+- MAXIMUM {MAX_TAGS_PER_POST} $ tags TOTAL across both sections
+- Use $ prefix ONLY for the allowed tags listed above
+- Keep each topic to 1-2 sentences maximum
+- Total character count must stay under 2000 for this AI section
+- FOCUS ON PORTFOLIO TICKERS in the Portfolio Focus section
 
 Output format:
-🌍 MARKET NEWS RECAP
+🌍 MARKET OVERVIEW
 
-[Market Overview section - NO $ tags here]
+[emoji emoji emoji] Topic Title
+Brief summary...
+
+[emoji emoji emoji] Topic Title
+Brief summary...
 
 💼 PORTFOLIO FOCUS
 
-[Portfolio Focus section - use ONLY the allowed $ tags here]
+[emoji emoji emoji] $TAG (if available)
+Brief summary...
+
+[emoji emoji emoji] Topic Title
+Brief summary...
 """
         
         print("🤖 Generating AI market news recap...")
@@ -505,6 +568,10 @@ Output format:
                 if response and response.text:
                     print(f"✅ AI news recap generated successfully using {model_name}!")
                     recap_text = response.text.strip()
+                    
+                    # Log successful API usage
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "daily_recap")
                     
                     # Post-process: remove any $ tags from market section
                     recap_text = _remove_market_section_tags(recap_text)

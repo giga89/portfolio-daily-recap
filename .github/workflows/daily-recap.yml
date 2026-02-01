@@ -113,7 +113,14 @@ jobs:
           path: |
             output/recap.txt
             output/performance_chart.png
+            output/gemini_api_usage.json
+            output/gemini_api_usage_report.txt
       
       - name: Display recap
         run: cat output/recap.txt
+      
+      - name: Display API Usage Report
+        run: |
+          echo "📊 Gemini API Usage Report:"
+          cat output/gemini_api_usage_report.txt || echo "No API usage report generated"
 
