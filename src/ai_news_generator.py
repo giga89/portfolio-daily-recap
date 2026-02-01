@@ -258,6 +258,10 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         now = datetime.now()
         current_month = now.strftime('%B %Y')  # e.g., "January 2026"
         
+        # Get all portfolio tickers for context
+        portfolio_symbols = list(PORTFOLIO_TICKERS.keys())
+        portfolio_context = ", ".join(portfolio_symbols)
+        
         prompt = f"""You are a senior financial analyst. Generate a comprehensive MONTHLY MARKET RECAP for {current_month}.
 
 Use your search tool to find the MAJOR EVENTS and TRENDS that defined this month across:
@@ -267,6 +271,10 @@ Use your search tool to find the MAJOR EVENTS and TRENDS that defined this month
 4. Key Economic Data (inflation, employment, GDP, central bank decisions)
 5. Major Corporate News (earnings, M&A, product launches)
 6. Geopolitical Events (if market-relevant)
+
+PORTFOLIO CONTEXT:
+These are the tickers in the portfolio you should focus on for the PORTFOLIO IMPACT section:
+{portfolio_context}
 
 Structure your response in TWO sections with a TOPIC-BASED FORMAT:
 
@@ -283,7 +291,8 @@ Example format:
 The Federal Reserve cut rates by 25bps to 4.25-4.50%, signaling a more dovish stance...
 
 2. 💼 PORTFOLIO IMPACT & OUTLOOK
-Organize this section into MAX 5 TOPICS showing how the month's events impacted portfolio stocks.
+Organize this section into MAX 5 TOPICS showing how the month's events impacted PORTFOLIO STOCKS listed above.
+IMPORTANT: Focus EXCLUSIVELY on the tickers from the portfolio context provided above.
 For each topic, if you have available tags from this list: {selected_tags_str}:
 - Use 3 relevant emojis + $TAG (e.g., 🤖💡🚀 $NVDA)
 - Write a 2-3 sentence summary about impact and outlook
@@ -300,6 +309,7 @@ STRICT LIMITS:
 - Use $ prefix ONLY for the allowed tags listed above
 - Focus on HIGH-IMPACT events that shaped the month
 - Total character count must stay under 2200 for this AI section
+- FOCUS ON PORTFOLIO TICKERS in the Portfolio Impact section
 
 Output format:
 🌍 MONTHLY MARKET OVERVIEW
@@ -461,6 +471,10 @@ CRITICAL REQUIREMENT: Focus ONLY on events from the last 24 hours. Use your sear
 
 {previous_topics_str}
 
+PORTFOLIO CONTEXT:
+These are the tickers in the portfolio you should focus on for the PORTFOLIO FOCUS section:
+{portfolio_context}
+
 Structure your response in TWO distinct sections with a TOPIC-BASED FORMAT:
 
 1. 🌍 MARKET OVERVIEW
@@ -475,7 +489,8 @@ Example format:
 The S&P 500 surged 1.2% today driven by strong tech earnings...
 
 2. 💼 PORTFOLIO FOCUS
-Organize this section into MAX 5 TOPICS related to the portfolio stocks.
+Organize this section into MAX 5 TOPICS related to the PORTFOLIO STOCKS listed above.
+IMPORTANT: Focus EXCLUSIVELY on the tickers from the portfolio context provided above.
 For each topic, if you have available tags from this list: {selected_tags_str}:
 - Use 3 relevant emojis + $TAG (e.g., 📦📦📦 $AMZN)
 - Write a 1-2 sentence summary about that stock/sector
@@ -492,6 +507,7 @@ STRICT LIMITS:
 - Use $ prefix ONLY for the allowed tags listed above
 - Keep each topic to 1-2 sentences maximum
 - Total character count must stay under 2000 for this AI section
+- FOCUS ON PORTFOLIO TICKERS in the Portfolio Focus section
 
 Output format:
 🌍 MARKET OVERVIEW
