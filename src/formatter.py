@@ -235,5 +235,15 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         benchmark_performance=benchmark_data
     )
     
+    # Enforce maximum recap length of 4500 characters
+    MAX_RECAP_LENGTH = 4500
+    if len(recap) > MAX_RECAP_LENGTH:
+        print(f"⚠️  Recap length ({len(recap)} chars) exceeds limit of {MAX_RECAP_LENGTH}. Truncating...")
+        # Truncate and add a message
+        recap = recap[:MAX_RECAP_LENGTH - 100]  # Leave space for truncation message
+        recap += "\n\n... [truncated due to length limit]"
+    else:
+        print(f"✅ Recap length: {len(recap)} chars (within limit of {MAX_RECAP_LENGTH})")
+    
     return recap
 
