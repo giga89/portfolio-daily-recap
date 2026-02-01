@@ -8,6 +8,13 @@ import os
 import random
 import ai_news_generator
 
+# Import API usage tracker
+try:
+    from api_usage_tracker import save_usage_report
+    API_TRACKER_AVAILABLE = True
+except ImportError:
+    API_TRACKER_AVAILABLE = False
+
 
 def get_emoji(etoro_symbol):
     """Get emoji for a given eToro symbol"""
@@ -244,6 +251,14 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         recap += "\n\n... [truncated due to length limit]"
     else:
         print(f"✅ Recap length: {len(recap)} chars (within limit of {MAX_RECAP_LENGTH})")
+    
+    # Generate and save API usage report
+    if API_TRACKER_AVAILABLE:
+        try:
+            save_usage_report()
+            print("📊 API usage report generated")
+        except Exception as e:
+            print(f"⚠️  Could not generate API usage report: {e}")
     
     return recap
 

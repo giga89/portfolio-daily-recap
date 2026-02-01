@@ -26,6 +26,14 @@ except ImportError:
     GIST_STORAGE_AVAILABLE = False
     print("⚠️  gist_storage module not available, using fallback")
 
+# Import API usage tracker
+try:
+    from api_usage_tracker import log_api_request, save_usage_report
+    API_TRACKER_AVAILABLE = True
+except ImportError:
+    API_TRACKER_AVAILABLE = False
+    print("⚠️  api_usage_tracker module not available, usage tracking disabled")
+
 # Maximum number of $ tags per post
 MAX_TAGS_PER_POST = 5
 
@@ -358,6 +366,10 @@ Impact and outlook summary...
                     print(f"✅ Monthly recap generated using {model_name}!")
                     recap_text = response.text.strip()
                     
+                    # Log successful API usage
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "monthly_recap")
+                    
                     # Post-process: remove tags from overview section
                     recap_text = _remove_market_section_tags(recap_text)
                     
@@ -556,6 +568,10 @@ Brief summary...
                 if response and response.text:
                     print(f"✅ AI news recap generated successfully using {model_name}!")
                     recap_text = response.text.strip()
+                    
+                    # Log successful API usage
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "daily_recap")
                     
                     # Post-process: remove any $ tags from market section
                     recap_text = _remove_market_section_tags(recap_text)
