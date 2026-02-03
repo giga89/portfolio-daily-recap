@@ -283,24 +283,23 @@ def fetch_stock_data():
                 daily_change = 0.0
             
             # Calculate monthly change (MTD - Month-To-Date from start of current month)
-            # This ensures that in January, monthly = YTD
+            # Use the same hist data we already fetched (period='1y') to ensure consistency
             current_year = datetime.now().year
             current_month = datetime.now().month
             try:
-                # Get last month of trading data to ensure we have yesterday's data
-                # Then filter to current month only
-                mtd_hist = stock.history(period='2mo')  # Get 2 months to ensure we have current month data
-                if not mtd_hist.empty:
+                # Use the existing hist data instead of making another API call
+                if not hist.empty:
                     # Normalize timezone - handle both tz-aware and tz-naive indices
-                    if mtd_hist.index.tz is not None:
-                        mtd_hist.index = mtd_hist.index.tz_convert(None)
-                    mtd_hist.index = pd.to_datetime(mtd_hist.index).normalize()
+                    hist_copy = hist.copy()
+                    if hist_copy.index.tz is not None:
+                        hist_copy.index = hist_copy.index.tz_convert(None)
+                    hist_copy.index = pd.to_datetime(hist_copy.index).normalize()
                     
                     current_month_start = pd.Timestamp(f'{current_year}-{current_month:02d}-01')
-                    mtd_hist_filtered = mtd_hist[mtd_hist.index >= current_month_start]
+                    mtd_hist_filtered = hist_copy[hist_copy.index >= current_month_start]
                     
-                    # Debug: log data points for first ticker to verify
-                    if etoro_symbol in ['INDO.PA', 'MSFT', 'NVDA']:
+                    # Debug: log data points for sample tickers to verify
+                    if etoro_symbol in ['INDO.PA', 'MSFT', 'NVDA', 'AZN.L', 'GLEN.L']:
                         print(f"  [{etoro_symbol}] MTD data points: {len(mtd_hist_filtered)}, dates: {mtd_hist_filtered.index.tolist()}")
                     
                     if len(mtd_hist_filtered) >= 2:
@@ -308,8 +307,10 @@ def fetch_stock_data():
                         mtd_current = mtd_hist_filtered['Close'].iloc[-1]
                         monthly_change = ((mtd_current - mtd_start) / mtd_start) * 100
                     elif len(mtd_hist_filtered) == 1:
-                        # Only one data point - no change possible
+                        # Only one data point for this month - no change possible
                         monthly_change = 0.0
+                        if etoro_symbol in ['INDO.PA', 'MSFT', 'NVDA']:
+                            print(f"  [{etoro_symbol}] Only 1 MTD point - setting monthly_change to 0.0")
                     else:
                         monthly_change = 0.0
                 else:
