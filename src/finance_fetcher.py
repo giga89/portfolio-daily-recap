@@ -284,7 +284,6 @@ def fetch_stock_data():
             
             # Calculate monthly change (MTD - Month-To-Date from start of current month)
             # This ensures that in January, monthly = YTD
-            # Using period='1mo' ensures we get the most recent month of data including yesterday
             current_year = datetime.now().year
             current_month = datetime.now().month
             try:
@@ -292,21 +291,33 @@ def fetch_stock_data():
                 # Then filter to current month only
                 mtd_hist = stock.history(period='2mo')  # Get 2 months to ensure we have current month data
                 if not mtd_hist.empty:
-                    # Filter to current month only
-                    mtd_hist.index = pd.to_datetime(mtd_hist.index).tz_localize(None)
+                    # Normalize timezone - handle both tz-aware and tz-naive indices
+                    if mtd_hist.index.tz is not None:
+                        mtd_hist.index = mtd_hist.index.tz_convert(None)
+                    mtd_hist.index = pd.to_datetime(mtd_hist.index).normalize()
+                    
                     current_month_start = pd.Timestamp(f'{current_year}-{current_month:02d}-01')
                     mtd_hist_filtered = mtd_hist[mtd_hist.index >= current_month_start]
+                    
+                    # Debug: log data points for first ticker to verify
+                    if etoro_symbol in ['INDO.PA', 'MSFT', 'NVDA']:
+                        print(f"  [{etoro_symbol}] MTD data points: {len(mtd_hist_filtered)}, dates: {mtd_hist_filtered.index.tolist()}")
                     
                     if len(mtd_hist_filtered) >= 2:
                         mtd_start = mtd_hist_filtered['Close'].iloc[0]
                         mtd_current = mtd_hist_filtered['Close'].iloc[-1]
                         monthly_change = ((mtd_current - mtd_start) / mtd_start) * 100
+                    elif len(mtd_hist_filtered) == 1:
+                        # Only one data point - no change possible
+                        monthly_change = 0.0
                     else:
                         monthly_change = 0.0
                 else:
                     monthly_change = 0.0
             except Exception as e:
                 print(f"MTD calculation error for {etoro_symbol}: {e}")
+                import traceback
+                traceback.print_exc()
                 monthly_change = 0.0
             
             # Calculate YTD change (from January 1st of current year)
