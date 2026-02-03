@@ -284,14 +284,25 @@ def fetch_stock_data():
             
             # Calculate monthly change (MTD - Month-To-Date from start of current month)
             # This ensures that in January, monthly = YTD
+            # Using period='1mo' ensures we get the most recent month of data including yesterday
             current_year = datetime.now().year
             current_month = datetime.now().month
             try:
-                mtd_hist = stock.history(start=f'{current_year}-{current_month:02d}-01')
-                if len(mtd_hist) >= 2:
-                    mtd_start = mtd_hist['Close'].iloc[0]
-                    mtd_current = mtd_hist['Close'].iloc[-1]
-                    monthly_change = ((mtd_current - mtd_start) / mtd_start) * 100
+                # Get last month of trading data to ensure we have yesterday's data
+                # Then filter to current month only
+                mtd_hist = stock.history(period='2mo')  # Get 2 months to ensure we have current month data
+                if not mtd_hist.empty:
+                    # Filter to current month only
+                    mtd_hist.index = pd.to_datetime(mtd_hist.index).tz_localize(None)
+                    current_month_start = pd.Timestamp(f'{current_year}-{current_month:02d}-01')
+                    mtd_hist_filtered = mtd_hist[mtd_hist.index >= current_month_start]
+                    
+                    if len(mtd_hist_filtered) >= 2:
+                        mtd_start = mtd_hist_filtered['Close'].iloc[0]
+                        mtd_current = mtd_hist_filtered['Close'].iloc[-1]
+                        monthly_change = ((mtd_current - mtd_start) / mtd_start) * 100
+                    else:
+                        monthly_change = 0.0
                 else:
                     monthly_change = 0.0
             except Exception as e:
@@ -487,8 +498,24 @@ def fetch_portfolio_history_from_bullaware(start_year=2020):
         
         # Convert to DataFrame
         data = []
+        current_date = datetime.now()
+        current_year = current_date.year
+        current_month = current_date.month
+        
+        # Check if we're at the end of the month (last 2 days)
+        # This allows including current month data only when it's nearly complete
+        import calendar
+        last_day_of_month = calendar.monthrange(current_year, current_month)[1]
+        is_month_end = current_date.day >= (last_day_of_month - 1)
+        
         for key, value in monthly_returns.items():
             year, month = map(int, key.split('-'))
+            
+            # Skip partial current month data unless we're at month end
+            if year == current_year and month == current_month and not is_month_end:
+                print(f"   Skipping partial month {year}-{month} (not yet complete)")
+                continue
+                
             if year >= start_year:
                 # Use end of month date roughly
                 date = pd.Timestamp(year=year, month=month, day=1) + pd.offsets.MonthEnd(0)
@@ -501,7 +528,7 @@ def fetch_portfolio_history_from_bullaware(start_year=2020):
         df = pd.DataFrame(data).sort_values('Date')
         df.set_index('Date', inplace=True)
         
-        # Calculate Cumulative Return
+        # Calculate Cumulative Return  
         # Formula: (1 + r1)*(1 + r2)*... - 1
         # Convert percentage to decimal
         df['Return_Decimal'] = df['Monthly_Return'] / 100.0
