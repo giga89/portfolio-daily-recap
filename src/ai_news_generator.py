@@ -136,6 +136,33 @@ def _limit_tags_in_text(text, allowed_tags, max_tags=MAX_TAGS_PER_POST):
     return re.sub(tag_pattern, tag_replacer, text)
 
 
+def _remove_intro_text(text):
+    """
+    Remove introductory sentences that Gemini sometimes adds before the Market Overview.
+    Examples: "Here is your concise daily market recap for today, YYYY-MM-DD:"
+    
+    Args:
+        text: The full recap text
+    
+    Returns:
+        str: Text with intro removed
+    """
+    # Pattern to match common intro formats
+    # Match lines that start with "Here is" or similar until the first real section
+    intro_patterns = [
+        r'^Here is .*?\n+',
+        r'^Below is .*?\n+',
+        r'^Here\'s .*?\n+',
+    ]
+    
+    cleaned_text = text
+    for pattern in intro_patterns:
+        cleaned_text = re.sub(pattern, '', cleaned_text, flags=re.IGNORECASE | re.MULTILINE)
+    
+    # Also remove any leading whitespace after removal
+    return cleaned_text.lstrip()
+
+
 def _remove_market_section_tags(text):
     """
     Remove all $ tags from the MARKET OVERVIEW section.
@@ -370,7 +397,8 @@ Impact and outlook summary...
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "monthly_recap")
                     
-                    # Post-process: remove tags from overview section
+                    # Post-process: remove intro text and tags from overview section
+                    recap_text = _remove_intro_text(recap_text)
                     recap_text = _remove_market_section_tags(recap_text)
                     
                     # Limit tags
@@ -396,6 +424,7 @@ Impact and outlook summary...
                         if response and response.text:
                             print(f"✅ Monthly recap generated (no tools) using {model_name}!")
                             recap_text = response.text.strip()
+                            recap_text = _remove_intro_text(recap_text)
                             recap_text = _remove_market_section_tags(recap_text)
                             recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
                             return "\n" + recap_text + "\n"
@@ -573,7 +602,8 @@ Brief summary...
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "daily_recap")
                     
-                    # Post-process: remove any $ tags from market section
+                    # Post-process: remove intro text and any $ tags from market section
+                    recap_text = _remove_intro_text(recap_text)
                     recap_text = _remove_market_section_tags(recap_text)
                     
                     # Post-process: ensure only allowed tags are used and limit count
@@ -606,6 +636,7 @@ Brief summary...
                             recap_text = response.text.strip()
                             
                             # Post-process
+                            recap_text = _remove_intro_text(recap_text)
                             recap_text = _remove_market_section_tags(recap_text)
                             recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
                             
