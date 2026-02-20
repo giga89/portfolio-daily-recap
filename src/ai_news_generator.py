@@ -713,6 +713,7 @@ Double your money in ~{time_to_double:.1f} years
 🎯 Long-term strategy based on solid fundamentals
 🔄 Periodic rebalancing to optimize risk/reward
 
+🔗 Links & Info: https://bio.mega89.uk/
 @AndreaRavalli
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
