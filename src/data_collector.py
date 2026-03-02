@@ -38,10 +38,10 @@ def main():
     print(f"Portfolio daily performance: {portfolio_daily:.2f}%")
     print("=" * 50)
     
-    # Step 2b: Get reliable Portfolio YTD (Annual Yield) from BullAware
-    # The user manual check at eToro stats confirms BullAware is highly accurate
-    print("📈 Fetching reliable Portfolio YTD from BullAware...")
-    portfolio_ytd = finance_fetcher.fetch_portfolio_ytd_from_bullaware()
+    # Step 2b: Get reliable Portfolio YTD (Annual Yield) from eToro public API
+    # Data comes directly from eToro's stats page - no auth required
+    print("📈 Fetching Portfolio YTD from eToro...")
+    portfolio_ytd = finance_fetcher.fetch_portfolio_ytd_from_etoro()
     
     # Fallback to calculated YTD if BullAware fails
     if portfolio_ytd is None:
@@ -85,7 +85,7 @@ def main():
     chart_path = None
     try:
         # Fetch history
-        port_hist = finance_fetcher.fetch_portfolio_history_from_bullaware(start_year=2020)
+        port_hist = finance_fetcher.fetch_portfolio_history_from_etoro(start_year=2020)
         bench_hist = finance_fetcher.fetch_benchmarks_history(start_date='2020-01-01')
         
         if port_hist is not None and not bench_hist.empty:

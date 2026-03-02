@@ -23,75 +23,100 @@ US_OPEN_MINUTE = 30
 US_CLOSE_HOUR = 16
 US_CLOSE_MINUTE = 00
 
-def fetch_portfolio_ytd_from_bullaware():
+# eToro public API configuration
+ETORO_USERNAME = 'AndreaRavalli'
+ETORO_CID = 7743547  # Customer ID, discovered via rankings API
+ETORO_API_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+}
+
+
+def _fetch_etoro_cid(username):
     """
-    Fetch portfolio aggregate YTD from BullAware by compounding monthly returns
-    found in the highly reliable JSON data embedded in the page.
+    Resolve eToro username to Customer ID (CID) via the public rankings API.
+    This is a fallback in case the hardcoded CID ever changes.
     """
     try:
-        url = "https://bullaware.com/etoro/AndreaRavalli"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        
-        # Simple retry loop
+        url = f"https://www.etoro.com/sapi/rankings/rankings?username={username}&Period=CurrYear&blocked=false"
+        response = requests.get(url, headers=ETORO_API_HEADERS, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if data.get('Status') == 'OK' and data.get('Items'):
+            return data['Items'][0]['CustomerId']
+    except Exception as e:
+        print(f"   ⚠️ Could not resolve eToro CID for {username}: {e}")
+    return None
+
+
+def fetch_portfolio_ytd_from_etoro():
+    """
+    Fetch portfolio YTD directly from eToro's public API.
+    Uses:
+      1. Rankings API with Period=CurrYear for the most up-to-date YTD gain
+      2. Fallback: userstats/gain/history yearly data for current year
+    These match exactly what's displayed on https://www.etoro.com/people/{username}/stats
+    """
+    try:
+        print(f"   Fetching from eToro public API (user: {ETORO_USERNAME})...")
+
+        # Method 1: Rankings API - gives the most up-to-date YTD gain
+        rankings_url = f"https://www.etoro.com/sapi/rankings/rankings?username={ETORO_USERNAME}&Period=CurrYear&blocked=false"
+
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                print(f"   Values fetch attempt {attempt+1}/{max_retries}...")
-                response = requests.get(url, headers=headers, timeout=30)
+                print(f"   Attempt {attempt+1}/{max_retries}...")
+                response = requests.get(rankings_url, headers=ETORO_API_HEADERS, timeout=15)
                 response.raise_for_status()
-                break # Success
+                data = response.json()
+
+                if data.get('Status') == 'OK' and data.get('Items'):
+                    item = data['Items'][0]
+                    ytd_value = item.get('Gain')
+                    if ytd_value is not None:
+                        print(f"✓ eToro Portfolio YTD (rankings API): {ytd_value:.2f}%")
+                        return ytd_value
+
+                break  # Got response but no valid data, try fallback
             except requests.exceptions.RequestException as e:
                 if attempt == max_retries - 1:
-                    raise e # Re-raise on last attempt
-                print(f"   ⚠️ Timeout or error, retrying: {e}")
-                import time
-                time.sleep(2) # Wait a bit before retry
+                    print(f"   ⚠️ Rankings API failed after {max_retries} attempts: {e}")
+                else:
+                    print(f"   ⚠️ Attempt failed, retrying: {e}")
+                    import time
+                    time.sleep(2)
 
-        content = response.text
-        
-        # 1. Try to find the monthly returns block
-        # The block usually contains contiguous months like "2025-1":3.59,"2025-2":-2.47...
+        # Method 2: Fallback - userstats yearly data
+        print("   Trying userstats fallback...")
+        cid = ETORO_CID
+        stats_url = f"https://www.etoro.com/sapi/userstats/gain/cid/{cid}/history?IncludeSimulation=true&Period=OneYearAgo"
+        response = requests.get(stats_url, headers=ETORO_API_HEADERS, timeout=15)
+        response.raise_for_status()
+        stats_data = response.json()
+
         current_year = datetime.now().year
-        # Search for the block starting with January of the current year
-        block_pattern = rf'\\?["\']{current_year}-1\\?["\']:\s*[+-]?\d+\.?\d*.*?[}}]'
-        match_block = re.search(block_pattern, content)
-        
-        if match_block:
-            block_content = match_block.group(0)
-            # Now extract all months from this specific block
-            monthly_pattern = rf'\\?["\']{current_year}-(\d+)\\?["\']:\s*([+-]?\d+\.?\d*)'
-            matches = re.findall(monthly_pattern, block_content)
-            
-            if matches:
-                # Sort by month index (1 to 12)
-                monthly_data = sorted([(int(m), float(v)) for m, v in matches], key=lambda x: x[0])
-                print(f"   Found {len(monthly_data)} months of data for {current_year}")
-                
-                # Compound the monthly returns
-                compounded_return = 1.0
-                for month, return_val in monthly_data:
-                    compounded_return *= (1 + (return_val / 100.0))
-                
-                ytd_value = (compounded_return - 1.0) * 100.0
-                print(f"✓ Calculated BullAware portfolio YTD (compounded): {ytd_value:.2f}%")
+        for entry in stats_data.get('yearly', []):
+            entry_year = int(entry['start'][:4])
+            if entry_year == current_year:
+                ytd_value = entry['gain']
+                print(f"✓ eToro Portfolio YTD (userstats API): {ytd_value:.2f}%")
                 return ytd_value
-            
-        # 2. Fallback to direct "Year to Date" string
-        ytd_pattern = r'Year to Date.*?([+-]?\d+\.?\d*)<!-- -->%'
-        match = re.search(ytd_pattern, content, re.IGNORECASE | re.DOTALL)
-        if match:
-            ytd_value = float(match.group(1))
-            print(f"✓ Found BullAware portfolio YTD (regex): {ytd_value}%")
-            return ytd_value
-            
-        print("Could not find portfolio YTD in BullAware page")
+
+        print("   Could not find current year data in eToro stats")
         return None
-        
+
     except Exception as e:
-        print(f"BullAware portfolio YTD fetch error: {e}")
+        print(f"❌ eToro portfolio YTD fetch error: {e}")
         return None
+
+
+def fetch_portfolio_ytd_from_bullaware():
+    """
+    DEPRECATED: Use fetch_portfolio_ytd_from_etoro() instead.
+    Kept for backward compatibility - now redirects to eToro API.
+    """
+    print("   (Redirecting to eToro API - BullAware is deprecated for YTD)")
+    return fetch_portfolio_ytd_from_etoro()
 
 
 def calculate_portfolio_ytd(stock_data, portfolio_weights=None):
@@ -466,47 +491,25 @@ def calculate_portfolio_weighted_change(stock_data, portfolio_weights=None, metr
     return bench_data
 
 
-def fetch_portfolio_history_from_bullaware(start_year=2020):
+def fetch_portfolio_history_from_etoro(start_year=2020):
     """
-    Fetch historical monthly returns from BullAware page and calculate cumulative return.
+    Fetch historical monthly returns from eToro's public API and calculate cumulative return.
     Returns a pandas Series of cumulative performance (percentage) indexed by date.
+    Uses the userstats/gain/history endpoint which provides monthly gains.
     """
-    print("📊 Fetching portfolio history from BullAware...")
+    print("📊 Fetching portfolio history from eToro API...")
     try:
-        url = "https://bullaware.com/etoro/AndreaRavalli"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
+        cid = ETORO_CID
+        url = f"https://www.etoro.com/sapi/userstats/gain/cid/{cid}/history?IncludeSimulation=true&Period=OneYearAgo"
         
-        response = requests.get(url, headers=headers, timeout=30)
+        response = requests.get(url, headers=ETORO_API_HEADERS, timeout=30)
         response.raise_for_status()
-        content = response.text
+        stats_data = response.json()
         
-        # Extract monthlyReturns JSON block
-        # Pattern: "monthlyReturns":{"2018-1":-5.13,...} or \"monthlyReturns\":{...}
-        # We also need to capture until the closing brace. Since it is a flat dict of numbers, 
-        # it should end with '}', or '\}' if escaped depending on context.
-        # But usually the valid JSON ends with }
-        
-        pattern = r'\\?"monthlyReturns\\?":\s*(\{.*?\})'
-        match = re.search(pattern, content)
-        if not match:
-             # Try simpler pattern or check if content is different
-            print(f"❌ Could not find monthlyReturns in BullAware page. Content length: {len(content)}")
-            # Debug: look for near matches
-            if "monthlyReturns" in content:
-                 print("   'monthlyReturns' string IS present in content.")
-            else:
-                 print("   'monthlyReturns' string IS NOT present.")
+        monthly_entries = stats_data.get('monthly', [])
+        if not monthly_entries:
+            print("❌ No monthly data returned from eToro API")
             return None
-            
-        monthly_returns_json = match.group(1)
-        
-        # Clean up escaped quotes if present in the captured group
-        if '\\"' in monthly_returns_json:
-            monthly_returns_json = monthly_returns_json.replace('\\"', '"')
-            
-        monthly_returns = json.loads(monthly_returns_json)
         
         # Convert to DataFrame
         data = []
@@ -515,52 +518,62 @@ def fetch_portfolio_history_from_bullaware(start_year=2020):
         current_month = current_date.month
         
         # Check if we're at the end of the month (last 2 days)
-        # This allows including current month data only when it's nearly complete
         import calendar
         last_day_of_month = calendar.monthrange(current_year, current_month)[1]
         is_month_end = current_date.day >= (last_day_of_month - 1)
         
-        for key, value in monthly_returns.items():
-            year, month = map(int, key.split('-'))
+        for entry in monthly_entries:
+            # Parse "2025-01-01T00:00:00Z" format
+            start_str = entry['start']
+            year = int(start_str[:4])
+            month = int(start_str[5:7])
+            gain = float(entry['gain'])
             
             # Skip partial current month data unless we're at month end
             if year == current_year and month == current_month and not is_month_end:
-                print(f"   Skipping partial month {year}-{month} (not yet complete)")
+                print(f"   Skipping partial month {year}-{month:02d} (not yet complete)")
                 continue
-                
+            
             if year >= start_year:
-                # Use end of month date roughly
+                # Use end of month date
                 date = pd.Timestamp(year=year, month=month, day=1) + pd.offsets.MonthEnd(0)
-                data.append({'Date': date, 'Monthly_Return': float(value)})
-                
+                data.append({'Date': date, 'Monthly_Return': gain})
+        
         if not data:
             print(f"⚠️ No data found from year {start_year}")
             return None
-            
+        
         df = pd.DataFrame(data).sort_values('Date')
         df.set_index('Date', inplace=True)
         
         # Calculate Cumulative Return  
         # Formula: (1 + r1)*(1 + r2)*... - 1
-        # Convert percentage to decimal
         df['Return_Decimal'] = df['Monthly_Return'] / 100.0
         df['Cumulative_Return'] = ((1 + df['Return_Decimal']).cumprod() - 1) * 100.0
         
-        # Add a starting point (0% at start_year-01-01) if desired, but monthly data starts at end of Jan.
-        # We can prepend a 0 point.
+        # Add a starting point (0% at start_year-01-01)
         start_date = pd.Timestamp(f"{start_year}-01-01")
         if start_date < df.index[0]:
-             # Create a 0 row
-             start_row = pd.DataFrame({'Monthly_Return': [0.0], 'Return_Decimal': [0.0], 'Cumulative_Return': [0.0]}, index=[start_date])
-             df = pd.concat([start_row, df])
-
+            start_row = pd.DataFrame({'Monthly_Return': [0.0], 'Return_Decimal': [0.0], 'Cumulative_Return': [0.0]}, index=[start_date])
+            df = pd.concat([start_row, df])
+        
+        print(f"✓ Fetched {len(data)} months of history from eToro API (from {start_year})")
         return df['Cumulative_Return']
         
     except Exception as e:
-        print(f"❌ Error fetching portfolio history: {e}")
+        print(f"❌ Error fetching portfolio history from eToro: {e}")
         import traceback
         traceback.print_exc()
         return None
+
+
+def fetch_portfolio_history_from_bullaware(start_year=2020):
+    """
+    DEPRECATED: Use fetch_portfolio_history_from_etoro() instead.
+    Kept for backward compatibility - now redirects to eToro API.
+    """
+    print("   (Redirecting to eToro API - BullAware is deprecated for history)")
+    return fetch_portfolio_history_from_etoro(start_year=start_year)
 
 
 def fetch_benchmarks_history(start_date='2020-01-01'):
