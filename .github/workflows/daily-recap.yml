@@ -2,9 +2,9 @@ name: Daily Portfolio Recap
 
 on:
   schedule:
-    - cron: '0 9 * * 1-5'  # 9:00 UTC - European market open (monday-friday)
-    - cron: '35 14 * * 1-5'  # 14:35 UTC - U.S. market open (monday-friday)
-    - cron: '0 21 * * 1-5'  # 21:00 UTC - U.S. market close (monday-friday)
+    - cron: '0 8 * * 1-5'  # 8:00 UTC - European market open
+    - cron: '30 14 * * 1-5'  # 14:30 UTC - U.S. market open
+    - cron: '0 21 * * 1-5'  # 21:00 UTC - U.S. market close
     - cron: '0 9 * * 6'     # 10:00 CET (09:00 UTC) - Weekly recap (Saturday)
     - cron: '0 21 * * 0'    # 22:00 CET (21:00 UTC) - Weekly recap (Sunday)
     - cron: '0 20 28-31 * *'  # 21:00 CET (20:00 UTC) - Monthly recap check (last day of month)
@@ -63,11 +63,11 @@ jobs:
              SESSION_NAME="Weekly recap (Sat)"
           elif [ "$DAY" -eq 7 ] && [ "$HOUR" -eq 21 ]; then
              SESSION_NAME="Weekly recap (Sun)"
-          elif [ "$HOUR" -eq 10 ]; then
+          elif [ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 9 ]; then
             SESSION_NAME="European market open"
-          elif [ "$HOUR" -eq 15 ]; then
+          elif [ "$HOUR" -eq 14 ] || [ "$HOUR" -eq 13 ] || [ "$HOUR" -eq 15 ]; then
             SESSION_NAME="U.S. market open"
-          elif [ "$HOUR" -eq 22 ]; then
+          elif [ "$HOUR" -eq 21 ] || [ "$HOUR" -eq 20 ] || [ "$HOUR" -eq 22 ]; then
             SESSION_NAME="U.S. market close"
           fi
           

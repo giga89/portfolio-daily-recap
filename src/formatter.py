@@ -87,6 +87,8 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
          header = f"📅 {session_upper} 📆"
     elif "OPEN" in session_upper:
         header = f"🌅 {session_upper} 📊"
+    elif "CLOSE" in session_upper:
+        header = f"🌆 {session_upper} 📉"
     elif "RECAP" in session_upper:
         header = f"🌠 {session_upper} 🌙"
     else:
