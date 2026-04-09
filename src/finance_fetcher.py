@@ -52,14 +52,36 @@ def fetch_portfolio_ytd_from_etoro():
     """
     Fetch portfolio YTD directly from eToro's public API.
     Uses:
-      1. Rankings API with Period=CurrYear for the most up-to-date YTD gain
-      2. Fallback: userstats/gain/history yearly data for current year
+      1. userstats/gain/history yearly data for current year (more accurate)
+      2. Fallback: Rankings API with Period=CurrYear
     These match exactly what's displayed on https://www.etoro.com/people/{username}/stats
     """
     try:
         print(f"   Fetching from eToro public API (user: {ETORO_USERNAME})...")
 
-        # Method 1: Rankings API - gives the most up-to-date YTD gain
+        # Method 1: userstats yearly data
+        print("   Trying userstats API for accurate YTD...")
+        try:
+            cid = ETORO_CID
+            stats_url = f"https://www.etoro.com/sapi/userstats/gain/cid/{cid}/history?IncludeSimulation=true&Period=OneYearAgo"
+            response = requests.get(stats_url, headers=ETORO_API_HEADERS, timeout=15)
+            response.raise_for_status()
+            stats_data = response.json()
+
+            current_year = datetime.now().year
+            for entry in stats_data.get('yearly', []):
+                entry_year = int(entry['start'][:4])
+                if entry_year == current_year:
+                    ytd_value = entry['gain']
+                    print(f"✓ eToro Portfolio YTD (userstats API): {ytd_value:.2f}%")
+                    return ytd_value
+                    
+            print("   Could not find current year data in eToro stats, trying fallback...")
+        except Exception as e:
+            print(f"   ⚠️ Userstats API failed: {e}. Trying fallback...")
+
+        # Method 2: Rankings API - gives the most up-to-date YTD gain (Fallback)
+        print("   Trying rankings API fallback...")
         rankings_url = f"https://www.etoro.com/sapi/rankings/rankings?username={ETORO_USERNAME}&Period=CurrYear&blocked=false"
 
         max_retries = 3
@@ -77,7 +99,7 @@ def fetch_portfolio_ytd_from_etoro():
                         print(f"✓ eToro Portfolio YTD (rankings API): {ytd_value:.2f}%")
                         return ytd_value
 
-                break  # Got response but no valid data, try fallback
+                break  # Got response but no valid data, end loop
             except requests.exceptions.RequestException as e:
                 if attempt == max_retries - 1:
                     print(f"   ⚠️ Rankings API failed after {max_retries} attempts: {e}")
@@ -86,23 +108,6 @@ def fetch_portfolio_ytd_from_etoro():
                     import time
                     time.sleep(2)
 
-        # Method 2: Fallback - userstats yearly data
-        print("   Trying userstats fallback...")
-        cid = ETORO_CID
-        stats_url = f"https://www.etoro.com/sapi/userstats/gain/cid/{cid}/history?IncludeSimulation=true&Period=OneYearAgo"
-        response = requests.get(stats_url, headers=ETORO_API_HEADERS, timeout=15)
-        response.raise_for_status()
-        stats_data = response.json()
-
-        current_year = datetime.now().year
-        for entry in stats_data.get('yearly', []):
-            entry_year = int(entry['start'][:4])
-            if entry_year == current_year:
-                ytd_value = entry['gain']
-                print(f"✓ eToro Portfolio YTD (userstats API): {ytd_value:.2f}%")
-                return ytd_value
-
-        print("   Could not find current year data in eToro stats")
         return None
 
     except Exception as e:
