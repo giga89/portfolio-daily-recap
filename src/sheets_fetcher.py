@@ -149,15 +149,45 @@ def init_historical_sheet_if_missing():
                 valueInputOption='USER_ENTERED',
                 body=body
             ).execute()
-        return True
+            return True
+        return False
     except Exception as e:
         print(f"Error initializing historical sheet: {e}")
         return False
 
-def append_historical_data(date_str, current_performance, current_ath):
-    """Append a row to the 'Storico' sheet."""
+def seed_historical_data(rows):
+    """Seed historical data with a single batch append."""
+    init_historical_sheet_if_missing()
     try:
-        init_historical_sheet_if_missing()
+        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+        if not creds_json:
+            return False
+        creds_dict = json.loads(creds_json)
+        credentials = service_account.Credentials.from_service_account_info(
+            creds_dict, scopes=['https://www.googleapis.com/auth/spreadsheets']
+        )
+        service = build('sheets', 'v4', credentials=credentials)
+        
+        body = {
+            'values': rows
+        }
+        service.spreadsheets().values().append(
+            spreadsheetId=GOOGLE_SHEETS_ID,
+            range='Storico!A:C',
+            valueInputOption='USER_ENTERED',
+            insertDataOption='INSERT_ROWS',
+            body=body
+        ).execute()
+        print(f"✓ Seeded {len(rows)} records into Storico.")
+        return True
+    except Exception as e:
+        print(f"❌ Error seeding Google Sheets: {e}")
+        return False
+
+def append_historical_data(date_str, current_performance, current_ath):
+    """Append a single row to the 'Storico' sheet."""
+    # We only call init if necessary, but assume it exists for single appends
+    try:
         creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
         if not creds_json:
             return False
@@ -183,6 +213,7 @@ def append_historical_data(date_str, current_performance, current_ath):
         print(f"✓ Appended {date_str} data to Storico sheet.")
         return True
     except Exception as e:
+        # Check if it failed because it doesn't exist
         print(f"❌ Error appending to Google Sheets: {e}")
         return False
 
