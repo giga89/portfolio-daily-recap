@@ -28,7 +28,7 @@ def format_ticker(etoro_symbol, company_name, performance, use_tag=False):
     return f"{emoji} {symbol_str} {performance:+.2f}%"
 
 
-def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None, portfolio_weekly=None, portfolio_monthly=None):
+def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None, portfolio_weekly=None, portfolio_monthly=None, ath_distance=0.0):
     """
     Generate the formatted daily recap matching the desired output format
     """
@@ -132,8 +132,15 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     recap = f"""{header}
 
 {perf_emoji} {perf_emoji} {perf_emoji} {perf_text}: {current_perf:+.2f}% {perf_emoji} {perf_emoji} {perf_emoji}
-
 """
+    
+    # Optional: Display ATH distance
+    if ath_distance is not None and ath_distance < 0:
+        recap += f"🏔️ Distance from All-Time High: {ath_distance:.2f}%\n"
+    elif ath_distance is not None and ath_distance >= 0:
+        recap += f"🏔️ New All-Time High Reached! 🎉\n"
+        
+    recap += "\n"
     
     # Only add daily/weekly section if NOT monthly
     if not is_monthly:
