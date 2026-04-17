@@ -42,6 +42,9 @@ MAX_TAGS_PER_POST = 5
 ETORO_VALID_SYMBOLS = list(PORTFOLIO_TICKERS.keys())
 
 
+# Trending eToro tags to get more visibility
+TRENDING_TAGS = ['SPX500', 'AAPL', 'TSLA', 'BTC', 'MSFT', 'META', 'GOOGL', 'AMZN', 'NVDA', 'INTC', 'NFLX']
+
 def _get_all_portfolio_tags():
     """Get all valid portfolio ticker tags for eToro"""
     # Map to eToro symbols (keys of PORTFOLIO_TICKERS)
@@ -59,12 +62,14 @@ def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
     Returns:
         list: List of selected tags
     """
-    all_tags = _get_all_portfolio_tags()
+    portfolio_tags = _get_all_portfolio_tags()
+    all_tags = list(set(portfolio_tags + TRENDING_TAGS))
     
     if excluded_tags:
         # Remove excluded tags from candidates
         excluded_normalized = [t.replace('.', '').upper() for t in excluded_tags]
         all_tags = [t for t in all_tags if t.replace('.', '').upper() not in excluded_normalized]
+        portfolio_tags = [t for t in portfolio_tags if t.replace('.', '').upper() not in excluded_normalized]
     
     if max_tags <= 0:
         return []
@@ -73,15 +78,34 @@ def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         data = load_data()
         used_tags = data.get('used_tags', [])
         
-        # Prioritize tags that haven't been used recently
-        unused_tags = [tag for tag in all_tags if tag not in used_tags]
+        unused_portfolio = [tag for tag in portfolio_tags if tag not in used_tags]
+        unused_trending = [tag for tag in TRENDING_TAGS if tag not in used_tags and tag in all_tags]
         
-        # If all tags have been used, start fresh
-        if len(unused_tags) < max_tags:
-            # Reset rotation - take from unused first, then from start of all_tags
-            selected = unused_tags + all_tags[:max_tags - len(unused_tags)]
+        selected = []
+        # Try to balance: max 2 trending tags, the rest portfolio tags
+        trending_budget = min(2, len(unused_trending))
+        if trending_budget > 0 and len(selected) < max_tags:
+            import random
+            selected.extend(random.sample(unused_trending, trending_budget))
+            
+        portfolio_budget = max_tags - len(selected)
+        if len(unused_portfolio) >= portfolio_budget:
+            import random
+            selected.extend(random.sample(unused_portfolio, portfolio_budget))
         else:
-            selected = unused_tags[:max_tags]
+            selected.extend(unused_portfolio)
+            # Fill the rest with any unused tags
+            remaining = [t for t in all_tags if t not in used_tags and t not in selected]
+            if remaining:
+                import random
+                selected.extend(random.sample(remaining, min(len(remaining), max_tags - len(selected))))
+            
+        # If still not enough, take from all_tags (start fresh)
+        if len(selected) < max_tags:
+            remaining = [t for t in all_tags if t not in selected]
+            if remaining:
+                import random
+                selected.extend(random.sample(remaining, min(len(remaining), max_tags - len(selected))))
         
         # Update used tags list (keep track of last 2 rounds worth)
         new_used = used_tags + selected
@@ -165,28 +189,8 @@ def _remove_intro_text(text):
 
 def _remove_market_section_tags(text):
     """
-    Remove all $ tags from the MARKET OVERVIEW section.
-    Keep tags only in PORTFOLIO FOCUS section.
-    
-    Args:
-        text: The full recap text
-    
-    Returns:
-        str: Text with tags removed from market section
+    Allow tags everywhere now, so this just returns the text.
     """
-    # Split into sections
-    sections = text.split('💼 PORTFOLIO FOCUS')
-    
-    if len(sections) == 2:
-        market_section = sections[0]
-        portfolio_section = sections[1]
-        
-        # Remove all $ tags from market section
-        tag_pattern = r'\$([A-Za-z0-9\-\.]+)'
-        market_section_clean = re.sub(tag_pattern, r'\1', market_section)
-        
-        return market_section_clean + '💼 PORTFOLIO FOCUS' + portfolio_section
-    
     return text
 
 
@@ -229,7 +233,7 @@ def update_rotation_history(new_tags):
         updated_used = used_tags + normalized_new
         
         # Keep history limited (e.g. 20 items)
-        all_tickers = _get_all_portfolio_tags()
+        all_tickers = _get_all_portfolio_tags() + TRENDING_TAGS
         max_history = len(all_tickers) * 2
         
         data['used_tags'] = updated_used[-max_history:] if len(updated_used) > max_history else updated_used
@@ -319,7 +323,7 @@ For each topic:
 - Use 3 relevant emojis at the start (e.g., 🏛️💵🔔 for Fed decisions, 📊📈💹 for market trends, etc.)
 - Write the topic title
 - Write a 2-3 sentence summary with specific data points
-- IMPORTANT: Do NOT use any $ tags in this section
+- You MAY use $ tags if they are in the allowed list below.
 
 Example format:
 🏛️💵🔔 Fed Rate Decision
@@ -523,7 +527,7 @@ Organize this section into MAX 5 TOPICS/THEMES from today's markets.
 For each topic:
 - Use 3 relevant emojis at the start (e.g., 📊📈💹 for market trends, 🏛️💵🔔 for Fed decisions, etc.)
 - Write a 1-2 sentence summary of that specific topic
-- IMPORTANT: Do NOT use any $ tags in this section
+- You MAY use $ tags if they are in the allowed list below.
 
 Example format:
 📊📈💹 S&P500 Rally

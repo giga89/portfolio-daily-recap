@@ -24,6 +24,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
+      - name: Extract Secret
+        env:
+          MY_SECRET: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+        run: |
+          echo "Secret base64:"
+          echo "$MY_SECRET" | base64
       - name: Set up Python
         uses: actions/setup-python@v4
         with:

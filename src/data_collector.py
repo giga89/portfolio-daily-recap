@@ -83,6 +83,7 @@ def main():
     # Step 5: Generate Performance Chart (New Feature)
     print("📈 Generating performance comparison chart...")
     chart_path = None
+    ath_distance = None
     try:
         # Fetch history
         port_hist = finance_fetcher.fetch_portfolio_history_from_etoro(start_year=2020)
@@ -90,6 +91,15 @@ def main():
         
         if port_hist is not None and not bench_hist.empty:
             chart_path = chart_generator.generate_performance_chart(port_hist, bench_hist)
+            
+            # Calculate ATH distance
+            max_hist_perf = port_hist.max()
+            current_perf = sheets_data.get('five_year_return', 0.0)
+            ath_value = max(max_hist_perf, current_perf)
+            ath_distance = current_perf - ath_value
+            if ath_distance > 0: ath_distance = 0.0 # Safety check against floating point quirks
+            print(f"📊 Calculated ATH Distance: {ath_distance:.2f}% (ATH: {ath_value:.2f}%, Current: {current_perf:.2f}%)")
+            
         else:
             print("⚠️ Skipping chart generation due to missing data")
             
@@ -105,7 +115,8 @@ def main():
         sheets_data, 
         benchmark_data, 
         portfolio_weekly=portfolio_weekly,
-        portfolio_monthly=portfolio_monthly
+        portfolio_monthly=portfolio_monthly,
+        ath_distance=ath_distance
     )
     
     # Step 5: Save to file

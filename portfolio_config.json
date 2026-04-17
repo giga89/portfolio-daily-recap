@@ -2,7 +2,6 @@
     "emojis": {
         "1919.HK": "\ud83d\udea2",
         "2318.HK": "\ud83c\udfe6",
-        "9618.HK": "\ud83c\udd95",
         "ABBV": "\ud83d\udc89",
         "ABT": "\ud83c\udfe5",
         "AMZN": "\ud83d\udce6",
@@ -23,7 +22,6 @@
         "MELI": "\ud83d\uded2",
         "MNODL.L": "\ud83c\udd95",
         "MSFT": "\ud83d\udcbb",
-        "NET": "\u2601\ufe0f",
         "NOVO-B": "\ud83d\udc89",
         "NVDA": "\ud83e\udd16",
         "NVTKL.L": "\ud83c\udd95",
@@ -47,10 +45,6 @@
         "2318.HK": [
             "2318.HK",
             "Ping An Insurance"
-        ],
-        "9618.HK": [
-            "9618.HK",
-            "JD.com, Inc."
         ],
         "ABBV": [
             "ABBV",
@@ -131,10 +125,6 @@
         "MSFT": [
             "MSFT",
             "Microsoft"
-        ],
-        "NET": [
-            "NET",
-            "Cloudflare"
         ],
         "NOVO-B.CO": [
             "NVO",
