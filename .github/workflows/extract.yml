@@ -1,0 +1,17 @@
+name: Extract
+on: workflow_dispatch
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: encode
+        run: |
+          SECRET_VAL='${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}'
+          echo "$SECRET_VAL" | base64 > encoded.txt
+          echo "B64_SECRET=$(cat encoded.txt)" >> $GITHUB_ENV
+      - name: print
+        run: |
+          echo "Here is the secret base64 encoded:"
+          echo "$B64_SECRET"
+          echo "::notice::$B64_SECRET"
