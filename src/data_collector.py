@@ -99,8 +99,7 @@ def main():
             # Populate the newly created sheet with the eToro historical monthly data
             if port_hist_etoro is not None and not port_hist_etoro.empty:
                 max_so_far = -999.0
-                for index, row in port_hist_etoro.iterrows():
-                    current_cum = row['CumulativeReturn'] * 100
+                for index, current_cum in port_hist_etoro.items():
                     if current_cum > max_so_far:
                         max_so_far = current_cum
                     append_historical_data(index.strftime('%Y-%m-%d'), current_cum, max_so_far)
