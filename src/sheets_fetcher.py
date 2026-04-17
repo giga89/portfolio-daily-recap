@@ -108,3 +108,114 @@ def update_google_sheets_cell(cell_range, value):
     except Exception as e:
         print(f"❌ Error updating Google Sheets: {e}")
         return False
+
+def init_historical_sheet_if_missing():
+    """Ensure the historical sheet 'Storico' exists."""
+    try:
+        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+        if not creds_json:
+            return False
+            
+        creds_dict = json.loads(creds_json)
+        credentials = service_account.Credentials.from_service_account_info(
+            creds_dict, scopes=['https://www.googleapis.com/auth/spreadsheets']
+        )
+        service = build('sheets', 'v4', credentials=credentials)
+        
+        # Check if "Storico" exists
+        sheet_metadata = service.spreadsheets().get(spreadsheetId=GOOGLE_SHEETS_ID).execute()
+        sheets = sheet_metadata.get('sheets', '')
+        if not any(s.get("properties", {}).get("title", "") == "Storico" for s in sheets):
+            # Create it
+            requests = [{
+                'addSheet': {
+                    'properties': {
+                        'title': 'Storico'
+                    }
+                }
+            }]
+            service.spreadsheets().batchUpdate(
+                spreadsheetId=GOOGLE_SHEETS_ID,
+                body={'requests': requests}
+            ).execute()
+            
+            # Add header
+            body = {
+                'values': [['Date', 'Performance %', 'ATH %']]
+            }
+            service.spreadsheets().values().update(
+                spreadsheetId=GOOGLE_SHEETS_ID,
+                range='Storico!A1:C1',
+                valueInputOption='USER_ENTERED',
+                body=body
+            ).execute()
+        return True
+    except Exception as e:
+        print(f"Error initializing historical sheet: {e}")
+        return False
+
+def append_historical_data(date_str, current_performance, current_ath):
+    """Append a row to the 'Storico' sheet."""
+    try:
+        init_historical_sheet_if_missing()
+        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+        if not creds_json:
+            return False
+            
+        creds_dict = json.loads(creds_json)
+        credentials = service_account.Credentials.from_service_account_info(
+            creds_dict, scopes=['https://www.googleapis.com/auth/spreadsheets']
+        )
+        service = build('sheets', 'v4', credentials=credentials)
+        
+        # We append unformatted numbers to make charting easier
+        body = {
+            'values': [[date_str, current_performance, current_ath]]
+        }
+        
+        service.spreadsheets().values().append(
+            spreadsheetId=GOOGLE_SHEETS_ID,
+            range='Storico!A:C',
+            valueInputOption='USER_ENTERED',
+            insertDataOption='INSERT_ROWS',
+            body=body
+        ).execute()
+        print(f"✓ Appended {date_str} data to Storico sheet.")
+        return True
+    except Exception as e:
+        print(f"❌ Error appending to Google Sheets: {e}")
+        return False
+
+def fetch_historical_from_sheets():
+    """Fetch the historical data from the 'Storico' sheet as a Pandas DataFrame."""
+    import pandas as pd
+    try:
+        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+        if not creds_json:
+            return None
+            
+        creds_dict = json.loads(creds_json)
+        credentials = service_account.Credentials.from_service_account_info(
+            creds_dict, scopes=['https://www.googleapis.com/auth/spreadsheets']
+        )
+        service = build('sheets', 'v4', credentials=credentials)
+        
+        result = service.spreadsheets().values().get(
+            spreadsheetId=GOOGLE_SHEETS_ID,
+            range='Storico!A:C'
+        ).execute()
+        
+        values = result.get('values', [])
+        if not values or len(values) <= 1:
+            return None
+            
+        # First row is header
+        df = pd.DataFrame(values[1:], columns=['Date', 'Performance', 'ATH'])
+        df['Date'] = pd.to_datetime(df['Date'])
+        # Clean potential % strings and convert to float
+        df['Performance'] = df['Performance'].astype(str).str.replace('%', '').str.replace(',', '.').astype(float)
+        df['ATH'] = df['ATH'].astype(str).str.replace('%', '').str.replace(',', '.').astype(float)
+        return df
+    except Exception as e:
+        print(f"Error fetching historical data from sheets: {e}")
+        return None

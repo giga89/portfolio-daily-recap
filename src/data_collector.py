@@ -11,6 +11,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
 import finance_fetcher
+from sheets_fetcher import update_google_sheets_cell, fetch_google_sheets_data, fetch_historical_from_sheets, append_historical_data
 import sheets_fetcher
 import formatter
 import telegram_sender
@@ -83,13 +84,49 @@ def main():
     # Step 5: Generate Performance Chart (New Feature)
     print("📈 Generating performance comparison chart...")
     chart_path = None
+    ath_distance = 0.0
     try:
-        # Fetch history
-        port_hist = finance_fetcher.fetch_portfolio_history_from_etoro(start_year=2020)
-        bench_hist = finance_fetcher.fetch_benchmarks_history(start_date='2020-01-01')
+        # Fetch history from Google Sheets
+        import pandas as pd
+        port_hist = fetch_historical_from_sheets()
+        current_perf = sheets_data.get('five_year_return', 156.0)
         
-        if port_hist is not None and not bench_hist.empty:
-            chart_path = chart_generator.generate_performance_chart(port_hist, bench_hist)
+        # If not present or too little, populate it from eToro first
+        if port_hist is None or len(port_hist) < 2:
+            print("   ⚠️ No rich history found in Sheets, pulling 2020+ from eToro to seed...")
+            port_hist_etoro = finance_fetcher.fetch_portfolio_history_from_etoro(start_year=2020)
+            
+            # Populate the newly created sheet with the eToro historical monthly data
+            if port_hist_etoro is not None and not port_hist_etoro.empty:
+                max_so_far = -999.0
+                for index, row in port_hist_etoro.iterrows():
+                    current_cum = row['CumulativeReturn'] * 100
+                    if current_cum > max_so_far:
+                        max_so_far = current_cum
+                    append_historical_data(index.strftime('%Y-%m-%d'), current_cum, max_so_far)
+                # Re-fetch from sheets to format properly
+                port_hist = fetch_historical_from_sheets()
+        
+        ath_value = current_perf
+        if port_hist is not None and not port_hist.empty:
+            max_hist_perf = port_hist['Performance'].max()
+            ath_value = max(max_hist_perf, current_perf)
+            
+            # Save today's snapshot to Sheets
+            append_historical_data(pd.Timestamp.now().strftime('%Y-%m-%d'), current_perf, ath_value)
+            
+            # Reprepare for charts (it expects 'CumulativeReturn' as decimals)
+            port_hist.rename(columns={'Performance': 'CumulativeReturn'}, inplace=True)
+            port_hist['CumulativeReturn'] = port_hist['CumulativeReturn'] / 100.0
+            port_hist.set_index('Date', inplace=True)
+            
+            bench_hist = finance_fetcher.fetch_benchmarks_history(start_date='2020-01-01')
+            if not bench_hist.empty:
+                chart_path = chart_generator.generate_performance_chart(port_hist, bench_hist)
+                
+            ath_distance = current_perf - ath_value
+            if ath_distance >= 0: ath_distance = 0.0 # Safety check / New ATH
+            print(f"📊 Calculated ATH Distance: {ath_distance:.2f}% (ATH: {ath_value:.2f}%, Current: {current_perf:.2f}%)")
         else:
             print("⚠️ Skipping chart generation due to missing data")
             
@@ -105,7 +142,8 @@ def main():
         sheets_data, 
         benchmark_data, 
         portfolio_weekly=portfolio_weekly,
-        portfolio_monthly=portfolio_monthly
+        portfolio_monthly=portfolio_monthly,
+        ath_distance=ath_distance
     )
     
     # Step 5: Save to file
