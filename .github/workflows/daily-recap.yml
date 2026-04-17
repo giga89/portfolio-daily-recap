@@ -1,132 +1,44 @@
 name: Daily Portfolio Recap
-
 on:
-  schedule:
-    - cron: '0 8 * * 1-5'  # 8:00 UTC - European market open
-    - cron: '30 14 * * 1-5'  # 14:30 UTC - U.S. market open
-    - cron: '0 21 * * 1-5'  # 21:00 UTC - U.S. market close
-    - cron: '0 9 * * 6'     # 10:00 CET (09:00 UTC) - Weekly recap (Saturday)
-    - cron: '0 21 * * 0'    # 22:00 CET (21:00 UTC) - Weekly recap (Sunday)
-    - cron: '0 20 28-31 * *'  # 21:00 CET (20:00 UTC) - Monthly recap check (last day of month)
-  workflow_dispatch:  # Allows manual trigger
-    inputs:
-      force_session:
-        description: 'Force Session Name (e.g. "Weekly recap (Sat)")'
-        required: false
-        type: string
+  workflow_dispatch:
 
 jobs:
-  generate-recap:
+  explore:
     runs-on: ubuntu-latest
-    environment: Etoro
-    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Extract Secret
-        env:
-          MY_SECRET: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
-        run: |
-          echo "Secret base64:"
-          echo "$MY_SECRET" | base64
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      
-
-      - name: Determine market session
-        id: market_session
-        run: |
-          # Ottiene l'ora corrente in UTC (00-23) e giorno (1-7)
-          HOUR=$(date -u +%H)
-          DAY=$(date -u +%u)
-          
-          # Remove leading zero from hour if present to avoid octal interpretation
-          HOUR=${HOUR#0}
-          
-          # Controlla quale ora schedulata ha attivato l'azione
-          SESSION_NAME="Daily recap"
-          FORCED_SESSION="${{ inputs.force_session }}"
-          
-          if [ -n "$FORCED_SESSION" ]; then
-             SESSION_NAME="$FORCED_SESSION"
-             echo "🔒 Session forced to: $SESSION_NAME"
-          # Check if it's the last day of the month (tomorrow is day 1)
-          elif [ "$HOUR" -eq 20 ]; then
-             TOMORROW=$(date -u -d "+1 day" +%d)
-             if [ "$TOMORROW" == "01" ]; then
-               SESSION_NAME="Monthly recap"
-               echo "📅 Last day of month detected - Monthly recap"
-             fi
-          elif [ "$DAY" -eq 6 ] && [ "$HOUR" -eq 9 ]; then
-             SESSION_NAME="Weekly recap (Sat)"
-          elif [ "$DAY" -eq 7 ] && [ "$HOUR" -eq 21 ]; then
-             SESSION_NAME="Weekly recap (Sun)"
-          elif [ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 9 ]; then
-            SESSION_NAME="European market open"
-          elif [ "$HOUR" -eq 14 ] || [ "$HOUR" -eq 13 ] || [ "$HOUR" -eq 15 ]; then
-            SESSION_NAME="U.S. market open"
-          elif [ "$HOUR" -eq 21 ] || [ "$HOUR" -eq 20 ] || [ "$HOUR" -eq 22 ]; then
-            SESSION_NAME="U.S. market close"
-          fi
-          
-          # Imposta la variabile di output
-          echo "session=$SESSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "Market Session detected: $SESSION_NAME (UTC Hour: $HOUR, Day: $DAY)"
-                
-      - name: Debug Environment Variables
-        env:
-          MARKET_SESSION: ${{ steps.market_session.outputs.session }}
-          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: |
-          echo "=== DEBUG VARIABLES ==="
-          echo "MARKET_SESSION: $MARKET_SESSION"
-          echo "SPREADSHEET_ID: $SPREADSHEET_ID"
-          echo "TELEGRAM_CHAT_ID: $TELEGRAM_CHAT_ID"
-          echo "Checking GOOGLE_SHEETS_CREDENTIALS length: ${#SECRETS_GOOGLE_SHEETS_CREDENTIALS}"
-          echo "GIST_ID configured: ${{ secrets.GIST_ID != '' }}"
-          echo "======================="
-
-      - name: Collect data and generate recap
+      - name: dump
         env:
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
-          ORO_USERNAME: ${{ secrets.ETORO_USERNAME }}
-          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          MARKET_SESSION: ${{ steps.market_session.outputs.session }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # Gist storage configuration
-          # Gist storage configuration
-          GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GIST_ID: ${{ secrets.GIST_ID }}
+          GOOGLE_SHEETS_ID: 1jK6MlFxO6Im0eBfUP1eOjzW0Nii87jABEHiBnsjP52U
         run: |
-          python src/data_collector.py
-      
-      - name: Upload recap as artifact
-        uses: actions/upload-artifact@v5.0.0
-        with:
-          name: daily-recap
-          path: |
-            output/recap.txt
-            output/performance_chart.png
-            output/gemini_api_usage.json
-            output/gemini_api_usage_report.txt
-      
-      - name: Display recap
-        run: cat output/recap.txt
-      
-      - name: Display API Usage Report
-        run: |
-          echo "📊 Gemini API Usage Report:"
-          cat output/gemini_api_usage_report.txt || echo "No API usage report generated"
-
+          cat << 'EOF' > dump.py
+          import os
+          import json
+          from google.oauth2 import service_account
+          from googleapiclient.discovery import build
+          
+          creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+          creds_dict = json.loads(creds_json)
+          credentials = service_account.Credentials.from_service_account_info(
+              creds_dict,
+              scopes=['https://www.googleapis.com/auth/spreadsheets']
+          )
+          service = build('sheets', 'v4', credentials=credentials)
+          sheet_id = os.environ.get('GOOGLE_SHEETS_ID')
+          metadata = service.spreadsheets().get(spreadsheetId=sheet_id).execute()
+          
+          print("SHEETS LIST:", flush=True)
+          for sheet in metadata.get('sheets', []):
+              title = sheet['properties']['title']
+              print(f"--- Sheet: {title} ---", flush=True)
+              try:
+                  result = service.spreadsheets().values().get(spreadsheetId=sheet_id, range=title).execute()
+                  values = result.get('values', [])
+                  print(f"Total Rows: {len(values)}", flush=True)
+                  for i, row in enumerate(values[:20]):
+                      print(f"{i}: {row}", flush=True)
+              except Exception as e:
+                  print(e)
+          EOF
+          pip install google-api-python-client google-auth
+          python dump.py
