@@ -174,6 +174,28 @@ def seed_historical_data(rows):
         print(f"❌ Error seeding Google Sheets: {e}")
         return False
 
+def update_historical_data(sheet_row, date_str, current_performance, current_ath):
+    """Update an existing row in the 'Storico' sheet by 1-based row number."""
+    try:
+        service = _get_sheets_service()
+        if not service:
+            return False
+
+        range_str = f'Storico!A{sheet_row}:C{sheet_row}'
+        body = {'values': [[date_str, current_performance, current_ath]]}
+
+        service.spreadsheets().values().update(
+            spreadsheetId=GOOGLE_SHEETS_ID,
+            range=range_str,
+            valueInputOption='USER_ENTERED',
+            body=body
+        ).execute()
+        print(f"✓ Updated row {sheet_row} ({date_str}) in Storico sheet.")
+        return True
+    except Exception as e:
+        print(f"❌ Error updating Google Sheets row {sheet_row}: {e}")
+        return False
+
 def append_historical_data(date_str, current_performance, current_ath):
     """Append a single row to the 'Storico' sheet."""
     try:
