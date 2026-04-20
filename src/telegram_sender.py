@@ -72,7 +72,6 @@ def send_telegram_message(message: str) -> bool:
             print(f"Error response status: {e.response.status_code}")
             print(f"Error response body: {e.response.text}")
         return False
-        return False
 
 def send_telegram_photo(image_path: str, caption: str = None) -> bool:
     """
@@ -120,7 +119,6 @@ def send_recap_to_telegram(recap_file_path: str, image_path: str = None) -> bool
         with open(recap_file_path, 'r', encoding='utf-8') as f:
             message = f.read()
         
-        print(f"📄 Recap file read successfully ({len(message)} characters)")
         print(f"📄 Recap file read successfully ({len(message)} characters)")
         
         # Send text message first

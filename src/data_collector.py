@@ -139,7 +139,7 @@ def main():
         import traceback
         traceback.print_exc()
 
-    # Step 6: Generate formatted recap
+    # Step 5: Generate formatted recap
     recap = formatter.generate_recap(
         stock_data, 
         portfolio_daily, 
@@ -150,7 +150,7 @@ def main():
         ath_distance=ath_distance
     )
     
-    # Step 5: Save to file
+    # Step 6: Save to file
     os.makedirs('output', exist_ok=True)
     output_path = 'output/recap.txt'
     
@@ -165,9 +165,8 @@ def main():
     print("=" * 50)
     print("Daily portfolio recap generation completed successfully!")
 
-    # Step 6: Send to Telegram
+    # Step 7: Send to Telegram
     print("=" * 50)
-    print("Sending recap to Telegram...")
     print("Sending recap to Telegram...")
     telegram_sender.send_recap_to_telegram(output_path, image_path=chart_path)
     print("=" * 50)

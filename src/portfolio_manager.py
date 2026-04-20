@@ -10,7 +10,7 @@ DEFAULT_TICKERS = {
     'IEUR': ('IEUR', 'iShares Core MSCI Europe UCITS ETF'),
     'IQQL.DE': ('IQQL.DE', 'iShares MSCI World Quality Factor UCITS ETF'),
     'IEMG': ('IEMG', 'iShares Core MSCI Emerging Markets ETF'),
-    'IEMG': ('IEMG', 'iShares Core MSCI Emerging Markets ETF'),
+    'VWCE.L': ('VWCE.L', 'Vanguard FTSE All-World UCITS ETF'),
     'WDEF.L': ('WDEF.L', 'WisdomTree Europe Equity Income UCITS ETF'),
     'INDO.PA': ('INDO.PA', 'Amundi MSCI Indonesia UCITS ETF Acc'),
     'MNODL.L': ('MNODL.L', 'Mondi PLC'),
@@ -64,7 +64,6 @@ DEFAULT_EMOJIS = {
     'IEUR': '�🇺',     # Europe
     'IQQL.DE': '🔥',
     'IEMG': '🌍',
-    'IEMG': '🌍',
     'WDEF.L': '💼',
     'INDO.PA': '🇮🇩',
     'MNODL.L': '📦',
@@ -75,7 +74,7 @@ DEFAULT_EMOJIS = {
     'ABT': '🏥',
     'ABBV': '💉',
     'LLY': '💊',
-    'NOVO-B': '💉',
+    'NOVO-B.CO': '💉',
     'HUM': '🏥',
     
     # Technology & Semiconductors

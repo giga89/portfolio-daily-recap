@@ -2,6 +2,7 @@
 Configuration file for portfolio ticker mappings, company names, and emoji
 """
 
+import os
 from portfolio_manager import get_tickers, get_emojis
 
 # Load dynamically from JSON
@@ -14,11 +15,11 @@ except Exception:
     EMOJI_MAP = {}
 
 # Google Sheets configuration
-GOOGLE_SHEETS_ID = '1jK6MlFxO6Im0eBfUP1eOjzW0Nii87jABEHiBnsjP52U'
+GOOGLE_SHEETS_ID = os.environ.get('SPREADSHEET_ID', '1jK6MlFxO6Im0eBfUP1eOjzW0Nii87jABEHiBnsjP52U')
 FIVE_YEAR_CELL = 'G6'
-MONTHLY_PERFORMANCE_CELL = 'G7'  # Add if you have monthly data
-YEARLY_PERFORMANCE_CELL = 'G8'   # Add if you have yearly data
-DIVIDEND_CELL = 'G9'              # Add if you have dividend data
+MONTHLY_PERFORMANCE_CELL = 'G7'
+YEARLY_PERFORMANCE_CELL = 'G8'
+DIVIDEND_CELL = 'G9'
 
 # Benchmarks for comparison
 BENCHMARKS = {
