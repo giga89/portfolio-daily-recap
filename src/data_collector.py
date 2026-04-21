@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
 import finance_fetcher
-from sheets_fetcher import update_google_sheets_cell, fetch_google_sheets_data, fetch_historical_from_sheets, append_historical_data, seed_historical_data
+from sheets_fetcher import update_google_sheets_cell, fetch_google_sheets_data, fetch_historical_from_sheets, append_historical_data, update_historical_data, seed_historical_data
 import sheets_fetcher
 import formatter
 import telegram_sender
@@ -114,11 +114,20 @@ def main():
             max_hist_perf = port_hist['Performance'].max()
             ath_value = float(max(max_hist_perf, current_perf))
             current_perf_float = float(current_perf)
+
+            # Upsert today's snapshot: update if already present, append if not.
+            today_str = pd.Timestamp.now().strftime('%Y-%m-%d')
+            today_mask = port_hist['Date'].dt.strftime('%Y-%m-%d') == today_str
+            if today_mask.any():
+                # Use the last occurrence (handles pre-existing duplicates)
+                row_idx = int(port_hist.index[today_mask][-1])
+                sheet_row = row_idx + 2  # +1 for 1-based, +1 for header row
+                update_historical_data(sheet_row, today_str, current_perf_float, ath_value)
+            else:
+                append_historical_data(today_str, current_perf_float, ath_value)
             
-            # Save today's snapshot to Sheets
-            append_historical_data(pd.Timestamp.now().strftime('%Y-%m-%d'), current_perf_float, ath_value)
-            
-            # Reprepare for charts - generate_performance_chart expects a pd.Series!
+            # Reprepare for charts — deduplicate dates (keep last) then index by Date
+            port_hist = port_hist.drop_duplicates(subset='Date', keep='last')
             port_hist.set_index('Date', inplace=True)
             port_series = port_hist['Performance']
             
@@ -150,7 +159,7 @@ def main():
         ath_distance=ath_distance
     )
     
-    # Step 5: Save to file
+    # Step 7: Save to file
     os.makedirs('output', exist_ok=True)
     output_path = 'output/recap.txt'
     
@@ -165,9 +174,8 @@ def main():
     print("=" * 50)
     print("Daily portfolio recap generation completed successfully!")
 
-    # Step 6: Send to Telegram
+    # Step 7: Send to Telegram
     print("=" * 50)
-    print("Sending recap to Telegram...")
     print("Sending recap to Telegram...")
     telegram_sender.send_recap_to_telegram(output_path, image_path=chart_path)
     print("=" * 50)

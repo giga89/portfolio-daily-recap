@@ -62,7 +62,7 @@ def fetch_portfolio_ytd_from_etoro():
         # Method 1: userstats yearly data
         print("   Trying userstats API for accurate YTD...")
         try:
-            cid = ETORO_CID
+            cid = _fetch_etoro_cid(ETORO_USERNAME) or ETORO_CID
             stats_url = f"https://www.etoro.com/sapi/userstats/gain/cid/{cid}/history?IncludeSimulation=true&Period=OneYearAgo"
             response = requests.get(stats_url, headers=ETORO_API_HEADERS, timeout=15)
             response.raise_for_status()

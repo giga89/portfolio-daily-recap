@@ -8,6 +8,26 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from config import GOOGLE_SHEETS_ID, FIVE_YEAR_CELL
 
+_sheets_service = None
+
+def _get_sheets_service():
+    """Return a cached Google Sheets API service, building it once per process."""
+    global _sheets_service
+    if _sheets_service is not None:
+        return _sheets_service
+
+    creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+    if not creds_json:
+        return None
+
+    creds_dict = json.loads(creds_json)
+    credentials = service_account.Credentials.from_service_account_info(
+        creds_dict,
+        scopes=['https://www.googleapis.com/auth/spreadsheets']
+    )
+    _sheets_service = build('sheets', 'v4', credentials=credentials)
+    return _sheets_service
+
 
 def fetch_google_sheets_data():
     """
@@ -15,11 +35,10 @@ def fetch_google_sheets_data():
     Returns dict with: five_year_return, monthly_performance, yearly_performance, dividend
     """
     print("Fetching Google Sheets data...")
-    
+
     try:
-        # Get credentials from environment variable
-        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
-        if not creds_json:
+        service = _get_sheets_service()
+        if not service:
             print("No Google Sheets credentials found, using fallback values")
             return {
                 'five_year_return': 156.0,
@@ -27,21 +46,13 @@ def fetch_google_sheets_data():
                 'yearly_performance': None,
                 'dividend': None
             }
-        
-        creds_dict = json.loads(creds_json)
-        credentials = service_account.Credentials.from_service_account_info(
-            creds_dict,
-            scopes=['https://www.googleapis.com/auth/spreadsheets']
-        )
-        
-        service = build('sheets', 'v4', credentials=credentials)
-        
+
         # Fetch 5-year return
         result = service.spreadsheets().values().get(
             spreadsheetId=GOOGLE_SHEETS_ID,
             range=FIVE_YEAR_CELL
         ).execute()
-        
+
         values = result.get('values', [])
         if values and len(values[0]) > 0:
             value_str = str(values[0][0]).replace('%', '').strip()
@@ -49,14 +60,14 @@ def fetch_google_sheets_data():
             print(f"5-year return from Google Sheets: {five_year_return}%")
         else:
             five_year_return = 156.0
-        
+
         return {
             'five_year_return': five_year_return,
-            'monthly_performance': None,  # Add fetching logic if needed
-            'yearly_performance': None,   # Add fetching logic if needed
-            'dividend': None              # Add fetching logic if needed
+            'monthly_performance': None,
+            'yearly_performance': None,
+            'dividend': None
         }
-            
+
     except Exception as e:
         print(f"Error fetching Google Sheets data: {e}")
         return {
@@ -72,39 +83,29 @@ def update_google_sheets_cell(cell_range, value):
     Update a specific cell in Google Sheets with a value
     """
     print(f"Updating Google Sheets cell {cell_range} with value: {value}...")
-    
+
     try:
-        # Get credentials from environment variable
-        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
-        if not creds_json:
+        service = _get_sheets_service()
+        if not service:
             print("No Google Sheets credentials found, cannot update")
             return False
-            
-        creds_dict = json.loads(creds_json)
-        credentials = service_account.Credentials.from_service_account_info(
-            creds_dict,
-            scopes=['https://www.googleapis.com/auth/spreadsheets']
-        )
-        
-        service = build('sheets', 'v4', credentials=credentials)
-        
-        # Prepare the value update
+
         # Format with comma as decimal separator (Italian style)
         value_str = f"{value:.2f}%".replace('.', ',')
         body = {
             'values': [[value_str]]
         }
-        
+
         result = service.spreadsheets().values().update(
             spreadsheetId=GOOGLE_SHEETS_ID,
             range=cell_range,
             valueInputOption='USER_ENTERED',
             body=body
         ).execute()
-        
+
         print(f"✓ Successfully updated cell {cell_range}: {result.get('updatedCells')} cells updated")
         return True
-        
+
     except Exception as e:
         print(f"❌ Error updating Google Sheets: {e}")
         return False
@@ -112,16 +113,10 @@ def update_google_sheets_cell(cell_range, value):
 def init_historical_sheet_if_missing():
     """Ensure the historical sheet 'Storico' exists."""
     try:
-        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
-        if not creds_json:
+        service = _get_sheets_service()
+        if not service:
             return False
-            
-        creds_dict = json.loads(creds_json)
-        credentials = service_account.Credentials.from_service_account_info(
-            creds_dict, scopes=['https://www.googleapis.com/auth/spreadsheets']
-        )
-        service = build('sheets', 'v4', credentials=credentials)
-        
+
         # Check if "Storico" exists
         sheet_metadata = service.spreadsheets().get(spreadsheetId=GOOGLE_SHEETS_ID).execute()
         sheets = sheet_metadata.get('sheets', '')
@@ -138,7 +133,7 @@ def init_historical_sheet_if_missing():
                 spreadsheetId=GOOGLE_SHEETS_ID,
                 body={'requests': requests}
             ).execute()
-            
+
             # Add header
             body = {
                 'values': [['Date', 'Performance %', 'ATH %']]
@@ -159,15 +154,10 @@ def seed_historical_data(rows):
     """Seed historical data with a single batch append."""
     init_historical_sheet_if_missing()
     try:
-        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
-        if not creds_json:
+        service = _get_sheets_service()
+        if not service:
             return False
-        creds_dict = json.loads(creds_json)
-        credentials = service_account.Credentials.from_service_account_info(
-            creds_dict, scopes=['https://www.googleapis.com/auth/spreadsheets']
-        )
-        service = build('sheets', 'v4', credentials=credentials)
-        
+
         body = {
             'values': rows
         }
@@ -184,25 +174,39 @@ def seed_historical_data(rows):
         print(f"❌ Error seeding Google Sheets: {e}")
         return False
 
+def update_historical_data(sheet_row, date_str, current_performance, current_ath):
+    """Update an existing row in the 'Storico' sheet by 1-based row number."""
+    try:
+        service = _get_sheets_service()
+        if not service:
+            return False
+
+        range_str = f'Storico!A{sheet_row}:C{sheet_row}'
+        body = {'values': [[date_str, current_performance, current_ath]]}
+
+        service.spreadsheets().values().update(
+            spreadsheetId=GOOGLE_SHEETS_ID,
+            range=range_str,
+            valueInputOption='USER_ENTERED',
+            body=body
+        ).execute()
+        print(f"✓ Updated row {sheet_row} ({date_str}) in Storico sheet.")
+        return True
+    except Exception as e:
+        print(f"❌ Error updating Google Sheets row {sheet_row}: {e}")
+        return False
+
 def append_historical_data(date_str, current_performance, current_ath):
     """Append a single row to the 'Storico' sheet."""
-    # We only call init if necessary, but assume it exists for single appends
     try:
-        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
-        if not creds_json:
+        service = _get_sheets_service()
+        if not service:
             return False
-            
-        creds_dict = json.loads(creds_json)
-        credentials = service_account.Credentials.from_service_account_info(
-            creds_dict, scopes=['https://www.googleapis.com/auth/spreadsheets']
-        )
-        service = build('sheets', 'v4', credentials=credentials)
-        
-        # We append unformatted numbers to make charting easier
+
         body = {
             'values': [[date_str, current_performance, current_ath]]
         }
-        
+
         service.spreadsheets().values().append(
             spreadsheetId=GOOGLE_SHEETS_ID,
             range='Storico!A:C',
@@ -213,7 +217,6 @@ def append_historical_data(date_str, current_performance, current_ath):
         print(f"✓ Appended {date_str} data to Storico sheet.")
         return True
     except Exception as e:
-        # Check if it failed because it doesn't exist
         print(f"❌ Error appending to Google Sheets: {e}")
         return False
 
@@ -221,25 +224,19 @@ def fetch_historical_from_sheets():
     """Fetch the historical data from the 'Storico' sheet as a Pandas DataFrame."""
     import pandas as pd
     try:
-        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
-        if not creds_json:
+        service = _get_sheets_service()
+        if not service:
             return None
-            
-        creds_dict = json.loads(creds_json)
-        credentials = service_account.Credentials.from_service_account_info(
-            creds_dict, scopes=['https://www.googleapis.com/auth/spreadsheets']
-        )
-        service = build('sheets', 'v4', credentials=credentials)
-        
+
         result = service.spreadsheets().values().get(
             spreadsheetId=GOOGLE_SHEETS_ID,
             range='Storico!A:C'
         ).execute()
-        
+
         values = result.get('values', [])
         if not values or len(values) <= 1:
             return None
-            
+
         # First row is header
         df = pd.DataFrame(values[1:], columns=['Date', 'Performance', 'ATH'])
         df['Date'] = pd.to_datetime(df['Date'])

@@ -37,6 +37,12 @@ LEGACY_HISTORY = [
   }
 ]
 
+_data_cache = None
+
+def _invalidate_cache():
+    global _data_cache
+    _data_cache = None
+
 def _get_headers():
     """Get authorization headers for GitHub API"""
     token = os.environ.get('GIST_ACCESS_TOKEN') or os.environ.get('GITHUB_GIST_TOKEN') or os.environ.get('GITHUB_TOKEN')
@@ -87,21 +93,28 @@ def _get_default_data():
 
 def load_data():
     """
-    Load data from GitHub Gist
-    
+    Load data from GitHub Gist. Results are cached in-memory for the lifetime
+    of the process so multiple callers within a single run share one API call.
+
     Returns:
         dict: Data containing recap_history, used_tags, etc.
     """
+    global _data_cache
+    if _data_cache is not None:
+        return _data_cache
+
     headers = _get_headers()
     gist_id = os.environ.get('GIST_ID', '')
     
     if not headers:
         print("⚠️ No GitHub token found, using empty data")
-        return _get_default_data()
-    
+        _data_cache = _get_default_data()
+        return _data_cache
+
     if not gist_id:
         print("ℹ️ No GIST_ID set, will create new gist on save")
-        return _get_default_data()
+        _data_cache = _get_default_data()
+        return _data_cache
     
     try:
         response = requests.get(
@@ -139,25 +152,27 @@ def load_data():
             migrated = True
             
         # If we performed a migration (merge or fresh default), we should ideally save it.
-        # But this function is a 'load', so we just return the data. 
+        # But this function is a 'load', so we just return the data.
         # The next 'save_data' call (which happens after generating news) will persist it.
         # If the news generation fails, we might lose the migration for this run, but it will try again next time.
-        return data
-            
+        _data_cache = data
+        return _data_cache
+
     except Exception as e:
         print(f"⚠️ Error loading from Gist: {e}")
         return _get_default_data()
 
 def save_data(data):
     """
-    Save data to GitHub Gist
-    
+    Save data to GitHub Gist and update the in-memory cache.
+
     Args:
         data: Dict containing recap_history, used_tags, etc.
-    
+
     Returns:
         bool: True if save was successful
     """
+    global _data_cache
     headers = _get_headers()
     gist_id = os.environ.get('GIST_ID', '')
     
@@ -166,6 +181,7 @@ def save_data(data):
         return False
     
     data['last_updated'] = datetime.now().isoformat()
+    _data_cache = data  # Keep cache in sync with what we're saving
     content = json.dumps(data, indent=2)
     
     gist_payload = {
