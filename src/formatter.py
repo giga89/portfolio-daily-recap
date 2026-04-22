@@ -28,7 +28,7 @@ def format_ticker(etoro_symbol, company_name, performance, use_tag=False):
     return f"{emoji} {symbol_str} {performance:+.2f}%"
 
 
-def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None, portfolio_weekly=None, portfolio_monthly=None, ath_distance=0.0):
+def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None, portfolio_weekly=None, portfolio_monthly=None, ath_distance=None):
     """
     Generate the formatted daily recap matching the desired output format
     """

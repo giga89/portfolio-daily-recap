@@ -84,7 +84,7 @@ def main():
     # Step 5: Generate Performance Chart (New Feature)
     print("📈 Generating performance comparison chart...")
     chart_path = None
-    ath_distance = 0.0
+    ath_distance = None
     try:
         # Fetch history from Google Sheets
         import pandas as pd
@@ -138,7 +138,7 @@ def main():
                 chart_path = chart_generator.generate_performance_chart(port_series, bench_hist)
                 
             ath_distance = current_perf_float - ath_value
-            if ath_distance >= 0: ath_distance = 0.0 # Safety check / New ATH
+            if ath_distance >= 0: ath_distance = 0.0  # True new ATH
             print(f"📊 Calculated ATH Distance: {ath_distance:.2f}% (ATH: {ath_value:.2f}%, Current: {current_perf_float:.2f}%)")
         else:
             print("⚠️ Skipping chart generation due to missing data")
