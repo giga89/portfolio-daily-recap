@@ -281,3 +281,42 @@ def save_portfolio_config(tickers, emojis):
     data['portfolio_config'] = tickers
     data['portfolio_emojis'] = emojis
     save_data(data)
+
+
+# ---------------------------------------------------------------------------
+# Performance history (replaces Google Sheets "Storico" sheet)
+# Each record: {'date': 'YYYY-MM-DD', 'perf': float, 'ath': float}
+# ---------------------------------------------------------------------------
+
+def get_perf_history():
+    """Return the full performance history list from Gist."""
+    data = load_data()
+    return data.get('perf_history', [])
+
+
+def upsert_perf_record(date_str, perf, ath):
+    """Insert or update the performance record for a given date."""
+    data = load_data()
+    records = data.get('perf_history', [])
+    for i, rec in enumerate(records):
+        if rec['date'] == date_str:
+            records[i] = {'date': date_str, 'perf': perf, 'ath': ath}
+            data['perf_history'] = records
+            save_data(data)
+            print(f"✓ Updated Gist perf record for {date_str}: perf={perf:.2f}%, ath={ath:.2f}%")
+            return
+    records.append({'date': date_str, 'perf': perf, 'ath': ath})
+    data['perf_history'] = records
+    save_data(data)
+    print(f"✓ Appended Gist perf record for {date_str}: perf={perf:.2f}%, ath={ath:.2f}%")
+
+
+def seed_perf_history(records):
+    """Bulk-seed performance history into Gist only if it is currently empty."""
+    data = load_data()
+    if data.get('perf_history'):
+        print(f"ℹ️ Gist perf_history already has {len(data['perf_history'])} records, skipping seed.")
+        return
+    data['perf_history'] = records
+    save_data(data)
+    print(f"✅ Seeded {len(records)} records into Gist perf_history.")
