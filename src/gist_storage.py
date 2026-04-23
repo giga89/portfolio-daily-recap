@@ -320,3 +320,27 @@ def seed_perf_history(records):
     data['perf_history'] = records
     save_data(data)
     print(f"✅ Seeded {len(records)} records into Gist perf_history.")
+
+
+def has_session_run_today(session_name):
+    """Return True if the given market session has already completed today (UTC date)."""
+    from datetime import datetime, timezone
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    data = load_data()
+    return f"{today}:{session_name}" in data.get('session_runs', {})
+
+
+def mark_session_run(session_name):
+    """Record that the given market session completed today (UTC date)."""
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc)
+    today = now.strftime('%Y-%m-%d')
+    data = load_data()
+    runs = data.get('session_runs', {})
+    # Discard entries older than the current month to prevent unbounded growth
+    month_start = now.strftime('%Y-%m-01')
+    runs = {k: v for k, v in runs.items() if k[:10] >= month_start}
+    runs[f"{today}:{session_name}"] = now.isoformat()
+    data['session_runs'] = runs
+    _invalidate_cache()
+    save_data(data)

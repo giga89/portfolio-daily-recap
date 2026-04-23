@@ -2,9 +2,12 @@ name: Daily Portfolio Recap
 
 on:
   schedule:
-    - cron: '0 8 * * 1-5'  # 8:00 UTC - European market open
-    - cron: '30 14 * * 1-5'  # 14:30 UTC - U.S. market open
-    - cron: '0 21 * * 1-5'  # 21:00 UTC - U.S. market close
+    - cron: '45 6 * * 1-5'   # EU open summer:  6:45 UTC → sleeps to 07:05 UTC (08:05 London/BST)
+    - cron: '45 7 * * 1-5'   # EU open winter:  7:45 UTC → sleeps to 08:05 UTC (08:05 London/GMT)
+    - cron: '15 13 * * 1-5'  # US open summer: 13:15 UTC → sleeps to 13:35 UTC (09:35 ET/EDT)
+    - cron: '15 14 * * 1-5'  # US open winter: 14:15 UTC → sleeps to 14:35 UTC (09:35 ET/EST)
+    - cron: '45 19 * * 1-5'  # US close summer: 19:45 UTC → sleeps to 20:05 UTC (16:05 ET/EDT)
+    - cron: '45 20 * * 1-5'  # US close winter: 20:45 UTC → sleeps to 21:05 UTC (16:05 ET/EST)
     - cron: '0 9 * * 6'     # 10:00 CET (09:00 UTC) - Weekly recap (Saturday)
     - cron: '0 21 * * 0'    # 22:00 CET (21:00 UTC) - Weekly recap (Sunday)
     - cron: '0 20 28-31 * *'  # 21:00 CET (20:00 UTC) - Monthly recap check (last day of month)
@@ -38,12 +41,15 @@ jobs:
       - name: Determine market session
         id: market_session
         run: |
-          # Ottiene l'ora corrente in UTC (00-23) e giorno (1-7)
+          # Ottiene l'ora corrente in UTC (00-23), minuto (00-59) e giorno (1-7)
           HOUR=$(date -u +%H)
+          MINUTE=$(date -u +%M)
           DAY=$(date -u +%u)
-          
-          # Remove leading zero from hour if present to avoid octal interpretation
+
+          # Remove leading zeros to avoid octal interpretation in arithmetic
           HOUR=${HOUR#0}
+          MINUTE=${MINUTE#0}
+          MINUTE=${MINUTE:-0}
           
           # Controlla quale ora schedulata ha attivato l'azione
           SESSION_NAME="Daily recap"
@@ -52,28 +58,103 @@ jobs:
           if [ -n "$FORCED_SESSION" ]; then
              SESSION_NAME="$FORCED_SESSION"
              echo "🔒 Session forced to: $SESSION_NAME"
-          # Check if it's the last day of the month (tomorrow is day 1)
+          # HOUR=20 is shared by the monthly cron (min=0) and US close winter cron (min=45);
+          # use MINUTE to distinguish them.
           elif [ "$HOUR" -eq 20 ]; then
              TOMORROW=$(date -u -d "+1 day" +%d)
-             if [ "$TOMORROW" == "01" ]; then
+             if [ "$TOMORROW" == "01" ] && [ "$MINUTE" -lt 30 ]; then
                SESSION_NAME="Monthly recap"
                echo "📅 Last day of month detected - Monthly recap"
+             elif [ "$DAY" -ge 1 ] && [ "$DAY" -le 5 ]; then
+               SESSION_NAME="U.S. market close"
              fi
           elif [ "$DAY" -eq 6 ] && [ "$HOUR" -eq 9 ]; then
              SESSION_NAME="Weekly recap (Sat)"
           elif [ "$DAY" -eq 7 ] && [ "$HOUR" -eq 21 ]; then
              SESSION_NAME="Weekly recap (Sun)"
-          elif [ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 9 ]; then
+          # EU open: summer cron fires at HOUR=6, winter at HOUR=7
+          elif [ "$HOUR" -eq 6 ] || [ "$HOUR" -eq 7 ] || [ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 9 ]; then
             SESSION_NAME="European market open"
-          elif [ "$HOUR" -eq 14 ] || [ "$HOUR" -eq 13 ] || [ "$HOUR" -eq 15 ]; then
+          # US open: summer cron fires at HOUR=13, winter at HOUR=14
+          elif [ "$HOUR" -eq 13 ] || [ "$HOUR" -eq 14 ] || [ "$HOUR" -eq 15 ]; then
             SESSION_NAME="U.S. market open"
-          elif [ "$HOUR" -eq 21 ] || [ "$HOUR" -eq 20 ] || [ "$HOUR" -eq 22 ]; then
+          # US close: summer cron fires at HOUR=19, winter at HOUR=20 (handled above)
+          elif [ "$HOUR" -eq 19 ] || [ "$HOUR" -eq 21 ] || [ "$HOUR" -eq 22 ]; then
             SESSION_NAME="U.S. market close"
           fi
           
           # Imposta la variabile di output
           echo "session=$SESSION_NAME" >> "$GITHUB_OUTPUT"
           echo "Market Session detected: $SESSION_NAME (UTC Hour: $HOUR, Day: $DAY)"
+
+      - name: Wait until target time
+        run: |
+          SESSION="${{ steps.market_session.outputs.session }}"
+          NOW=$(date -u +%s)
+          TODAY=$(date -u +%Y-%m-%d)
+          HOUR=$(date -u +%H)
+          HOUR=${HOUR#0}
+          TARGET_EPOCH=0
+
+          # Each cron fires 20min before its fixed UTC target.
+          # Two crons per session (summer/winter) → always ~20min sleep, never 80min.
+          # Deduplication via Gist ensures only the first one that reaches the target sends.
+          if [ "$SESSION" = "European market open" ]; then
+            if [ "$HOUR" -le 6 ]; then
+              TARGET_EPOCH=$(date -u -d "$TODAY 07:05:00" +%s)  # summer: 07:05 UTC (BST open)
+            else
+              TARGET_EPOCH=$(date -u -d "$TODAY 08:05:00" +%s)  # winter: 08:05 UTC (GMT open)
+            fi
+          elif [ "$SESSION" = "U.S. market open" ]; then
+            if [ "$HOUR" -le 13 ]; then
+              TARGET_EPOCH=$(date -u -d "$TODAY 13:35:00" +%s)  # summer: 13:35 UTC (EDT open)
+            else
+              TARGET_EPOCH=$(date -u -d "$TODAY 14:35:00" +%s)  # winter: 14:35 UTC (EST open)
+            fi
+          elif [ "$SESSION" = "U.S. market close" ]; then
+            if [ "$HOUR" -le 19 ]; then
+              TARGET_EPOCH=$(date -u -d "$TODAY 20:05:00" +%s)  # summer: 20:05 UTC (EDT close)
+            else
+              TARGET_EPOCH=$(date -u -d "$TODAY 21:05:00" +%s)  # winter: 21:05 UTC (EST close)
+            fi
+          fi
+
+          if [ "$TARGET_EPOCH" -gt "$NOW" ]; then
+            SLEEP_SECS=$((TARGET_EPOCH - NOW))
+            echo "Sleeping ${SLEEP_SECS}s until $(date -u -d "@$TARGET_EPOCH") ..."
+            sleep "$SLEEP_SECS"
+          else
+            echo "Non-market session or already past target time, proceeding immediately."
+          fi
+
+      - name: Check for duplicate session run
+        id: dedup_check
+        env:
+          GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          MARKET_SESSION: ${{ steps.market_session.outputs.session }}
+        run: |
+          python - <<'PYEOF'
+          import os, sys
+          sys.path.insert(0, 'src')
+          import gist_storage
+
+          session = os.environ.get('MARKET_SESSION', '')
+          market_sessions = {'European market open', 'U.S. market open', 'U.S. market close'}
+
+          if session not in market_sessions:
+              print(f"Session '{session}' does not need deduplication, proceeding.")
+              skip = 'false'
+          elif gist_storage.has_session_run_today(session):
+              print(f"DUPLICATE: '{session}' already ran today. Skipping.")
+              skip = 'true'
+          else:
+              print(f"NEW RUN: '{session}'")
+              skip = 'false'
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'skip={skip}\n')
+          PYEOF
                 
       - name: Debug Environment Variables
         env:
@@ -90,6 +171,7 @@ jobs:
           echo "======================="
 
       - name: Collect data and generate recap
+        if: steps.dedup_check.outputs.skip != 'true'
         env:
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
           ORO_USERNAME: ${{ secrets.ETORO_USERNAME }}
@@ -107,6 +189,7 @@ jobs:
           python src/data_collector.py
       
       - name: Upload recap as artifact
+        if: steps.dedup_check.outputs.skip != 'true'
         uses: actions/upload-artifact@v5.0.0
         with:
           name: daily-recap
@@ -117,10 +200,31 @@ jobs:
             output/gemini_api_usage_report.txt
       
       - name: Display recap
+        if: steps.dedup_check.outputs.skip != 'true'
         run: cat output/recap.txt
       
       - name: Display API Usage Report
+        if: steps.dedup_check.outputs.skip != 'true'
         run: |
           echo "📊 Gemini API Usage Report:"
           cat output/gemini_api_usage_report.txt || echo "No API usage report generated"
+
+      - name: Mark session as completed
+        if: steps.dedup_check.outputs.skip != 'true'
+        env:
+          GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          MARKET_SESSION: ${{ steps.market_session.outputs.session }}
+        run: |
+          python - <<'PYEOF'
+          import os, sys
+          sys.path.insert(0, 'src')
+          import gist_storage
+
+          session = os.environ.get('MARKET_SESSION', '')
+          market_sessions = {'European market open', 'U.S. market open', 'U.S. market close'}
+          if session in market_sessions:
+              gist_storage.mark_session_run(session)
+              print(f"Marked '{session}' as completed for today.")
+          PYEOF
 
