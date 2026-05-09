@@ -35,7 +35,7 @@ except ImportError:
     print("⚠️  api_usage_tracker module not available, usage tracking disabled")
 
 # Maximum number of $ tags per post
-MAX_TAGS_PER_POST = 5
+MAX_TAGS_PER_POST = 4
 
 # Valid eToro symbols for tagging (only use these in posts)
 # These are confirmed to exist on eToro platform

@@ -148,8 +148,8 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
 """
     
     # --- TAG SELECTION LOGIC ---
-    # Goal: Max 5 tags total. Randomly select from Daily/Monthly/Yearly lists, 
-    # prioritizing those NOT used in the last 36h (approx 25 tags).
+    # Goal: Max 4 tags total. Randomly select from Daily/Monthly/Yearly lists, 
+    # prioritizing those NOT used in the last 36h (approx 20 tags).
     
     # 1. Collect all candidates
     candidates = []
@@ -163,9 +163,9 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     # Remove duplicates while preserving order
     unique_candidates = list(dict.fromkeys(candidates))
     
-    # 2. Get recent history to exclude (last ~36h -> approx 25 tags)
-    # 3 runs/day * 5 tags = 15 tags/day * 1.5 days = 22.5 -> round to 25
-    recent_history = ai_news_generator.get_recent_tags(limit=25)
+    # 2. Get recent history to exclude (last ~36h -> approx 20 tags)
+    # 3 runs/day * 4 tags = 12 tags/day * 1.5 days = 18 -> round to 20
+    recent_history = ai_news_generator.get_recent_tags(limit=20)
     normalized_history = set(t.replace('$', '').upper() for t in recent_history)
     
     # 3. Filter candidates available for tagging (not recently used)
@@ -177,13 +177,13 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     # If we have available candidates that haven't been used recently, pick from them
     if available_candidates:
         # Shuffle to give random chance to Monthly/Yearly if Daily are used
-        # We take up to 5.
+        # We take up to 4.
         # Note: If you prefer strict priority (Daily > Monthly > Yearly) remove shuffle.
         # User requested "randomico mettendo a pari priorità", so shuffle is correct.
         random.shuffle(available_candidates)
         
-        # Take max 5
-        selected = available_candidates[:5]
+        # Take max 4
+        selected = available_candidates[:4]
         tags_selected_map.update(selected)
     
     # (Optional fallback) If we have very few fresh candidates (e.g. < 2) and plenty of space, 
@@ -219,7 +219,7 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     
     # Calculate used count and remaining budget
     tags_used_count = len(tags_selected_map)
-    tag_budget_remaining = 5 - tags_used_count
+    tag_budget_remaining = 4 - tags_used_count
     if tag_budget_remaining < 0: tag_budget_remaining = 0
 
     # Update rotation history immediately with the tags we just used
