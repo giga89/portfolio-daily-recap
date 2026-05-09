@@ -5,6 +5,7 @@
         "9618.HK": "\ud83c\udd95",
         "ABBV": "\ud83d\udc89",
         "ABT": "\ud83c\udfe5",
+        "ABT.US": "\ud83c\udfe5",
         "AMZN": "\ud83d\udce6",
         "AVGO": "\ud83d\udcbb",
         "AZN.L": "\ud83e\uddec",
@@ -57,6 +58,10 @@
             "AbbVie"
         ],
         "ABT": [
+            "ABT",
+            "Abbott Laboratories"
+        ],
+        "ABT.US": [
             "ABT",
             "Abbott Laboratories"
         ],
@@ -125,8 +130,8 @@
             "MercadoLibre"
         ],
         "MNODL.L": [
-            "MNODL.L",
-            "MNODL.L"
+            "MNDI.L",
+            "Mondi PLC"
         ],
         "MSFT": [
             "MSFT",
@@ -145,8 +150,8 @@
             "NVIDIA"
         ],
         "NVTKL.L": [
-            "NVTKL.L",
-            "NVTKL.L"
+            "NVTK.ME",
+            "Novatek"
         ],
         "PLTR": [
             "PLTR",

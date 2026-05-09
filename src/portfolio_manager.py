@@ -13,12 +13,13 @@ DEFAULT_TICKERS = {
     'VWCE.L': ('VWCE.L', 'Vanguard FTSE All-World UCITS ETF'),
     'WDEF.L': ('WDEF.L', 'WisdomTree Europe Equity Income UCITS ETF'),
     'INDO.PA': ('INDO.PA', 'Amundi MSCI Indonesia UCITS ETF Acc'),
-    'MNODL.L': ('MNODL.L', 'Mondi PLC'),
-    'NVTKL.L': ('NVTKL.L', 'Novatek'),
+    'MNODL.L': ('MNDI.L', 'Mondi PLC'),
+    'NVTKL.L': ('NVTK.ME', 'Novatek'),
     
     # Healthcare & Pharmaceuticals
     'AZN.L': ('AZN.L', 'AstraZeneca'),
     'ABT': ('ABT', 'Abbott Laboratories'),
+    'ABT.US': ('ABT', 'Abbott Laboratories'),
     'ABBV': ('ABBV', 'AbbVie'),
     'LLY': ('LLY', 'Eli Lilly & Co'),
     'NOVO-B.CO': ('NVO', 'Novo Nordisk'),
@@ -72,6 +73,7 @@ DEFAULT_EMOJIS = {
     # Healthcare & Pharmaceuticals
     'AZN.L': '🧬',
     'ABT': '🏥',
+    'ABT.US': '🏥',
     'ABBV': '💉',
     'LLY': '💊',
     'NOVO-B.CO': '💉',
@@ -129,10 +131,28 @@ def load_config():
         gist_tickers, gist_emojis = get_portfolio_config()
         if gist_tickers:
             print("✅ Loaded portfolio config from Gist")
-            return {
+            config = {
                 "tickers": gist_tickers,
                 "emojis": gist_emojis
             }
+            # Auto-migration for bad tickers
+            needs_save = False
+            if config["tickers"].get("MNODL.L", [""])[0] == "MNODL.L":
+                config["tickers"]["MNODL.L"] = ["MNDI.L", "Mondi PLC"]
+                needs_save = True
+            if config["tickers"].get("NVTKL.L", [""])[0] == "NVTKL.L":
+                config["tickers"]["NVTKL.L"] = ["NVTK.ME", "Novatek"]
+                needs_save = True
+            if "ABT.US" not in config["tickers"]:
+                config["tickers"]["ABT.US"] = ["ABT", "Abbott Laboratories"]
+                config["emojis"]["ABT.US"] = config["emojis"].get("ABT", "🏥")
+                needs_save = True
+                
+            if needs_save:
+                print("🔄 Applying auto-migration to fix ticker mappings in Gist...")
+                save_config(config)
+                
+            return config
     except Exception as e:
         print(f"⚠️ Failed to load config from Gist: {e}")
 
