@@ -11,6 +11,7 @@
         "AZN.L": "\ud83e\uddec",
         "CCJ": "\u26a1",
         "ENEL.MI": "\ud83d\udd0b",
+        "ENI.MI": "\u26fd",
         "ETOR": "\ud83c\udfdb\ufe0f",
         "GLEN.L": "\u26cf\ufe0f",
         "GOOG": "\ud83d\udd0d",
@@ -84,6 +85,10 @@
         "ENEL.MI": [
             "ENEL.MI",
             "Enel"
+        ],
+        "ENI.MI": [
+            "ENI.MI",
+            "Eni S.p.A."
         ],
         "ETOR": [
             "ETOR",

@@ -39,6 +39,8 @@ DEFAULT_TICKERS = {
     # Energy & Nuclear
     'CCJ': ('CCJ', 'Cameco'),
     'ENEL.MI': ('ENEL.MI', 'Enel'),
+    'ENI.MI': ('ENI.MI', 'Eni S.p.A.'),
+    'ENI': ('ENI.MI', 'Eni S.p.A.'),
     
     # Crypto
     'TRX': ('TRX-USD', 'TRON'),
@@ -93,6 +95,8 @@ DEFAULT_EMOJIS = {
     # Energy & Nuclear
     'CCJ': '⚡',
     'ENEL.MI': '🔋',
+    'ENI.MI': '⛽',
+    'ENI': '⛽',
     
     # Crypto
     'TRX': '🪙',
@@ -147,6 +151,13 @@ def load_config():
                 config["tickers"]["ABT.US"] = ["ABT", "Abbott Laboratories"]
                 config["emojis"]["ABT.US"] = config["emojis"].get("ABT", "🏥")
                 needs_save = True
+            
+            # Fix ENI emoji
+            for eni_key in ["ENI", "ENI.MI"]:
+                if eni_key in config["tickers"]:
+                    if config["emojis"].get(eni_key) in ["🆕", None]:
+                        config["emojis"][eni_key] = "⛽"
+                        needs_save = True
                 
             if needs_save:
                 print("🔄 Applying auto-migration to fix ticker mappings in Gist...")
