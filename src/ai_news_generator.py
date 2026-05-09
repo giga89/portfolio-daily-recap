@@ -263,7 +263,6 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
     
     # List of models to try
     models_to_try = [
-        'gemini-2.0-flash-lite',
         'gemini-2.0-flash',
         'gemini-2.5-flash',
         'gemini-flash-latest',
@@ -464,7 +463,6 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
     
     # List of models to try (in order of preference)
     models_to_try = [
-        'gemini-2.0-flash-lite',
         'gemini-2.0-flash',
         'gemini-2.5-flash',
         'gemini-flash-latest',
