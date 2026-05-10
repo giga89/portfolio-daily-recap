@@ -78,12 +78,6 @@ def send_twitter_post(text: str) -> bool:
         print(f"   ⚠️  Missing Twitter credentials: {', '.join(missing)} — skipping.")
         return False
 
-    # Enforce monthly posting limit (default ON)
-    post_monthly = os.environ.get("TWITTER_POST_MONTHLY", "true").lower() != "false"
-    if post_monthly and _already_posted_this_month():
-        print("   ⚠️  Twitter: already posted this calendar month — skipping (free tier limit).")
-        return False
-
     # Truncate to 280 chars
     tweet_text = text[:277] + "..." if len(text) > 280 else text
 
@@ -102,7 +96,6 @@ def send_twitter_post(text: str) -> bool:
         if response.ok:
             tweet_id = response.json().get("data", {}).get("id")
             print(f"   ✅ Tweet posted! ID: {tweet_id}")
-            _mark_posted_this_month()
             return True
         else:
             print(f"   ❌ Twitter error: {response.text[:300]}")
@@ -110,3 +103,4 @@ def send_twitter_post(text: str) -> bool:
     except Exception as e:
         print(f"   ❌ Twitter exception: {e}")
         return False
+
