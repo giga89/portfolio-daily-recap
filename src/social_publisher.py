@@ -158,26 +158,36 @@ def publish_all(
         print("   ⏭️  Not configured.")
         results["telegram"] = False
 
-    # ── 2. Twitter/X (US close, daily — no monthly cap) ─────────────
+    # ── 2. Twitter/X (US close — 2-tweet thread) ─────────────────────
     print("\n🐦 Twitter/X:")
     if not is_us_close:
         print(f"   ⏭️  Only at US close.")
         results["twitter"] = False
     elif os.environ.get("TWITTER_API_KEY") and os.environ.get("TWITTER_ACCESS_TOKEN"):
-        tweet = _make_twitter_post(plain_recap)
-        ok = twitter_sender.send_twitter_post(tweet)
+        tweets = twitter_sender.build_twitter_thread(
+            portfolio_daily=portfolio_daily,
+            top_performers=top_performers,
+            session_name=market_session,
+            plain_recap=plain_recap,
+        )
+        ok = twitter_sender.send_twitter_thread(tweets)
         results["twitter"] = ok
     else:
         print("   ⏭️  Not configured.")
         results["twitter"] = False
 
-    # ── 3. Bluesky (US close, daily) ─────────────────────────────────
+    # ── 3. Bluesky (US close — 2-post thread) ────────────────────────
     print("\n🦋 Bluesky:")
     if not is_us_close:
         print(f"   ⏭️  Only at US close.")
         results["bluesky"] = False
     elif os.environ.get("BLUESKY_HANDLE") and os.environ.get("BLUESKY_APP_PASS"):
-        ok = bluesky_sender.send_bluesky_post(plain_with_footer)
+        bsky_posts = bluesky_sender.build_bluesky_thread(
+            portfolio_daily=portfolio_daily,
+            top_performers=top_performers,
+            session_name=market_session,
+        )
+        ok = bluesky_sender.send_bluesky_thread(bsky_posts)
         results["bluesky"] = ok
     else:
         print("   ⏭️  Not configured.")

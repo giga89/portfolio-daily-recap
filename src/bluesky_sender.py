@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-Bluesky Sender
-Posts portfolio recap to Bluesky via AT Protocol (atproto).
+Bluesky Sender — Thread support via AT Protocol
+Posts a 2-post thread: performance hook + CTA reply.
 
-Setup:
-  1. Log in to bsky.app
-  2. Settings → Privacy and Security → App Passwords → Add App Password
-  3. Name it "PortfolioRecap" and save the generated password
+Post 1: Daily result + top performers + hashtags (≤300 chars)
+Post 2 (reply): eToro profile + referral link
+
+Bluesky finance tags that get visibility:
+  #Investing #Stocks #ETF #Finance #Portfolio
+  #eToro #CopyTrading #Mercati #Finanza
 
 Required env vars:
-  BLUESKY_HANDLE   — your handle, e.g. "andrearavalli.bsky.social"
-  BLUESKY_APP_PASS — app password generated in Bluesky settings (NOT your login password)
+  BLUESKY_HANDLE   — e.g. "andrearavalli.bsky.social"
+  BLUESKY_APP_PASS — app password from bsky.app → Settings → App Passwords
 """
 
 import os
@@ -20,105 +22,164 @@ from datetime import datetime, timezone
 
 BSKY_API = "https://bsky.social/xrpc"
 
+ETORO_PROFILE  = "https://www.etoro.com/people/andrearavalli"
+ETORO_REFERRAL = "https://etoro.tw/46qgHLr"
+
 
 def _create_session(handle: str, app_pass: str) -> tuple[str, str] | tuple[None, None]:
-    """Create a Bluesky session. Returns (did, access_jwt) or (None, None)."""
+    """Authenticate and return (did, access_jwt)."""
     r = requests.post(
         f"{BSKY_API}/com.atproto.server.createSession",
         json={"identifier": handle, "password": app_pass},
         timeout=15,
     )
     if r.ok:
-        data = r.json()
-        print(f"   ✅ Bluesky session created for {handle}")
-        return data["did"], data["accessJwt"]
-    print(f"   ❌ Bluesky login failed {r.status_code}: {r.text[:200]}")
+        d = r.json()
+        print(f"   ✅ Bluesky session: {handle}")
+        return d["did"], d["accessJwt"]
+    print(f"   ❌ Bluesky auth failed {r.status_code}: {r.text[:150]}")
     return None, None
 
 
 def _detect_facets(text: str) -> list:
     """
-    Detect URLs and hashtags in text and create AT Protocol facets
-    (rich-text annotations for links/tags).
+    Detect URLs, #hashtags and @mentions → AT Protocol rich-text facets.
+    Required for links and tags to be clickable/searchable on Bluesky.
     """
     import re
     facets = []
-    text_bytes = text.encode("utf-8")
 
-    # URLs
-    url_pattern = re.compile(r"https?://[^\s]+")
-    for m in url_pattern.finditer(text):
-        start = len(text[:m.start()].encode("utf-8"))
-        end = len(text[:m.end()].encode("utf-8"))
-        facets.append({
-            "index": {"byteStart": start, "byteEnd": end},
-            "features": [{"$type": "app.bsky.richtext.facet#link", "uri": m.group()}],
-        })
+    patterns = [
+        (re.compile(r"https?://[^\s]+"),
+         lambda m: {"$type": "app.bsky.richtext.facet#link", "uri": m.group()}),
+        (re.compile(r"#(\w+)"),
+         lambda m: {"$type": "app.bsky.richtext.facet#tag", "tag": m.group(1)}),
+        (re.compile(r"@([\w.]+)"),
+         lambda m: {"$type": "app.bsky.richtext.facet#mention",
+                    "did": f"did:placeholder:{m.group(1)}"}),
+    ]
 
-    # Hashtags
-    tag_pattern = re.compile(r"#(\w+)")
-    for m in tag_pattern.finditer(text):
-        start = len(text[:m.start()].encode("utf-8"))
-        end = len(text[:m.end()].encode("utf-8"))
-        facets.append({
-            "index": {"byteStart": start, "byteEnd": end},
-            "features": [{"$type": "app.bsky.richtext.facet#tag", "tag": m.group(1)}],
-        })
-
+    for pattern, feature_fn in patterns:
+        for m in pattern.finditer(text):
+            start = len(text[:m.start()].encode("utf-8"))
+            end = len(text[:m.end()].encode("utf-8"))
+            facets.append({
+                "index": {"byteStart": start, "byteEnd": end},
+                "features": [feature_fn(m)],
+            })
     return facets
 
 
-def _post_record(did: str, jwt: str, text: str) -> bool:
-    """Create a post record on Bluesky."""
+def _create_record(
+    did: str,
+    jwt: str,
+    text: str,
+    reply_ref: dict = None,
+) -> tuple[str, str] | tuple[None, None]:
+    """
+    Create a Bluesky post record. Returns (uri, cid) or (None, None).
+    reply_ref format: {"root": {"uri":..,"cid":..}, "parent": {"uri":..,"cid":..}}
+    """
     now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    facets = _detect_facets(text)
-
     record = {
         "$type": "app.bsky.feed.post",
-        "text": text,
+        "text": text[:300],
         "createdAt": now,
     }
+    facets = _detect_facets(text)
     if facets:
         record["facets"] = facets
+    if reply_ref:
+        record["reply"] = reply_ref
 
     r = requests.post(
         f"{BSKY_API}/com.atproto.repo.createRecord",
         headers={"Authorization": f"Bearer {jwt}"},
-        json={
-            "repo": did,
-            "collection": "app.bsky.feed.post",
-            "record": record,
-        },
+        json={"repo": did, "collection": "app.bsky.feed.post", "record": record},
         timeout=15,
     )
     if r.ok:
-        uri = r.json().get("uri", "")
-        print(f"   ✅ Bluesky post published! URI: {uri}")
-        return True
-    print(f"   ❌ Bluesky post failed {r.status_code}: {r.text[:300]}")
-    return False
+        data = r.json()
+        uri = data.get("uri", "")
+        cid = data.get("cid", "")
+        print(f"   ✅ Bluesky post created: {uri[:60]}")
+        return uri, cid
+    print(f"   ❌ Bluesky post error {r.status_code}: {r.text[:250]}")
+    return None, None
 
 
-def send_bluesky_post(text: str) -> bool:
+def build_bluesky_thread(
+    portfolio_daily: float,
+    top_performers: list,
+    session_name: str = "U.S. market close",
+) -> list[str]:
     """
-    Post to Bluesky. Handles auth, rich-text facets, and 300-char limit.
+    Build a 2-post Bluesky thread optimised for discoverability.
 
-    Bluesky limit: 300 graphemes per post. For longer text we post a thread
-    (first post + reply with the rest).
+    Post 1 — Performance hook + top 3 + finance hashtags (≤300 chars)
+    Post 2 — eToro CTA with profile + referral links
+    """
+    # Performance label
+    if portfolio_daily > 2.0:
+        label, p_emoji = "TO THE MOON 🚀", "🔥"
+    elif portfolio_daily > 0.5:
+        label, p_emoji = "GREAT GREEN 🍀", "✅"
+    elif portfolio_daily >= 0:
+        label, p_emoji = "SLIGHT GAINS 🌿", "🌱"
+    elif portfolio_daily > -0.5:
+        label, p_emoji = "MINOR DIP 📉", "⚖️"
+    elif portfolio_daily > -2.0:
+        label, p_emoji = "ROUGH 💀", "🩸"
+    else:
+        label, p_emoji = "MARKET CRASH 🧨", "🆘"
+
+    date_str = datetime.now().strftime("%d %b %Y")
+
+    # ── Post 1: hook ─────────────────────────────────────────────────
+    lines = [
+        f"🌆 Portfolio — {date_str}",
+        "",
+        f"{p_emoji} {label}: {portfolio_daily:+.2f}%",
+        "",
+    ]
+    if top_performers:
+        lines.append("📈 Top performers oggi:")
+        for sym, pct in top_performers[:3]:
+            arrow = "▲" if pct >= 0 else "▼"
+            lines.append(f"  {arrow} #{sym} {pct:+.2f}%")
+        lines.append("")
+    lines.append("#Investing #Stocks #ETF #Finance #Portfolio #Mercati #Finanza")
+    post1 = "\n".join(lines)[:300]
+
+    # ── Post 2: CTA ──────────────────────────────────────────────────
+    post2 = (
+        "👤 Segui il mio portfolio su eToro:\n"
+        f"{ETORO_PROFILE}\n"
+        "\n"
+        "🎁 Non sei ancora su eToro? Iscriviti gratis:\n"
+        f"{ETORO_REFERRAL}\n"
+        "\n"
+        "#eToro #CopyTrading #Investimenti #Finanza"
+    )
+
+    return [post1, post2[:300]]
+
+
+def send_bluesky_thread(posts: list[str]) -> bool:
+    """
+    Post a thread on Bluesky. Post 2 is a reply to post 1.
 
     Args:
-        text: Post text
+        posts: List of post texts (2 recommended)
 
     Returns:
         bool: True if at least the first post succeeded
     """
-    handle = os.environ.get("BLUESKY_HANDLE")
+    handle   = os.environ.get("BLUESKY_HANDLE")
     app_pass = os.environ.get("BLUESKY_APP_PASS")
 
     print("=" * 50)
-    print("🦋 Posting to Bluesky...")
-    print(f"   Handle present: {bool(handle)}")
-    print(f"   App password present: {bool(app_pass)}")
+    print(f"🦋 Posting Bluesky thread ({len(posts)} posts)...")
 
     if not handle or not app_pass:
         print("   ⚠️  BLUESKY_HANDLE or BLUESKY_APP_PASS not set — skipping.")
@@ -128,32 +189,41 @@ def send_bluesky_post(text: str) -> bool:
     if not did:
         return False
 
-    # Bluesky limit: 300 graphemes
-    MAX = 300
-    if len(text) <= MAX:
-        return _post_record(did, jwt, text)
+    root_uri = root_cid = None
+    prev_uri = prev_cid = None
+    success = False
 
-    # Split into chunks for a thread
-    chunks = []
-    words = text.split(" ")
-    current = ""
-    for word in words:
-        candidate = (current + " " + word).strip()
-        if len(candidate) > MAX - 5:  # -5 for "..." or numbering
-            if current:
-                chunks.append(current.strip())
-            current = word
+    for i, text in enumerate(posts):
+        print(f"   📝 Post {i+1}/{len(posts)}...")
+        reply_ref = None
+        if root_uri and prev_uri:
+            reply_ref = {
+                "root":   {"uri": root_uri,  "cid": root_cid},
+                "parent": {"uri": prev_uri,  "cid": prev_cid},
+            }
+
+        uri, cid = _create_record(did, jwt, text, reply_ref)
+        if uri:
+            if i == 0:
+                root_uri, root_cid = uri, cid
+                success = True
+            prev_uri, prev_cid = uri, cid
         else:
-            current = candidate
-    if current:
-        chunks.append(current.strip())
-
-    print(f"   📝 Text split into {len(chunks)} posts (thread)")
-    success = True
-    for i, chunk in enumerate(chunks[:5]):  # max 5 posts in thread
-        part_text = chunk if i == 0 else f"({i+1}/{len(chunks)}) {chunk}"
-        ok = _post_record(did, jwt, part_text[:MAX])
-        if not ok:
-            success = False
+            print(f"   ⚠️  Post {i+1} failed, stopping thread.")
             break
+
     return success
+
+
+def send_bluesky_post(text: str) -> bool:
+    """Simple single-post interface (legacy)."""
+    handle   = os.environ.get("BLUESKY_HANDLE")
+    app_pass = os.environ.get("BLUESKY_APP_PASS")
+    if not handle or not app_pass:
+        print("   ⚠️  Bluesky credentials not set — skipping.")
+        return False
+    did, jwt = _create_session(handle, app_pass)
+    if not did:
+        return False
+    uri, _ = _create_record(did, jwt, text[:300])
+    return uri is not None
