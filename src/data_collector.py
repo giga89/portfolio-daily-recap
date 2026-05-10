@@ -14,7 +14,7 @@ import pandas as pd
 import finance_fetcher
 import gist_storage
 import formatter
-import telegram_sender
+import social_publisher
 import chart_generator
 
 def main():
@@ -190,10 +190,17 @@ def main():
     print("=" * 50)
     print("Daily portfolio recap generation completed successfully!")
 
-    # Step 7: Send to Telegram
+    # Step 8: Publish to all social platforms
     print("=" * 50)
-    print("Sending recap to Telegram...")
-    telegram_sender.send_recap_to_telegram(output_path, image_path=chart_path)
+    print("Publishing recap to social platforms...")
+    social_publisher.publish_all(
+        recap_file_path=output_path,
+        image_path=chart_path,
+        data={
+            "portfolio_daily": portfolio_daily,
+            "stock_data": stock_data,
+        }
+    )
     print("=" * 50)
 
 if __name__ == '__main__':
