@@ -313,7 +313,7 @@ These are the tickers in the portfolio you should focus on for the PORTFOLIO IMP
 Structure your response in TWO sections with a TOPIC-BASED FORMAT:
 
 1. 🌍 MONTHLY MARKET OVERVIEW
-Organize this section into MAX 5 MAJOR TOPICS/THEMES that defined {current_month}.
+Organize this section into MAX 3 MAJOR TOPICS/THEMES that defined {current_month}.
 For each topic:
 - Use 3 relevant emojis at the start (e.g., 🏛️💵🔔 for Fed decisions, 📊📈💹 for market trends, etc.)
 - Write the topic title
@@ -338,7 +338,7 @@ Example format (when tag is available):
 NVIDIA's new AI chip announcement drove 15% gains this month. Looking ahead to strong Q1 earnings...
 
 STRICT LIMITS:
-- MAXIMUM 5 topics per section (total 10 topics max)
+- MAXIMUM 3 topics for MARKET OVERVIEW, 5 for PORTFOLIO IMPACT (total 8 topics max)
 - MAXIMUM {MAX_TAGS_PER_POST} $ tags TOTAL across both sections
 - Use $ prefix ONLY for the allowed tags listed above
 - Focus on HIGH-IMPACT events that shaped the month
@@ -517,7 +517,7 @@ These are the tickers in the portfolio you should focus on for the PORTFOLIO FOC
 Structure your response in TWO distinct sections with a TOPIC-BASED FORMAT:
 
 1. 🌍 MARKET OVERVIEW
-Organize this section into MAX 5 TOPICS/THEMES from today's markets.
+Organize this section into MAX 3 TOPICS/THEMES from today's markets.
 For each topic:
 - Use 3 relevant emojis at the start (e.g., 📊📈💹 for market trends, 🏛️💵🔔 for Fed decisions, etc.)
 - Write a 1-2 sentence summary of that specific topic
@@ -541,11 +541,11 @@ Example format (when tag is available):
 Amazon announced new AI-powered logistics system...
 
 STRICT LIMITS:
-- MAXIMUM 5 topics per section (total 10 topics max)
+- MAXIMUM 3 topics for MARKET OVERVIEW, 5 for PORTFOLIO FOCUS (total 8 topics max)
 - MAXIMUM {MAX_TAGS_PER_POST} $ tags TOTAL across both sections
 - Use $ prefix ONLY for the allowed tags listed above
 - Keep each topic to 1-2 sentences maximum
-- Total character count must stay under 2000 for this AI section
+- Total character count must stay under 1800 for this AI section
 - FOCUS ON PORTFOLIO TICKERS in the Portfolio Focus section
 
 Output format:

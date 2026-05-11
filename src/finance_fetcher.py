@@ -387,6 +387,19 @@ def fetch_stock_data():
             # yfinance sometimes attributes prev close to current.
             # We explicitly flag it.
 
+            # Sanitize NaN values — yfinance can return NaN for tickers
+            # with missing or partial data (e.g. HK stocks on holidays)
+            import math
+            if math.isnan(daily_change):
+                print(f"⚠️  {etoro_symbol}: daily_change is NaN, setting to 0.0")
+                daily_change = 0.0
+            if math.isnan(monthly_change):
+                print(f"⚠️  {etoro_symbol}: monthly_change is NaN, setting to 0.0")
+                monthly_change = 0.0
+            if math.isnan(yearly_change):
+                print(f"⚠️  {etoro_symbol}: yearly_change is NaN, setting to 0.0")
+                yearly_change = 0.0
+
             stock_data[etoro_symbol] = {
                 'yahoo_ticker': yahoo_ticker,
                 'company_name': company_name,
@@ -404,6 +417,9 @@ def fetch_stock_data():
                 current = hist['Close'].iloc[-1]
                 week_ago = hist['Close'].iloc[-5]
                 weekly_change = ((current - week_ago) / week_ago) * 100
+                if math.isnan(weekly_change):
+                    print(f"⚠️  {etoro_symbol}: weekly_change is NaN, setting to 0.0")
+                    weekly_change = 0.0
                 stock_data[etoro_symbol]['weekly_change'] = weekly_change
             else:
                  stock_data[etoro_symbol]['weekly_change'] = 0.0

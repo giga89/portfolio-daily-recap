@@ -52,6 +52,15 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     current_month = datetime.now().month
     is_january = (current_month == 1)
     
+    # Filter out assets with NaN values in any performance metric (safety net)
+    import math
+    nan_tickers = [k for k, v in stock_data.items()
+                   if any(isinstance(v.get(m), float) and math.isnan(v.get(m, 0))
+                          for m in ('daily_change', 'weekly_change', 'monthly_change', 'yearly_change'))]
+    if nan_tickers:
+        print(f"⚠️  Filtering out {len(nan_tickers)} assets with NaN values: {nan_tickers}")
+        stock_data = {k: v for k, v in stock_data.items() if k not in nan_tickers}
+
     # Calculate top performers
     # Filter for active trading today for the "Daily" list
     stock_data_active = {k: v for k, v in stock_data.items() if v.get('has_traded_today', True)}
