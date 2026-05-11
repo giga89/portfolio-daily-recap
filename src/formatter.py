@@ -251,15 +251,20 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         benchmark_performance=benchmark_data
     )
     
-    # Enforce maximum recap length of 4500 characters
-    MAX_RECAP_LENGTH = 4500
+    # Enforce maximum recap length matching Telegram's 4096-character limit
+    MAX_RECAP_LENGTH = 4096
     if len(recap) > MAX_RECAP_LENGTH:
-        print(f"⚠️  Recap length ({len(recap)} chars) exceeds limit of {MAX_RECAP_LENGTH}. Truncating...")
-        # Truncate and add a message
-        recap = recap[:MAX_RECAP_LENGTH - 100]  # Leave space for truncation message
-        recap += "\n\n... [truncated due to length limit]"
+        print(f"⚠️  Recap length ({len(recap)} chars) exceeds Telegram limit of {MAX_RECAP_LENGTH}. Trimming...")
+        # Trim at the last paragraph break that still fits, so we never cut mid-sentence
+        cut = recap.rfind('\n\n', 0, MAX_RECAP_LENGTH - 50)
+        if cut == -1:
+            cut = recap.rfind('\n', 0, MAX_RECAP_LENGTH - 50)
+        if cut == -1:
+            cut = MAX_RECAP_LENGTH - 50
+        recap = recap[:cut].rstrip()
+        print(f"✅ Recap trimmed to {len(recap)} chars")
     else:
-        print(f"✅ Recap length: {len(recap)} chars (within limit of {MAX_RECAP_LENGTH})")
+        print(f"✅ Recap length: {len(recap)} chars (within Telegram limit of {MAX_RECAP_LENGTH})")
     
     # Generate and save API usage report
     if API_TRACKER_AVAILABLE:
