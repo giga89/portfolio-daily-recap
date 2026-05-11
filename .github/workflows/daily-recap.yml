@@ -43,51 +43,67 @@ jobs:
       - name: Determine market session
         id: market_session
         run: |
-          # Ottiene l'ora corrente in UTC (00-23), minuto (00-59) e giorno (1-7)
-          HOUR=$(date -u +%H)
-          MINUTE=$(date -u +%M)
-          DAY=$(date -u +%u)
-
-          # Remove leading zeros to avoid octal interpretation in arithmetic
-          HOUR=${HOUR#0}
-          MINUTE=${MINUTE#0}
-          MINUTE=${MINUTE:-0}
-          
-          # Controlla quale ora schedulata ha attivato l'azione
-          SESSION_NAME="Daily recap"
+          # Use the scheduled cron expression that triggered this run (immune to GitHub delays).
+          # Falls back to current-time logic only for workflow_dispatch without force_session.
+          SCHEDULE="${{ github.event.schedule }}"
           FORCED_SESSION="${{ inputs.force_session }}"
-          
+          SESSION_NAME="Daily recap"
+
           if [ -n "$FORCED_SESSION" ]; then
-             SESSION_NAME="$FORCED_SESSION"
-             echo "🔒 Session forced to: $SESSION_NAME"
-          # HOUR=20 is shared by the monthly cron (min=0) and US close winter cron (min=45);
-          # use MINUTE to distinguish them.
-          elif [ "$HOUR" -eq 20 ]; then
-             TOMORROW=$(date -u -d "+1 day" +%d)
-             if [ "$TOMORROW" == "01" ] && [ "$MINUTE" -lt 30 ]; then
-               SESSION_NAME="Monthly recap"
-               echo "📅 Last day of month detected - Monthly recap"
-             elif [ "$DAY" -ge 1 ] && [ "$DAY" -le 5 ]; then
-               SESSION_NAME="U.S. market close"
-             fi
-          elif [ "$DAY" -eq 6 ] && [ "$HOUR" -eq 9 ]; then
-             SESSION_NAME="Weekly recap (Sat)"
-          elif [ "$DAY" -eq 7 ] && [ "$HOUR" -eq 21 ]; then
-             SESSION_NAME="Weekly recap (Sun)"
-          # EU open: summer cron fires at HOUR=6, winter at HOUR=7
-          elif [ "$HOUR" -eq 6 ] || [ "$HOUR" -eq 7 ] || [ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 9 ]; then
-            SESSION_NAME="European market open"
-          # US open: summer cron fires at HOUR=13, winter at HOUR=14
-          elif [ "$HOUR" -eq 13 ] || [ "$HOUR" -eq 14 ] || [ "$HOUR" -eq 15 ]; then
-            SESSION_NAME="U.S. market open"
-          # US close: summer cron fires at HOUR=19, winter at HOUR=20 (handled above)
-          elif [ "$HOUR" -eq 19 ] || [ "$HOUR" -eq 21 ] || [ "$HOUR" -eq 22 ]; then
-            SESSION_NAME="U.S. market close"
+            SESSION_NAME="$FORCED_SESSION"
+            echo "Session forced to: $SESSION_NAME"
+          elif [ -n "$SCHEDULE" ]; then
+            # Map each cron expression to its session name.
+            # This is reliable regardless of how late GitHub fires the job.
+            case "$SCHEDULE" in
+              "45 6 * * 1-5"|"45 7 * * 1-5")
+                SESSION_NAME="European market open" ;;
+              "15 13 * * 1-5"|"15 14 * * 1-5")
+                SESSION_NAME="U.S. market open" ;;
+              "45 19 * * 1-5"|"45 20 * * 1-5")
+                SESSION_NAME="U.S. market close" ;;
+              "0 9 * * 6")
+                SESSION_NAME="Weekly recap (Sat)" ;;
+              "0 21 * * 0")
+                SESSION_NAME="Weekly recap (Sun)" ;;
+              "0 20 28-31 * *")
+                TOMORROW=$(date -u -d "+1 day" +%d)
+                if [ "$TOMORROW" == "01" ]; then
+                  SESSION_NAME="Monthly recap"
+                  echo "Last day of month detected - Monthly recap"
+                fi ;;
+            esac
+          else
+            # Fallback for workflow_dispatch: detect from current UTC time
+            HOUR=$(date -u +%H)
+            MINUTE=$(date -u +%M)
+            DAY=$(date -u +%u)
+            HOUR=${HOUR#0}
+            MINUTE=${MINUTE#0}
+            MINUTE=${MINUTE:-0}
+            if [ "$HOUR" -eq 20 ]; then
+              TOMORROW=$(date -u -d "+1 day" +%d)
+              if [ "$TOMORROW" == "01" ] && [ "$MINUTE" -lt 30 ]; then
+                SESSION_NAME="Monthly recap"
+              elif [ "$DAY" -ge 1 ] && [ "$DAY" -le 5 ]; then
+                SESSION_NAME="U.S. market close"
+              fi
+            elif [ "$DAY" -eq 6 ] && [ "$HOUR" -eq 9 ]; then
+              SESSION_NAME="Weekly recap (Sat)"
+            elif [ "$DAY" -eq 7 ] && [ "$HOUR" -eq 21 ]; then
+              SESSION_NAME="Weekly recap (Sun)"
+            elif [ "$HOUR" -eq 6 ] || [ "$HOUR" -eq 7 ] || [ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 9 ]; then
+              SESSION_NAME="European market open"
+            elif [ "$HOUR" -eq 13 ] || [ "$HOUR" -eq 14 ] || [ "$HOUR" -eq 15 ]; then
+              SESSION_NAME="U.S. market open"
+            elif [ "$HOUR" -eq 19 ] || [ "$HOUR" -eq 21 ] || [ "$HOUR" -eq 22 ]; then
+              SESSION_NAME="U.S. market close"
+            fi
           fi
-          
-          # Imposta la variabile di output
+
+          HOUR=$(date -u +%H); HOUR=${HOUR#0}
           echo "session=$SESSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "Market Session detected: $SESSION_NAME (UTC Hour: $HOUR, Day: $DAY)"
+          echo "Market Session detected: $SESSION_NAME (triggered by cron: '${SCHEDULE:-dispatch}', actual UTC Hour: $HOUR)"
 
       - name: Wait until target time
         run: |
