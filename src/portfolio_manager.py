@@ -22,7 +22,7 @@ DEFAULT_TICKERS = {
     'ABT.US': ('ABT', 'Abbott Laboratories'),
     'ABBV': ('ABBV', 'AbbVie'),
     'LLY': ('LLY', 'Eli Lilly & Co'),
-    'NOVO-B.CO': ('NVO', 'Novo Nordisk'),
+    'NOVO-B.CO': ('NOVO-B.CO', 'Novo Nordisk'),
     'HUM': ('HUM', 'Humana'),
     
     # Technology & Semiconductors
@@ -162,6 +162,11 @@ def load_config():
             # Fix NOVO-B → NOVO-B.CO emoji key
             if "NOVO-B" in config["emojis"] and "NOVO-B.CO" not in config["emojis"]:
                 config["emojis"]["NOVO-B.CO"] = config["emojis"].pop("NOVO-B")
+                needs_save = True
+
+            # Fix NOVO-B.CO YF ticker: use native Copenhagen listing instead of US ADR
+            if config["tickers"].get("NOVO-B.CO", [""])[0] == "NVO":
+                config["tickers"]["NOVO-B.CO"] = ["NOVO-B.CO", "Novo Nordisk"]
                 needs_save = True
 
             if needs_save:
