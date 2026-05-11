@@ -56,6 +56,8 @@ DEFAULT_TICKERS = {
     'MELI': ('MELI', 'MercadoLibre'),
     'PYPL': ('PYPL', 'PayPal'),
     'GLEN.L': ('GLEN.L', 'Glencore'),
+    'XEON.DE': ('XEON.DE', 'Xtrackers II EUR Overnight Rate Swap UCITS ETF'),
+    'IB01.L': ('IB01.L', 'iShares Treasury Bond 0-1yr UCITS ETF'),
     '1919.HK': ('1919.HK', 'COSCO SHIPPING Holdings'),
     '2318.HK': ('2318.HK', 'Ping An Insurance'),
 }
@@ -112,6 +114,8 @@ DEFAULT_EMOJIS = {
     'MELI': '🛒',
     'PYPL': '💳',
     'GLEN.L': '⛏️',
+    'XEON.DE': '💤',    # EUR overnight rate (cash/liquidity)
+    'IB01.L': '💵',    # US Treasury short-term bonds
     '1919.HK': '🚢',
     '2318.HK': '🏦',
 }
@@ -167,6 +171,16 @@ def load_config():
             # Fix NOVO-B.CO YF ticker: use native Copenhagen listing instead of US ADR
             if config["tickers"].get("NOVO-B.CO", [""])[0] == "NVO":
                 config["tickers"]["NOVO-B.CO"] = ["NOVO-B.CO", "Novo Nordisk"]
+                needs_save = True
+
+            # Add new positions: XEON.DE and IB01.L
+            if "XEON.DE" not in config["tickers"]:
+                config["tickers"]["XEON.DE"] = ["XEON.DE", "Xtrackers II EUR Overnight Rate Swap UCITS ETF"]
+                config["emojis"]["XEON.DE"] = "💤"
+                needs_save = True
+            if "IB01.L" not in config["tickers"]:
+                config["tickers"]["IB01.L"] = ["IB01.L", "iShares Treasury Bond 0-1yr UCITS ETF"]
+                config["emojis"]["IB01.L"] = "💵"
                 needs_save = True
 
             if needs_save:
