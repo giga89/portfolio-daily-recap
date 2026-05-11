@@ -158,7 +158,12 @@ def load_config():
                     if config["emojis"].get(eni_key) in ["🆕", None]:
                         config["emojis"][eni_key] = "⛽"
                         needs_save = True
-                
+
+            # Fix NOVO-B → NOVO-B.CO emoji key
+            if "NOVO-B" in config["emojis"] and "NOVO-B.CO" not in config["emojis"]:
+                config["emojis"]["NOVO-B.CO"] = config["emojis"].pop("NOVO-B")
+                needs_save = True
+
             if needs_save:
                 print("🔄 Applying auto-migration to fix ticker mappings in Gist...")
                 save_config(config)
