@@ -1,0 +1,128 @@
+name: Test eToro Data Bundle API
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: 'eToro username'
+        required: false
+        default: 'andrearavalli'
+        type: string
+      trade_history_days:
+        description: 'Trade history days'
+        required: false
+        default: '90'
+        type: string
+
+jobs:
+  test-etoro-bundle:
+    runs-on: ubuntu-latest
+    environment: Etoro
+
+    steps:
+      - name: Call getEtoroDataBundle API
+        id: call_api
+        run: |
+          echo "Calling getEtoroDataBundle for user: ${{ inputs.username }}"
+          echo "Trade history days: ${{ inputs.trade_history_days }}"
+
+          RESPONSE=$(curl -sk -X POST \
+            "https://base44.app/api/apps/698c3171c182151081c9528e/functions/getEtoroDataBundle" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.BASE44_API_TOKEN }}" \
+            -d "{\"username\":\"${{ inputs.username }}\",\"tradeHistoryDays\":${{ inputs.trade_history_days }}}" \
+            -w "\n---HTTP_STATUS:%{http_code}")
+
+          HTTP_STATUS=$(echo "$RESPONSE" | grep -oP '(?<=---HTTP_STATUS:)\d+')
+          BODY=$(echo "$RESPONSE" | sed '/---HTTP_STATUS:/d')
+
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "http_status=$HTTP_STATUS" >> "$GITHUB_OUTPUT"
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "ERROR: Unexpected HTTP status $HTTP_STATUS"
+            echo "Response body:"
+            echo "$BODY"
+            exit 1
+          fi
+
+          echo "Response body (first 2000 chars):"
+          echo "$BODY" | head -c 2000
+
+          # Save full response as artifact
+          echo "$BODY" > etoro_bundle_response.json
+
+      - name: Parse and summarize bundle
+        if: success()
+        run: |
+          RESPONSE_FILE="etoro_bundle_response.json"
+
+          echo "=== eToro Data Bundle Summary ==="
+
+          # Check if response is valid JSON
+          if ! python3 -c "import json,sys; json.load(open('$RESPONSE_FILE'))" 2>/dev/null; then
+            echo "Response is not valid JSON, printing raw:"
+            cat "$RESPONSE_FILE"
+            exit 0
+          fi
+
+          python3 - <<'PYEOF'
+          import json, sys
+
+          with open("etoro_bundle_response.json") as f:
+              data = json.load(f)
+
+          print(f"Top-level keys: {list(data.keys()) if isinstance(data, dict) else type(data).__name__}")
+
+          if isinstance(data, dict):
+              # Portfolio summary
+              portfolio = data.get("portfolio") or data.get("Portfolio") or data.get("portfolioData")
+              if portfolio:
+                  print(f"\n--- Portfolio ---")
+                  if isinstance(portfolio, dict):
+                      for k, v in list(portfolio.items())[:10]:
+                          print(f"  {k}: {v}")
+                  elif isinstance(portfolio, list):
+                      print(f"  {len(portfolio)} positions")
+
+              # Trade history summary
+              trades = data.get("tradeHistory") or data.get("TradeHistory") or data.get("trades")
+              if trades:
+                  print(f"\n--- Trade History ---")
+                  if isinstance(trades, list):
+                      print(f"  {len(trades)} trades")
+                      if trades:
+                          print(f"  First trade keys: {list(trades[0].keys()) if isinstance(trades[0], dict) else trades[0]}")
+                  elif isinstance(trades, dict):
+                      for k, v in list(trades.items())[:5]:
+                          print(f"  {k}: {v}")
+
+              # Gain summary
+              gain = data.get("gain") or data.get("Gain") or data.get("gainData")
+              if gain:
+                  print(f"\n--- Gain ---")
+                  if isinstance(gain, dict):
+                      for k, v in list(gain.items())[:10]:
+                          print(f"  {k}: {v}")
+                  else:
+                      print(f"  {gain}")
+
+              # Print any other top-level keys
+              known_keys = {"portfolio", "Portfolio", "portfolioData", "tradeHistory", "TradeHistory", "trades", "gain", "Gain", "gainData"}
+              for k in data:
+                  if k not in known_keys:
+                      v = data[k]
+                      preview = str(v)[:200]
+                      print(f"\n--- {k} ---")
+                      print(f"  {preview}")
+          else:
+              print(json.dumps(data, indent=2)[:3000])
+          PYEOF
+
+      - name: Upload response as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: etoro-bundle-response
+          path: etoro_bundle_response.json
+          retention-days: 7
