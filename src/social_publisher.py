@@ -147,6 +147,7 @@ def publish_all(
         results.update(_publish_monday_posts(
             portfolio_perf=portfolio_perf,
             portfolio_weekly=portfolio_weekly,
+            portfolio_weights=portfolio_weights,
             pie_chart_path=pie_chart_path,
         ))
         return results
@@ -295,6 +296,7 @@ def publish_all(
 def _publish_monday_posts(
     portfolio_perf: float,
     portfolio_weekly: float = None,
+    portfolio_weights: dict = None,
     pie_chart_path: str = None,
 ) -> dict:
     """
@@ -321,6 +323,7 @@ def _publish_monday_posts(
     print("\n📋 Generating decision post...")
     decision_text = ai_news_generator.generate_decision_post(
         recent_closes_text=recent_closes_text,
+        current_weights=portfolio_weights,
         history_stats_text=history_stats_text,
     )
     if decision_text:
