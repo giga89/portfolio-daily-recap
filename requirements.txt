@@ -10,4 +10,5 @@ yfinance
 matplotlib
 seaborn
 pandas
+openpyxl
 pytz

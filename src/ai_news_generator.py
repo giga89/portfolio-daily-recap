@@ -716,3 +716,181 @@ Double your money in ~{time_to_double:.1f} years
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
     return message
+
+
+def generate_decision_post(
+    recent_closes_text: str,
+    current_weights: dict = None,
+    history_stats_text: str = '',
+) -> str:
+    """
+    Generate a "decision of the week" post explaining recent trading choices.
+    Uses Gemini to write an empathetic, transparent narrative for copiers.
+
+    Args:
+        recent_closes_text: Text summary of recently closed positions (from etoro_history)
+        current_weights: Current portfolio weights {ticker: %} from BullAware
+        history_stats_text: Short stats summary from etoro_history
+
+    Returns:
+        str: Formatted post text, or empty string on failure
+    """
+    if not GENAI_AVAILABLE:
+        return ""
+
+    api_key = os.environ.get('GEMINI_API_KEY')
+    if not api_key:
+        return ""
+
+    models_to_try = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-flash-latest']
+
+    weights_context = ""
+    if current_weights:
+        top_holdings = sorted(current_weights.items(), key=lambda x: x[1], reverse=True)[:8]
+        weights_context = "Current top holdings: " + ", ".join(
+            f"{t} ({w:.1f}%)" for t, w in top_holdings
+        )
+
+    prompt = f"""You are Andrea Ravalli, an Italian private investor sharing your eToro portfolio journey with your copiers.
+You are transparent, humble, and data-driven. You write in a warm, personal tone — like you're talking to friends who trust you with their money.
+
+TODAY'S TASK: Write a "Decision of the Week" post explaining your recent trading decisions.
+
+RECENT CLOSED POSITIONS (last 30 days):
+{recent_closes_text if recent_closes_text else 'No recent closes.'}
+
+{weights_context}
+
+PORTFOLIO HISTORY CONTEXT:
+{history_stats_text if history_stats_text else ''}
+
+Write a post (max 1400 characters) in ITALIAN that:
+1. Opens with a personal, relatable hook (1-2 sentences about the market mood this week)
+2. Explains 1-2 specific decisions you made (why you exited or held, what you were thinking)
+3. Connects emotionally with copiers ("so che vederlo in rosso fa male, ma...")
+4. Ends with your forward-looking thesis (what you're watching next)
+
+TONE: Transparent, confident but humble, empathetic. Never overconfident.
+AVOID: Generic phrases, vague claims, percentage promises.
+FORMAT: Plain text, no HTML. Use emojis naturally (2-3 max). No bullet lists.
+
+Output ONLY the post text, no introduction or explanation."""
+
+    try:
+        client = genai.Client(api_key=api_key)
+        config = types.GenerateContentConfig(temperature=0.85)
+
+        for model_name in models_to_try:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config,
+                )
+                if response and response.text:
+                    print(f"✅ Decision post generated with {model_name}")
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "decision_post")
+                    return response.text.strip()
+            except Exception as exc:
+                print(f"⚠️ Decision post model {model_name} failed: {exc}")
+                time.sleep(1)
+
+        print("❌ All models failed for decision post")
+        return ""
+
+    except Exception as exc:
+        print(f"❌ Error generating decision post: {exc}")
+        return ""
+
+
+def generate_empathy_post(
+    portfolio_perf: float,
+    weekly_perf: float = None,
+    market_context: str = '',
+    history_stats_text: str = '',
+) -> str:
+    """
+    Generate an empathetic post for copiers during tough market periods or to celebrate gains.
+    Connects emotionally, explains the long-term view, and reinforces trust.
+
+    Args:
+        portfolio_perf: Current cumulative portfolio performance % (e.g. 156.0)
+        weekly_perf: Weekly performance % (negative = drawdown week)
+        market_context: Brief market summary for context
+        history_stats_text: Short stats from etoro history
+
+    Returns:
+        str: Formatted post text, or empty string on failure
+    """
+    if not GENAI_AVAILABLE:
+        return ""
+
+    api_key = os.environ.get('GEMINI_API_KEY')
+    if not api_key:
+        return ""
+
+    models_to_try = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-flash-latest']
+
+    # Determine emotional context
+    if weekly_perf is not None and weekly_perf < -2:
+        mood = f"difficult week (portfolio: {weekly_perf:+.1f}% this week)"
+        angle = "reassure copiers, explain the bigger picture, normalize short-term pain"
+    elif weekly_perf is not None and weekly_perf > 3:
+        mood = f"strong week (portfolio: {weekly_perf:+.1f}% this week)"
+        angle = "celebrate the gain, remind that discipline drove it, stay humble and grounded"
+    else:
+        mood = "typical market week"
+        angle = "check in with copiers, reinforce the strategy thesis, share your mindset"
+
+    prompt = f"""You are Andrea Ravalli, an Italian private investor on eToro sharing your journey with your copiers.
+You have been investing since 2020 and your portfolio is up ~{portfolio_perf:.0f}% cumulative.
+You are transparent, humble, and human. You write like you're talking to friends.
+
+TODAY'S TASK: Write a warm, empathetic weekly check-in post.
+
+CURRENT CONTEXT:
+- Portfolio cumulative return: +{portfolio_perf:.0f}%
+- This week's mood: {mood}
+- Your angle: {angle}
+- Market context: {market_context if market_context else 'Mixed global markets'}
+- Portfolio history note: {history_stats_text[:200] if history_stats_text else ''}
+
+Write a post (max 1200 characters) in ITALIAN that:
+1. Opens with a human, relatable moment (something you felt or observed this week)
+2. Addresses how the week felt for copiers and validates their emotions
+3. Zooms out to the bigger picture (the long-term strategy, the "why")
+4. Closes with one concrete thing you are watching next week
+
+TONE: Warm, honest, personal. Like a weekly letter to people who trust you.
+AVOID: Generic motivational quotes, exaggerated claims, financial advice promises.
+FORMAT: Plain text. 2-4 natural emojis. No bullet lists. Conversational paragraphs.
+
+Output ONLY the post text, no introduction or explanation."""
+
+    try:
+        client = genai.Client(api_key=api_key)
+        config = types.GenerateContentConfig(temperature=0.90)
+
+        for model_name in models_to_try:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config,
+                )
+                if response and response.text:
+                    print(f"✅ Empathy post generated with {model_name}")
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "empathy_post")
+                    return response.text.strip()
+            except Exception as exc:
+                print(f"⚠️ Empathy post model {model_name} failed: {exc}")
+                time.sleep(1)
+
+        print("❌ All models failed for empathy post")
+        return ""
+
+    except Exception as exc:
+        print(f"❌ Error generating empathy post: {exc}")
+        return ""

@@ -25,6 +25,8 @@ import threads_sender
 import facebook_sender
 import instagram_sender
 import story_generator
+import ai_news_generator
+import etoro_history
 
 
 # ── eToro constants ───────────────────────────────────────────────────────────
@@ -44,10 +46,11 @@ ETORO_FOOTER_SHORT = (
 )
 
 # Session name constants
-SESSION_US_CLOSE = "U.S. market close"
-SESSION_WEEKLY_SAT = "Weekly recap (Sat)"
-SESSION_WEEKLY_SUN = "Weekly recap (Sun)"
-SESSION_MONTHLY = "Monthly recap"
+SESSION_US_CLOSE    = "U.S. market close"
+SESSION_WEEKLY_SAT  = "Weekly recap (Sat)"
+SESSION_WEEKLY_SUN  = "Weekly recap (Sun)"
+SESSION_MONTHLY     = "Monthly recap"
+SESSION_MONDAY      = "Monday decision post"
 
 
 def _strip_html(text: str) -> str:
@@ -105,6 +108,7 @@ def _extract_top_performers(plain_text: str, stock_data: dict = None) -> list:
 def publish_all(
     recap_file_path: str,
     image_path: str = None,
+    pie_chart_path: str = None,
     data: dict = None,
 ) -> dict:
     """
@@ -113,21 +117,39 @@ def publish_all(
     Args:
         recap_file_path: Path to recap.txt
         image_path: Optional path to the performance chart PNG
-        data: {"portfolio_daily": float, "stock_data": dict}
+        pie_chart_path: Optional path to a pie chart PNG (alternates each session)
+        data: {"portfolio_daily": float, "stock_data": dict, "portfolio_weights": dict,
+               "portfolio_perf": float, "portfolio_weekly": float}
 
     Returns:
         dict: {platform: True/False}
     """
     results = {}
     data = data or {}
-    portfolio_daily = data.get("portfolio_daily", 0.0)
-    stock_data = data.get("stock_data", {})
+    portfolio_daily   = data.get("portfolio_daily", 0.0)
+    stock_data        = data.get("stock_data", {})
+    portfolio_weights = data.get("portfolio_weights", {})
+    portfolio_perf    = data.get("portfolio_perf", 0.0)
+    portfolio_weekly  = data.get("portfolio_weekly", None)
 
     market_session = os.environ.get("MARKET_SESSION", "Daily recap")
-    is_us_close = SESSION_US_CLOSE.lower() in market_session.lower()
-    is_weekly   = any(s.lower() in market_session.lower()
-                      for s in [SESSION_WEEKLY_SAT, SESSION_WEEKLY_SUN, "weekly"])
-    is_monthly  = SESSION_MONTHLY.lower() in market_session.lower()
+    is_us_close  = SESSION_US_CLOSE.lower() in market_session.lower()
+    is_weekly    = any(s.lower() in market_session.lower()
+                       for s in [SESSION_WEEKLY_SAT, SESSION_WEEKLY_SUN, "weekly"])
+    is_monthly   = SESSION_MONTHLY.lower() in market_session.lower()
+    is_monday    = SESSION_MONDAY.lower() in market_session.lower()
+
+    # ── Monday decision + empathy post (Telegram only) ────────────────────
+    if is_monday:
+        print("\n" + "=" * 60)
+        print(f"📅 MONDAY SESSION — Decision & Empathy Post")
+        print("=" * 60)
+        results.update(_publish_monday_posts(
+            portfolio_perf=portfolio_perf,
+            portfolio_weekly=portfolio_weekly,
+            pie_chart_path=pie_chart_path,
+        ))
+        return results
 
     print("\n" + "=" * 60)
     print(f"🌐 SOCIAL PUBLISHER — Session: '{market_session}'")
@@ -135,6 +157,7 @@ def publish_all(
     print(f"   → Twitter / Bluesky: {'✅ YES' if is_us_close else '⏭️  only at US close'}")
     print(f"   → LinkedIn:          {'✅ YES' if is_weekly else '⏭️  only on weekly recap'}")
     print(f"   → Threads/FB/IG:     {'✅ YES' if is_us_close else '⏭️  only at US close'}")
+    print(f"   → Pie chart:         {'✅ ' + pie_chart_path if pie_chart_path else '⏭️  not generated'}")
     print("=" * 60)
 
     # ── Read recap ──────────────────────────────────────────────────
@@ -149,11 +172,19 @@ def publish_all(
     plain_with_footer = plain_recap + ETORO_FOOTER_LONG
     top_performers = _extract_top_performers(plain_recap, stock_data)
 
-    # ── 1. Telegram (every session) ──────────────────────────────────
+    # ── 1. Telegram (every session) — sends recap + chart OR pie chart ──
     print("\n📨 Telegram:")
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
         ok = telegram_sender.send_recap_to_telegram(recap_file_path, image_path=image_path)
         results["telegram"] = ok
+        # Also send pie chart as a separate photo when available
+        if pie_chart_path and os.path.exists(pie_chart_path):
+            try:
+                caption = "📊 Portfolio breakdown — alternating views each session"
+                telegram_sender.send_telegram_photo(pie_chart_path, caption=caption)
+                print("   🥧 Pie chart sent to Telegram")
+            except Exception as exc:
+                print(f"   ⚠️ Pie chart send failed: {exc}")
     else:
         print("   ⏭️  Not configured.")
         results["telegram"] = False
@@ -257,6 +288,80 @@ def publish_all(
         icon = "✅" if success else "❌"
         print(f"   {icon} {platform.replace('_', ' ').capitalize()}")
     print("=" * 60 + "\n")
+
+    return results
+
+
+def _publish_monday_posts(
+    portfolio_perf: float,
+    portfolio_weekly: float = None,
+    pie_chart_path: str = None,
+) -> dict:
+    """
+    Generate and send Monday decision + empathy posts to Telegram.
+    Also sends the current pie chart.
+
+    Returns:
+        dict: {platform: True/False}
+    """
+    results = {}
+
+    if not (os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID")):
+        print("   ⏭️  Telegram not configured.")
+        results["telegram_decision"] = False
+        results["telegram_empathy"] = False
+        return results
+
+    # Load eToro history for context
+    history = etoro_history.get_history_from_gist()
+    history_stats_text  = etoro_history.get_stats_summary_text(history)
+    recent_closes_text  = etoro_history.get_recent_closes_text(history, days=30)
+
+    # 1. Decision post
+    print("\n📋 Generating decision post...")
+    decision_text = ai_news_generator.generate_decision_post(
+        recent_closes_text=recent_closes_text,
+        history_stats_text=history_stats_text,
+    )
+    if decision_text:
+        header = "<b>📋 DECISIONE DELLA SETTIMANA</b>\n\n"
+        footer = ETORO_FOOTER_LONG
+        full_msg = header + decision_text + footer
+        ok = telegram_sender.send_telegram_message(full_msg[:4096])
+        results["telegram_decision"] = ok
+        print(f"   {'✅' if ok else '❌'} Decision post sent")
+    else:
+        print("   ⚠️  Decision post generation failed")
+        results["telegram_decision"] = False
+
+    # 2. Empathy post
+    print("\n💬 Generating empathy post...")
+    empathy_text = ai_news_generator.generate_empathy_post(
+        portfolio_perf=portfolio_perf,
+        weekly_perf=portfolio_weekly,
+        history_stats_text=history_stats_text,
+    )
+    if empathy_text:
+        header = "<b>💬 UN PENSIERO PER VOI</b>\n\n"
+        footer = ETORO_FOOTER_LONG
+        full_msg = header + empathy_text + footer
+        ok = telegram_sender.send_telegram_message(full_msg[:4096])
+        results["telegram_empathy"] = ok
+        print(f"   {'✅' if ok else '❌'} Empathy post sent")
+    else:
+        print("   ⚠️  Empathy post generation failed")
+        results["telegram_empathy"] = False
+
+    # 3. Pie chart (if available)
+    if pie_chart_path and os.path.exists(pie_chart_path):
+        try:
+            caption = "📊 Come è composto il portfolio questa settimana — aggiornato in tempo reale da eToro."
+            telegram_sender.send_telegram_photo(pie_chart_path, caption=caption)
+            results["telegram_pie_chart"] = True
+            print("   ✅ Pie chart sent to Telegram")
+        except Exception as exc:
+            print(f"   ⚠️  Pie chart send failed: {exc}")
+            results["telegram_pie_chart"] = False
 
     return results
 

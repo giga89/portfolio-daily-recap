@@ -16,6 +16,8 @@ import gist_storage
 import formatter
 import social_publisher
 import chart_generator
+import pie_chart_generator
+import etoro_history
 
 def main():
     """
@@ -193,12 +195,45 @@ def main():
     # Step 8: Publish to all social platforms
     print("=" * 50)
     print("Publishing recap to social platforms...")
+
+    # Generate pie chart (alternates each session via Gist counter)
+    pie_chart_path = None
+    try:
+        pie_type = gist_storage.get_next_pie_chart_type()
+        print(f"🥧 Generating pie chart: {pie_type}")
+        os.makedirs('output', exist_ok=True)
+        if pie_type == 'allocation':
+            pie_chart_path = pie_chart_generator.generate_allocation_pie(
+                portfolio_weights or {}, 'output/pie_allocation.png'
+            )
+        elif pie_type == 'sector':
+            pie_chart_path = pie_chart_generator.generate_sector_pie(
+                portfolio_weights or {}, 'output/pie_sector.png'
+            )
+        elif pie_type == 'geo':
+            pie_chart_path = pie_chart_generator.generate_geo_pie(
+                portfolio_weights or {}, 'output/pie_geo.png'
+            )
+        elif pie_type == 'pnl_history':
+            history = etoro_history.get_history_from_gist()
+            pnl_by_type = history.get('stats', {}).get('pnl_by_type', {})
+            if pnl_by_type:
+                pie_chart_path = pie_chart_generator.generate_pnl_history_pie(
+                    pnl_by_type, 'output/pie_pnl_history.png'
+                )
+    except Exception as exc:
+        print(f"⚠️ Pie chart generation failed: {exc}")
+
     social_publisher.publish_all(
         recap_file_path=output_path,
         image_path=chart_path,
+        pie_chart_path=pie_chart_path,
         data={
             "portfolio_daily": portfolio_daily,
             "stock_data": stock_data,
+            "portfolio_weights": portfolio_weights or {},
+            "portfolio_perf": five_year_return,
+            "portfolio_weekly": portfolio_weekly,
         }
     )
     print("=" * 50)

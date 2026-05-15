@@ -344,3 +344,48 @@ def mark_session_run(session_name):
     data['session_runs'] = runs
     _invalidate_cache()
     save_data(data)
+
+
+# ---------------------------------------------------------------------------
+# eToro history (imported from Excel account statement)
+# ---------------------------------------------------------------------------
+
+def get_etoro_history() -> dict:
+    """Return the stored eToro history dict (from Excel import)."""
+    data = load_data()
+    return data.get('etoro_history', {})
+
+
+def save_etoro_history(history: dict) -> bool:
+    """Save parsed eToro history to Gist."""
+    data = load_data()
+    data['etoro_history'] = history
+    return save_data(data)
+
+
+# ---------------------------------------------------------------------------
+# Pie chart image rotation tracking
+# Rotates through: allocation → sector → geo → pnl_history → allocation …
+# ---------------------------------------------------------------------------
+
+PIE_CHART_TYPES = ['allocation', 'sector', 'geo', 'pnl_history']
+
+
+def get_next_pie_chart_type() -> str:
+    """
+    Return the next pie chart type to use (round-robin).
+    Advances the internal counter and saves it back to Gist.
+    """
+    data = load_data()
+    idx = data.get('pie_chart_index', 0)
+    chart_type = PIE_CHART_TYPES[idx % len(PIE_CHART_TYPES)]
+    data['pie_chart_index'] = (idx + 1) % len(PIE_CHART_TYPES)
+    save_data(data)
+    return chart_type
+
+
+def get_current_pie_chart_type() -> str:
+    """Return the current pie chart type without advancing the counter."""
+    data = load_data()
+    idx = data.get('pie_chart_index', 0)
+    return PIE_CHART_TYPES[idx % len(PIE_CHART_TYPES)]
