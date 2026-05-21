@@ -19,7 +19,7 @@ def generate_test_chart():
     print("=" * 60)
     
     # Create sample portfolio data (monthly returns since 2020)
-    dates = pd.date_range(start='2020-01-01', end='2026-01-31', freq='ME')
+    dates = pd.date_range(start='2020-01-01', end='2026-01-31', freq='M')
     
     # Simulate portfolio performance (strong growth with volatility)
     portfolio_returns = [0]

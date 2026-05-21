@@ -237,7 +237,7 @@ jobs:
           name: daily-recap
           path: |
             output/recap.txt
-            output/performance_chart.png
+            output/*.png
             output/gemini_api_usage.json
             output/gemini_api_usage_report.txt
       
