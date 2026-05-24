@@ -48,18 +48,23 @@ def _get_all_portfolio_tags():
     return [symbol.replace('.', '') for symbol in PORTFOLIO_TICKERS.keys()]
 
 
-def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
+def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, allowed_tickers=None):
     """
     Select tags for the current post with rotation to ensure variety.
     
     Args:
         max_tags: Maximum number of tags to select
         excluded_tags: List of tags to exclude (e.g. already used in this post)
+        allowed_tickers: Optional list of tickers to restrict the selection to
     
     Returns:
         list: List of selected tags
     """
     all_tags = _get_all_portfolio_tags()
+    
+    if allowed_tickers:
+        allowed_normalized = [t.replace('.', '').upper() for t in allowed_tickers]
+        all_tags = [t for t in all_tags if t.replace('.', '').upper() in allowed_normalized]
     
     if excluded_tags:
         # Remove excluded tags from candidates
@@ -440,13 +445,14 @@ Impact and outlook summary...
         return ""
 
 
-def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
+def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, market_session=None):
     """
     Generate AI-powered market news recap for USA, CHINA, and EU markets
     
     Args:
         max_tags: Maximum number of $ tags allowed in the AI output
         excluded_tags: List of tags already used elsewhere in the post
+        market_session: Name of the current market session
         
     Returns:
         str: Formatted news recap or empty string if API key not set
@@ -468,6 +474,20 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         'gemini-flash-latest',
     ]
     
+    if not market_session:
+        market_session = os.environ.get('MARKET_SESSION', 'Daily recap')
+        
+    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'MNODL.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L']
+    US_TICKERS = ['AMZN', 'AVGO', 'GOOG', 'LLY', 'MSFT', 'NET', 'PLTR', 'PYPL', 'TSM', 'ABBV', 'ABT', 'ABT.US', 'CCJ', 'HUM', 'MELI', 'IB01.L']
+    
+    allowed_tickers = None
+    session_upper = market_session.upper()
+    if "EUROPEAN" in session_upper:
+        allowed_tickers = EUROPEAN_TICKERS
+    elif "U.S." in session_upper or "US" in session_upper:
+        if "OPEN" in session_upper:
+            allowed_tickers = US_TICKERS
+            
     try:
         # Configure Gemini client
         client = genai.Client(api_key=api_key)
@@ -478,16 +498,16 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         tag_instruction = ""
         
         if max_tags > 0:
-            selected_tags = _select_tags_for_rotation(max_tags, excluded_tags)
+            selected_tags = _select_tags_for_rotation(max_tags, excluded_tags, allowed_tickers)
             selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags])
             tag_instruction = f"""
-- IMPORTANT: You MUST use ONLY these $ tags in this section (max {max_tags}): {selected_tags_str}
-- Only use these exact tags, no other $ symbols.
+- IMPORTANTE: Devi usare ESATTAMENTE ed ESCLUSIVAMENTE questi tag con il simbolo $ (max {max_tags}): {selected_tags_str}
+- Usa solo questi tag esatti nel corpo del testo in modo fluido e naturale, senza inserire altri simboli con $.
 """
         else:
             tag_instruction = """
-- IMPORTANT: Do NOT use any $ tags in this section.
-- Write all ticker symbols as plain text (e.g. NVDA, MSFT) without the $ prefix.
+- IMPORTANTE: Non usare alcun tag con il simbolo $ in questa sezione.
+- Scrivi tutti i simboli azionari come testo normale (es. NVDA, MSFT) senza il prefisso $.
 """
         
         # Get all portfolio tickers for context
@@ -502,69 +522,114 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
             for entry in history:
                 previous_topics_str += f"- {entry['content'][:300]}...\n"
         
-        # Create prompt with strict daily focus and topic-organized format
+        # Create prompt based on session
         current_date = datetime.now().strftime('%Y-%m-%d')
-        prompt = f"""You are a senior financial market analyst. Generate a concise daily market recap for today ({current_date}).
-
-CRITICAL REQUIREMENT: Focus ONLY on events from the last 24 hours. Use your search tool to find the most recent news.
-
-{previous_topics_str}
-
-PORTFOLIO CONTEXT:
-These are the tickers in the portfolio you should focus on for the PORTFOLIO FOCUS section:
-{portfolio_context}
-
-Structure your response in TWO distinct sections with a TOPIC-BASED FORMAT:
-
-1. 🌍 MARKET OVERVIEW
-Organize this section into MAX 3 TOPICS/THEMES from today's markets.
-For each topic:
-- Use 3 relevant emojis at the start (e.g., 📊📈💹 for market trends, 🏛️💵🔔 for Fed decisions, etc.)
-- Write a 1-2 sentence summary of that specific topic
-- IMPORTANT: Do NOT use any $ tags in this section
-
-Example format:
-📊📈💹 S&P500 Rally
-The S&P 500 surged 1.2% today driven by strong tech earnings...
-
-2. 💼 PORTFOLIO FOCUS
-Organize this section into MAX 5 TOPICS related to the PORTFOLIO STOCKS listed above.
-IMPORTANT: Focus EXCLUSIVELY on the tickers from the portfolio context provided above.
-For each topic, if you have available tags from this list: {selected_tags_str}:
-- Use 3 relevant emojis + $TAG (e.g., 📦📦📦 $AMZN)
-- Write a 1-2 sentence summary about that stock/sector
-- If no tags available, just use emojis without tags
-{tag_instruction}
-
-Example format (when tag is available):
-📦📦📦 $AMZN
-Amazon announced new AI-powered logistics system...
-
-STRICT LIMITS:
-- MAXIMUM 3 topics for MARKET OVERVIEW, 5 for PORTFOLIO FOCUS (total 8 topics max)
-- MAXIMUM {MAX_TAGS_PER_POST} $ tags TOTAL across both sections
-- Use $ prefix ONLY for the allowed tags listed above
-- Keep each topic to 1-2 sentences maximum
-- Total character count must stay under 1800 for this AI section
-- FOCUS ON PORTFOLIO TICKERS in the Portfolio Focus section
-
-Output format:
-🌍 MARKET OVERVIEW
-
-[emoji emoji emoji] Topic Title
-Brief summary...
-
-[emoji emoji emoji] Topic Title
-Brief summary...
-
-💼 PORTFOLIO FOCUS
-
-[emoji emoji emoji] $TAG (if available)
-Brief summary...
-
-[emoji emoji emoji] Topic Title
-Brief summary...
-"""
+        
+        if "EUROPEAN" in session_upper and "OPEN" in session_upper:
+            prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura dei mercati europei.
+            
+            Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e gli eventi di mercato più rilevanti delle ultime 12-24 ore relativi ai mercati europei o ai titoli europei nel nostro portafoglio.
+            
+            CONTESTO PORTAFOGLIO EUROPEO:
+            I principali titoli europei del nostro portafoglio su cui concentrarsi sono:
+            AstraZeneca (AZN.L), Novo Nordisk (NOVO-B.CO), Enel (ENEL.MI), Eni (ENI.MI), Prysmian (PRY.MI), Ferrari (RACE), Volkswagen (VOW3.DE), Glencore (GLEN.L).
+            
+            LINEE GUIDA PER IL TESTO:
+            - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a degli amici/investitori che si fidano di te). Evita toni eccessivamente formali o robotici.
+            - Inizia con un saluto caloroso e naturale (es. "Buongiorno! Iniziamo una nuova giornata sui mercati europei...")
+            - Presenta MAX 3 brevi spunti o notizie principali per l'apertura europea, focalizzandoti sulle novità dei nostri titoli in portafoglio o sull'indice Euro Stoxx.
+            - {tag_instruction}
+            - Usa le emoji in modo spontaneo e naturale (non metterne troppe, massimo 3 o 4 in tutto il post).
+            - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
+            
+            Output format (ONLY return the plain text of the post in Italian):
+            [Il tuo messaggio naturale in italiano]
+            """
+            
+        elif "U.S." in session_upper and "OPEN" in session_upper:
+            prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno/buon pomeriggio caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura di Wall Street (U.S. market open).
+            
+            Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e gli eventi di mercato più rilevanti delle ultime 12-24 ore relativi ai mercati americani o ai titoli USA nel nostro portafoglio.
+            
+            CONTESTO PORTAFOGLIO USA:
+            I principali titoli USA del nostro portafoglio su cui concentrarsi sono:
+            NVIDIA (NVDA), Microsoft (MSFT), Amazon (AMZN), Eli Lilly (LLY), Palantir (PLTR), Broadcom (AVGO), Cloudflare (NET), PayPal (PYPL), Taiwan Semiconductor (TSM), AbbVie (ABBV), Abbott (ABT).
+            
+            LINEE GUIDA PER IL TESTO:
+            - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a degli amici/investitori che si fidano di te). Evita toni eccessivamente formali o robotici.
+            - Inizia con un saluto caloroso e naturale (es. "Buongiorno! Ci prepariamo all'apertura di Wall Street...")
+            - Presenta MAX 3 brevi spunti o notizie principali per l'apertura USA, focalizzandoti sulle novità dei nostri titoli in portafoglio o sugli indici americani (S&P 500, Nasdaq).
+            - {tag_instruction}
+            - Usa le emoji in modo spontaneo e naturale (non metterne troppe, massimo 3 o 4 in tutto il post).
+            - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
+            
+            Output format (ONLY return the plain text of the post in Italian):
+            [Il tuo messaggio naturale in italiano]
+            """
+            
+        elif "WEEKLY" in session_upper and "SAT" in session_upper:
+            prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di fine settimana caldo, onesto e naturale per i tuoi copiatori ed follower (Weekly Recap - Sabato).
+            
+            Usa il tuo strumento di ricerca Google per analizzare l'andamento della settimana appena trascorsa sui mercati globali e l'impatto sul nostro portafoglio.
+            
+            CONTESTO PORTAFOGLIO:
+            {portfolio_context}
+            
+            LINEE GUIDA PER IL TESTO:
+            - Scrivi in ITALIANO con uno stile estremamente naturale, fluido ed empatico. Parla apertamente di come è andata la settimana, se è stata verde o rossa, dei risultati ottenuti e delle tue sensazioni.
+            - Inizia con un saluto amichevole per il fine settimana (es. "Buon fine settimana! Con i mercati chiusi, facciamo il punto su questa settimana...")
+            - Fai un bilancio sincero di cosa ha guidato il portafoglio in questa settimana, menzionando i movimenti principali dei nostri titoli chiave.
+            - Spiega brevemente cosa terremo d'occhio per la prossima settimana.
+            - {tag_instruction}
+            - Usa le emoji in modo spontaneo e naturale (massimo 3 o 4 in tutto il post).
+            - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
+            
+            Output format (ONLY return the plain text of the post in Italian):
+            [Il tuo messaggio naturale in italiano]
+            """
+            
+        elif "WEEKLY" in session_upper and "SUN" in session_upper:
+            prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un commento domenicale naturale e professionale per i tuoi copiatori sui migliori titoli della settimana (Weekly Recap - Domenica).
+            
+            Usa il tuo strumento di ricerca Google per analizzare i motivi del forte rialzo dei migliori titoli del nostro portafoglio durante la settimana appena trascorsa.
+            
+            CONTESTO PORTAFOGLIO:
+            {portfolio_context}
+            
+            LINEE GUIDA PER IL TESTO:
+            - Scrivi in ITALIANO con uno stile naturale e chiaro. Questo post accompagnerà la classifica dei migliori titoli del portafoglio.
+            - Inizia in modo naturale (es. "Buona domenica! Oggi diamo un'occhiata più da vicino ai titoli che hanno guidato la classifica delle performance settimanali...")
+            - Spiega in modo semplice e chiaro i motivi del successo dei titoli migliori di questa settimana (massimo 2-3 titoli).
+            - Collega queste performance alla nostra tesi d'investimento di lungo termine, rassicurando i copiatori sulla bontà delle nostre scelte.
+            - {tag_instruction}
+            - Usa le emoji in modo spontaneo e naturale (massimo 3 o 4 in tutto il post).
+            - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
+            
+            Output format (ONLY return the plain text of the post in Italian):
+            [Il tuo messaggio naturale in italiano]
+            """
+            
+        else:
+            prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un resoconto serale caldo, professionale e naturale per i tuoi copiatori dopo la chiusura dei mercati USA (U.S. market close / fine giornata).
+            
+            Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e le performance più rilevanti delle ultime 24 ore sui mercati globali e per i titoli del nostro portafoglio.
+            
+            {previous_topics_str}
+            
+            CONTESTO PORTAFOGLIO:
+            {portfolio_context}
+            
+            LINEE GUIDA PER IL TESTO:
+            - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un resoconto sincero scritto a fine giornata per i tuoi amici e investitori).
+            - Inizia in modo amichevole (es. "Buonasera! Ecco il nostro recap di fine giornata per vedere cosa è successo oggi sui mercati...")
+            - Presenta un breve quadro della giornata di borsa (S&P 500, Nasdaq, mercati europei) e spiega l'impatto diretto sui titoli del nostro portafoglio.
+            - {tag_instruction}
+            - Usa le emoji in modo spontaneo e naturale (massimo 3 o 4 in tutto il post).
+            - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
+            
+            Output format (ONLY return the plain text of the post in Italian):
+            [Il tuo messaggio naturale in italiano]
+            """
         
         print("🤖 Generating AI market news recap...")
         print(f"   Selected tags for this post: {selected_tags_str}")
@@ -684,34 +749,34 @@ def get_why_copy_message(five_year_return=161, avg_yearly_return=32, benchmark_p
         for ticker, perf in benchmark_performance.items():
             # Calculate the difference (delta) between our return and benchmark
             delta = five_year_return - perf
-            perf_label = "(outperformance)" if delta >= 0 else "(underperformance)"
+            perf_label = "(sovraperformance)" if delta >= 0 else "(sottoperformance)"
             benchmark_lines += f"✓ VS {ticker} : {delta:+.0f}% {perf_label}\n"
     else:
         # Fallback if no data
-        benchmark_lines = "✓ Outperforming S&P500\n✓ Outperforming MSCI World\n✓ Outperforming Euro Stoxx 50"
+        benchmark_lines = "✓ Sovraperformance vs S&P500\n✓ Sovraperformance vs MSCI World\n✓ Sovraperformance vs Euro Stoxx 50"
 
     message = f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 WHY COPY THIS PORTFOLIO?
+💡 PERCHÈ COPIARE QUESTO PORTAFOGLIO?
 
-📈 TRACK RECORD:
-+{five_year_return:.0f}% since strategy change (2020)
-~{avg_yearly_return:.0f}% average annual return
-Double your money in ~{time_to_double:.1f} years
+📈 STORICO DELLE PERFORMANCE:
++{five_year_return:.0f}% dal cambio di strategia (2020)
+~{avg_yearly_return:.0f}% rendimento medio annuo
+Raddoppio del capitale stimato in ~{time_to_double:.1f} anni
 
-✅ STRATEGY HIGHLIGHTS:
-• Smart diversification across 3 continents
-• Focus on megatrends: AI, Healthcare, Energy
-• Mix of ETFs + high-potential individual stocks
-• Active and transparent management
+✅ PUNTI DI FORZA DELLA STRATEGIA:
+• Diversificazione intelligente su 3 continenti
+• Focus sui megatrend del futuro: AI, Sanità ed Energia
+• Mix bilanciato di ETF e azioni individuali ad alto potenziale
+• Gestione attiva, trasparente e senza commissioni nascoste
 
-📊 PERFORMANCE DELTA vs. BENCHMARKS (Since 2020):
+📊 DIFFERENZIALE RISPETTO AI BENCHMARK (Dal 2020):
 {benchmark_lines.strip()}
 
-🎯 Long-term strategy based on solid fundamentals
-🔄 Periodic rebalancing to optimize risk/reward
+🎯 Strategia di lungo termine basata su fondamentali solidi
+🔄 Ribilanciamento periodico per ottimizzare il rapporto rischio/rendimento
 
-🔗 Links & Info: https://bio.mega89.uk/
+🔗 Info & Link per copiarmi: https://bio.mega89.uk/
 @AndreaRavalli
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """

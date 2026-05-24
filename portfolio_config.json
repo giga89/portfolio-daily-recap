@@ -1,47 +1,48 @@
 {
     "emojis": {
-        "1919.HK": "🚢",
-        "2318.HK": "🏦",
-        "9618.HK": "🆕",
-        "ABBV": "💉",
-        "ABT": "🏥",
-        "ABT.US": "🏥",
-        "AMZN": "📦",
-        "AVGO": "💻",
-        "AZN.L": "🧬",
-        "CCJ": "⚡",
-        "ENEL.MI": "🔋",
-        "ENI.MI": "⛽",
-        "ETOR": "🏛️",
-        "GLEN.L": "⛏️",
-        "GOOG": "🔍",
-        "HUM": "🏥",
-        "IEMG": "🌍",
-        "IEUR": "🏦",
-        "INDO.PA": "🆕",
-        "IQQL.DE": "🔥",
-        "LLY": "💊",
-        "MAU.PA": "🛢️",
-        "MELI": "🛒",
-        "MNODL.L": "🆕",
-        "MSFT": "💻",
-        "NET": "☁️",
-        "NOVO-B.CO": "💉",
-        "NVDA": "🤖",
-        "NVTKL.L": "🆕",
-        "PLTR": "🛡️",
-        "PRY.MI": "🔌",
-        "PYPL": "💳",
-        "RACE": "🏎️",
-        "SX7PEX.DE": "📊",
-        "TRIG.L": "🔺",
-        "TRX": "🪙",
-        "TSM": "🏭",
-        "VOW3.DE": "🚗",
-        "VWCE.L": "🌐",
-        "WDEF.L": "💼",
-        "IB01.L": "💵",
-        "XEON.DE": "💤"
+        "1919.HK": "\ud83d\udea2",
+        "2318.HK": "\ud83c\udfe6",
+        "ABBV": "\ud83d\udc89",
+        "ABT": "\ud83c\udfe5",
+        "ABT.US": "\ud83c\udfe5",
+        "AMZN": "\ud83d\udce6",
+        "AVGO": "\ud83d\udcbb",
+        "AZN.L": "\ud83e\uddec",
+        "CCJ": "\u26a1",
+        "DB1.DE": "\ud83d\udcca",
+        "ENEL.MI": "\ud83d\udd0b",
+        "ENI": "\u26fd",
+        "ENI.MI": "\u26fd",
+        "ETOR": "\ud83c\udfdb\ufe0f",
+        "GLEN.L": "\u26cf\ufe0f",
+        "GOOG": "\ud83d\udd0d",
+        "HUM": "\ud83c\udfe5",
+        "IB01.L": "\ud83d\udcb5",
+        "IEMG": "\ud83c\udf0d",
+        "IEUR": "\ufffd\ud83c\uddfa",
+        "INDO.PA": "\ud83c\uddee\ud83c\udde9",
+        "IQQL.DE": "\ud83d\udd25",
+        "LLY": "\ud83d\udc8a",
+        "MAU.PA": "\ud83d\udee2\ufe0f",
+        "MELI": "\ud83d\uded2",
+        "MNODL.L": "\ud83d\udce6",
+        "MSFT": "\ud83d\udcbb",
+        "NET": "\u2601\ufe0f",
+        "NOVO-B.CO": "\ud83d\udc89",
+        "NVDA": "\ud83e\udd16",
+        "NVTKL.L": "\ud83d\udd25",
+        "PLTR": "\ud83d\udee1\ufe0f",
+        "PRY.MI": "\ud83d\udd0c",
+        "PYPL": "\ud83d\udcb3",
+        "RACE": "\ud83c\udfce\ufe0f",
+        "SX7PEX.DE": "\ud83c\udfdb\ufe0f",
+        "TRIG.L": "\ud83c\udf2c\ufe0f",
+        "TRX": "\ud83e\ude99",
+        "TSM": "\ud83c\udfed",
+        "VOW3.DE": "\ud83d\ude97",
+        "VWCE.L": "\ud83c\udf10",
+        "WDEF.L": "\ud83d\udcbc",
+        "XEON.DE": "\ud83d\udca4"
     },
     "tickers": {
         "1919.HK": [
@@ -51,10 +52,6 @@
         "2318.HK": [
             "2318.HK",
             "Ping An Insurance"
-        ],
-        "9618.HK": [
-            "9618.HK",
-            "JD.com, Inc."
         ],
         "ABBV": [
             "ABBV",
@@ -84,9 +81,17 @@
             "CCJ",
             "Cameco"
         ],
+        "DB1.DE": [
+            "DB1.DE",
+            "Deutsche B\u00f6rse AG"
+        ],
         "ENEL.MI": [
             "ENEL.MI",
             "Enel"
+        ],
+        "ENI": [
+            "ENI.MI",
+            "Eni S.p.A."
         ],
         "ENI.MI": [
             "ENI.MI",
@@ -108,13 +113,13 @@
             "HUM",
             "Humana"
         ],
+        "IB01.L": [
+            "IB01.L",
+            "iShares Treasury Bond 0-1yr UCITS ETF"
+        ],
         "IEMG": [
             "IEMG",
             "iShares Core MSCI Emerging Markets ETF"
-        ],
-        "IB01.L": [
-            "IB01.L",
-            "iShares $ Treasury Bond 0-1yr UCITS ETF"
         ],
         "IEUR": [
             "IEUR",
@@ -199,6 +204,10 @@
         "VOW3.DE": [
             "VOW3.DE",
             "Volkswagen"
+        ],
+        "VWCE.L": [
+            "VWCE.L",
+            "Vanguard FTSE All-World UCITS ETF"
         ],
         "WDEF.L": [
             "WDEF.L",

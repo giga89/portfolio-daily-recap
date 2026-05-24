@@ -91,52 +91,56 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     # Determine dynamic header based on session
     session_upper = market_session.upper()
     if "MONTHLY" in session_upper:
-         header = f"📅 {session_upper} 🗓️"
+        header = f"📅 RESOCONTO MENSILE PORTAFOGLIO 🗓️"
     elif "WEEKLY" in session_upper:
-         header = f"📅 {session_upper} 📆"
+        if "SAT" in session_upper:
+            header = f"📅 RESOCONTO SETTIMANALE (SABATO) 📆"
+        elif "SUN" in session_upper:
+            header = f"🏆 CLASSIFICA SETTIMANALE DEI TITOLI 📊"
+        else:
+            header = f"📅 RESOCONTO SETTIMANALE 📆"
     elif "OPEN" in session_upper:
-        header = f"🌅 {session_upper} 📊"
+        if "EUROPEAN" in session_upper:
+            header = f"🌅 APERTURA MERCATI EUROPEI 🇪🇺"
+        else:
+            header = f"🌅 APERTURA WALL STREET 🇺🇸"
     elif "CLOSE" in session_upper:
-        header = f"🌆 {session_upper} 📉"
+        header = f"🌆 CHIUSURA DEI MERCATI 📈"
     elif "RECAP" in session_upper:
-        header = f"🌠 {session_upper} 🌙"
+        header = f"🌠 RESOCONTO GIORNALIERO 🌙"
     else:
-        header = f"✨ {session_upper} ✨"
+        header = f"✨ {market_session.upper()} ✨"
 
     # Determine dynamic performance line
     # Use monthly performance if this is a monthly recap, weekly if weekly, else daily
     if is_monthly:
         current_perf = portfolio_monthly if portfolio_monthly is not None else portfolio_daily
-        perf_period = "MONTHLY"
+        period_label = "MESE"
     elif is_weekly and portfolio_weekly is not None:
         current_perf = portfolio_weekly
-        perf_period = "WEEKLY"
+        period_label = "SETTIMANA"
     else:
         current_perf = portfolio_daily
-        perf_period = ""  # No prefix for daily
+        period_label = "GIORNATA"
     
     if current_perf > 2.0:
-        perf_text = "🚀 TO THE MOON"
+        perf_text = "PORTAFOGLIO IN VOLO! 🚀"
         perf_emoji = "🔥"
     elif current_perf > 0.5:
-        perf_text = "🍀 GREAT GREEN"
+        perf_text = f"OTTIMA {period_label}! 🟢"
         perf_emoji = "✅"
     elif current_perf >= 0:
-        perf_text = "🌿 SLIGHT GAINS"
+        perf_text = f"LIEVE CRESCITA 🌱"
         perf_emoji = "🌱"
     elif current_perf > -0.5:
-        perf_text = "📉 MINOR DIP"
+        perf_text = f"STABILE / LIEVE CALO ⚖️"
         perf_emoji = "⚖️"
     elif current_perf > -2.0:
-        perf_text = "💀 ROUGH"
+        perf_text = f"{period_label} DIFFICILE 🩸"
         perf_emoji = "🩸"
     else:
-        perf_text = "🧨 MARKET CRASH"
+        perf_text = f"FORTE CORREZIONE! 🆘"
         perf_emoji = "🆘"
-    
-    # Add period prefix for weekly/monthly
-    if perf_period:
-        perf_text = f"{perf_period} {perf_text}"
 
     recap = f"""{header}
 
@@ -145,16 +149,11 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     
     # Optional: Display ATH distance
     if ath_distance is not None and ath_distance < 0:
-        recap += f"🏔️ Distance from All-Time High: {ath_distance:.2f}%\n"
+        recap += f"🏔️ Distanza dal Massimo Storico (ATH): {ath_distance:.2f}%\n"
     elif ath_distance is not None and ath_distance >= 0:
-        recap += f"🏔️ New All-Time High Reached! 🎉\n"
+        recap += f"🏔️ Nuovo Massimo Storico Raggiunto! 🎉\n"
         
     recap += "\n"
-    
-    # Only add daily/weekly section if NOT monthly
-    if not is_monthly:
-        recap += f"""TOP 5 {"WEEKLY" if is_weekly else "TODAY"} PERFORMANCE OF PORTFOLIO 📈
-"""
     
     # --- TAG SELECTION LOGIC ---
     # Goal: Max 4 tags total. Randomly select from Daily/Monthly/Yearly lists, 
@@ -180,51 +179,58 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     # 3. Filter candidates available for tagging (not recently used)
     available_candidates = [c for c in unique_candidates if c.upper() not in normalized_history]
     
+    # Filter by region if morning open
+    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'MNODL.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L']
+    US_TICKERS = ['AMZN', 'AVGO', 'GOOG', 'LLY', 'MSFT', 'NET', 'PLTR', 'PYPL', 'TSM', 'ABBV', 'ABT', 'ABT.US', 'CCJ', 'HUM', 'MELI', 'IB01.L']
+    
+    if "EUROPEAN" in session_upper and "OPEN" in session_upper:
+        available_candidates = [c for c in available_candidates if c.upper() in [t.upper() for t in EUROPEAN_TICKERS]]
+    elif "U.S." in session_upper and "OPEN" in session_upper:
+        available_candidates = [c for c in available_candidates if c.upper() in [t.upper() for t in US_TICKERS]]
+    
     # 4. Select tags for this run
     tags_selected_map = set() # Set of symbols to be tagged
     
     # If we have available candidates that haven't been used recently, pick from them
     if available_candidates:
-        # Shuffle to give random chance to Monthly/Yearly if Daily are used
-        # We take up to 4.
-        # Note: If you prefer strict priority (Daily > Monthly > Yearly) remove shuffle.
-        # User requested "randomico mettendo a pari priorità", so shuffle is correct.
         random.shuffle(available_candidates)
-        
-        # Take max 4
         selected = available_candidates[:4]
         tags_selected_map.update(selected)
     
-    # (Optional fallback) If we have very few fresh candidates (e.g. < 2) and plenty of space, 
-    # we *could* reuse some old ones, but it's better to leave the budget for AI news 
-    # which might find something new. So we do nothing here.
-    
     # --- FORMATTING WITH TAGS ---
     
-    # Only show daily/weekly performance if not monthly recap
-    if not is_monthly and daily_sorted:
-        for etoro_symbol, data in daily_sorted:
-            should_tag = etoro_symbol in tags_selected_map
-            performance = data['weekly_change'] if is_weekly else data['daily_change']
-            recap += format_ticker(etoro_symbol, data['company_name'], performance, use_tag=should_tag) + "\n"
-        recap += "\n"
-    
-    # Show monthly performance (skip in January for monthly recap since it equals YTD)
-    if monthly_sorted:
-        recap += f"TOP {len(monthly_sorted)} MONTHLY PERFORMANCE OF PORTFOLIO 📈\n"
-        for etoro_symbol, data in monthly_sorted:
-            should_tag = etoro_symbol in tags_selected_map
-            recap += format_ticker(etoro_symbol, data['company_name'], data['monthly_change'], use_tag=should_tag) + "\n"
-        recap += "\n"
-    
-    # Show yearly performance (always show for monthly recap, otherwise top 3)
-    if yearly_sorted:
-        # In January monthly recap, this is the only section (YTD)
-        yearly_label = "YTD" if (is_monthly and is_january) else ("YEARLY" if is_monthly else "HOLDING YEARLY")
-        recap += f"TOP {len(yearly_sorted)} {yearly_label} PERFORMANCE OF PORTFOLIO 📈\n"
-        for etoro_symbol, data in yearly_sorted:
-            should_tag = etoro_symbol in tags_selected_map
-            recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change'], use_tag=should_tag) + "\n"
+    # Determine whether we should output the dry tables of top performers
+    # Opening sessions and Saturday weekly recap should NOT show them; Daily Close and Sunday Recap DO show them.
+    show_perf_lists = True
+    if "OPEN" in session_upper or ("WEEKLY" in session_upper and "SAT" in session_upper):
+        show_perf_lists = False
+
+    if show_perf_lists:
+        # Only show daily/weekly performance if not monthly recap
+        if not is_monthly and daily_sorted:
+            recap += f"MIGLIORI 5 {'SETTIMANALI' if is_weekly else 'DI OGGI'} DEL PORTAFOGLIO 📈\n"
+            for etoro_symbol, data in daily_sorted:
+                should_tag = etoro_symbol in tags_selected_map
+                performance = data['weekly_change'] if is_weekly else data['daily_change']
+                recap += format_ticker(etoro_symbol, data['company_name'], performance, use_tag=should_tag) + "\n"
+            recap += "\n"
+        
+        # Show monthly performance (skip in January for monthly recap since it equals YTD)
+        if monthly_sorted:
+            recap += f"MIGLIORI {len(monthly_sorted)} PERFORMANCE MENSILI 📈\n"
+            for etoro_symbol, data in monthly_sorted:
+                should_tag = etoro_symbol in tags_selected_map
+                recap += format_ticker(etoro_symbol, data['company_name'], data['monthly_change'], use_tag=should_tag) + "\n"
+            recap += "\n"
+        
+        # Show yearly performance (always show for monthly recap, otherwise top 3)
+        if yearly_sorted:
+            yearly_label = "YTD" if (is_monthly and is_january) else ("DELL'ANNO" if is_monthly else "DI SEMPRE (YTD)")
+            recap += f"MIGLIORI {len(yearly_sorted)} {yearly_label} DEL PORTAFOGLIO 📈\n"
+            for etoro_symbol, data in yearly_sorted:
+                should_tag = etoro_symbol in tags_selected_map
+                recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change'], use_tag=should_tag) + "\n"
+            recap += "\n"
     
     # Calculate used count and remaining budget
     tags_used_count = len(tags_selected_map)
@@ -236,10 +242,6 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         ai_news_generator.update_rotation_history(list(tags_selected_map))
 
     # Add AI-generated market news recap
-    # We exclude: 
-    # 1. Recently used tags (history)
-    # 2. Tags just used in this run (tags_selected_map)
-    # This forces AI to find truly fresh news/tickers if possible
     current_exclusions = list(set(recent_history + list(tags_selected_map)))
     
     # Use monthly AI recap for monthly sessions, daily for others
@@ -247,8 +249,12 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         print(f"Generating monthly AI recap (Budget for tags: {tag_budget_remaining})...")
         ai_news = ai_news_generator.generate_monthly_ai_recap(max_tags=tag_budget_remaining, excluded_tags=current_exclusions)
     else:
-        print(f"Generating AI market news (Budget for tags: {tag_budget_remaining})...")
-        ai_news = ai_news_generator.generate_market_news_recap(max_tags=tag_budget_remaining, excluded_tags=current_exclusions)
+        print(f"Generating AI market news (Budget for tags: {tag_budget_remaining}, Session: {market_session})...")
+        ai_news = ai_news_generator.generate_market_news_recap(
+            max_tags=tag_budget_remaining, 
+            excluded_tags=current_exclusions,
+            market_session=market_session
+        )
     
     if ai_news:
         recap += ai_news
@@ -260,10 +266,10 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         benchmark_performance=benchmark_data
     )
     
-    # Enforce maximum recap length matching Telegram's 4096-character limit
-    MAX_RECAP_LENGTH = 4096
+    # Enforce maximum recap length matching Telegram's 4000-character limit (using 3950 for safety)
+    MAX_RECAP_LENGTH = 3950
     if len(recap) > MAX_RECAP_LENGTH:
-        print(f"⚠️  Recap length ({len(recap)} chars) exceeds Telegram limit of {MAX_RECAP_LENGTH}. Trimming...")
+        print(f"⚠️  Recap length ({len(recap)} chars) exceeds Telegram limit. Trimming...")
         # Trim at the last paragraph break that still fits, so we never cut mid-sentence
         cut = recap.rfind('\n\n', 0, MAX_RECAP_LENGTH - 50)
         if cut == -1:
