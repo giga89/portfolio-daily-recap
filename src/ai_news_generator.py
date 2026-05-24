@@ -672,6 +672,10 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                     # Post-process: ensure only allowed tags are used and limit count
                     recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
                     
+                    # Update rotation history with the tags actually selected for the post
+                    if selected_tags:
+                        update_rotation_history(selected_tags)
+                    
                     # Save to history (using Gist storage)
                     if GIST_STORAGE_AVAILABLE:
                         save_to_history(recap_text)
@@ -703,6 +707,10 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                             recap_text = _remove_market_section_tags(recap_text)
                             recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
                             
+                            # Update rotation history with the tags actually selected for the post
+                            if selected_tags:
+                                update_rotation_history(selected_tags)
+                                
                             if GIST_STORAGE_AVAILABLE:
                                 save_to_history(recap_text)
                             return "\n" + recap_text + "\n"

@@ -188,22 +188,24 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     elif "U.S." in session_upper and "OPEN" in session_upper:
         available_candidates = [c for c in available_candidates if c.upper() in [t.upper() for t in US_TICKERS]]
     
-    # 4. Select tags for this run
-    tags_selected_map = set() # Set of symbols to be tagged
-    
-    # If we have available candidates that haven't been used recently, pick from them
-    if available_candidates:
-        random.shuffle(available_candidates)
-        selected = available_candidates[:4]
-        tags_selected_map.update(selected)
-    
-    # --- FORMATTING WITH TAGS ---
-    
     # Determine whether we should output the dry tables of top performers
     # Opening sessions and Saturday weekly recap should NOT show them; Daily Close and Sunday Recap DO show them.
     show_perf_lists = True
     if "OPEN" in session_upper or ("WEEKLY" in session_upper and "SAT" in session_upper):
         show_perf_lists = False
+
+    # 4. Select tags for this run
+    tags_selected_map = set() # Set of symbols to be tagged
+    
+    # Only select tags for the tables if we are showing the performance lists
+    if show_perf_lists:
+        # If we have available candidates that haven't been used recently, pick from them
+        if available_candidates:
+            random.shuffle(available_candidates)
+            selected = available_candidates[:4]
+            tags_selected_map.update(selected)
+    
+    # --- FORMATTING WITH TAGS ---
 
     if show_perf_lists:
         # Only show daily/weekly performance if not monthly recap
