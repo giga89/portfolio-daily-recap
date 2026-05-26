@@ -45,7 +45,7 @@ ETORO_VALID_SYMBOLS = list(PORTFOLIO_TICKERS.keys())
 def _get_all_portfolio_tags():
     """Get all valid portfolio ticker tags for eToro"""
     # Map to eToro symbols (keys of PORTFOLIO_TICKERS)
-    return [symbol.replace('.', '') for symbol in PORTFOLIO_TICKERS.keys()]
+    return list(PORTFOLIO_TICKERS.keys())
 
 
 def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, allowed_tickers=None):
@@ -121,24 +121,33 @@ def _limit_tags_in_text(text, allowed_tags, max_tags=MAX_TAGS_PER_POST):
     tags_found = []
     def tag_replacer(match):
         tag = match.group(1)
-        # Normalize tag (remove dots for comparison)
-        tag_normalized = tag.replace('.', '').replace('-', '')
+        # Normalize tag (remove dots and hyphens for comparison)
+        tag_normalized = tag.replace('.', '').replace('-', '').upper()
         
-        # Check if this tag is in our allowed list
-        allowed_normalized = [t.replace('.', '').replace('-', '') for t in allowed_tags]
-        
-        if tag_normalized.upper() in [t.upper() for t in allowed_normalized]:
-            if len(tags_found) < max_tags:
-                tags_found.append(tag)
-                return f'${tag}'
+        # Find the matching allowed tag to preserve the exact format (with dot!)
+        matched_tag = None
+        for t in allowed_tags:
+            if t.replace('.', '').replace('-', '').upper() == tag_normalized:
+                matched_tag = t
+                break
+                
+        if matched_tag:
+            # Avoid duplicate tagging of the same symbol in a single post
+            if matched_tag not in tags_found and len(tags_found) < max_tags:
+                tags_found.append(matched_tag)
+                # Ensure a space before and after the tag as requested by the user
+                return f' ${matched_tag} '
             else:
-                # Exceeded max tags, remove the $ prefix
-                return tag
+                # Exceeded max tags or duplicate, remove the $ prefix
+                return matched_tag
         else:
             # Not an allowed tag, remove the $ prefix
             return tag
-    
-    return re.sub(tag_pattern, tag_replacer, text)
+            
+    result = re.sub(tag_pattern, tag_replacer, text)
+    # Collapse multiple spaces created by padding tags into a single space
+    result = re.sub(r' +', ' ', result)
+    return result
 
 
 def _remove_intro_text(text):
