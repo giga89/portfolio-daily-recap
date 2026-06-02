@@ -304,12 +304,20 @@ def _render_pie(
         max_idx  = int(np.argmax(values))
         explode  = [0.03 if i == max_idx else 0.0 for i in range(num_slices)]
 
+        # Use a closure to map matplotlib's normalized percentage back to
+        # the original value so pie-slice labels match the legend exactly.
+        total = sum(values)
+
+        def _autopct(p):
+            actual = p * total / 100.0
+            return f'{actual:.1f}%' if p >= 3 else ''
+
         wedges, texts, autotexts = ax.pie(
             values,
             labels=None,
             colors=slice_colors,
             explode=explode,
-            autopct=lambda p: f'{p:.1f}%' if p >= 3 else '',
+            autopct=_autopct,
             pctdistance=0.75,
             startangle=90,
             wedgeprops={'linewidth': 1.5, 'edgecolor': BG_COLOR},

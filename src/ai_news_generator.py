@@ -527,6 +527,10 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         # Configure Gemini client
         client = genai.Client(api_key=api_key)
         
+        # Build the full list of allowed tickers for tag validation
+        # (broader than the rotation-selected subset — any valid portfolio ticker is OK)
+        all_allowed_for_validation = list(PORTFOLIO_TICKERS.keys())
+        
         # Select tags for this post (with rotation)
         selected_tags = []
         selected_tags_str = "None" # Fix UnboundLocalError
@@ -706,8 +710,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                     recap_text = _remove_intro_text(recap_text)
                     recap_text = _remove_market_section_tags(recap_text)
                     
-                    # Post-process: ensure only allowed tags are used and limit count
-                    recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                    # Post-process: ensure only valid portfolio tags are used and limit count
+                    recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
                     
                     # Update rotation history with the tags actually selected for the post
                     if selected_tags:
@@ -742,7 +746,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                             # Post-process
                             recap_text = _remove_intro_text(recap_text)
                             recap_text = _remove_market_section_tags(recap_text)
-                            recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                            recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
                             
                             # Update rotation history with the tags actually selected for the post
                             if selected_tags:

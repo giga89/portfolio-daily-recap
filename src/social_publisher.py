@@ -109,6 +109,7 @@ def publish_all(
     recap_file_path: str,
     image_path: str = None,
     pie_chart_path: str = None,
+    ai_cover_path: str = None,
     data: dict = None,
 ) -> dict:
     """
@@ -173,9 +174,18 @@ def publish_all(
     plain_with_footer = plain_recap + ETORO_FOOTER_LONG
     top_performers = _extract_top_performers(plain_recap, stock_data)
 
-    # ── 1. Telegram (every session) — sends recap + chart OR pie chart ──
+    # ── 1. Telegram (every session) — sends AI cover + recap + charts ──
     print("\n📨 Telegram:")
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
+        # Send AI cover as primary visual (if available)
+        if ai_cover_path and os.path.exists(ai_cover_path):
+            try:
+                telegram_sender.send_telegram_photo(ai_cover_path, caption="")
+                print("   🎨 AI cover image sent to Telegram")
+            except Exception as exc:
+                print(f"   ⚠️ AI cover send failed: {exc}")
+
+        # Send text recap + performance chart
         ok = telegram_sender.send_recap_to_telegram(recap_file_path, image_path=image_path)
         results["telegram"] = ok
         # Also send pie chart as a separate photo when available
