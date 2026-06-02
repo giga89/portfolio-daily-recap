@@ -7,7 +7,7 @@ Automated daily portfolio performance recap generator with GitHub Actions. It co
 - 📈 **Multi-source data collection**: Yahoo Finance (real-time YTD, monthly, daily), BullAware (weighted positions), Google Sheets (historical performance).
 - 🤖 **AI Market News**: AI-generated daily recap of USA, CHINA, and EU markets + specific portfolio focus using **Google Gemini** (with multi-model fallback).
 - ⚖️ **Weighted Performance**: Calculates overall portfolio performance based on actual position weights (scraped from BullAware).
-- ⏰ **Automated Scheduling**: Runs twice daily at 16:00 (Market Open) and 22:00 (Daily Recap) CET via GitHub Actions.
+- ⏰ **Precise Scheduling**: Market recaps triggered at exact times via **Orange Pi 5 local scheduler** (with GitHub Actions cron as fallback). Three daily sessions: EU open, US open, US close.
 - 🤖 **Telegram Notifications**: Sends beautiful, emoji-enriched reports with dynamic headers and performance indicators.
 - 📊 **Benchmark Comparison**: Automatically compares your strategy performance since 2020 against S&P 500, Nasdaq 100, MSCI World, and Euro Stoxx 50.
 - 💡 **Strategic Insights**: Includes a "Why Copy This Portfolio" section with long-term metrics and strategy highlights.
@@ -47,6 +47,13 @@ portfolio-daily-recap/
 │   ├── sheets_fetcher.py     # Google Sheets API integration
 │   ├── telegram_sender.py    # Telegram Bot API integration
 │   └── update_weights.py     # Utility to sync portfolio weights
+├── scripts/
+│   ├── orangepi-scheduler/       # 🍊 Local cron scheduler (Orange Pi 5)
+│   │   ├── dispatch.sh           # GitHub API dispatch script
+│   │   ├── crontab.txt           # Market session cron schedule
+│   │   ├── .env.example          # Config template (GitHub token)
+│   │   └── README.md             # Setup instructions
+│   └── import_etoro_history.py   # eToro data import utility
 ├── output/
 │   └── recap.txt             # Latest generated report
 ├── requirements.txt          # Python dependencies
@@ -78,7 +85,12 @@ MARKET_SESSION="16:00 Open" python src/data_collector.py
 ```
 
 ### Automatic (GitHub Actions)
-Triggered via `workflow_dispatch` or on schedule (16:00 and 22:00 CET).
+Triggered via:
+1. **Orange Pi 5 scheduler** (primary) — dispatches at precise market times via `repository_dispatch`
+2. **GitHub Actions cron** (fallback) — runs if Orange Pi is offline
+3. **Manual trigger** — via `workflow_dispatch` in the GitHub Actions UI
+
+See [`scripts/orangepi-scheduler/README.md`](scripts/orangepi-scheduler/README.md) for scheduler setup.
 
 ## 📊 Sample Output
 ```

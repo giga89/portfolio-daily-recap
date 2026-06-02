@@ -1,6 +1,10 @@
 name: Daily Portfolio Recap
 
 on:
+  # ── Primary trigger: Orange Pi 5 local scheduler (precise timing) ──────────
+  repository_dispatch:
+    types: [eu_open, us_open, us_close, weekly_sat, weekly_sun]
+  # ── Fallback: GitHub Actions cron (may have 5-40min delays) ────────────────
   schedule:
     - cron: '45 6 * * 1-5'   # EU open summer:  6:45 UTC → sleeps to 07:05 UTC (08:05 London/BST)
     - cron: '45 7 * * 1-5'   # EU open winter:  7:45 UTC → sleeps to 08:05 UTC (08:05 London/GMT)
@@ -43,15 +47,32 @@ jobs:
       - name: Determine market session
         id: market_session
         run: |
-          # Use the scheduled cron expression that triggered this run (immune to GitHub delays).
-          # Falls back to current-time logic only for workflow_dispatch without force_session.
+          # Priority: 1) forced session, 2) repository_dispatch, 3) cron schedule, 4) time-based fallback
           SCHEDULE="${{ github.event.schedule }}"
           FORCED_SESSION="${{ inputs.force_session }}"
+          EVENT_TYPE="${{ github.event.action }}"
+          DISPATCH_SESSION="${{ github.event.client_payload.session }}"
+          TRIGGER="${{ github.event_name }}"
           SESSION_NAME="Daily recap"
 
           if [ -n "$FORCED_SESSION" ]; then
             SESSION_NAME="$FORCED_SESSION"
             echo "Session forced to: $SESSION_NAME"
+          elif [ "$TRIGGER" = "repository_dispatch" ]; then
+            # Triggered by Orange Pi 5 local scheduler — session name is in the payload
+            if [ -n "$DISPATCH_SESSION" ]; then
+              SESSION_NAME="$DISPATCH_SESSION"
+            else
+              # Fallback: map event_type to session name
+              case "$EVENT_TYPE" in
+                eu_open)    SESSION_NAME="European market open" ;;
+                us_open)    SESSION_NAME="U.S. market open" ;;
+                us_close)   SESSION_NAME="U.S. market close" ;;
+                weekly_sat) SESSION_NAME="Weekly recap (Sat)" ;;
+                weekly_sun) SESSION_NAME="Weekly recap (Sun)" ;;
+              esac
+            fi
+            echo "Triggered by Orange Pi 5 (repository_dispatch: $EVENT_TYPE)"
           elif [ -n "$SCHEDULE" ]; then
             # Map each cron expression to its session name.
             # This is reliable regardless of how late GitHub fires the job.
@@ -73,6 +94,7 @@ jobs:
                   echo "Last day of month detected - Monthly recap"
                 fi ;;
             esac
+            echo "Triggered by GitHub cron (fallback): $SCHEDULE"
           else
             # Fallback for workflow_dispatch: detect from current UTC time
             HOUR=$(date -u +%H)
@@ -103,11 +125,20 @@ jobs:
 
           HOUR=$(date -u +%H); HOUR=${HOUR#0}
           echo "session=$SESSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "Market Session detected: $SESSION_NAME (triggered by cron: '${SCHEDULE:-dispatch}', actual UTC Hour: $HOUR)"
+          echo "trigger=$TRIGGER" >> "$GITHUB_OUTPUT"
+          echo "Market Session detected: $SESSION_NAME (trigger: ${TRIGGER}, cron: '${SCHEDULE:-n/a}', actual UTC Hour: $HOUR)"
 
       - name: Wait until target time
         run: |
+          TRIGGER="${{ steps.market_session.outputs.trigger }}"
           SESSION="${{ steps.market_session.outputs.session }}"
+
+          # Skip sleep for repository_dispatch — Orange Pi already triggered at the right time
+          if [ "$TRIGGER" = "repository_dispatch" ]; then
+            echo "Triggered by Orange Pi 5 — skipping sleep, proceeding immediately."
+            exit 0
+          fi
+
           NOW=$(date -u +%s)
           TODAY=$(date -u +%Y-%m-%d)
           HOUR=$(date -u +%H)
