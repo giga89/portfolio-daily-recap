@@ -202,7 +202,7 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         # If we have available candidates that haven't been used recently, pick from them
         if available_candidates:
             random.shuffle(available_candidates)
-            selected = available_candidates[:4]
+            selected = available_candidates[:3]
             tags_selected_map.update(selected)
     
     # --- FORMATTING WITH TAGS ---

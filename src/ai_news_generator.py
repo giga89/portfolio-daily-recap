@@ -103,13 +103,24 @@ def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, al
         return all_tags[:max_tags]
 
 
+def _is_valid_ticker(tag):
+    """Check if a tag looks like a valid stock/index ticker after normalization"""
+    tag_upper = tag.upper()
+    if not (1 <= len(tag_upper) <= 10):
+        return False
+    # Must be uppercase alphanumeric, dots, or hyphens
+    return bool(re.match(r'^[A-Z0-9\-\.]+$', tag_upper))
+
+
 def _limit_tags_in_text(text, allowed_tags, max_tags=MAX_TAGS_PER_POST):
     """
     Ensure text has at most max_tags $ symbols, and only uses allowed tags.
+    Allows at most 1 dynamic trending stock/index tag not in allowed_tags,
+    as long as it looks like a valid ticker and fits in the total tag budget.
     
     Args:
         text: The generated text
-        allowed_tags: List of allowed tag symbols (without $)
+        allowed_tags: List of allowed portfolio tag symbols (without $)
         max_tags: Maximum number of tags to keep
     
     Returns:
@@ -119,30 +130,43 @@ def _limit_tags_in_text(text, allowed_tags, max_tags=MAX_TAGS_PER_POST):
     tag_pattern = r'\$([A-Za-z0-9\-\.]+)'
     
     tags_found = []
+    trending_found = False
+    
     def tag_replacer(match):
+        nonlocal trending_found
         tag = match.group(1)
         # Normalize tag (remove dots and hyphens for comparison)
         tag_normalized = tag.replace('.', '').replace('-', '').upper()
         
-        # Find the matching allowed tag to preserve the exact format (with dot!)
-        matched_tag = None
+        # 1. Check if it's an allowed portfolio tag
+        matched_portfolio_tag = None
         for t in allowed_tags:
             if t.replace('.', '').replace('-', '').upper() == tag_normalized:
-                matched_tag = t
+                matched_portfolio_tag = t
                 break
                 
-        if matched_tag:
+        if matched_portfolio_tag:
             # Avoid duplicate tagging of the same symbol in a single post
-            if matched_tag not in tags_found and len(tags_found) < max_tags:
-                tags_found.append(matched_tag)
+            if matched_portfolio_tag not in tags_found and len(tags_found) < max_tags:
+                tags_found.append(matched_portfolio_tag)
                 # Ensure a space before and after the tag as requested by the user
-                return f' ${matched_tag} '
+                return f' ${matched_portfolio_tag} '
             else:
                 # Exceeded max tags or duplicate, remove the $ prefix
-                return matched_tag
-        else:
-            # Not an allowed tag, remove the $ prefix
-            return tag
+                return matched_portfolio_tag
+                
+        # 2. Check if it's a valid trending index/stock tag (allow at most 1)
+        if not trending_found and _is_valid_ticker(tag):
+            tag_upper = tag.upper()
+            if tag_upper not in tags_found and len(tags_found) < max_tags:
+                tags_found.append(tag_upper)
+                trending_found = True
+                return f' ${tag_upper} '
+            else:
+                return tag_upper
+                
+        # Not allowed, remove the $ prefix
+        return tag
             
     result = re.sub(tag_pattern, tag_replacer, text)
     # Collapse multiple spaces created by padding tags into a single space
@@ -291,11 +315,13 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         tag_instruction = ""
         
         if max_tags > 0:
-            selected_tags = _select_tags_for_rotation(max_tags, excluded_tags)
-            selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags])
+            portfolio_budget = max(0, max_tags - 1)
+            selected_tags = _select_tags_for_rotation(portfolio_budget, excluded_tags)
+            selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags]) if selected_tags else "None"
             tag_instruction = f"""
-- You MUST use ONLY these $ tags (max {max_tags}): {selected_tags_str}
-- Only use these exact tags, no other $ symbols.
+- IMPORTANT: You MUST dedicate exactly 1 tag of the allowed {max_tags} tags to a highly discussed/trending index or stock of the month that you will discuss in the recap. Choose this tag from popular indices like $NSDQ100, $SPX500 (highly recommended to attract copiers), or if there is major news about a specific hot stock this month (e.g. $TSLA, $AAPL, $BTC, etc.), you can tag and discuss that instead. This index/stock MUST be included and explained in the recap.
+- In addition to this trending tag, you can use at most {portfolio_budget} tags from this portfolio list: {selected_tags_str}.
+- Never exceed the total limit of {max_tags} tags with the $ symbol in the post.
 """
         else:
             tag_instruction = """
@@ -507,11 +533,13 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         tag_instruction = ""
         
         if max_tags > 0:
-            selected_tags = _select_tags_for_rotation(max_tags, excluded_tags, allowed_tickers)
-            selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags])
+            portfolio_budget = max(0, max_tags - 1)
+            selected_tags = _select_tags_for_rotation(portfolio_budget, excluded_tags, allowed_tickers)
+            selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags]) if selected_tags else "Nessuno"
             tag_instruction = f"""
-- IMPORTANTE: Devi usare ESATTAMENTE ed ESCLUSIVAMENTE questi tag con il simbolo $ (max {max_tags}): {selected_tags_str}
-- Usa solo questi tag esatti nel corpo del testo in modo fluido e naturale, senza inserire altri simboli con $.
+- DEVI dedicare esattamente 1 tag (dei {max_tags} consentiti) a un indice o titolo estremamente discusso/cercato del giorno di cui parlerai nel riassunto. Scegli questo tag prioritariamente tra: $NSDQ100, $SPX500 (molto cercati dai copiatori per avere più visibilità). Se c'è una notizia straordinaria o un forte trend su un titolo specifico di enorme interesse oggi (es. $TSLA per Tesla, o $AAPL, $NVDA, $BTC, ecc.), puoi usare quello. Questo titolo/indice DEVE far parte del riassunto e devi spiegare brevemente cosa sta succedendo. Questo tag conta nel budget dei tag.
+- Oltre a questo tag di tendenza, puoi usare solo questi tag del nostro portafoglio (max {portfolio_budget}): {selected_tags_str}
+- In totale, tra il tag di tendenza e i tag del portafoglio, non devi mai superare i {max_tags} tag con il simbolo $ nel testo.
 """
         else:
             tag_instruction = """
