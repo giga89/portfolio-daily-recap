@@ -283,11 +283,12 @@ jobs:
           cat output/gemini_api_usage_report.txt || echo "No API usage report generated"
 
       - name: Mark session as completed
-        if: steps.dedup_check.outputs.skip != 'true'
+        if: steps.dedup_check.outputs.skip != 'true' && github.event_name != 'workflow_dispatch'
         env:
           GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
           MARKET_SESSION: ${{ steps.market_session.outputs.session }}
+          TRIGGER: ${{ github.event_name }}
         run: |
           python - <<'PYEOF'
           import os, sys
@@ -295,9 +296,12 @@ jobs:
           import gist_storage
 
           session = os.environ.get('MARKET_SESSION', '')
+          trigger = os.environ.get('TRIGGER', '')
           market_sessions = {'European market open', 'U.S. market open', 'U.S. market close'}
+
           if session in market_sessions:
               gist_storage.mark_session_run(session)
-              print(f"Marked '{session}' as completed for today.")
+              print(f"Marked '{session}' as completed for today (trigger: {trigger}).")
+          else:
+              print(f"Session '{session}' does not need dedup marking.")
           PYEOF
-
