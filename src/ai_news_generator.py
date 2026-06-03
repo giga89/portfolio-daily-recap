@@ -73,31 +73,44 @@ def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, al
     
     if max_tags <= 0:
         return []
-    
+
     try:
         data = load_data()
         used_tags = data.get('used_tags', [])
-        
+
         # Prioritize tags that haven't been used recently
         unused_tags = [tag for tag in all_tags if tag not in used_tags]
-        
-        # If all tags have been used, start fresh
-        if len(unused_tags) < max_tags:
-            # Reset rotation - take from unused first, then from start of all_tags
-            selected = unused_tags + all_tags[:max_tags - len(unused_tags)]
-        else:
+
+        if len(unused_tags) >= max_tags:
             selected = unused_tags[:max_tags]
-        
-        # Update used tags list (keep track of last 2 rounds worth)
+        elif unused_tags:
+            # Not enough unused — fill the gap from all_tags (least-recently-used first)
+            already = set(unused_tags)
+            filler = [t for t in all_tags if t not in already]
+            selected = unused_tags + filler[:max_tags - len(unused_tags)]
+        else:
+            # All tags recently used — just take from the full list
+            selected = all_tags[:max_tags]
+
+        # Guarantee we always return exactly max_tags (safety net: pool was too small)
+        if len(selected) < max_tags:
+            # all_tags already had excluded_tags stripped; ignore excluded to fill
+            full_pool = _get_all_portfolio_tags()
+            if allowed_tickers:
+                allowed_normalized = [t.replace('.', '').upper() for t in allowed_tickers]
+                full_pool = [t for t in full_pool if t.replace('.', '').upper() in allowed_normalized]
+            extra = [t for t in full_pool if t not in selected]
+            selected = selected + extra[:max_tags - len(selected)]
+
+        # Update used-tags rotation history (keep last 2 full rounds)
         new_used = used_tags + selected
-        # Keep only the most recent ones (about 2 rounds)
-        max_history = len(all_tags) * 2
+        max_history = len(_get_all_portfolio_tags()) * 2
         data['used_tags'] = new_used[-max_history:] if len(new_used) > max_history else new_used
-        
+
         save_data(data)
-        
+
         return selected
-        
+
     except Exception as e:
         print(f"⚠️ Error in tag rotation: {e}")
         return all_tags[:max_tags]
