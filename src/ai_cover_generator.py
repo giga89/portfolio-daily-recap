@@ -79,7 +79,75 @@ SESSION_STYLES = {
 IMAGE_MODELS = [
     "gemini-2.0-flash-preview-image-generation",
     "gemini-2.0-flash-exp",
+    "gemini-2.0-flash",          # might support image output in newer SDK
 ]
+
+
+def _create_gradient_background(width: int, height: int, style: dict, mood: str) -> "Image.Image":
+    """
+    Create a professional gradient background as fallback when AI image
+    generation is unavailable. Uses PIL to draw a dark financial-themed
+    gradient with decorative chart lines.
+    """
+    # Choose gradient colors based on session
+    accent = style.get("accent_color", "blue")
+    if "gold" in accent:
+        c1, c2 = (15, 25, 55), (45, 35, 10)
+    elif "green" in accent:
+        c1, c2 = (10, 30, 25), (15, 45, 30)
+    elif "orange" in accent or "warm" in accent:
+        c1, c2 = (35, 15, 10), (55, 25, 15)
+    elif "teal" in accent:
+        c1, c2 = (10, 30, 35), (15, 45, 50)
+    elif "navy" in accent:
+        c1, c2 = (10, 12, 30), (20, 25, 55)
+    else:
+        c1, c2 = (15, 20, 40), (25, 35, 60)
+
+    img = Image.new("RGB", (width, height))
+    draw = ImageDraw.Draw(img)
+
+    # Vertical gradient
+    for y in range(height):
+        t = y / height
+        r = int(c1[0] * (1 - t) + c2[0] * t)
+        g = int(c1[1] * (1 - t) + c2[1] * t)
+        b = int(c1[2] * (1 - t) + c2[2] * t)
+        draw.line([(0, y), (width, y)], fill=(r, g, b))
+
+    # Add decorative chart lines (faint)
+    import random
+    random.seed(42)  # deterministic for consistent look
+    line_color = (255, 255, 255, 15)
+    overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    odraw = ImageDraw.Draw(overlay)
+
+    # Horizontal grid lines
+    for y in range(100, height - 100, 80):
+        odraw.line([(50, y), (width - 50, y)], fill=(255, 255, 255, 12), width=1)
+
+    # Fake candlestick chart
+    x = 80
+    prev_y = height // 2
+    while x < width - 80:
+        body_h = random.randint(10, 40)
+        direction = random.choice([-1, 1])
+        y = prev_y + direction * random.randint(5, 30)
+        y = max(150, min(height - 200, y))
+
+        bar_color = (0, 180, 80, 30) if direction > 0 else (200, 50, 50, 30)
+        odraw.rectangle([x, y, x + 12, y + body_h * direction], fill=bar_color)
+        # Wick
+        odraw.line([(x + 6, y - 15), (x + 6, y + body_h * direction + 15)], fill=bar_color, width=1)
+
+        prev_y = y
+        x += random.randint(20, 35)
+
+    img = img.convert("RGBA")
+    img = Image.alpha_composite(img, overlay)
+
+    return img
+
 
 
 def _create_circular_avatar(photo_path: str, size: int = 180) -> Image.Image | None:
@@ -357,8 +425,8 @@ The overall feeling should be a premium financial news publication cover that co
                 continue
 
         if bg_image is None:
-            print("❌ All image models failed — no background generated")
-            return None
+            print("⚠️  All AI image models failed — using PIL gradient fallback")
+            bg_image = _create_gradient_background(1280, 720, style, market_mood)
 
         # Resize background to 1280x720 (16:9)
         bg_image = bg_image.resize((1280, 720), Image.LANCZOS)
