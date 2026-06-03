@@ -17,6 +17,11 @@ on:
         description: 'Force Session Name (e.g. "Weekly recap (Sat)")'
         required: false
         type: string
+      force_run:
+        description: 'Skip dedup check and force run even if session ran today'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   generate-recap:
@@ -156,6 +161,7 @@ jobs:
           GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
           MARKET_SESSION: ${{ steps.market_session.outputs.session }}
+          FORCE_RUN: ${{ inputs.force_run }}
         run: |
           python - <<'PYEOF'
           import os, sys
@@ -163,9 +169,13 @@ jobs:
           import gist_storage
 
           session = os.environ.get('MARKET_SESSION', '')
+          force_run = os.environ.get('FORCE_RUN', 'false').lower() == 'true'
           market_sessions = {'European market open', 'U.S. market open', 'U.S. market close'}
 
-          if session not in market_sessions:
+          if force_run:
+              print(f"FORCE RUN: dedup check bypassed for '{session}'.")
+              skip = 'false'
+          elif session not in market_sessions:
               print(f"Session '{session}' does not need deduplication, proceeding.")
               skip = 'false'
           elif gist_storage.has_session_run_today(session):
