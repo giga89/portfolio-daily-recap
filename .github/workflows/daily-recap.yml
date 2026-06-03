@@ -4,17 +4,13 @@ on:
   # ── Primary trigger: Orange Pi 5 local scheduler (precise timing) ──────────
   repository_dispatch:
     types: [eu_open, us_open, us_close, weekly_sat, weekly_sun]
-  # ── Fallback: GitHub Actions cron (may have 5-40min delays) ────────────────
+  # ── Fallback: GitHub Actions cron (1 per session, Orange Pi is primary) ─────
   schedule:
-    - cron: '45 6 * * 1-5'   # EU open summer:  6:45 UTC → sleeps to 07:05 UTC (08:05 London/BST)
-    - cron: '45 7 * * 1-5'   # EU open winter:  7:45 UTC → sleeps to 08:05 UTC (08:05 London/GMT)
-    - cron: '15 13 * * 1-5'  # US open summer: 13:15 UTC → sleeps to 13:35 UTC (09:35 ET/EDT)
-    - cron: '15 14 * * 1-5'  # US open winter: 14:15 UTC → sleeps to 14:35 UTC (09:35 ET/EST)
-    - cron: '45 19 * * 1-5'  # US close summer: 19:45 UTC → sleeps to 20:05 UTC (16:05 ET/EDT)
-    - cron: '45 20 * * 1-5'  # US close winter: 20:45 UTC → sleeps to 21:05 UTC (16:05 ET/EST)
-    - cron: '0 9 * * 6'     # 10:00 CET (09:00 UTC) - Weekly recap (Saturday)
-    - cron: '0 21 * * 0'    # 22:00 CET (21:00 UTC) - Weekly recap (Sunday)
-    - cron: '0 20 28-31 * *'  # 21:00 CET (20:00 UTC) - Monthly recap check (last day of month)
+    - cron: '45 7 * * 1-5'    # EU open fallback:  07:45 UTC
+    - cron: '15 14 * * 1-5'   # US open fallback:  14:15 UTC
+    - cron: '45 20 * * 1-5'   # US close fallback: 20:45 UTC
+    - cron: '0 9 * * 6'       # Weekly recap (Saturday)  09:00 UTC
+    - cron: '0 21 * * 0'      # Weekly recap (Sunday)    21:00 UTC
   workflow_dispatch:  # Allows manual trigger
     inputs:
       force_session:
@@ -74,25 +70,18 @@ jobs:
             fi
             echo "Triggered by Orange Pi 5 (repository_dispatch: $EVENT_TYPE)"
           elif [ -n "$SCHEDULE" ]; then
-            # Map each cron expression to its session name.
-            # This is reliable regardless of how late GitHub fires the job.
+            # Map each cron expression to its session name (1 cron per session)
             case "$SCHEDULE" in
-              "45 6 * * 1-5"|"45 7 * * 1-5")
+              "45 7 * * 1-5")
                 SESSION_NAME="European market open" ;;
-              "15 13 * * 1-5"|"15 14 * * 1-5")
+              "15 14 * * 1-5")
                 SESSION_NAME="U.S. market open" ;;
-              "45 19 * * 1-5"|"45 20 * * 1-5")
+              "45 20 * * 1-5")
                 SESSION_NAME="U.S. market close" ;;
               "0 9 * * 6")
                 SESSION_NAME="Weekly recap (Sat)" ;;
               "0 21 * * 0")
                 SESSION_NAME="Weekly recap (Sun)" ;;
-              "0 20 28-31 * *")
-                TOMORROW=$(date -u -d "+1 day" +%d)
-                if [ "$TOMORROW" == "01" ]; then
-                  SESSION_NAME="Monthly recap"
-                  echo "Last day of month detected - Monthly recap"
-                fi ;;
             esac
             echo "Triggered by GitHub cron (fallback): $SCHEDULE"
           else
@@ -141,31 +130,16 @@ jobs:
 
           NOW=$(date -u +%s)
           TODAY=$(date -u +%Y-%m-%d)
-          HOUR=$(date -u +%H)
-          HOUR=${HOUR#0}
           TARGET_EPOCH=0
 
-          # Each cron fires 20min before its fixed UTC target.
-          # Two crons per session (summer/winter) → always ~20min sleep, never 80min.
-          # Deduplication via Gist ensures only the first one that reaches the target sends.
+          # Single cron per session → sleep ~20min to the target time.
+          # These are winter-biased times; in summer the Orange Pi handles it.
           if [ "$SESSION" = "European market open" ]; then
-            if [ "$HOUR" -le 6 ]; then
-              TARGET_EPOCH=$(date -u -d "$TODAY 07:05:00" +%s)  # summer: 07:05 UTC (BST open)
-            else
-              TARGET_EPOCH=$(date -u -d "$TODAY 08:05:00" +%s)  # winter: 08:05 UTC (GMT open)
-            fi
+            TARGET_EPOCH=$(date -u -d "$TODAY 08:05:00" +%s)
           elif [ "$SESSION" = "U.S. market open" ]; then
-            if [ "$HOUR" -le 13 ]; then
-              TARGET_EPOCH=$(date -u -d "$TODAY 13:35:00" +%s)  # summer: 13:35 UTC (EDT open)
-            else
-              TARGET_EPOCH=$(date -u -d "$TODAY 14:35:00" +%s)  # winter: 14:35 UTC (EST open)
-            fi
+            TARGET_EPOCH=$(date -u -d "$TODAY 14:35:00" +%s)
           elif [ "$SESSION" = "U.S. market close" ]; then
-            if [ "$HOUR" -le 19 ]; then
-              TARGET_EPOCH=$(date -u -d "$TODAY 20:05:00" +%s)  # summer: 20:05 UTC (EDT close)
-            else
-              TARGET_EPOCH=$(date -u -d "$TODAY 21:05:00" +%s)  # winter: 21:05 UTC (EST close)
-            fi
+            TARGET_EPOCH=$(date -u -d "$TODAY 21:05:00" +%s)
           fi
 
           if [ "$TARGET_EPOCH" -gt "$NOW" ]; then
