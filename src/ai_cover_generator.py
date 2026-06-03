@@ -136,9 +136,11 @@ def _create_gradient_background(width: int, height: int, style: dict, mood: str)
         y = max(150, min(height - 200, y))
 
         bar_color = (0, 180, 80, 30) if direction > 0 else (200, 50, 50, 30)
-        odraw.rectangle([x, y, x + 12, y + body_h * direction], fill=bar_color)
+        y_end = y + body_h * direction
+        y_top, y_bot = min(y, y_end), max(y, y_end)
+        odraw.rectangle([x, y_top, x + 12, y_bot], fill=bar_color)
         # Wick
-        odraw.line([(x + 6, y - 15), (x + 6, y + body_h * direction + 15)], fill=bar_color, width=1)
+        odraw.line([(x + 6, y_top - 15), (x + 6, y_bot + 15)], fill=bar_color, width=1)
 
         prev_y = y
         x += random.randint(20, 35)
