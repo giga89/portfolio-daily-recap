@@ -299,11 +299,14 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         print("⚠️  Warning: GEMINI_API_KEY not set, skipping AI monthly recap")
         return ""
     
-    # List of models to try
+    # Models in order of preference — each belongs to a DIFFERENT quota bucket so
+    # a 429 on one does not affect the others.
+    # gemini-flash-latest is intentionally excluded: it is an alias of gemini-2.0-flash
+    # and would share the same daily quota, giving no real fallback.
     models_to_try = [
-        'gemini-2.0-flash',
-        'gemini-2.5-flash',
-        'gemini-flash-latest',
+        'gemini-2.5-flash',     # newest, separate quota bucket
+        'gemini-2.0-flash',     # main free-tier bucket
+        'gemini-1.5-flash',     # older bucket, independent daily limit
     ]
     
     try:
@@ -451,6 +454,8 @@ Impact and outlook summary...
             except Exception as model_error:
                 error_msg = str(model_error).lower()
                 print(f"⚠️  Model {model_name} failed: {model_error}")
+                if API_TRACKER_AVAILABLE:
+                    log_api_request(model_name, False, "monthly_recap")
                 time.sleep(2)
                 
                 # Try without tools if not supported
@@ -462,6 +467,8 @@ Impact and outlook summary...
                         )
                         if response and response.text:
                             print(f"✅ Monthly recap generated (no tools) using {model_name}!")
+                            if API_TRACKER_AVAILABLE:
+                                log_api_request(model_name, True, "monthly_recap")
                             recap_text = response.text.strip()
                             recap_text = _remove_intro_text(recap_text)
                             recap_text = _remove_market_section_tags(recap_text)
@@ -502,11 +509,14 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         print("⚠️  Warning: GEMINI_API_KEY not set, skipping AI news generation")
         return ""
     
-    # List of models to try (in order of preference)
+    # Models in order of preference — each belongs to a DIFFERENT quota bucket so
+    # a 429 on one does not affect the others.
+    # gemini-flash-latest is intentionally excluded: it is an alias of gemini-2.0-flash
+    # and would share the same daily quota, giving no real fallback.
     models_to_try = [
-        'gemini-2.0-flash',
-        'gemini-2.5-flash',
-        'gemini-flash-latest',
+        'gemini-2.5-flash',     # newest, separate quota bucket
+        'gemini-2.0-flash',     # main free-tier bucket
+        'gemini-1.5-flash',     # older bucket, independent daily limit
     ]
     
     if not market_session:
@@ -729,6 +739,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             except Exception as model_error:
                 error_msg = str(model_error).lower()
                 print(f"⚠️  Model {model_name} failed: {model_error}")
+                if API_TRACKER_AVAILABLE:
+                    log_api_request(model_name, False, "daily_recap")
                 time.sleep(2)
                 
                 # Check if it's a quota error or something that might be fixed by removing tools
@@ -741,6 +753,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                         )
                         if response and response.text:
                             print(f"✅ AI news recap generated successfully (without tools) using {model_name}!")
+                            if API_TRACKER_AVAILABLE:
+                                log_api_request(model_name, True, "daily_recap")
                             recap_text = response.text.strip()
                             
                             # Post-process

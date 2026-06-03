@@ -17,7 +17,7 @@ import formatter
 import social_publisher
 import chart_generator
 import pie_chart_generator
-import ai_cover_generator
+import cover_generator
 import etoro_history
 
 def main():
@@ -197,19 +197,16 @@ def main():
     print("=" * 50)
     print("Publishing recap to social platforms...")
 
-    # Generate AI cover image for the session
+    # Generate cover image for the session
     ai_cover_path = None
     try:
-        # Use the first ~300 chars of recap as context for image mood
-        recap_summary = recap[:300] if recap else ""
-        ai_cover_path = ai_cover_generator.generate_session_cover(
+        ai_cover_path = cover_generator.generate_cover(
             session_name=market_session,
-            recap_summary=recap_summary,
             portfolio_daily=portfolio_daily,
             output_path='output/ai_cover.png',
         )
     except Exception as exc:
-        print(f"⚠️ AI cover image generation failed: {exc}")
+        print(f"Warning: cover image generation failed: {exc}")
 
     # Generate pie chart (alternates each session via Gist counter)
     pie_chart_path = None

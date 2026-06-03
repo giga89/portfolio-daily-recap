@@ -1,39 +1,74 @@
 #!/usr/bin/env python3
 """
-Track Gemini API usage and generate a usage report
+Track Gemini API usage and generate a usage report.
+
+Data is persisted in the Gist store (key: 'gemini_api_usage') so it survives
+across ephemeral GitHub Actions runs.  A local copy is also written to
+output/gemini_api_usage.json for the artifact upload.
 """
 
 import json
 from datetime import datetime
 from pathlib import Path
 
-# File to store API usage data
+# File to store API usage data (local, per-run copy for artifact upload)
 USAGE_FILE = Path("output/gemini_api_usage.json")
 
-def load_usage_data():
-    """Load existing usage data"""
+# Gist key used to persist usage across runs
+GIST_KEY = "gemini_api_usage"
+
+# Lazy-import gist_storage so this module works even without it
+try:
+    import gist_storage as _gist
+    GIST_AVAILABLE = True
+except ImportError:
+    GIST_AVAILABLE = False
+
+
+def load_usage_data() -> dict:
+    """Load usage data — prefer Gist for cross-run persistence."""
+    # Try Gist first
+    if GIST_AVAILABLE:
+        try:
+            gist_data = _gist.load_data()
+            stored = gist_data.get(GIST_KEY)
+            if stored and isinstance(stored, dict) and "requests" in stored:
+                return stored
+        except Exception:
+            pass
+    # Fallback: local file (current run only)
     if USAGE_FILE.exists():
         try:
             with open(USAGE_FILE, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception:
-            return {"requests": [], "summary": {}}
+            pass
     return {"requests": [], "summary": {}}
 
-def save_usage_data(data):
-    """Save usage data to file"""
+
+def save_usage_data(data: dict) -> None:
+    """Persist usage data to both Gist and the local artifact file."""
+    # Local file (for artifact upload)
     USAGE_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(USAGE_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
+    # Gist (persists across runs)
+    if GIST_AVAILABLE:
+        try:
+            gist_data = _gist.load_data()
+            gist_data[GIST_KEY] = data
+            _gist.save_data(gist_data)
+        except Exception as exc:
+            print(f"Warning: could not persist API usage to Gist: {exc}")
 
-def log_api_request(model_name, success, request_type="recap"):
+def log_api_request(model_name: str, success: bool, request_type: str = "recap") -> None:
     """
-    Log an API request
-    
+    Log an API request (both successful and failed ones).
+
     Args:
-        model_name: Name of the Gemini model used
-        success: Whether the request was successful
-        request_type: Type of request (recap, monthly_recap, etc.)
+        model_name:   Name of the Gemini model attempted.
+        success:      True if the request succeeded, False otherwise.
+        request_type: Type of request (recap, monthly_recap, cover, etc.)
     """
     data = load_usage_data()
     
