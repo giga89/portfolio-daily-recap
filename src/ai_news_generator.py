@@ -589,9 +589,10 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             selected_tags = _select_tags_for_rotation(portfolio_budget, excluded_tags, allowed_tickers)
             selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags]) if selected_tags else "Nessuno"
             tag_instruction = f"""
-- DEVI dedicare esattamente 1 tag (dei {max_tags} consentiti) a un indice o titolo estremamente discusso/cercato del giorno di cui parlerai nel riassunto. Scegli questo tag prioritariamente tra: $NSDQ100, $SPX500 (molto cercati dai copiatori per avere più visibilità). Se c'è una notizia straordinaria o un forte trend su un titolo specifico di enorme interesse oggi (es. $TSLA per Tesla, o $AAPL, $NVDA, $BTC, ecc.), puoi usare quello. Questo titolo/indice DEVE far parte del riassunto e devi spiegare brevemente cosa sta succedendo. Questo tag conta nel budget dei tag.
-- Oltre a questo tag di tendenza, puoi usare solo questi tag del nostro portafoglio (max {portfolio_budget}): {selected_tags_str}
-- In totale, tra il tag di tendenza e i tag del portafoglio, non devi mai superare i {max_tags} tag con il simbolo $ nel testo.
+- REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE {max_tags} tag con il simbolo $ nel testo. Non uno di meno, non uno di più.
+- TAG OBBLIGATORI DEL PORTAFOGLIO ({portfolio_budget}): DEVI includere TUTTI questi tag nel testo, ognuno accompagnato da almeno una frase che lo riguardi: {selected_tags_str}. Non puoi saltarne nessuno.
+- TAG TENDENZA OBBLIGATORIO (1): DEVI aggiungere esattamente 1 tag tra i più cercati/discussi del momento, scegliendo tra $NSDQ100 o $SPX500 (preferiti perché attirano copiatori), oppure un titolo di enorme interesse del giorno (es. $TSLA, $NVDA, $AAPL, $BTC). Questo tag DEVE essere spiegato nel testo.
+- TOTALE: {portfolio_budget} tag portafoglio + 1 tag tendenza = {max_tags} tag totali. Conta i $ nel testo prima di concludere e verifica che siano esattamente {max_tags}.
 """
         else:
             tag_instruction = """

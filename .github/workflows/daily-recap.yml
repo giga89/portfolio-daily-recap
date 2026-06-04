@@ -57,7 +57,16 @@ jobs:
           SESSION_NAME="Daily recap"
 
           if [ -n "$FORCED_SESSION" ]; then
-            SESSION_NAME="$FORCED_SESSION"
+            # Map short keys to full session names (same mapping used for repository_dispatch)
+            case "$FORCED_SESSION" in
+              eu_open)    SESSION_NAME="European market open" ;;
+              us_open)    SESSION_NAME="U.S. market open" ;;
+              us_close)   SESSION_NAME="U.S. market close" ;;
+              weekly_sat) SESSION_NAME="Weekly recap (Sat)" ;;
+              weekly_sun) SESSION_NAME="Weekly recap (Sun)" ;;
+              monthly)    SESSION_NAME="Monthly recap" ;;
+              *)          SESSION_NAME="$FORCED_SESSION" ;;
+            esac
             echo "Session forced to: $SESSION_NAME"
           elif [ "$TRIGGER" = "repository_dispatch" ]; then
             # Triggered by Orange Pi 5 local scheduler — session name is in the payload
