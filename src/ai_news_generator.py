@@ -317,9 +317,9 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
     # gemini-flash-latest is intentionally excluded: it is an alias of gemini-2.0-flash
     # and would share the same daily quota, giving no real fallback.
     models_to_try = [
-        'gemini-2.5-flash',     # newest, separate quota bucket
-        'gemini-2.0-flash',     # main free-tier bucket
-        'gemini-1.5-flash',     # older bucket, independent daily limit
+        'gemini-2.5-flash',          # newest, separate quota bucket
+        'gemini-2.0-flash',          # main free-tier bucket
+        'gemini-1.5-flash-latest',   # older bucket, independent daily limit
     ]
     
     try:
@@ -469,10 +469,35 @@ Impact and outlook summary...
                 print(f"⚠️  Model {model_name} failed: {model_error}")
                 if API_TRACKER_AVAILABLE:
                     log_api_request(model_name, False, "monthly_recap")
+                
+                # 503 UNAVAILABLE is transient — retry once after a short delay
+                if '503' in error_msg or 'unavailable' in error_msg:
+                    print(f"   503 transient error on {model_name}, waiting 15s then retrying once...")
+                    time.sleep(15)
+                    try:
+                        response = client.models.generate_content(
+                            model=model_name,
+                            contents=prompt,
+                            config=config
+                        )
+                        if response and response.text:
+                            print(f"✅ Monthly recap generated (after 503 retry) using {model_name}!")
+                            if API_TRACKER_AVAILABLE:
+                                log_api_request(model_name, True, "monthly_recap")
+                            recap_text = response.text.strip()
+                            recap_text = _remove_intro_text(recap_text)
+                            recap_text = _remove_market_section_tags(recap_text)
+                            recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                            return "\n" + recap_text + "\n"
+                    except Exception as e2:
+                        print(f"   Retry also failed: {e2}")
+                    continue
+                
                 time.sleep(2)
                 
-                # Try without tools if not supported
-                if 'not supported' in error_msg or 'invalid' in error_msg:
+                # Try without tools if not supported (exclude 404 NOT_FOUND from this branch)
+                is_tool_issue = ('not supported' in error_msg or 'invalid' in error_msg) and '404' not in error_msg
+                if is_tool_issue:
                     try:
                         response = client.models.generate_content(
                             model=model_name,
@@ -527,9 +552,9 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
     # gemini-flash-latest is intentionally excluded: it is an alias of gemini-2.0-flash
     # and would share the same daily quota, giving no real fallback.
     models_to_try = [
-        'gemini-2.5-flash',     # newest, separate quota bucket
-        'gemini-2.0-flash',     # main free-tier bucket
-        'gemini-1.5-flash',     # older bucket, independent daily limit
+        'gemini-2.5-flash',          # newest, separate quota bucket
+        'gemini-2.0-flash',          # main free-tier bucket
+        'gemini-1.5-flash-latest',   # older bucket, independent daily limit
     ]
     
     if not market_session:
@@ -754,10 +779,42 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                 print(f"⚠️  Model {model_name} failed: {model_error}")
                 if API_TRACKER_AVAILABLE:
                     log_api_request(model_name, False, "daily_recap")
+                
+                # 503 UNAVAILABLE is a transient server-side error — retry once after a short delay
+                # before moving to the next model (different from 429 quota which is hard limit)
+                if '503' in error_msg or 'unavailable' in error_msg:
+                    print(f"   503 transient error on {model_name}, waiting 15s then retrying once...")
+                    time.sleep(15)
+                    try:
+                        response = client.models.generate_content(
+                            model=model_name,
+                            contents=prompt,
+                            config=config
+                        )
+                        if response and response.text:
+                            print(f"✅ AI news recap generated (after 503 retry) using {model_name}!")
+                            if API_TRACKER_AVAILABLE:
+                                log_api_request(model_name, True, "daily_recap")
+                            recap_text = response.text.strip()
+                            recap_text = _remove_intro_text(recap_text)
+                            recap_text = _remove_market_section_tags(recap_text)
+                            recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
+                            if selected_tags:
+                                update_rotation_history(selected_tags)
+                            if GIST_STORAGE_AVAILABLE:
+                                save_to_history(recap_text)
+                            return "\n" + recap_text + "\n"
+                    except Exception as e2:
+                        print(f"   Retry also failed: {e2}")
+                    last_error = model_error
+                    continue
+                
                 time.sleep(2)
                 
-                # Check if it's a quota error or something that might be fixed by removing tools
-                if 'not supported' in error_msg or 'invalid' in error_msg:
+                # 404 NOT_FOUND may include "not supported" in the message — check for actual
+                # tool-compatibility issues (not just model not found) by excluding 404 errors
+                is_tool_issue = ('not supported' in error_msg or 'invalid' in error_msg) and '404' not in error_msg
+                if is_tool_issue:
                     print(f"   Model {model_name} might not support search tools, trying without...")
                     try:
                         response = client.models.generate_content(
@@ -883,7 +940,7 @@ def generate_decision_post(
     if not api_key:
         return ""
 
-    models_to_try = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-flash-latest']
+    models_to_try = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest']
 
     weights_context = ""
     if current_weights:
@@ -971,7 +1028,7 @@ def generate_empathy_post(
     if not api_key:
         return ""
 
-    models_to_try = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-flash-latest']
+    models_to_try = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest']
 
     # Determine emotional context
     if weekly_perf is not None and weekly_perf < -2:
