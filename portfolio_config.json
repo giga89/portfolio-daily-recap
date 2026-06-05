@@ -1,17 +1,21 @@
 {
+    "added_dates": {
+        "01211.HK": "2026-06-03",
+        "PPFB.DE": "2026-06-03",
+        "ULVR.L": "2026-06-03",
+        "VOF.L": "2026-06-03"
+    },
     "emojis": {
+        "01211.HK": "\ud83c\udd95",
         "1919.HK": "\ud83d\udea2",
         "2318.HK": "\ud83c\udfe6",
         "ABBV": "\ud83d\udc89",
-        "ABT": "\ud83c\udfe5",
         "ABT.US": "\ud83c\udfe5",
         "AMZN": "\ud83d\udce6",
         "AVGO": "\ud83d\udcbb",
         "AZN.L": "\ud83e\uddec",
         "CCJ": "\u26a1",
-        "DB1.DE": "\ud83d\udcca",
         "ENEL.MI": "\ud83d\udd0b",
-        "ENI": "\u26fd",
         "ENI.MI": "\u26fd",
         "ETOR": "\ud83c\udfdb\ufe0f",
         "GLEN.L": "\u26cf\ufe0f",
@@ -27,24 +31,28 @@
         "MELI": "\ud83d\uded2",
         "MNODL.L": "\ud83d\udce6",
         "MSFT": "\ud83d\udcbb",
-        "NET": "\u2601\ufe0f",
         "NOVO-B.CO": "\ud83d\udc89",
         "NVDA": "\ud83e\udd16",
         "NVTKL.L": "\ud83d\udd25",
         "PLTR": "\ud83d\udee1\ufe0f",
+        "PPFB.DE": "\ud83c\udd95",
         "PRY.MI": "\ud83d\udd0c",
-        "PYPL": "\ud83d\udcb3",
         "RACE": "\ud83c\udfce\ufe0f",
         "SX7PEX.DE": "\ud83c\udfdb\ufe0f",
         "TRIG.L": "\ud83c\udf2c\ufe0f",
         "TRX": "\ud83e\ude99",
         "TSM": "\ud83c\udfed",
+        "ULVR.L": "\ud83c\udd95",
+        "VOF.L": "\ud83c\udd95",
         "VOW3.DE": "\ud83d\ude97",
-        "VWCE.L": "\ud83c\udf10",
         "WDEF.L": "\ud83d\udcbc",
         "XEON.DE": "\ud83d\udca4"
     },
     "tickers": {
+        "01211.HK": [
+            "01211.HK",
+            "01211.HK"
+        ],
         "1919.HK": [
             "1919.HK",
             "COSCO SHIPPING Holdings"
@@ -56,10 +64,6 @@
         "ABBV": [
             "ABBV",
             "AbbVie"
-        ],
-        "ABT": [
-            "ABT",
-            "Abbott Laboratories"
         ],
         "ABT.US": [
             "ABT",
@@ -81,17 +85,9 @@
             "CCJ",
             "Cameco"
         ],
-        "DB1.DE": [
-            "DB1.DE",
-            "Deutsche B\u00f6rse AG"
-        ],
         "ENEL.MI": [
             "ENEL.MI",
             "Enel"
-        ],
-        "ENI": [
-            "ENI.MI",
-            "Eni S.p.A."
         ],
         "ENI.MI": [
             "ENI.MI",
@@ -153,10 +149,6 @@
             "MSFT",
             "Microsoft"
         ],
-        "NET": [
-            "NET",
-            "Cloudflare"
-        ],
         "NOVO-B.CO": [
             "NOVO-B.CO",
             "Novo Nordisk"
@@ -173,13 +165,13 @@
             "PLTR",
             "Palantir Technologies Inc"
         ],
+        "PPFB.DE": [
+            "PPFB.DE",
+            "iShares Physical Metals PLC   O"
+        ],
         "PRY.MI": [
             "PRY.MI",
             "Prysmian"
-        ],
-        "PYPL": [
-            "PYPL",
-            "PayPal"
         ],
         "RACE": [
             "RACE",
@@ -201,13 +193,17 @@
             "TSM",
             "Taiwan Semiconductor"
         ],
+        "ULVR.L": [
+            "ULVR.L",
+            "Unilever PLC"
+        ],
+        "VOF.L": [
+            "VOF.L",
+            "VinaCapital Vietnam Opportunity Fund Limited"
+        ],
         "VOW3.DE": [
             "VOW3.DE",
             "Volkswagen"
-        ],
-        "VWCE.L": [
-            "VWCE.L",
-            "Vanguard FTSE All-World UCITS ETF"
         ],
         "WDEF.L": [
             "WDEF.L",
