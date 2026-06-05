@@ -135,10 +135,17 @@ jobs:
         run: |
           TRIGGER="${{ steps.market_session.outputs.trigger }}"
           SESSION="${{ steps.market_session.outputs.session }}"
+          FORCE_RUN="${{ inputs.force_run }}"
 
           # Skip sleep for repository_dispatch — Orange Pi already triggered at the right time
           if [ "$TRIGGER" = "repository_dispatch" ]; then
             echo "Triggered by Orange Pi 5 — skipping sleep, proceeding immediately."
+            exit 0
+          fi
+
+          # Skip sleep for forced manual runs (testing)
+          if [ "$FORCE_RUN" = "true" ]; then
+            echo "Force run — skipping wait, proceeding immediately."
             exit 0
           fi
 
