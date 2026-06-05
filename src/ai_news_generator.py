@@ -312,14 +312,15 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         print("⚠️  Warning: GEMINI_API_KEY not set, skipping AI monthly recap")
         return ""
     
-    # Models in order of preference — each belongs to a DIFFERENT quota bucket so
-    # a 429 on one does not affect the others.
-    # gemini-flash-latest is intentionally excluded: it is an alias of gemini-2.0-flash
-    # and would share the same daily quota, giving no real fallback.
+    # Models in order of preference — each belongs to a DIFFERENT quota bucket.
+    # Order: 2.0-flash first (more stable at EU open hour), 2.5-flash second
+    # (frequently 503-overloaded at 07:00 UTC), 2.0-flash-lite third (smaller
+    # model but genuinely independent daily quota — gemini-1.5 is deprecated
+    # and returns 404 in API v1beta).
     models_to_try = [
-        'gemini-2.5-flash',          # newest, separate quota bucket
-        'gemini-2.0-flash',          # main free-tier bucket
-        'gemini-1.5-flash-latest',   # older bucket, independent daily limit
+        'gemini-2.0-flash',      # main free-tier bucket, stable
+        'gemini-2.5-flash',      # newest bucket, but often 503 at EU peak hours
+        'gemini-2.0-flash-lite', # lighter model, independent daily quota
     ]
     
     try:
@@ -472,8 +473,8 @@ Impact and outlook summary...
                 
                 # 503 UNAVAILABLE is transient — retry once after a short delay
                 if '503' in error_msg or 'unavailable' in error_msg:
-                    print(f"   503 transient error on {model_name}, waiting 15s then retrying once...")
-                    time.sleep(15)
+                    print(f"   503 transient error on {model_name}, waiting 5s then retrying once...")
+                    time.sleep(5)
                     try:
                         response = client.models.generate_content(
                             model=model_name,
@@ -547,14 +548,15 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         print("⚠️  Warning: GEMINI_API_KEY not set, skipping AI news generation")
         return ""
     
-    # Models in order of preference — each belongs to a DIFFERENT quota bucket so
-    # a 429 on one does not affect the others.
-    # gemini-flash-latest is intentionally excluded: it is an alias of gemini-2.0-flash
-    # and would share the same daily quota, giving no real fallback.
+    # Models in order of preference — each belongs to a DIFFERENT quota bucket.
+    # Order: 2.0-flash first (more stable at EU open hour), 2.5-flash second
+    # (frequently 503-overloaded at 07:00 UTC), 2.0-flash-lite third (smaller
+    # model but genuinely independent daily quota — gemini-1.5 is deprecated
+    # and returns 404 in API v1beta).
     models_to_try = [
-        'gemini-2.5-flash',          # newest, separate quota bucket
-        'gemini-2.0-flash',          # main free-tier bucket
-        'gemini-1.5-flash-latest',   # older bucket, independent daily limit
+        'gemini-2.0-flash',      # main free-tier bucket, stable
+        'gemini-2.5-flash',      # newest bucket, but often 503 at EU peak hours
+        'gemini-2.0-flash-lite', # lighter model, independent daily quota
     ]
     
     if not market_session:
@@ -784,8 +786,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                 # 503 UNAVAILABLE is a transient server-side error — retry once after a short delay
                 # before moving to the next model (different from 429 quota which is hard limit)
                 if '503' in error_msg or 'unavailable' in error_msg:
-                    print(f"   503 transient error on {model_name}, waiting 15s then retrying once...")
-                    time.sleep(15)
+                    print(f"   503 transient error on {model_name}, waiting 5s then retrying once...")
+                    time.sleep(5)
                     try:
                         response = client.models.generate_content(
                             model=model_name,
@@ -941,7 +943,7 @@ def generate_decision_post(
     if not api_key:
         return ""
 
-    models_to_try = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest']
+    models_to_try = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite']
 
     weights_context = ""
     if current_weights:
@@ -1029,7 +1031,7 @@ def generate_empathy_post(
     if not api_key:
         return ""
 
-    models_to_try = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest']
+    models_to_try = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite']
 
     # Determine emotional context
     if weekly_perf is not None and weekly_perf < -2:
