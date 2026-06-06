@@ -351,12 +351,13 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         now = datetime.now()
         current_month = now.strftime('%B %Y')  # e.g., "January 2026"
         
-        # Get all portfolio tickers for context (exclude Russian stocks)
+        # Get all portfolio tickers for context with descriptions (exclude Russian stocks)
         excluded_tickers = {'MNODL.L', 'NVTKL.L'}
-        portfolio_symbols = [t for t in PORTFOLIO_TICKERS.keys() if t not in excluded_tickers]
-        portfolio_context = ", ".join(portfolio_symbols)
-        # Add crypto classification note so AI doesn't confuse TRX with a stock
-        portfolio_context += "\nNOTA: TRX è la criptovaluta TRON (non un'azione). Trattalo come crypto nei commenti."
+        portfolio_items = []
+        for t, (_, descr) in PORTFOLIO_TICKERS.items():
+            if t not in excluded_tickers:
+                portfolio_items.append(f"{t} ({descr})")
+        portfolio_context = ", ".join(portfolio_items)
         
         prompt = f"""You are a senior financial analyst. Generate a comprehensive MONTHLY MARKET RECAP for {current_month}.
 
@@ -607,12 +608,13 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
 - Scrivi tutti i simboli azionari come testo normale (es. NVDA, MSFT) senza il prefisso $.
 """
         
-        # Get all portfolio tickers for context (exclude Russian stocks)
+        # Get all portfolio tickers for context with descriptions (exclude Russian stocks)
         excluded_tickers = {'MNODL.L', 'NVTKL.L'}
-        portfolio_symbols = [t for t in PORTFOLIO_TICKERS.keys() if t not in excluded_tickers]
-        portfolio_context = ", ".join(portfolio_symbols)
-        # Add crypto classification note so AI doesn't confuse TRX with a stock
-        portfolio_context += "\nNOTA: TRX è la criptovaluta TRON (non un'azione). Trattalo come crypto nei commenti."
+        portfolio_items = []
+        for t, (_, descr) in PORTFOLIO_TICKERS.items():
+            if t not in excluded_tickers:
+                portfolio_items.append(f"{t} ({descr})")
+        portfolio_context = ", ".join(portfolio_items)
         
         # Load previous history to avoid repetition
         history = load_recap_history() if GIST_STORAGE_AVAILABLE else []
