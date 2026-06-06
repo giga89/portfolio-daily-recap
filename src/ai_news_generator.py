@@ -39,13 +39,15 @@ MAX_TAGS_PER_POST = 4
 
 # Valid eToro symbols for tagging (only use these in posts)
 # These are confirmed to exist on eToro platform
-ETORO_VALID_SYMBOLS = list(PORTFOLIO_TICKERS.keys())
+# Exclude Russian stocks (sanctioned/untradeable)
+_EXCLUDED_FROM_TAGS = {'MNODL.L', 'NVTKL.L'}
+ETORO_VALID_SYMBOLS = [t for t in PORTFOLIO_TICKERS.keys() if t not in _EXCLUDED_FROM_TAGS]
 
 
 def _get_all_portfolio_tags():
     """Get all valid portfolio ticker tags for eToro"""
-    # Map to eToro symbols (keys of PORTFOLIO_TICKERS)
-    return list(PORTFOLIO_TICKERS.keys())
+    # Map to eToro symbols (keys of PORTFOLIO_TICKERS), excluding Russian stocks
+    return [t for t in PORTFOLIO_TICKERS.keys() if t not in _EXCLUDED_FROM_TAGS]
 
 
 def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, allowed_tickers=None):
@@ -349,9 +351,12 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         now = datetime.now()
         current_month = now.strftime('%B %Y')  # e.g., "January 2026"
         
-        # Get all portfolio tickers for context
-        portfolio_symbols = list(PORTFOLIO_TICKERS.keys())
+        # Get all portfolio tickers for context (exclude Russian stocks)
+        excluded_tickers = {'MNODL.L', 'NVTKL.L'}
+        portfolio_symbols = [t for t in PORTFOLIO_TICKERS.keys() if t not in excluded_tickers]
         portfolio_context = ", ".join(portfolio_symbols)
+        # Add crypto classification note so AI doesn't confuse TRX with a stock
+        portfolio_context += "\nNOTA: TRX è la criptovaluta TRON (non un'azione). Trattalo come crypto nei commenti."
         
         prompt = f"""You are a senior financial analyst. Generate a comprehensive MONTHLY MARKET RECAP for {current_month}.
 
@@ -562,7 +567,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
     if not market_session:
         market_session = os.environ.get('MARKET_SESSION', 'Daily recap')
         
-    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'MNODL.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L']
+    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L']
     US_TICKERS = ['AMZN', 'AVGO', 'GOOG', 'LLY', 'MSFT', 'NET', 'PLTR', 'PYPL', 'TSM', 'ABBV', 'ABT', 'ABT.US', 'CCJ', 'HUM', 'MELI', 'IB01.L']
     
     allowed_tickers = None
@@ -602,9 +607,12 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
 - Scrivi tutti i simboli azionari come testo normale (es. NVDA, MSFT) senza il prefisso $.
 """
         
-        # Get all portfolio tickers for context
-        portfolio_symbols = list(PORTFOLIO_TICKERS.keys())
+        # Get all portfolio tickers for context (exclude Russian stocks)
+        excluded_tickers = {'MNODL.L', 'NVTKL.L'}
+        portfolio_symbols = [t for t in PORTFOLIO_TICKERS.keys() if t not in excluded_tickers]
         portfolio_context = ", ".join(portfolio_symbols)
+        # Add crypto classification note so AI doesn't confuse TRX with a stock
+        portfolio_context += "\nNOTA: TRX è la criptovaluta TRON (non un'azione). Trattalo come crypto nei commenti."
         
         # Load previous history to avoid repetition
         history = load_recap_history() if GIST_STORAGE_AVAILABLE else []

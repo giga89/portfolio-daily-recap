@@ -8,6 +8,9 @@ import os
 import random
 import ai_news_generator
 
+# Russian stocks to exclude from all rankings and AI news (sanctioned/untradeable)
+EXCLUDED_TICKERS = {'MNODL.L', 'NVTKL.L'}
+
 # Import API usage tracker
 try:
     from api_usage_tracker import save_usage_report
@@ -60,6 +63,12 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     if nan_tickers:
         print(f"⚠️  Filtering out {len(nan_tickers)} assets with NaN values: {nan_tickers}")
         stock_data = {k: v for k, v in stock_data.items() if k not in nan_tickers}
+
+    # Filter out excluded tickers (e.g. Russian stocks) from all rankings and news
+    excluded_found = [k for k in stock_data if k in EXCLUDED_TICKERS]
+    if excluded_found:
+        print(f"🚫 Excluding {len(excluded_found)} tickers from recap: {excluded_found}")
+        stock_data = {k: v for k, v in stock_data.items() if k not in EXCLUDED_TICKERS}
 
     # Calculate top performers
     # Filter for active trading today for the "Daily" list
@@ -180,7 +189,7 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     available_candidates = [c for c in unique_candidates if c.upper() not in normalized_history]
     
     # Filter by region if morning open
-    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'MNODL.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L']
+    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L']
     US_TICKERS = ['AMZN', 'AVGO', 'GOOG', 'LLY', 'MSFT', 'NET', 'PLTR', 'PYPL', 'TSM', 'ABBV', 'ABT', 'ABT.US', 'CCJ', 'HUM', 'MELI', 'IB01.L']
     
     if "EUROPEAN" in session_upper and "OPEN" in session_upper:
