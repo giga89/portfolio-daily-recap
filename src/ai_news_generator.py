@@ -477,27 +477,37 @@ Impact and outlook summary...
                 if API_TRACKER_AVAILABLE:
                     log_api_request(model_name, False, "monthly_recap")
                 
-                # 503 UNAVAILABLE is transient — retry once after a short delay
+                # 503 UNAVAILABLE — retry with 10-minute intervals up to 5 times
                 if '503' in error_msg or 'unavailable' in error_msg:
-                    print(f"   503 transient error on {model_name}, waiting 5s then retrying once...")
-                    time.sleep(5)
-                    try:
-                        response = client.models.generate_content(
-                            model=model_name,
-                            contents=prompt,
-                            config=config
-                        )
-                        if response and response.text:
-                            print(f"✅ Monthly recap generated (after 503 retry) using {model_name}!")
-                            if API_TRACKER_AVAILABLE:
-                                log_api_request(model_name, True, "monthly_recap")
-                            recap_text = response.text.strip()
-                            recap_text = _remove_intro_text(recap_text)
-                            recap_text = _remove_market_section_tags(recap_text)
-                            recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
-                            return "\n" + recap_text + "\n"
-                    except Exception as e2:
-                        print(f"   Retry also failed: {e2}")
+                    max_503_retries = 5
+                    retry_wait_secs = 600
+                    succeeded = False
+                    for attempt in range(1, max_503_retries + 1):
+                        print(f"   503 on {model_name} (retry {attempt}/{max_503_retries}), waiting {retry_wait_secs}s...")
+                        time.sleep(retry_wait_secs)
+                        try:
+                            response = client.models.generate_content(
+                                model=model_name,
+                                contents=prompt,
+                                config=config
+                            )
+                            if response and response.text:
+                                print(f"✅ Monthly recap generated (after 503 retry {attempt}) using {model_name}!")
+                                if API_TRACKER_AVAILABLE:
+                                    log_api_request(model_name, True, "monthly_recap")
+                                recap_text = response.text.strip()
+                                recap_text = _remove_intro_text(recap_text)
+                                recap_text = _remove_market_section_tags(recap_text)
+                                recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                                succeeded = True
+                                return "\n" + recap_text + "\n"
+                        except Exception as e2:
+                            retry_msg = str(e2).lower()
+                            if '503' not in retry_msg and 'unavailable' not in retry_msg:
+                                print(f"   Non-503 error on 503-retry {attempt}: {e2}")
+                                break
+                    if not succeeded:
+                        last_error = model_error
                     continue
                 
                 time.sleep(2)
@@ -793,32 +803,39 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                 if API_TRACKER_AVAILABLE:
                     log_api_request(model_name, False, "daily_recap")
                 
-                # 503 UNAVAILABLE is a transient server-side error — retry once after a short delay
-                # before moving to the next model (different from 429 quota which is hard limit)
+                # 503 UNAVAILABLE at EU open (07:00 UTC) on gemini-2.5-flash typically
+                # lasts 30-50 minutes. Retry with 10-minute intervals (up to 5 times = 50 min
+                # max) before giving up and trying the next model.
                 if '503' in error_msg or 'unavailable' in error_msg:
-                    print(f"   503 transient error on {model_name}, waiting 5s then retrying once...")
-                    time.sleep(5)
-                    try:
-                        response = client.models.generate_content(
-                            model=model_name,
-                            contents=prompt,
-                            config=config
-                        )
-                        if response and response.text:
-                            print(f"✅ AI news recap generated (after 503 retry) using {model_name}!")
-                            if API_TRACKER_AVAILABLE:
-                                log_api_request(model_name, True, "daily_recap")
-                            recap_text = response.text.strip()
-                            recap_text = _remove_intro_text(recap_text)
-                            recap_text = _remove_market_section_tags(recap_text)
-                            recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
-                            if selected_tags:
-                                update_rotation_history(selected_tags)
-                            if GIST_STORAGE_AVAILABLE:
-                                save_to_history(recap_text)
-                            return "\n" + recap_text + "\n"
-                    except Exception as e2:
-                        print(f"   Retry also failed: {e2}")
+                    max_503_retries = 5
+                    retry_wait_secs = 600  # 10 minutes
+                    for attempt in range(1, max_503_retries + 1):
+                        print(f"   503 on {model_name} (retry {attempt}/{max_503_retries}), waiting {retry_wait_secs}s...")
+                        time.sleep(retry_wait_secs)
+                        try:
+                            response = client.models.generate_content(
+                                model=model_name,
+                                contents=prompt,
+                                config=config
+                            )
+                            if response and response.text:
+                                print(f"✅ AI news recap generated (after 503 retry {attempt}) using {model_name}!")
+                                if API_TRACKER_AVAILABLE:
+                                    log_api_request(model_name, True, "daily_recap")
+                                recap_text = response.text.strip()
+                                recap_text = _remove_intro_text(recap_text)
+                                recap_text = _remove_market_section_tags(recap_text)
+                                recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
+                                if selected_tags:
+                                    update_rotation_history(selected_tags)
+                                if GIST_STORAGE_AVAILABLE:
+                                    save_to_history(recap_text)
+                                return "\n" + recap_text + "\n"
+                        except Exception as e2:
+                            retry_msg = str(e2).lower()
+                            if '503' not in retry_msg and 'unavailable' not in retry_msg:
+                                print(f"   Non-503 error on 503-retry {attempt}: {e2}")
+                                break  # different error, stop retrying this model
                     last_error = model_error
                     continue
                 
