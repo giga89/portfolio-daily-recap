@@ -315,14 +315,17 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         return ""
     
     # Models in order of preference — each belongs to a DIFFERENT quota bucket.
-    # Order: 2.0-flash first (more stable at EU open hour), 2.5-flash second
-    # (frequently 503-overloaded at 07:00 UTC), 2.0-flash-lite third (smaller
-    # model but genuinely independent daily quota — gemini-1.5 is deprecated
-    # and returns 404 in API v1beta).
+    # gemini-2.0-flash and gemini-2.0-flash-lite are SHUT DOWN (limit:0 = removed
+    # from free tier). Current valid options with separate quota buckets:
+    #   gemini-3.5-flash      — newest stable, independent bucket
+    #   gemini-2.5-flash      — often 503 at EU open (07:00 UTC peak)
+    #   gemini-2.5-pro        — Pro subscription needed, very capable
+    #   gemini-2.5-flash-lite — lightest 2.5 variant, own quota
     models_to_try = [
-        'gemini-2.0-flash',      # main free-tier bucket, stable
-        'gemini-2.5-flash',      # newest bucket, but often 503 at EU peak hours
-        'gemini-2.0-flash-lite', # lighter model, independent daily quota
+        'gemini-3.5-flash',      # newest stable, separate quota bucket
+        'gemini-2.5-flash',      # may 503 at EU peak hours
+        'gemini-2.5-pro',        # Pro subscription bucket
+        'gemini-2.5-flash-lite', # lightest, independent quota
     ]
     
     try:
@@ -565,14 +568,18 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         return ""
     
     # Models in order of preference — each belongs to a DIFFERENT quota bucket.
-    # Order: 2.0-flash first (more stable at EU open hour), 2.5-flash second
-    # (frequently 503-overloaded at 07:00 UTC), 2.0-flash-lite third (smaller
-    # model but genuinely independent daily quota — gemini-1.5 is deprecated
-    # and returns 404 in API v1beta).
+    # Models in order of preference — each belongs to a DIFFERENT quota bucket.
+    # gemini-2.0-flash and gemini-2.0-flash-lite are SHUT DOWN (limit:0 = removed
+    # from free tier). Current valid options with separate quota buckets:
+    #   gemini-3.5-flash      — newest stable, independent bucket
+    #   gemini-2.5-flash      — often 503 at EU open (07:00 UTC peak)
+    #   gemini-2.5-pro        — Pro subscription needed, very capable
+    #   gemini-2.5-flash-lite — lightest 2.5 variant, own quota
     models_to_try = [
-        'gemini-2.0-flash',      # main free-tier bucket, stable
-        'gemini-2.5-flash',      # newest bucket, but often 503 at EU peak hours
-        'gemini-2.0-flash-lite', # lighter model, independent daily quota
+        'gemini-3.5-flash',      # newest stable, separate quota bucket
+        'gemini-2.5-flash',      # may 503 at EU peak hours
+        'gemini-2.5-pro',        # Pro subscription bucket
+        'gemini-2.5-flash-lite', # lightest, independent quota
     ]
     
     if not market_session:
@@ -970,7 +977,7 @@ def generate_decision_post(
     if not api_key:
         return ""
 
-    models_to_try = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite']
+    models_to_try = ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.5-flash-lite']
 
     weights_context = ""
     if current_weights:
@@ -1058,7 +1065,7 @@ def generate_empathy_post(
     if not api_key:
         return ""
 
-    models_to_try = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite']
+    models_to_try = ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.5-flash-lite']
 
     # Determine emotional context
     if weekly_perf is not None and weekly_perf < -2:
