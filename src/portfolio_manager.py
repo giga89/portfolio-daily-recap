@@ -155,6 +155,21 @@ def load_config():
                 config["tickers"]["ABT.US"] = ["ABT", "Abbott Laboratories"]
                 config["emojis"]["ABT.US"] = config["emojis"].get("ABT", "🏥")
                 needs_save = True
+            # Fix ABT.US yahoo ticker if it was stored as "ABT.US" instead of "ABT"
+            if config["tickers"].get("ABT.US", [""])[0] == "ABT.US":
+                config["tickers"]["ABT.US"] = ["ABT", "Abbott Laboratories"]
+                needs_save = True
+            # Fix 01211.HK (BYD HK): leading zero not valid on Yahoo Finance, correct symbol is 1211.HK
+            if "01211.HK" in config["tickers"]:
+                config["tickers"].pop("01211.HK")
+                config["tickers"]["1211.HK"] = ["1211.HK", "BYD Company"]
+                if "01211.HK" in config.get("emojis", {}):
+                    config["emojis"]["1211.HK"] = config["emojis"].pop("01211.HK")
+                else:
+                    config.setdefault("emojis", {}).setdefault("1211.HK", "🔋")
+                if "01211.HK" in config.get("added_dates", {}):
+                    config["added_dates"]["1211.HK"] = config["added_dates"].pop("01211.HK")
+                needs_save = True
             
             # Fix ENI emoji
             for eni_key in ["ENI", "ENI.MI"]:
