@@ -240,6 +240,18 @@ def fetch_portfolio_weights_from_bullaware():
                             continue
                             
                 if weights:
+                    # Normalize HK tickers: BullAware may pad to 5 digits (e.g., 01211.HK)
+                    # but Yahoo Finance uses the standard HKEX code without extra leading zeros
+                    # (e.g., 1211.HK for BYD). Strip one leading zero from 5-digit HK codes.
+                    normalized_weights = {}
+                    for sym, w in weights.items():
+                        if sym.endswith('.HK'):
+                            numeric_part = sym[:-3]
+                            if len(numeric_part) == 5 and numeric_part[0] == '0':
+                                sym = numeric_part[1:] + '.HK'
+                        normalized_weights[sym] = w
+                    weights = normalized_weights
+
                     print(f"✓ Successfully extracted {len(weights)} portfolio weights")
                     
                     # Sort by weight descending for logging

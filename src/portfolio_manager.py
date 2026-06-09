@@ -60,6 +60,7 @@ DEFAULT_TICKERS = {
     'IB01.L': ('IB01.L', 'iShares Treasury Bond 0-1yr UCITS ETF'),
     '1919.HK': ('1919.HK', 'COSCO SHIPPING Holdings'),
     '2318.HK': ('2318.HK', 'Ping An Insurance'),
+    '1211.HK': ('1211.HK', 'BYD Company'),
 }
 
 DEFAULT_EMOJIS = {
@@ -118,6 +119,7 @@ DEFAULT_EMOJIS = {
     'IB01.L': '💵',    # US Treasury short-term bonds
     '1919.HK': '🚢',
     '2318.HK': '🏦',
+    '1211.HK': '🔋',   # BYD
 }
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../portfolio_config.json')
@@ -276,6 +278,13 @@ def lookup_ticker_info(symbol):
         candidates.append(f"{symbol}.L")    # London
         candidates.append(f"{symbol}.DE")   # Germany
         candidates.append(f"{symbol}.MI")   # Milan
+
+    # For HK tickers with 5-digit codes (BullAware pads some with leading zero),
+    # also try the 4-digit canonical Yahoo Finance form (e.g., 01211.HK -> 1211.HK)
+    if symbol.endswith('.HK'):
+        numeric_part = symbol[:-3]
+        if len(numeric_part) == 5 and numeric_part[0] == '0':
+            candidates.insert(1, numeric_part[1:] + '.HK')
     
     print(f"🔎 Attempting to resolve details for new asset: {symbol}")
     
