@@ -18,6 +18,7 @@ import social_publisher
 import chart_generator
 import pie_chart_generator
 import cover_generator
+import winners_losers_card
 import etoro_history
 
 def main():
@@ -208,15 +209,18 @@ def main():
     except Exception as exc:
         print(f"Warning: cover image generation failed: {exc}")
 
-    # Generate engagement question card (1080x1080 square for social feeds)
+    # Generate Top & Flop card (16:9 landscape format)
     engagement_card_path = None
     try:
-        engagement_card_path = cover_generator.generate_engagement_card(
+        from config import EMOJI_MAP
+        engagement_card_path = winners_losers_card.build_card_from_stock_data(
+            stock_data=stock_data,
             session_name=market_session,
-            output_path='output/engagement_card.png',
+            emoji_map=EMOJI_MAP,
+            output_path='output/winners_losers.png',
         )
     except Exception as exc:
-        print(f"Warning: engagement card generation failed: {exc}")
+        print(f"Warning: Top & Flop card generation failed: {exc}")
 
     # Generate pie chart (alternates each session via Gist counter)
     pie_chart_path = None
