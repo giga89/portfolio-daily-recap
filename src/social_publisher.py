@@ -110,15 +110,18 @@ def publish_all(
     image_path: str = None,
     pie_chart_path: str = None,
     ai_cover_path: str = None,
+    engagement_card_path: str = None,
     data: dict = None,
 ) -> dict:
     """
     Read the recap and publish to all enabled platforms.
 
     Args:
-        recap_file_path: Path to recap.txt
-        image_path: Optional path to the performance chart PNG
-        pie_chart_path: Optional path to a pie chart PNG (alternates each session)
+        recap_file_path:      Path to recap.txt
+        image_path:           Optional path to the performance chart PNG
+        pie_chart_path:       Optional path to a pie chart PNG (alternates each session)
+        ai_cover_path:        Optional path to the AI/PIL cover image
+        engagement_card_path: Optional path to the square engagement question card
         data: {"portfolio_daily": float, "stock_data": dict, "portfolio_weights": dict,
                "portfolio_perf": float, "portfolio_weekly": float}
 
@@ -196,6 +199,16 @@ def publish_all(
                 print("   🥧 Pie chart sent to Telegram")
             except Exception as exc:
                 print(f"   ⚠️ Pie chart send failed: {exc}")
+        # Send engagement card to boost interaction
+        if ok and engagement_card_path and os.path.exists(engagement_card_path):
+            try:
+                telegram_sender.send_telegram_photo(
+                    engagement_card_path,
+                    caption="💬 Lascia un commento qui sotto! ⬇️",
+                )
+                print("   💬 Engagement card sent to Telegram")
+            except Exception as exc:
+                print(f"   ⚠️ Engagement card send failed: {exc}")
     else:
         print("   ⏭️  Not configured.")
         results["telegram"] = False
@@ -218,7 +231,7 @@ def publish_all(
         print("   ⏭️  Not configured.")
         results["twitter"] = False
 
-    # ── 3. Bluesky (US close — 2-post thread) ────────────────────────
+    # ── 3. Bluesky (US close — 2-post thread with engagement image) ────────────
     print("\n🦋 Bluesky:")
     if not is_us_close:
         print(f"   ⏭️  Only at US close.")
@@ -229,7 +242,14 @@ def publish_all(
             top_performers=top_performers,
             session_name=market_session,
         )
-        ok = bluesky_sender.send_bluesky_thread(bsky_posts)
+        if engagement_card_path and os.path.exists(engagement_card_path):
+            ok = bluesky_sender.send_bluesky_thread_with_image(
+                bsky_posts,
+                image_path=engagement_card_path,
+                image_alt="Portfolio daily performance — lascia un commento!",
+            )
+        else:
+            ok = bluesky_sender.send_bluesky_thread(bsky_posts)
         results["bluesky"] = ok
     else:
         print("   ⏭️  Not configured.")

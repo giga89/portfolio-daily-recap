@@ -271,6 +271,7 @@ jobs:
             output/*.png
             output/gemini_api_usage.json
             output/gemini_api_usage_report.txt
+            output/engagement_card.png
       
       - name: Display recap
         if: steps.dedup_check.outputs.skip != 'true'

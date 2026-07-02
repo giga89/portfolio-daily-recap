@@ -1,0 +1,92 @@
+name: Update Stock Logos
+
+on:
+  # ── Manual trigger (run anytime, with optional specific tickers) ─────────────
+  workflow_dispatch:
+    inputs:
+      tickers:
+        description: 'Comma-separated tickers to update (leave empty = all missing)'
+        required: false
+        type: string
+      force:
+        description: 'Re-download even if logo already exists in repo'
+        required: false
+        type: boolean
+        default: false
+
+  # ── Auto-trigger: when portfolio_config.json changes on main ─────────────────
+  push:
+    branches: [main]
+    paths:
+      - 'portfolio_config.json'
+
+  # ── Weekly sweep: every Monday at 06:00 UTC (catch any CDN improvements) ─────
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  update-logos:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write    # needed to push the logos back to the repo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests Pillow
+
+      - name: Download logos
+        run: |
+          set -e
+          ARGS=""
+
+          # If specific tickers were requested via manual trigger
+          TICKERS="${{ inputs.tickers }}"
+          if [ -n "$TICKERS" ]; then
+            # Convert comma-separated list to space-separated args
+            ARGS=$(echo "$TICKERS" | tr ',' ' ')
+            echo "Downloading specific tickers: $ARGS"
+          else
+            ARGS="--missing"
+            echo "Downloading all missing logos"
+          fi
+
+          # Add --force flag if requested
+          if [ "${{ inputs.force }}" = "true" ]; then
+            ARGS="$ARGS --force"
+          fi
+
+          python3 scripts/download_logos.py $ARGS
+
+      - name: Check for new logos
+        id: check_logos
+        run: |
+          git add assets/logos/ 2>/dev/null || true
+          CHANGED=$(git diff --cached --name-only | grep "assets/logos/" | wc -l)
+          echo "changed_count=$CHANGED" >> "$GITHUB_OUTPUT"
+          echo "Found $CHANGED new/updated logo(s)"
+
+      - name: Commit and push logos
+        if: steps.check_logos.outputs.changed_count != '0'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          COUNT="${{ steps.check_logos.outputs.changed_count }}"
+          git commit -m "chore(assets): update $COUNT stock logo(s) [skip ci]"
+          git push
+          echo "✅ $COUNT logo(s) committed and pushed."
+
+      - name: No changes
+        if: steps.check_logos.outputs.changed_count == '0'
+        run: echo "✅ No new logos to commit — all logos are up to date."

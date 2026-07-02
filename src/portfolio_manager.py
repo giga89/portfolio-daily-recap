@@ -203,7 +203,11 @@ def load_config():
             if needs_save:
                 print("🔄 Applying auto-migration to fix ticker mappings in Gist...")
                 save_config(config)
-                
+
+            # Always check for expired '\ud83c\udd95' badges — independent of BullAware sync
+            if expire_new_emojis(config):
+                save_config(config)
+
             return config
     except Exception as e:
         print(f"⚠️ Failed to load config from Gist: {e}")
@@ -228,6 +232,49 @@ def load_config():
 def get_added_dates():
     """Get the dictionary of when tickers were added."""
     return load_config().get('added_dates', {})
+
+
+def expire_new_emojis(config: dict) -> bool:
+    """
+    Check every ticker whose emoji is still '\ud83c\udd95' (NEW) and
+    replace it with a permanent emoji once it has been in the portfolio
+    for more than 7 days.
+
+    This function is safe to call at any time — it modifies `config` in-place
+    and returns True if any emoji was updated (so the caller knows to persist).
+
+    The replacement priority:
+      1. DEFAULT_EMOJIS (hardcoded per ticker)
+      2. '\ud83d\udcca' generic chart fallback
+    """
+    from datetime import date as _date, datetime as _datetime
+
+    added_dates = config.get('added_dates', {})
+    emojis      = config.get('emojis', {})
+    changed     = False
+
+    today = _date.today()
+    for ticker, emoji in list(emojis.items()):
+        if emoji != '\ud83c\udd95':
+            continue   # nothing to do for non-new tickers
+
+        added_str = added_dates.get(ticker)
+        if not added_str:
+            # Ticker marked as new but no date recorded — treat as old
+            days = 999
+        else:
+            try:
+                days = (today - _datetime.fromisoformat(added_str).date()).days
+            except Exception:
+                days = 0  # can't parse — leave as-is
+
+        if days > 7:
+            replacement = DEFAULT_EMOJIS.get(ticker, '\ud83d\udcca')
+            print(f"\ud83d\udd52 {ticker}: \ud83c\udd95 expired ({days}d) → {replacement}")
+            emojis[ticker] = replacement
+            changed = True
+
+    return changed
 
 def migrate_from_defaults():
     """Create JSON config from the defaults."""
@@ -346,27 +393,10 @@ def sync_portfolio(bullaware_weights):
             current_emojis[k] = "🆕" 
             current_config['added_dates'][k] = today_iso
             
-    # 3. MAINTENANCE: Check for expired "New" icons (older than 7 days)
-    # This runs every sync to keep icons clean
-    if 'added_dates' in current_config:
-        from datetime import date, datetime
-        today_date = date.today()
-        
-        for k, added_str in current_config['added_dates'].items():
-            if k in current_emojis and current_emojis[k] == "🆕":
-                try:
-                    added_date = datetime.fromisoformat(added_str).date()
-                    delta = (today_date - added_date).days
-                    if delta > 7:
-                        print(f"🕒 Asset {k} is no longer new ({delta} days). Resetting emoji.")
-                        # Reset to a default logic or generic chart
-                        # We can try to match against DEFAULT_EMOJIS if available, or just use generic
-                        if k in DEFAULT_EMOJIS:
-                            current_emojis[k] = DEFAULT_EMOJIS[k]
-                        else:
-                            current_emojis[k] = "📊"
-                except Exception as e:
-                    print(f"Error checking date for {k}: {e}")
+    # 3. MAINTENANCE: expire '🆕' badges older than 7 days
+    if expire_new_emojis(current_config):
+        # expire_new_emojis already printed per-ticker messages
+        pass
 
     # Save if changes were made or maintenance happened
     # We always save to ensure added_dates are persisted locally and in Gist (if we update Gist schema support)
