@@ -511,7 +511,7 @@ def generate_winners_losers_card(
         return y
 
     # Draw winner
-    y = _draw_block(winner, y, GREEN, "MIGLIORE", "🏆")
+    y = _draw_block(winner, y, GREEN, "MIGLIORE", "▲")
     y += 20
 
     # Separator between blocks
@@ -519,7 +519,7 @@ def generate_winners_losers_card(
     y += 36
 
     # Draw loser
-    _draw_block(loser, y, RED, "PEGGIORE", "📉")
+    _draw_block(loser, y, RED, "PEGGIORE", "▼")
 
     # ── Bottom bar with branding ──────────────────────────────────────────────
     bar_bot_h = 90
