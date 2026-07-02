@@ -1,37 +1,13 @@
 #!/usr/bin/env python3
 """
-Winners & Losers Card Generator — v2
-======================================
-Generates a 1080×1350 (4:5) card — the optimal format for eToro/Instagram
-feed posts on mobile. Shows the best and worst performing stocks with:
-  • Stock logo fetched from cdn.tickerlogos.com (no API key needed)
-  • Company name, ticker, performance % (big)
-  • Proportional bar
-  • One-line sector tag
-
-Layout (1080×1350, portrait — better mobile feed coverage):
-  ┌─────────────────────────────────────────────────────────┐
-  │  02 Jul 2025                        CHIUSURA MERCATI    │
-  │                                                          │
-  │   TOP  &  FLOP  DEL  GIORNO                             │
-  │   ─────────────────────────────────────────────────     │
-  │                                                          │
-  │   🏆  MIGLIORE                                           │
-  │   [logo]  NVIDIA                     NVDA               │
-  │                  +4.82%                                  │
-  │            ████████████░░░░░                             │
-  │            Chip AI · semiconduttori                      │
-  │                                                          │
-  │   ─────────────────────────────────────────────────     │
-  │                                                          │
-  │   📉  PEGGIORE                                           │
-  │   [logo]  Eni S.p.A.                ENI.MI               │
-  │                  -2.31%                                  │
-  │            █████░░░░░░░░░                                │
-  │            Energia · petrolio e gas                      │
-  │                                                          │
-  │  [avatar] Andrea Ravalli         etoro.com/...           │
-  └─────────────────────────────────────────────────────────┘
+Winners & Losers Card Generator — Landscape 16:9 (1280x720)
+=============================================================
+Generates a 1280x720 landscape card inspired by modern news/sports banners:
+  • 16:9 aspect ratio — optimal for desktop & mobile feeds without cropping
+  • Two stacked horizontal rounded cards with neon glow borders
+  • Left badge: Circular stock logo
+  • Centre: Company Name, Ticker, Sector tag
+  • Right: Huge percentage change (+4.82% / -2.31%) with glow effect
 """
 
 import io
@@ -52,8 +28,8 @@ try:
 except ImportError:
     REQUESTS_AVAILABLE = False
 
-CARD_W = 1080
-CARD_H = 1350   # 4:5 — optimal for eToro / Instagram feed posts
+CARD_W = 1280
+CARD_H = 720   # 16:9 Landscape — fits perfectly in all feeds without cropping
 
 PROFILE_PHOTO_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -63,7 +39,6 @@ LOGO_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "assets", "logos"
 )
-# Fallback runtime cache (for tickers not yet committed to repo)
 LOGO_CACHE_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "assets", "logo_cache"
@@ -71,7 +46,6 @@ LOGO_CACHE_DIR = os.path.join(
 URL_TEXT    = "etoro.com/people/andrearavalli"
 AUTHOR_TEXT = "Andrea Ravalli"
 
-# ─── Sector descriptions ─────────────────────────────────────────────────────
 SECTOR_TAGS = {
     "NVDA":      "Chip AI · semiconduttori",
     "MSFT":      "Software · cloud · AI",
@@ -142,7 +116,6 @@ PERIOD_LABELS = {
     "monthly_change": "DEL MESE",
 }
 
-# Hardcoded domain map for tickers that need special handling
 _TICKER_DOMAIN_MAP = {
     "NVDA":      "nvidia.com",
     "MSFT":      "microsoft.com",
@@ -162,13 +135,11 @@ _TICKER_DOMAIN_MAP = {
     "AZN.L":     "astrazeneca.com",
     "NOVO-B.CO": "novonordisk.com",
     "ENEL.MI":   "enel.com",
-    "ENI.MI":    "eni.com",
     "PRY.MI":    "prysmiangroup.com",
     "RACE":      "ferrari.com",
-    "VOW3.DE":   "volkswagen.com",
+    "VOW3.DE":   "volkswagenag.com",
     "GLEN.L":    "glencore.com",
-    "1211.HK":   "bydglobal.com",
-    "1919.HK":   "coscoshipping.com.cn",
+    "1211.HK":   "byd.com",
     "2318.HK":   "pingan.com",
 }
 
@@ -203,82 +174,45 @@ def _reg_font(size: int) -> "ImageFont.FreeTypeFont":
 
 # ─── Logo fetching ────────────────────────────────────────────────────────────
 
-def _logo_cache_path(ticker: str) -> str:
-    key = hashlib.md5(ticker.encode()).hexdigest()[:8]
-    return os.path.join(LOGO_CACHE_DIR, f"{ticker.replace('/', '_')}_{key}.png")
-
-
 def _fetch_logo_url_for_ticker(ticker: str) -> "str | None":
-    """
-    Resolve the logo URL for a ticker using:
-    1. Hardcoded domain map (fastest, no network)
-    2. cdn.tickerlogos.com search API (free, no key)
-    Returns the final image URL or None.
-    """
     if not REQUESTS_AVAILABLE:
         return None
-
-    # 1. Hardcoded map
     domain = _TICKER_DOMAIN_MAP.get(ticker)
     if domain:
         return f"https://cdn.tickerlogos.com/{domain}"
-
-    # 2. Search API
     try:
-        r = _requests.get(
-            "https://cdn.tickerlogos.com/api/logo-search/",
-            params={"q": ticker},
-            timeout=5,
-        )
+        r = _requests.get("https://cdn.tickerlogos.com/api/logo-search/", params={"q": ticker}, timeout=5)
         if r.ok:
             results = r.json().get("results", [])
             if results:
-                domain = results[0].get("website", "")
-                if domain:
-                    return f"https://cdn.tickerlogos.com/{domain}"
+                d = results[0].get("website", "")
+                if d: return f"https://cdn.tickerlogos.com/{d}"
     except Exception:
         pass
-
     return None
 
 
 def _download_logo(ticker: str, size: int = 100) -> "Image.Image | None":
-    """
-    Load a logo for the given ticker. Priority:
-      1. assets/logos/{ticker}.png  — committed to repo, zero network
-      2. assets/logo_cache/{ticker}  — runtime disk cache (7 days)
-      3. cdn.tickerlogos.com         — live download, saved to cache
-
-    Returns a circular PIL image or None on failure.
-    """
     if not PIL_AVAILABLE:
         return None
-
     safe = ticker.replace("/", "_").replace("\\", "_")
-
-    # 1. Committed repo logo (fastest path — no network)
     repo_path = os.path.join(LOGO_DIR, f"{safe}.png")
     if os.path.exists(repo_path) and os.path.getsize(repo_path) > 500:
         try:
             return _make_circular(Image.open(repo_path).convert("RGBA"), size)
         except Exception:
-            pass   # fall through to next source
+            pass
 
     if not REQUESTS_AVAILABLE:
         return None
 
-    # 2. Runtime cache (< 7 days old)
     os.makedirs(LOGO_CACHE_DIR, exist_ok=True)
     cache_file = os.path.join(LOGO_CACHE_DIR, f"{safe}.png")
     if os.path.exists(cache_file):
-        age = time.time() - os.path.getmtime(cache_file)
-        if age < 7 * 86400:
-            try:
-                return _make_circular(Image.open(cache_file).convert("RGBA"), size)
-            except Exception:
-                pass
+        if time.time() - os.path.getmtime(cache_file) < 7 * 86400:
+            try: return _make_circular(Image.open(cache_file).convert("RGBA"), size)
+            except Exception: pass
 
-    # 3. Live download from CDN
     logo_url = _fetch_logo_url_for_ticker(ticker)
     if not logo_url:
         return None
@@ -288,19 +222,15 @@ def _download_logo(ticker: str, size: int = 100) -> "Image.Image | None":
             img = Image.open(io.BytesIO(r.content)).convert("RGBA")
             img.save(cache_file, "PNG")
             return _make_circular(img, size)
-        return None
-    except Exception as exc:
-        print(f"   ⚠️ Logo fetch failed for {ticker}: {exc}")
-        return None
+    except Exception:
+        pass
+    return None
 
 
 def _make_circular(img: "Image.Image", size: int) -> "Image.Image":
-    """Resize to square and apply circular mask with white background."""
     img = img.resize((size, size), Image.LANCZOS)
-    # White background (for logos with transparency)
     bg = Image.new("RGBA", (size, size), (255, 255, 255, 255))
     bg.paste(img, (0, 0), img)
-    # Circular mask
     mask = Image.new("L", (size, size), 0)
     ImageDraw.Draw(mask).ellipse([0, 0, size - 1, size - 1], fill=255)
     out = Image.new("RGBA", (size, size), (0, 0, 0, 0))
@@ -308,44 +238,26 @@ def _make_circular(img: "Image.Image", size: int) -> "Image.Image":
     return out
 
 
-# ─── Draw helpers ─────────────────────────────────────────────────────────────
-
-def _centered(draw, text, cx, y, font, fill):
-    bb = draw.textbbox((0, 0), text, font=font)
-    draw.text((cx - (bb[2] - bb[0]) // 2 - bb[0], y), text, fill=fill, font=font)
-    return bb[3] - bb[1]
-
-
-def _bar(draw, x, y, w, h, pct, color, max_pct=5.0):
-    ratio = min(abs(pct) / max_pct, 1.0)
-    filled = int(w * ratio)
-    draw.rounded_rectangle([x, y, x + w, y + h], radius=h // 2, fill=(35, 33, 50))
-    if filled > 0:
-        draw.rounded_rectangle([x, y, x + filled, y + h], radius=h // 2, fill=color)
-
-
-def _circular_avatar(path: str, size: int = 56):
+def _circular_avatar(path: str, size: int = 50):
     try:
         photo = Image.open(path).convert("RGBA")
         w, h = photo.size
         s = min(w, h)
-        photo = photo.crop(((w - s) // 2, (h - s) // 2,
-                             (w + s) // 2, (h + s) // 2))
+        photo = photo.crop(((w - s) // 2, (h - s) // 2, (w + s) // 2, (h + s) // 2))
         photo = photo.resize((size, size), Image.LANCZOS)
         mask = Image.new("L", (size, size), 0)
         ImageDraw.Draw(mask).ellipse([0, 0, size - 1, size - 1], fill=255)
         out = Image.new("RGBA", (size, size), (0, 0, 0, 0))
         out.paste(photo, (0, 0), mask)
-        frame = Image.new("RGBA", (size + 6, size + 6), (0, 0, 0, 0))
-        ImageDraw.Draw(frame).ellipse([0, 0, size + 5, size + 5],
-                                      outline=(0, 210, 10, 220), width=2)
-        frame.paste(out, (3, 3), out)
+        frame = Image.new("RGBA", (size + 4, size + 4), (0, 0, 0, 0))
+        ImageDraw.Draw(frame).ellipse([0, 0, size + 3, size + 3], outline=(0, 210, 10, 220), width=2)
+        frame.paste(out, (2, 2), out)
         return frame
     except Exception:
         return None
 
 
-# ─── Main card generation ─────────────────────────────────────────────────────
+# ─── Main 16:9 Card Generator ─────────────────────────────────────────────────
 
 def generate_winners_losers_card(
     winner: dict,
@@ -356,18 +268,7 @@ def generate_winners_losers_card(
     fetch_logos: bool = True,
 ) -> "str | None":
     """
-    Generate a 1080×1350 (4:5) card with best and worst performers.
-
-    Args:
-        winner:       {'ticker': str, 'company_name': str, 'change': float}
-        loser:        {'ticker': str, 'company_name': str, 'change': float}
-        session_name: Controls label and period text
-        emoji_map:    Optional {ticker: emoji}
-        output_path:  Where to save the PNG
-        fetch_logos:  If True, download stock logos from CDN
-
-    Returns:
-        Saved file path, or None on failure.
+    Generate a 1280×720 Landscape card with top & flop performance boxes.
     """
     if not PIL_AVAILABLE:
         print("Warning: Pillow not available")
@@ -377,179 +278,162 @@ def generate_winners_losers_card(
     period_label  = PERIOD_LABELS.get(metric, "DEL GIORNO")
     session_label = SESSION_LABELS.get(session_name, session_name.upper())
 
-    # ── Pre-fetch logos (network, may take a second) ──────────────────────────
+    # Fetch logos
     LOGO_SIZE = 110
     winner_logo = _download_logo(winner["ticker"], LOGO_SIZE) if fetch_logos else None
     loser_logo  = _download_logo(loser["ticker"],  LOGO_SIZE) if fetch_logos else None
 
-    # ── Background: very dark charcoal gradient ──────────────────────────────
-    bg_top = (10, 10, 18)
-    bg_bot = (20, 16, 36)
-    img = Image.new("RGB", (CARD_W, CARD_H))
+    # Base image: Dark rich background
+    img = Image.new("RGBA", (CARD_W, CARD_H), (10, 12, 24, 255))
     draw = ImageDraw.Draw(img)
+
+    # Gradient overlay
+    bg_top = (12, 14, 28)
+    bg_bot = (22, 18, 42)
     for y in range(CARD_H):
         t = y / CARD_H
-        r = int(bg_top[0] * (1 - t) + bg_top[0] * (1 - t) + bg_bot[0] * t)
+        r = int(bg_top[0] * (1 - t) + bg_bot[0] * t)
         g = int(bg_top[1] * (1 - t) + bg_bot[1] * t)
         b = int(bg_top[2] * (1 - t) + bg_bot[2] * t)
-        draw.line([(0, y), (CARD_W, y)], fill=(r, g, b))
+        draw.line([(0, y), (CARD_W, y)], fill=(r, g, b, 255))
 
-    img = img.convert("RGBA")
-
-    # Gold accent bar at very top
+    # Decorative top bar
     acc = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
     ad  = ImageDraw.Draw(acc)
-    for y in range(6):
-        a = int(255 * (1 - y / 6))
-        ad.line([(0, y), (CARD_W, y)], fill=(200, 168, 30, a))
+    for y in range(5):
+        a = int(255 * (1 - y / 5))
+        ad.line([(0, y), (CARD_W, y)], fill=(210, 168, 40, a))
     img = Image.alpha_composite(img, acc)
     draw = ImageDraw.Draw(img)
 
-    # ── Fonts ─────────────────────────────────────────────────────────────────
+    # Fonts
+    f_title   = _font(38)
+    f_sub     = _reg_font(20)
     f_date    = _reg_font(18)
     f_sess    = _reg_font(18)
-    f_title   = _font(36)
-    f_period  = _reg_font(20)
-    f_section = _font(22)     # "🏆 MIGLIORE"
-    f_company = _font(38)     # company name
-    f_ticker  = _reg_font(24) # ticker symbol beside company
-    f_pct     = _font(100)    # big % number
-    f_sector  = _reg_font(22) # sector tag
-    f_author  = _reg_font(20)
+
+    f_box_title = _font(20)   # "▲ MIGLIORE"
+    f_co_name   = _font(34)   # "NVIDIA"
+    f_ticker    = _reg_font(22) # "$NVDA"
+    f_sector    = _reg_font(18) # "Chip AI · semiconduttori"
+    f_pct       = _font(64)   # "+4.82%"
+
+    f_author  = _reg_font(18)
     f_url     = _reg_font(16)
 
-    # ── Colours ───────────────────────────────────────────────────────────────
-    WHITE        = (245, 245, 250, 255)
-    MUTED        = (150, 148, 168, 220)
-    GOLD         = (210, 168, 40, 240)
-    GREEN        = (45, 215, 100, 255)
-    GREEN_DIM    = (30, 100, 60, 255)
-    RED          = (230, 55, 75, 255)
-    RED_DIM      = (110, 25, 40, 255)
-    DIVIDER      = (55, 50, 80, 200)
+    # Colours
+    WHITE       = (245, 245, 250, 255)
+    MUTED       = (160, 160, 180, 230)
+    GOLD        = (225, 180, 45, 255)
+    GREEN_GLOW  = (40, 225, 100, 255)
+    GREEN_BG    = (15, 45, 28, 220)
+    RED_GLOW    = (240, 60, 80, 255)
+    RED_BG      = (45, 16, 24, 220)
 
     # ── Header ────────────────────────────────────────────────────────────────
-    y = 26
-    date_str = datetime.now().strftime("%-d %b %Y")
-    draw.text((40, y), date_str, fill=MUTED, font=f_date)
-    bb = draw.textbbox((0, 0), session_label, font=f_sess)
-    draw.text((CARD_W - bb[2] - 40, y), session_label, fill=MUTED, font=f_sess)
-    y += 60
+    date_str = datetime.now().strftime("%d %b %Y").upper()
+    draw.text((60, 28), date_str, fill=MUTED, font=f_date)
+    bb_s = draw.textbbox((0, 0), session_label, font=f_sess)
+    draw.text((CARD_W - bb_s[2] - 60, 28), session_label, fill=MUTED, font=f_sess)
 
-    # ── Main title ────────────────────────────────────────────────────────────
-    _centered(draw, "TOP  &  FLOP", CARD_W // 2, y, f_title, GOLD)
-    y += 50
-    _centered(draw, period_label, CARD_W // 2, y, f_period, MUTED)
-    y += 38
+    # Title centred
+    title_text = f"TOP & FLOP {period_label}"
+    bb_t = draw.textbbox((0, 0), title_text, font=f_title)
+    draw.text(((CARD_W - (bb_t[2] - bb_t[0])) // 2, 65), title_text, fill=WHITE, font=f_title)
 
-    # Separator
-    draw.line([(60, y), (CARD_W - 60, y)], fill=DIVIDER, width=1)
-    y += 36
+    # Line under header
+    draw.line([(60, 120), (CARD_W - 60, 120)], fill=(60, 60, 85, 180), width=1)
 
-    # ── Helper: draw one stock block ──────────────────────────────────────────
-    def _draw_block(data: dict, y_start: int, color: tuple, label_text: str, label_emoji: str) -> int:
-        """Draw a single winner/loser block. Returns the y position after the block."""
-        ticker  = data["ticker"]
+    # ── Box Drawer Helper ─────────────────────────────────────────────────────
+    def _draw_row_box(data: dict, logo_img: "Image.Image", y_pos: int, color_glow: tuple, color_bg: tuple, is_winner: bool):
+        BOX_W = 1160
+        BOX_H = 210
+        BOX_X = (CARD_W - BOX_W) // 2
+        RADIUS = 20
+
+        # Create overlay for glow and box background
+        box_layer = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
+        bd = ImageDraw.Draw(box_layer)
+
+        # Glow / Border
+        # Outer glow border
+        bd.rounded_rectangle([BOX_X - 2, y_pos - 2, BOX_X + BOX_W + 2, y_pos + BOX_H + 2], radius=RADIUS + 2, fill=(*color_glow[:3], 40))
+        bd.rounded_rectangle([BOX_X - 1, y_pos - 1, BOX_X + BOX_W + 1, y_pos + BOX_H + 1], radius=RADIUS + 1, fill=(*color_glow[:3], 160))
+        # Box background
+        bd.rounded_rectangle([BOX_X, y_pos, BOX_X + BOX_W, y_pos + BOX_H], radius=RADIUS, fill=color_bg)
+
+        # Composite box background
+        nonlocal img
+        img = Image.alpha_composite(img, box_layer)
+        d = ImageDraw.Draw(img)
+
+        # 1. Left Badge Label (e.g. ▲ MIGLIORE)
+        lbl_text = "▲ MIGLIORE" if is_winner else "▼ PEGGIORE"
+        d.text((BOX_X + 30, y_pos + 20), lbl_text, fill=color_glow, font=f_box_title)
+
+        # 2. Logo placement
+        logo_x = BOX_X + 30
+        logo_y = y_pos + 60
+        if logo_img:
+            img.paste(logo_img, (logo_x, logo_y), logo_img)
+            text_start_x = logo_x + LOGO_SIZE + 25
+        else:
+            text_start_x = logo_x
+
+        # 3. Company Name & Ticker
         company = data["company_name"]
-        change  = data["change"]
-        sector  = SECTOR_TAGS.get(ticker, "")
-        logo    = winner_logo if color == GREEN else loser_logo
+        company_display = company if len(company) <= 24 else company[:22] + "…"
+        ticker = f"${data['ticker']}"
+        sector = SECTOR_TAGS.get(data["ticker"], "")
 
-        cx  = CARD_W // 2
-        PAD = 60
-        y   = y_start
+        d.text((text_start_x, y_pos + 62), company_display, fill=WHITE, font=f_co_name)
+        d.text((text_start_x, y_pos + 106), ticker, fill=MUTED, font=f_ticker)
 
-        # Section label (e.g. "🏆  MIGLIORE")
-        lbl = f"{label_emoji}  {label_text}"
-        draw.text((PAD, y), lbl, fill=color, font=f_section)
-        y += 38
-
-        # ── Logo + Company name + Ticker on one row ───────────────────────────
-        row_h = LOGO_SIZE + 10
-        logo_x = PAD
-        text_x = PAD + (LOGO_SIZE + 20 if logo else 0)
-
-        if logo:
-            img.paste(logo, (logo_x, y), logo)
-
-        # Company name (may be long — truncate if needed)
-        company_display = company if len(company) <= 22 else company[:20] + "…"
-        bb_co = draw.textbbox((0, 0), company_display, font=f_company)
-        co_h  = bb_co[3] - bb_co[1]
-        co_y  = y + (LOGO_SIZE - co_h) // 2 - 14
-
-        draw.text((text_x, co_y), company_display, fill=WHITE, font=f_company)
-
-        # Ticker in muted below company
-        draw.text((text_x, co_y + co_h + 4), ticker, fill=MUTED, font=f_ticker)
-
-        y += row_h + 18
-
-        # ── Big % number centred ──────────────────────────────────────────────
-        pct_str = f"{change:+.2f}%"
-        bb_pct  = draw.textbbox((0, 0), pct_str, font=f_pct)
-        pw = bb_pct[2] - bb_pct[0]
-        ph = bb_pct[3] - bb_pct[1]
-        px = cx - pw // 2 - bb_pct[0]
-        # Glow
-        for dx, dy in [(-4, 4), (4, 4), (0, 5), (-4, -2), (4, -2)]:
-            draw.text((px + dx, y + dy), pct_str, fill=(*color[:3], 30), font=f_pct)
-        draw.text((px, y), pct_str, fill=color, font=f_pct)
-        y += ph + 24
-
-        # ── Progress bar ──────────────────────────────────────────────────────
-        bar_w = CARD_W - PAD * 2
-        bar_h = 16
-        _bar(draw, PAD, y, bar_w, bar_h, change, color, max_pct=5.0)
-        y += bar_h + 18
-
-        # ── Sector tag ────────────────────────────────────────────────────────
         if sector:
-            _centered(draw, sector, cx, y, f_sector, MUTED)
-            y += 32
+            d.text((text_start_x, y_pos + 142), sector, fill=(180, 180, 200, 200), font=f_sector)
 
-        return y
+        # 4. Right side: Percentage with Glow
+        pct_val = data["change"]
+        pct_str = f"{pct_val:+.2f}%"
+        bb_p = d.textbbox((0, 0), pct_str, font=f_pct)
+        pw = bb_p[2] - bb_p[0]
+        ph = bb_p[3] - bb_p[1]
 
-    # Draw winner
-    y = _draw_block(winner, y, GREEN, "MIGLIORE", "▲")
-    y += 20
+        px = BOX_X + BOX_W - pw - 40
+        py = y_pos + (BOX_H - ph) // 2 - 10
 
-    # Separator between blocks
-    draw.line([(60, y), (CARD_W - 60, y)], fill=DIVIDER, width=1)
-    y += 36
+        # Glow effect behind number
+        for dx, dy in [(-3, 3), (3, 3), (0, 4), (-3, -1), (3, -1)]:
+            d.text((px + dx, py + dy), pct_str, fill=(*color_glow[:3], 40), font=f_pct)
 
-    # Draw loser
-    _draw_block(loser, y, RED, "PEGGIORE", "▼")
+        d.text((px, py), pct_str, fill=color_glow, font=f_pct)
 
-    # ── Bottom bar with branding ──────────────────────────────────────────────
-    bar_bot_h = 90
-    bot_ov = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
-    bd = ImageDraw.Draw(bot_ov)
-    for y in range(bar_bot_h):
-        a = int(220 * (y / bar_bot_h))
-        bd.line([(0, CARD_H - bar_bot_h + y), (CARD_W, CARD_H - bar_bot_h + y)],
-                fill=(6, 5, 15, a))
-    img = Image.alpha_composite(img, bot_ov)
-    draw = ImageDraw.Draw(img)
+    # Draw Top Box (Winner)
+    _draw_row_box(winner, winner_logo, 155, GREEN_GLOW, GREEN_BG, is_winner=True)
 
-    avatar = _circular_avatar(PROFILE_PHOTO_PATH, 56) if os.path.exists(PROFILE_PHOTO_PATH) else None
-    bot_y  = CARD_H - bar_bot_h + (bar_bot_h - 62) // 2
-    tx = 30
+    # Draw Bottom Box (Loser)
+    _draw_row_box(loser, loser_logo, 395, RED_GLOW, RED_BG, is_winner=False)
+
+    # ── Footer ────────────────────────────────────────────────────────────────
+    footer_y = 635
+    draw.line([(60, footer_y), (CARD_W - 60, footer_y)], fill=(60, 60, 85, 180), width=1)
+
+    avatar = _circular_avatar(PROFILE_PHOTO_PATH, 46) if os.path.exists(PROFILE_PHOTO_PATH) else None
+    bot_y = footer_y + 16
+    tx = 60
     if avatar:
-        img.paste(avatar, (30, bot_y), avatar)
-        tx = 30 + avatar.size[0] + 10
+        img.paste(avatar, (60, bot_y), avatar)
+        tx = 60 + avatar.size[0] + 12
 
     bb_auth = draw.textbbox((0, 0), AUTHOR_TEXT, font=f_author)
     auth_h  = bb_auth[3] - bb_auth[1]
-    draw.text((tx, bot_y + (62 - auth_h) // 2), AUTHOR_TEXT,
-              fill=(230, 228, 245, 240), font=f_author)
+    draw.text((tx, bot_y + (46 - auth_h) // 2), AUTHOR_TEXT, fill=(230, 228, 245, 240), font=f_author)
 
     bb_url = draw.textbbox((0, 0), URL_TEXT, font=f_url)
-    draw.text((CARD_W - bb_url[2] - 30,
-               CARD_H - bar_bot_h + (bar_bot_h - (bb_url[3] - bb_url[1])) // 2),
-              URL_TEXT, fill=(130, 170, 230, 200), font=f_url)
+    draw.text((CARD_W - (bb_url[2] - bb_url[0]) - 60, bot_y + (46 - (bb_url[3] - bb_url[1])) // 2),
+              URL_TEXT, fill=(140, 175, 235, 210), font=f_url)
 
-    # ── Save ──────────────────────────────────────────────────────────────────
+    # Save PNG
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
     img.convert("RGB").save(output_path, "PNG", optimize=True)
     print(f"Winners/Losers card saved: {output_path} ({CARD_W}×{CARD_H})")
