@@ -57,6 +57,54 @@ SESSION_LABELS = {
 URL_TEXT = "etoro.com/people/andrearavalli"
 AUTHOR_TEXT = "Andrea Ravalli"
 
+# ── Engagement-card size (square, optimised for feed) ────────────────────────
+CARD_W = 1080
+CARD_H = 1080
+
+# ── Questions shown on the engagement card, keyed by session ────────────────
+_CARD_QUESTIONS = {
+    "EU_OPEN": [
+        "Quali titoli europei\nstate seguendo oggi?",
+        "Vi aspettate un'apertura\neuropea positiva o negativa?",
+        "C'è qualche notizia EU\nche vi entusiasma\nstamattina?",
+    ],
+    "US_OPEN": [
+        "Vi aspettate una giornata\npositiva per Wall Street?",
+        "Quale titolo USA monitorate\ncon più attenzione oggi?",
+        "Come pensate reagirà\nWall Street alle\nnotizie di oggi?",
+    ],
+    "US_CLOSE": [
+        "Com'è andata\nla vostra giornata?",
+        "Quale movimento di mercato\nvi ha sorpreso\ndi più oggi?",
+        "Soddisfatti dell'andamento\ndel portafoglio oggi?",
+        "Avete domande su qualche\ntitolo in particolare?",
+    ],
+    "WEEKLY_SAT": [
+        "Qual è stato il titolo\npiù sorprendente\ndella settimana?",
+        "Cosa vi ha colpito di più\nnell'andamento dei mercati\nquesta settimana?",
+        "Siete soddisfatti\ndella settimana\ndel portafoglio?",
+    ],
+    "WEEKLY_SUN": [
+        "Cosa vi aspettate\ndalla prossima settimana?",
+        "Ottimismo o cautela\nper la settimana\nche inizia domani?",
+        "Quale titolo pensate\npotrà sorprendere\nla prossima settimana?",
+    ],
+}
+
+
+def _session_to_card_key(session_name: str) -> str:
+    """Map a session name to the question pool key."""
+    s = session_name.upper()
+    if "EUROPEAN" in s and "OPEN" in s:
+        return "EU_OPEN"
+    if "U.S." in s and "OPEN" in s:
+        return "US_OPEN"
+    if "WEEKLY" in s and "SAT" in s:
+        return "WEEKLY_SAT"
+    if "WEEKLY" in s and "SUN" in s:
+        return "WEEKLY_SUN"
+    return "US_CLOSE"  # default
+
 
 def _find_font(size: int) -> ImageFont.FreeTypeFont:
     """Try to load a system TTF font; fall back to PIL default."""
@@ -280,4 +328,139 @@ def generate_cover(
     final.save(output_path, "PNG", optimize=True)
 
     print(f"Cover image saved: {output_path} ({IMAGE_W}x{IMAGE_H})")
+    return output_path
+
+
+def generate_engagement_card(
+    session_name: str,
+    output_path: str = "output/engagement_card.png",
+    question: str = None,
+) -> str | None:
+    """
+    Generate a square (1080×1080) engagement card with a bold question
+    overlaid on a dark gradient background — designed to encourage comments.
+
+    Args:
+        session_name:  Market session identifier (used to select the question pool).
+        output_path:   Destination file path.
+        question:      Override the question text. If None, picks one at random
+                       from the session-specific pool.
+
+    Returns:
+        Saved file path, or None on failure.
+    """
+    if not PIL_AVAILABLE:
+        print("Warning: Pillow not available, skipping engagement card generation")
+        return None
+
+    # ── Pick question ────────────────────────────────────────────────────────
+    if question is None:
+        pool_key = _session_to_card_key(session_name)
+        candidates = _CARD_QUESTIONS.get(pool_key, _CARD_QUESTIONS["US_CLOSE"])
+        question = random.choice(candidates)
+
+    # ── Background — deep purple/navy gradient ───────────────────────────────
+    c1 = (12, 10, 35)   # very dark indigo top
+    c2 = (28, 18, 60)   # slightly lighter bottom
+
+    img = Image.new("RGB", (CARD_W, CARD_H))
+    draw = ImageDraw.Draw(img)
+    for y in range(CARD_H):
+        t = y / CARD_H
+        r = int(c1[0] * (1 - t) + c2[0] * t)
+        g = int(c1[1] * (1 - t) + c2[1] * t)
+        b = int(c1[2] * (1 - t) + c2[2] * t)
+        draw.line([(0, y), (CARD_W, y)], fill=(r, g, b))
+
+    img = img.convert("RGBA")
+
+    # ── Faint geometric accent circles ───────────────────────────────────────
+    overlay = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
+    odraw = ImageDraw.Draw(overlay)
+    odraw.ellipse([-180, -180, 520, 520], outline=(130, 80, 255, 18), width=3)
+    odraw.ellipse([560, 560, CARD_W + 180, CARD_H + 180], outline=(80, 160, 255, 18), width=3)
+    img = Image.alpha_composite(img, overlay)
+    draw = ImageDraw.Draw(img)
+
+    # ── Accent bar on top ────────────────────────────────────────────────────
+    accent_overlay = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
+    adraw = ImageDraw.Draw(accent_overlay)
+    for y in range(8):
+        alpha = int(255 * (1 - y / 8))
+        adraw.line([(0, y), (CARD_W, y)], fill=(140, 80, 255, alpha))
+    img = Image.alpha_composite(img, accent_overlay)
+    draw = ImageDraw.Draw(img)
+
+    # ── Fonts ────────────────────────────────────────────────────────────────
+    font_q_big   = _find_font(80)           # question text
+    font_label   = _find_regular_font(26)   # small "DOMANDA PER VOI" label
+    font_author  = _find_regular_font(22)   # bottom author
+    font_url     = _find_regular_font(18)   # bottom URL
+
+    # ── Small label at top ───────────────────────────────────────────────────
+    label = "💬  DOMANDA PER VOI"
+    draw.text((54, 48), label, fill=(180, 140, 255, 230), font=font_label)
+
+    # ── Big question text — centred vertically ───────────────────────────────
+    lines = question.split("\n")
+    line_height = 90
+    total_text_h = len(lines) * line_height
+    start_y = (CARD_H - total_text_h) // 2 - 30  # slightly above centre
+
+    for i, line in enumerate(lines):
+        bbox = draw.textbbox((0, 0), line, font=font_q_big)
+        tw = bbox[2] - bbox[0]
+        x = (CARD_W - tw) // 2
+        y = start_y + i * line_height
+
+        # Soft glow
+        for dx, dy in [(-2, 2), (2, 2), (-2, -2), (2, -2)]:
+            draw.text((x + dx, y + dy), line, fill=(120, 70, 200, 40), font=font_q_big)
+
+        draw.text((x, y), line, fill=(235, 225, 255, 240), font=font_q_big)
+
+    # ── Bottom bar with branding ─────────────────────────────────────────────
+    bar_h = 100
+    bar_overlay2 = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
+    bdraw = ImageDraw.Draw(bar_overlay2)
+    for y in range(bar_h):
+        alpha = int(200 * (y / bar_h))
+        bdraw.line([(0, CARD_H - bar_h + y), (CARD_W, CARD_H - bar_h + y)],
+                   fill=(8, 6, 22, alpha))
+    img = Image.alpha_composite(img, bar_overlay2)
+    draw = ImageDraw.Draw(img)
+
+    # Avatar
+    avatar = None
+    if os.path.exists(PROFILE_PHOTO_PATH):
+        avatar = _circular_avatar(PROFILE_PHOTO_PATH, size=64)
+
+    bottom_y = CARD_H - bar_h + (bar_h - 72) // 2
+    text_x = 30
+    if avatar:
+        img.paste(avatar, (30, bottom_y), avatar)
+        text_x = 30 + avatar.size[0] + 12
+
+    bbox_auth = draw.textbbox((0, 0), AUTHOR_TEXT, font=font_author)
+    auth_h = bbox_auth[3] - bbox_auth[1]
+    draw.text(
+        (text_x, bottom_y + (72 - auth_h) // 2),
+        AUTHOR_TEXT,
+        fill=(230, 225, 255, 240),
+        font=font_author,
+    )
+
+    bbox_url = draw.textbbox((0, 0), URL_TEXT, font=font_url)
+    url_w = bbox_url[2] - bbox_url[0]
+    url_h = bbox_url[3] - bbox_url[1]
+    url_x = CARD_W - url_w - 30
+    url_y = CARD_H - bar_h + (bar_h - url_h) // 2
+    draw.text((url_x, url_y), URL_TEXT, fill=(150, 180, 240, 200), font=font_url)
+
+    # ── Save ────────────────────────────────────────────────────────────────
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+    final = img.convert("RGB")
+    final.save(output_path, "PNG", optimize=True)
+
+    print(f"Engagement card saved: {output_path} ({CARD_W}x{CARD_H})")
     return output_path

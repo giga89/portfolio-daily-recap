@@ -244,6 +244,173 @@ def _remove_market_section_tags(text):
 
 
 
+# ─── Dynamic greeting helpers ───────────────────────────────────────────────
+
+# Greeting pools indexed by session key.
+# Each session can also have day-specific variants keyed by weekday integer
+# (0=Monday … 6=Sunday). Falls back to the 'default' list.
+_GREETING_POOLS = {
+    "EU_OPEN": {
+        0: [
+            "Buon lunedì! Si riparte, vediamo subito cosa ci aspetta sull'apertura europea...",
+            "Lunedì mattina: nuova settimana, nuove opportunità sui mercati europei! Ecco le prime notizie...",
+            "Ripartiamo! È lunedì e i mercati europei stanno per accendersi...",
+        ],
+        4: [
+            "Buon venerdì! Ultimo giorno della settimana di trading europeo, vediamo come chiudiamo...",
+            "È venerdì e i mercati europei aprono per l'ultima sessione della settimana. Ecco cosa tenere d'occhio...",
+            "Siamo all'ultimo sprint! Apertura europea di venerdì in avvicinamento...",
+        ],
+        "default": [
+            "Buongiorno! I mercati europei stanno per aprire, ecco le prime notizie del giorno...",
+            "Un nuovo giorno di trading europeo. Ecco gli spunti principali da tenere d'occhio questa mattina...",
+            "Eccoci qui, inizia una nuova sessione europea! Vediamo cosa ci riserva il mercato oggi...",
+            "Apertura europea in avvicinamento! Ecco le notizie che potrebbero muovere i titoli del nostro portafoglio...",
+            "Buongiorno a tutti! Nuova mattinata, nuova sessione europea: partiamo con un rapido sguardo ai mercati...",
+        ],
+    },
+    "US_OPEN": {
+        0: [
+            "Buon pomeriggio! Si apre la settimana anche a Wall Street: vediamo come si presentano i mercati USA...",
+            "Lunedì pomeriggio e Wall Street si sveglia! Ecco le prime notizie per capire come potrebbe andare...",
+        ],
+        4: [
+            "Buon pomeriggio di venerdì! Ultimo giorno di Wall Street questa settimana: vediamo come si chiuderà...",
+            "Venerdì pomeriggio: apertura USA in arrivo. Sarà un finale di settimana in rosa o in rosso?",
+        ],
+        "default": [
+            "Buon pomeriggio! Tra poco apre Wall Street: vediamo cosa ci aspetta nella sessione americana...",
+            "È l'ora di Wall Street! Ecco gli spunti principali prima dell'apertura USA...",
+            "Ci prepariamo all'apertura americana. Ecco le notizie chiave da monitorare per i titoli del nostro portafoglio...",
+            "Pomeriggio di borsa! Wall Street sta per aprire e questo è il momento per capire l'umore del mercato...",
+            "Buon pomeriggio! La sessione americana si avvicina: facciamo il punto su cosa succede oltreoceano...",
+        ],
+    },
+    "US_CLOSE": {
+        0: [
+            "Buona sera! La prima sessione della settimana si chiude: vediamo com'è andata sui mercati USA...",
+            "Lunedì sera: Wall Street ha chiuso i battenti, ecco il nostro primo resoconto settimanale...",
+        ],
+        4: [
+            "Buona sera e buon weekend anticipato! Wall Street ha chiuso l'ultima sessione della settimana...",
+            "È venerdì sera e i mercati USA hanno detto l'ultima parola della settimana. Ecco com'è andata...",
+        ],
+        "default": [
+            "Buonasera! I mercati USA hanno chiuso: ecco il nostro recap di fine giornata...",
+            "Giornata conclusa! Analizziamo insieme i movimenti di oggi su Wall Street...",
+            "I mercati americani hanno abbassato il sipario. Ecco com'è andata oggi sul nostro portafoglio...",
+            "Buonasera a tutti! Chiusura USA completata: vediamo cosa ha combinato il mercato oggi...",
+            "Fine sessione! Facciamo un po' di chiarezza su quello che è successo oggi oltre Atlantico...",
+        ],
+    },
+    "WEEKLY_SAT": {
+        "default": [
+            "Buon sabato! Con i mercati chiusi, è il momento perfetto per fare il punto sulla settimana...",
+            "Weekend! È arrivato il momento di guardare la settimana nel suo insieme: com'è andata?",
+            "Sabato di analisi! Prendiamoci un attimo per capire cosa ha mosso il portafoglio questa settimana...",
+            "Buon fine settimana! Approfittiamo della pausa dai mercati per un bilancio settimanale onesto...",
+        ],
+    },
+    "WEEKLY_SUN": {
+        "default": [
+            "Buona domenica! Oggi diamo uno sguardo più da vicino ai titoli che hanno guidato la classifica settimanale...",
+            "Domenica di recap! Analizziamo insieme i migliori titoli di questa settimana e le ragioni dei loro movimenti...",
+            "Eccoci alla domenica! Un'occhiata alla classifica settimanale per capire chi ha brillato di più...",
+            "Buona domenica a tutti! Oggi ci concentriamo sui titoli che hanno fatto la differenza in questa settimana...",
+        ],
+    },
+}
+
+
+def _get_dynamic_greeting(session_upper: str, day_of_week: int = None) -> str:
+    """
+    Return a randomly chosen greeting string for the given session and day.
+
+    Args:
+        session_upper: Upper-case session name (e.g. 'EUROPEAN MARKET OPEN').
+        day_of_week:   0=Monday … 6=Sunday (default: today).
+
+    Returns:
+        A greeting string ready to inject into an AI prompt.
+    """
+    import random as _random
+    from datetime import datetime as _dt
+
+    if day_of_week is None:
+        day_of_week = _dt.now().weekday()
+
+    if "EUROPEAN" in session_upper and "OPEN" in session_upper:
+        pool_key = "EU_OPEN"
+    elif "U.S." in session_upper and "OPEN" in session_upper:
+        pool_key = "US_OPEN"
+    elif "U.S." in session_upper and "CLOSE" in session_upper:
+        pool_key = "US_CLOSE"
+    elif "WEEKLY" in session_upper and "SAT" in session_upper:
+        pool_key = "WEEKLY_SAT"
+    elif "WEEKLY" in session_upper and "SUN" in session_upper:
+        pool_key = "WEEKLY_SUN"
+    else:
+        pool_key = "US_CLOSE"  # generic fallback
+
+    session_pool = _GREETING_POOLS[pool_key]
+    # Prefer day-specific list; fall back to 'default'
+    candidates = session_pool.get(day_of_week, session_pool["default"])
+    return _random.choice(candidates)
+
+
+def _get_closing_question_instruction(session_upper: str) -> str:
+    """
+    Return a prompt instruction asking Gemini to close the post with a
+    contextual, open-ended question to boost follower interaction.
+
+    The instruction includes a few example questions to guide the model;
+    Gemini should pick the most fitting one or write a similar variant.
+    """
+    import random as _random
+
+    if "EUROPEAN" in session_upper and "OPEN" in session_upper:
+        examples = [
+            "Quali titoli europei state seguendo oggi?",
+            "Vi aspettate un'apertura europea positiva o negativa?",
+            "C'è qualche notizia europea che vi preoccupa o entusiasma questa mattina?",
+        ]
+    elif "U.S." in session_upper and "OPEN" in session_upper:
+        examples = [
+            "Vi aspettate una giornata positiva o negativa per Wall Street oggi?",
+            "Quale titolo USA del portafoglio monitorate con più attenzione questa sessione?",
+            "Come pensate che reagirà Wall Street alle notizie di oggi?",
+        ]
+    elif "WEEKLY" in session_upper and "SAT" in session_upper:
+        examples = [
+            "Qual è stato per voi il titolo più sorprendente di questa settimana?",
+            "Cosa vi ha colpito di più nell'andamento del mercato questa settimana?",
+            "Siete soddisfatti della direzione del portafoglio questa settimana?",
+        ]
+    elif "WEEKLY" in session_upper and "SUN" in session_upper:
+        examples = [
+            "Cosa vi aspettate dalla prossima settimana? Ottimismo o cautela?",
+            "Quale titolo pensate potrà sorprendere la prossima settimana?",
+            "Qual è il vostro sentiment per la settimana che inizia domani?",
+        ]
+    else:  # US Close / generic
+        examples = [
+            "Com'è andata la vostra giornata? Soddisfatti dell'andamento del portafoglio?",
+            "Qual è stato il movimento di mercato che vi ha sorpreso di più oggi?",
+            "Cosa pensate delle performance di oggi sul nostro portafoglio?",
+            "Avete domande sull'andamento di oggi o su qualche titolo in particolare?",
+        ]
+
+    chosen = _random.choice(examples)
+    return (
+        f"- Concludi il tuo messaggio con una domanda aperta e naturale per coinvolgere i lettori. "
+        f"Scegli la domanda più adatta al contesto di oggi, oppure scrivi una variante simile. "
+        f"Esempi: \"{chosen}\" — ma adattala liberamente al contenuto che hai scritto sopra. "
+        f"La domanda deve sembrare spontanea, non formulaica."
+    )
+
+# ─── End dynamic greeting helpers ───────────────────────────────────────────
+
+
 def get_recent_tags(limit=None):
     """
     Get list of recently used tags from storage.
@@ -644,6 +811,10 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         # Create prompt based on session
         current_date = datetime.now().strftime('%Y-%m-%d')
         
+        # Build dynamic greeting and closing question for this session
+        dynamic_greeting = _get_dynamic_greeting(session_upper)
+        closing_question_instruction = _get_closing_question_instruction(session_upper)
+        
         if "EUROPEAN" in session_upper and "OPEN" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura dei mercati europei.
             
@@ -655,10 +826,11 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a degli amici/investitori che si fidano di te). Evita toni eccessivamente formali o robotici.
-            - Inizia con un saluto caloroso e naturale (es. "Buongiorno! Iniziamo una nuova giornata sui mercati europei...")
+            - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta MAX 3 brevi spunti o notizie principali per l'apertura europea, focalizzandoti sulle novità dei nostri titoli in portafoglio o sull'indice Euro Stoxx.
             - {tag_instruction}
             - Usa le emoji in modo spontaneo e naturale (non metterne troppe, massimo 3 o 4 in tutto il post).
+            - {closing_question_instruction}
             - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
             
             Output format (ONLY return the plain text of the post in Italian):
@@ -676,10 +848,11 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a degli amici/investitori che si fidano di te). Evita toni eccessivamente formali o robotici.
-            - Inizia con un saluto caloroso e naturale (es. "Buongiorno! Ci prepariamo all'apertura di Wall Street...")
+            - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta MAX 3 brevi spunti o notizie principali per l'apertura USA, focalizzandoti sulle novità dei nostri titoli in portafoglio o sugli indici americani (S&P 500, Nasdaq).
             - {tag_instruction}
             - Usa le emoji in modo spontaneo e naturale (non metterne troppe, massimo 3 o 4 in tutto il post).
+            - {closing_question_instruction}
             - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
             
             Output format (ONLY return the plain text of the post in Italian):
@@ -696,11 +869,12 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido ed empatico. Parla apertamente di come è andata la settimana, se è stata verde o rossa, dei risultati ottenuti e delle tue sensazioni.
-            - Inizia con un saluto amichevole per il fine settimana (es. "Buon fine settimana! Con i mercati chiusi, facciamo il punto su questa settimana...")
+            - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Fai un bilancio sincero di cosa ha guidato il portafoglio in questa settimana, menzionando i movimenti principali dei nostri titoli chiave.
             - Spiega brevemente cosa terremo d'occhio per la prossima settimana.
             - {tag_instruction}
             - Usa le emoji in modo spontaneo e naturale (massimo 3 o 4 in tutto il post).
+            - {closing_question_instruction}
             - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
             
             Output format (ONLY return the plain text of the post in Italian):
@@ -717,11 +891,12 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile naturale e chiaro. Questo post accompagnerà la classifica dei migliori titoli del portafoglio.
-            - Inizia in modo naturale (es. "Buona domenica! Oggi diamo un'occhiata più da vicino ai titoli che hanno guidato la classifica delle performance settimanali...")
+            - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Spiega in modo semplice e chiaro i motivi del successo dei titoli migliori di questa settimana (massimo 2-3 titoli).
             - Collega queste performance alla nostra tesi d'investimento di lungo termine, rassicurando i copiatori sulla bontà delle nostre scelte.
             - {tag_instruction}
             - Usa le emoji in modo spontaneo e naturale (massimo 3 o 4 in tutto il post).
+            - {closing_question_instruction}
             - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
             
             Output format (ONLY return the plain text of the post in Italian):
@@ -740,10 +915,11 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un resoconto sincero scritto a fine giornata per i tuoi amici e investitori).
-            - Inizia in modo amichevole (es. "Buonasera! Ecco il nostro recap di fine giornata per vedere cosa è successo oggi sui mercati...")
+            - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta un breve quadro della giornata di borsa (S&P 500, Nasdaq, mercati europei) e spiega l'impatto diretto sui titoli del nostro portafoglio.
             - {tag_instruction}
             - Usa le emoji in modo spontaneo e naturale (massimo 3 o 4 in tutto il post).
+            - {closing_question_instruction}
             - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
             
             Output format (ONLY return the plain text of the post in Italian):

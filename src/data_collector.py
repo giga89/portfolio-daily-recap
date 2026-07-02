@@ -208,6 +208,16 @@ def main():
     except Exception as exc:
         print(f"Warning: cover image generation failed: {exc}")
 
+    # Generate engagement question card (1080x1080 square for social feeds)
+    engagement_card_path = None
+    try:
+        engagement_card_path = cover_generator.generate_engagement_card(
+            session_name=market_session,
+            output_path='output/engagement_card.png',
+        )
+    except Exception as exc:
+        print(f"Warning: engagement card generation failed: {exc}")
+
     # Generate pie chart (alternates each session via Gist counter)
     pie_chart_path = None
     try:
@@ -241,6 +251,7 @@ def main():
         image_path=chart_path,
         pie_chart_path=pie_chart_path,
         ai_cover_path=ai_cover_path,
+        engagement_card_path=engagement_card_path,
         data={
             "portfolio_daily": portfolio_daily,
             "stock_data": stock_data,

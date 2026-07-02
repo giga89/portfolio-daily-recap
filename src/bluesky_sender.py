@@ -75,10 +75,12 @@ def _create_record(
     jwt: str,
     text: str,
     reply_ref: dict = None,
+    embed: dict = None,
 ) -> tuple[str, str] | tuple[None, None]:
     """
     Create a Bluesky post record. Returns (uri, cid) or (None, None).
     reply_ref format: {"root": {"uri":..,"cid":..}, "parent": {"uri":..,"cid":..}}
+    embed format: app.bsky.embed.images or app.bsky.embed.external object
     """
     now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     record = {
@@ -91,6 +93,8 @@ def _create_record(
         record["facets"] = facets
     if reply_ref:
         record["reply"] = reply_ref
+    if embed:
+        record["embed"] = embed
 
     r = requests.post(
         f"{BSKY_API}/com.atproto.repo.createRecord",
@@ -106,6 +110,46 @@ def _create_record(
         return uri, cid
     print(f"   ❌ Bluesky post error {r.status_code}: {r.text[:250]}")
     return None, None
+
+
+def _upload_image_blob(jwt: str, image_path: str) -> dict | None:
+    """
+    Upload an image file to Bluesky and return the blob object for embedding.
+
+    Args:
+        jwt:        Access JWT from _create_session().
+        image_path: Local path to the PNG or JPEG image.
+
+    Returns:
+        Blob dict (from the API response) or None on failure.
+    """
+    import mimetypes
+    mime, _ = mimetypes.guess_type(image_path)
+    mime = mime or "image/png"
+
+    try:
+        with open(image_path, "rb") as f:
+            data = f.read()
+        r = requests.post(
+            f"{BSKY_API}/com.atproto.repo.uploadBlob",
+            headers={
+                "Authorization": f"Bearer {jwt}",
+                "Content-Type": mime,
+            },
+            data=data,
+            timeout=30,
+        )
+        if r.ok:
+            blob = r.json().get("blob")
+            print(f"   ✅ Bluesky image blob uploaded ({len(data)//1024} KB)")
+            return blob
+        print(f"   ❌ Bluesky blob upload failed {r.status_code}: {r.text[:200]}")
+        return None
+    except Exception as exc:
+        print(f"   ❌ Bluesky blob upload error: {exc}")
+        return None
+
+
 
 
 def build_bluesky_thread(
@@ -203,6 +247,85 @@ def send_bluesky_thread(posts: list[str]) -> bool:
             }
 
         uri, cid = _create_record(did, jwt, text, reply_ref)
+        if uri:
+            if i == 0:
+                root_uri, root_cid = uri, cid
+                success = True
+            prev_uri, prev_cid = uri, cid
+        else:
+            print(f"   ⚠️  Post {i+1} failed, stopping thread.")
+            break
+
+    return success
+
+
+def send_bluesky_thread_with_image(
+    posts: list[str],
+    image_path: str,
+    image_alt: str = "Portfolio engagement card",
+) -> bool:
+    """
+    Post a Bluesky thread where the first post carries an embedded image.
+    Falls back to a text-only thread if the image upload fails.
+
+    Args:
+        posts:      List of post texts (2 recommended).
+        image_path: Local path to the image file to embed in post 1.
+        image_alt:  Alt-text for accessibility.
+
+    Returns:
+        bool: True if at least the first post succeeded.
+    """
+    handle   = os.environ.get("BLUESKY_HANDLE")
+    app_pass = os.environ.get("BLUESKY_APP_PASS")
+
+    print("=" * 50)
+    print(f"🦋 Posting Bluesky thread with image ({len(posts)} posts)...")
+
+    if not handle or not app_pass:
+        print("   ⚠️  BLUESKY_HANDLE or BLUESKY_APP_PASS not set — skipping.")
+        return False
+
+    did, jwt = _create_session(handle, app_pass)
+    if not did:
+        return False
+
+    # Upload image blob for post 1
+    embed = None
+    import os as _os
+    if image_path and _os.path.exists(image_path):
+        blob = _upload_image_blob(jwt, image_path)
+        if blob:
+            embed = {
+                "$type": "app.bsky.embed.images",
+                "images": [
+                    {
+                        "image": blob,
+                        "alt": image_alt,
+                    }
+                ],
+            }
+        else:
+            print("   ⚠️  Image upload failed — continuing without image.")
+    else:
+        print(f"   ⚠️  Image not found: {image_path} — continuing without image.")
+
+    root_uri = root_cid = None
+    prev_uri = prev_cid = None
+    success = False
+
+    for i, text in enumerate(posts):
+        print(f"   📝 Post {i+1}/{len(posts)}...")
+        reply_ref = None
+        if root_uri and prev_uri:
+            reply_ref = {
+                "root":   {"uri": root_uri,  "cid": root_cid},
+                "parent": {"uri": prev_uri,  "cid": prev_cid},
+            }
+
+        # Embed image only in the first post
+        post_embed = embed if i == 0 else None
+        uri, cid = _create_record(did, jwt, text, reply_ref, embed=post_embed)
         if uri:
             if i == 0:
                 root_uri, root_cid = uri, cid
