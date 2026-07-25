@@ -270,6 +270,20 @@ def save_used_tags(tags):
     data['used_tags'] = tags
     save_data(data)
 
+def get_used_stock_focus_tickers():
+    """Get list of recently used stock focus tickers for rotation"""
+    data = load_data()
+    return data.get('used_stock_focus_tickers', [])
+
+def save_used_stock_focus_ticker(ticker):
+    """Save ticker to stock focus rotation history"""
+    data = load_data()
+    used = data.get('used_stock_focus_tickers', [])
+    if ticker not in used:
+        used.append(ticker)
+    data['used_stock_focus_tickers'] = used[-25:]
+    save_data(data)
+
 def get_portfolio_config():
     """Get portfolio items (tickers) from Gist"""
     data = load_data()

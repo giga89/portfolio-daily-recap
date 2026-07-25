@@ -1319,6 +1319,7 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
         tuple: (ticker_symbol, formatted_post_text)
     """
     from portfolio_manager import load_config, get_ticker_all_tags, get_related_tickers
+    from gist_storage import get_used_stock_focus_tickers, save_used_stock_focus_ticker
     import random
 
     config = load_config()
@@ -1328,13 +1329,22 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
         print("⚠️ No tickers in portfolio config for stock focus post")
         return "", ""
 
-    # Exclude money market ETFs from stock focus if possible
-    stock_candidates = [t for t in tickers.keys() if t not in ['XEON.DE', 'IB01.L']]
+    # Exclude money market ETFs and physical metal ETFs from stock focus candidates
+    stock_candidates = [t for t in tickers.keys() if t not in ['XEON.DE', 'IB01.L', 'PPFB.DE']]
     if not stock_candidates:
         stock_candidates = list(tickers.keys())
 
     if not ticker or ticker not in tickers:
-        ticker = random.choice(stock_candidates)
+        used_tickers = get_used_stock_focus_tickers()
+        unused = [t for t in stock_candidates if t not in used_tickers]
+        if unused:
+            ticker = random.choice(unused)
+        else:
+            # All have been used at least once; pick from the ones least recently used
+            least_recent = [t for t in stock_candidates if t not in used_tickers[-len(stock_candidates)//2:]]
+            ticker = random.choice(least_recent) if least_recent else random.choice(stock_candidates)
+
+    save_used_stock_focus_ticker(ticker)
 
     yahoo_ticker, company_name = tickers[ticker]
     primary_tags = get_ticker_all_tags(ticker)
@@ -1513,9 +1523,10 @@ Usa il tuo strumento di ricerca Google per consultare il calendario macroeconomi
 REGOLE PER IL TESTO (in ITALIANO):
 1. Inizio chiaro e d'impatto: "🌍 MACRO OUTLOOK: Il calendario e gli eventi chiave della prossima settimana sui mercati"
 2. Elenca e spiega i 3-4 principali appuntamenti macroeconomici previsti per la settimana in arrivo (es. decisioni sui tassi di interesse FED o BCE, dati sull'inflazione CPI/PCE, report sul lavoro NFP, PIL, stime di crescita o tensioni geopolitiche).
-3. Fornisci la tua interpretazione di come questi dati potrebbero influenzare i mercati globali ($S&P500, $NSDQ100, $EuroStoxx) e l'impatto potenziale sul nostro portafoglio.
-4. Mantieni la lunghezza totale sotto i 1500 caratteri.
-5. Stile lucido, professionale, accessibile ed esaustivo.
+3. Fornisci la tua interpretazione di come questi dati potrebbero influenzare i mercati globali e l'impatto potenziale sul nostro portafoglio.
+4. OBBLIGATORIO - INSERISCI I TAG NEL TESTO: Devi obbligatoriamente includere ed integrare nel testo i tag degli indici di mercato principali (es. $SPX500, $NSDQ100, $EuroStoxx) E ALMENO 2-3 TAG di titoli del nostro portafoglio particolarmente sensibili ai dati macro (es. $NVDA, $ENI.MI, $NOVO-B.CO, $MSFT, $CCJ, $ABBV).
+5. Mantieni la lunghezza totale sotto i 1500 caratteri.
+6. Stile lucido, professionale, accessibile ed esaustivo.
 
 Output ONLY the post text in Italian."""
 
