@@ -62,10 +62,13 @@ jobs:
               eu_open)    SESSION_NAME="European market open" ;;
               us_open)    SESSION_NAME="U.S. market open" ;;
               us_close)   SESSION_NAME="U.S. market close" ;;
-              weekly_sat) SESSION_NAME="Weekly recap (Sat)" ;;
-              weekly_sun) SESSION_NAME="Weekly recap (Sun)" ;;
-              monthly)    SESSION_NAME="Monthly recap" ;;
-              *)          SESSION_NAME="$FORCED_SESSION" ;;
+              weekly_sat)        SESSION_NAME="Weekly recap (Sat)" ;;
+              weekly_sun)        SESSION_NAME="Weekly recap (Sun)" ;;
+              monthly)           SESSION_NAME="Monthly recap" ;;
+              stock_focus)       SESSION_NAME="Stock focus" ;;
+              portfolio_outlook) SESSION_NAME="Weekly portfolio outlook" ;;
+              macro_outlook)     SESSION_NAME="Weekly macro outlook" ;;
+              *)                 SESSION_NAME="$FORCED_SESSION" ;;
             esac
             echo "Session forced to: $SESSION_NAME"
           elif [ "$TRIGGER" = "repository_dispatch" ]; then

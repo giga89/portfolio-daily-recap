@@ -46,11 +46,14 @@ ETORO_FOOTER_SHORT = (
 )
 
 # Session name constants
-SESSION_US_CLOSE    = "U.S. market close"
-SESSION_WEEKLY_SAT  = "Weekly recap (Sat)"
-SESSION_WEEKLY_SUN  = "Weekly recap (Sun)"
-SESSION_MONTHLY     = "Monthly recap"
-SESSION_MONDAY      = "Monday decision post"
+SESSION_US_CLOSE                 = "U.S. market close"
+SESSION_WEEKLY_SAT               = "Weekly recap (Sat)"
+SESSION_WEEKLY_SUN               = "Weekly recap (Sun)"
+SESSION_MONTHLY                  = "Monthly recap"
+SESSION_MONDAY                   = "Monday decision post"
+SESSION_STOCK_FOCUS              = "Stock focus"
+SESSION_WEEKLY_PORTFOLIO_OUTLOOK = "Weekly portfolio outlook"
+SESSION_WEEKLY_MACRO_OUTLOOK     = "Weekly macro outlook"
 
 
 def _strip_html(text: str) -> str:
@@ -137,13 +140,16 @@ def publish_all(
     portfolio_weekly  = data.get("portfolio_weekly", None)
 
     market_session = os.environ.get("MARKET_SESSION", "Daily recap")
-    is_us_close  = SESSION_US_CLOSE.lower() in market_session.lower()
-    is_weekly    = any(s.lower() in market_session.lower()
-                       for s in [SESSION_WEEKLY_SAT, SESSION_WEEKLY_SUN, "weekly"])
-    is_monthly   = SESSION_MONTHLY.lower() in market_session.lower()
-    is_monday    = SESSION_MONDAY.lower() in market_session.lower()
+    is_us_close          = SESSION_US_CLOSE.lower() in market_session.lower()
+    is_weekly            = any(s.lower() in market_session.lower()
+                               for s in [SESSION_WEEKLY_SAT, SESSION_WEEKLY_SUN, "weekly"])
+    is_monthly           = SESSION_MONTHLY.lower() in market_session.lower()
+    is_monday            = SESSION_MONDAY.lower() in market_session.lower()
+    is_stock_focus       = SESSION_STOCK_FOCUS.lower() in market_session.lower()
+    is_portfolio_outlook = SESSION_WEEKLY_PORTFOLIO_OUTLOOK.lower() in market_session.lower()
+    is_macro_outlook     = SESSION_WEEKLY_MACRO_OUTLOOK.lower() in market_session.lower()
 
-    # ── Monday decision + empathy post (Telegram only) ────────────────────
+    # ── Special Sessions ──────────────────────────────────────────────────
     if is_monday:
         print("\n" + "=" * 60)
         print(f"📅 MONDAY SESSION — Decision & Empathy Post")
@@ -154,6 +160,27 @@ def publish_all(
             portfolio_weights=portfolio_weights,
             pie_chart_path=pie_chart_path,
         ))
+        return results
+
+    if is_stock_focus:
+        print("\n" + "=" * 60)
+        print(f"🔍 DAILY SESSION — Single Stock Focus Deep-Dive")
+        print("=" * 60)
+        results.update(_publish_stock_focus_post())
+        return results
+
+    if is_portfolio_outlook:
+        print("\n" + "=" * 60)
+        print(f"📅 SATURDAY SESSION — Weekly Portfolio Outlook")
+        print("=" * 60)
+        results.update(_publish_weekly_portfolio_outlook())
+        return results
+
+    if is_macro_outlook:
+        print("\n" + "=" * 60)
+        print(f"🌍 SATURDAY SESSION — Weekly Global Macro Outlook")
+        print("=" * 60)
+        results.update(_publish_weekly_macro_outlook())
         return results
 
     print("\n" + "=" * 60)
@@ -446,5 +473,107 @@ def _publish_instagram(
     else:
         print("   ⚠️  No images — Instagram post skipped.")
         results["instagram_post"] = False
+
+    return results
+
+
+# ── Artifact Saving & Special Session Publishers ──────────────────────────────
+
+def _save_post_to_artifacts(filename: str, title: str, content: str):
+    """
+    Save generated post content into output/ and the AGY conversation artifacts folder.
+    """
+    os.makedirs("output", exist_ok=True)
+    out_path = os.path.join("output", filename)
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"💾 Saved post to {out_path}")
+
+    # Also attempt to copy to conversation artifacts directory if it exists
+    brain_dir = os.environ.get("CONVERSATION_ARTIFACTS_DIR", r"C:\Users\andre\.gemini\antigravity\brain\0f2f1dd3-ac81-49cc-b9be-1d45e0dd1585")
+    if os.path.exists(brain_dir):
+        art_dir = os.path.join(brain_dir, "generated_posts")
+        os.makedirs(art_dir, exist_ok=True)
+        art_path = os.path.join(art_dir, filename)
+        with open(art_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"📦 Saved post artifact to {art_path}")
+
+
+def _publish_stock_focus_post(ticker: str = None) -> dict:
+    """Publish Daily Stock Focus post to Telegram and save to artifacts."""
+    results = {}
+    ticker_sym, post_text = ai_news_generator.generate_stock_focus_post(ticker)
+    if not post_text:
+        print("⚠️ Stock focus post text empty, skipping publish.")
+        return {"telegram_stock_focus": False}
+
+    full_text = post_text + ETORO_FOOTER_LONG
+    _save_post_to_artifacts(f"stock_focus_{ticker_sym}.txt", f"Stock Focus - {ticker_sym}", full_text)
+
+    # Telegram send
+    if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
+        try:
+            telegram_sender.send_telegram_message(full_text)
+            print(f"✅ Stock Focus post for {ticker_sym} published to Telegram")
+            results["telegram_stock_focus"] = True
+        except Exception as e:
+            print(f"❌ Telegram send failed for Stock Focus: {e}")
+            results["telegram_stock_focus"] = False
+    else:
+        print("   ⏭️  Telegram not configured.")
+        results["telegram_stock_focus"] = False
+
+    return results
+
+
+def _publish_weekly_portfolio_outlook() -> dict:
+    """Publish Saturday Portfolio Outlook post to Telegram and save to artifacts."""
+    results = {}
+    post_text = ai_news_generator.generate_weekly_portfolio_outlook()
+    if not post_text:
+        print("⚠️ Weekly portfolio outlook post text empty, skipping publish.")
+        return {"telegram_portfolio_outlook": False}
+
+    full_text = post_text + ETORO_FOOTER_LONG
+    _save_post_to_artifacts("weekly_portfolio_outlook.txt", "Weekly Portfolio Outlook", full_text)
+
+    if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
+        try:
+            telegram_sender.send_telegram_message(full_text)
+            print("✅ Weekly Portfolio Outlook published to Telegram")
+            results["telegram_portfolio_outlook"] = True
+        except Exception as e:
+            print(f"❌ Telegram send failed for Portfolio Outlook: {e}")
+            results["telegram_portfolio_outlook"] = False
+    else:
+        print("   ⏭️  Telegram not configured.")
+        results["telegram_portfolio_outlook"] = False
+
+    return results
+
+
+def _publish_weekly_macro_outlook() -> dict:
+    """Publish Saturday Global Macro Outlook post to Telegram and save to artifacts."""
+    results = {}
+    post_text = ai_news_generator.generate_weekly_macro_outlook()
+    if not post_text:
+        print("⚠️ Weekly macro outlook post text empty, skipping publish.")
+        return {"telegram_macro_outlook": False}
+
+    full_text = post_text + ETORO_FOOTER_LONG
+    _save_post_to_artifacts("weekly_macro_outlook.txt", "Weekly Macro Outlook", full_text)
+
+    if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
+        try:
+            telegram_sender.send_telegram_message(full_text)
+            print("✅ Weekly Global Macro Outlook published to Telegram")
+            results["telegram_macro_outlook"] = True
+        except Exception as e:
+            print(f"❌ Telegram send failed for Macro Outlook: {e}")
+            results["telegram_macro_outlook"] = False
+    else:
+        print("   ⏭️  Telegram not configured.")
+        results["telegram_macro_outlook"] = False
 
     return results

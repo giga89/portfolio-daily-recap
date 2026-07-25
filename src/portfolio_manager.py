@@ -416,3 +416,91 @@ def sync_portfolio(bullaware_weights):
     save_config(current_config)
 
     return current_tickers
+
+
+# ── Dual / Multi-Exchange Ticker Tags & Related Competitors Mapping ───────────
+
+MULTI_TAG_MAP = {
+    'ENI.MI': ['$ENI.MI', '$E'],
+    'ENI': ['$ENI.MI', '$E'],
+    'NOVO-B.CO': ['$NOVO-B.CO', '$NVO'],
+    'AZN.L': ['$AZN.L', '$AZN'],
+    '1211.HK': ['$1211.HK', '$BYDDY'],
+    '1919.HK': ['$1919.HK', '$CICOY'],
+    '2318.HK': ['$2318.HK', '$PNGAY'],
+    'RACE': ['$RACE', '$RACE.MI'],
+    'ULVR.L': ['$ULVR.L', '$UL'],
+    'VOW3.DE': ['$VOW3.DE', '$VWAGY'],
+    'ABT.US': ['$ABT.US', '$ABT'],
+    'ABT': ['$ABT.US', '$ABT'],
+    'PRY.MI': ['$PRY.MI', '$PRY'],
+    'ENEL.MI': ['$ENEL.MI', '$ENLAY'],
+}
+
+RELATED_TICKERS_MAP = {
+    'NVDA': ['$AMD', '$AVGO', '$TSM'],
+    'MSFT': ['$GOOG', '$AMZN', '$AAPL'],
+    'AMZN': ['$MELI', '$WMT', '$MSFT'],
+    'GOOG': ['$MSFT', '$AMZN', '$META'],
+    'LLY': ['$NOVO-B.CO', '$NVO', '$PFE'],
+    'NOVO-B.CO': ['$LLY', '$NVO', '$PFE'],
+    'PLTR': ['$SNOW', '$AI', '$MSFT'],
+    'AVGO': ['$NVDA', '$QCOM', '$TXN'],
+    'TSM': ['$NVDA', '$AVGO', '$INTC'],
+    'ABBV': ['$LLY', '$AZN.L', '$JNJ'],
+    'ABT.US': ['$MDT', '$BSX', '$SYK'],
+    'HUM': ['$UNH', '$CVS', '$CI'],
+    'CCJ': ['$URA', '$LEU', '$NXE'],
+    'ENEL.MI': ['$IBE.MC', '$EDP.LS', '$RWE.DE'],
+    'ENI.MI': ['$SHEL', '$TTE', '$BP'],
+    'ETOR': ['$HOOD', '$COIN', '$IBKR'],
+    'GLEN.L': ['$RIO.L', '$BHP.L', '$AAL.L'],
+    'MAU.PA': ['$TTE', '$ENI.MI', '$SHEL'],
+    'PRY.MI': ['$NEX.PA', '$NKT.CO', '$ENEL.MI'],
+    'RACE': ['$VOW3.DE', '$MBG.DE', '$P911.DE'],
+    'VOW3.DE': ['$RACE', '$MBG.DE', '$BMW.DE'],
+    'MELI': ['$AMZN', '$BABA', '$SE'],
+    '1211.HK': ['$TSLA', '$9866.HK', '$9868.HK'],
+    '1919.HK': ['$1138.HK', '$ZIM', '$MATX'],
+    '2318.HK': ['$2628.HK', '$3968.HK', '$939.HK'],
+    'SX7PEX.DE': ['$BAC', '$JPM', '$HSBA.L'],
+    'IEUR': ['$VGK', '$EZU', '$FEZ'],
+    'IQQL.DE': ['$QUAL', '$IWDA.L', '$VWCE.L'],
+    'IEMG': ['$EEM', '$VWO', '$IEMG'],
+    'WDEF.L': ['$IDVY.L', '$VHYL.L', '$WDEF.L'],
+    'INDO.PA': ['$EIDO', '$INDO.PA', '$IEMG'],
+    'PPFB.DE': ['$GLD', '$IAU', '$SLV'],
+    'XEON.DE': ['$CSH2.PA', '$XEON.DE', '$IB01.L'],
+    'IB01.L': ['$SHY', '$BIL', '$XEON.DE'],
+    'TRIG.L': ['$UKW.L', '$FSFL.L', '$TRIG.L'],
+    'VOF.L': ['$VNM', '$VEIL.L', '$VOF.L'],
+    'TRX': ['$BTC', '$ETH', '$SOL'],
+    'NET': ['$CRWD', '$PANW', '$DDOG'],
+    'PYPL': ['$SQ', '$V', '$MA'],
+    'AZN.L': ['$LLY', '$NOVO-B.CO', '$PFE'],
+    'MNODL.L': ['$PKG', '$IP', '$DSMI.L'],
+    'NVTKL.L': ['$GAZP.ME', '$ROSN.ME', '$LKOH.ME'],
+}
+
+
+def get_ticker_all_tags(ticker: str) -> list[str]:
+    """
+    Return all ticker tags associated with a stock across different exchanges (e.g. ENI.MI -> ['$ENI.MI', '$E']).
+    """
+    clean = ticker.upper()
+    if clean in MULTI_TAG_MAP:
+        return MULTI_TAG_MAP[clean]
+    # Default fallback
+    base_tag = f"${clean}"
+    return [base_tag]
+
+
+def get_related_tickers(ticker: str) -> list[str]:
+    """
+    Return 2-3 related/competitor ticker tags for a given ticker.
+    """
+    clean = ticker.upper()
+    if clean in RELATED_TICKERS_MAP:
+        return RELATED_TICKERS_MAP[clean]
+    return ["$S&P500", "$NSDQ100"]
+

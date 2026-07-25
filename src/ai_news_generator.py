@@ -1305,3 +1305,244 @@ Output ONLY the post text, no introduction or explanation."""
     except Exception as exc:
         print(f"❌ Error generating empathy post: {exc}")
         return ""
+
+
+# ── 1. Daily Stock Focus Deep-Dive Post ────────────────────────────────────────
+
+def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
+    """
+    Generates a deep-dive asset post for eToro & Telegram:
+    "Perché ho il titolo X, possibili upside e possibili downside".
+    Includes primary tags across exchanges (e.g. $ENI.MI and $E) + 2-3 related competitor tags.
+
+    Returns:
+        tuple: (ticker_symbol, formatted_post_text)
+    """
+    from portfolio_manager import load_config, get_ticker_all_tags, get_related_tickers
+    import random
+
+    config = load_config()
+    tickers = config.get("tickers", {})
+
+    if not tickers:
+        print("⚠️ No tickers in portfolio config for stock focus post")
+        return "", ""
+
+    # Exclude money market ETFs from stock focus if possible
+    stock_candidates = [t for t in tickers.keys() if t not in ['XEON.DE', 'IB01.L']]
+    if not stock_candidates:
+        stock_candidates = list(tickers.keys())
+
+    if not ticker or ticker not in tickers:
+        ticker = random.choice(stock_candidates)
+
+    yahoo_ticker, company_name = tickers[ticker]
+    primary_tags = get_ticker_all_tags(ticker)
+    related_tags = get_related_tickers(ticker)
+
+    primary_tags_str = " ".join(primary_tags)
+    related_tags_str = " ".join(related_tags)
+
+    print(f"📌 Generating Stock Focus post for {ticker} ({company_name})...")
+    print(f"   Primary tags: {primary_tags_str} | Related tags: {related_tags_str}")
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("⚠️ GEMINI_API_KEY not set, skipping stock focus post generation")
+        return ticker, ""
+
+    models_to_try = [
+        "gemini-2.0-flash",
+        "gemini-2.5-flash",
+        "gemini-flash-latest",
+    ]
+
+    prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro.
+Scrivi un post di approfondimento e analisi su un singolo titolo presente nel nostro portafoglio.
+
+TITOLO IN FOCUS:
+- Azienda: {company_name}
+- Ticker: {ticker} (Yahoo: {yahoo_ticker})
+- Tag principali da includere nel testo: {primary_tags_str}
+- Tag di titoli correlati/competitor da includere nel testo: {related_tags_str}
+
+REGOLE PER IL TESTO (in ITALIANO):
+1. Titolo iniziale accattivante: "🔍 FOCUS ASSET: Perché ho in portafoglio {company_name} ({primary_tags[0]})"
+2. Spiega brevemente LA TESI DI INVESTIMENTO ("Perché ho questo titolo").
+3. Sezione "🚀 POSSIBILI UPSIDE": 2-3 catalizzatori principali di crescita, trend o punti di forza aziendali.
+4. Sezione "⚠️ POSSIBILI DOWNSIDE": 2-3 rischi principali, venti contrari o sfide di mercato/settore.
+5. Inserisci in modo fluido ed organico i tag principali ({primary_tags_str}) e i tag dei titoli correlati ({related_tags_str}) nel testo.
+6. Mantieni un tono trasparente, professionale ed esaustivo ma facile da leggere (massimo 1400 caratteri).
+7. Usa 3-5 emoji appropriate.
+
+Output ONLY the post text in Italian, no extra conversational preamble."""
+
+    try:
+        client = genai.Client(api_key=api_key)
+        config_gen = types.GenerateContentConfig(temperature=0.85)
+
+        for model_name in models_to_try:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config_gen,
+                )
+                if response and response.text:
+                    print(f"✅ Stock Focus post generated for {ticker} using {model_name}")
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "stock_focus_post")
+                    return ticker, response.text.strip()
+            except Exception as exc:
+                print(f"⚠️ Stock focus model {model_name} failed: {exc}")
+                time.sleep(1)
+
+        print(f"❌ All models failed for stock focus post on {ticker}")
+        return ticker, ""
+
+    except Exception as exc:
+        print(f"❌ Error generating stock focus post: {exc}")
+        return ticker, ""
+
+
+# ── 2. Saturday Afternoon: Weekly Portfolio Outlook ───────────────────────────
+
+def generate_weekly_portfolio_outlook() -> str:
+    """
+    Generates Saturday afternoon post:
+    "Cosa ci aspetta nella prossima settimana per i titoli in portafoglio" (earnings, catalysts, events).
+
+    Returns:
+        str: Formatted post in Italian
+    """
+    from portfolio_manager import load_config
+    config = load_config()
+    tickers = config.get("tickers", {})
+    ticker_names = [f"{name} (${t})" for t, (_, name) in list(tickers.items())[:15]]
+    context_str = ", ".join(ticker_names)
+
+    print("📅 Generating Saturday Portfolio Outlook post...")
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("⚠️ GEMINI_API_KEY not set, skipping portfolio outlook post")
+        return ""
+
+    models_to_try = [
+        "gemini-2.0-flash",
+        "gemini-2.5-flash",
+        "gemini-flash-latest",
+    ]
+
+    prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro.
+Scrivi il post del Sabato pomeriggio per i tuoi follower e copier focalizzato su:
+"COSA CI ASPETTA NELLA PROSSIMA SETTIMANA PER I TITOLI IN PORTAFOGLIO".
+
+Usa il tuo strumento di ricerca Google per cercare le notizie, le trimestrali (earnings), gli eventi societari e i catalizzatori previsti per la prossima settimana relativi ai titoli del nostro portafoglio.
+
+PORTAFOGLIO PRINCIPALE:
+{context_str}
+
+REGOLE PER IL TESTO (in ITALIANO):
+1. Inizio caldo ed empatico: "📅 ANTEPRIMA SETTIMANALE: I catalizzatori dei nostri titoli per la prossima settimana"
+2. Analizza 3-4 appuntamenti o eventi chiave previsti per i nostri titoli nella prossima settimana (es. risultati trimestrali, lanci prodotti, assemblee, date ex-dividendo o attesa per dati di settore).
+3. Spiega in modo chiaro ed esaustivo cosa monitoreremo e come questi eventi si inseriscono nella nostra tesi di investimento.
+4. Usa i tag delle aziende menzionate (es. $NVDA, $LLY, $MSFT, $AZN.L).
+5. Mantieni la lunghezza totale sotto i 1500 caratteri.
+6. Stile trasparente, appassionato ed empatico.
+
+Output ONLY the post text in Italian."""
+
+    try:
+        client = genai.Client(api_key=api_key)
+        config_gen = types.GenerateContentConfig(temperature=0.85)
+
+        for model_name in models_to_try:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config_gen,
+                )
+                if response and response.text:
+                    print(f"✅ Portfolio Outlook post generated using {model_name}")
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "portfolio_outlook_post")
+                    return response.text.strip()
+            except Exception as exc:
+                print(f"⚠️ Portfolio outlook model {model_name} failed: {exc}")
+                time.sleep(1)
+
+        print("❌ All models failed for portfolio outlook post")
+        return ""
+
+    except Exception as exc:
+        print(f"❌ Error generating portfolio outlook post: {exc}")
+        return ""
+
+
+# ── 3. Saturday Afternoon: Global Macro Outlook ───────────────────────────────
+
+def generate_weekly_macro_outlook() -> str:
+    """
+    Generates Saturday afternoon post:
+    "Cosa ci aspetta nella prossima settimana a livello macroeconomico globale" (FED/ECB, CPI, NFP, GDP).
+
+    Returns:
+        str: Formatted post in Italian
+    """
+    print("🌍 Generating Saturday Global Macro Outlook post...")
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("⚠️ GEMINI_API_KEY not set, skipping macro outlook post")
+        return ""
+
+    models_to_try = [
+        "gemini-2.0-flash",
+        "gemini-2.5-flash",
+        "gemini-flash-latest",
+    ]
+
+    prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro.
+Scrivi il post del Sabato pomeriggio per i tuoi follower e copier focalizzato su:
+"COSA CI ASPETTA NELLA PROSSIMA SETTIMANA A LIVELLO MACROECONOMICO GLOBALE".
+
+Usa il tuo strumento di ricerca Google per consultare il calendario macroeconomico globale della prossima settimana (dati USA, Europa, Cina, banche centrali FED/BCE).
+
+REGOLE PER IL TESTO (in ITALIANO):
+1. Inizio chiaro e d'impatto: "🌍 MACRO OUTLOOK: Il calendario e gli eventi chiave della prossima settimana sui mercati"
+2. Elenca e spiega i 3-4 principali appuntamenti macroeconomici previsti per la settimana in arrivo (es. decisioni sui tassi di interesse FED o BCE, dati sull'inflazione CPI/PCE, report sul lavoro NFP, PIL, stime di crescita o tensioni geopolitiche).
+3. Fornisci la tua interpretazione di come questi dati potrebbero influenzare i mercati globali ($S&P500, $NSDQ100, $EuroStoxx) e l'impatto potenziale sul nostro portafoglio.
+4. Mantieni la lunghezza totale sotto i 1500 caratteri.
+5. Stile lucido, professionale, accessibile ed esaustivo.
+
+Output ONLY the post text in Italian."""
+
+    try:
+        client = genai.Client(api_key=api_key)
+        config_gen = types.GenerateContentConfig(temperature=0.85)
+
+        for model_name in models_to_try:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config_gen,
+                )
+                if response and response.text:
+                    print(f"✅ Global Macro Outlook post generated using {model_name}")
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "macro_outlook_post")
+                    return response.text.strip()
+            except Exception as exc:
+                print(f"⚠️ Macro outlook model {model_name} failed: {exc}")
+                time.sleep(1)
+
+        print("❌ All models failed for macro outlook post")
+        return ""
+
+    except Exception as exc:
+        print(f"❌ Error generating macro outlook post: {exc}")
+        return ""
+

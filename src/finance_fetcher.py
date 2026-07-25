@@ -424,17 +424,22 @@ def fetch_stock_data():
                 'is_us_stock': is_us_stock
             }
 
-            # Calculate weekly change (last 5 trading days)
-            if len(hist) >= 5:
+            # Calculate weekly change (5 full trading days from previous Friday close)
+            if len(hist) >= 6:
                 current = hist['Close'].iloc[-1]
-                week_ago = hist['Close'].iloc[-5]
+                week_ago = hist['Close'].iloc[-6]
                 weekly_change = ((current - week_ago) / week_ago) * 100
-                if math.isnan(weekly_change):
-                    print(f"⚠️  {etoro_symbol}: weekly_change is NaN, setting to 0.0")
-                    weekly_change = 0.0
-                stock_data[etoro_symbol]['weekly_change'] = weekly_change
+            elif len(hist) >= 2:
+                current = hist['Close'].iloc[-1]
+                week_ago = hist['Close'].iloc[0]
+                weekly_change = ((current - week_ago) / week_ago) * 100
             else:
-                 stock_data[etoro_symbol]['weekly_change'] = 0.0
+                weekly_change = 0.0
+
+            if math.isnan(weekly_change):
+                print(f"⚠️  {etoro_symbol}: weekly_change is NaN, setting to 0.0")
+                weekly_change = 0.0
+            stock_data[etoro_symbol]['weekly_change'] = weekly_change
             
             print(f"{etoro_symbol} ({yahoo_ticker}): Daily {daily_change:.2f}%, Monthly {monthly_change:.2f}%, Yearly {yearly_change:.2f}%")
             

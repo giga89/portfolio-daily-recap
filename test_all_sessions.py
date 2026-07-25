@@ -236,5 +236,37 @@ def main():
     )
     print_session_preview("Weekly recap (Sun)", sun_recap_mock)
 
+    # 6. Daily Stock Focus Deep-Dive
+    stock_focus_mock = (
+        "🔍 FOCUS ASSET: Perché ho in portafoglio Eni S.p.A. ($ENI.MI / $E)\n\n"
+        "La nostra posizione su $ENI.MI si basa su una tesi di transizione energetica bilanciata e rendimento elevato.\n\n"
+        "🚀 POSSIBILI UPSIDE:\n"
+        "1. Solido dividend yield superiore al 6% con piano di buyback attivo.\n"
+        "2. Crescita del modello 'Satellite' (Plenitude e Enilive).\n\n"
+        "⚠️ POSSIBILI DOWNSIDE:\n"
+        "1. Volatilità del prezzo del greggio Brent e gas naturale.\n"
+        "2. Rallentamento della domanda globale di raffinazione.\n\n"
+        "Competitor di settore da monitorare: $SHEL, $TTE, $BP."
+    )
+    print_session_preview("Stock focus", stock_focus_mock)
+
+    # 7. Saturday Weekly Portfolio Outlook
+    portfolio_outlook_mock = (
+        "📅 ANTEPRIMA SETTIMANALE: I catalizzatori dei nostri titoli per la prossima settimana\n\n"
+        "La prossima settimana si preannuncia ricca di eventi aziendali per i principali titoli in portafoglio. "
+        "In primo piano le trimestrali di $NVDA e $MSFT, che forniranno dettagli cruciali sulla spesa in infrastrutture AI. "
+        "Nel settore salute, attesi aggiornamenti dai trial clinici di $LLY e $AZN.L."
+    )
+    print_session_preview("Weekly portfolio outlook", portfolio_outlook_mock)
+
+    # 8. Saturday Weekly Macro Outlook
+    macro_outlook_mock = (
+        "🌍 MACRO OUTLOOK: Il calendario e gli eventi chiave della prossima settimana sui mercati\n\n"
+        "I mercati globali ($S&P500, $NSDQ100) si preparano a una settimana decisiva sul fronte macroeconomico. "
+        "Attesa per la riunione della FED sui tassi di interesse e per i nuovi dati sull'inflazione CPI in USA ed Europa. "
+        "Un quadro fondamentale per capire la traiettoria dei tassi nella seconda metà dell'anno."
+    )
+    print_session_preview("Weekly macro outlook", macro_outlook_mock)
+
 if __name__ == '__main__':
     main()
