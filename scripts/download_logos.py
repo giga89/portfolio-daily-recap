@@ -73,6 +73,8 @@ DOMAIN_MAP = {
     "TRIG.L":     "trig-ltd.com",
     "MAU.PA":     "maureletprom.fr",
     "ULVR.L":     "unilever.com",
+    "MNODL.L":    "mondigroup.com",
+    "NVTKL.L":    "novatek.ru",
     # ── Asia ────────────────────────────────────────────────────────────────
     "1211.HK":    "byd.com",
     "1919.HK":    "coscoshipping.com",
@@ -87,11 +89,10 @@ DOMAIN_MAP = {
     "INDO.PA":    "amundi.com",
     "PPFB.DE":    "ishares.com",
     "XEON.DE":    "dws.com",
-    "VOF.L":      "vinacapital-mi.com",
+    "VOF.L":      "vinacapital.com",
     # ── Other ────────────────────────────────────────────────────────────────
     "ETOR":       "etoro.com",
     "TRX":        "tron.network",
-    # MNODL.L and NVTKL.L are sanctioned Russian stocks — no logo needed
 }
 
 # CDN base URL
@@ -151,6 +152,7 @@ def _save_logo(ticker: str, raw_bytes: bytes) -> bool:
 def download_logo(ticker: str, force: bool = False) -> bool:
     """
     Download and save the logo for a single ticker.
+    Uses multi-provider fallback strategy (tickerlogos -> icon.horse -> parqet -> google favicons).
     Returns True if the logo was successfully saved (or already existed).
     """
     if not force and _logo_exists(ticker):
@@ -158,23 +160,41 @@ def download_logo(ticker: str, force: bool = False) -> bool:
         return True
 
     domain = _fetch_domain(ticker)
-    if not domain:
-        print(f"  ✗ {ticker:<20} no domain found — skipping.")
-        return False
 
-    url = f"{CDN_BASE}/{domain}"
-    try:
-        r = requests.get(url, timeout=10)
-        if r.ok and len(r.content) > 200:
-            _save_logo(ticker, r.content)
-            print(f"  ✓ {ticker:<20} saved ({len(r.content)//1024}KB) from {domain}")
-            return True
-        else:
-            print(f"  ✗ {ticker:<20} CDN returned {r.status_code} for {domain}")
-            return False
-    except Exception as e:
-        print(f"  ✗ {ticker:<20} download error: {e}")
-        return False
+    # Build candidate URLs
+    candidate_urls = []
+    if domain:
+        candidate_urls.append(f"{CDN_BASE}/{domain}")
+        candidate_urls.append(f"https://icon.horse/icon/{domain}")
+    candidate_urls.append(f"https://assets.parqet.com/logos/symbol/{ticker}")
+    if domain:
+        candidate_urls.append(f"https://www.google.com/s2/favicons?domain={domain}&sz=128")
+
+    headers = {'User-Agent': 'Mozilla/5.0'}
+
+    for url in candidate_urls:
+        try:
+            r = requests.get(url, headers=headers, timeout=10)
+            if r.ok and len(r.content) > 500:
+                # Check if image can be parsed by PIL if available
+                if PIL_AVAILABLE:
+                    try:
+                        img = Image.open(io.BytesIO(r.content))
+                        if img.format in ['PNG', 'JPEG', 'WEBP', 'ICO']:
+                            _save_logo(ticker, r.content)
+                            print(f"  ✓ {ticker:<20} saved ({len(r.content)//1024}KB) from {url}")
+                            return True
+                    except Exception:
+                        continue
+                else:
+                    _save_logo(ticker, r.content)
+                    print(f"  ✓ {ticker:<20} saved ({len(r.content)//1024}KB) from {url}")
+                    return True
+        except Exception:
+            continue
+
+    print(f"  ✗ {ticker:<20} failed across all logo providers")
+    return False
 
 
 def load_all_tickers() -> list[str]:

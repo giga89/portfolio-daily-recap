@@ -120,6 +120,9 @@ DEFAULT_EMOJIS = {
     '1919.HK': '🚢',
     '2318.HK': '🏦',
     '1211.HK': '🔋',   # BYD
+    'PPFB.DE': '🥇',   # Physical Gold/Metals
+    'ULVR.L': '🧼',    # Unilever
+    'VOF.L': '🇻🇳',     # Vietnam Opportunity Fund
 }
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../portfolio_config.json')
@@ -218,6 +221,8 @@ def load_config():
         try:
             with open(CONFIG_FILE, 'r') as f:
                 local_data = json.load(f)
+                if expire_new_emojis(local_data):
+                    save_config(local_data)
                 # If we are here, it means Gist was empty or failed. 
                 # We should try to push this local data to Gist to initialize it.
                 print("📤 Initializing Gist config from local file...")
@@ -227,7 +232,10 @@ def load_config():
             print(f"Error loading config file: {e}")
 
     # 3. Defaults
-    return migrate_from_defaults()
+    cfg = migrate_from_defaults()
+    if expire_new_emojis(cfg):
+        save_config(cfg)
+    return cfg
 
 def get_added_dates():
     """Get the dictionary of when tickers were added."""
@@ -236,7 +244,7 @@ def get_added_dates():
 
 def expire_new_emojis(config: dict) -> bool:
     """
-    Check every ticker whose emoji is still '\ud83c\udd95' (NEW) and
+    Check every ticker whose emoji is still '🆕' (\U0001F195) (NEW) and
     replace it with a permanent emoji once it has been in the portfolio
     for more than 7 days.
 
@@ -245,7 +253,7 @@ def expire_new_emojis(config: dict) -> bool:
 
     The replacement priority:
       1. DEFAULT_EMOJIS (hardcoded per ticker)
-      2. '\ud83d\udcca' generic chart fallback
+      2. '📊' generic chart fallback
     """
     from datetime import date as _date, datetime as _datetime
 
@@ -255,7 +263,7 @@ def expire_new_emojis(config: dict) -> bool:
 
     today = _date.today()
     for ticker, emoji in list(emojis.items()):
-        if emoji != '\ud83c\udd95':
+        if emoji not in ['\U0001F195', '🆕']:
             continue   # nothing to do for non-new tickers
 
         added_str = added_dates.get(ticker)
@@ -269,8 +277,8 @@ def expire_new_emojis(config: dict) -> bool:
                 days = 0  # can't parse — leave as-is
 
         if days > 7:
-            replacement = DEFAULT_EMOJIS.get(ticker, '\ud83d\udcca')
-            print(f"\ud83d\udd52 {ticker}: \ud83c\udd95 expired ({days}d) → {replacement}")
+            replacement = DEFAULT_EMOJIS.get(ticker, '📊')
+            print(f"🕒 {ticker}: 🆕 expired ({days}d) → {replacement}")
             emojis[ticker] = replacement
             changed = True
 
