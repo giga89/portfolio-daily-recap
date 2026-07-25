@@ -1,10 +1,4 @@
 {
-    "added_dates": {
-        "1211.HK": "2026-06-03",
-        "PPFB.DE": "2026-06-03",
-        "ULVR.L": "2026-06-03",
-        "VOF.L": "2026-06-03"
-    },
     "emojis": {
         "1211.HK": "\ud83d\udd0b",
         "1919.HK": "\ud83d\udea2",
@@ -22,7 +16,6 @@
         "GOOG": "\ud83d\udd0d",
         "HUM": "\ud83c\udfe5",
         "IB01.L": "\ud83d\udcb5",
-        "IEMG": "\ud83c\udf0d",
         "IEUR": "\ufffd\ud83c\uddfa",
         "INDO.PA": "\ud83c\uddee\ud83c\udde9",
         "IQQL.DE": "\ud83d\udd25",
@@ -30,6 +23,7 @@
         "MAU.PA": "\ud83d\udee2\ufe0f",
         "MELI": "\ud83d\uded2",
         "MNODL.L": "\ud83d\udce6",
+        "MRVL": "\ud83d\udcca",
         "MSFT": "\ud83d\udcbb",
         "NOVO-B.CO": "\ud83d\udc89",
         "NVDA": "\ud83e\udd16",
@@ -38,6 +32,8 @@
         "PPFB.DE": "\ud83e\udd47",
         "PRY.MI": "\ud83d\udd0c",
         "RACE": "\ud83c\udfce\ufe0f",
+        "SPCX": "\ud83d\udcca",
+        "SPCX.RTH": "\ud83d\udcca",
         "SX7PEX.DE": "\ud83c\udfdb\ufe0f",
         "TRIG.L": "\ud83c\udf2c\ufe0f",
         "TRX": "\ud83e\ude99",
@@ -113,10 +109,6 @@
             "IB01.L",
             "iShares Treasury Bond 0-1yr UCITS ETF"
         ],
-        "IEMG": [
-            "IEMG",
-            "iShares Core MSCI Emerging Markets ETF"
-        ],
         "IEUR": [
             "IEUR",
             "iShares Core MSCI Europe UCITS ETF"
@@ -144,6 +136,10 @@
         "MNODL.L": [
             "MNDI.L",
             "Mondi PLC"
+        ],
+        "MRVL": [
+            "MRVL",
+            "Marvell Technology, Inc."
         ],
         "MSFT": [
             "MSFT",
@@ -176,6 +172,14 @@
         "RACE": [
             "RACE",
             "Ferrari"
+        ],
+        "SPCX": [
+            "SPCX",
+            "Space Exploration Technologies Corp."
+        ],
+        "SPCX.RTH": [
+            "SPCX.RTH",
+            "SPCX.RTH"
         ],
         "SX7PEX.DE": [
             "EXV1.DE",
