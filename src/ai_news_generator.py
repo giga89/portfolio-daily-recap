@@ -1329,20 +1329,30 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
         print("⚠️ No tickers in portfolio config for stock focus post")
         return "", ""
 
-    # Exclude money market ETFs and physical metal ETFs from stock focus candidates
-    stock_candidates = [t for t in tickers.keys() if t not in ['XEON.DE', 'IB01.L', 'PPFB.DE']]
-    if not stock_candidates:
-        stock_candidates = list(tickers.keys())
+    import time
 
-    if not ticker or ticker not in tickers:
+    # Case-insensitive ticker lookup dictionary for robustness
+    ticker_map = {t.upper(): t for t in tickers.keys()}
+
+    # Exclude money market ETFs and physical metal ETFs from stock focus candidates
+    stock_candidates = sorted([t for t in tickers.keys() if t not in ['XEON.DE', 'IB01.L', 'PPFB.DE']])
+    if not stock_candidates:
+        stock_candidates = sorted(list(tickers.keys()))
+
+    if ticker and ticker.upper() in ticker_map:
+        ticker = ticker_map[ticker.upper()]
+    else:
         used_tickers = get_used_stock_focus_tickers()
         unused = [t for t in stock_candidates if t not in used_tickers]
         if unused:
-            ticker = random.choice(unused)
+            seed_idx = int(time.time_ns()) % len(unused)
+            ticker = unused[seed_idx]
         else:
             # All have been used at least once; pick from the ones least recently used
             least_recent = [t for t in stock_candidates if t not in used_tickers[-len(stock_candidates)//2:]]
-            ticker = random.choice(least_recent) if least_recent else random.choice(stock_candidates)
+            pool = least_recent if least_recent else stock_candidates
+            seed_idx = int(time.time_ns()) % len(pool)
+            ticker = pool[seed_idx]
 
     save_used_stock_focus_ticker(ticker)
 

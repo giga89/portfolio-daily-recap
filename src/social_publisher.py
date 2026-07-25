@@ -163,10 +163,13 @@ def publish_all(
         return results
 
     if is_stock_focus:
+        specified_ticker = None
+        if ":" in market_session:
+            specified_ticker = market_session.split(":", 1)[1].strip()
         print("\n" + "=" * 60)
-        print(f"🔍 DAILY SESSION — Single Stock Focus Deep-Dive")
+        print(f"🔍 DAILY SESSION — Single Stock Focus Deep-Dive (Ticker: {specified_ticker or 'Auto-Rotate'})")
         print("=" * 60)
-        results.update(_publish_stock_focus_post())
+        results.update(_publish_stock_focus_post(specified_ticker))
         return results
 
     if is_portfolio_outlook:

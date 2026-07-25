@@ -65,6 +65,7 @@ jobs:
               weekly_sat)        SESSION_NAME="Weekly recap (Sat)" ;;
               weekly_sun)        SESSION_NAME="Weekly recap (Sun)" ;;
               monthly)           SESSION_NAME="Monthly recap" ;;
+              stock_focus:*)     SESSION_NAME="Stock focus:${FORCED_SESSION#stock_focus:}" ;;
               stock_focus)       SESSION_NAME="Stock focus" ;;
               portfolio_outlook) SESSION_NAME="Weekly portfolio outlook" ;;
               macro_outlook)     SESSION_NAME="Weekly macro outlook" ;;
