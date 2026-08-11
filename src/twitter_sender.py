@@ -15,7 +15,13 @@ Required env vars:
 
 import os
 import requests
-from requests_oauthlib import OAuth1
+
+try:
+    from requests_oauthlib import OAuth1
+    OAUTH1_AVAILABLE = True
+except ImportError:
+    OAuth1 = None
+    OAUTH1_AVAILABLE = False
 
 TWEET_URL = "https://api.twitter.com/2/tweets"
 
@@ -23,7 +29,9 @@ ETORO_PROFILE  = "etoro.com/people/andrearavalli"
 ETORO_REFERRAL = "etoro.tw/46qgHLr"
 
 
-def _get_oauth() -> OAuth1:
+def _get_oauth():
+    if not OAUTH1_AVAILABLE or OAuth1 is None:
+        raise ImportError("requests_oauthlib is required for Twitter OAuth1")
     return OAuth1(
         os.environ["TWITTER_API_KEY"],
         os.environ["TWITTER_API_SECRET"],

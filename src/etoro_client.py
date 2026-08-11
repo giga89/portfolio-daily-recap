@@ -21,6 +21,55 @@ import uuid
 
 BASE_URL = "https://public-api.etoro.com"
 
+MARKET_IDS = {
+    "PLTR": 7991,
+    "NVDA": 1137,
+    "MSFT": 1004,
+    "AMZN": 1005,
+    "GOOG": 1002,
+    "CCJ": 6634,
+    "URNM": 75677,
+    "LLY": 1567,
+    "NOVO-B.CO": 2260,
+    "SX7PEX.DE": 10595,
+    "MELI": 4108,
+    "ASML.AS": 1500,
+    "TSM": 4481,
+    "AVGO": 4236,
+    "MBG.DE": 1133,
+    "0005.HK": 5472,
+    "1211.HK": 2380,
+    "01211.HK": 2380,
+    "RACE": 1917,
+    "ENEL.MI": 1282,
+    "ENI.MI": 1283,
+    "PRY.MI": 1296,
+    "VOW3.DE": 1210,
+    "AZN.L": 2010,
+    "GLEN.L": 2035,
+    "TRIG.L": 2686,
+    "VOF.L": 2828,
+    "IEUR": 3150,
+    "IQQL.DE": 2913,
+    "WDEF.L": 3297,
+    "PPFB.DE": 2941,
+    "XEON.DE": 10559,
+    "IB01.L": 1442,
+    "HUM": 1512,
+    "ABBV": 1452,
+    "ABT.US": 1552,
+}
+
+
+def get_market_ids_for_tickers(tickers: List[str]) -> List[int]:
+    """Resolve a list of ticker symbols into eToro numeric market IDs."""
+    ids = []
+    for t in tickers:
+        clean = t.replace("$", "").strip().upper()
+        if clean in MARKET_IDS:
+            ids.append(MARKET_IDS[clean])
+    return ids
+
 
 def get_credentials() -> Tuple[Optional[str], Optional[str], str]:
     """Retrieve eToro credentials from environment."""

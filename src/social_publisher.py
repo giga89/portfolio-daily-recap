@@ -27,6 +27,7 @@ import facebook_sender
 import instagram_sender
 import etoro_sender
 import stock_focus_card
+import stock_focus_infographic
 import analytics_tracker
 import story_generator
 import ai_news_generator
@@ -572,20 +573,27 @@ def _publish_stock_focus_post(ticker: str = None) -> dict:
     full_text = post_text + ETORO_FOOTER_LONG
     _save_post_to_artifacts(f"stock_focus_{ticker_sym}.txt", f"Stock Focus - {ticker_sym}", full_text)
 
-    # 1. Generate 16:9 Stock Focus Card
-    card_path = f"output/stock_focus_{ticker_sym}.png"
+    # 1. Generate High-End Investor Infographic (Hitachi Style)
+    card_path = f"output/infographic_{ticker_sym}.png"
     try:
-        from portfolio_manager import load_config
-        config = load_config()
-        comp_name = config.get("tickers", {}).get(ticker_sym, [None, ticker_sym])[1]
-        card_path = stock_focus_card.generate_stock_focus_card(
+        card_path = stock_focus_infographic.generate_stock_infographic(
             ticker=ticker_sym,
-            company_name=comp_name,
             output_path=card_path,
         )
     except Exception as exc:
-        print(f"⚠️ Stock focus card generation warning: {exc}")
-        card_path = None
+        print(f"⚠️ Infographic generation warning: {exc}")
+        # Fallback to stock_focus_card if needed
+        try:
+            from portfolio_manager import load_config
+            config = load_config()
+            comp_name = config.get("tickers", {}).get(ticker_sym, [None, ticker_sym])[1]
+            card_path = stock_focus_card.generate_stock_focus_card(
+                ticker=ticker_sym,
+                company_name=comp_name,
+                output_path=f"output/stock_focus_{ticker_sym}.png",
+            )
+        except Exception:
+            card_path = None
 
     # 2. eToro Social Feed
     print("\n🐂 eToro Social Feed (Stock Focus):")
