@@ -24,6 +24,7 @@ import linkedin_sender
 import threads_sender
 import facebook_sender
 import instagram_sender
+import etoro_sender
 import story_generator
 import ai_news_generator
 import etoro_history
@@ -341,6 +342,26 @@ def publish_all(
         print("   ⏭️  Not configured (pending Meta restriction fix).")
         results["instagram_story"] = False
         results["instagram_post"] = False
+
+    # ── 8. eToro Social Feed (Every session — with Winners & Losers card) ────
+    print("\n🐂 eToro Social Feed:")
+    if etoro_sender.etoro_client.is_configured():
+        # Always prefer the Winners & Losers (Top & Flop) card as requested
+        card_to_upload = engagement_card_path if (engagement_card_path and os.path.exists(engagement_card_path)) else image_path
+        etoro_text = etoro_sender.build_etoro_post_text(
+            plain_recap=plain_recap,
+            portfolio_daily=portfolio_daily,
+            top_performers=top_performers,
+            session_name=market_session,
+        )
+        ok = etoro_sender.send_etoro_post(
+            text=etoro_text,
+            image_path=card_to_upload,
+        )
+        results["etoro"] = ok
+    else:
+        print("   ⏭️  Not configured (ETORO_USER_KEY missing).")
+        results["etoro"] = False
 
     # ── Summary ──────────────────────────────────────────────────────
     print("\n" + "=" * 60)

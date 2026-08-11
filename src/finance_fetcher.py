@@ -13,6 +13,11 @@ import json
 import pytz
 import pandas as pd
 import numpy as np
+try:
+    import etoro_client
+    ETORO_CLIENT_AVAILABLE = True
+except ImportError:
+    ETORO_CLIENT_AVAILABLE = False
 
 # Fuso orario USA (New York)
 NY_TZ = pytz.timezone('America/New_York')
@@ -163,12 +168,31 @@ def calculate_portfolio_ytd(stock_data, portfolio_weights=None):
     return weighted_sum
 
 
+def fetch_portfolio_weights():
+    """
+    Fetch exact portfolio weights from official eToro API, falling back to BullAware if needed.
+    """
+    if ETORO_CLIENT_AVAILABLE and etoro_client.is_configured():
+        print("📊 Fetching portfolio weights from official eToro API...")
+        weights = etoro_client.fetch_portfolio_weights()
+        if weights:
+            return weights
+        print("⚠️ Official eToro API returned empty weights, falling back to BullAware...")
+
+    return fetch_portfolio_weights_from_bullaware()
+
+
 def fetch_portfolio_weights_from_bullaware():
     """
     Fetch individual stock/ETF portfolio weights from BullAware using direct HTTP and Regex.
     Extracts the 'positions' JSON data embedded in the Next.js page.
     Returns dict with {ticker: weight_percentage}
     """
+    if ETORO_CLIENT_AVAILABLE and etoro_client.is_configured():
+        weights = etoro_client.fetch_portfolio_weights()
+        if weights:
+            return weights
+
     print("📊 Fetching portfolio weights from BullAware...")
     
     try:
@@ -533,10 +557,52 @@ def fetch_portfolio_history_from_etoro(start_year=2020):
     """
     Fetch historical monthly returns from eToro's public API and calculate cumulative return.
     Returns a pandas Series of cumulative performance (percentage) indexed by date.
-    Uses the userstats/gain/history endpoint which provides monthly gains.
     """
     print("📊 Fetching portfolio history from eToro API...")
     try:
+        # Try official eToro Public API first
+        if ETORO_CLIENT_AVAILABLE and etoro_client.is_configured():
+            gain_data = etoro_client.fetch_gain_history(granularity="monthly")
+            if gain_data:
+                data = []
+                current_date = datetime.now()
+                current_year = current_date.year
+                current_month = current_date.month
+
+                import calendar
+                last_day_of_month = calendar.monthrange(current_year, current_month)[1]
+                is_month_end = current_date.day >= (last_day_of_month - 1)
+
+                for entry in gain_data:
+                    date_str = entry.get('date', '')
+                    gain = float(entry.get('gain', 0.0))
+                    if not date_str or len(date_str) < 7:
+                        continue
+                    year = int(date_str[:4])
+                    month = int(date_str[5:7])
+
+                    if year == current_year and month == current_month and not is_month_end:
+                        continue
+
+                    if year >= start_year:
+                        date = pd.Timestamp(year=year, month=month, day=1) + pd.offsets.MonthEnd(0)
+                        data.append({'Date': date, 'Monthly_Return': gain})
+
+                if data:
+                    df = pd.DataFrame(data).sort_values('Date')
+                    df.set_index('Date', inplace=True)
+                    df['Return_Decimal'] = df['Monthly_Return'] / 100.0
+                    df['Cumulative_Return'] = ((1 + df['Return_Decimal']).cumprod() - 1) * 100.0
+
+                    start_date = pd.Timestamp(f"{start_year}-01-01")
+                    if start_date < df.index[0]:
+                        start_row = pd.DataFrame({'Monthly_Return': [0.0], 'Return_Decimal': [0.0], 'Cumulative_Return': [0.0]}, index=[start_date])
+                        df = pd.concat([start_row, df])
+
+                    print(f"✓ Fetched {len(data)} months of history from official eToro Public API (from {start_year})")
+                    return df['Cumulative_Return']
+
+        # Fallback to legacy web sapi endpoint
         cid = ETORO_CID
         url = f"https://www.etoro.com/sapi/userstats/gain/cid/{cid}/history?IncludeSimulation=true&Period=OneYearAgo"
         

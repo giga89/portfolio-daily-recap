@@ -25,6 +25,23 @@ def _check(platform: str, ok: bool, detail: str):
     print(f"{icon} {platform}: {detail}")
 
 
+# ── eToro Social Feed ─────────────────────────────────────────────────────────
+def test_etoro():
+    import etoro_client
+    if not etoro_client.is_configured():
+        _check("eToro", False, "ETORO_USER_KEY not set")
+        return
+    res = etoro_client.verify_connection()
+    if res.get("success"):
+        username = res.get("username", "AndreaRavalli")
+        scopes_count = len(res.get("scopes", []))
+        can_post = "etoro-public:feed:write" in res.get("scopes", [])
+        detail = f"User @{username} — {scopes_count} scopes (Feed write: {'✅' if can_post else '❌'})"
+        _check("eToro", True, detail)
+    else:
+        _check("eToro", False, f"Auth failed: {res.get('error', 'Unknown error')}")
+
+
 # ── Telegram ──────────────────────────────────────────────────────────────────
 def test_telegram():
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
@@ -229,6 +246,7 @@ if __name__ == "__main__":
     print("🔌 Testing social platform connections...")
     print("=" * 50)
 
+    test_etoro()
     test_telegram()
     test_twitter()
     test_bluesky()
