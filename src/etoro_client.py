@@ -17,6 +17,8 @@ import json
 import requests
 from typing import Dict, Any, Optional, List, Tuple
 
+import uuid
+
 BASE_URL = "https://public-api.etoro.com"
 
 
@@ -29,7 +31,7 @@ def get_credentials() -> Tuple[Optional[str], Optional[str], str]:
 
 
 def get_headers() -> Optional[Dict[str, str]]:
-    """Build request headers with authentication."""
+    """Build request headers with authentication and fresh x-request-id."""
     user_key, api_key, _ = get_credentials()
     if not user_key:
         return None
@@ -37,6 +39,7 @@ def get_headers() -> Optional[Dict[str, str]]:
         "User-Agent": "PortfolioRecapBot/1.0 (Mozilla/5.0)",
         "x-user-key": user_key.strip(),
         "x-api-key": api_key.strip(),
+        "x-request-id": str(uuid.uuid4()),
     }
 
 
@@ -252,3 +255,37 @@ def create_post(
     except Exception as e:
         print(f"❌ Exception posting to eToro: {e}")
         return {"success": False, "error": str(e)}
+
+
+def get_post_metrics(post_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Fetch engagement metrics (likes, comments, content) for a specific eToro post.
+    GET /api/v1/posts/{postId}
+    """
+    headers = get_headers()
+    if not headers:
+        return None
+
+    url = f"{BASE_URL}/api/v1/posts/{post_id}"
+    try:
+        resp = requests.get(url, headers=headers, timeout=20)
+        if resp.status_code == 200:
+            data = resp.json()
+            emotions = data.get("emotions", {})
+            comments = data.get("comments", {})
+            return {
+                "id": data.get("id"),
+                "created": data.get("created"),
+                "likes": emotions.get("total", 0),
+                "comments": comments.get("total", 0),
+                "word_count": data.get("wordCount", 0),
+                "reading_time": data.get("readingTimeMinutes", 0),
+                "raw": data,
+            }
+        else:
+            print(f"⚠️ Failed to get metrics for post {post_id} (HTTP {resp.status_code})")
+            return None
+    except Exception as e:
+        print(f"⚠️ Error fetching post metrics: {e}")
+        return None
+
