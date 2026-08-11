@@ -286,13 +286,186 @@ COMPANY_INFOGRAPHICS = {
         "pillars": [
             ("Marchio di Lusso Storico:", "Brand value secolare che garantisce elevato potere di prezzo."),
             ("Strategia Orientata ai Margini:", "Priorità alla redditività e ai veicoli alto di gamma rispetto ai volumi."),
-            ("Generazione di Flussi di Cassa:", "Capacità di distribuire ricchi dividendi mantenendo cassa industriale solida."),
-            ("Investimenti nella Guida Autonoma:", "Pioniere nei sistemi di guida autonoma di Livello 3 certificati."),
-        ],
         "quote": "Il lusso autentico mantiene il suo valore e la sua desiderabilità attraverso i decenni.",
         "tags": ["#MercedesBenz", "#Luxury", "#Dividends", "#Automotive", "#Germany"],
         "color": (50, 60, 70),
         "domain": "mercedes-benz.com"
+    },
+    "AMZN": {
+        "name": "AMAZON",
+        "tagline": "Cloud Infrastructure & Global E-Commerce",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Amazon è il leader mondiale indiscusso nel cloud computing (AWS) e nell'infrastruttura logistica di e-commerce.",
+        "kpis": [
+            {"label": "CRESCITA AWS", "val": "+19%", "sub": "Accelerazione AI e workload cloud"},
+            {"label": "MARGINE OPERATIVO", "val": "11%+", "sub": "Leva operativa ed efficienza record"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Pilastro tecnologia e commercio"},
+            {"label": "FLUSSO DI CASSA LIBERO", "val": "$50B+", "sub": "Massiccia generazione di cassa"},
+        ],
+        "pillars": [
+            ("Monopolio AWS nel Cloud:", "AWS è la spina dorsale di internet e dell'infrastruttura AI aziendale."),
+            ("Fossato Logistico Globale:", "Rete logistica e programma Prime con altissima fidelizzazione dei clienti."),
+            ("Boom della Pubblicità Digitale:", "Il segmento advertising ad altissimo margine cresce oltre il 20%."),
+            ("Efficienza Operativa con AI:", "Automazione e robotica nei magazzini aumentano costantemente i margini."),
+        ],
+        "quote": "Nel business, il miglior modo per avere successo è essere ossessionati dal cliente a lungo termine.",
+        "tags": ["#Amazon", "#AWS", "#CloudComputing", "#Ecommerce", "#TechGiant"],
+        "color": (255, 153, 0),
+        "domain": "amazon.com"
+    },
+    "GOOG": {
+        "name": "ALPHABET / GOOGLE",
+        "tagline": "Search, Google Cloud & Gemini AI",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Alphabet controlla l'accesso alle informazioni globali tramite Google Search, YouTube, Android e Google Cloud.",
+        "kpis": [
+            {"label": "QUOTA GOOGLE SEARCH", "val": ">90%", "sub": "Monopolio globale delle ricerche"},
+            {"label": "CRESCITA GOOGLE CLOUD", "val": "+29%", "sub": "Margini cloud in forte espansione"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Leader AI e internet economy"},
+            {"label": "CASSA E LIQUIDITÀ", "val": "$100B+", "sub": "Fortezza finanziaria con buyback"},
+        ],
+        "pillars": [
+            ("Fossato Imbattibile nella Ricerca:", "Google Search e YouTube rimangono i punti di riferimento per la pubblicità."),
+            ("Accelerazione Google Cloud & AI:", "Gemini e le infrastrutture TPU attraggono le migliori startup e corporate."),
+            ("Diversificazione Ecosistema:", "Android, Waymo (guida autonoma) e sottoscrizioni YouTube Premium in crescita."),
+            ("Solidità Finanziaria Straordinaria:", "Bilancio blindato con dividendi e continui riacquisti di azioni proprie."),
+        ],
+        "quote": "L'accesso universale alla conoscenza è la più grande leva di progresso e creazione di valore.",
+        "tags": ["#Alphabet", "#Google", "#AI", "#GoogleCloud", "#TechLeader"],
+        "color": (66, 133, 244),
+        "domain": "google.com"
+    },
+    "MSFT": {
+        "name": "MICROSOFT",
+        "tagline": "Enterprise Cloud & AI Ecosystem",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Microsoft è il fornitore essenziale di software enterprise, produttività e cloud infrastructure (Azure) nel mondo.",
+        "kpis": [
+            {"label": "CRESCITA AZURE", "val": "+30%+", "sub": "Infrastruttura cloud AI leader"},
+            {"label": "MARGINE OPERATIVO", "val": "45%", "sub": "Redditività eccezionale"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Infrastruttura software core"},
+            {"label": "DIVIDENDO & BUYBACK", "val": "$30B+", "sub": "Crescita costante del dividendo"},
+        ],
+        "pillars": [
+            ("Partnership Esclusiva con OpenAI:", "Integrazione di Copilot e ChatGPT in tutta la suite Microsoft 365 e Azure."),
+            ("Fossato Software Enterprise:", "Windows, Office 365, Teams e LinkedIn sono insostituibili per le aziende."),
+            ("Azure Cloud Platform:", "Crescita costante e contratti pluriennali con le maggiori multinazionali."),
+            ("Rating Creditizio AAA:", "Uno dei rarissimi bilanci al mondo con rating di credito superiore a molti stati sovrani."),
+        ],
+        "quote": "La nostra missione è consentire a ogni persona e organizzazione di ottenere di più.",
+        "tags": ["#Microsoft", "#Azure", "#OpenAI", "#Cloud", "#Software"],
+        "color": (0, 164, 239),
+        "domain": "microsoft.com"
+    },
+    "ENI.MI": {
+        "name": "ENI",
+        "tagline": "Global Energy & Plenitude Transition",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Eni è una delle major energetiche più efficienti al mondo, con modello satellitare e dividendi generosi.",
+        "kpis": [
+            {"label": "DIVIDEND YIELD", "val": "6.5%+", "sub": "Dividendi trimestrali costanti"},
+            {"label": "VALORE SATELLITI", "val": "Plenitude", "sub": "Valorizzazione energie rinnovabili"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Pilastro dividendi e sicurezza energetica"},
+            {"label": "BREAK-EVEN BRENT", "val": "<$30/bbl", "sub": "Efficienza nei costi di estrazione"},
+        ],
+        "pillars": [
+            ("Esplorazione e Nuove Scoperte:", "Storico imbattibile nella scoperta di giacimenti a basso costo di sviluppo."),
+            ("Strategia Satellitare:", "Quotazione e partnership su asset specifici (Plenitude, Enilive) per sbloccare valore."),
+            ("Remunerazione Azionisti Generosa:", "Distribuzione del cash flow tramite dividendi in crescita e buyback continui."),
+            ("Transizione e Bioraffinazione:", "Leader europeo nei biocarburanti per aviazione e mobilità sostenibile."),
+        ],
+        "quote": "L'energia del futuro richiede pragmatismo: sicurezza degli approvvigionamenti e decarbonizzazione.",
+        "tags": ["#Eni", "#Energy", "#Dividends", "#OilGas", "#CleanEnergy"],
+        "color": (255, 204, 0),
+        "domain": "eni.com"
+    },
+    "PRY.MI": {
+        "name": "PRYSMIAN",
+        "tagline": "Cabling Systems & Energy Transition",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Prysmian è il leader mondiale assoluto nei cavi per l'elettrificazione, i parchi eolici offshore e la fibra ottica.",
+        "kpis": [
+            {"label": "ORDER BACKLOG", "val": "€18B+", "sub": "Ordini record per interconnessioni"},
+            {"label": "QUOTA MERCATO CAVI", "val": "Leader", "sub": "Numero 1 al mondo per fatturato"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Infrastruttura elettrificazione"},
+            {"label": "MARGINI EBITDA", "val": "+15% YoY", "sub": "Leva operativa e sinergie Encore"},
+        ],
+        "pillars": [
+            ("Monopolio nei Cavi Alta Tensione:", "Fornitore insostituibile per i collegamenti tra reti nazionali e parchi eolici."),
+            ("Megatrend Elettrificazione & Grid:", "Decenni di investimenti necessari per modernizzare le reti elettriche mondiali."),
+            ("Integrazione di Encore Wire:", "Espansione massiccia nel mercato nordamericano con forti sinergie commerciali."),
+            ("Barriere all'Entrata Elevatissime:", "Navi posacavi proprietarie e brevetti tecnologici unici al mondo."),
+        ],
+        "quote": "Non c'è transizione energetica né intelligenza artificiale senza cavi che trasportano potenza e dati.",
+        "tags": ["#Prysmian", "#Electrification", "#EnergyGrid", "#Cables", "#Infrastructure"],
+        "color": (0, 80, 160),
+        "domain": "prysmiangroup.com"
+    },
+    "BMW.DE": {
+        "name": "BMW",
+        "tagline": "Premium Automotive & Neue Klasse",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "BMW è il costruttore premium leader mondiale per profittabilità, flessibilità produttiva e brand value.",
+        "kpis": [
+            {"label": "DIVIDEND YIELD", "val": "6.0%+", "sub": "Solida remunerazione azionisti"},
+            {"label": "MARGINE AUTO (EBIT)", "val": "8-10%", "sub": "Ai vertici del settore automobilistico"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Valore e manifattura premium"},
+            {"label": "PIATTAFORMA NEUE KLASSE", "val": "2025+", "sub": "Nuova generazione elettrica scalabile"},
+        ],
+        "pillars": [
+            ("Flessibilità Produttiva Unica:", "Capacità di produrre motori termici, ibridi ed elettrici sulla stessa linea."),
+            ("Brand Value Iconico:", "Fortissimo potere di prezzo e fedeltà dei clienti in Europa, USA e Asia."),
+            ("Generazione di Cassa Industriale:", "Cassa netta solida che finanzia ricerca, dividendi e riacquisto azioni."),
+            ("Leadership nell'Innovazione:", "Batterie cilindriche di nuova generazione con maggiore densità ed efficienza."),
+        ],
+        "quote": "Il piacere di guidare unito all'eccellenza ingegneristica crea un valore intramontabile.",
+        "tags": ["#BMW", "#Automotive", "#Luxury", "#Dividends", "#NeueKlasse"],
+        "color": (0, 102, 177),
+        "domain": "bmwgroup.com"
+    },
+    "RACE": {
+        "name": "FERRARI",
+        "tagline": "Ultra-Luxury & High Performance Supercars",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Ferrari è il brand di lusso assoluto con portafoglio ordini blindato per oltre 2 anni e margini incomparabili.",
+        "kpis": [
+            {"label": "MARGINE EBITDA", "val": "38%+", "sub": "Margini paragonabili all'alta moda"},
+            {"label": "ORDER BOOK", "val": "2+ Anni", "sub": "Produzione interamente venduta"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Marchio di lusso e pricing power"},
+            {"label": "PERSONALIZZAZIONE", "val": "+20%", "sub": "Optional su misura ad altissimo margine"},
+        ],
+        "pillars": [
+            ("Potere di Prezzo Incomparabile:", "I clienti accettano qualsiasi aumento di prezzo pur di avere una Ferrari."),
+            ("Scarsità Controllata:", "Produzione deliberatamente inferiore alla domanda globale per proteggere il valore."),
+            ("Elettrificazione ed E-Building:", "Nuovo impianto per supercar ibride e prima Ferrari 100% elettrica nel 2025."),
+            ("Resilienza alle Crisi Economiche:", "Clientela ultra-facoltosa totalmente insensibile ai cicli macroeconomici."),
+        ],
+        "quote": "La Ferrari è un sogno: la gente sogna di possedere questa vettura speciale e per la maggior parte resterà un sogno.",
+        "tags": ["#Ferrari", "#Luxury", "#Supercars", "#PricingPower", "#MadeInItaly"],
+        "color": (220, 0, 0),
+        "domain": "ferrari.com"
+    },
+    "URNM": {
+        "name": "SPROTT URANIUM MINERS",
+        "tagline": "Nuclear Fuel & Uranium Producers ETF",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "URNM offre l'esposizione più pura ai produttori globali di uranio e al combustibile per l'energia nucleare.",
+        "kpis": [
+            {"label": "DEFICIT DI URANIO", "val": "Strutturale", "sub": "Domanda reattori superiore all'offerta"},
+            {"label": "RINASCITA NUCLEARE", "val": "COP28", "sub": "Obiettivo globale di triplicare il nucleare"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Esposizione diretta al combustibile pulito"},
+            {"label": "ASSET FISICO & MINERS", "val": "Top Holdings", "sub": "Cameco, Kazatomprom, Sprott Physical"},
+        ],
+        "pillars": [
+            ("Squilibrio Domanda/Offerta:", "I reattori nucleari consumano più uranio di quanto ne venga estratto ogni anno."),
+            ("Contrattazione Pluriennale delle Utility:", "Le centrali nucleari devono assicurarsi il combustibile a lungo termine."),
+            ("AI e Data Center Nucleari:", "I colossi tech investono direttamente nell'energia nucleare per alimentare i data center."),
+            ("Zero Emissioni di Carbonio:", "Il nucleare è l'unica fonte continua (baseload) a zero emissioni di CO2."),
+        ],
+        "quote": "Non esiste intelligenza artificiale né transizione verde senza energia nucleare costante e affidabile.",
+        "tags": ["#Uranium", "#NuclearEnergy", "#URNM", "#CleanEnergy", "#Commodities"],
+        "color": (0, 180, 130),
+        "domain": "sprott.com"
     }
 }
 
@@ -347,7 +520,34 @@ def generate_stock_infographic(
     if not output_path:
         output_path = f"output/infographic_{clean_ticker}.png"
 
-    info = COMPANY_INFOGRAPHICS.get(clean_ticker, COMPANY_INFOGRAPHICS.get("PLTR"))
+    info = COMPANY_INFOGRAPHICS.get(clean_ticker)
+    if not info:
+        # Dynamic branded generator for any portfolio company
+        from portfolio_manager import load_config
+        config = load_config()
+        comp_name = config.get("tickers", {}).get(clean_ticker, [None, clean_ticker])[1]
+        info = {
+            "name": comp_name.upper(),
+            "tagline": f"Core Portfolio Position (${clean_ticker})",
+            "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+            "subtitle": f"{comp_name} (${clean_ticker}) è una posizione strategica selezionata per la solidità dei fondamentali e il profilo di crescita.",
+            "kpis": [
+                {"label": "STRATEGIA", "val": "Core", "sub": "Selezione macro & fondamentale"},
+                {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Allocazione gestita nel portafoglio"},
+                {"label": "ORIZZONTE", "val": "Lungo Termine", "sub": "Creazione di valore nel tempo"},
+                {"label": "MONITORAGGIO", "val": "Attivo", "sub": "Gestione costante del rischio"},
+            ],
+            "pillars": [
+                ("Posizionamento di Settore:", f"{comp_name} opera con un solido posizionamento competitivo nel proprio mercato."),
+                ("Tesi d'Investimento Chiara:", "Esposizione mirata alla crescita e alla generazione di valore nel lungo termine."),
+                ("Gestione del Rischio:", "Dimensionamento calibrato per ottimizzare il profilo rischio/rendimento."),
+                ("Integrazione di Portafoglio:", "Contribuisce alla diversificazione globale e alla resilienza della strategia."),
+            ],
+            "quote": "La qualità dei fondamentali e la visione di lungo periodo sono il vero motore dei rendimenti.",
+            "tags": [f"#{clean_ticker.replace('.', '_')}", "#Portfolio", "#Investing", "#LongTerm", "#Value"],
+            "color": (20, 100, 200),
+            "domain": "etoro.com"
+        }
     live_weight = _get_live_weight_for_ticker(clean_ticker)
 
     # 1. Base Canvas - Off-white / Warm Ivory Premium background (#F6F8FC)

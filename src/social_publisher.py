@@ -371,16 +371,15 @@ def publish_all(
                 text=etoro_text,
                 image_type="winners_losers_card" if card_to_upload == engagement_card_path else "chart",
             )
-            # Launch 3-comment cross-linking sequence (at 10m intervals) for recap sessions
+            # Execute 3-comment cross-linking sequence (at 10m intervals) for recap sessions
             if etoro_sender.LAST_PUBLISHED_POST_ID and market_session in ["U.S. market open", "European market open", "U.S. market close"]:
                 try:
-                    import subprocess
+                    import cross_link_scheduler
                     target_pid = etoro_sender.LAST_PUBLISHED_POST_ID
-                    script_path = os.path.join(os.path.dirname(__file__), "cross_link_scheduler.py")
-                    print(f"🚀 Launching 3-comment cross-linking sequence on eToro post {target_pid} (10m intervals)...")
-                    subprocess.Popen([sys.executable, script_path, target_pid, "600"])
+                    print(f"🚀 Starting 3-comment cross-linking sequence on eToro post {target_pid} (10m intervals)...")
+                    cross_link_scheduler.run_comments_sequence(post_id=target_pid, interval_seconds=600)
                 except Exception as c_err:
-                    print(f"⚠️ Failed to launch cross_link_scheduler: {c_err}")
+                    print(f"⚠️ Failed to execute cross_link_scheduler: {c_err}")
     else:
         print("   ⏭️  Not configured (ETORO_USER_KEY missing).")
         results["etoro"] = False
