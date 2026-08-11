@@ -78,13 +78,13 @@ I pilastri difensivi e a forte crescita globale:
 ]
 
 
-def run_comments_sequence(post_id: str, interval_seconds: int = 600):
+def run_comments_sequence(post_id: str, interval_seconds: int = 5):
     """
-    Publish all 3 comments spaced by `interval_seconds` (default 600s = 10 minutes).
+    Publish all 3 comments spaced by `interval_seconds` (default 5s for fast execution).
     """
     print("=" * 60)
     print(f"🚀 STARTING 3-COMMENT CROSSLINKING SEQUENCE ON POST: {post_id}")
-    print(f"⏱️ Interval between comments: {interval_seconds}s ({interval_seconds // 60} minutes)")
+    print(f"⏱️ Interval between comments: {interval_seconds}s")
     print("=" * 60)
 
     if not etoro_client.is_configured():
