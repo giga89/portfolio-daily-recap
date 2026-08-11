@@ -4,63 +4,67 @@ import os
 import yfinance as yf
 
 # DEFAULT DATA MOVED HERE TO AVOID CIRCULAR IMPORT WITH CONFIG.PY
+# REAL ACTIVE ASSETS IN ANDREA RAVALLI'S ETORO PORTFOLIO
 DEFAULT_TICKERS = {
-    # ETFs
-    'SX7PEX.DE': ('EXV1.DE', 'iShares STOXX Europe 600 Banks UCITS ETF'),
-    'IEUR': ('IEUR', 'iShares Core MSCI Europe UCITS ETF'),
-    'IQQL.DE': ('IQQL.DE', 'iShares MSCI World Quality Factor UCITS ETF'),
-    'IEMG': ('IEMG', 'iShares Core MSCI Emerging Markets ETF'),
-    'VWCE.L': ('VWCE.L', 'Vanguard FTSE All-World UCITS ETF'),
-    'WDEF.L': ('WDEF.L', 'WisdomTree Europe Equity Income UCITS ETF'),
-    'INDO.PA': ('INDO.PA', 'Amundi MSCI Indonesia UCITS ETF Acc'),
-    'MNODL.L': ('MNDI.L', 'Mondi PLC'),
-    'NVTKL.L': ('NVTK.ME', 'Novatek'),
-    
-    # Healthcare & Pharmaceuticals
-    'AZN.L': ('AZN.L', 'AstraZeneca'),
-    'ABT': ('ABT', 'Abbott Laboratories'),
-    'ABT.US': ('ABT', 'Abbott Laboratories'),
-    'ABBV': ('ABBV', 'AbbVie'),
-    'LLY': ('LLY', 'Eli Lilly & Co'),
-    'NOVO-B.CO': ('NOVO-B.CO', 'Novo Nordisk'),
-    'HUM': ('HUM', 'Humana'),
-    
-    # Technology & Semiconductors
-    'AVGO': ('AVGO', 'Broadcom Inc'),
-    'NVDA': ('NVDA', 'NVIDIA'),
-    'TSM': ('TSM', 'Taiwan Semiconductor'),
-    'MSFT': ('MSFT', 'Microsoft'),
-
-    'AMZN': ('AMZN', 'Amazon'),
-    'GOOG': ('GOOGL', 'Alphabet'),
-    'PLTR': ('PLTR', 'Palantir Technologies Inc'),
-    'NET': ('NET', 'Cloudflare'),
-    
-    # Energy & Nuclear
-    'CCJ': ('CCJ', 'Cameco'),
-    'ENEL.MI': ('ENEL.MI', 'Enel'),
+    # Nuclear & Energy
+    'CCJ': ('CCJ', 'Cameco Corp.'),
+    'URNM': ('URNM', 'Sprott Uranium Miners ETF'),
     'ENI.MI': ('ENI.MI', 'Eni S.p.A.'),
-    'ENI': ('ENI.MI', 'Eni S.p.A.'),
+    'ENEL.MI': ('ENEL.MI', 'Enel S.p.A.'),
+    'MAU.PA': ('MAU.PA', 'Etablissements Maurel & Prom SA'),
+    
+    # Financial & Banking
+    'SX7PEX.DE': ('EXV1.DE', 'iShares STOXX Europe 600 Banks UCITS ETF'),
+    '0005.HK': ('0005.HK', 'HSBC Holdings PLC'),
+    'DB1.DE': ('DB1.DE', 'Deutsche Börse AG'),
+    
+    # Healthcare & Pharma
+    'NOVO-B.CO': ('NOVO-B.CO', 'Novo Nordisk A/S'),
+    'LLY': ('LLY', 'Eli Lilly and Co'),
+    'AZN.L': ('AZN.L', 'AstraZeneca PLC'),
+    'ABBV': ('ABBV', 'AbbVie Inc'),
+    'ABT': ('ABT', 'Abbott Laboratories'),
+    'HUM': ('HUM', 'Humana Inc'),
+    
+    # Tech, AI & Semiconductors
+    'PLTR': ('PLTR', 'Palantir Technologies Inc'),
+    'NVDA': ('NVDA', 'NVIDIA Corporation'),
+    'ASML.AS': ('ASML.AS', 'ASML Holding NV'),
+    'TSM': ('TSM', 'Taiwan Semiconductor Manufacturing Co'),
+    'MSFT': ('MSFT', 'Microsoft Corporation'),
+    'AMZN': ('AMZN', 'Amazon.com Inc'),
+    'GOOG': ('GOOGL', 'Alphabet Inc'),
+    'AVGO': ('AVGO', 'Broadcom Inc'),
+    'SAP.DE': ('SAP.DE', 'SAP SE'),
+    
+    # E-Commerce & Payments
+    'MELI': ('MELI', 'MercadoLibre Inc'),
+    'PYPL': ('PYPL', 'PayPal Holdings Inc'),
+    
+    # Automotive, Industrials & Luxury
+    'PRY.MI': ('PRY.MI', 'Prysmian S.p.A.'),
+    'BMW.DE': ('BMW.DE', 'Bayerische Motoren Werke AG'),
+    'MBG.DE': ('MBG.DE', 'Mercedes-Benz Group AG'),
+    'VOW3.DE': ('VOW3.DE', 'Volkswagen AG'),
+    'RACE': ('RACE', 'Ferrari N.V.'),
+    'AIR.PA': ('AIR.PA', 'Airbus SE'),
+    'MC.PA': ('MC.PA', 'LVMH Moët Hennessy Louis Vuitton'),
+    'OR.PA': ('OR.PA', "L'Oréal SA"),
+    'RMS.PA': ('RMS.PA', 'Hermès International SA'),
+    '1211.HK': ('1211.HK', 'BYD Co Ltd'),
+    '1919.HK': ('1919.HK', 'COSCO SHIPPING Holdings Co Ltd'),
+    'GLEN.L': ('GLEN.L', 'Glencore PLC'),
+    
+    # Emerging Markets & Specialized ETFs
+    'INDO.PA': ('INDO.PA', 'Amundi MSCI Indonesia UCITS ETF Acc'),
+    'WDEF.L': ('WDEF.L', 'WisdomTree Europe Equity Income UCITS ETF'),
     
     # Crypto
     'TRX': ('TRX-USD', 'TRON'),
-    'ETOR': ('ETOR', 'Etoro'),
     
-    # Financial Services & Others
-    'DB1.DE': ('DB1.DE', 'Deutsche Börse AG'),
-    'TRIG.L': ('TRIG.L', 'Trig PLC'),
-    'MAU.PA': ('MAU.PA', 'Etablissements Maurel & Prom SA'),
-    'PRY.MI': ('PRY.MI', 'Prysmian'),
-    'RACE': ('RACE', 'Ferrari'),
-    'VOW3.DE': ('VOW3.DE', 'Volkswagen'),
-    'MELI': ('MELI', 'MercadoLibre'),
-    'PYPL': ('PYPL', 'PayPal'),
-    'GLEN.L': ('GLEN.L', 'Glencore'),
+    # Cash & Liquidity Management
+    'IB01.L': ('IB01.L', 'iShares $ Treasury Bond 0-1yr UCITS ETF'),
     'XEON.DE': ('XEON.DE', 'Xtrackers II EUR Overnight Rate Swap UCITS ETF'),
-    'IB01.L': ('IB01.L', 'iShares Treasury Bond 0-1yr UCITS ETF'),
-    '1919.HK': ('1919.HK', 'COSCO SHIPPING Holdings'),
-    '2318.HK': ('2318.HK', 'Ping An Insurance'),
-    '1211.HK': ('1211.HK', 'BYD Company'),
 }
 
 DEFAULT_EMOJIS = {
