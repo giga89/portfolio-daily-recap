@@ -16,6 +16,7 @@ eToro profile + referral link appended to all posts.
 """
 
 import os
+from datetime import datetime
 
 import telegram_sender
 import twitter_sender
@@ -25,6 +26,8 @@ import threads_sender
 import facebook_sender
 import instagram_sender
 import etoro_sender
+import stock_focus_card
+import analytics_tracker
 import story_generator
 import ai_news_generator
 import etoro_history
@@ -359,9 +362,23 @@ def publish_all(
             image_path=card_to_upload,
         )
         results["etoro"] = ok
+        if ok:
+            analytics_tracker.record_post(
+                platform="etoro",
+                post_id=f"recap_{market_session.replace(' ', '_').lower()}_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
+                session_name=market_session,
+                text=etoro_text,
+                image_type="winners_losers_card" if card_to_upload == engagement_card_path else "chart",
+            )
     else:
         print("   ⏭️  Not configured (ETORO_USER_KEY missing).")
         results["etoro"] = False
+
+    # Update and regenerate analytics dashboard HTML for GitHub Pages
+    try:
+        analytics_tracker.update_and_build_dashboard()
+    except Exception as exc:
+        print(f"⚠️ Analytics dashboard update warning: {exc}")
 
     # ── Summary ──────────────────────────────────────────────────────
     print("\n" + "=" * 60)
@@ -436,7 +453,27 @@ def _publish_monday_posts(
         print("   ⚠️  Empathy post generation failed")
         results["telegram_empathy"] = False
 
-    # 3. Pie chart (if available)
+    # 3. eToro Social Feed for Empathy Post
+    print("\n🐂 eToro Social Feed (Empathy Post):")
+    if etoro_sender.etoro_client.is_configured() and empathy_text:
+        top_flop_img = "output/winners_losers.png"
+        ok_etoro = etoro_sender.send_etoro_post(
+            text=empathy_text,
+            image_path=top_flop_img if os.path.exists(top_flop_img) else None,
+        )
+        results["etoro_empathy"] = ok_etoro
+        if ok_etoro:
+            analytics_tracker.record_post(
+                platform="etoro",
+                post_id=f"empathy_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
+                session_name="Monday decision / Empathy",
+                text=empathy_text,
+                image_type="winners_losers_card",
+            )
+    else:
+        results["etoro_empathy"] = False
+
+    # 4. Pie chart (if available)
     if pie_chart_path and os.path.exists(pie_chart_path):
         try:
             caption = "📊 Come è composto il portfolio questa settimana — aggiornato in tempo reale da eToro."
@@ -525,20 +562,58 @@ def _save_post_to_artifacts(filename: str, title: str, content: str):
 
 
 def _publish_stock_focus_post(ticker: str = None) -> dict:
-    """Publish Daily Stock Focus post to Telegram and save to artifacts."""
+    """Publish Daily Stock Focus post to Telegram & eToro with 16:9 Stock Focus Card."""
     results = {}
     ticker_sym, post_text = ai_news_generator.generate_stock_focus_post(ticker)
     if not post_text:
         print("⚠️ Stock focus post text empty, skipping publish.")
-        return {"telegram_stock_focus": False}
+        return {"telegram_stock_focus": False, "etoro_stock_focus": False}
 
     full_text = post_text + ETORO_FOOTER_LONG
     _save_post_to_artifacts(f"stock_focus_{ticker_sym}.txt", f"Stock Focus - {ticker_sym}", full_text)
 
-    # Telegram send
+    # 1. Generate 16:9 Stock Focus Card
+    card_path = f"output/stock_focus_{ticker_sym}.png"
+    try:
+        from portfolio_manager import load_config
+        config = load_config()
+        comp_name = config.get("tickers", {}).get(ticker_sym, [None, ticker_sym])[1]
+        card_path = stock_focus_card.generate_stock_focus_card(
+            ticker=ticker_sym,
+            company_name=comp_name,
+            output_path=card_path,
+        )
+    except Exception as exc:
+        print(f"⚠️ Stock focus card generation warning: {exc}")
+        card_path = None
+
+    # 2. eToro Social Feed
+    print("\n🐂 eToro Social Feed (Stock Focus):")
+    if etoro_sender.etoro_client.is_configured():
+        ok_etoro = etoro_sender.send_etoro_post(
+            text=post_text,
+            image_path=card_path if (card_path and os.path.exists(card_path)) else None,
+        )
+        results["etoro_stock_focus"] = ok_etoro
+        if ok_etoro:
+            analytics_tracker.record_post(
+                platform="etoro",
+                post_id=f"focus_{ticker_sym}_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
+                session_name="Stock focus",
+                text=post_text,
+                image_type="stock_focus_card",
+                tickers=[ticker_sym],
+            )
+    else:
+        print("   ⏭️  eToro not configured.")
+        results["etoro_stock_focus"] = False
+
+    # 3. Telegram send
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
         try:
             telegram_sender.send_telegram_message(full_text)
+            if card_path and os.path.exists(card_path):
+                telegram_sender.send_telegram_photo(card_path, caption=f"🔍 Focus Titolo: ${ticker_sym}")
             print(f"✅ Stock Focus post for {ticker_sym} published to Telegram")
             results["telegram_stock_focus"] = True
         except Exception as e:
@@ -548,19 +623,43 @@ def _publish_stock_focus_post(ticker: str = None) -> dict:
         print("   ⏭️  Telegram not configured.")
         results["telegram_stock_focus"] = False
 
+    try:
+        analytics_tracker.update_and_build_dashboard()
+    except Exception:
+        pass
+
     return results
 
 
 def _publish_weekly_portfolio_outlook() -> dict:
-    """Publish Saturday Portfolio Outlook post to Telegram and save to artifacts."""
+    """Publish Saturday Portfolio Outlook post to Telegram and eToro."""
     results = {}
     post_text = ai_news_generator.generate_weekly_portfolio_outlook()
     if not post_text:
         print("⚠️ Weekly portfolio outlook post text empty, skipping publish.")
-        return {"telegram_portfolio_outlook": False}
+        return {"telegram_portfolio_outlook": False, "etoro_portfolio_outlook": False}
 
     full_text = post_text + ETORO_FOOTER_LONG
     _save_post_to_artifacts("weekly_portfolio_outlook.txt", "Weekly Portfolio Outlook", full_text)
+
+    # eToro send with Winners & Losers card if available
+    if etoro_sender.etoro_client.is_configured():
+        top_flop_img = "output/winners_losers.png"
+        ok_etoro = etoro_sender.send_etoro_post(
+            text=post_text,
+            image_path=top_flop_img if os.path.exists(top_flop_img) else None,
+        )
+        results["etoro_portfolio_outlook"] = ok_etoro
+        if ok_etoro:
+            analytics_tracker.record_post(
+                platform="etoro",
+                post_id=f"outlook_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
+                session_name="Weekly portfolio outlook",
+                text=post_text,
+                image_type="winners_losers_card",
+            )
+    else:
+        results["etoro_portfolio_outlook"] = False
 
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
         try:
@@ -578,15 +677,26 @@ def _publish_weekly_portfolio_outlook() -> dict:
 
 
 def _publish_weekly_macro_outlook() -> dict:
-    """Publish Saturday Global Macro Outlook post to Telegram and save to artifacts."""
+    """Publish Saturday Global Macro Outlook post to Telegram and eToro."""
     results = {}
     post_text = ai_news_generator.generate_weekly_macro_outlook()
     if not post_text:
         print("⚠️ Weekly macro outlook post text empty, skipping publish.")
-        return {"telegram_macro_outlook": False}
+        return {"telegram_macro_outlook": False, "etoro_macro_outlook": False}
 
     full_text = post_text + ETORO_FOOTER_LONG
     _save_post_to_artifacts("weekly_macro_outlook.txt", "Weekly Macro Outlook", full_text)
+
+    # eToro send
+    if etoro_sender.etoro_client.is_configured():
+        top_flop_img = "output/winners_losers.png"
+        ok_etoro = etoro_sender.send_etoro_post(
+            text=post_text,
+            image_path=top_flop_img if os.path.exists(top_flop_img) else None,
+        )
+        results["etoro_macro_outlook"] = ok_etoro
+    else:
+        results["etoro_macro_outlook"] = False
 
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
         try:

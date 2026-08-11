@@ -3,12 +3,13 @@ name: Daily Portfolio Recap
 on:
   # ── Primary trigger: Orange Pi 5 local scheduler (precise timing) ──────────
   repository_dispatch:
-    types: [eu_open, us_open, us_close, weekly_sat, weekly_sun]
+    types: [eu_open, stock_focus, us_open, us_close, weekly_sat, weekly_sun]
   # ── Fallback: GitHub Actions cron (1 per session, Orange Pi is primary) ─────
   schedule:
-    - cron: '45 7 * * 1-5'    # EU open fallback:  07:45 UTC
-    - cron: '15 14 * * 1-5'   # US open fallback:  14:15 UTC
-    - cron: '45 20 * * 1-5'   # US close fallback: 20:45 UTC
+    - cron: '45 7 * * 1-5'    # EU open fallback:  07:45 UTC (09:45 ITA)
+    - cron: '0 12 * * 1-5'    # Stock focus:       12:00 UTC (14:00 ITA)
+    - cron: '15 14 * * 1-5'   # US open fallback:  14:15 UTC (16:15 ITA)
+    - cron: '45 20 * * 1-5'   # US close fallback: 20:45 UTC (22:45 ITA)
     - cron: '0 9 * * 6'       # Weekly recap (Saturday)  09:00 UTC
     - cron: '0 21 * * 0'      # Weekly recap (Sunday)    21:00 UTC
   workflow_dispatch:  # Allows manual trigger
@@ -79,11 +80,12 @@ jobs:
             else
               # Fallback: map event_type to session name
               case "$EVENT_TYPE" in
-                eu_open)    SESSION_NAME="European market open" ;;
-                us_open)    SESSION_NAME="U.S. market open" ;;
-                us_close)   SESSION_NAME="U.S. market close" ;;
-                weekly_sat) SESSION_NAME="Weekly recap (Sat)" ;;
-                weekly_sun) SESSION_NAME="Weekly recap (Sun)" ;;
+                eu_open)     SESSION_NAME="European market open" ;;
+                stock_focus) SESSION_NAME="Stock focus" ;;
+                us_open)     SESSION_NAME="U.S. market open" ;;
+                us_close)    SESSION_NAME="U.S. market close" ;;
+                weekly_sat)  SESSION_NAME="Weekly recap (Sat)" ;;
+                weekly_sun)  SESSION_NAME="Weekly recap (Sun)" ;;
               esac
             fi
             echo "Triggered by Orange Pi 5 (repository_dispatch: $EVENT_TYPE)"
@@ -92,6 +94,8 @@ jobs:
             case "$SCHEDULE" in
               "45 7 * * 1-5")
                 SESSION_NAME="European market open" ;;
+              "0 12 * * 1-5")
+                SESSION_NAME="Stock focus" ;;
               "15 14 * * 1-5")
                 SESSION_NAME="U.S. market open" ;;
               "45 20 * * 1-5")
@@ -310,3 +314,16 @@ jobs:
           else:
               print(f"Session '{session}' does not need dedup marking.")
           PYEOF
+
+      - name: Update GitHub Pages Dashboard & Analytics
+        if: steps.dedup_check.outputs.skip != 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/ data/ 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No changes to docs or analytics database."
+          else
+            git commit -m "chore(analytics): update social analytics dashboard & post history [skip ci]"
+            git push origin main || echo "Git push failed or branch protected"
+          fi
