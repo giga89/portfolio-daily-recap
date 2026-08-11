@@ -59,22 +59,26 @@ def build_etoro_post_text(
     return post_content[:3950]
 
 
+LAST_PUBLISHED_POST_ID = None
+
+
 def send_etoro_post(
     text: str,
     image_path: Optional[str] = None,
     language: str = "it",
 ) -> bool:
     """
-    Send a post to the eToro Social Feed with an optional image attachment.
+    Format and send a post to the eToro Social Feed using official eToro API.
 
     Args:
-        text: Post content (plain text, max 4000 characters)
-        image_path: Path to image file (e.g. output/winners_losers.png)
-        language: ISO 639-1 language code (default: 'it')
+        text (str): Post content in plain text / markdown / HTML.
+        image_path (str, optional): Local path to image file to attach.
+        language (str): Post language code (default "it").
 
     Returns:
         bool: True if published successfully, False otherwise
     """
+    global LAST_PUBLISHED_POST_ID
     if not etoro_client.is_configured():
         print("   ⏭️  eToro API not configured (ETORO_USER_KEY missing).")
         return False
@@ -109,12 +113,14 @@ def send_etoro_post(
 
     if res.get("success"):
         post_id = res.get("id")
+        LAST_PUBLISHED_POST_ID = post_id
         _, _, username = etoro_client.get_credentials()
         print(f"   ✅ Published on eToro! Profile: https://www.etoro.com/people/{username}")
         if post_id:
             print(f"   🔗 Post ID: {post_id}")
         return True
     else:
+        LAST_PUBLISHED_POST_ID = None
         print(f"   ❌ Failed to publish on eToro: {res.get('error')}")
         return False
 
