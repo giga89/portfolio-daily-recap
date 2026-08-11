@@ -109,3 +109,68 @@ def send_etoro_post(
     else:
         print(f"   ❌ Failed to publish on eToro: {res.get('error')}")
         return False
+
+
+def build_stock_focus_cross_link_comment(recent_count: int = 3) -> str:
+    """
+    Build a cross-linking comment referencing the last 3 Stock Focus posts.
+    """
+    import time
+    from stock_focus_card import TICKER_THEMES
+
+    # Retrieve last used tickers from gist / local analytics
+    try:
+        from gist_storage import get_used_stock_focus_tickers
+        used = get_used_stock_focus_tickers()
+    except Exception:
+        used = []
+
+    if not used or len(used) < recent_count:
+        default_top = ["PLTR", "NVDA", "CCJ", "SX7PEX.DE", "LLY"]
+        used = (used + [t for t in default_top if t not in used])
+
+    recent = used[-recent_count:]
+    recent.reverse()  # most recent first
+
+    lines = [
+        "💡 <b>APPROFONDIMENTI TITOLI IN PORTAFOGLIO</b>",
+        "Se vuoi approfondire le singole posizioni e la tesi di lungo termine, ecco gli ultimi focus dedicati:\n"
+    ]
+
+    for idx, ticker in enumerate(recent, 1):
+        info = TICKER_THEMES.get(ticker, {})
+        sector = info.get("sector", "Azienda")
+        thesis = info.get("thesis", "Tesi fondamentale di crescita.")
+        lines.append(f"{idx}️⃣ <b>${ticker}</b> · {sector}\n   ↳ <i>{thesis}</i>\n")
+
+    lines.append("👉 Trovi tutti i dettagli e le analisi sul mio profilo @AndreaRavalli! 🎯")
+    return "\n".join(lines)
+
+
+def send_delayed_cross_link_comment(
+    post_id: str,
+    delay_seconds: int = 600,
+    language: str = "it",
+) -> bool:
+    """
+    Wait `delay_seconds` (default 10 minutes) then post the cross-linking comment under `post_id`.
+    """
+    import time
+    if not post_id or not etoro_client.is_configured():
+        return False
+
+    if delay_seconds > 0:
+        print(f"⏳ Waiting {delay_seconds // 60} minutes ({delay_seconds}s) before posting cross-link comment...")
+        time.sleep(delay_seconds)
+
+    comment_msg = build_stock_focus_cross_link_comment(recent_count=3)
+    clean_msg = _strip_html(comment_msg)
+
+    print(f"💬 Posting cross-link comment to eToro post {post_id}...")
+    res = etoro_client.add_post_comment(
+        post_id=post_id,
+        message=clean_msg,
+        language=language,
+    )
+    return res.get("success", False)
+

@@ -289,3 +289,43 @@ def get_post_metrics(post_id: str) -> Optional[Dict[str, Any]]:
         print(f"⚠️ Error fetching post metrics: {e}")
         return None
 
+
+def add_post_comment(
+    post_id: str,
+    message: str,
+    language: str = "it",
+    attachment_ids: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """
+    Add a comment to an existing eToro post.
+    POST /api/v1/posts/{postId}/comments
+    """
+    headers = get_headers()
+    if not headers:
+        return {"success": False, "error": "eToro API not configured"}
+
+    headers["Content-Type"] = "application/json"
+    url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
+
+    body: Dict[str, Any] = {
+        "message": message,
+        "language": language,
+    }
+    if attachment_ids:
+        body["attachments"] = [{"id": att_id, "type": "Image"} for att_id in attachment_ids]
+
+    try:
+        resp = requests.post(url, headers=headers, json=body, timeout=20)
+        if resp.status_code in (200, 201):
+            data = resp.json()
+            comment_id = data.get("id")
+            print(f"✅ Comment added to eToro post {post_id}! Comment ID: {comment_id}")
+            return {"success": True, "id": comment_id, "data": data}
+        else:
+            print(f"❌ Failed to add comment (HTTP {resp.status_code}): {resp.text}")
+            return {"success": False, "status_code": resp.status_code, "error": resp.text}
+    except Exception as e:
+        print(f"❌ Exception adding comment to eToro: {e}")
+        return {"success": False, "error": str(e)}
+
+
