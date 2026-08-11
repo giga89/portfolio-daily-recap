@@ -223,7 +223,7 @@ def create_post(
     url = f"{BASE_URL}/api/v1/posts"
 
     body: Dict[str, Any] = {
-        "content": content,
+        "message": content,
         "language": language,
     }
 
