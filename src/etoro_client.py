@@ -258,11 +258,16 @@ def create_post(
     content: str,
     language: str = "it",
     attachment_ids: Optional[List[str]] = None,
+    attachment_objects: Optional[List[Dict[str, Any]]] = None,
     market_ids: Optional[List[int]] = None,
     tagged_user_ids: Optional[List[int]] = None,
 ) -> Dict[str, Any]:
     """
     Publish a post to the eToro Social Feed via POST /api/v1/posts.
+
+    For attachments, pass the full upload response objects via attachment_objects.
+    The legacy attachment_ids parameter is kept for backward compatibility but
+    attachment_objects is the correct way to attach images.
     """
     headers = get_headers()
     if not headers:
@@ -276,7 +281,9 @@ def create_post(
         "language": language,
     }
 
-    if attachment_ids:
+    if attachment_objects:
+        body["attachments"] = attachment_objects
+    elif attachment_ids:
         body["attachments"] = [{"id": att_id, "type": "Image"} for att_id in attachment_ids]
     if market_ids:
         body["marketIds"] = market_ids

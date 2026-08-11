@@ -80,30 +80,32 @@ def send_etoro_post(
         return False
 
     print("📢 Publishing post to eToro Social Feed...")
-    attachment_ids = []
+    attachment_objects = []
 
     # Upload attachment if provided
     if image_path and os.path.exists(image_path):
         print(f"   🖼️ Uploading media attachment: {os.path.basename(image_path)}")
         att = etoro_client.upload_attachment(image_path)
-        if att and att.get("id"):
-            attachment_ids.append(att["id"])
-            print(f"   ✓ Media attached: {att.get('id')}")
+        if att and att.get("url"):
+            attachment_objects.append(att)
+            print(f"   ✓ Media attached: {att.get('url', '')[:80]}...")
         else:
             print("   ⚠️ Media upload failed, continuing with text-only post.")
 
-    clean_content = _strip_html(text)
-    
-    # Automatically resolve all mentioned cashtags to eToro market IDs
-    found_tickers = re.findall(r"\$([A-Za-z0-9\.\-]+)", clean_content)
+    # Automatically resolve all mentioned cashtags to eToro market IDs BEFORE formatting
+    found_tickers = re.findall(r"\$([A-Za-z0-9\.\-]+)", text)
     market_ids = etoro_client.get_market_ids_for_tickers(found_tickers)
     if market_ids:
         print(f"   🏷️ Tagged eToro markets: {found_tickers} -> IDs {market_ids}")
 
+    clean_content = _strip_html(text)
+    # Remove $ prefix so eToro backend does not strip cashtags/numbers into blank ()
+    clean_content = re.sub(r"\$([A-Za-z0-9\.\-]+)", r"\1", clean_content)
+
     res = etoro_client.create_post(
         content=clean_content,
         language=language,
-        attachment_ids=attachment_ids if attachment_ids else None,
+        attachment_objects=attachment_objects if attachment_objects else None,
         market_ids=market_ids if market_ids else None,
     )
 
