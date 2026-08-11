@@ -92,15 +92,13 @@ def send_etoro_post(
         else:
             print("   ⚠️ Media upload failed, continuing with text-only post.")
 
-    # Automatically resolve all mentioned cashtags to eToro market IDs BEFORE formatting
+    # Automatically resolve all mentioned cashtags to eToro market IDs
     found_tickers = re.findall(r"\$([A-Za-z0-9\.\-]+)", text)
     market_ids = etoro_client.get_market_ids_for_tickers(found_tickers)
     if market_ids:
         print(f"   🏷️ Tagged eToro markets: {found_tickers} -> IDs {market_ids}")
 
     clean_content = _strip_html(text)
-    # Remove $ prefix so eToro backend does not strip cashtags/numbers into blank ()
-    clean_content = re.sub(r"\$([A-Za-z0-9\.\-]+)", r"\1", clean_content)
 
     res = etoro_client.create_post(
         content=clean_content,
