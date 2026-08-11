@@ -130,14 +130,32 @@ def verify_connection() -> Dict[str, Any]:
 
 def fetch_portfolio_weights() -> Dict[str, float]:
     """
-    Fetch exact portfolio weights from GET /api/v2/trading/info/instrument-breakdown.
+    Fetch exact live portfolio weights from GET /api/v1/user-info/people/{username}/portfolio/live.
+    Calculates live mark-to-market weighting = investmentPct * (1 + netProfit/100).
     Returns a dictionary of {ticker: weight_percentage}.
     """
     headers = get_headers()
     if not headers:
         return {}
 
-    url = f"{BASE_URL}/api/v2/trading/info/instrument-breakdown"
+    from collections import defaultdict
+    _, _, username = get_credentials()
+    username = username or "AndreaRavalli"
+
+    # Known eToro Instrument ID to Ticker mapping for Andrea's portfolio
+    ID_TO_TICKER = {
+        100026: 'TRX', 10559: 'NOVO-B.CO', 6634: 'CCJ', 1442: 'ENI.MI', 4236: 'PRY.MI',
+        1002: 'AMZN', 10595: 'SX7PEX.DE', 1296: 'BMW.DE', 1137: 'NVDA', 1512: 'ASML.AS',
+        1005: 'GOOG', 1452: 'ENEL.MI', 7991: 'PLTR', 3150: 'TSM', 3297: 'MELI',
+        2941: 'PYPL', 15327: 'URNM', 1567: 'AIR.PA', 2093: '1211.HK', 1552: 'MC.PA',
+        1917: 'OR.PA', 1004: 'MSFT', 2010: 'LLY', 1283: 'RMS.PA', 4481: '0005.HK',
+        13669: 'INDO.PA', 2686: 'MAU.PA', 2260: 'AZN.L', 3585: 'GLEN.L', 2913: 'RACE',
+        4358: '1919.HK', 1282: 'VOW3.DE', 2828: 'MBG.DE', 2380: 'ABBV', 4108: 'DB1.DE',
+        12200: 'WDEF.L', 2035: 'HUM', 2316: 'ABT', 15623: 'IB01.L', 1210: 'SAP.DE',
+        1352: 'XEON.DE', 1353: 'VWCE.L', 2312: 'AVGO',
+    }
+
+    url = f"{BASE_URL}/api/v1/user-info/people/{username}/portfolio/live"
     try:
         resp = requests.get(url, headers=headers, timeout=25)
         if resp.status_code != 200:
@@ -145,29 +163,31 @@ def fetch_portfolio_weights() -> Dict[str, float]:
             return {}
 
         data = resp.json()
-        instruments = data.get("instruments", [])
+        positions = data.get("positions", [])
+        if not positions:
+            return {}
+
+        invested_by_inst = defaultdict(float)
+        current_val_by_inst = defaultdict(float)
+        total_val = 0.0
+
+        for p in positions:
+            iid = p.get("instrumentId")
+            inv = p.get("investmentPct", 0.0)
+            pnl = p.get("netProfit", 0.0)  # PnL %
+            cur_val = inv * (1.0 + pnl / 100.0)
+            invested_by_inst[iid] += inv
+            current_val_by_inst[iid] += cur_val
+            total_val += cur_val
+
         weights = {}
-
-        for inst in instruments:
-            sym = inst.get("symbol")
-            totals = inst.get("totals", {})
-            weight = totals.get("weightPercent")
-
-            if sym and weight is not None:
-                try:
-                    w = float(weight)
-                    if w > 0:
-                        # Normalize HK tickers if needed (e.g. 0005.HK -> standard format)
-                        if sym.endswith(".HK"):
-                            numeric_part = sym[:-3]
-                            if len(numeric_part) == 5 and numeric_part[0] == "0":
-                                sym = numeric_part[1:] + ".HK"
-                        weights[sym] = w
-                except (ValueError, TypeError):
-                    continue
+        for iid, cur in current_val_by_inst.items():
+            ticker = ID_TO_TICKER.get(iid, str(iid))
+            w = (cur / total_val) * 100.0 if total_val > 0 else invested_by_inst[iid]
+            weights[ticker] = round(w, 2)
 
         if weights:
-            print(f"✓ Fetched {len(weights)} exact portfolio weights directly from official eToro API")
+            print(f"✓ Fetched {len(weights)} exact live portfolio weights directly from official eToro API")
         return weights
 
     except Exception as e:

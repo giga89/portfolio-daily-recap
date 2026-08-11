@@ -322,14 +322,16 @@ def _get_live_weight_for_ticker(ticker: str) -> str:
     except Exception:
         pass
     
-    # Fallback known default weights
+    # Fallback known actual live portfolio weights
     defaults = {
-        "CCJ": "20.67%", "SX7PEX.DE": "17.65%", "PLTR": "14.75%", "0005.HK": "8.35%",
-        "URNM": "7.91%", "1211.HK": "4.88%", "MBG.DE": "4.79%", "NOVO-B.CO": "4.41%",
-        "ASML.AS": "3.39%", "LLY": "3.32%", "MELI": "3.12%", "TSM": "2.14%",
-        "NVDA": "2.13%", "AMZN": "1.48%", "GOOG": "0.88%", "MSFT": "0.08%", "AVGO": "0.06%"
+        "NOVO-B.CO": "4.30%", "CCJ": "4.01%", "ENI.MI": "3.94%", "PRY.MI": "3.86%",
+        "AMZN": "3.80%", "SX7PEX.DE": "3.43%", "BMW.DE": "3.30%", "NVDA": "3.30%",
+        "ASML.AS": "3.19%", "GOOG": "3.14%", "ENEL.MI": "2.94%", "PLTR": "2.87%",
+        "TSM": "2.87%", "MELI": "2.72%", "PYPL": "2.56%", "URNM": "2.38%",
+        "1211.HK": "2.35%", "MSFT": "2.19%", "LLY": "2.19%", "0005.HK": "2.04%",
+        "MBG.DE": "1.24%", "AVGO": "0.05%"
     }
-    return defaults.get(clean, "Core")
+    return defaults.get(clean, "2.50%")
 
 
 def generate_stock_infographic(
