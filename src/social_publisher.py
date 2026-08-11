@@ -574,7 +574,12 @@ def _save_post_to_artifacts(filename: str, title: str, content: str):
 def _publish_stock_focus_post(ticker: str = None) -> dict:
     """Publish Daily Stock Focus post to Telegram & eToro with 16:9 Stock Focus Card."""
     results = {}
-    ticker_sym, post_text = ai_news_generator.generate_stock_focus_post(ticker)
+    stock_focus_res = ai_news_generator.generate_stock_focus_post(ticker)
+    if not stock_focus_res or not isinstance(stock_focus_res, (tuple, list)) or len(stock_focus_res) < 2:
+        print("⚠️ Stock focus generation returned invalid result, skipping publish.")
+        return {"telegram_stock_focus": False, "etoro_stock_focus": False}
+
+    ticker_sym, post_text = stock_focus_res
     if not post_text:
         print("⚠️ Stock focus post text empty, skipping publish.")
         return {"telegram_stock_focus": False, "etoro_stock_focus": False}

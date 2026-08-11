@@ -216,6 +216,34 @@ def _remove_intro_text(text):
     return cleaned_text.lstrip()
 
 
+def _clean_robotic_phrases(text: str) -> str:
+    """
+    Remove unnatural, robotic self-introductions such as:
+    - 'Come Andrea Ravalli, monitoro costantemente...'
+    - 'Come Andrea Ravalli, ...'
+    - 'In qualità di Andrea Ravalli...'
+    - 'Io sono Andrea Ravalli...'
+    """
+    if not text:
+        return text
+
+    patterns = [
+        (r"(?i)Come\s+Andrea\s+Ravalli[,\s]+(io\s+)?(monitoro|gestisco|investo|seguo|ritengo|credo|osservo)?\s*", r"\2 "),
+        (r"(?i)Come\s+Andrea\s+Ravalli[,\s]*", ""),
+        (r"(?i)In\s+qualit[àa]\s+di\s+Andrea\s+Ravalli[,\s]*", ""),
+        (r"(?i)Io\s+sono\s+Andrea\s+Ravalli[,\s]*", ""),
+        (r"(?i)Come\s+investitore\s+privato\s+Andrea\s+Ravalli[,\s]*", ""),
+    ]
+    cleaned = text
+    for pat, repl in patterns:
+        cleaned = re.sub(pat, repl, cleaned)
+
+    # Capitalize the first letter if stripped at beginning
+    cleaned = re.sub(r"^\s*([a-z])", lambda m: m.group(1).upper(), cleaned)
+    return cleaned.strip()
+
+
+
 def _remove_market_section_tags(text):
     """
     Remove all $ tags from the MARKET OVERVIEW section.
@@ -1393,33 +1421,6 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
             weight_str = f"- Peso attuale certificato in portafoglio: {w:.2f}%\n"
     except Exception:
         pass
-
-def _clean_robotic_phrases(text: str) -> str:
-    """
-    Remove unnatural, robotic self-introductions such as:
-    - 'Come Andrea Ravalli, monitoro costantemente...'
-    - 'Come Andrea Ravalli, ...'
-    - 'In qualità di Andrea Ravalli...'
-    - 'Io sono Andrea Ravalli...'
-    """
-    if not text:
-        return text
-    
-    patterns = [
-        (r"(?i)Come\s+Andrea\s+Ravalli[,\s]+(io\s+)?(monitoro|gestisco|investo|seguo|ritengo|credo|osservo)?\s*", r"\2 "),
-        (r"(?i)Come\s+Andrea\s+Ravalli[,\s]*", ""),
-        (r"(?i)In\s+qualit[àa]\s+di\s+Andrea\s+Ravalli[,\s]*", ""),
-        (r"(?i)Io\s+sono\s+Andrea\s+Ravalli[,\s]*", ""),
-        (r"(?i)Come\s+investitore\s+privato\s+Andrea\s+Ravalli[,\s]*", ""),
-    ]
-    cleaned = text
-    for pat, repl in patterns:
-        cleaned = re.sub(pat, repl, cleaned)
-    
-    # Capitalize the first letter if stripped at beginning
-    cleaned = re.sub(r"^\s*([a-z])", lambda m: m.group(1).upper(), cleaned)
-    return cleaned.strip()
-
 
     prompt = f"""Sei un investitore privato esperto su eToro.
 Scrivi un post di approfondimento e analisi su un singolo titolo presente nel nostro portafoglio.
