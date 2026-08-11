@@ -1377,23 +1377,34 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
         "gemini-flash-latest",
     ]
 
+    # Fetch live weight for this specific ticker
+    weight_str = ""
+    try:
+        from finance_fetcher import fetch_portfolio_weights
+        weights = fetch_portfolio_weights()
+        w = weights.get(ticker, 0.0)
+        if w > 0:
+            weight_str = f"- Peso attuale certificato in portafoglio: {w:.2f}%\n"
+    except Exception:
+        pass
+
     prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro.
 Scrivi un post di approfondimento e analisi su un singolo titolo presente nel nostro portafoglio.
 
 TITOLO IN FOCUS:
 - Azienda: {company_name}
 - Ticker: {ticker} (Yahoo: {yahoo_ticker})
-- Tag principali da includere nel testo: {primary_tags_str}
+{weight_str}- Tag principali da includere nel testo: {primary_tags_str}
 - Tag di titoli correlati/competitor da includere nel testo: {related_tags_str}
 
 REGOLE PER IL TESTO (in ITALIANO):
 1. Titolo iniziale accattivante: "🔍 FOCUS ASSET: Perché ho in portafoglio {company_name} ({primary_tags[0]})"
-2. Spiega brevemente LA TESI DI INVESTIMENTO ("Perché ho questo titolo").
+2. Spiega brevemente LA TESI DI INVESTIMENTO ("Perché ho questo titolo"). Se indicato il peso in portafoglio, citalo con precisione ({weight_str.strip() if weight_str else ''}).
 3. Sezione "🚀 POSSIBILI UPSIDE": 2-3 catalizzatori principali di crescita, trend o punti di forza aziendali.
 4. Sezione "⚠️ POSSIBILI DOWNSIDE": 2-3 rischi principali, venti contrari o sfide di mercato/settore.
 5. Inserisci in modo fluido ed organico i tag principali ({primary_tags_str}) e i tag dei titoli correlati ({related_tags_str}) nel testo.
 6. Mantieni un tono trasparente, professionale ed esaustivo ma facile da leggere (massimo 1400 caratteri).
-7. Usa 3-5 emoji appropriate.
+7. Usa solo emoji standard universalmente supportate (🔍, 🚀, ⚠️, 📊, 👇, 👤, 🎁).
 
 Output ONLY the post text in Italian, no extra conversational preamble."""
 
