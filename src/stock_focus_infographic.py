@@ -13,6 +13,7 @@ Generates ultra-premium, professional investment infographics inspired by top-ti
 
 import io
 import os
+import json
 import time
 import requests
 from typing import Dict, Any, Optional, List
@@ -286,6 +287,9 @@ COMPANY_INFOGRAPHICS = {
         "pillars": [
             ("Marchio di Lusso Storico:", "Brand value secolare che garantisce elevato potere di prezzo."),
             ("Strategia Orientata ai Margini:", "Priorità alla redditività e ai veicoli alto di gamma rispetto ai volumi."),
+            ("Generazione di Cassa Industriale:", "Capacità di distribuire ricchi dividendi mantenendo cassa solida."),
+            ("Investimenti nella Guida Autonoma:", "Pioniere nei sistemi di guida autonoma di Livello 3 certificati."),
+        ],
         "quote": "Il lusso autentico mantiene il suo valore e la sua desiderabilità attraverso i decenni.",
         "tags": ["#MercedesBenz", "#Luxury", "#Dividends", "#Automotive", "#Germany"],
         "color": (50, 60, 70),
@@ -507,6 +511,115 @@ def _get_live_weight_for_ticker(ticker: str) -> str:
     return defaults.get(clean, "2.50%")
 
 
+def fetch_dynamic_company_infographic_data(ticker: str) -> dict:
+    """
+    Fetch dynamic, real-time structured data for any company using Gemini AI
+    and current portfolio metrics, cached in data/infographics_cache/{ticker}.json.
+    """
+    clean_ticker = ticker.replace("$", "").strip().upper()
+    cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "infographics_cache")
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file = os.path.join(cache_dir, f"{clean_ticker}.json")
+
+    # 1. Check local cache (fresh for 7 days)
+    if os.path.exists(cache_file):
+        try:
+            mtime = os.path.getmtime(cache_file)
+            if (time.time() - mtime) < 7 * 86400:
+                with open(cache_file, "r", encoding="utf-8") as f:
+                    cached = json.load(f)
+                    if cached and "kpis" in cached and "pillars" in cached:
+                        return cached
+        except Exception:
+            pass
+
+    # 2. Resolve company name from portfolio config
+    from portfolio_manager import load_config
+    config = load_config()
+    tickers = config.get("tickers", {})
+    yahoo_ticker, company_name = tickers.get(clean_ticker, (clean_ticker, clean_ticker))
+
+    # 3. Call Gemini AI if API key is available
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key:
+        try:
+            from google import genai
+            from google.genai import types
+
+            client = genai.Client(api_key=api_key)
+            prompt = f"""Analizza in profondità l'azienda {company_name} (${clean_ticker}).
+Fornisci in formato JSON strutturato (senza markdown extra):
+{{
+  "name": "{company_name.upper()}",
+  "tagline": "Slogan aziendale o posizionamento competitivo (max 5 parole)",
+  "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+  "subtitle": "Sintesi chiara della tesi di investimento (max 20 parole)",
+  "kpis": [
+    {{"label": "KPI 1 (es. CRESCITA RICAVI)", "val": "DATO ATTUALE (es. +25%)", "sub": "breve dettaglio"}},
+    {{"label": "KPI 2 (es. MARGINE OPERATIVO)", "val": "DATO ATTUALE (es. 35%)", "sub": "breve dettaglio"}},
+    {{"label": "PESO IN PORTAFOGLIO", "val": "{{weight}}", "sub": "Allocazione gestita nel portafoglio"}},
+    {{"label": "KPI 4 (es. CASSA / DIVIDENDI)", "val": "DATO ATTUALE (es. $5B+)", "sub": "breve dettaglio"}}
+  ],
+  "pillars": [
+    ["Fossato Competitivo:", "Spiegazione del moat o barriere all'entrata in 1 riga."],
+    ["Catalizzatore di Crescita:", "Spiegazione del principale driver di crescita attuale in 1 riga."],
+    ["Solidità e Finanze:", "Spiegazione della salute finanziaria / cash flow in 1 riga."],
+    ["Visione Decennale:", "Perché è un titolo vincente per il lungo termine in 1 riga."]
+  ],
+  "quote": "Frase iconica sulla visione strategica di lungo termine (max 18 parole).",
+  "tags": ["#{clean_ticker.replace('.', '_')}", "#Investing", "#Portfolio", "#LongTerm", "#Value"],
+  "color": [20, 100, 200]
+}}"""
+
+            config_gen = types.GenerateContentConfig(
+                temperature=0.3,
+                response_mime_type="application/json"
+            )
+
+            res = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+                config=config_gen,
+            )
+
+            if res and res.text:
+                parsed = json.loads(res.text)
+                if parsed.get("name") and parsed.get("kpis"):
+                    with open(cache_file, "w", encoding="utf-8") as f:
+                        json.dump(parsed, f, indent=2, ensure_ascii=False)
+                    print(f"✓ Dynamically generated and cached AI infographic data for {clean_ticker}")
+                    return parsed
+        except Exception as exc:
+            print(f"⚠️ Dynamic Gemini infographic generation fallback for {clean_ticker}: {exc}")
+
+    # 4. Fallback to curated dictionary or generic dynamic template
+    if clean_ticker in COMPANY_INFOGRAPHICS:
+        return COMPANY_INFOGRAPHICS[clean_ticker]
+
+    return {
+        "name": company_name.upper(),
+        "tagline": f"Conviction Holding (${clean_ticker})",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": f"{company_name} (${clean_ticker}) è una posizione strategica selezionata per fondamentali solidi e crescita di lungo termine.",
+        "kpis": [
+            {"label": "STRATEGIA", "val": "Core", "sub": "Selezione macro & fondamentale"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Allocazione gestita"},
+            {"label": "ORIZZONTE", "val": "Lungo Termine", "sub": "Creazione di valore nel tempo"},
+            {"label": "MONITORAGGIO", "val": "Attivo", "sub": "Gestione costante del rischio"},
+        ],
+        "pillars": [
+            ("Posizionamento di Settore:", f"{company_name} opera con un solido posizionamento competitivo nel proprio mercato."),
+            ("Tesi d'Investimento Chiara:", "Esposizione mirata alla crescita e alla generazione di valore nel lungo termine."),
+            ("Gestione del Rischio:", "Dimensionamento calibrato per ottimizzare il profilo rischio/rendimento."),
+            ("Integrazione di Portafoglio:", "Contribuisce alla diversificazione globale e alla resilienza della strategia."),
+        ],
+        "quote": "La qualità dei fondamentali e la visione di lungo periodo sono il vero motore dei rendimenti.",
+        "tags": [f"#{clean_ticker.replace('.', '_')}", "#Portfolio", "#Investing", "#LongTerm", "#Value"],
+        "color": (20, 100, 200),
+        "domain": "etoro.com"
+    }
+
+
 def generate_stock_infographic(
     ticker: str,
     output_path: str = None,
@@ -520,34 +633,8 @@ def generate_stock_infographic(
     if not output_path:
         output_path = f"output/infographic_{clean_ticker}.png"
 
-    info = COMPANY_INFOGRAPHICS.get(clean_ticker)
-    if not info:
-        # Dynamic branded generator for any portfolio company
-        from portfolio_manager import load_config
-        config = load_config()
-        comp_name = config.get("tickers", {}).get(clean_ticker, [None, clean_ticker])[1]
-        info = {
-            "name": comp_name.upper(),
-            "tagline": f"Core Portfolio Position (${clean_ticker})",
-            "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
-            "subtitle": f"{comp_name} (${clean_ticker}) è una posizione strategica selezionata per la solidità dei fondamentali e il profilo di crescita.",
-            "kpis": [
-                {"label": "STRATEGIA", "val": "Core", "sub": "Selezione macro & fondamentale"},
-                {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Allocazione gestita nel portafoglio"},
-                {"label": "ORIZZONTE", "val": "Lungo Termine", "sub": "Creazione di valore nel tempo"},
-                {"label": "MONITORAGGIO", "val": "Attivo", "sub": "Gestione costante del rischio"},
-            ],
-            "pillars": [
-                ("Posizionamento di Settore:", f"{comp_name} opera con un solido posizionamento competitivo nel proprio mercato."),
-                ("Tesi d'Investimento Chiara:", "Esposizione mirata alla crescita e alla generazione di valore nel lungo termine."),
-                ("Gestione del Rischio:", "Dimensionamento calibrato per ottimizzare il profilo rischio/rendimento."),
-                ("Integrazione di Portafoglio:", "Contribuisce alla diversificazione globale e alla resilienza della strategia."),
-            ],
-            "quote": "La qualità dei fondamentali e la visione di lungo periodo sono il vero motore dei rendimenti.",
-            "tags": [f"#{clean_ticker.replace('.', '_')}", "#Portfolio", "#Investing", "#LongTerm", "#Value"],
-            "color": (20, 100, 200),
-            "domain": "etoro.com"
-        }
+    # Always fetch dynamic data with AI synthesis and real-time updates
+    info = fetch_dynamic_company_infographic_data(clean_ticker)
     live_weight = _get_live_weight_for_ticker(clean_ticker)
 
     # 1. Base Canvas - Off-white / Warm Ivory Premium background (#F6F8FC)

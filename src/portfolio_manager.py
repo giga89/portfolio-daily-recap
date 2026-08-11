@@ -1,7 +1,10 @@
 
 import json
 import os
-import yfinance as yf
+try:
+    import yfinance as yf
+except ImportError:
+    yf = None
 
 # DEFAULT DATA MOVED HERE TO AVOID CIRCULAR IMPORT WITH CONFIG.PY
 # REAL ACTIVE ASSETS IN ANDREA RAVALLI'S ETORO PORTFOLIO
