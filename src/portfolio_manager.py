@@ -9,65 +9,59 @@ except ImportError:
 # DEFAULT DATA MOVED HERE TO AVOID CIRCULAR IMPORT WITH CONFIG.PY
 # REAL ACTIVE ASSETS IN ANDREA RAVALLI'S ETORO PORTFOLIO
 DEFAULT_TICKERS = {
-    # Nuclear & Energy
-    'CCJ': ('CCJ', 'Cameco Corp.'),
-    'URNM': ('URNM', 'Sprott Uranium Miners ETF'),
-    'ENI.MI': ('ENI.MI', 'Eni S.p.A.'),
-    'ENEL.MI': ('ENEL.MI', 'Enel S.p.A.'),
-    'MAU.PA': ('MAU.PA', 'Etablissements Maurel & Prom SA'),
-    
-    # Financial & Banking
+    # Cash, Fixed Income & Macro ETFs
+    'XEON.DE': ('XEON.DE', 'Xtrackers II EUR Overnight Rate Swap UCITS ETF'),
+    'IB01.L': ('IB01.L', 'iShares $ Treasury Bond 0-1yr UCITS ETF'),
+    'INDO.PA': ('INDO.PA', 'Amundi MSCI Indonesia UCITS ETF Acc'),
+    'PPFB.DE': ('PPFB.DE', 'iShares Physical Gold ETC'),
     'SX7PEX.DE': ('EXV1.DE', 'iShares STOXX Europe 600 Banks UCITS ETF'),
-    '0005.HK': ('0005.HK', 'HSBC Holdings PLC'),
-    'DB1.DE': ('DB1.DE', 'Deutsche Börse AG'),
+    'TRIG.L': ('TRIG.L', 'The Renewables Infrastructure Group Ltd'),
+    'WDEF.L': ('WDEF.L', 'WisdomTree Europe Equity Income UCITS ETF'),
+    'IEUR': ('IEUR', 'iShares Core MSCI Europe ETF'),
+    'IQQL.DE': ('IQQL.DE', 'iShares Listed Private Equity UCITS ETF'),
+    'VOF.L': ('VOF.L', 'VinaCapital Vietnam Opportunity Fund'),
     
     # Healthcare & Pharma
-    'NOVO-B.CO': ('NOVO-B.CO', 'Novo Nordisk A/S'),
-    'LLY': ('LLY', 'Eli Lilly and Co'),
-    'AZN.L': ('AZN.L', 'AstraZeneca PLC'),
-    'ABBV': ('ABBV', 'AbbVie Inc'),
-    'ABT': ('ABT', 'Abbott Laboratories'),
+    'ABT.US': ('ABT', 'Abbott Laboratories'),
     'HUM': ('HUM', 'Humana Inc'),
+    'NOVO-B.CO': ('NOVO-B.CO', 'Novo Nordisk A/S'),
+    'ABBV': ('ABBV', 'AbbVie Inc'),
+    'AZN.L': ('AZN.L', 'AstraZeneca PLC'),
+    'LLY': ('LLY', 'Eli Lilly and Co'),
     
     # Tech, AI & Semiconductors
-    'PLTR': ('PLTR', 'Palantir Technologies Inc'),
-    'NVDA': ('NVDA', 'NVIDIA Corporation'),
-    'ASML.AS': ('ASML.AS', 'ASML Holding NV'),
-    'TSM': ('TSM', 'Taiwan Semiconductor Manufacturing Co'),
-    'MSFT': ('MSFT', 'Microsoft Corporation'),
     'AMZN': ('AMZN', 'Amazon.com Inc'),
+    'MRVL': ('MRVL', 'Marvell Technology Inc'),
+    'MSFT': ('MSFT', 'Microsoft Corporation'),
     'GOOG': ('GOOGL', 'Alphabet Inc'),
+    'TSM': ('TSM', 'Taiwan Semiconductor Manufacturing Co'),
+    'NVDA': ('NVDA', 'NVIDIA Corporation'),
     'AVGO': ('AVGO', 'Broadcom Inc'),
-    'SAP.DE': ('SAP.DE', 'SAP SE'),
+    'PLTR': ('PLTR', 'Palantir Technologies Inc'),
     
-    # E-Commerce & Payments
-    'MELI': ('MELI', 'MercadoLibre Inc'),
-    'PYPL': ('PYPL', 'PayPal Holdings Inc'),
-    
-    # Automotive, Industrials & Luxury
-    'PRY.MI': ('PRY.MI', 'Prysmian S.p.A.'),
-    'BMW.DE': ('BMW.DE', 'Bayerische Motoren Werke AG'),
-    'MBG.DE': ('MBG.DE', 'Mercedes-Benz Group AG'),
-    'VOW3.DE': ('VOW3.DE', 'Volkswagen AG'),
-    'RACE': ('RACE', 'Ferrari N.V.'),
-    'AIR.PA': ('AIR.PA', 'Airbus SE'),
-    'MC.PA': ('MC.PA', 'LVMH Moët Hennessy Louis Vuitton'),
-    'OR.PA': ('OR.PA', "L'Oréal SA"),
-    'RMS.PA': ('RMS.PA', 'Hermès International SA'),
-    '1211.HK': ('1211.HK', 'BYD Co Ltd'),
-    '1919.HK': ('1919.HK', 'COSCO SHIPPING Holdings Co Ltd'),
+    # Energy, Nuclear, Utilities & Commodities
+    'ENI.MI': ('ENI.MI', 'Eni S.p.A.'),
+    'MAU.PA': ('MAU.PA', 'Etablissements Maurel & Prom SA'),
+    'ENEL.MI': ('ENEL.MI', 'Enel S.p.A.'),
+    'CCJ': ('CCJ', 'Cameco Corp.'),
     'GLEN.L': ('GLEN.L', 'Glencore PLC'),
+    'MNODL.L': ('MNODL.L', 'MMC Norilsk Nickel OJSC'),
+    'NVTKL.L': ('NVTKL.L', 'NOVATEK OAO'),
     
-    # Emerging Markets & Specialized ETFs
-    'INDO.PA': ('INDO.PA', 'Amundi MSCI Indonesia UCITS ETF Acc'),
-    'WDEF.L': ('WDEF.L', 'WisdomTree Europe Equity Income UCITS ETF'),
+    # Automotive, Luxury & Industrials
+    'RACE': ('RACE', 'Ferrari N.V.'),
+    'PRY.MI': ('PRY.MI', 'Prysmian S.p.A.'),
+    '1919.HK': ('1919.HK', 'COSCO SHIPPING Holdings Co Ltd'),
+    'VOW3.DE': ('VOW3.DE', 'Volkswagen AG'),
+    '1211.HK': ('1211.HK', 'BYD Co Ltd'),
+    'ULVR.L': ('ULVR.L', 'Unilever PLC'),
     
-    # Crypto
+    # E-Commerce, Fintech, Pre-IPO & Crypto
+    'MELI': ('MELI', 'MercadoLibre Inc'),
+    'ETOR': ('ETOR', 'eToro Group Ltd'),
+    '2318.HK': ('2318.HK', 'Ping An Insurance Group'),
     'TRX': ('TRX-USD', 'TRON'),
-    
-    # Cash & Liquidity Management
-    'IB01.L': ('IB01.L', 'iShares $ Treasury Bond 0-1yr UCITS ETF'),
-    'XEON.DE': ('XEON.DE', 'Xtrackers II EUR Overnight Rate Swap UCITS ETF'),
+    'SPCX.RTH': ('SPCX.RTH', 'Space Exploration Technologies Corp.'),
 }
 
 DEFAULT_EMOJIS = {

@@ -27,6 +27,7 @@ except ImportError:
 CARD_W = 1200
 CARD_H = 1200  # Square 1:1 format (optimal for both mobile and desktop feed)
 
+LOGO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "logos")
 LOGO_CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "logo_cache")
 
 # Full company data dictionary tailored for infographics (NO raw emojis in pillar titles to prevent tofu/rectangles)
@@ -488,6 +489,53 @@ def _font(size: int, bold: bool = True) -> "ImageFont.FreeTypeFont":
     return ImageFont.load_default()
 
 
+def _fetch_logo(ticker: str, domain: str = None) -> Optional["Image.Image"]:
+    """Fetch company logo from committed assets/logos/, cache, or remote."""
+    if not PIL_AVAILABLE:
+        return None
+    clean = ticker.replace("$", "").strip().upper()
+    base_sym = clean.split(".")[0]
+
+    # 1. Check committed assets/logos/
+    for check_sym in [clean, base_sym, f"{clean}.US" if "." not in clean else None]:
+        if not check_sym:
+            continue
+        repo_path = os.path.join(LOGO_DIR, f"{check_sym}.png")
+        if os.path.exists(repo_path) and os.path.getsize(repo_path) > 200:
+            try:
+                return Image.open(repo_path).convert("RGBA")
+            except Exception:
+                pass
+
+    # 2. Check assets/logo_cache/
+    os.makedirs(LOGO_CACHE_DIR, exist_ok=True)
+    cache_path = os.path.join(LOGO_CACHE_DIR, f"{clean}.png")
+    if os.path.exists(cache_path) and os.path.getsize(cache_path) > 200:
+        try:
+            return Image.open(cache_path).convert("RGBA")
+        except Exception:
+            pass
+
+    # 3. Remote fetch via logo providers
+    if not domain:
+        domain = f"{clean.lower()}.com"
+
+    urls = [
+        f"https://img.logo.dev/{domain}?token=pk_anonymous&size=160&format=png",
+        f"https://cdn.tickerlogos.com/{domain}",
+    ]
+    for url in urls:
+        try:
+            resp = requests.get(url, timeout=3)
+            if resp.status_code == 200 and len(resp.content) > 300:
+                img = Image.open(io.BytesIO(resp.content)).convert("RGBA")
+                img.save(cache_path)
+                return img
+        except Exception:
+            continue
+    return None
+
+
 def _get_live_weight_for_ticker(ticker: str) -> str:
     """Fetch live weight from portfolio / eToro API, formatted with percentage."""
     clean = ticker.replace("$", "").strip().upper()
@@ -513,15 +561,20 @@ def _get_live_weight_for_ticker(ticker: str) -> str:
 
 def fetch_dynamic_company_infographic_data(ticker: str) -> dict:
     """
-    Fetch dynamic, real-time structured data for any company using Gemini AI
-    and current portfolio metrics, cached in data/infographics_cache/{ticker}.json.
+    Fetch structured data for any company. Prioritizes curated dictionary,
+    falling back to Gemini AI synthesis or dynamic template.
     """
     clean_ticker = ticker.replace("$", "").strip().upper()
+
+    # 1. First priority: Check curated dictionary for known core holdings
+    if clean_ticker in COMPANY_INFOGRAPHICS:
+        return COMPANY_INFOGRAPHICS[clean_ticker]
+
     cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "infographics_cache")
     os.makedirs(cache_dir, exist_ok=True)
     cache_file = os.path.join(cache_dir, f"{clean_ticker}.json")
 
-    # 1. Check local cache (fresh for 7 days)
+    # 2. Check local cache (fresh for 7 days)
     if os.path.exists(cache_file):
         try:
             mtime = os.path.getmtime(cache_file)
@@ -533,13 +586,14 @@ def fetch_dynamic_company_infographic_data(ticker: str) -> dict:
         except Exception:
             pass
 
-    # 2. Resolve company name from portfolio config
+    # 3. Resolve company name from portfolio config
     from portfolio_manager import load_config
     config = load_config()
     tickers = config.get("tickers", {})
     yahoo_ticker, company_name = tickers.get(clean_ticker, (clean_ticker, clean_ticker))
+    live_weight = _get_live_weight_for_ticker(clean_ticker)
 
-    # 3. Call Gemini AI if API key is available
+    # 4. Call Gemini AI if API key is available
     api_key = os.environ.get("GEMINI_API_KEY")
     if api_key:
         try:
@@ -548,6 +602,7 @@ def fetch_dynamic_company_infographic_data(ticker: str) -> dict:
 
             client = genai.Client(api_key=api_key)
             prompt = f"""Analizza in profondità l'azienda {company_name} (${clean_ticker}).
+Il peso attuale in portafoglio è: {live_weight}.
 Fornisci in formato JSON strutturato (senza markdown extra):
 {{
   "name": "{company_name.upper()}",
@@ -557,7 +612,7 @@ Fornisci in formato JSON strutturato (senza markdown extra):
   "kpis": [
     {{"label": "KPI 1 (es. CRESCITA RICAVI)", "val": "DATO ATTUALE (es. +25%)", "sub": "breve dettaglio"}},
     {{"label": "KPI 2 (es. MARGINE OPERATIVO)", "val": "DATO ATTUALE (es. 35%)", "sub": "breve dettaglio"}},
-    {{"label": "PESO IN PORTAFOGLIO", "val": "{{weight}}", "sub": "Allocazione gestita nel portafoglio"}},
+    {{"label": "PESO IN PORTAFOGLIO", "val": "{live_weight}", "sub": "Allocazione gestita nel portafoglio"}},
     {{"label": "KPI 4 (es. CASSA / DIVIDENDI)", "val": "DATO ATTUALE (es. $5B+)", "sub": "breve dettaglio"}}
   ],
   "pillars": [
@@ -585,16 +640,15 @@ Fornisci in formato JSON strutturato (senza markdown extra):
             if res and res.text:
                 parsed = json.loads(res.text)
                 if parsed.get("name") and parsed.get("kpis"):
+                    for k in parsed.get("kpis", []):
+                        if "PESO" in k.get("label", "").upper():
+                            k["val"] = live_weight
                     with open(cache_file, "w", encoding="utf-8") as f:
                         json.dump(parsed, f, indent=2, ensure_ascii=False)
                     print(f"✓ Dynamically generated and cached AI infographic data for {clean_ticker}")
                     return parsed
         except Exception as exc:
             print(f"⚠️ Dynamic Gemini infographic generation fallback for {clean_ticker}: {exc}")
-
-    # 4. Fallback to curated dictionary or generic dynamic template
-    if clean_ticker in COMPANY_INFOGRAPHICS:
-        return COMPANY_INFOGRAPHICS[clean_ticker]
 
     return {
         "name": company_name.upper(),
@@ -603,7 +657,7 @@ Fornisci in formato JSON strutturato (senza markdown extra):
         "subtitle": f"{company_name} (${clean_ticker}) è una posizione strategica selezionata per fondamentali solidi e crescita di lungo termine.",
         "kpis": [
             {"label": "STRATEGIA", "val": "Core", "sub": "Selezione macro & fondamentale"},
-            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Allocazione gestita"},
+            {"label": "PESO IN PORTAFOGLIO", "val": live_weight, "sub": "Allocazione gestita"},
             {"label": "ORIZZONTE", "val": "Lungo Termine", "sub": "Creazione di valore nel tempo"},
             {"label": "MONITORAGGIO", "val": "Attivo", "sub": "Gestione costante del rischio"},
         ],
@@ -627,15 +681,20 @@ def generate_stock_infographic(
     """
     Generate an ultra-premium Hitachi-style square infographic (1200x1200).
     Uses clean vector badges to prevent square/tofu rendering artifacts.
-    Injects dynamic portfolio weights from official data.
+    Injects dynamic portfolio weights with auto-scaling text and logo support.
     """
     clean_ticker = ticker.replace("$", "").strip().upper()
     if not output_path:
         output_path = f"output/infographic_{clean_ticker}.png"
 
-    # Always fetch dynamic data with AI synthesis and real-time updates
+    # Always fetch data with curated priority or AI synthesis
     info = fetch_dynamic_company_infographic_data(clean_ticker)
     live_weight = _get_live_weight_for_ticker(clean_ticker)
+
+    # Accent color
+    accent_color = info.get("color", (190, 24, 24))
+    if isinstance(accent_color, list):
+        accent_color = tuple(accent_color)
 
     # 1. Base Canvas - Off-white / Warm Ivory Premium background (#F6F8FC)
     img = Image.new("RGBA", (CARD_W, CARD_H), (246, 248, 252, 255))
@@ -650,35 +709,52 @@ def generate_stock_infographic(
         b = int(252 * (1 - alpha) + 252 * alpha)
         draw.line([(0, y), (CARD_W, y)], fill=(r, g, b, 255))
 
-    # Top Brand Bar
+    # Top Brand Bar with Company Logo
     f_brand = _font(44, bold=True)
     f_tagline = _font(21, bold=False)
     f_title = _font(36, bold=True)
     f_lead = _font(19, bold=False)
 
     brand_name = info["name"]
-    draw.text((60, 45), brand_name, fill=(16, 24, 40, 255), font=f_brand)
-    bb_brand = draw.textbbox((60, 45), brand_name, font=f_brand)
+    logo_img = _fetch_logo(clean_ticker, domain=info.get("domain"))
+
+    start_x = 60
+    if logo_img:
+        try:
+            # Draw rounded logo box
+            logo_box_size = 58
+            logo_resized = logo_img.resize((logo_box_size - 8, logo_box_size - 8), Image.Resampling.LANCZOS)
+            draw.rounded_rectangle([60, 42, 60 + logo_box_size, 42 + logo_box_size], radius=12, fill=(255, 255, 255, 255), outline=(215, 225, 238, 255), width=1)
+            # Paste logo centered
+            img.alpha_composite(logo_resized, (60 + 4, 42 + 4))
+            draw = ImageDraw.Draw(img)
+            start_x = 60 + logo_box_size + 18
+        except Exception:
+            start_x = 60
+
+    draw.text((start_x, 45), brand_name, fill=(16, 24, 40, 255), font=f_brand)
+    bb_brand = draw.textbbox((start_x, 45), brand_name, font=f_brand)
     
     # Vertical divider
     div_x = bb_brand[2] + 20
     draw.line([(div_x, 48), (div_x, 92)], fill=(180, 190, 205, 255), width=2)
-    draw.text((div_x + 20, 58), info["tagline"], fill=(100, 115, 135, 255), font=f_tagline)
+    draw.text((div_x + 20, 58), info.get("tagline", f"Asset ${clean_ticker}"), fill=(100, 115, 135, 255), font=f_tagline)
 
     # Title in Red Accent
-    draw.text((60, 115), info["title"], fill=(190, 24, 24, 255), font=f_title)
+    draw.text((60, 115), info.get("title", "TESI D'INVESTIMENTO & HIGHLIGHTS"), fill=(190, 24, 24, 255), font=f_title)
     
     # Subtitle lead text
-    sub_words = info["subtitle"].split()
+    sub_words = info.get("subtitle", "").split()
     sub_lines, curr = [], ""
     for w in sub_words:
         test = (curr + " " + w).strip()
-        if draw.textbbox((0,0), test, font=f_lead)[2] < 1080:
+        if draw.textbbox((0, 0), test, font=f_lead)[2] < 1080:
             curr = test
         else:
             sub_lines.append(curr)
             curr = w
-    if curr: sub_lines.append(curr)
+    if curr:
+        sub_lines.append(curr)
     
     sy = 170
     for l in sub_lines[:2]:
@@ -692,10 +768,6 @@ def generate_stock_infographic(
     gap = 18
     kpi_w = (CARD_W - 120 - gap * 3) // 4
 
-    f_kpi_lbl = _font(13, bold=True)
-    f_kpi_val = _font(32, bold=True)
-    f_kpi_sub = _font(13, bold=False)
-
     for i, kpi in enumerate(kpis[:4]):
         kx = 60 + i * (kpi_w + gap)
         # White card with soft border and subtle shadow
@@ -704,19 +776,46 @@ def generate_stock_infographic(
         # Top Accent Dot
         draw.ellipse([kx + 18, kpi_y + 18, kx + 28, kpi_y + 28], fill=(190, 24, 24, 255))
         
-        # Label
-        draw.text((kx + 34, kpi_y + 16), kpi["label"][:18], fill=(100, 115, 135, 255), font=f_kpi_lbl)
+        # Auto-fit Label (never cut off like "PORTAFOGLI")
+        lbl_text = kpi.get("label", "").strip()
+        lbl_font = _font(13, bold=True)
+        for sz in [13, 12, 11, 10]:
+            test_f = _font(sz, bold=True)
+            if draw.textbbox((0, 0), lbl_text, font=test_f)[2] <= (kpi_w - 44):
+                lbl_font = test_f
+                break
+        draw.text((kx + 34, kpi_y + 16), lbl_text, fill=(100, 115, 135, 255), font=lbl_font)
         
-        # Value (inject dynamic weight if applicable)
-        val_str = kpi["val"].replace("{weight}", live_weight)
-        draw.text((kx + 18, kpi_y + 55), val_str, fill=(16, 24, 40, 255), font=f_kpi_val)
+        # Value (inject dynamic weight if placeholder present or if label is PESO)
+        raw_val = str(kpi.get("val", ""))
+        if "{weight}" in raw_val:
+            val_str = raw_val.replace("{weight}", live_weight)
+        elif "PESO" in lbl_text.upper():
+            val_str = live_weight
+        else:
+            val_str = raw_val
+
+        # Auto-fit value so it NEVER overflows card width
+        val_font = _font(32, bold=True)
+        max_val_w = kpi_w - 36
+        for sz in [32, 28, 24, 20, 18, 16]:
+            test_f = _font(sz, bold=True)
+            if draw.textbbox((0, 0), val_str, font=test_f)[2] <= max_val_w:
+                val_font = test_f
+                break
+        draw.text((kx + 18, kpi_y + 55), val_str, fill=(16, 24, 40, 255), font=val_font)
         
-        # Subtitle / note
-        sub_str = kpi["sub"]
-        draw.text((kx + 18, kpi_y + 118), sub_str, fill=(100, 116, 139, 255), font=f_kpi_sub)
+        # Subtitle / note (auto-fit or wrap)
+        sub_str = kpi.get("sub", "").strip()
+        sub_font = _font(13, bold=False)
+        for sz in [13, 12, 11]:
+            test_f = _font(sz, bold=False)
+            if draw.textbbox((0, 0), sub_str, font=test_f)[2] <= max_val_w:
+                sub_font = test_f
+                break
+        draw.text((kx + 18, kpi_y + 118), sub_str, fill=(100, 116, 139, 255), font=sub_font)
 
     # 4. Middle Content Sections:
-    # Left Box (Why I Invest - 60% width) + Right Box (Quote Box - 40% width)
     mid_y = kpi_y + kpi_h + 24
     mid_h = 515
     left_w = 660
@@ -751,12 +850,13 @@ def generate_stock_infographic(
         d_lines, dc = [], ""
         for w in dw:
             t = (dc + " " + w).strip()
-            if draw.textbbox((0,0), t, font=f_bullet_desc)[2] < left_w - 90:
+            if draw.textbbox((0, 0), t, font=f_bullet_desc)[2] < left_w - 90:
                 dc = t
             else:
                 d_lines.append(dc)
                 dc = w
-        if dc: d_lines.append(dc)
+        if dc:
+            d_lines.append(dc)
         
         dy = py + 28
         for dl in d_lines[:2]:
@@ -808,3 +908,4 @@ def generate_stock_infographic(
     img.convert("RGB").save(output_path, "PNG", optimize=True)
     print(f"🏆 Ultra-Premium Hitachi-style Infographic generated: {output_path} (Live Weight: {live_weight})")
     return output_path
+

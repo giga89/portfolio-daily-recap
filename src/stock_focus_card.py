@@ -36,6 +36,10 @@ PROFILE_PHOTO_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "assets", "profile_photo.jpg"
 )
+LOGO_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "assets", "logos"
+)
 LOGO_CACHE_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "assets", "logo_cache"
@@ -92,32 +96,48 @@ def _reg_font(size: int) -> "ImageFont.FreeTypeFont":
 
 
 def _fetch_logo(ticker: str, domain: str = None) -> Optional[Image.Image]:
-    """Fetch high-res logo from cache or remote."""
+    """Fetch high-res logo from committed assets/logos/, cache, or remote."""
     if not PIL_AVAILABLE or not REQUESTS_AVAILABLE:
         return None
+    clean = ticker.replace("$", "").strip().upper()
+    base_sym = clean.split(".")[0]
+
+    # 1. Check committed assets/logos/
+    for check_sym in [clean, base_sym, f"{clean}.US" if "." not in clean else None]:
+        if not check_sym:
+            continue
+        repo_path = os.path.join(LOGO_DIR, f"{check_sym}.png")
+        if os.path.exists(repo_path) and os.path.getsize(repo_path) > 200:
+            try:
+                return Image.open(repo_path).convert("RGBA")
+            except Exception:
+                pass
+
+    # 2. Check assets/logo_cache/
     os.makedirs(LOGO_CACHE_DIR, exist_ok=True)
-    cache_path = os.path.join(LOGO_CACHE_DIR, f"{ticker}.png")
-    if os.path.exists(cache_path):
+    cache_path = os.path.join(LOGO_CACHE_DIR, f"{clean}.png")
+    if os.path.exists(cache_path) and os.path.getsize(cache_path) > 200:
         try:
             return Image.open(cache_path).convert("RGBA")
-        except:
+        except Exception:
             pass
 
+    # 3. Remote fetch via logo providers
     if not domain:
-        domain = TICKER_THEMES.get(ticker, {}).get("domain", f"{ticker.lower()}.com")
+        domain = TICKER_THEMES.get(clean, {}).get("domain", f"{clean.lower()}.com")
 
     urls = [
         f"https://img.logo.dev/{domain}?token=pk_anonymous&size=160&format=png",
-        f"https://logo.clearbit.com/{domain}?size=160",
+        f"https://cdn.tickerlogos.com/{domain}",
     ]
     for url in urls:
         try:
-            resp = _requests.get(url, timeout=4)
+            resp = _requests.get(url, timeout=3)
             if resp.status_code == 200 and len(resp.content) > 300:
                 img = Image.open(io.BytesIO(resp.content)).convert("RGBA")
                 img.save(cache_path)
                 return img
-        except:
+        except Exception:
             continue
     return None
 

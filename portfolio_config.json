@@ -1,65 +1,64 @@
 {
     "emojis": {
-        "1211.HK": "\ud83d\udd0b",
-        "1919.HK": "\ud83d\udea2",
-        "2318.HK": "\ud83c\udfe6",
-        "ABBV": "\ud83d\udc89",
-        "ABT.US": "\ud83c\udfe5",
-        "AMZN": "\ud83d\udce6",
-        "AVGO": "\ud83d\udcbb",
-        "AZN.L": "\ud83e\uddec",
-        "CCJ": "\u26a1",
-        "ENEL.MI": "\ud83d\udd0b",
-        "ENI.MI": "\u26fd",
-        "ETOR": "\ud83c\udfdb\ufe0f",
-        "GLEN.L": "\u26cf\ufe0f",
-        "GOOG": "\ud83d\udd0d",
-        "HUM": "\ud83c\udfe5",
-        "IB01.L": "\ud83d\udcb5",
-        "IEUR": "\ufffd\ud83c\uddfa",
-        "INDO.PA": "\ud83c\uddee\ud83c\udde9",
-        "IQQL.DE": "\ud83d\udd25",
-        "LLY": "\ud83d\udc8a",
-        "MAU.PA": "\ud83d\udee2\ufe0f",
-        "MELI": "\ud83d\uded2",
-        "MNODL.L": "\ud83d\udce6",
-        "MRVL": "\ud83d\udcca",
-        "MSFT": "\ud83d\udcbb",
-        "NOVO-B.CO": "\ud83d\udc89",
-        "NVDA": "\ud83e\udd16",
-        "NVTKL.L": "\ud83d\udd25",
-        "PLTR": "\ud83d\udee1\ufe0f",
-        "PPFB.DE": "\ud83e\udd47",
-        "PRY.MI": "\ud83d\udd0c",
-        "RACE": "\ud83c\udfce\ufe0f",
-        "SPCX": "\ud83d\udcca",
-        "SPCX.RTH": "\ud83d\udcca",
-        "SX7PEX.DE": "\ud83c\udfdb\ufe0f",
-        "TRIG.L": "\ud83c\udf2c\ufe0f",
-        "TRX": "\ud83e\ude99",
-        "TSM": "\ud83c\udfed",
-        "ULVR.L": "\ud83e\uddfc",
-        "VOF.L": "\ud83c\uddfb\ud83c\uddf3",
-        "VOW3.DE": "\ud83d\ude97",
-        "WDEF.L": "\ud83d\udcbc",
-        "XEON.DE": "\ud83d\udca4"
+        "1211.HK": "🔋",
+        "1919.HK": "🚢",
+        "2318.HK": "🏦",
+        "ABBV": "💉",
+        "ABT.US": "🏥",
+        "AMZN": "📦",
+        "AVGO": "🔌",
+        "AZN.L": "🧬",
+        "CCJ": "⚡",
+        "ENEL.MI": "🔋",
+        "ENI.MI": "⛽",
+        "ETOR": "��️",
+        "GLEN.L": "⛏️",
+        "GOOG": "🔍",
+        "HUM": "🏥",
+        "IB01.L": "💵",
+        "IEUR": "🇪🇺",
+        "INDO.PA": "🇮🇩",
+        "IQQL.DE": "🔥",
+        "LLY": "💊",
+        "MAU.PA": "🛢️",
+        "MELI": "🛒",
+        "MNODL.L": "📦",
+        "MRVL": "📊",
+        "MSFT": "💻",
+        "NOVO-B.CO": "💉",
+        "NVDA": "🤖",
+        "NVTKL.L": "🔥",
+        "PLTR": "🛡️",
+        "PPFB.DE": "🥇",
+        "PRY.MI": "🔌",
+        "RACE": "🏎️",
+        "SPCX.RTH": "🚀",
+        "SX7PEX.DE": "🏛️",
+        "TRIG.L": "🌬️",
+        "TRX": "🪙",
+        "TSM": "🏭",
+        "ULVR.L": "🧼",
+        "VOF.L": "🇻🇳",
+        "VOW3.DE": "🚗",
+        "WDEF.L": "💼",
+        "XEON.DE": "💤"
     },
     "tickers": {
         "1211.HK": [
             "1211.HK",
-            "BYD Company"
+            "BYD Co Ltd"
         ],
         "1919.HK": [
             "1919.HK",
-            "COSCO SHIPPING Holdings"
+            "COSCO SHIPPING Holdings Co Ltd"
         ],
         "2318.HK": [
             "2318.HK",
-            "Ping An Insurance"
+            "Ping An Insurance Group"
         ],
         "ABBV": [
             "ABBV",
-            "AbbVie"
+            "AbbVie Inc"
         ],
         "ABT.US": [
             "ABT",
@@ -67,7 +66,7 @@
         ],
         "AMZN": [
             "AMZN",
-            "Amazon"
+            "Amazon.com Inc"
         ],
         "AVGO": [
             "AVGO",
@@ -75,15 +74,15 @@
         ],
         "AZN.L": [
             "AZN.L",
-            "AstraZeneca"
+            "AstraZeneca PLC"
         ],
         "CCJ": [
             "CCJ",
-            "Cameco"
+            "Cameco Corp."
         ],
         "ENEL.MI": [
             "ENEL.MI",
-            "Enel"
+            "Enel S.p.A."
         ],
         "ENI.MI": [
             "ENI.MI",
@@ -91,27 +90,27 @@
         ],
         "ETOR": [
             "ETOR",
-            "Etoro"
+            "eToro Group Ltd"
         ],
         "GLEN.L": [
             "GLEN.L",
-            "Glencore"
+            "Glencore PLC"
         ],
         "GOOG": [
             "GOOGL",
-            "Alphabet"
+            "Alphabet Inc"
         ],
         "HUM": [
             "HUM",
-            "Humana"
+            "Humana Inc"
         ],
         "IB01.L": [
             "IB01.L",
-            "iShares Treasury Bond 0-1yr UCITS ETF"
+            "iShares $ Treasury Bond 0-1yr UCITS ETF"
         ],
         "IEUR": [
             "IEUR",
-            "iShares Core MSCI Europe UCITS ETF"
+            "iShares Core MSCI Europe ETF"
         ],
         "INDO.PA": [
             "INDO.PA",
@@ -119,11 +118,11 @@
         ],
         "IQQL.DE": [
             "IQQL.DE",
-            "iShares MSCI World Quality Factor UCITS ETF"
+            "iShares Listed Private Equity UCITS ETF"
         ],
         "LLY": [
             "LLY",
-            "Eli Lilly & Co"
+            "Eli Lilly and Co"
         ],
         "MAU.PA": [
             "MAU.PA",
@@ -131,31 +130,31 @@
         ],
         "MELI": [
             "MELI",
-            "MercadoLibre"
+            "MercadoLibre Inc"
         ],
         "MNODL.L": [
-            "MNDI.L",
-            "Mondi PLC"
+            "MNODL.L",
+            "MMC Norilsk Nickel OJSC"
         ],
         "MRVL": [
             "MRVL",
-            "Marvell Technology, Inc."
+            "Marvell Technology Inc"
         ],
         "MSFT": [
             "MSFT",
-            "Microsoft"
+            "Microsoft Corporation"
         ],
         "NOVO-B.CO": [
             "NOVO-B.CO",
-            "Novo Nordisk"
+            "Novo Nordisk A/S"
         ],
         "NVDA": [
             "NVDA",
-            "NVIDIA"
+            "NVIDIA Corporation"
         ],
         "NVTKL.L": [
-            "NVTK.ME",
-            "Novatek"
+            "NVTKL.L",
+            "NOVATEK OAO"
         ],
         "PLTR": [
             "PLTR",
@@ -163,23 +162,19 @@
         ],
         "PPFB.DE": [
             "PPFB.DE",
-            "iShares Physical Metals PLC   O"
+            "iShares Physical Gold ETC"
         ],
         "PRY.MI": [
             "PRY.MI",
-            "Prysmian"
+            "Prysmian S.p.A."
         ],
         "RACE": [
             "RACE",
-            "Ferrari"
-        ],
-        "SPCX": [
-            "SPCX",
-            "Space Exploration Technologies Corp."
+            "Ferrari N.V."
         ],
         "SPCX.RTH": [
             "SPCX.RTH",
-            "SPCX.RTH"
+            "Space Exploration Technologies Corp."
         ],
         "SX7PEX.DE": [
             "EXV1.DE",
@@ -187,7 +182,7 @@
         ],
         "TRIG.L": [
             "TRIG.L",
-            "Trig PLC"
+            "The Renewables Infrastructure Group Ltd"
         ],
         "TRX": [
             "TRX-USD",
@@ -195,7 +190,7 @@
         ],
         "TSM": [
             "TSM",
-            "Taiwan Semiconductor"
+            "Taiwan Semiconductor Manufacturing Co"
         ],
         "ULVR.L": [
             "ULVR.L",
@@ -203,11 +198,11 @@
         ],
         "VOF.L": [
             "VOF.L",
-            "VinaCapital Vietnam Opportunity Fund Limited"
+            "VinaCapital Vietnam Opportunity Fund"
         ],
         "VOW3.DE": [
             "VOW3.DE",
-            "Volkswagen"
+            "Volkswagen AG"
         ],
         "WDEF.L": [
             "WDEF.L",

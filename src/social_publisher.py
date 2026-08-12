@@ -377,7 +377,12 @@ def publish_all(
                     import cross_link_scheduler
                     target_pid = etoro_sender.LAST_PUBLISHED_POST_ID
                     print(f"🚀 Publishing 3 cross-linking comments on eToro post {target_pid} in immediate sequence (5s interval)...")
-                    cross_link_scheduler.run_comments_sequence(post_id=target_pid, interval_seconds=5)
+                    cross_link_scheduler.run_comments_sequence(
+                        post_id=target_pid,
+                        interval_seconds=5,
+                        session_name=market_session,
+                        market_data=portfolio_data
+                    )
                 except Exception as c_err:
                     print(f"⚠️ Failed to execute cross_link_scheduler: {c_err}")
     else:

@@ -152,7 +152,7 @@ def fetch_portfolio_weights() -> Dict[str, float]:
         13669: 'INDO.PA', 2686: 'MAU.PA', 2260: 'AZN.L', 3585: 'GLEN.L', 2913: 'RACE',
         4358: '1919.HK', 1282: 'VOW3.DE', 2828: 'MBG.DE', 2380: 'ABBV', 4108: 'DB1.DE',
         12200: 'WDEF.L', 2035: 'HUM', 2316: 'ABT', 15623: 'IB01.L', 1210: 'SAP.DE',
-        1352: 'XEON.DE', 1353: 'VWCE.L', 2312: 'AVGO',
+        1352: 'XEON.DE', 2312: 'AVGO',
     }
 
     url = f"{BASE_URL}/api/v1/user-info/people/{username}/portfolio/live"
