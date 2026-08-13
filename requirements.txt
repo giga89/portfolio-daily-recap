@@ -12,3 +12,4 @@ seaborn
 pandas
 openpyxl
 pytz
+Pillow>=10.0.0
