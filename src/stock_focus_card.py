@@ -60,7 +60,7 @@ TICKER_THEMES = {
     "NOVO-B.CO": {"sector": "Biotecnologie & Cura del Diabete", "domain": "novonordisk.com", "thesis": "Pioniere mondiale del GLP-1 con Ozempic e Wegovy, forte pipeline clinica.", "color": (0, 110, 200)},
     "SX7PEX.DE": {"sector": "ETF Bancario Europeo", "domain": "stoxx.com", "thesis": "Elevati dividendi, solidità patrimoniale e redditività da tassi d'interesse.", "color": (70, 130, 240)},
     "MELI": {"sector": "E-Commerce & Fintech America Latina", "domain": "mercadolibre.com", "thesis": "Leader indiscusso del commercio elettronico e dei pagamenti con Mercado Pago.", "color": (255, 220, 0)},
-    "ASML.AS": {"sector": "Litografia EUV per Semiconduttori", "domain": "asml.com", "thesis": "Monopolio mondiale nei macchinari litografici a ultravioletti estremi.", "color": (15, 45, 140)},
+    "MRVL": {"sector": "Semiconduttori & Networking AI Data Center", "domain": "marvell.com", "thesis": "Leader nei chip ottici ad altissima velocità e silicio custom per hyperscaler.", "color": (0, 90, 180)},
     "TSM":  {"sector": "Fonderia di Chip Avanzati", "domain": "tsmc.com", "thesis": "Produce oltre il 90% dei chip più avanzati al mondo a 3nm e 2nm.", "color": (220, 50, 50)},
     "AVGO": {"sector": "Chip Custom & Networking AI", "domain": "broadcom.com", "thesis": "Dominio negli switch per cluster AI e integrazione strategica di VMware.", "color": (204, 0, 0)},
     "MBG.DE": {"sector": "Auto di Lusso & Premium Mobility", "domain": "mercedes-benz.com", "thesis": "Potere di prezzo nei segmenti top-end, transizione elettrica e dividendi.", "color": (160, 175, 190)},

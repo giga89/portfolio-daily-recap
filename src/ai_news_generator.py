@@ -1614,3 +1614,139 @@ Output ONLY the post text in Italian."""
         print(f"❌ Error generating macro outlook post: {exc}")
         return ""
 
+
+# ── 4. Daily Crypto Market & Sentiment Recap ─────────────────────────────────
+
+def generate_crypto_daily_post(crypto_data: dict = None) -> tuple[str, str]:
+    """
+    Generates a daily cryptocurrency recap for eToro & Telegram:
+    - Analyzes 4 crypto assets ($BTC, $ETH, $SOL, $TRX)
+    - Incorporates exact live spot prices, 24h % change, 24h volumes, and Fear & Greed Index
+    - Factual analysis of daily catalysts and market sentiment
+    - Concludes with an engaging question to spark discussion on eToro
+
+    Returns:
+        tuple: (title, formatted_post_text)
+    """
+    import crypto_fetcher
+    if not crypto_data:
+        crypto_data = crypto_fetcher.fetch_crypto_daily_data()
+
+    sentiment = crypto_data.get("sentiment", {})
+    sent_score = sentiment.get("score", 50)
+    sent_cls = sentiment.get("classification_it", "Neutrale")
+    sent_emoji = sentiment.get("emoji", "⚖️")
+
+    cryptos = crypto_data.get("cryptos", {})
+    crypto_list = list(cryptos.values())
+
+    # Build dynamic crypto cards string for fallback and prompt
+    blocks = []
+    cashtags_list = []
+    hashtags_list = ["#Crypto", "#eToro", "#Investimenti"]
+
+    for d in crypto_list:
+        sym = d.get("symbol", "")
+        name = d.get("name", sym)
+        emoji = d.get("emoji", "🪙")
+        cashtag = d.get("cashtag", f"${sym}")
+        cashtags_list.append(cashtag)
+        hashtags_list.append(f"#{name.replace(' ', '')}")
+
+        portfolio_note = " | Posizione attiva in portafoglio" if sym == "TRX" else ""
+        block = (
+            f"{emoji} {cashtag} ({name}): {d.get('price_formatted', 'N/D')} ({d.get('change_24h', 0.0):+.2f}%)\n"
+            f"↳ Volume 24h: {d.get('volume_formatted', 'N/D')} | Range: {d.get('low_formatted', 'N/D')} - {d.get('high_formatted', 'N/D')}{portfolio_note}"
+        )
+        blocks.append(block)
+
+    blocks_str = "\n\n".join(blocks)
+    cashtags_str = " ".join(cashtags_list)
+    hashtags_str = " ".join(hashtags_list)
+
+    # Build factual summary metrics string
+    facts_list = []
+    for sym, d in cryptos.items():
+        portfolio_tag = " [IN PORTAFOGLIO ANDREA]" if sym == "TRX" else ""
+        facts_list.append(
+            f"• {d.get('emoji', '🪙')} {d.get('name', sym)} ({d.get('cashtag', f'${sym}')}){portfolio_tag}: "
+            f"Prezzo {d.get('price_formatted', 'N/D')}, Variazione 24h: {d.get('change_24h', 0.0):+.2f}%, "
+            f"Volume 24h: {d.get('volume_formatted', 'N/D')}, Range: {d.get('low_formatted', 'N/D')} - {d.get('high_formatted', 'N/D')}"
+        )
+    facts_str = "\n".join(facts_list)
+
+    # Fallback template if Gemini is unavailable
+    fallback_text = f"""⚡ FLASH CRYPTO DEL GIORNO & SENTIMENT 🪙
+
+📊 Indice Crypto Fear & Greed: {sent_score}/100 · {sent_cls} {sent_emoji}
+
+Ecco i dati certi e i livelli chiave della sessione sulle 4 crypto monitorate:
+
+{blocks_str}
+
+💡 SINTESI DI MERCATO:
+La sessione evidenzia una fase di consolidamento con volumi e sentiment allineati all'attuale contesto macro. $BTC e $ETH continuano a dettare la direzione della liquidità globale, mentre i principali altcoin monitorati e $TRX (detenuto in portafoglio) mostrano dinamiche di transazione e adozione on-chain resilienti.
+
+💬 Quale di questi 4 asset ritenete abbia il miglior rapporto rischio/rendimento nei prossimi mesi? Avete posizioni crypto aperte? 👇
+
+{hashtags_str}"""
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("ℹ️ GEMINI_API_KEY missing, using high-quality fallback template for crypto recap")
+        return "Daily crypto recap", fallback_text
+
+    models_to_try = [
+        "gemini-2.5-flash",
+        "gemini-2.5-pro",
+        "gemini-2.0-flash",
+    ]
+
+    prompt = f"""Sei Andrea Ravalli, un Popular Investor italiano su eToro.
+Scrivi un post giornaliero in ITALIANO dedicato all'aggiornamento del mercato CRYPTO da pubblicare su eToro e Telegram.
+
+DATI CERTI E REALI DELLA SESSIONE:
+- Indice Crypto Fear & Greed: {sent_score}/100 ({sent_cls} {sent_emoji})
+- Dati di mercato verificati per le 4 crypto su eToro:
+{facts_str}
+
+REGOLE PER IL POST:
+1. Titolo d'impatto: "⚡ FLASH CRYPTO DEL GIORNO & SENTIMENT 🪙"
+2. Cita subito il punteggio esatto del Crypto Fear & Greed Index ({sent_score}/100) spiegando cosa significa per il sentiment attuale.
+3. Riporta i dati certi per ciascuna delle 4 crypto ({cashtags_str}): prezzo esatto, variazione 24h % e volume 24h. Ricorda che $TRX è detenuto anche nel nostro portafoglio.
+4. Fornisci un commento sintetico, lucido e professionale sui fatti del giorno, sui flussi di liquidità e sui driver di mercato.
+5. Includi OBBLIGATORIAMENTE i cashtag ({cashtags_str}) nel testo e gli hashtag finali ({hashtags_str}).
+6. Concludi con una domanda aperta e stimolante per invitare i follower di eToro a commentare.
+7. Lunghezza: 900-1400 caratteri. Tono autorevole, equilibrato e non da "hype" finanziario.
+
+Output ONLY the post text in Italian."""
+
+    try:
+        client = genai.Client(api_key=api_key)
+        config_gen = types.GenerateContentConfig(temperature=0.8)
+
+        for model_name in models_to_try:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config_gen,
+                )
+                if response and response.text:
+                    print(f"✅ Crypto Daily Recap post generated using {model_name}")
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "crypto_daily_post")
+                    cleaned_post = _clean_robotic_phrases(response.text.strip())
+                    return "Daily crypto recap", cleaned_post
+            except Exception as exc:
+                print(f"⚠️ Crypto recap model {model_name} failed: {exc}")
+                time.sleep(1)
+
+        print("❌ All models failed for crypto recap post, using fallback")
+        return "Daily crypto recap", fallback_text
+
+    except Exception as exc:
+        print(f"❌ Error generating crypto recap post: {exc}")
+        return "Daily crypto recap", fallback_text
+
+

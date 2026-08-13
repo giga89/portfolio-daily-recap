@@ -13,12 +13,23 @@
 2 7 * * 1-5   /opt/portfolio-dispatch/dispatch.sh eu_open  >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 2 8 * * 1-5   /opt/portfolio-dispatch/dispatch.sh eu_open  >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
+# ── Stock Focus (Midday) ───────────────────────────────────────────────────────
+# 14:00 local (CET/CEST) → 12:00 UTC (summer) / 13:00 UTC (winter)
+0 12 * * 1-5   /opt/portfolio-dispatch/dispatch.sh stock_focus >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+0 13 * * 1-5   /opt/portfolio-dispatch/dispatch.sh stock_focus >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
 # ── U.S. Market Open ─────────────────────────────────────────────────────────
 # NYSE open: 09:30 local → trigger at 09:32 local
 # Summer (EDT): 09:32 EDT = 13:32 UTC
 # Winter (EST): 09:32 EST = 14:32 UTC
 32 13 * * 1-5  /opt/portfolio-dispatch/dispatch.sh us_open  >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 32 14 * * 1-5  /opt/portfolio-dispatch/dispatch.sh us_open  >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
+# ── Daily Crypto Pulse & Sentiment Recap ─────────────────────────────────────
+# 18:00 local (CET/CEST) → 16:00 UTC (summer) / 17:00 UTC (winter)
+0 16 * * *     /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+0 17 * * *     /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
 
 # ── U.S. Market Close ────────────────────────────────────────────────────────
 # NYSE close: 16:00 local → trigger at 16:02 local

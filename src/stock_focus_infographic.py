@@ -164,27 +164,27 @@ COMPANY_INFOGRAPHICS = {
         "color": (0, 100, 200),
         "domain": "novonordisk.com"
     },
-    "ASML.AS": {
-        "name": "ASML",
-        "tagline": "Semiconductor Lithography Monopoly",
+    "MRVL": {
+        "name": "MARVELL",
+        "tagline": "AI Data Center Connectivity & Custom Silicon",
         "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
-        "subtitle": "ASML detiene il monopolio assoluto al mondo sulle macchine litografiche EUV indispensabili per produrre i chip avanzati.",
+        "subtitle": "Marvell progetta semiconduttori essenziali per la connettività ottica ad altissima velocità e chip custom per i supercomputer AI.",
         "kpis": [
-            {"label": "QUOTA DI MERCATO EUV", "val": "100%", "sub": "Monopolio tecnologico insostituibile"},
-            {"label": "PORTAFOGLIO ORDINI", "val": "€35B+", "sub": "Visibilità ricavi pluriennale"},
-            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Fondamenta della tecnologia globale"},
-            {"label": "PROSSIMA GEN HIGH-NA", "val": "Avviata", "sub": "EUV di nuova generazione per nodi <2nm"},
+            {"label": "CRESCITA REVENUE AI", "val": "+50%+", "sub": "Domanda record per chip data center"},
+            {"label": "LEADERSHIP PAM4 DSP", "val": "Top 1", "sub": "Standard de facto interconnessioni"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Asset strategico infrastruttura AI"},
+            {"label": "PIPELINE CUSTOM SILICON", "val": "Tier-1", "sub": "Accordi con i maggiori hyperscaler"},
         ],
         "pillars": [
-            ("Monopolio Litografico Unico:", "Nessuna azienda al mondo può stampare chip a 3nm o 2nm senza ASML."),
-            ("Clienti di Livello Mondiale:", "Fornitore esclusivo per TSMC, NVIDIA, Apple, Intel e Samsung."),
-            ("Barriere Tecnologiche Estreme:", "Oltre 30 anni di brevetti ottici e laser impossibili da replicare."),
-            ("Crescita Guidata dall'AI:", "L'espansione dei semiconduttori garantisce domanda crescente per il decennio."),
+            ("Monopolio Interconnessioni Ottiche:", "I chip elettro-ottici PAM4 collegano i cluster di GPU con minima latenza."),
+            ("Custom ASIC per Hyperscaler:", "Sviluppo di chip proprietari su misura per i maggiori giganti cloud."),
+            ("Forte Espansione dei Margini:", "La quota crescente di prodotti AI accelera la redditività operativa."),
+            ("Barriere Tecnologiche Elevate:", "Know-how proprietario fondamentale per scalare le reti dei data center."),
         ],
-        "quote": "Se i chip sono il futuro, ASML è l'unica azienda al mondo che possiede la macchina per stamparli.",
-        "tags": ["#ASML", "#Semiconductors", "#EUV", "#TechMonopoly", "#Europe"],
-        "color": (20, 50, 140),
-        "domain": "asml.com"
+        "quote": "La potenza di calcolo senza connettività ad altissima velocità non può scalare: Marvell è il ponte dell'AI.",
+        "tags": ["#Marvell", "#Semiconductors", "#AIDataCenter", "#Networking", "#CustomSilicon"],
+        "color": (0, 90, 180),
+        "domain": "marvell.com"
     },
     "MELI": {
         "name": "MERCADOLIBRE",
@@ -551,7 +551,7 @@ def _get_live_weight_for_ticker(ticker: str) -> str:
     defaults = {
         "NOVO-B.CO": "4.30%", "CCJ": "4.01%", "ENI.MI": "3.94%", "PRY.MI": "3.86%",
         "AMZN": "3.80%", "SX7PEX.DE": "3.43%", "BMW.DE": "3.30%", "NVDA": "3.30%",
-        "ASML.AS": "3.19%", "GOOG": "3.14%", "ENEL.MI": "2.94%", "PLTR": "2.87%",
+        "HUM": "3.19%", "GOOG": "3.14%", "ENEL.MI": "2.94%", "PLTR": "2.87%",
         "TSM": "2.87%", "MELI": "2.72%", "PYPL": "2.56%", "URNM": "2.38%",
         "1211.HK": "2.35%", "MSFT": "2.19%", "LLY": "2.19%", "0005.HK": "2.04%",
         "MBG.DE": "1.24%", "AVGO": "0.05%"

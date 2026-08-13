@@ -28,17 +28,19 @@ source "$ENV_FILE"
 # Session name from argument
 SESSION="${1:-}"
 if [ -z "$SESSION" ]; then
-    echo "Usage: $0 <eu_open|us_open|us_close|weekly_sat|weekly_sun>" >&2
+    echo "Usage: $0 <eu_open|stock_focus|us_open|crypto_recap|us_close|weekly_sat|weekly_sun>" >&2
     exit 1
 fi
 
 # Map session argument to workflow session name
 case "$SESSION" in
-    eu_open)    SESSION_NAME="European market open" ;;
-    us_open)    SESSION_NAME="U.S. market open" ;;
-    us_close)   SESSION_NAME="U.S. market close" ;;
-    weekly_sat) SESSION_NAME="Weekly recap (Sat)" ;;
-    weekly_sun) SESSION_NAME="Weekly recap (Sun)" ;;
+    eu_open)      SESSION_NAME="European market open" ;;
+    stock_focus)  SESSION_NAME="Stock focus" ;;
+    us_open)      SESSION_NAME="U.S. market open" ;;
+    crypto_recap) SESSION_NAME="Daily crypto recap" ;;
+    us_close)     SESSION_NAME="U.S. market close" ;;
+    weekly_sat)   SESSION_NAME="Weekly recap (Sat)" ;;
+    weekly_sun)   SESSION_NAME="Weekly recap (Sun)" ;;
     *)
         echo "ERROR: Unknown session '$SESSION'" >&2
         exit 1
@@ -47,16 +49,26 @@ esac
 
 # Check if today is a weekday (for market sessions)
 DOW=$(date -u +%u)  # 1=Mon, 7=Sun
-if [[ "$SESSION" =~ ^(eu_open|us_open|us_close)$ ]] && [ "$DOW" -gt 5 ]; then
+if [[ "$SESSION" =~ ^(eu_open|stock_focus|us_open|us_close)$ ]] && [ "$DOW" -gt 5 ]; then
     echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP $SESSION — weekend (day $DOW)" >> "$LOG_DIR/dispatch.log"
     exit 0
 fi
 
-# Dedup: check if this session was already dispatched today
+# ---------------------------------------------------------------------------
+# Dedup: use SESSION + current hour bucket to avoid blocking scheduled runs
+# when a manual test runs earlier in the day.
+#
+# Each cron fires in a specific UTC-hour window. We record
+# "SESSION:HH" so that eu_open at 07 does not block eu_open at 08,
+# and a manual us_close at 13 does not block the real us_close at 20.
+# ---------------------------------------------------------------------------
 TODAY=$(date -u +%Y-%m-%d)
+CURRENT_HOUR=$(date -u +%H)
+DEDUP_KEY="${SESSION}:${CURRENT_HOUR}"
 DEDUP_FILE="$LOG_DIR/dispatched_${TODAY}.txt"
-if grep -qF "$SESSION" "$DEDUP_FILE" 2>/dev/null; then
-    echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') DEDUP $SESSION — already dispatched today" >> "$LOG_DIR/dispatch.log"
+
+if grep -qF "$DEDUP_KEY" "$DEDUP_FILE" 2>/dev/null; then
+    echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') DEDUP $SESSION (hour $CURRENT_HOUR) — already dispatched today" >> "$LOG_DIR/dispatch.log"
     exit 0
 fi
 
@@ -73,7 +85,7 @@ HTTP_CODE=$(curl -s -o /tmp/dispatch_response.json -w "%{http_code}" \
 
 if [ "$HTTP_CODE" = "204" ]; then
     echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SUCCESS $SESSION — HTTP $HTTP_CODE" >> "$LOG_DIR/dispatch.log"
-    echo "$SESSION" >> "$DEDUP_FILE"
+    echo "$DEDUP_KEY" >> "$DEDUP_FILE"
 else
     RESPONSE=$(cat /tmp/dispatch_response.json 2>/dev/null || echo "no response body")
     echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') FAIL $SESSION — HTTP $HTTP_CODE — $RESPONSE" >> "$LOG_DIR/dispatch.log"

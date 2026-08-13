@@ -57,6 +57,7 @@ SESSION_WEEKLY_SUN               = "Weekly recap (Sun)"
 SESSION_MONTHLY                  = "Monthly recap"
 SESSION_MONDAY                   = "Monday decision post"
 SESSION_STOCK_FOCUS              = "Stock focus"
+SESSION_CRYPTO_RECAP             = "Daily crypto recap"
 SESSION_WEEKLY_PORTFOLIO_OUTLOOK = "Weekly portfolio outlook"
 SESSION_WEEKLY_MACRO_OUTLOOK     = "Weekly macro outlook"
 
@@ -151,6 +152,7 @@ def publish_all(
     is_monthly           = SESSION_MONTHLY.lower() in market_session.lower()
     is_monday            = SESSION_MONDAY.lower() in market_session.lower()
     is_stock_focus       = SESSION_STOCK_FOCUS.lower() in market_session.lower()
+    is_crypto_recap      = SESSION_CRYPTO_RECAP.lower() in market_session.lower() or "crypto" in market_session.lower()
     is_portfolio_outlook = SESSION_WEEKLY_PORTFOLIO_OUTLOOK.lower() in market_session.lower()
     is_macro_outlook     = SESSION_WEEKLY_MACRO_OUTLOOK.lower() in market_session.lower()
 
@@ -175,6 +177,13 @@ def publish_all(
         print(f"🔍 DAILY SESSION — Single Stock Focus Deep-Dive (Ticker: {specified_ticker or 'Auto-Rotate'})")
         print("=" * 60)
         results.update(_publish_stock_focus_post(specified_ticker))
+        return results
+
+    if is_crypto_recap:
+        print("\n" + "=" * 60)
+        print(f"🪙 DAILY SESSION — Crypto Market & Sentiment Recap")
+        print("=" * 60)
+        results.update(_publish_crypto_recap_post())
         return results
 
     if is_portfolio_outlook:
@@ -381,10 +390,16 @@ def publish_all(
                         post_id=target_pid,
                         interval_seconds=5,
                         session_name=market_session,
-                        market_data=portfolio_data
+                        market_data=stock_data
                     )
                 except Exception as c_err:
                     print(f"⚠️ Failed to execute cross_link_scheduler: {c_err}")
+                    import traceback
+                    traceback.print_exc()
+            elif not etoro_sender.LAST_PUBLISHED_POST_ID:
+                print("ℹ️ No eToro post ID captured, skipping automatic cross-link comments.")
+            else:
+                print(f"ℹ️ Session '{market_session}' does not trigger cross-link comments.")
     else:
         print("   ⏭️  Not configured (ETORO_USER_KEY missing).")
         results["etoro"] = False
@@ -738,3 +753,71 @@ def _publish_weekly_macro_outlook() -> dict:
         results["telegram_macro_outlook"] = False
 
     return results
+
+
+def _publish_crypto_recap_post() -> dict:
+    """Publish Daily Crypto Recap post to eToro & Telegram with 16:9 Crypto Card."""
+    import crypto_fetcher
+    import crypto_card_generator
+
+    results = {}
+    crypto_data = crypto_fetcher.fetch_crypto_daily_data()
+    title, post_text = ai_news_generator.generate_crypto_daily_post(crypto_data)
+    if not post_text:
+        print("⚠️ Crypto post text empty, skipping publish.")
+        return {"telegram_crypto_recap": False, "etoro_crypto_recap": False}
+
+    full_text = post_text + ETORO_FOOTER_LONG
+    _save_post_to_artifacts("crypto_daily_recap.txt", "Crypto Daily Recap", full_text)
+
+    # 1. Generate 16:9 Crypto Card
+    card_path = "output/crypto_recap.png"
+    try:
+        card_path = crypto_card_generator.generate_crypto_card(crypto_data, card_path)
+    except Exception as exc:
+        print(f"⚠️ Crypto card generation warning: {exc}")
+        card_path = None
+
+    # 2. eToro Social Feed
+    print("\n🐂 eToro Social Feed (Crypto Daily Recap):")
+    if etoro_sender.etoro_client.is_configured():
+        ok_etoro = etoro_sender.send_etoro_post(
+            text=post_text,
+            image_path=card_path if (card_path and os.path.exists(card_path)) else None,
+        )
+        results["etoro_crypto_recap"] = ok_etoro
+        if ok_etoro:
+            analytics_tracker.record_post(
+                platform="etoro",
+                post_id=f"crypto_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
+                session_name="Daily crypto recap",
+                text=post_text,
+                image_type="crypto_card",
+                tickers=["BTC", "ETH", "SOL", "TRX"],
+            )
+    else:
+        print("   ⏭️  eToro not configured.")
+        results["etoro_crypto_recap"] = False
+
+    # 3. Telegram
+    if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
+        try:
+            telegram_sender.send_telegram_message(full_text)
+            if card_path and os.path.exists(card_path):
+                telegram_sender.send_telegram_photo(card_path, caption="⚡ Flash Crypto del Giorno & Sentiment 🪙")
+            print("✅ Crypto Daily Recap post published to Telegram")
+            results["telegram_crypto_recap"] = True
+        except Exception as e:
+            print(f"❌ Telegram send failed for Crypto Recap: {e}")
+            results["telegram_crypto_recap"] = False
+    else:
+        print("   ⏭️  Telegram not configured.")
+        results["telegram_crypto_recap"] = False
+
+    try:
+        analytics_tracker.update_and_build_dashboard()
+    except Exception:
+        pass
+
+    return results
+

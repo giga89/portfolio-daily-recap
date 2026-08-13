@@ -4,7 +4,7 @@ Dynamic Cross-Link Comments Generator & Scheduler for eToro
 ===========================================================
 Publishes 3 curated, dynamic cross-link comments on an eToro recap post.
 Each comment focuses on EXACTLY ONE SINGLE ASSET from a specific category:
-  • Comment 1/3: Single AI & Tech Asset (e.g. $PLTR, $NVDA, $ASML.AS, $TSM, $MSFT, $GOOG, $AVGO, $AMZN)
+  • Comment 1/3: Single AI & Tech Asset (e.g. $PLTR, $NVDA, $MRVL, $TSM, $MSFT, $GOOG, $AVGO, $AMZN)
   • Comment 2/3: Single Defensive, Healthcare, Energy or Value Asset (e.g. $LLY, $NOVO-B.CO, $CCJ, $ENI.MI, $PRY.MI, $BMW.DE, $ENEL.MI, $MBG.DE)
   • Comment 3/3: Single ETF & Macro Strategy Asset (e.g. $SX7PEX.DE, $URNM, $WDEF.L, $INDO.PA, $IEUR)
 
@@ -52,13 +52,13 @@ AI_TECH_PROFILES = {
         "driver": "Margini lordi superiori al 75% e domanda multi-annuale garantita dagli investimenti dei principali hyperscaler mondiali.",
         "question": "Ritenete che gli investimenti in compute e infrastrutture AI continueranno a battere le stime anche nei prossimi trimestri?"
     },
-    "ASML.AS": {
-        "name": "ASML Holding",
-        "emoji": "🔬",
-        "role": "Monopolio Mondiale Litografia EUV",
-        "thesis": "L'unica società al mondo capace di costruire le macchine litografiche a ultravioletti estremi, indispensabili per produrre qualsiasi chip sotto i 5nm.",
-        "driver": "Portafoglio ordini pluriennale superiore a €35B e fornitore esclusivo per TSMC, Apple, NVIDIA, Intel e Samsung.",
-        "question": "Considerate ASML il vero pilastro insostituibile dell'intera filiera globale dei semiconduttori?"
+    "MRVL": {
+        "name": "Marvell Technology",
+        "emoji": "📊",
+        "role": "Infrastruttura Connettività & Chip Custom AI",
+        "thesis": "Leader nei semiconduttori per data center, interconnessioni ottiche PAM4 ad altissima velocità e silicio custom per hyperscaler.",
+        "driver": "Forte espansione dei ricavi legati all'AI con domanda record per chip elettro-ottici e soluzioni di storage ad alte prestazioni.",
+        "question": "Seguite Marvell tra i titoli strategici per la scalabilità delle reti dei data center AI?"
     },
     "TSM": {
         "name": "Taiwan Semiconductor (TSMC)",

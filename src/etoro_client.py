@@ -28,36 +28,35 @@ MARKET_IDS = {
     "AMZN": 1005,
     "GOOG": 1002,
     "CCJ": 6634,
-    "URNM": 75677,
-    "LLY": 1567,
+    "URNM": 15327,
+    "LLY": 2010,
     "NOVO-B.CO": 2260,
     "SX7PEX.DE": 10595,
-    "MELI": 4108,
-    "ASML.AS": 1500,
+    "MELI": 3297,
     "TSM": 4481,
     "AVGO": 4236,
-    "MBG.DE": 1133,
-    "0005.HK": 5472,
-    "1211.HK": 2380,
-    "01211.HK": 2380,
+    "MBG.DE": 2828,
+    "1211.HK": 2093,
+    "1919.HK": 4358,
     "RACE": 1917,
     "ENEL.MI": 1282,
     "ENI.MI": 1283,
     "PRY.MI": 1296,
     "VOW3.DE": 1210,
-    "AZN.L": 2010,
-    "GLEN.L": 2035,
+    "AZN.L": 2260,
+    "GLEN.L": 3585,
     "TRIG.L": 2686,
     "VOF.L": 2828,
     "IEUR": 3150,
     "IQQL.DE": 2913,
-    "WDEF.L": 3297,
+    "WDEF.L": 12200,
     "PPFB.DE": 2941,
-    "XEON.DE": 10559,
-    "IB01.L": 1442,
+    "XEON.DE": 1352,
+    "IB01.L": 15623,
     "HUM": 1512,
-    "ABBV": 1452,
-    "ABT.US": 1552,
+    "ABBV": 2380,
+    "ABT.US": 2316,
+    "TRX": 100026,
 }
 
 
@@ -142,18 +141,22 @@ def fetch_portfolio_weights() -> Dict[str, float]:
     _, _, username = get_credentials()
     username = username or "AndreaRavalli"
 
-    # Known eToro Instrument ID to Ticker mapping for Andrea's portfolio
-    ID_TO_TICKER = {
-        100026: 'TRX', 10559: 'NOVO-B.CO', 6634: 'CCJ', 1442: 'ENI.MI', 4236: 'PRY.MI',
-        1002: 'AMZN', 10595: 'SX7PEX.DE', 1296: 'BMW.DE', 1137: 'NVDA', 1512: 'ASML.AS',
-        1005: 'GOOG', 1452: 'ENEL.MI', 7991: 'PLTR', 3150: 'TSM', 3297: 'MELI',
-        2941: 'PYPL', 15327: 'URNM', 1567: 'AIR.PA', 2093: '1211.HK', 1552: 'MC.PA',
-        1917: 'OR.PA', 1004: 'MSFT', 2010: 'LLY', 1283: 'RMS.PA', 4481: '0005.HK',
-        13669: 'INDO.PA', 2686: 'MAU.PA', 2260: 'AZN.L', 3585: 'GLEN.L', 2913: 'RACE',
-        4358: '1919.HK', 1282: 'VOW3.DE', 2828: 'MBG.DE', 2380: 'ABBV', 4108: 'DB1.DE',
-        12200: 'WDEF.L', 2035: 'HUM', 2316: 'ABT', 15623: 'IB01.L', 1210: 'SAP.DE',
-        1352: 'XEON.DE', 2312: 'AVGO',
-    }
+    # Known eToro Instrument ID to Ticker mapping derived from MARKET_IDS
+    ID_TO_TICKER = {v: k for k, v in MARKET_IDS.items()}
+    # Specific aliases / secondary instrument IDs on eToro
+    ID_TO_TICKER.update({
+        1512: 'HUM',
+        1442: 'ENI.MI',
+        10559: 'XEON.DE',
+        4108: 'MELI',
+        1567: 'LLY',
+        1552: 'ABT.US',
+        1452: 'ABBV',
+        1133: 'MBG.DE',
+        2380: '1211.HK',
+        2035: 'GLEN.L',
+        2010: 'AZN.L',
+    })
 
     url = f"{BASE_URL}/api/v1/user-info/people/{username}/portfolio/live"
     try:
