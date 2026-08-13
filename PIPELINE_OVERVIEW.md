@@ -7,33 +7,32 @@ Last reviewed: May 2026.
 
 ## What runs and when
 
-| Trigger (GitHub Actions cron) | Session name | What it does |
-|---|---|---|
-| Mon–Fri 06:45 UTC (summer) / 07:45 UTC (winter) | `European market open` | Recap + Telegram |
-| Mon–Fri 13:15 UTC (summer) / 14:15 UTC (winter) | `U.S. market open` | Recap + Telegram |
-| Mon–Fri 19:45 UTC (summer) / 20:45 UTC (winter) | `U.S. market close` | Recap + Telegram + Twitter + Bluesky |
-| Saturday 09:00 UTC | `Weekly recap (Sat)` | Weekly recap + Telegram + LinkedIn |
-| Sunday 21:00 UTC | `Weekly recap (Sun)` | Weekly recap + Telegram + LinkedIn |
-| Last day of month 20:00 UTC | `Monthly recap` | Monthly recap + Telegram |
-| Manual dispatch only | `Monday decision post` | AI decision + empathy posts → Telegram only |
+| Trigger (Orange Pi 5 / Fallback GitHub Cron) | Session name | What it does | Targets |
+|---|---|---|---|
+| Mon–Fri 07:02 UTC (09:02 ITA) | `European market open` | Recap + Top 5 + ATH distance + 3 automatic cross-linking comments | Telegram, eToro Feed |
+| Mon–Fri 12:00 UTC (14:00 ITA) | `Stock focus` | Single stock deep-dive with 1:1 HD Infographic, bull/bear thesis & valuation | Telegram, eToro Feed |
+| Mon–Fri 13:32 / 14:32 UTC (15:32 / 16:32 ITA) | `U.S. market open` | Opening moves, AI/Tech catalysts + 3 automatic cross-linking comments | Telegram, eToro Feed |
+| Daily 16:00 UTC (18:00 ITA) | `Daily crypto recap` | 16:9 Crypto Card, Fear & Greed Index, $BTC, $ETH, $TRX, and dynamic altcoin | Telegram, eToro Feed |
+| Mon–Fri 20:02 / 21:02 UTC (22:02 / 23:02 ITA) | `U.S. market close` | Full daily wrap-up, benchmark charts, pie chart, Top & Flop card + 3 comments | Telegram, eToro, Twitter, Bluesky, Threads, FB, IG |
+| Saturday 08:00 / 09:00 UTC (10:00 ITA) | `Weekly recap (Sat)` | Weekly portfolio & macro recap with Top & Flop card | Telegram, eToro Feed, LinkedIn |
+| Sunday 20:00 / 21:00 UTC (22:00 ITA) | `Weekly recap (Sun)` | Upcoming catalysts, earnings & central banks schedule | Telegram, eToro Feed, LinkedIn |
 
-**Important:** EU open and US open/close each have two crons (summer/winter). The workflow sleeps ~20 min
-after firing to hit the exact target time. Deduplication via Gist prevents the two crons from sending twice.
+**Important:** Triggered primarily by the Orange Pi 5 local scheduler (`dispatch.sh`) with hour-bucket deduplication to guarantee on-the-minute execution regardless of daylight saving time (DST).
 
 ---
 
 ## Data flow (one normal session)
 
 ```
-[GitHub Actions cron fires]
+[Orange Pi 5 crontab fires / GitHub Actions cron fallback]
         ↓
-[Detect session name from cron or force_session input]
+[Detect session name from repository_dispatch or cron schedule]
         ↓
-[Dedup check via Gist — skip if already ran this session today]
+[Dedup check — skip if already ran this session in this hour]
         ↓
 [data_collector.py — main entry point]
     1. Fetch stock prices → yfinance
-    2. Fetch portfolio weights → BullAware (Selenium scrape)
+    2. Fetch portfolio weights → live holdings from eToro API
     3. Weighted daily performance = sum(weight * daily_change)
     4. YTD performance → eToro public API (userstats + rankings)
     5. Cumulative 5-year return → eToro history seeded from Gist
@@ -41,22 +40,21 @@ after firing to hit the exact target time. Deduplication via Gist prevents the t
     7. Weekly / monthly perf → yfinance (if session requires it)
     8. Performance chart → chart_generator.py (matplotlib, portfolio vs benchmarks)
     9. Pie chart → pie_chart_generator.py (rotates: allocation / sector / geo / PnL)
-   10. AI market news → ai_news_generator.py (Gemini API)
+   10. AI market news → ai_news_generator.py (Gemini 2.5 Flash / Pro API)
    11. Format recap → formatter.py → output/recap.txt
         ↓
 [social_publisher.py — route to platforms based on session]
-    → Telegram: every session (recap.txt + chart + pie chart as separate photo)
-    → Twitter/X: US close only (2-tweet thread)
-    → Bluesky:   US close only (2-post thread)
-    → LinkedIn:  Weekly only (professional format)
-    → Threads / Facebook / Instagram: US close (PENDING Meta restriction fix)
+    → eToro Feed: every session (recap text + Top/Flop or Infographic/Crypto card + 3 auto comments)
+    → Telegram:   every session (formatted text + HD visual cards)
+    → Twitter/X:  US close only (2-tweet thread)
+    → Bluesky:    US close only (2-post thread)
+    → LinkedIn:   Weekly only (professional format)
+    → Threads / Facebook / Instagram: US close (Meta Graph API)
         ↓
-[gist_storage.py — persist state]
-    → Performance history snapshot
-    → ATH (All-Time High) tracking
-    → Tag rotation state (used_tags, avoids repeating same tickers)
-    → Session dedup flags
-    → Recap history (for dedup + context)
+[gist_storage.py & analytics_tracker.py — persist state & dashboard]
+    → Performance history snapshot & ATH tracking
+    → Tag rotation state (avoids repeating same tickers)
+    → Post analytics & GitHub Pages dashboard generation
 ```
 
 ---
