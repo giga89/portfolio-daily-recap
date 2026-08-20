@@ -37,6 +37,20 @@ except ImportError:
 # Maximum number of $ tags per post
 MAX_TAGS_PER_POST = 4
 
+# Default Gemini models in priority order (Smartest -> Standard fallback).
+# Each model belongs to an independent Free Tier quota bucket (20 RPD each).
+DEFAULT_GEMINI_MODELS = [
+    'gemini-3.7-flash',       # Most intelligent & capable (5 RPM, 20 RPD)
+    'gemini-3.6-flash',       # High capability 3.x series (5 RPM, 20 RPD)
+    'gemini-3.5-flash',       # Advanced financial context & reasoning (5 RPM, 20 RPD)
+    'gemini-2.5-flash',       # Robust standard model (5 RPM, 20 RPD)
+]
+
+
+def _throttle_request(delay: float = 2.0):
+    """Sleep briefly between API requests to avoid breaching RPM limits on Free Tier."""
+    time.sleep(delay)
+
 # Valid eToro symbols for tagging (only use these in posts)
 # These are confirmed to exist on eToro platform
 # Exclude Russian stocks (sanctioned/untradeable)
@@ -509,19 +523,9 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
         print("⚠️  Warning: GEMINI_API_KEY not set, skipping AI monthly recap")
         return ""
     
-    # Models in order of preference — each belongs to a DIFFERENT quota bucket.
-    # gemini-2.0-flash and gemini-2.0-flash-lite are SHUT DOWN (limit:0 = removed
-    # from free tier). Current valid options with separate quota buckets:
-    #   gemini-3.5-flash      — newest stable, independent bucket
-    #   gemini-2.5-flash      — often 503 at EU open (07:00 UTC peak)
-    #   gemini-2.5-pro        — Pro subscription needed, very capable
-    #   gemini-2.5-flash-lite — lightest 2.5 variant, own quota
-    models_to_try = [
-        'gemini-3.5-flash',      # newest stable, separate quota bucket
-        'gemini-2.5-flash',      # may 503 at EU peak hours
-        'gemini-2.5-pro',        # Pro subscription bucket
-        'gemini-2.5-flash-lite', # lightest, independent quota
-    ]
+    # Models in order of preference — each belongs to a DIFFERENT quota bucket (20 RPD each).
+    # gemini-2.5-flash-lite is first (10 RPM vs 5 RPM).
+    models_to_try = list(DEFAULT_GEMINI_MODELS)
     
     try:
         client = genai.Client(api_key=api_key)
@@ -762,20 +766,9 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         print("⚠️  Warning: GEMINI_API_KEY not set, skipping AI news generation")
         return ""
     
-    # Models in order of preference — each belongs to a DIFFERENT quota bucket.
-    # Models in order of preference — each belongs to a DIFFERENT quota bucket.
-    # gemini-2.0-flash and gemini-2.0-flash-lite are SHUT DOWN (limit:0 = removed
-    # from free tier). Current valid options with separate quota buckets:
-    #   gemini-3.5-flash      — newest stable, independent bucket
-    #   gemini-2.5-flash      — often 503 at EU open (07:00 UTC peak)
-    #   gemini-2.5-pro        — Pro subscription needed, very capable
-    #   gemini-2.5-flash-lite — lightest 2.5 variant, own quota
-    models_to_try = [
-        'gemini-3.5-flash',      # newest stable, separate quota bucket
-        'gemini-2.5-flash',      # may 503 at EU peak hours
-        'gemini-2.5-pro',        # Pro subscription bucket
-        'gemini-2.5-flash-lite', # lightest, independent quota
-    ]
+    # Models in order of preference — each belongs to a DIFFERENT quota bucket (20 RPD each).
+    # gemini-2.5-flash-lite is first (10 RPM vs 5 RPM).
+    models_to_try = list(DEFAULT_GEMINI_MODELS)
     
     if not market_session:
         market_session = os.environ.get('MARKET_SESSION', 'Daily recap')
@@ -1187,7 +1180,7 @@ def generate_decision_post(
     if not api_key:
         return ""
 
-    models_to_try = ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.5-flash-lite']
+    models_to_try = list(DEFAULT_GEMINI_MODELS)
 
     weights_context = ""
     if current_weights:
@@ -1275,7 +1268,7 @@ def generate_empathy_post(
     if not api_key:
         return ""
 
-    models_to_try = ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.5-flash-lite']
+    models_to_try = list(DEFAULT_GEMINI_MODELS)
 
     # Determine emotional context
     if weekly_perf is not None and weekly_perf < -2:
@@ -1370,7 +1363,7 @@ def generate_copy_trading_post(
     if not api_key:
         return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data)
 
-    models_to_try = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite"]
+    models_to_try = list(DEFAULT_GEMINI_MODELS)
 
     # Build rankings and copier context if available from live eToro API
     rankings_context = ""
@@ -1589,11 +1582,7 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
         print("⚠️ GEMINI_API_KEY not set, skipping stock focus post generation")
         return ticker, ""
 
-    models_to_try = [
-        "gemini-2.0-flash",
-        "gemini-2.5-flash",
-        "gemini-flash-latest",
-    ]
+    models_to_try = list(DEFAULT_GEMINI_MODELS)
 
     # Fetch live weight for this specific ticker
     weight_str = ""
@@ -1679,11 +1668,7 @@ def generate_weekly_portfolio_outlook() -> str:
         print("⚠️ GEMINI_API_KEY not set, skipping portfolio outlook post")
         return ""
 
-    models_to_try = [
-        "gemini-2.0-flash",
-        "gemini-2.5-flash",
-        "gemini-flash-latest",
-    ]
+    models_to_try = list(DEFAULT_GEMINI_MODELS)
 
     prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro.
 Scrivi il post del Sabato pomeriggio per i tuoi follower e copier focalizzato su:
@@ -1749,11 +1734,7 @@ def generate_weekly_macro_outlook() -> str:
         print("⚠️ GEMINI_API_KEY not set, skipping macro outlook post")
         return ""
 
-    models_to_try = [
-        "gemini-2.0-flash",
-        "gemini-2.5-flash",
-        "gemini-flash-latest",
-    ]
+    models_to_try = list(DEFAULT_GEMINI_MODELS)
 
     prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro.
 Scrivi il post del Sabato pomeriggio per i tuoi follower e copier focalizzato su:
@@ -1880,11 +1861,7 @@ La sessione evidenzia una fase di consolidamento con volumi e sentiment allineat
         print("ℹ️ GEMINI_API_KEY missing, using high-quality fallback template for crypto recap")
         return "Daily crypto recap", fallback_text
 
-    models_to_try = [
-        "gemini-2.5-flash",
-        "gemini-2.5-pro",
-        "gemini-2.0-flash",
-    ]
+    models_to_try = list(DEFAULT_GEMINI_MODELS)
 
     prompt = f"""Sei Andrea Ravalli, un Popular Investor italiano su eToro.
 Scrivi un post giornaliero in ITALIANO dedicato all'aggiornamento del mercato CRYPTO da pubblicare su eToro e Telegram.

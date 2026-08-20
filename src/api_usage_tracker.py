@@ -92,13 +92,24 @@ def log_api_request(model_name: str, success: bool, request_type: str = "recap")
     
     # Daily count
     if today not in data["summary"]["daily"]:
-        data["summary"]["daily"][today] = {"total": 0, "successful": 0, "failed": 0}
+        data["summary"]["daily"][today] = {"total": 0, "successful": 0, "failed": 0, "by_model": {}}
+    elif "by_model" not in data["summary"]["daily"][today]:
+        data["summary"]["daily"][today]["by_model"] = {}
     
     data["summary"]["daily"][today]["total"] += 1
     if success:
         data["summary"]["daily"][today]["successful"] += 1
     else:
         data["summary"]["daily"][today]["failed"] += 1
+    
+    # Model specific daily count
+    if model_name not in data["summary"]["daily"][today]["by_model"]:
+        data["summary"]["daily"][today]["by_model"][model_name] = {"total": 0, "successful": 0, "failed": 0}
+    data["summary"]["daily"][today]["by_model"][model_name]["total"] += 1
+    if success:
+        data["summary"]["daily"][today]["by_model"][model_name]["successful"] += 1
+    else:
+        data["summary"]["daily"][today]["by_model"][model_name]["failed"] += 1
     
     # Monthly count
     if this_month not in data["summary"]["monthly"]:
@@ -124,19 +135,22 @@ def generate_usage_report():
     this_month = datetime.now().strftime("%Y-%m")
     
     # Get today's stats
-    daily_stats = data["summary"].get("daily", {}).get(today, {"total": 0, "successful": 0, "failed": 0})
+    daily_stats = data["summary"].get("daily", {}).get(today, {"total": 0, "successful": 0, "failed": 0, "by_model": {}})
     monthly_stats = data["summary"].get("monthly", {}).get(this_month, {"total": 0, "successful": 0, "failed": 0})
     
-    # Calculate percentages (based on typical free tier limits)
-    FREE_TIER_DAILY_LIMIT = 1500  # Requests per day
-    FREE_TIER_HOURLY_LIMIT = 15   # Requests per minute * 60 (approximate)
-    
-    daily_usage_pct = (daily_stats["total"] / FREE_TIER_DAILY_LIMIT) * 100
-    monthly_usage_pct = (monthly_stats["total"] / (FREE_TIER_DAILY_LIMIT * 30)) * 100  # Approximate monthly
+    # Free tier limit per model is 20 RPD
+    FREE_TIER_MODEL_RPD = 20
     
     # Get recent requests
     recent_requests = data["requests"][-10:]  # Last 10 requests
     
+    # Model breakdown lines
+    by_model_lines = ""
+    for m_name, m_stats in daily_stats.get("by_model", {}).items():
+        m_tot = m_stats.get("total", 0)
+        status_flag = "⚠️ QUOTA EXCEEDED" if m_tot >= FREE_TIER_MODEL_RPD else "✅ OK"
+        by_model_lines += f"│  • {m_name:<22}: {m_tot:>2}/{FREE_TIER_MODEL_RPD} RPD ({status_flag})  │\n"
+
     report = f"""
 ╔══════════════════════════════════════════════════════════════╗
 ║          📊 GEMINI API USAGE REPORT                          ║
@@ -151,9 +165,8 @@ def generate_usage_report():
 │ Successful:         {daily_stats['successful']:>4} ✅                           
 │ Failed:             {daily_stats['failed']:>4} ❌                           
 │                                                              
-│ Daily Limit:        {FREE_TIER_DAILY_LIMIT:>4} (Free Tier)                 
-│ Usage:              {daily_usage_pct:>5.2f}% of daily limit               
-└──────────────────────────────────────────────────────────────┘
+│ Usage by Model (Free Tier limit: 20 RPD / model):            
+{by_model_lines if by_model_lines else '│  (No model breakdown yet)                                    │\n'}└──────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────┐
 │ THIS MONTH'S USAGE ({this_month})                       
@@ -161,9 +174,6 @@ def generate_usage_report():
 │ Total Requests:     {monthly_stats['total']:>4}                               
 │ Successful:         {monthly_stats['successful']:>4} ✅                           
 │ Failed:             {monthly_stats['failed']:>4} ❌                           
-│                                                              
-│ Est. Monthly Limit: {FREE_TIER_DAILY_LIMIT * 30:>4} (1500/day * 30)         
-│ Usage:              {monthly_usage_pct:>5.2f}% of est. monthly limit       
 └──────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────┐
@@ -181,21 +191,13 @@ def generate_usage_report():
     report += """└──────────────────────────────────────────────────────────────┘
 
 📝 NOTES:
-• Free Tier limits: 15 RPM, 1500 RPD for most models
-• Usage percentages are estimates based on typical limits
-• For exact quotas, check: https://aistudio.google.com/
-• Monthly limit is estimated as 1500 requests/day * 30 days
+• Free Tier limits: 10 RPM / 20 RPD for gemini-2.5-flash-lite, 5 RPM / 20 RPD for 3.5/2.5/3.6/3.7 flash
+• Each model has its OWN separate 20 RPD quota bucket
+• For exact real-time quotas, check: https://aistudio.google.com/
 
-💡 TIPS TO OPTIMIZE USAGE:
-  1. Use gemini-2.0-flash-lite instead of flash (same limits but faster)
-  2. Add delays between requests if hitting rate limits
-  3. Reduce max_output_tokens to save on token usage
-  4. Use caching for repeated content
-
-🔗 CHECK DETAILED QUOTA:
-  • Google AI Studio: https://aistudio.google.com/app/apikey
-  • Cloud Console: https://console.cloud.google.com/apis/dashboard
-
+💡 RECOMMENDATIONS:
+  1. Distribute tasks across models (gemini-2.5-flash-lite, 3.5-flash, 2.5-flash)
+  2. Set up billing on AI Studio ($0.05 - $0.20/month) to unblock all daily limits
 """
     
     return report

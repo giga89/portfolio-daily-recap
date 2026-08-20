@@ -1,0 +1,40 @@
+name: Gemini API Health & Quota Check
+
+on:
+  schedule:
+    - cron: '30 6 * * 1-5'   # 06:30 UTC (08:30 ITA) - Before European Open
+    - cron: '30 13 * * 1-5'  # 13:30 UTC (15:30 ITA) - Before US Open
+  workflow_dispatch:
+    inputs:
+      notify_always:
+        description: 'Send Telegram notification even if all models are OK'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  check-gemini:
+    runs-on: ubuntu-latest
+    environment: Etoro
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Gemini API Health & Quota Monitor
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          NOTIFY_ALWAYS: ${{ inputs.notify_always }}
+        run: |
+          python scripts/gemini_health_monitor.py
