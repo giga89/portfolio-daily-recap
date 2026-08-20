@@ -136,14 +136,33 @@ def publish_etoro_poll(
     message = custom_message or selected["message"]
     tickers = custom_tickers or selected["tickers"]
 
-    market_ids = etoro_client.get_market_ids_for_tickers(tickers)
+    # Extract any mentioned cashtags from title, options, and message
+    import re
+    all_text = f"{title} {' '.join(options)} {message} {' '.join(tickers)}"
+    found_tickers = re.findall(r"\$([A-Za-z0-9\.\-]+)", all_text)
+    all_tickers = list(dict.fromkeys(tickers + found_tickers))  # preserve order & deduplicate
+
+    market_ids = etoro_client.get_market_ids_for_tickers(all_tickers)
+
+    # Format prominent cashtags and hashtags footer for maximum feed discovery
+    cashtags_str = " ".join([f"${t.replace('$', '')}" for t in all_tickers[:8]])
+    tag_footer = (
+        f"\n\n📌 {cashtags_str}\n"
+        f"🏷️ #eToro #Sondaggio #Investimenti #CopyTrading #PopularInvestor\n\n"
+        f"👤 Segui il mio portafoglio: https://www.etoro.com/people/andrearavalli"
+    )
+
+    full_message = message.strip()
+    if not any(tag.lower() in full_message.lower() for tag in ["#etoro", "#sondaggio"]):
+        full_message += tag_footer
+
     print(f"📌 Poll Title: {title}")
     print(f"📌 Options ({len(options)}): {options}")
-    print(f"🏷️ Tagged Markets: {tickers} -> IDs {market_ids}")
+    print(f"🏷️ Tagged Markets: {all_tickers} -> IDs {market_ids}")
 
     # Create poll via official eToro API
     res = etoro_client.create_poll_post(
-        message=message,
+        message=full_message[:1000],
         poll_title=title,
         poll_options=options,
         language="it",
