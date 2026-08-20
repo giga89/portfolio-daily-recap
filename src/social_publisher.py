@@ -60,6 +60,7 @@ SESSION_STOCK_FOCUS              = "Stock focus"
 SESSION_CRYPTO_RECAP             = "Daily crypto recap"
 SESSION_WEEKLY_PORTFOLIO_OUTLOOK = "Weekly portfolio outlook"
 SESSION_WEEKLY_MACRO_OUTLOOK     = "Weekly macro outlook"
+SESSION_COPY_TRADING             = "Copy trading post"
 
 
 def _strip_html(text: str) -> str:
@@ -155,6 +156,7 @@ def publish_all(
     is_crypto_recap      = SESSION_CRYPTO_RECAP.lower() in market_session.lower() or "crypto" in market_session.lower()
     is_portfolio_outlook = SESSION_WEEKLY_PORTFOLIO_OUTLOOK.lower() in market_session.lower()
     is_macro_outlook     = SESSION_WEEKLY_MACRO_OUTLOOK.lower() in market_session.lower()
+    is_copy_trading      = SESSION_COPY_TRADING.lower() in market_session.lower()
 
     # ── Special Sessions ──────────────────────────────────────────────────
     if is_monday:
@@ -198,6 +200,15 @@ def publish_all(
         print(f"🌍 SATURDAY SESSION — Weekly Global Macro Outlook")
         print("=" * 60)
         results.update(_publish_weekly_macro_outlook())
+        return results
+
+    if is_copy_trading:
+        print("\n" + "=" * 60)
+        print(f"🔁 DAILY SESSION — Copy Trading Education Post")
+        print("=" * 60)
+        results.update(_publish_copy_trading_post(
+            portfolio_perf=data.get("portfolio_perf", None),
+        ))
         return results
 
     print("\n" + "=" * 60)
@@ -821,3 +832,97 @@ def _publish_crypto_recap_post() -> dict:
 
     return results
 
+
+def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
+    """
+    Generate and publish a daily Copy Trading education + persuasion post.
+    Fetches real eToro history (P&L, win rate, monthly gains) and sends to
+    both eToro Social Feed and Telegram.
+
+    Returns:
+        dict: {platform: True/False}
+    """
+    results = {}
+
+    # Load real eToro history for credibility data
+    history = etoro_history.get_history_from_gist()
+    history_stats_text = etoro_history.get_stats_summary_text(history)
+
+    # Try to fetch monthly gain history and live trader rankings/copiers from official eToro API
+    gain_history = None
+    rankings_data = None
+    try:
+        import etoro_client as _ec
+        if _ec.is_configured():
+            gain_history = _ec.fetch_gain_history(granularity="monthly")
+            rankings_data = _ec.fetch_trader_rankings(period="CurrYear")
+    except Exception as exc:
+        print(f"⚠️  Could not fetch live eToro data for copy trading post: {exc}")
+
+    # Generate post text with live copiers, AUM, risk score and performance
+    print("\n✍️  Generating Copy Trading post with live eToro copier & performance stats...")
+    post_text = ai_news_generator.generate_copy_trading_post(
+        history_stats_text=history_stats_text,
+        gain_history=gain_history,
+        portfolio_perf=portfolio_perf,
+        rankings_data=rankings_data,
+    )
+
+    if not post_text:
+        print("⚠️  Copy trading post generation returned empty text.")
+        results["etoro_copy_trading"] = False
+        results["telegram_copy_trading"] = False
+        return results
+
+    full_text = post_text + ETORO_FOOTER_LONG
+    _save_post_to_artifacts("copy_trading_post.txt", "Copy Trading Post", full_text)
+
+    # 1. eToro Social Feed
+    print("\n🐂 eToro Social Feed (Copy Trading Post):")
+    if etoro_sender.etoro_client.is_configured():
+        # Use existing card as visual if available
+        visual_path = None
+        for candidate in ["output/winners_losers.png", "output/pie_chart.png"]:
+            if os.path.exists(candidate):
+                visual_path = candidate
+                break
+
+        ok_etoro = etoro_sender.send_etoro_post(
+            text=post_text,
+            image_path=visual_path,
+        )
+        results["etoro_copy_trading"] = ok_etoro
+        if ok_etoro:
+            analytics_tracker.record_post(
+                platform="etoro",
+                post_id=f"copytrading_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
+                session_name="Copy trading post",
+                text=post_text,
+                image_type="copy_trading_card",
+            )
+            print("   ✅ Copy trading post sent to eToro")
+    else:
+        print("   ⏭️  eToro not configured.")
+        results["etoro_copy_trading"] = False
+
+    # 2. Telegram
+    print("\n📨 Telegram (Copy Trading Post):")
+    if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
+        try:
+            header = "<b>🔁 COPY TRADING — IL MIO PORTFOLIO SU ETORO</b>\n\n"
+            telegram_sender.send_telegram_message((header + post_text + ETORO_FOOTER_LONG)[:4096])
+            print("   ✅ Copy trading post sent to Telegram")
+            results["telegram_copy_trading"] = True
+        except Exception as exc:
+            print(f"   ❌ Telegram send failed: {exc}")
+            results["telegram_copy_trading"] = False
+    else:
+        print("   ⏭️  Telegram not configured.")
+        results["telegram_copy_trading"] = False
+
+    try:
+        analytics_tracker.update_and_build_dashboard()
+    except Exception:
+        pass
+
+    return results

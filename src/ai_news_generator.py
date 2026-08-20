@@ -1341,6 +1341,190 @@ Output ONLY the post text, no introduction or explanation."""
         return ""
 
 
+def generate_copy_trading_post(
+    history_stats_text: str = "",
+    gain_history: list = None,
+    portfolio_perf: float = None,
+    rankings_data: dict = None,
+) -> str:
+    """
+    Generate a daily Copy Trading education + persuasion post for eToro.
+
+    Explains how Copy Trading works, why copying AndreaRavalli makes sense,
+    and uses REAL historical performance data (P&L, win rate, copiers count,
+    AUM, risk score, monthly gains) from the eToro account history and live rankings.
+
+    Args:
+        history_stats_text: Short stats summary from etoro_history (win rate, P&L, etc.)
+        gain_history:       List of monthly gain dicts from fetch_gain_history()
+        portfolio_perf:     Cumulative portfolio performance % (e.g. 156.0)
+        rankings_data:      Dict with live eToro rankings, copiers, AUM, risk score
+
+    Returns:
+        str: Formatted post text in Italian, or fallback text on failure
+    """
+    if not GENAI_AVAILABLE:
+        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data)
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data)
+
+    models_to_try = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite"]
+
+    # Build rankings and copier context if available from live eToro API
+    rankings_context = ""
+    if rankings_data:
+        copiers = rankings_data.get("copiers", 0)
+        aum = rankings_data.get("aumValue", 0)
+        risk = rankings_data.get("riskScore", 3)
+        win_ratio = rankings_data.get("winRatio", 0.0)
+        ytd_gain = rankings_data.get("gain", 0.0) * 100
+        five_y_gain = rankings_data.get("fiveYearGain", 0.0) * 100
+        weeks = rankings_data.get("weeksSinceRegistration", 0)
+        years = round(weeks / 52, 1) if weeks else 0
+        rankings_context = (
+            f"STATISTICHE UFFICIALI eToro (da API):\n"
+            f"- Copiatori attivi: {copiers}\n"
+            f"- Asset in gestione (AUM): ~${aum:,.0f}\n"
+            f"- Status: Popular Investor Elite\n"
+            f"- Punteggio di Rischio: {risk}/10 (Basso rischio, profilo prudente e disciplinato)\n"
+            f"- Win Ratio: {win_ratio:.1f}%\n"
+            f"- Rendimento YTD 2026: +{ytd_gain:.2f}%\n"
+            f"- Rendimento 5 Anni: +{five_y_gain:.1f}%\n"
+            f"- Anni di esperienza e presenza su eToro: ~{years} anni\n"
+            f"- Profilo Leva: 100% posizioni a zero/bassa leva (no trading con leva speculativa)\n"
+        )
+
+    # Build gain history context (last 12 months)
+    gain_context = ""
+    if gain_history:
+        recent = gain_history[-12:] if len(gain_history) > 12 else gain_history
+        lines = []
+        for entry in recent:
+            month = entry.get("date", entry.get("month", "?"))
+            gain = entry.get("gain", entry.get("value", 0.0))
+            sign = "+" if float(gain) >= 0 else ""
+            lines.append(f"  {month}: {sign}{float(gain):.1f}%")
+        gain_context = "GUADAGNO MENSILE (ultimi 12 mesi):\n" + "\n".join(lines)
+
+    perf_context = ""
+    if portfolio_perf is not None:
+        sign = "+" if portfolio_perf >= 0 else ""
+        perf_context = f"Performance cumulativa portafoglio: {sign}{portfolio_perf:.1f}%"
+
+    # Rotate post angle to avoid repetition (based on weekday)
+    from datetime import datetime as _dt
+    weekday = _dt.utcnow().weekday()  # 0=Mon … 6=Sun
+    angles = [
+        "Come funziona il Copy Trading step-by-step + perché è diverso da un fondo",
+        "I miei numeri reali su eToro: performance storica, win rate e trasparenza totale",
+        "Domande frequenti sul Copy Trading: rischi, costi, gestione della liquidità e come iniziare",
+        "Il mio approccio di investimento prudente: zero leva e diversificazione globale",
+        "Copy Trading vs ETF: i vantaggi di una gestione attiva trasparente",
+        "Cosa succede al tuo capitale quando mi copi: controllo e libertà totale in ogni momento",
+        "I miei principi d'investimento: lungo periodo, gestione del rischio e disciplina",
+    ]
+    angle = angles[weekday % len(angles)]
+
+    prompt = f"""Sei Andrea Ravalli, Popular Investor Elite italiano su eToro con un portfolio reale, trasparente e prudente.
+Il tuo obiettivo oggi è scrivere un post educativo e persuasivo sul Copy Trading di eToro per la tua community.
+
+ANGOLO DEL POST DI OGGI: "{angle}"
+
+DATI REALI DEL PORTAFOGLIO & COPIATORI (usali con naturalezza per dare massima credibilità):
+{rankings_context if rankings_context else ''}
+
+{history_stats_text if history_stats_text else 'Portafoglio attivo su eToro da molti anni con risultati costanti.'}
+
+{perf_context}
+
+{gain_context}
+
+OBIETTIVO DEL POST:
+1. Spiegare in modo limpido come funziona il Copy Trading su eToro
+2. Mostrare perché ha senso copiare la tua strategia (lungo termine, basso rischio score 3, 100% no leva, win rate solido, oltre 8 anni di storico)
+3. Essere totalmente onesto e trasparente: il Copy Trading non garantisce profitti, i mercati oscillano
+4. Concludere con una domanda aperta stimolante per invitare i lettori a commentare
+
+REGOLE OBBLIGATORIE:
+- Scrivi in ITALIANO, tono caldo, accogliente, professionale e autorevole ma mai arrogante
+- MAX 1400 caratteri (deve essere compatibile con i limiti eToro senza tagli)
+- NO promesse di rendimento futuro
+- Usa 2-4 emoji in modo armonioso
+- Testo discorsivo a paragrafi, NO lunghi elenchi puntati
+- Includi 2-3 cashtag rilevanti del portafoglio: es. $PLTR $NVDA $CCJ $MSFT $AMZN
+- Post autonomo e completo
+
+Output ONLY the Italian post text, no introduction or wrapping."""
+
+    try:
+        client = genai.Client(api_key=api_key)
+        config = types.GenerateContentConfig(temperature=0.88)
+
+        for model_name in models_to_try:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config,
+                )
+                if response and response.text:
+                    print(f"✅ Copy trading post generated with {model_name}")
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "copy_trading_post")
+                    return response.text.strip()
+            except Exception as exc:
+                print(f"⚠️ Copy trading post model {model_name} failed: {exc}")
+                time.sleep(1)
+
+        print("❌ All models failed for copy trading post — using fallback")
+        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data)
+
+    except Exception as exc:
+        print(f"❌ Error generating copy trading post: {exc}")
+        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data)
+
+
+def _copy_trading_fallback(
+    history_stats_text: str = "",
+    gain_history: list = None,
+    portfolio_perf: float = None,
+    rankings_data: dict = None,
+) -> str:
+    """Fallback copy trading post when Gemini is unavailable — uses real stats data."""
+    perf_line = ""
+    if portfolio_perf is not None:
+        sign = "+" if portfolio_perf >= 0 else ""
+        perf_line = f"\n📈 Performance cumulativa: {sign}{portfolio_perf:.1f}%"
+
+    copier_line = ""
+    if rankings_data:
+        copiers = rankings_data.get("copiers", 0)
+        risk = rankings_data.get("riskScore", 3)
+        if copiers > 0:
+            copier_line = f"\n👥 {copiers} copiatori attivi | 🛡️ Risk Score {risk}/10 (basso rischio)"
+
+    win_line = ""
+    if rankings_data and rankings_data.get("winRatio"):
+        win_line = f"\n🎯 Win Ratio: {rankings_data.get('winRatio'):.1f}%"
+    elif history_stats_text:
+        for line in history_stats_text.splitlines():
+            if "win rate" in line.lower():
+                win_line = f"\n🎯 {line.strip()}"
+                break
+
+    return (
+        "💡 Sai come funziona il Copy Trading su eToro?\n\n"
+        "Con il Copy Trading puoi replicare in tempo reale e in proporzione tutte le mie operazioni di portafoglio, "
+        "con il capitale che scegli tu — mantenendo sempre il pieno controllo e potendo fermare la copia in qualsiasi istante.\n\n"
+        f"La mia strategia punta su fondamentali solidi, diversificazione globale e zero leva speculativa.{perf_line}{copier_line}{win_line}\n\n"
+        "Investire con metodo e disciplina nel lungo periodo fa la differenza.\n\n"
+        "⚠️ Ricorda: i rendimenti passati non sono garanzia di risultati futuri. Investire comporta rischi.\n\n"
+        "Hai curiosità o dubbi sul funzionamento della copia? Scrivimelo nei commenti qui sotto 👇"
+    )
+
+
 # ── 1. Daily Stock Focus Deep-Dive Post ────────────────────────────────────────
 
 def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
