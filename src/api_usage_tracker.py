@@ -145,11 +145,14 @@ def generate_usage_report():
     recent_requests = data["requests"][-10:]  # Last 10 requests
     
     # Model breakdown lines
-    by_model_lines = ""
-    for m_name, m_stats in daily_stats.get("by_model", {}).items():
-        m_tot = m_stats.get("total", 0)
-        status_flag = "⚠️ QUOTA EXCEEDED" if m_tot >= FREE_TIER_MODEL_RPD else "✅ OK"
-        by_model_lines += f"│  • {m_name:<22}: {m_tot:>2}/{FREE_TIER_MODEL_RPD} RPD ({status_flag})  │\n"
+    if daily_stats.get("by_model"):
+        by_model_lines = ""
+        for m_name, m_stats in daily_stats.get("by_model", {}).items():
+            m_tot = m_stats.get("total", 0)
+            status_flag = "⚠️ QUOTA EXCEEDED" if m_tot >= FREE_TIER_MODEL_RPD else "✅ OK"
+            by_model_lines += f"│  • {m_name:<22}: {m_tot:>2}/{FREE_TIER_MODEL_RPD} RPD ({status_flag})  │\n"
+    else:
+        by_model_lines = "│  (No model breakdown yet)                                    │\n"
 
     report = f"""
 ╔══════════════════════════════════════════════════════════════╗
@@ -166,7 +169,7 @@ def generate_usage_report():
 │ Failed:             {daily_stats['failed']:>4} ❌                           
 │                                                              
 │ Usage by Model (Free Tier limit: 20 RPD / model):            
-{by_model_lines if by_model_lines else '│  (No model breakdown yet)                                    │\n'}└──────────────────────────────────────────────────────────────┘
+{by_model_lines}└──────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────┐
 │ THIS MONTH'S USAGE ({this_month})                       
