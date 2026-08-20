@@ -28,7 +28,6 @@ MARKET_IDS = {
     "AMZN": 1005,
     "GOOG": 1002,
     "CCJ": 6634,
-    "URNM": 15327,
     "LLY": 2010,
     "NOVO-B.CO": 2260,
     "SX7PEX.DE": 10595,

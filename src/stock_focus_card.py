@@ -55,7 +55,6 @@ TICKER_THEMES = {
     "AMZN": {"sector": "E-Commerce Globale & Cloud AWS", "domain": "amazon.com", "thesis": "Leadership assoluta di AWS e margini in forte espansione dalla pubblicità.", "color": (255, 153, 0)},
     "GOOG": {"sector": "Search, Cloud & Intelligenza Artificiale", "domain": "google.com", "thesis": "Fossato difensivo nei motori di ricerca, YouTube e crescita di Google Cloud.", "color": (66, 133, 244)},
     "CCJ":  {"sector": "Uranio & Combustibile Nucleare", "domain": "cameco.com", "thesis": "Deficit strutturale di offerta globale di uranio per la transizione nucleare.", "color": (255, 180, 0)},
-    "URNM": {"sector": "ETF Uranio & Minerari Nucleari", "domain": "sprott.com", "thesis": "Esposizione diversificata ai principali produttori e detentori fisici di uranio.", "color": (255, 160, 50)},
     "LLY":  {"sector": "Farmaceutica & Trattamenti GLP-1", "domain": "lilly.com", "thesis": "Leadership nei farmaci antidiabete e obesità con Mounjaro e Zepbound.", "color": (230, 40, 40)},
     "NOVO-B.CO": {"sector": "Biotecnologie & Cura del Diabete", "domain": "novonordisk.com", "thesis": "Pioniere mondiale del GLP-1 con Ozempic e Wegovy, forte pipeline clinica.", "color": (0, 110, 200)},
     "SX7PEX.DE": {"sector": "ETF Bancario Europeo", "domain": "stoxx.com", "thesis": "Elevati dividendi, solidità patrimoniale e redditività da tassi d'interesse.", "color": (70, 130, 240)},

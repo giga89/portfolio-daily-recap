@@ -450,28 +450,6 @@ COMPANY_INFOGRAPHICS = {
         "color": (220, 0, 0),
         "domain": "ferrari.com"
     },
-    "URNM": {
-        "name": "SPROTT URANIUM MINERS",
-        "tagline": "Nuclear Fuel & Uranium Producers ETF",
-        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
-        "subtitle": "URNM offre l'esposizione più pura ai produttori globali di uranio e al combustibile per l'energia nucleare.",
-        "kpis": [
-            {"label": "DEFICIT DI URANIO", "val": "Strutturale", "sub": "Domanda reattori superiore all'offerta"},
-            {"label": "RINASCITA NUCLEARE", "val": "COP28", "sub": "Obiettivo globale di triplicare il nucleare"},
-            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Esposizione diretta al combustibile pulito"},
-            {"label": "ASSET FISICO & MINERS", "val": "Top Holdings", "sub": "Cameco, Kazatomprom, Sprott Physical"},
-        ],
-        "pillars": [
-            ("Squilibrio Domanda/Offerta:", "I reattori nucleari consumano più uranio di quanto ne venga estratto ogni anno."),
-            ("Contrattazione Pluriennale delle Utility:", "Le centrali nucleari devono assicurarsi il combustibile a lungo termine."),
-            ("AI e Data Center Nucleari:", "I colossi tech investono direttamente nell'energia nucleare per alimentare i data center."),
-            ("Zero Emissioni di Carbonio:", "Il nucleare è l'unica fonte continua (baseload) a zero emissioni di CO2."),
-        ],
-        "quote": "Non esiste intelligenza artificiale né transizione verde senza energia nucleare costante e affidabile.",
-        "tags": ["#Uranium", "#NuclearEnergy", "#URNM", "#CleanEnergy", "#Commodities"],
-        "color": (0, 180, 130),
-        "domain": "sprott.com"
-    }
 }
 
 
@@ -552,7 +530,7 @@ def _get_live_weight_for_ticker(ticker: str) -> str:
         "NOVO-B.CO": "4.30%", "CCJ": "4.01%", "ENI.MI": "3.94%", "PRY.MI": "3.86%",
         "AMZN": "3.80%", "SX7PEX.DE": "3.43%", "BMW.DE": "3.30%", "NVDA": "3.30%",
         "HUM": "3.19%", "GOOG": "3.14%", "ENEL.MI": "2.94%", "PLTR": "2.87%",
-        "TSM": "2.87%", "MELI": "2.72%", "PYPL": "2.56%", "URNM": "2.38%",
+        "TSM": "2.87%", "MELI": "2.72%", "PYPL": "2.56%",
         "1211.HK": "2.35%", "MSFT": "2.19%", "LLY": "2.19%", "0005.HK": "2.04%",
         "MBG.DE": "1.24%", "AVGO": "0.05%"
     }

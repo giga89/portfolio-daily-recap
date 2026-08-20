@@ -6,7 +6,7 @@ Publishes 3 curated, dynamic cross-link comments on an eToro recap post.
 Each comment focuses on EXACTLY ONE SINGLE ASSET from a specific category:
   • Comment 1/3: Single AI & Tech Asset (e.g. $PLTR, $NVDA, $MRVL, $TSM, $MSFT, $GOOG, $AVGO, $AMZN)
   • Comment 2/3: Single Defensive, Healthcare, Energy or Value Asset (e.g. $LLY, $NOVO-B.CO, $CCJ, $ENI.MI, $PRY.MI, $BMW.DE, $ENEL.MI, $MBG.DE)
-  • Comment 3/3: Single ETF & Macro Strategy Asset (e.g. $SX7PEX.DE, $URNM, $WDEF.L, $INDO.PA, $IEUR)
+  • Comment 3/3: Single ETF & Macro Strategy Asset (e.g. $SX7PEX.DE, $WDEF.L, $INDO.PA, $IEUR)
 
 Features:
   - Rotates dynamically across sessions and days (or picks top movers).
@@ -177,14 +177,6 @@ ETF_MACRO_PROFILES = {
         "thesis": "Esposizione ai maggiori istituti bancari europei con bilanci solidi, coefficienti patrimoniali (CET1 >15.5%) ai massimi storici e crediti deteriorati ai minimi.",
         "driver": "Dividend yield superiore al 7% accompagnato da consistenti programmi di buyback che incrementano il valore per azione.",
         "question": "Preferite espormi al settore bancario tramite ETF diversificato o tramite la selezione di singoli titoli?"
-    },
-    "URNM": {
-        "name": "Sprott Uranium Miners ETF",
-        "emoji": "☢️",
-        "role": "ETF Tematico Uranio & Produttori Nucleari",
-        "thesis": "Esposizione pura e bilanciata all'intera filiera del combustibile nucleare, includendo sia produttori primari sia detentori fisici di uranio.",
-        "driver": "Squilibrio strutturale tra la domanda globale di energia atomica e l'offerta limitata dei complessi minerari.",
-        "question": "Utilizzate ETF tematici sulle materie prime strategiche per proteggere il portafoglio e diversificare dal tech?"
     },
     "WDEF.L": {
         "name": "WisdomTree Europe Equity Income ETF",
