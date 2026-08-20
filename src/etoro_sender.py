@@ -99,8 +99,9 @@ def send_etoro_post(
     # Automatically resolve all mentioned cashtags to eToro market IDs
     found_tickers = re.findall(r"\$([A-Za-z0-9\.\-]+)", text)
     market_ids = etoro_client.get_market_ids_for_tickers(found_tickers)
+    valid_tickers = [t for t in found_tickers if t.upper() in etoro_client.MARKET_IDS]
     if market_ids:
-        print(f"   🏷️ Tagged eToro markets: {found_tickers} -> IDs {market_ids}")
+        print(f"   🏷️ Tagged eToro markets: {valid_tickers} -> IDs {market_ids}")
 
     clean_content = _strip_html(text)
 
