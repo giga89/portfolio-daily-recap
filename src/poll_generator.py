@@ -32,12 +32,12 @@ from etoro_sender import _strip_html
 POLL_TEMPLATES = [
     {
         "id": "megatrend_h2",
-        "title": "Quale megatrend guiderà le performance nei prossimi 6-12 mesi? 🚀",
+        "title": "Quale megatrend guiderà le performance nei prossimi mesi? 🚀",
         "options": [
-            "AI & Supercomputing ($NVDA, $PLTR)",
-            "Sanità & GLP-1 ($LLY, $NOVO)",
-            "Energia Nucleare & Grid ($CCJ, $PRY)",
-            "Dividendi & Oro ($WDEF, $PPFB)",
+            "AI & Tech ($NVDA, $PLTR)",
+            "Sanità & GLP-1 ($LLY)",
+            "Energia & Uranio ($CCJ)",
+            "Dividendi & Oro ($WDEF)",
         ],
         "tickers": ["NVDA", "PLTR", "LLY", "CCJ"],
         "message": (
@@ -51,10 +51,10 @@ POLL_TEMPLATES = [
         "id": "ai_valuation_debate",
         "title": "Come valutate l'attuale fase dell'Intelligenza Artificiale? 🤖",
         "options": [
-            "Primi stadi: ancora forte upside",
-            "Fase matura: selezionare i leader",
-            "Valutazioni eccessivamente tirate",
-            "Preferisco diversificare su ETF",
+            "Primi stadi: forte upside",
+            "Fase matura: solo leader",
+            "Valutazioni troppo tirate",
+            "Preferisco ETF diversificati",
         ],
         "tickers": ["PLTR", "NVDA", "TSM", "MSFT"],
         "message": (
@@ -68,10 +68,10 @@ POLL_TEMPLATES = [
         "id": "risk_management_choice",
         "title": "Qual è la vostra priorità principale nel portafoglio oggi? ⚖️",
         "options": [
-            "Massima crescita (High Beta/Tech)",
-            "Crescita con basso rischio (Risk Score < 4)",
-            "Rendimento da dividendi costanti",
-            "Accumulo liquidità per storni",
+            "Massima crescita (High Beta)",
+            "Crescita a basso rischio",
+            "Rendimento da dividendi",
+            "Accumulo liquidità",
         ],
         "tickers": ["PLTR", "LLY", "SX7PEX.DE", "WDEF.L"],
         "message": (
@@ -83,12 +83,12 @@ POLL_TEMPLATES = [
     },
     {
         "id": "pltr_conviction",
-        "title": "Palantir ($PLTR): Quale target vi aspettate a medio termine? 🛡️",
+        "title": "Palantir ($PLTR): Quale scenario vi aspettate a medio termine? 🛡️",
         "options": [
-            "Forte rialzo (AIP leader enterprise)",
-            "Consolidamento sui livelli attuali",
-            "Possibile correzione tecnica",
-            "Non seguo / preferisco altri titoli",
+            "Forte rialzo (AIP leader)",
+            "Consolidamento laterale",
+            "Correzione tecnica",
+            "Preferisco altri titoli",
         ],
         "tickers": ["PLTR", "NVDA"],
         "message": (

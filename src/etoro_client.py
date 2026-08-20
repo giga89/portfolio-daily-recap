@@ -477,10 +477,9 @@ def create_poll_post(
     headers["Content-Type"] = "application/json"
     url = f"{BASE_URL}/api/v1/posts/polls"
 
-    opts = [{"index": idx + 1, "text": opt} for idx, opt in enumerate(poll_options[:4])]
+    opts = [{"index": idx + 1, "text": opt[:28].strip()} for idx, opt in enumerate(poll_options[:4])]
     body: Dict[str, Any] = {
         "message": message[:1000],
-        "language": language,
         "poll": {
             "title": poll_title[:200],
             "options": opts,
