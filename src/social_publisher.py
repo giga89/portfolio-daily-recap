@@ -874,6 +874,17 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
         results["telegram_copy_trading"] = False
         return results
 
+    # Ensure prominent cashtags and hashtags for eToro feeds and social visibility
+    core_cashtags = ["$PLTR", "$NVDA", "$CCJ", "$MSFT", "$AMZN", "$SX7PEX.DE", "$TSM"]
+    tag_suffix = ""
+    if not any(tag.lower() in post_text.lower() for tag in core_cashtags):
+        tag_suffix += "\n\n📌 " + " ".join(core_cashtags)
+    if "#copytrading" not in post_text.lower() and "#etoro" not in post_text.lower():
+        tag_suffix += "\n🏷️ #eToro #CopyTrading #PopularInvestor #Investimenti"
+
+    if tag_suffix:
+        post_text = post_text.strip() + tag_suffix
+
     full_text = post_text + ETORO_FOOTER_LONG
     _save_post_to_artifacts("copy_trading_post.txt", "Copy Trading Post", full_text)
 
@@ -899,6 +910,7 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
                 session_name="Copy trading post",
                 text=post_text,
                 image_type="copy_trading_card",
+                tickers=["PLTR", "NVDA", "CCJ", "MSFT", "AMZN", "SX7PEX.DE", "TSM"],
             )
             print("   ✅ Copy trading post sent to eToro")
     else:
