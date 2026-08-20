@@ -459,3 +459,120 @@ def add_post_comment(
         return {"success": False, "error": str(e)}
 
 
+def create_poll_post(
+    message: str,
+    poll_title: str,
+    poll_options: List[str],
+    language: str = "it",
+    market_ids: Optional[List[int]] = None,
+) -> Dict[str, Any]:
+    """
+    Create an interactive Poll post on eToro Social Feed via POST /api/v1/posts/polls.
+    `poll_options` must have between 2 and 4 options.
+    """
+    headers = get_headers()
+    if not headers:
+        return {"success": False, "error": "eToro API not configured"}
+
+    headers["Content-Type"] = "application/json"
+    url = f"{BASE_URL}/api/v1/posts/polls"
+
+    opts = [{"index": idx + 1, "text": opt} for idx, opt in enumerate(poll_options[:4])]
+    body: Dict[str, Any] = {
+        "message": message[:1000],
+        "language": language,
+        "poll": {
+            "title": poll_title[:200],
+            "options": opts,
+        }
+    }
+    if market_ids:
+        body["marketIds"] = market_ids
+
+    try:
+        resp = requests.post(url, headers=headers, json=body, timeout=30)
+        if resp.status_code in (200, 201):
+            data = resp.json()
+            post_id = data.get("id")
+            print(f"✅ Successfully created Poll on eToro! Post ID: {post_id}")
+            return {"success": True, "id": post_id, "data": data}
+        else:
+            print(f"❌ Failed to create poll (HTTP {resp.status_code}): {resp.text}")
+            return {"success": False, "status_code": resp.status_code, "error": resp.text}
+    except Exception as e:
+        print(f"❌ Exception creating poll on eToro: {e}")
+        return {"success": False, "error": str(e)}
+
+
+def like_comment(post_id: str, comment_id: str) -> bool:
+    """
+    Like a user comment on a post via POST /api/v1/posts/{postId}/comments/{commentId}/likes.
+    """
+    headers = get_headers()
+    if not headers:
+        return False
+    url = f"{BASE_URL}/api/v1/posts/{post_id}/comments/{comment_id}/likes"
+    try:
+        resp = requests.post(url, headers=headers, timeout=15)
+        return resp.status_code in (200, 201, 204)
+    except Exception as e:
+        print(f"⚠️ Error liking comment {comment_id}: {e}")
+        return False
+
+
+def like_post(post_id: str) -> bool:
+    """
+    Like a post via POST /api/v1/posts/{postId}/likes.
+    """
+    headers = get_headers()
+    if not headers:
+        return False
+    url = f"{BASE_URL}/api/v1/posts/{post_id}/likes"
+    try:
+        resp = requests.post(url, headers=headers, timeout=15)
+        return resp.status_code in (200, 201, 204)
+    except Exception as e:
+        print(f"⚠️ Error liking post {post_id}: {e}")
+        return False
+
+
+def get_post_comments(post_id: str) -> List[Dict[str, Any]]:
+    """
+    Fetch all comments on a specific post via GET /api/v1/posts/{postId}/comments.
+    """
+    headers = get_headers()
+    if not headers:
+        return []
+    url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
+    try:
+        resp = requests.get(url, headers=headers, timeout=20)
+        if resp.status_code == 200:
+            data = resp.json()
+            return data.get("comments", []) if isinstance(data, dict) else []
+        return []
+    except Exception as e:
+        print(f"⚠️ Error fetching comments for post {post_id}: {e}")
+        return []
+
+
+def reply_to_comment(post_id: str, comment_id: str, message: str, language: str = "it") -> Dict[str, Any]:
+    """
+    Reply to a specific comment on an eToro post via POST /api/v1/posts/{postId}/comments/{commentId}/replies.
+    """
+    headers = get_headers()
+    if not headers:
+        return {"success": False, "error": "eToro API not configured"}
+    headers["Content-Type"] = "application/json"
+    url = f"{BASE_URL}/api/v1/posts/{post_id}/comments/{comment_id}/replies"
+    body = {"message": message, "language": language}
+    try:
+        resp = requests.post(url, headers=headers, json=body, timeout=20)
+        if resp.status_code in (200, 201):
+            data = resp.json()
+            return {"success": True, "id": data.get("id"), "data": data}
+        return {"success": False, "status_code": resp.status_code, "error": resp.text}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+

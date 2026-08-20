@@ -403,3 +403,54 @@ def get_current_pie_chart_type() -> str:
     data = load_data()
     idx = data.get('pie_chart_index', 0)
     return PIE_CHART_TYPES[idx % len(PIE_CHART_TYPES)]
+
+
+# ---------------------------------------------------------------------------
+# eToro Post & Delayed Engagement Tracking
+# ---------------------------------------------------------------------------
+
+def save_last_etoro_post(
+    post_id: str,
+    session_name: str,
+    tickers: list = None,
+    market_data_summary: dict = None,
+) -> bool:
+    """
+    Save the most recently published eToro post ID and its metadata for delayed follow-up.
+    """
+    from datetime import datetime, timezone
+    data = load_data()
+    data['last_etoro_post'] = {
+        'post_id': post_id,
+        'session_name': session_name,
+        'created_at': datetime.now(timezone.utc).isoformat(),
+        'tickers': tickers or [],
+        'market_data_summary': market_data_summary or {},
+        'followup_done': False,
+        'followup_at': None,
+    }
+    _invalidate_cache()
+    return save_data(data)
+
+
+def get_last_etoro_post() -> dict:
+    """Return metadata of the last published eToro post."""
+    data = load_data()
+    return data.get('last_etoro_post', {})
+
+
+def mark_last_etoro_post_followup_done(post_id: str = None) -> bool:
+    """Mark that the delayed engagement (+1h follow-up) has been completed."""
+    from datetime import datetime, timezone
+    data = load_data()
+    last_post = data.get('last_etoro_post', {})
+    if last_post:
+        if post_id and last_post.get('post_id') != post_id:
+            pass
+        last_post['followup_done'] = True
+        last_post['followup_at'] = datetime.now(timezone.utc).isoformat()
+        data['last_etoro_post'] = last_post
+        _invalidate_cache()
+        return save_data(data)
+    return False
+

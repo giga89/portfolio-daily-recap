@@ -32,6 +32,7 @@ import analytics_tracker
 import story_generator
 import ai_news_generator
 import etoro_history
+import gist_storage
 
 
 # ── eToro constants ───────────────────────────────────────────────────────────
@@ -384,13 +385,26 @@ def publish_all(
         )
         results["etoro"] = ok
         if ok:
+            real_pid = etoro_sender.LAST_PUBLISHED_POST_ID or f"recap_{market_session.replace(' ', '_').lower()}_{datetime.utcnow().strftime('%Y%m%d_%H%M')}"
             analytics_tracker.record_post(
                 platform="etoro",
-                post_id=f"recap_{market_session.replace(' ', '_').lower()}_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
+                post_id=real_pid,
                 session_name=market_session,
                 text=etoro_text,
                 image_type="winners_losers_card" if card_to_upload == engagement_card_path else "chart",
+                tickers=[s[0] for s in top_performers] if top_performers else [],
             )
+            if etoro_sender.LAST_PUBLISHED_POST_ID:
+                try:
+                    gist_storage.save_last_etoro_post(
+                        post_id=etoro_sender.LAST_PUBLISHED_POST_ID,
+                        session_name=market_session,
+                        tickers=[s[0] for s in top_performers] if top_performers else [],
+                        market_data_summary={"portfolio_daily": portfolio_daily}
+                    )
+                except Exception as g_err:
+                    print(f"⚠️ Failed to save last eToro post to Gist: {g_err}")
+
             # Execute 3-comment cross-linking sequence in immediate succession (5s interval) to save runner minutes
             if etoro_sender.LAST_PUBLISHED_POST_ID and market_session in ["U.S. market open", "European market open", "U.S. market close"]:
                 try:
@@ -649,14 +663,24 @@ def _publish_stock_focus_post(ticker: str = None) -> dict:
         )
         results["etoro_stock_focus"] = ok_etoro
         if ok_etoro:
+            real_pid = etoro_sender.LAST_PUBLISHED_POST_ID or f"focus_{ticker_sym}_{datetime.utcnow().strftime('%Y%m%d_%H%M')}"
             analytics_tracker.record_post(
                 platform="etoro",
-                post_id=f"focus_{ticker_sym}_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
+                post_id=real_pid,
                 session_name="Stock focus",
                 text=post_text,
                 image_type="stock_focus_card",
                 tickers=[ticker_sym],
             )
+            if etoro_sender.LAST_PUBLISHED_POST_ID:
+                try:
+                    gist_storage.save_last_etoro_post(
+                        post_id=etoro_sender.LAST_PUBLISHED_POST_ID,
+                        session_name="Stock focus",
+                        tickers=[ticker_sym],
+                    )
+                except Exception:
+                    pass
     else:
         print("   ⏭️  eToro not configured.")
         results["etoro_stock_focus"] = False
@@ -798,14 +822,24 @@ def _publish_crypto_recap_post() -> dict:
         )
         results["etoro_crypto_recap"] = ok_etoro
         if ok_etoro:
+            real_pid = etoro_sender.LAST_PUBLISHED_POST_ID or f"crypto_{datetime.utcnow().strftime('%Y%m%d_%H%M')}"
             analytics_tracker.record_post(
                 platform="etoro",
-                post_id=f"crypto_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
+                post_id=real_pid,
                 session_name="Daily crypto recap",
                 text=post_text,
                 image_type="crypto_card",
                 tickers=["BTC", "ETH", "SOL", "TRX"],
             )
+            if etoro_sender.LAST_PUBLISHED_POST_ID:
+                try:
+                    gist_storage.save_last_etoro_post(
+                        post_id=etoro_sender.LAST_PUBLISHED_POST_ID,
+                        session_name="Daily crypto recap",
+                        tickers=["BTC", "ETH", "SOL", "TRX"],
+                    )
+                except Exception:
+                    pass
     else:
         print("   ⏭️  eToro not configured.")
         results["etoro_crypto_recap"] = False
@@ -904,14 +938,24 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
         )
         results["etoro_copy_trading"] = ok_etoro
         if ok_etoro:
+            real_pid = etoro_sender.LAST_PUBLISHED_POST_ID or f"copytrading_{datetime.utcnow().strftime('%Y%m%d_%H%M')}"
             analytics_tracker.record_post(
                 platform="etoro",
-                post_id=f"copytrading_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
+                post_id=real_pid,
                 session_name="Copy trading post",
                 text=post_text,
                 image_type="copy_trading_card",
                 tickers=["PLTR", "NVDA", "CCJ", "MSFT", "AMZN", "SX7PEX.DE", "TSM"],
             )
+            if etoro_sender.LAST_PUBLISHED_POST_ID:
+                try:
+                    gist_storage.save_last_etoro_post(
+                        post_id=etoro_sender.LAST_PUBLISHED_POST_ID,
+                        session_name="Copy trading post",
+                        tickers=["PLTR", "NVDA", "CCJ", "MSFT", "AMZN", "SX7PEX.DE", "TSM"],
+                    )
+                except Exception:
+                    pass
             print("   ✅ Copy trading post sent to eToro")
     else:
         print("   ⏭️  eToro not configured.")

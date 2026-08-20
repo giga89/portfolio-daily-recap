@@ -34,13 +34,18 @@ fi
 
 # Map session argument to workflow session name
 case "$SESSION" in
-    eu_open)      SESSION_NAME="European market open" ;;
-    stock_focus)  SESSION_NAME="Stock focus" ;;
-    us_open)      SESSION_NAME="U.S. market open" ;;
-    crypto_recap) SESSION_NAME="Daily crypto recap" ;;
-    us_close)     SESSION_NAME="U.S. market close" ;;
-    weekly_sat)   SESSION_NAME="Weekly recap (Sat)" ;;
-    weekly_sun)   SESSION_NAME="Weekly recap (Sun)" ;;
+    eu_open)               SESSION_NAME="European market open" ;;
+    eu_open_followup)      SESSION_NAME="European market open follow-up" ;;
+    stock_focus)           SESSION_NAME="Stock focus" ;;
+    stock_focus_followup)  SESSION_NAME="Stock focus follow-up" ;;
+    us_open)               SESSION_NAME="U.S. market open" ;;
+    us_open_followup)      SESSION_NAME="U.S. market open follow-up" ;;
+    crypto_recap)          SESSION_NAME="Daily crypto recap" ;;
+    us_close)              SESSION_NAME="U.S. market close" ;;
+    us_close_followup)     SESSION_NAME="U.S. market close follow-up" ;;
+    delayed_engagement)    SESSION_NAME="Delayed engagement (+1h)" ;;
+    weekly_sat)            SESSION_NAME="Weekly recap (Sat)" ;;
+    weekly_sun)            SESSION_NAME="Weekly recap (Sun)" ;;
     *)
         echo "ERROR: Unknown session '$SESSION'" >&2
         exit 1
