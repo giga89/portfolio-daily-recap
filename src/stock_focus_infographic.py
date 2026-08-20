@@ -609,22 +609,27 @@ Fornisci in formato JSON strutturato (senza markdown extra):
                 response_mime_type="application/json"
             )
 
-            res = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt,
-                config=config_gen,
-            )
-
-            if res and res.text:
-                parsed = json.loads(res.text)
-                if parsed.get("name") and parsed.get("kpis"):
-                    for k in parsed.get("kpis", []):
-                        if "PESO" in k.get("label", "").upper():
-                            k["val"] = live_weight
-                    with open(cache_file, "w", encoding="utf-8") as f:
-                        json.dump(parsed, f, indent=2, ensure_ascii=False)
-                    print(f"✓ Dynamically generated and cached AI infographic data for {clean_ticker}")
-                    return parsed
+            models_to_try = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"]
+            for model_name in models_to_try:
+                try:
+                    res = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=config_gen,
+                    )
+                    if res and res.text:
+                        parsed = json.loads(res.text)
+                        if parsed.get("name") and parsed.get("kpis"):
+                            for k in parsed.get("kpis", []):
+                                if "PESO" in k.get("label", "").upper():
+                                    k["val"] = live_weight
+                            with open(cache_file, "w", encoding="utf-8") as f:
+                                json.dump(parsed, f, indent=2, ensure_ascii=False)
+                            print(f"✓ Dynamically generated and cached AI infographic data for {clean_ticker} using {model_name}")
+                            return parsed
+                except Exception as m_err:
+                    print(f"   ⚠️ Infographic generation model {model_name} failed: {m_err}")
+                    time.sleep(1)
         except Exception as exc:
             print(f"⚠️ Dynamic Gemini infographic generation fallback for {clean_ticker}: {exc}")
 

@@ -22,39 +22,58 @@ import uuid
 BASE_URL = "https://public-api.etoro.com"
 
 MARKET_IDS = {
+    # Tech, AI & Semiconductors
     "PLTR": 7991,
     "NVDA": 1137,
     "MSFT": 1004,
     "AMZN": 1005,
     "GOOG": 1002,
-    "CCJ": 6634,
-    "LLY": 2010,
-    "NOVO-B.CO": 2260,
-    "SX7PEX.DE": 10595,
-    "MELI": 3297,
     "TSM": 4481,
     "AVGO": 4236,
-    "MBG.DE": 2828,
-    "1211.HK": 2093,
-    "1919.HK": 4358,
-    "RACE": 1917,
-    "ENEL.MI": 1282,
+    "MRVL": 4358,
+
+    # Healthcare & Pharma
+    "LLY": 1567,
+    "NOVO-B.CO": 2260,
+    "HUM": 1512,
+    "ABBV": 1452,
+    "ABT.US": 1552,
+    "AZN.L": 2010,
+
+    # Energy, Utilities, Commodities & Nuclear
+    "CCJ": 6634,
     "ENI.MI": 1283,
+    "ENEL.MI": 1282,
+    "MAU.PA": 3585,
+    "GLEN.L": 2035,
+    "TRIG.L": 2686,
+    "MNODL.L": 1352,
+    "NVTKL.L": 1353,
+
+    # ETFs, Fixed Income & Cash
+    "SX7PEX.DE": 10595,
+    "IEUR": 3150,
+    "WDEF.L": 3297,
+    "PPFB.DE": 2941,
+    "XEON.DE": 10559,
+    "IB01.L": 1442,
+    "INDO.PA": 15327,
+    "IQQL.DE": 2913,
+    "VOF.L": 2828,
+
+    # Automotive, Luxury & Industrials
+    "RACE": 1917,
     "PRY.MI": 1296,
     "VOW3.DE": 1210,
-    "AZN.L": 2260,
-    "GLEN.L": 3585,
-    "TRIG.L": 2686,
-    "VOF.L": 2828,
-    "IEUR": 3150,
-    "IQQL.DE": 2913,
-    "WDEF.L": 12200,
-    "PPFB.DE": 2941,
-    "XEON.DE": 1352,
-    "IB01.L": 15623,
-    "HUM": 1512,
-    "ABBV": 2380,
-    "ABT.US": 2316,
+    "1211.HK": 2380,
+    "1919.HK": 13669,
+    "ULVR.L": 2093,
+
+    # E-Commerce, Fintech, Pre-IPO & Crypto
+    "MELI": 4108,
+    "ETOR": 12200,
+    "2318.HK": 2316,
+    "SPCX.RTH": 15623,
     "TRX": 100026,
 }
 
@@ -70,10 +89,30 @@ def get_market_ids_for_tickers(tickers: List[str]) -> List[int]:
 
 
 def get_credentials() -> Tuple[Optional[str], Optional[str], str]:
-    """Retrieve eToro credentials from environment."""
+    """Retrieve eToro credentials from environment or local .env file."""
     user_key = os.environ.get("ETORO_USER_KEY")
-    api_key = os.environ.get("ETORO_API_KEY", "sdgdskldFPLGfjHn1421dgnlxdGTbngdflg6290bRjslfihsjhSDsdgGHH25hjf")
-    username = os.environ.get("ETORO_USERNAME", "AndreaRavalli")
+    api_key = os.environ.get("ETORO_API_KEY")
+    username = os.environ.get("ETORO_USERNAME")
+
+    # Fallback to local .env file if running locally
+    if not user_key:
+        env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+        if os.path.exists(env_path):
+            try:
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith("ETORO_USER_KEY="):
+                            user_key = line.split("=", 1)[1].strip().strip('"').strip("'")
+                        elif line.startswith("ETORO_API_KEY=") and not api_key:
+                            api_key = line.split("=", 1)[1].strip().strip('"').strip("'")
+                        elif line.startswith("ETORO_USERNAME=") and not username:
+                            username = line.split("=", 1)[1].strip().strip('"').strip("'")
+            except Exception:
+                pass
+
+    api_key = api_key or "sdgdskldFPLGfjHn1421dgnlxdGTbngdflg6290bRjslfihsjhSDsdgGHH25hjf"
+    username = username or "AndreaRavalli"
     return user_key, api_key, username
 
 
@@ -140,22 +179,8 @@ def fetch_portfolio_weights() -> Dict[str, float]:
     _, _, username = get_credentials()
     username = username or "AndreaRavalli"
 
-    # Known eToro Instrument ID to Ticker mapping derived from MARKET_IDS
+    # Known eToro Instrument ID to Ticker mapping derived from authoritative MARKET_IDS
     ID_TO_TICKER = {v: k for k, v in MARKET_IDS.items()}
-    # Specific aliases / secondary instrument IDs on eToro
-    ID_TO_TICKER.update({
-        1512: 'HUM',
-        1442: 'ENI.MI',
-        10559: 'XEON.DE',
-        4108: 'MELI',
-        1567: 'LLY',
-        1552: 'ABT.US',
-        1452: 'ABBV',
-        1133: 'MBG.DE',
-        2380: '1211.HK',
-        2035: 'GLEN.L',
-        2010: 'AZN.L',
-    })
 
     url = f"{BASE_URL}/api/v1/user-info/people/{username}/portfolio/live"
     try:
@@ -232,6 +257,33 @@ def fetch_gain_history(granularity: str = "monthly") -> Optional[List[Dict[str, 
         return None
     except Exception as e:
         print(f"⚠️ Error fetching gain history from eToro API: {e}")
+        return None
+
+
+def fetch_trader_rankings(period: str = "CurrYear") -> Optional[Dict[str, Any]]:
+    """
+    Fetch investor rankings, copier statistics, risk score, and performance from
+    GET /api/v2/portfolios/{username}/rankings?period={period}.
+    Returns dict containing copiers count, AUM, win ratio, risk score, etc.
+    """
+    headers = get_headers()
+    if not headers:
+        return None
+
+    _, _, username = get_credentials()
+    username = username or "AndreaRavalli"
+    url = f"{BASE_URL}/api/v2/portfolios/{username}/rankings"
+    try:
+        resp = requests.get(url, headers=headers, params={"period": period}, timeout=25)
+        if resp.status_code == 200:
+            data = resp.json().get("data", {})
+            if data:
+                copiers = data.get("copiers", 0)
+                print(f"✓ Fetched live eToro rankings for {username}: {copiers} copiers, Risk Score {data.get('riskScore')}, AUM ${data.get('aumValue', 0):,}")
+            return data
+        return None
+    except Exception as e:
+        print(f"⚠️ Error fetching trader rankings from eToro API: {e}")
         return None
 
 

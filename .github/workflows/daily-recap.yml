@@ -3,7 +3,7 @@ name: Daily Portfolio Recap
 on:
   # ── Primary trigger: Orange Pi 5 local scheduler (precise timing) ──────────
   repository_dispatch:
-    types: [eu_open, stock_focus, crypto_recap, us_open, us_close, weekly_sat, weekly_sun]
+    types: [eu_open, stock_focus, crypto_recap, us_open, us_close, weekly_sat, weekly_sun, copy_trading]
   # ── Fallback: GitHub Actions cron (1 per session, Orange Pi is primary) ─────
   schedule:
     - cron: '45 7 * * 1-5'    # EU open fallback:    07:45 UTC (09:45 ITA)
@@ -13,6 +13,7 @@ on:
     - cron: '45 20 * * 1-5'   # US close fallback:   20:45 UTC (22:45 ITA)
     - cron: '0 9 * * 6'       # Weekly recap (Sat):  09:00 UTC
     - cron: '0 21 * * 0'      # Weekly recap (Sun):  21:00 UTC
+    - cron: '0 11 * * 1-5'   # Copy trading post:   11:00 UTC (13:00 ITA)
   workflow_dispatch:  # Allows manual trigger
     inputs:
       force_session:
@@ -71,6 +72,7 @@ jobs:
               stock_focus)       SESSION_NAME="Stock focus" ;;
               crypto_recap)      SESSION_NAME="Daily crypto recap" ;;
               crypto)            SESSION_NAME="Daily crypto recap" ;;
+              copy_trading)     SESSION_NAME="Copy trading post" ;;
               portfolio_outlook) SESSION_NAME="Weekly portfolio outlook" ;;
               macro_outlook)     SESSION_NAME="Weekly macro outlook" ;;
               *)                 SESSION_NAME="$FORCED_SESSION" ;;
@@ -90,6 +92,7 @@ jobs:
                 us_close)     SESSION_NAME="U.S. market close" ;;
                 weekly_sat)   SESSION_NAME="Weekly recap (Sat)" ;;
                 weekly_sun)   SESSION_NAME="Weekly recap (Sun)" ;;
+                copy_trading) SESSION_NAME="Copy trading post" ;;
               esac
             fi
             echo "Triggered by Orange Pi 5 (repository_dispatch: $EVENT_TYPE)"
@@ -110,6 +113,8 @@ jobs:
                 SESSION_NAME="Weekly recap (Sat)" ;;
               "0 21 * * 0")
                 SESSION_NAME="Weekly recap (Sun)" ;;
+              "0 11 * * 1-5")
+                SESSION_NAME="Copy trading post" ;;
             esac
             echo "Triggered by GitHub cron (fallback): $SCHEDULE"
           else

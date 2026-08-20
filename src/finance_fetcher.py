@@ -2,25 +2,39 @@
 Fetch stock data from Yahoo Finance using yfinance
 """
 
-import yfinance as yf
+try:
+    import yfinance as yf
+except ImportError:
+    yf = None
 from config import PORTFOLIO_TICKERS, BENCHMARKS
 import requests
-from bs4 import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    BeautifulSoup = None
 import os
 import re
 from datetime import datetime
 import json
-import pytz
-import pandas as pd
-import numpy as np
+try:
+    import pytz
+    NY_TZ = pytz.timezone('America/New_York')
+except ImportError:
+    pytz = None
+    NY_TZ = None
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+try:
+    import numpy as np
+except ImportError:
+    np = None
 try:
     import etoro_client
     ETORO_CLIENT_AVAILABLE = True
 except ImportError:
     ETORO_CLIENT_AVAILABLE = False
-
-# Fuso orario USA (New York)
-NY_TZ = pytz.timezone('America/New_York')
 
 # Orario di apertura e chiusura della borsa USA (9:30 AM a 4:00 PM ET)
 US_OPEN_HOUR = 9
@@ -55,17 +69,41 @@ def _fetch_etoro_cid(username):
 
 def fetch_portfolio_ytd_from_etoro():
     """
-    Fetch portfolio YTD directly from eToro's public API.
+    Fetch portfolio YTD directly from eToro's official Public API / MCP endpoint.
     Uses:
-      1. userstats/gain/history yearly data for current year (more accurate)
-      2. Fallback: Rankings API with Period=CurrYear
-    These match exactly what's displayed on https://www.etoro.com/people/{username}/stats
+      1. etoro_client.fetch_trader_rankings(period="CurrYear") (official & reliable)
+      2. etoro_client.fetch_gain_history(granularity="monthly")
+      3. Fallback to legacy web sapi endpoints
     """
     try:
-        print(f"   Fetching from eToro public API (user: {ETORO_USERNAME})...")
+        # Method 1: Official eToro Public API / MCP rankings endpoint
+        if ETORO_CLIENT_AVAILABLE and etoro_client.is_configured():
+            print(f"   Fetching YTD from official eToro Public API (user: {ETORO_USERNAME})...")
+            rankings = etoro_client.fetch_trader_rankings(period="CurrYear")
+            if rankings and "gain" in rankings:
+                ytd_val = float(rankings["gain"]) * 100.0
+                print(f"✓ eToro Portfolio YTD (official API / rankings): {ytd_val:.2f}%")
+                return ytd_val
 
-        # Method 1: userstats yearly data
-        print("   Trying userstats API for accurate YTD...")
+            # Method 1b: monthly gain history compound for current year
+            gain_history = etoro_client.fetch_gain_history(granularity="monthly")
+            if gain_history:
+                current_year_str = str(datetime.now().year)
+                ytd_compound = 1.0
+                has_entries = False
+                for entry in gain_history:
+                    d = str(entry.get("date", ""))
+                    if d.startswith(current_year_str):
+                        g = float(entry.get("gain", 0.0)) / 100.0
+                        ytd_compound *= (1.0 + g)
+                        has_entries = True
+                if has_entries:
+                    ytd_val = round((ytd_compound - 1.0) * 100.0, 2)
+                    print(f"✓ eToro Portfolio YTD (official API / monthly gain history): {ytd_val:.2f}%")
+                    return ytd_val
+
+        # Method 2: Legacy fallback
+        print("   Trying userstats API fallback...")
         try:
             cid = _fetch_etoro_cid(ETORO_USERNAME) or ETORO_CID
             stats_url = f"https://www.etoro.com/sapi/userstats/gain/cid/{cid}/history?IncludeSimulation=true&Period=OneYearAgo"
@@ -80,38 +118,8 @@ def fetch_portfolio_ytd_from_etoro():
                     ytd_value = entry['gain']
                     print(f"✓ eToro Portfolio YTD (userstats API): {ytd_value:.2f}%")
                     return ytd_value
-                    
-            print("   Could not find current year data in eToro stats, trying fallback...")
         except Exception as e:
-            print(f"   ⚠️ Userstats API failed: {e}. Trying fallback...")
-
-        # Method 2: Rankings API - gives the most up-to-date YTD gain (Fallback)
-        print("   Trying rankings API fallback...")
-        rankings_url = f"https://www.etoro.com/sapi/rankings/rankings?username={ETORO_USERNAME}&Period=CurrYear&blocked=false"
-
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                print(f"   Attempt {attempt+1}/{max_retries}...")
-                response = requests.get(rankings_url, headers=ETORO_API_HEADERS, timeout=15)
-                response.raise_for_status()
-                data = response.json()
-
-                if data.get('Status') == 'OK' and data.get('Items'):
-                    item = data['Items'][0]
-                    ytd_value = item.get('Gain')
-                    if ytd_value is not None:
-                        print(f"✓ eToro Portfolio YTD (rankings API): {ytd_value:.2f}%")
-                        return ytd_value
-
-                break  # Got response but no valid data, end loop
-            except requests.exceptions.RequestException as e:
-                if attempt == max_retries - 1:
-                    print(f"   ⚠️ Rankings API failed after {max_retries} attempts: {e}")
-                else:
-                    print(f"   ⚠️ Attempt failed, retrying: {e}")
-                    import time
-                    time.sleep(2)
+            print(f"   ⚠️ Userstats API fallback failed: {e}")
 
         return None
 
