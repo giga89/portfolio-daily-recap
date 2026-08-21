@@ -274,27 +274,27 @@ COMPANY_INFOGRAPHICS = {
         "color": (180, 0, 0),
         "domain": "byd.com"
     },
-    "MBG.DE": {
-        "name": "MERCEDES-BENZ",
-        "tagline": "Top-End Luxury & Automotive Excellence",
+    "VOW3.DE": {
+        "name": "VOLKSWAGEN",
+        "tagline": "Global Mobility & Iconic Brand Portfolio",
         "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
-        "subtitle": "Mercedes-Benz è il brand automobilistico di lusso per eccellenza, con forte generazione di cassa e ritorni per gli azionisti.",
+        "subtitle": "Volkswagen AG è uno dei maggiori costruttori automobilistici mondiali (Porsche, Audi, VW) con solida cassa e dividendi generosi.",
         "kpis": [
-            {"label": "DIVIDEND YIELD", "val": "8.0%+", "sub": "Remunerazione azionisti top tier"},
-            {"label": "FOCUS TOP-END LUXURY", "val": "Maybach/AMG", "sub": "Margini elevati sui veicoli di punta"},
+            {"label": "DIVIDEND YIELD", "val": "7.5%+", "sub": "Forte ritorno di capitale"},
+            {"label": "MARCHI ICONICI", "val": "Porsche/Audi", "sub": "Presenza in tutti i segmenti"},
             {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Pilastro valore e dividendi europei"},
-            {"label": "CASSA NETTA INDUSTRIALE", "val": "€30B+", "sub": "Bilancio solido e prudente"},
+            {"label": "SCALA PRODUTTIVA", "val": "9M+ Veicoli", "sub": "Leadership globale dell'automotive"},
         ],
         "pillars": [
-            ("Marchio di Lusso Storico:", "Brand value secolare che garantisce elevato potere di prezzo."),
-            ("Strategia Orientata ai Margini:", "Priorità alla redditività e ai veicoli alto di gamma rispetto ai volumi."),
-            ("Generazione di Cassa Industriale:", "Capacità di distribuire ricchi dividendi mantenendo cassa solida."),
-            ("Investimenti nella Guida Autonoma:", "Pioniere nei sistemi di guida autonoma di Livello 3 certificati."),
+            ("Portafoglio Marchi Leader:", "Ampia diversificazione dai veicoli di massa al lusso e sportivo."),
+            ("Piattaforme Unificate:", "Sinergie di scala sui pianali e sulle architetture software di nuova generazione."),
+            ("Remunerazione Azionisti:", "Dividendo elevato supportato dalla stabilità dei flussi di cassa industriali."),
+            ("Espansione Elettrica & Batterie:", "Investimenti capillari nella produzione di celle e mobilità sostenibile."),
         ],
-        "quote": "Il lusso autentico mantiene il suo valore e la sua desiderabilità attraverso i decenni.",
-        "tags": ["#MercedesBenz", "#Luxury", "#Dividends", "#Automotive", "#Germany"],
-        "color": (50, 60, 70),
-        "domain": "mercedes-benz.com"
+        "quote": "La scala globale e la solidità patrimoniale guidano la trasformazione della mobilità.",
+        "tags": ["#Volkswagen", "#Automotive", "#Dividends", "#ValueInvesting", "#Germany"],
+        "color": (0, 70, 150),
+        "domain": "volkswagen.com"
     },
     "AMZN": {
         "name": "AMAZON",
@@ -554,7 +554,7 @@ def _get_live_weight_for_ticker(ticker: str) -> str:
         "HUM": "3.19%", "GOOG": "3.14%", "ENEL.MI": "2.94%", "PLTR": "2.87%",
         "TSM": "2.87%", "MELI": "2.72%", "PYPL": "2.56%",
         "1211.HK": "2.35%", "MSFT": "2.19%", "LLY": "2.19%", "0005.HK": "2.04%",
-        "MBG.DE": "1.24%", "AVGO": "0.05%"
+        "VOW3.DE": "1.24%", "AVGO": "0.05%"
     }
     return defaults.get(clean, "2.50%")
 

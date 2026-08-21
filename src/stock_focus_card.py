@@ -62,7 +62,7 @@ TICKER_THEMES = {
     "MRVL": {"sector": "Semiconduttori & Networking AI Data Center", "domain": "marvell.com", "thesis": "Leader nei chip ottici ad altissima velocità e silicio custom per hyperscaler.", "color": (0, 90, 180)},
     "TSM":  {"sector": "Fonderia di Chip Avanzati", "domain": "tsmc.com", "thesis": "Produce oltre il 90% dei chip più avanzati al mondo a 3nm e 2nm.", "color": (220, 50, 50)},
     "AVGO": {"sector": "Chip Custom & Networking AI", "domain": "broadcom.com", "thesis": "Dominio negli switch per cluster AI e integrazione strategica di VMware.", "color": (204, 0, 0)},
-    "MBG.DE": {"sector": "Auto di Lusso & Premium Mobility", "domain": "mercedes-benz.com", "thesis": "Potere di prezzo nei segmenti top-end, transizione elettrica e dividendi.", "color": (160, 175, 190)},
+    "VOW3.DE": {"sector": "Leader Automotive Globale", "domain": "volkswagen.com", "thesis": "Portafoglio marchi iconici, transizione software e dividendi generosi.", "color": (0, 70, 150)},
     "0005.HK": {"sector": "Banca Globale & Wealth Management Asia", "domain": "hsbc.com", "thesis": "Hub finanziario chiave per i flussi di capitale tra Europa e Asia.", "color": (219, 0, 17)},
     "1211.HK": {"sector": "Veicoli Elettrici & Batterie EV", "domain": "byd.com", "thesis": "Integrazione verticale completa dalle batterie alla produzione su larga scala.", "color": (30, 144, 255)},
     "WMT": {"sector": "Retail Globale & Logistica Omnicanale", "domain": "walmart.com", "thesis": "Dominio nella grande distribuzione, crescita continua dell'e-commerce e margini dalla pubblicità retail.", "color": (0, 113, 206)},

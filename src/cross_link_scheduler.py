@@ -5,7 +5,7 @@ Dynamic Cross-Link Comments Generator & Scheduler for eToro
 Publishes 3 curated, dynamic cross-link comments on an eToro recap post.
 Each comment focuses on EXACTLY ONE SINGLE ASSET from a specific category:
   • Comment 1/3: Single AI & Tech Asset (e.g. $PLTR, $NVDA, $MRVL, $TSM, $MSFT, $GOOG, $AVGO, $AMZN)
-  • Comment 2/3: Single Defensive, Healthcare, Energy or Value Asset (e.g. $LLY, $NOVO-B.CO, $CCJ, $ENI.MI, $PRY.MI, $BMW.DE, $ENEL.MI, $MBG.DE)
+  • Comment 2/3: Single Defensive, Healthcare, Energy or Value Asset (e.g. $LLY, $NOVO-B.CO, $CCJ, $ENI.MI, $PRY.MI, $ENEL.MI, $VOW3.DE, $ULVR.L)
   • Comment 3/3: Single ETF & Macro Strategy Asset (e.g. $SX7PEX.DE, $WDEF.L, $INDO.PA, $IEUR)
 
 Features:
@@ -159,13 +159,13 @@ DEFENSIVE_VALUE_PROFILES = {
         "driver": "Politica di dividendi stabili e crescenti, trainata dall'elettrificazione dei consumi civili e industriali.",
         "question": "Considerate le utility regolate come Enel un ottimo strumento di stabilità e rendimento nei momenti di incertezza?"
     },
-    "MBG.DE": {
-        "name": "Mercedes-Benz Group",
-        "emoji": "⭐",
-        "role": "Lusso Top-End & Redditività Industriale",
-        "thesis": "Brand secolare di lusso con forte pricing power, focalizzato sui segmenti a più alto margine (Maybach, AMG e Classe S).",
-        "driver": "Generazione di cassa robusta, dividendo top-tier (>8%) e leadership tecnologica nella guida autonoma di Livello 3.",
-        "question": "Come valutate la capacità dei marchi automobilistici premium di mantenere margini e dividendi elevati?"
+    "VOW3.DE": {
+        "name": "Volkswagen AG",
+        "emoji": "🚗",
+        "role": "Leader Automotive Globale & Mobilità Elettrica",
+        "thesis": "Presenza globale capillare con marchi iconici (Porsche, Audi, VW), transizione verso architetture unificate e forte scala produttiva.",
+        "driver": "Valutazioni a forte sconto, cassa netta industriale solida e dividend yield superiore al 7%.",
+        "question": "Come valutate il piano di efficientamento e la transizione elettrica del gruppo Volkswagen?"
     }
 }
 
