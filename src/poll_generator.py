@@ -122,7 +122,7 @@ def publish_etoro_poll(
 
     # Select template or use custom inputs
     selected = None
-    if poll_id:
+    if poll_id and poll_id.lower() != "auto":
         for t in POLL_TEMPLATES:
             if t["id"] == poll_id:
                 selected = t
@@ -181,6 +181,7 @@ def publish_etoro_poll(
                 tickers=tickers,
                 market_data_summary={"is_poll": True, "title": title}
             )
+            gist_storage.mark_session_run("Community Poll")
         except Exception as e:
             print(f"⚠️ Gist save warning: {e}")
 

@@ -1,18 +1,30 @@
 name: Publish eToro Community Poll
 
 on:
+  # ── Primary trigger: Orange Pi 5 local scheduler ────────────────────────────
+  repository_dispatch:
+    types: [community_poll, publish_poll, poll]
+  # ── Fallback: GitHub Actions cron (Mon-Fri 10:30 UTC = 12:30 ITA) ───────────
+  schedule:
+    - cron: '30 10 * * 1-5'
   workflow_dispatch:
     inputs:
       poll_template:
-        description: 'Poll Template to publish'
-        required: true
+        description: 'Poll Template to publish (leave auto for rotation)'
+        required: false
         type: choice
         options:
+          - auto
           - megatrend_h2
           - ai_valuation_debate
           - risk_management_choice
           - pltr_conviction
-        default: megatrend_h2
+        default: auto
+      force_run:
+        description: 'Skip dedup check and force run'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   publish-poll:
@@ -35,7 +47,35 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Check for duplicate poll run
+        id: dedup_check
+        env:
+          GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          FORCE_RUN: ${{ inputs.force_run }}
+        run: |
+          python - <<'PYEOF'
+          import os, sys
+          sys.path.insert(0, 'src')
+          import gist_storage
+
+          force_run = os.environ.get('FORCE_RUN', 'false').lower() == 'true'
+          if force_run:
+              print("FORCE RUN: dedup check bypassed for Community Poll.")
+              skip = 'false'
+          elif gist_storage.has_session_run_today("Community Poll"):
+              print("DUPLICATE: Community Poll already ran today. Skipping.")
+              skip = 'true'
+          else:
+              print("NEW RUN: Community Poll")
+              skip = 'false'
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'skip={skip}\n')
+          PYEOF
+
       - name: Publish Poll to eToro
+        if: steps.dedup_check.outputs.skip != 'true'
         env:
           ETORO_USER_KEY: ${{ secrets.ETORO_USER_KEY }}
           ETORO_API_KEY: ${{ secrets.ETORO_API_KEY }}
@@ -43,11 +83,12 @@ jobs:
           GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
-          POLL_TEMPLATE: ${{ inputs.poll_template }}
+          POLL_TEMPLATE: ${{ inputs.poll_template || 'auto' }}
         run: |
           python src/poll_generator.py ${POLL_TEMPLATE}
 
       - name: Update GitHub Pages Dashboard & Analytics
+        if: steps.dedup_check.outputs.skip != 'true'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"

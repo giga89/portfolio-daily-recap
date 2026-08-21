@@ -13,6 +13,11 @@
 2 7 * * 1-5   /opt/portfolio-dispatch/dispatch.sh eu_open  >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 2 8 * * 1-5   /opt/portfolio-dispatch/dispatch.sh eu_open  >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
+# ── Interactive Community Poll ───────────────────────────────────────────────
+# 12:30 local (CET/CEST) → 10:30 UTC (summer) / 11:30 UTC (winter)
+30 10 * * 1-5  /opt/portfolio-dispatch/dispatch.sh community_poll >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+30 11 * * 1-5  /opt/portfolio-dispatch/dispatch.sh community_poll >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
 # ── Stock Focus (Midday) ───────────────────────────────────────────────────────
 # 14:00 local (CET/CEST) → 12:00 UTC (summer) / 13:00 UTC (winter)
 0 12 * * 1-5   /opt/portfolio-dispatch/dispatch.sh stock_focus >> /opt/portfolio-dispatch/logs/cron.log 2>&1

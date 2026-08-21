@@ -7,13 +7,13 @@ on:
   # ── Fallback: GitHub Actions cron (1 per session, Orange Pi is primary) ─────
   schedule:
     - cron: '45 7 * * 1-5'    # EU open fallback:    07:45 UTC (09:45 ITA)
-    - cron: '0 12 * * 1-5'    # Stock focus:         12:00 UTC (14:00 ITA)
+    - cron: '30 12 * * 1-5'   # Stock focus:         12:30 UTC (14:30 ITA)
     - cron: '15 14 * * 1-5'   # US open fallback:    14:15 UTC (16:15 ITA)
-    - cron: '0 16 * * *'      # Daily crypto recap:  16:00 UTC (18:00 ITA)
+    - cron: '20 16 * * *'     # Daily crypto recap:  16:20 UTC (18:20 ITA)
     - cron: '45 20 * * 1-5'   # US close fallback:   20:45 UTC (22:45 ITA)
-    - cron: '0 9 * * 6'       # Weekly recap (Sat):  09:00 UTC
-    - cron: '0 21 * * 0'      # Weekly recap (Sun):  21:00 UTC
-    - cron: '0 11 * * 1-5'   # Copy trading post:   11:00 UTC (13:00 ITA)
+    - cron: '30 9 * * 6'      # Weekly recap (Sat):  09:30 UTC
+    - cron: '30 21 * * 0'     # Weekly recap (Sun):  21:30 UTC
+    - cron: '30 11 * * 1-5'   # Copy trading post:   11:30 UTC (13:30 ITA)
   workflow_dispatch:  # Allows manual trigger
     inputs:
       force_session:
@@ -101,19 +101,19 @@ jobs:
             case "$SCHEDULE" in
               "45 7 * * 1-5")
                 SESSION_NAME="European market open" ;;
-              "0 12 * * 1-5")
+              "30 12 * * 1-5")
                 SESSION_NAME="Stock focus" ;;
               "15 14 * * 1-5")
                 SESSION_NAME="U.S. market open" ;;
-              "0 16 * * *")
+              "20 16 * * *")
                 SESSION_NAME="Daily crypto recap" ;;
               "45 20 * * 1-5")
                 SESSION_NAME="U.S. market close" ;;
-              "0 9 * * 6")
+              "30 9 * * 6")
                 SESSION_NAME="Weekly recap (Sat)" ;;
-              "0 21 * * 0")
+              "30 21 * * 0")
                 SESSION_NAME="Weekly recap (Sun)" ;;
-              "0 11 * * 1-5")
+              "30 11 * * 1-5")
                 SESSION_NAME="Copy trading post" ;;
             esac
             echo "Triggered by GitHub cron (fallback): $SCHEDULE"
@@ -205,19 +205,39 @@ jobs:
 
           session = os.environ.get('MARKET_SESSION', '')
           force_run = os.environ.get('FORCE_RUN', 'false').lower() == 'true'
-          market_sessions = {'European market open', 'U.S. market open', 'U.S. market close'}
 
+          def get_dedup_key(s):
+              if not s:
+                  return None
+              if s.startswith('Stock focus'):
+                  return 'Stock focus'
+              known = {
+                  'European market open',
+                  'Stock focus',
+                  'Daily crypto recap',
+                  'U.S. market open',
+                  'U.S. market close',
+                  'Copy trading post',
+                  'Weekly recap (Sat)',
+                  'Weekly recap (Sun)',
+                  'Weekly portfolio outlook',
+                  'Weekly macro outlook',
+                  'Monthly recap',
+              }
+              return s if s in known else None
+
+          dedup_key = get_dedup_key(session)
           if force_run:
               print(f"FORCE RUN: dedup check bypassed for '{session}'.")
               skip = 'false'
-          elif session not in market_sessions:
+          elif not dedup_key:
               print(f"Session '{session}' does not need deduplication, proceeding.")
               skip = 'false'
-          elif gist_storage.has_session_run_today(session):
-              print(f"DUPLICATE: '{session}' already ran today. Skipping.")
+          elif gist_storage.has_session_run_today(dedup_key):
+              print(f"DUPLICATE: '{dedup_key}' already ran today. Skipping.")
               skip = 'true'
           else:
-              print(f"NEW RUN: '{session}'")
+              print(f"NEW RUN: '{dedup_key}'")
               skip = 'false'
 
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
@@ -320,11 +340,31 @@ jobs:
 
           session = os.environ.get('MARKET_SESSION', '')
           trigger = os.environ.get('TRIGGER', '')
-          market_sessions = {'European market open', 'U.S. market open', 'U.S. market close'}
 
-          if session in market_sessions:
-              gist_storage.mark_session_run(session)
-              print(f"Marked '{session}' as completed for today (trigger: {trigger}).")
+          def get_dedup_key(s):
+              if not s:
+                  return None
+              if s.startswith('Stock focus'):
+                  return 'Stock focus'
+              known = {
+                  'European market open',
+                  'Stock focus',
+                  'Daily crypto recap',
+                  'U.S. market open',
+                  'U.S. market close',
+                  'Copy trading post',
+                  'Weekly recap (Sat)',
+                  'Weekly recap (Sun)',
+                  'Weekly portfolio outlook',
+                  'Weekly macro outlook',
+                  'Monthly recap',
+              }
+              return s if s in known else None
+
+          dedup_key = get_dedup_key(session)
+          if dedup_key:
+              gist_storage.mark_session_run(dedup_key)
+              print(f"Marked '{dedup_key}' as completed for today (trigger: {trigger}).")
           else:
               print(f"Session '{session}' does not need dedup marking.")
           PYEOF

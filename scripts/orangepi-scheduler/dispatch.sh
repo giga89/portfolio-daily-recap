@@ -28,7 +28,7 @@ source "$ENV_FILE"
 # Session name from argument
 SESSION="${1:-}"
 if [ -z "$SESSION" ]; then
-    echo "Usage: $0 <eu_open|stock_focus|us_open|crypto_recap|us_close|weekly_sat|weekly_sun>" >&2
+    echo "Usage: $0 <eu_open|community_poll|stock_focus|us_open|crypto_recap|us_close|weekly_sat|weekly_sun>" >&2
     exit 1
 fi
 
@@ -36,6 +36,7 @@ fi
 case "$SESSION" in
     eu_open)               SESSION_NAME="European market open" ;;
     eu_open_followup)      SESSION_NAME="European market open follow-up" ;;
+    community_poll)        SESSION_NAME="Community Poll" ;;
     stock_focus)           SESSION_NAME="Stock focus" ;;
     stock_focus_followup)  SESSION_NAME="Stock focus follow-up" ;;
     us_open)               SESSION_NAME="U.S. market open" ;;
@@ -54,7 +55,7 @@ esac
 
 # Check if today is a weekday (for market sessions)
 DOW=$(date -u +%u)  # 1=Mon, 7=Sun
-if [[ "$SESSION" =~ ^(eu_open|stock_focus|us_open|us_close)$ ]] && [ "$DOW" -gt 5 ]; then
+if [[ "$SESSION" =~ ^(eu_open|community_poll|stock_focus|us_open|us_close)$ ]] && [ "$DOW" -gt 5 ]; then
     echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP $SESSION — weekend (day $DOW)" >> "$LOG_DIR/dispatch.log"
     exit 0
 fi
