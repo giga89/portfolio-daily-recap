@@ -158,7 +158,7 @@ def build_stock_focus_cross_link_comment(recent_count: int = 3) -> str:
         thesis = info.get("thesis", "Tesi fondamentale di crescita.")
         lines.append(f"{idx}️⃣ <b>${ticker}</b> · {sector}\n   ↳ <i>{thesis}</i>\n")
 
-    lines.append("👉 Trovi tutti i dettagli e le analisi sul mio profilo @AndreaRavalli! 🎯")
+    lines.append("👉 Trovi tutti i dettagli e le analisi sul mio profilo! 🎯")
     return "\n".join(lines)
 
 

@@ -65,6 +65,7 @@ TICKER_THEMES = {
     "MBG.DE": {"sector": "Auto di Lusso & Premium Mobility", "domain": "mercedes-benz.com", "thesis": "Potere di prezzo nei segmenti top-end, transizione elettrica e dividendi.", "color": (160, 175, 190)},
     "0005.HK": {"sector": "Banca Globale & Wealth Management Asia", "domain": "hsbc.com", "thesis": "Hub finanziario chiave per i flussi di capitale tra Europa e Asia.", "color": (219, 0, 17)},
     "1211.HK": {"sector": "Veicoli Elettrici & Batterie EV", "domain": "byd.com", "thesis": "Integrazione verticale completa dalle batterie alla produzione su larga scala.", "color": (30, 144, 255)},
+    "WMT": {"sector": "Retail Globale & Logistica Omnicanale", "domain": "walmart.com", "thesis": "Dominio nella grande distribuzione, crescita continua dell'e-commerce e margini dalla pubblicità retail.", "color": (0, 113, 206)},
 }
 
 

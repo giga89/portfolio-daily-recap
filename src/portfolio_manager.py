@@ -56,10 +56,11 @@ DEFAULT_TICKERS = {
     '1211.HK': ('1211.HK', 'BYD Co Ltd'),
     'ULVR.L': ('ULVR.L', 'Unilever PLC'),
     
-    # E-Commerce, Fintech, Pre-IPO & Crypto
+    # E-Commerce, Fintech, Pre-IPO, Retail & Crypto
     'MELI': ('MELI', 'MercadoLibre Inc'),
     'ETOR': ('ETOR', 'eToro Group Ltd'),
     '2318.HK': ('2318.HK', 'Ping An Insurance Group'),
+    'WMT': ('WMT', 'Walmart Inc.'),
     'TRX': ('TRX-USD', 'TRON'),
     'SPCX.RTH': ('SPCX.RTH', 'Space Exploration Technologies Corp.'),
 }
@@ -102,9 +103,10 @@ DEFAULT_EMOJIS = {
     'ENI.MI': '⛽',
     'ENI': '⛽',
     
-    # Crypto
+    # Crypto & Retail
     'TRX': '🪙',
     'ETOR': '🏛️',
+    'WMT': '🛒',
     
     # Financial Services & Others
     'DB1.DE': '📊',
@@ -326,6 +328,12 @@ def lookup_ticker_info(symbol):
     Attempt to find valid Yahoo Finance ticker and name for a given symbol.
     Returns (yahoo_ticker, name) or None if validation fails.
     """
+    # Guard: If symbol is purely numeric without an exchange suffix (e.g. "1035"),
+    # it's an unresolved eToro instrument ID, NOT a valid ticker! Never resolve to random HK tickers.
+    if str(symbol).isdigit():
+        print(f"⚠️ Rejecting pure numeric symbol '{symbol}' — looks like an unresolved eToro instrument ID, not a ticker.")
+        return symbol, symbol
+
     candidates = [symbol]
     
     # Heuristics for common variations
@@ -436,12 +444,14 @@ MULTI_TAG_MAP = {
     'ABT': ['$ABT.US', '$ABT'],
     'PRY.MI': ['$PRY.MI', '$PRY'],
     'ENEL.MI': ['$ENEL.MI', '$ENLAY'],
+    'WMT': ['$WMT'],
 }
 
 RELATED_TICKERS_MAP = {
     'NVDA': ['$AMD', '$AVGO', '$TSM'],
     'MSFT': ['$GOOG', '$AMZN', '$AAPL'],
     'AMZN': ['$MELI', '$WMT', '$MSFT'],
+    'WMT': ['$AMZN', '$COST', '$TGT'],
     'GOOG': ['$MSFT', '$AMZN', '$META'],
     'LLY': ['$NOVO-B.CO', '$NVO', '$PFE'],
     'NOVO-B.CO': ['$LLY', '$NVO', '$PFE'],

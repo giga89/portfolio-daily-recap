@@ -41,6 +41,7 @@
         "VOF.L": "\ud83c\uddfb\ud83c\uddf3",
         "VOW3.DE": "\ud83d\ude97",
         "WDEF.L": "\ud83d\udcbc",
+        "WMT": "\ud83d\uded2",
         "XEON.DE": "\ud83d\udca4"
     },
     "tickers": {
@@ -207,6 +208,10 @@
         "WDEF.L": [
             "WDEF.L",
             "WisdomTree Europe Equity Income UCITS ETF"
+        ],
+        "WMT": [
+            "WMT",
+            "Walmart Inc."
         ],
         "XEON.DE": [
             "XEON.DE",

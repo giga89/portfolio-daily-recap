@@ -237,11 +237,14 @@ def _clean_robotic_phrases(text: str) -> str:
     - 'Come Andrea Ravalli, ...'
     - 'In qualità di Andrea Ravalli...'
     - 'Io sono Andrea Ravalli...'
+    And strip any '@AndreaRavalli' mentions that generate notifications to followers.
     """
     if not text:
         return text
 
     patterns = [
+        (r"(?i)@AndreaRavalli\b", ""),
+        (r"(?i)@andrearavalli\b", ""),
         (r"(?i)Come\s+Andrea\s+Ravalli[,\s]+(io\s+)?(monitoro|gestisco|investo|seguo|ritengo|credo|osservo)?\s*", r"\2 "),
         (r"(?i)Come\s+Andrea\s+Ravalli[,\s]*", ""),
         (r"(?i)In\s+qualit[àa]\s+di\s+Andrea\s+Ravalli[,\s]*", ""),
@@ -251,6 +254,10 @@ def _clean_robotic_phrases(text: str) -> str:
     cleaned = text
     for pat, repl in patterns:
         cleaned = re.sub(pat, repl, cleaned)
+
+    # Clean up any leftover empty lines or double spaces
+    cleaned = re.sub(r"[ \t]+", " ", cleaned)
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
 
     # Capitalize the first letter if stripped at beginning
     cleaned = re.sub(r"^\s*([a-z])", lambda m: m.group(1).upper(), cleaned)
@@ -941,6 +948,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un resoconto sincero scritto a fine giornata per i tuoi compagni investitori).
             - IMPORTANTE: Parla direttamente in prima persona ("Chiudiamo la sessione...", "Nel nostro portafoglio...", "Oggi abbiamo osservato..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
+            - È TASSATIVAMENTE VIETATO inserire menzioni o tag come @AndreaRavalli o @andrearavalli.
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta un breve quadro della giornata di borsa (S&P 500, Nasdaq, mercati europei) e spiega l'impatto diretto sui titoli del nostro portafoglio.
             - {tag_instruction}
@@ -1102,14 +1110,16 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
 
 
 
-def get_why_copy_message(five_year_return=161, avg_yearly_return=32, benchmark_performance=None):
+def get_why_copy_message(five_year_return=161, avg_yearly_return=32, benchmark_performance=None, market_session=''):
     """
-    Returns the fixed message explaining why to copy this portfolio
+    Returns the fixed message explaining why to copy this portfolio.
+    Only includes the @AndreaRavalli tag in U.S. market close session to avoid notification spam on other sessions.
     
     Args:
         five_year_return: Total return since strategy change (default 161%)
         avg_yearly_return: Average yearly return (default 32%)
         benchmark_performance: Dict of {etoro_ticker: performance_value}
+        market_session: Current market session name
     
     Returns:
         str: Formatted fixed message with performance data
@@ -1127,6 +1137,9 @@ def get_why_copy_message(five_year_return=161, avg_yearly_return=32, benchmark_p
     else:
         # Fallback if no data
         benchmark_lines = "✓ Sovraperformance vs S&P500\n✓ Sovraperformance vs MSCI World\n✓ Sovraperformance vs Euro Stoxx 50"
+
+    # Only include @AndreaRavalli tag during US market close recap
+    tag_line = "\n@AndreaRavalli" if "CLOSE" in (market_session or "").upper() else ""
 
     message = f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1149,8 +1162,7 @@ Raddoppio del capitale stimato in ~{time_to_double:.1f} anni
 🎯 Strategia di lungo termine basata su fondamentali solidi
 🔄 Ribilanciamento periodico per ottimizzare il rapporto rischio/rendimento
 
-🔗 Info & Link per copiarmi: https://bio.mega89.uk/
-@AndreaRavalli
+🔗 Info & Link per copiarmi: https://bio.mega89.uk/{tag_line}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
     return message

@@ -270,11 +270,12 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     if ai_news:
         recap += ai_news
     
-    # Add fixed "why copy" message with performance data
+    # Add fixed "why copy" message with performance data (tags @AndreaRavalli only on US close)
     recap += ai_news_generator.get_why_copy_message(
         five_year_return=five_year_return,
         avg_yearly_return=avg_yearly_return,
-        benchmark_performance=benchmark_data
+        benchmark_performance=benchmark_data,
+        market_session=market_session
     )
     
     # Enforce maximum recap length matching Telegram's 4000-character limit (using 3950 for safety)

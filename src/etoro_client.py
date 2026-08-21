@@ -69,10 +69,11 @@ MARKET_IDS = {
     "1919.HK": 13669,
     "ULVR.L": 2093,
 
-    # E-Commerce, Fintech, Pre-IPO & Crypto
+    # E-Commerce, Fintech, Pre-IPO, Retail & Crypto
     "MELI": 4108,
     "ETOR": 12200,
     "2318.HK": 2316,
+    "WMT": 1035,
     "SPCX.RTH": 15623,
     "TRX": 100026,
 }
@@ -207,9 +208,33 @@ def fetch_portfolio_weights() -> Dict[str, float]:
             current_val_by_inst[iid] += cur_val
             total_val += cur_val
 
+        # Find all unmapped instrument IDs in the current portfolio
+        unmapped_iids = [iid for iid in current_val_by_inst.keys() if iid not in ID_TO_TICKER]
+        if unmapped_iids:
+            print(f"🔎 Dynamically resolving {len(unmapped_iids)} new/unmapped eToro instrument IDs: {unmapped_iids}...")
+            try:
+                ids_str = ",".join(str(i) for i in unmapped_iids)
+                meta_url = f"{BASE_URL}/api/v1/market-data/instruments?instrumentIds={ids_str}"
+                meta_resp = requests.get(meta_url, headers=headers, timeout=10)
+                if meta_resp.status_code == 200:
+                    meta_data = meta_resp.json()
+                    for item in meta_data.get("instrumentDisplayDatas", []):
+                        iid_res = item.get("instrumentID")
+                        sym_res = item.get("symbolFull")
+                        name_res = item.get("instrumentDisplayName", sym_res)
+                        if iid_res and sym_res:
+                            ID_TO_TICKER[iid_res] = sym_res
+                            print(f"   ✓ Auto-resolved new eToro asset: ID {iid_res} -> ${sym_res} ({name_res})")
+            except Exception as res_err:
+                print(f"   ⚠️ Dynamic instrument resolution error: {res_err}")
+
         weights = {}
         for iid, cur in current_val_by_inst.items():
-            ticker = ID_TO_TICKER.get(iid, str(iid))
+            ticker = ID_TO_TICKER.get(iid)
+            if not ticker:
+                print(f"   ⚠️ Skipping unresolved numeric ID {iid} to prevent phantom assets.")
+                continue
+
             w = (cur / total_val) * 100.0 if total_val > 0 else invested_by_inst[iid]
             weights[ticker] = round(w, 2)
 

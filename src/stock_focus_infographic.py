@@ -450,6 +450,28 @@ COMPANY_INFOGRAPHICS = {
         "color": (220, 0, 0),
         "domain": "ferrari.com"
     },
+    "WMT": {
+        "name": "WALMART",
+        "tagline": "Global Retail & Omnichannel Ecosystem",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Walmart è il leader mondiale assoluto del retail con una trasformazione digitale ed e-commerce ad altissima redditività.",
+        "kpis": [
+            {"label": "FATTURATO GLOBALE", "val": "$650B+", "sub": "Scala operativa ineguagliata"},
+            {"label": "CRESCITA E-COMMERCE", "val": "+22%", "sub": "Adozione omnichannel in forte accelerazione"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Pilastro difensivo di consumo di base"},
+            {"label": "PUBBLICITÀ (WALMART CONNECT)", "val": "+26%", "sub": "Segmento a più alto margine operativo"},
+        ],
+        "pillars": [
+            ("Fossato Difensivo & Scala:", "La più grande rete logistica e potere contrattuale con i fornitori al mondo."),
+            ("Espansione Digitale & Prime:", "Crescita a doppia cifra delle vendite online e dell'abbonamento Walmart+."),
+            ("Monetizzazione Dati & Ads:", "Crescita rapida dell'advertising retail ad altissima marginalità."),
+            ("Resilienza Macroeconomica:", "Beni di prima necessità a prezzi imbattibili in qualsiasi ciclo economico."),
+        ],
+        "quote": "La convenienza e la vicinanza al cliente sono i pilastri che non passeranno mai di moda.",
+        "tags": ["#Walmart", "#Retail", "#Omnichannel", "#ConsumerStaples", "#ValueInvesting"],
+        "color": (0, 113, 206),
+        "domain": "walmart.com"
+    },
 }
 
 
