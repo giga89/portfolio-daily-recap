@@ -1,0 +1,70 @@
+name: Publish Dividend Announcement
+
+on:
+  repository_dispatch:
+    types: [dividend_post, publish_dividend]
+  workflow_dispatch:
+    inputs:
+      ticker:
+        description: 'Portfolio Ticker for Dividend Announcement (e.g. ENI.MI, WDEF.L, ABBV, VOW3.DE)'
+        required: true
+        type: string
+        default: 'ENI.MI'
+      dry_run:
+        description: 'Dry Run (preview post without publishing to eToro)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  publish-dividend:
+    runs-on: ubuntu-latest
+    environment: Etoro
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Publish Dividend Post to eToro & Telegram
+        env:
+          ETORO_USER_KEY: ${{ secrets.ETORO_USER_KEY }}
+          ETORO_API_KEY: ${{ secrets.ETORO_API_KEY }}
+          ETORO_USERNAME: ${{ secrets.ETORO_USERNAME }}
+          GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TICKER_INPUT: ${{ inputs.ticker || 'ENI.MI' }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+        run: |
+          ARGS="${TICKER_INPUT}"
+          if [ "$DRY_RUN_INPUT" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python src/dividend_tracker.py $ARGS
+
+      - name: Update GitHub Pages Dashboard & Analytics
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/ data/ 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No changes to analytics database."
+          else
+            git commit -m "chore(analytics): update social analytics dashboard after dividend announcement [skip ci]"
+            git push origin main || echo "Git push failed or branch protected"
+          fi
