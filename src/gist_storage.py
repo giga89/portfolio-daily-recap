@@ -454,3 +454,78 @@ def mark_last_etoro_post_followup_done(post_id: str = None) -> bool:
         return save_data(data)
     return False
 
+
+# ---------------------------------------------------------------------------
+# Stock Focus Post IDs & Catalyst News Tracking
+# ---------------------------------------------------------------------------
+
+def save_stock_focus_post_id(
+    ticker: str,
+    post_id: str,
+    title: str = None,
+    company_name: str = None,
+) -> bool:
+    """
+    Save or update the latest eToro post ID for a specific stock focus deep dive.
+    This enables targeted follow-up comments when breaking news/catalysts occur.
+    """
+    from datetime import datetime, timezone
+    ticker = ticker.replace('$', '').upper().strip()
+    data = load_data()
+    posts = data.get('stock_focus_posts', {})
+    posts[ticker] = {
+        'post_id': str(post_id),
+        'title': title or f"Stock Focus: ${ticker}",
+        'company_name': company_name or ticker,
+        'published_at': datetime.now(timezone.utc).isoformat(),
+    }
+    data['stock_focus_posts'] = posts
+    _invalidate_cache()
+    return save_data(data)
+
+
+def get_stock_focus_post_id(ticker: str) -> dict:
+    """Return the stored post metadata for a specific ticker, or empty dict."""
+    ticker = ticker.replace('$', '').upper().strip()
+    data = load_data()
+    return data.get('stock_focus_posts', {}).get(ticker, {})
+
+
+def get_all_stock_focus_posts() -> dict:
+    """Return dictionary of all tracked stock focus posts {ticker: post_data}."""
+    data = load_data()
+    return data.get('stock_focus_posts', {})
+
+
+def is_news_commented(news_hash: str) -> bool:
+    """Check if a news item (identified by its unique hash) was already commented on."""
+    data = load_data()
+    commented = data.get('commented_news_hashes', {})
+    return str(news_hash) in commented
+
+
+def mark_news_commented(
+    news_hash: str,
+    ticker: str,
+    post_id: str,
+    headline: str = None,
+) -> bool:
+    """Record that a news item was commented under a stock focus post."""
+    from datetime import datetime, timezone
+    ticker = ticker.replace('$', '').upper().strip()
+    data = load_data()
+    commented = data.get('commented_news_hashes', {})
+    # Keep last 200 commented news items to prevent unlimited growth
+    if len(commented) > 200:
+        commented = dict(list(commented.items())[-150:])
+    commented[str(news_hash)] = {
+        'ticker': ticker,
+        'post_id': str(post_id),
+        'headline': headline or '',
+        'commented_at': datetime.now(timezone.utc).isoformat(),
+    }
+    data['commented_news_hashes'] = commented
+    _invalidate_cache()
+    return save_data(data)
+
+

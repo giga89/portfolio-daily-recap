@@ -679,8 +679,13 @@ def _publish_stock_focus_post(ticker: str = None) -> dict:
                         session_name="Stock focus",
                         tickers=[ticker_sym],
                     )
-                except Exception:
-                    pass
+                    gist_storage.save_stock_focus_post_id(
+                        ticker=ticker_sym,
+                        post_id=etoro_sender.LAST_PUBLISHED_POST_ID,
+                        title=f"Stock Focus: ${ticker_sym}",
+                    )
+                except Exception as e:
+                    print(f"⚠️ Gist stock focus save warning: {e}")
     else:
         print("   ⏭️  eToro not configured.")
         results["etoro_stock_focus"] = False

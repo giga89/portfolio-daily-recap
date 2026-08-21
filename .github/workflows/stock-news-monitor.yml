@@ -1,29 +1,26 @@
-name: eToro Delayed Follow-up Engagement
+name: Stock News & Catalyst Follow-up Commenter
 
 on:
-  # ── Primary trigger: Orange Pi 5 local scheduler (+60min post-publish) ─────
+  # ── Primary trigger: Orange Pi 5 local scheduler ────────────────────────────
   repository_dispatch:
-    types: [delayed_engagement, followup_engagement, eu_open_followup, stock_focus_followup, us_open_followup, us_close_followup]
-  # ── Fallback: GitHub Actions cron (1h after main sessions) ──────────────────
+    types: [stock_news, stock_news_monitor, catalyst_monitor]
+  # ── Fallback: GitHub Actions cron (Mon-Fri 15:30 UTC = 17:30 ITA) ───────────
   schedule:
-    - cron: '0 9 * * 1-5'    # EU open follow-up:    09:00 UTC (11:00 ITA)
-    - cron: '15 13 * * 1-5'  # Stock focus follow-up: 13:15 UTC (15:15 ITA)
-    - cron: '30 15 * * 1-5'  # US open follow-up:    15:30 UTC (17:30 ITA)
-    - cron: '0 22 * * 1-5'   # US close follow-up:   22:00 UTC (00:00 ITA)
+    - cron: '30 15 * * 1-5'
   workflow_dispatch:
     inputs:
-      post_id:
-        description: 'Target eToro Post ID (optional, defaults to last post in Gist)'
+      ticker:
+        description: 'Specific Ticker to check (e.g. NVDA, optional)'
         required: false
         type: string
-      force:
-        description: 'Force run even if already processed or under 30min old'
+      dry_run:
+        description: 'Dry Run (preview comments without posting to eToro)'
         required: false
         type: boolean
         default: false
 
 jobs:
-  delayed-engagement:
+  stock-news-commenter:
     runs-on: ubuntu-latest
     environment: Etoro
     env:
@@ -43,7 +40,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Delayed Engagement & Feed Revival
+      - name: Run Stock News & Catalyst Commenter
         env:
           ETORO_USER_KEY: ${{ secrets.ETORO_USER_KEY }}
           ETORO_API_KEY: ${{ secrets.ETORO_API_KEY }}
@@ -51,14 +48,18 @@ jobs:
           GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
-          POST_ID: ${{ inputs.post_id }}
-          FORCE_RUN: ${{ inputs.force }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TICKER_INPUT: ${{ inputs.ticker }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
         run: |
-          FLAGS=""
-          if [ "$FORCE_RUN" = "true" ]; then
-            FLAGS="--force"
+          ARGS=""
+          if [ -n "$TICKER_INPUT" ]; then
+            ARGS="$ARGS --ticker $TICKER_INPUT"
           fi
-          python src/delayed_engagement.py ${POST_ID} ${FLAGS}
+          if [ "$DRY_RUN_INPUT" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python src/stock_news_commenter.py $ARGS
 
       - name: Update GitHub Pages Dashboard & Analytics
         run: |
@@ -68,6 +69,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to analytics database."
           else
-            git commit -m "chore(analytics): update social analytics dashboard after delayed engagement [skip ci]"
+            git commit -m "chore(analytics): update social analytics dashboard after stock news commenting [skip ci]"
             git push origin main || echo "Git push failed or branch protected"
           fi
