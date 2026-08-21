@@ -4,9 +4,11 @@ on:
   # ── Primary trigger: Orange Pi 5 local scheduler ────────────────────────────
   repository_dispatch:
     types: [stock_news, stock_news_monitor, catalyst_monitor]
-  # ── Fallback: GitHub Actions cron (Mon-Fri 15:30 UTC = 17:30 ITA) ───────────
+  # ── Fallback: GitHub Actions cron (3x daily, Mon-Sun) ──────────────────────
   schedule:
-    - cron: '30 15 * * 1-5'
+    - cron: '30 9 * * *'   # 09:30 UTC (11:30 ITA) - Morning check
+    - cron: '0 15 * * *'   # 15:00 UTC (17:00 ITA) - US session check
+    - cron: '30 21 * * *'  # 21:30 UTC (23:30 ITA) - US close & post-market check
   workflow_dispatch:
     inputs:
       ticker:

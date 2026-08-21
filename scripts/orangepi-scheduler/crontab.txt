@@ -43,11 +43,18 @@
 2 20 * * 1-5   /opt/portfolio-dispatch/dispatch.sh us_close >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 2 21 * * 1-5   /opt/portfolio-dispatch/dispatch.sh us_close >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── Stock News & Catalyst Follow-up Commenter ─────────────────────────────────
-# Checks breaking news for portfolio stocks and comments on historical deep dives
-# 17:00 local (CET/CEST) → 15:00 UTC (summer) / 16:00 UTC (winter)
-0 15 * * 1-5   /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 16 * * 1-5   /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── Stock News & Catalyst Follow-up Commenter (3x daily, Mon-Sun) ───────────
+# Morning:    11:30 local → 09:30 UTC (summer) / 10:30 UTC (winter)
+30 9 * * *    /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+30 10 * * *   /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
+# Afternoon:  17:00 local → 15:00 UTC (summer) / 16:00 UTC (winter)
+0 15 * * *    /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+0 16 * * *    /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
+# Evening:    23:30 local → 21:30 UTC (summer) / 22:30 UTC (winter)
+30 21 * * *   /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+30 22 * * *   /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
 # ── Weekly Recap (Saturday) ──────────────────────────────────────────────────
 # 10:00 CET = 09:00 UTC (summer: 08:00 UTC)
