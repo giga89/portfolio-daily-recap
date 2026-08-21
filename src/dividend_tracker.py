@@ -217,6 +217,58 @@ DIVIDEND_PROFILES = {
 }
 
 
+def fetch_dynamic_dividend_metrics(ticker: str) -> Dict[str, Any]:
+    """
+    Fetch real-time dynamic dividend metrics (live price, exact 12m dividend sum,
+    live dynamic yield %, last dividend date, and actual tranche amount) from Yahoo Finance API.
+    """
+    import urllib.request
+    import json
+    from datetime import datetime, timezone
+
+    clean_sym = ticker.replace('$', '').strip()
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{clean_sym}?events=div&interval=1mo&range=1y"
+
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=4) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            result = data.get('chart', {}).get('result', [])
+            if result:
+                res = result[0]
+                meta = res.get('meta', {})
+                events = res.get('events', {}).get('dividends', {})
+                price = meta.get('regularMarketPrice') or meta.get('previousClose') or 0.0
+                currency = meta.get('currency', 'USD')
+                
+                div_sum = sum(float(v.get('amount', 0.0)) for v in events.values())
+                yield_pct = (div_sum / price * 100.0) if (price and price > 0 and div_sum > 0) else None
+
+                last_event = list(events.values())[-1] if events else {}
+                last_amt = float(last_event.get('amount', 0.0)) if last_event else 0.0
+                last_ts = last_event.get('date')
+                last_dt_str = datetime.fromtimestamp(last_ts, tz=timezone.utc).strftime('%d %B %Y') if last_ts else None
+                last_tranche_pct = (last_amt / price * 100.0) if (price and price > 0 and last_amt > 0) else None
+
+                return {
+                    "live_price": price,
+                    "currency": currency,
+                    "live_annual_dividend_sum": div_sum,
+                    "live_yield_pct": yield_pct,
+                    "last_dividend_amount": last_amt,
+                    "last_dividend_date": last_dt_str,
+                    "last_tranche_pct": last_tranche_pct,
+                    "dividends_count_1y": len(events),
+                }
+    except Exception as e:
+        print(f"ℹ️ Dynamic dividend fetch fallback for {clean_sym} ({e})")
+
+    return {}
+
+
 def calculate_copier_dividend_impact(
     ticker: str,
     holding_weight_pct: float,
@@ -224,9 +276,10 @@ def calculate_copier_dividend_impact(
     portfolio_annual_yield_pct: float = 3.0,
 ) -> Dict[str, Any]:
     """
-    Calculate the exact mathematical impact of a dividend distribution for a copier.
+    Calculate the exact mathematical impact of a dividend distribution for a copier,
+    dynamically overriding yield, tranche %, and DPS with live financial data when available.
     """
-    profile = DIVIDEND_PROFILES.get(ticker, {
+    profile = dict(DIVIDEND_PROFILES.get(ticker, {
         "name": ticker,
         "cashtag": f"${ticker}",
         "emoji": "💰",
@@ -236,7 +289,24 @@ def calculate_copier_dividend_impact(
         "tranche_pct": 1.0,
         "approx_dps": "N/D",
         "thesis": "Generazione di cassa e ritorno di capitale per gli azionisti.",
-    })
+    }))
+
+    # Dynamically fetch live metrics and override baseline if available
+    live_data = fetch_dynamic_dividend_metrics(ticker)
+    if live_data:
+        if live_data.get("live_yield_pct") and live_data["live_yield_pct"] > 0:
+            profile["annual_yield_pct"] = round(live_data["live_yield_pct"], 2)
+            print(f"   📈 Live Dynamic Dividend Yield for {ticker}: {profile['annual_yield_pct']}%")
+        if live_data.get("last_tranche_pct") and live_data["last_tranche_pct"] > 0:
+            profile["tranche_pct"] = round(live_data["last_tranche_pct"], 2)
+        if live_data.get("last_dividend_amount") and live_data["last_dividend_amount"] > 0:
+            curr = live_data.get("currency", "USD")
+            curr_sym = "€" if curr == "EUR" else "$" if curr == "USD" else curr
+            profile["approx_dps"] = f"{curr_sym}{live_data['last_dividend_amount']:.2f} per azione"
+        if live_data.get("last_dividend_date"):
+            profile["last_dividend_date"] = live_data["last_dividend_date"]
+        if live_data.get("live_price"):
+            profile["live_price"] = live_data["live_price"]
 
     # Dollar allocation for this position on $10,000 base
     position_usd = copier_capital_usd * (holding_weight_pct / 100.0)
