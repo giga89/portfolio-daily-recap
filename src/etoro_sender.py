@@ -104,6 +104,11 @@ def send_etoro_post(
         print(f"   🏷️ Tagged eToro markets: {valid_tickers} -> IDs {market_ids}")
 
     clean_content = _strip_html(text)
+    try:
+        from ai_news_generator import sanitize_etoro_cashtags
+        clean_content = sanitize_etoro_cashtags(clean_content)
+    except Exception:
+        pass
 
     res = etoro_client.create_post(
         content=clean_content,

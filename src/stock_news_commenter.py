@@ -310,6 +310,11 @@ def run_stock_news_commenter(
             # Generate high quality comment
             comment_text = generate_catalyst_comment_text(sym, company_name, item)
             clean_text = _strip_html(comment_text)
+            try:
+                from ai_news_generator import sanitize_etoro_cashtags
+                clean_text = sanitize_etoro_cashtags(clean_text)
+            except Exception:
+                pass
 
             print("\n" + "-" * 50)
             print(f"💬 Generated Comment to post under eToro Post {post_id}:\n")

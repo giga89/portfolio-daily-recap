@@ -230,6 +230,35 @@ def _remove_intro_text(text):
     return cleaned_text.lstrip()
 
 
+def sanitize_etoro_cashtags(text: str) -> str:
+    """
+    Ensure all $TICKER cashtags are properly isolated with whitespace on eToro.
+    eToro requires cashtags (e.g. $AAPL, $ENEL.MI) to not be enclosed in parentheses
+    e.g. ($ENEL.MI) -> $ENEL.MI
+    and not immediately glued to punctuation e.g. $IBE.MC. -> $IBE.MC .
+    """
+    if not text:
+        return text
+    # 1. Ensure space before '$' if attached to a letter/number
+    text = re.sub(r'([A-Za-z0-9_])(\$[A-Za-z0-9])', r'\1 \2', text)
+    
+    # 2. Remove enclosing parentheses or brackets around cashtags: ($TICKER) -> $TICKER
+    text = re.sub(r'\(\s*(\$[A-Za-z0-9.\-_]+)\s*\)', r' \1 ', text)
+    text = re.sub(r'\[\s*(\$[A-Za-z0-9.\-_]+)\s*\]', r' \1 ', text)
+    text = re.sub(r'\(\s*(\$[A-Za-z0-9.\-_]+)', r'( \1', text)
+    text = re.sub(r'(\$[A-Za-z0-9.\-_]+)\s*\)', r'\1 )', text)
+    
+    # 3. Separate punctuation immediately glued to the end of a cashtag (?, !, ,, :, ;)
+    text = re.sub(r'(\$[A-Za-z0-9.\-_]+)([?!,:;])', r'\1 \2', text)
+    
+    # 4. Handle trailing period at end of cashtag (e.g. '$ENEL.MI.' or '$NVDA.')
+    text = re.sub(r'(\$[A-Za-z0-9\-_]+(?:\.[A-Za-z0-9\-_]+)*)\.(\s|$)', r'\1 .\2', text)
+    
+    # 5. Clean up any excess spaces while preserving newlines
+    lines = [re.sub(r'[ \t]+', ' ', line).strip() for line in text.split('\n')]
+    return '\n'.join(lines)
+
+
 def _clean_robotic_phrases(text: str) -> str:
     """
     Remove unnatural, robotic self-introductions such as:
@@ -238,6 +267,7 @@ def _clean_robotic_phrases(text: str) -> str:
     - 'In qualità di Andrea Ravalli...'
     - 'Io sono Andrea Ravalli...'
     And strip any '@AndreaRavalli' mentions that generate notifications to followers.
+    Also ensures cashtags are isolated and taggable on eToro.
     """
     if not text:
         return text
@@ -261,6 +291,9 @@ def _clean_robotic_phrases(text: str) -> str:
 
     # Capitalize the first letter if stripped at beginning
     cleaned = re.sub(r"^\s*([a-z])", lambda m: m.group(1).upper(), cleaned)
+    
+    # Ensure all cashtags are properly isolated for eToro
+    cleaned = sanitize_etoro_cashtags(cleaned)
     return cleaned.strip()
 
 
@@ -1617,7 +1650,7 @@ TITOLO IN FOCUS:
 - Tag di titoli correlati/competitor da includere nel testo: {related_tags_str}
 
 REGOLE PER IL TESTO (in ITALIANO):
-1. Titolo iniziale accattivante: "🔍 FOCUS ASSET: Perché ho in portafoglio {company_name} ({primary_tags[0]})"
+1. Titolo iniziale accattivante: "🔍 FOCUS ASSET: Perché ho in portafoglio {company_name} {primary_tags[0]}" (SENZA parentesi tonde attorno al tag!)
 2. Spiega brevemente LA TESI DI INVESTIMENTO ("Perché ho questo titolo"). Se indicato il peso in portafoglio, citalo con precisione ({weight_str.strip() if weight_str else ''}).
 3. IMPORTANTE: Parla in prima persona in modo naturale ("Nel mio portafoglio...", "Punto su questa azienda perché..."). È SEVERAMENTE VIETATO usare formule come "Come Andrea Ravalli..." o presentarti per nome!
 4. Sezione "🚀 POSSIBILI UPSIDE": 2-3 catalizzatori principali di crescita, trend o punti di forza aziendali.
@@ -1625,6 +1658,7 @@ REGOLE PER IL TESTO (in ITALIANO):
 6. Inserisci in modo fluido ed organico i tag principali ({primary_tags_str}) e i tag dei titoli correlati ({related_tags_str}) nel testo.
 7. Mantieni un tono trasparente, professionale ed esaustivo ma facile da leggere (massimo 1400 caratteri).
 8. Usa solo emoji standard universalmente supportate (🔍, 🚀, ⚠️, 📊, 👇, 👤, 🎁).
+9. REGOLE CASHTAG ETORO: Ogni cashtag (es. {primary_tags_str}) DEVE avere sempre uno spazio prima e dopo per essere cliccabile su eToro. NON racchiudere MAI i cashtag tra parentesi tonde (scrivi ad es. "...competitor come $IBE.MC e $RWE.DE" invece di "($IBE.MC)") e NON incollare punteggiatura al tag (scrivi "$EDP.LS ?" invece di "$EDP.LS?").
 
 Output ONLY the post text in Italian, no extra conversational preamble."""
 
