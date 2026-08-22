@@ -412,9 +412,10 @@ def create_post(
         return {"success": False, "error": str(e)}
 
 
-def get_post_metrics(post_id: str) -> Optional[Dict[str, Any]]:
+def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict[str, Any]]:
     """
     Fetch engagement metrics (likes, comments, content) for a specific eToro post.
+    Filters out author self-likes and automated author comments if exclude_author is True.
     GET /api/v1/posts/{postId}
     """
     headers = get_headers()
@@ -426,15 +427,49 @@ def get_post_metrics(post_id: str) -> Optional[Dict[str, Any]]:
         resp = requests.get(url, headers=headers, timeout=20)
         if resp.status_code == 200:
             data = resp.json()
+            post_owner = data.get("post", {}).get("owner", {})
+            my_username = (post_owner.get("username") or "AndreaRavalli").lower()
+            my_user_id = str(post_owner.get("id") or "8029424")
+
+            # 1. External Likes (exclude author's own like)
             emotions_data = data.get("emotionsData", {})
             like_data = emotions_data.get("like", {})
-            likes = like_data.get("paging", {}).get("totalCount", len(like_data.get("emotions", [])))
+            emotions_list = like_data.get("emotions", [])
+
+            if exclude_author and emotions_list:
+                external_likes = [
+                    e for e in emotions_list
+                    if e.get("owner", {}).get("username", "").lower() != my_username
+                    and str(e.get("owner", {}).get("id")) != my_user_id
+                ]
+                likes = len(external_likes)
+            else:
+                likes = like_data.get("paging", {}).get("totalCount", len(emotions_list))
+
+            # 2. External Comments (exclude author's own/bot comments)
+            comments = 0
+            try:
+                c_url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
+                c_resp = requests.get(c_url, headers=headers, timeout=10)
+                if c_resp.status_code == 200:
+                    c_data = c_resp.json()
+                    c_list = c_data.get("comments", [])
+                    if exclude_author:
+                        external_comments = [
+                            c for c in c_list
+                            if c.get("entity", {}).get("owner", {}).get("username", "").lower() != my_username
+                            and str(c.get("entity", {}).get("owner", {}).get("id")) != my_user_id
+                            and not c.get("requesterContext", {}).get("isOwner", False)
+                        ]
+                        comments = len(external_comments)
+                    else:
+                        comments = len(c_list)
+                else:
+                    comments = 0
+            except Exception:
+                comments = 0
 
             summary = data.get("summary", {})
-            comments = summary.get("totalCommentsAndReplies", 0)
-            if not comments:
-                comments = data.get("commentsData", {}).get("reactionPaging", {}).get("totalCount", len(data.get("commentsData", {}).get("comments", [])))
-
             shares = summary.get("sharedCount", 0)
             return {
                 "id": data.get("id"),
