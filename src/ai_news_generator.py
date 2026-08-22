@@ -1557,8 +1557,8 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
     # Case-insensitive ticker lookup dictionary for robustness
     ticker_map = {t.upper(): t for t in tickers.keys()}
 
-    # Exclude money market ETFs and physical metal ETFs from stock focus candidates
-    stock_candidates = sorted([t for t in tickers.keys() if t not in ['XEON.DE', 'IB01.L', 'PPFB.DE']])
+    # Exclude money market ETFs, physical metal ETFs, and frozen Russian assets from stock focus candidates
+    stock_candidates = sorted([t for t in tickers.keys() if t not in ['XEON.DE', 'IB01.L', 'PPFB.DE', 'MNODL.L', 'NVTKL.L']])
     if not stock_candidates:
         stock_candidates = sorted(list(tickers.keys()))
 

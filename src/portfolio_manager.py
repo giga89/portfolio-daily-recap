@@ -45,8 +45,6 @@ DEFAULT_TICKERS = {
     'ENEL.MI': ('ENEL.MI', 'Enel S.p.A.'),
     'CCJ': ('CCJ', 'Cameco Corp.'),
     'GLEN.L': ('GLEN.L', 'Glencore PLC'),
-    'MNODL.L': ('MNODL.L', 'MMC Norilsk Nickel OJSC'),
-    'NVTKL.L': ('NVTKL.L', 'NOVATEK OAO'),
     
     # Automotive, Luxury & Industrials
     'RACE': ('RACE', 'Ferrari N.V.'),
@@ -69,13 +67,11 @@ DEFAULT_EMOJIS = {
     # ETFs
     'SX7PEX.DE': '🏛️', # Banking
     'VWCE.L': '🌐',
-    'IEUR': '�🇺',     # Europe
+    'IEUR': '🇪🇺',     # Europe
     'IQQL.DE': '🔥',
     'IEMG': '🌍',
     'WDEF.L': '💼',
     'INDO.PA': '🇮🇩',
-    'MNODL.L': '📦',
-    'NVTKL.L': '🔥',
     
     # Healthcare & Pharmaceuticals
     'AZN.L': '🧬',
@@ -153,12 +149,14 @@ def load_config():
             }
             # Auto-migration for bad tickers
             needs_save = False
-            if config["tickers"].get("MNODL.L", [""])[0] == "MNODL.L":
-                config["tickers"]["MNODL.L"] = ["MNDI.L", "Mondi PLC"]
-                needs_save = True
-            if config["tickers"].get("NVTKL.L", [""])[0] == "NVTKL.L":
-                config["tickers"]["NVTKL.L"] = ["NVTK.ME", "Novatek"]
-                needs_save = True
+            # Purge any Russian / untradeable assets
+            for russian_t in ["MNODL.L", "NVTKL.L"]:
+                if russian_t in config["tickers"]:
+                    config["tickers"].pop(russian_t, None)
+                    needs_save = True
+                if russian_t in config.get("emojis", {}):
+                    config["emojis"].pop(russian_t, None)
+                    needs_save = True
             if "ABT.US" not in config["tickers"]:
                 config["tickers"]["ABT.US"] = ["ABT", "Abbott Laboratories"]
                 config["emojis"]["ABT.US"] = config["emojis"].get("ABT", "🏥")
@@ -222,7 +220,7 @@ def load_config():
     if os.path.exists(CONFIG_FILE):
         print("ℹ️ Verify local config fallback...")
         try:
-            with open(CONFIG_FILE, 'r') as f:
+            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                 local_data = json.load(f)
                 if expire_new_emojis(local_data):
                     save_config(local_data)
@@ -302,8 +300,8 @@ def save_config(data):
     """Save configuration to BOTH Gist and local JSON."""
     # 1. Local Save
     try:
-        with open(CONFIG_FILE, 'w') as f:
-            json.dump(data, f, indent=4, sort_keys=True)
+        with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4, sort_keys=True, ensure_ascii=False)
         print(f"✅ Portfolio configuration saved to {CONFIG_FILE}")
     except Exception as e:
         print(f"❌ Error saving local config: {e}")
@@ -489,8 +487,6 @@ RELATED_TICKERS_MAP = {
     'NET': ['$CRWD', '$PANW', '$DDOG'],
     'PYPL': ['$SQ', '$V', '$MA'],
     'AZN.L': ['$LLY', '$NOVO-B.CO', '$PFE'],
-    'MNODL.L': ['$PKG', '$IP', '$DSMI.L'],
-    'NVTKL.L': ['$GAZP.ME', '$ROSN.ME', '$LKOH.ME'],
 }
 
 

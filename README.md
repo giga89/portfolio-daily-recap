@@ -17,8 +17,9 @@ Built specifically for **Andrea Ravalli**'s Popular Investor portfolio on **eTor
 * 📈 **Live Portfolio Intelligence**: Real-time position weighting, daily/weekly/monthly/YTD performance, and 5-year cumulative historical track record vs. 4 major benchmarks (**S&P 500**, **Nasdaq 100**, **MSCI World**, **Euro Stoxx 50**).
 * 🐂 **Native eToro Social Feed Integration**: Formats and automatically posts updates directly to Andrea's official eToro Social Feed with cashtag resolution, image uploads, and automated 3-comment cross-linking sequences.
 * 🪙 **Daily Crypto Pulse & Sentiment**: Live 16:9 card generator featuring the **Crypto Fear & Greed Index**, spot prices, 24h volumes, $TRX portfolio highlight, and a dynamic 4th altcoin selected from **30 pre-cached official crypto logos**.
-* 🔍 **Stock Focus Deep-Dive**: 1:1 high-resolution visual infographics with bull/bear catalysts, investment theses, valuation multiples, and sector comparisons.
-* 🤖 **AI Financial Journalism (Google Gemini)**: Natural, engaging financial commentary tailored for European and US markets with automatic multi-model quota fallback (`gemini-2.5-flash` → `gemini-2.5-pro` → `gemini-2.0-flash`).
+* 🔍 **Stock Focus Deep-Dive & Niche Coverage**: 1:1 ultra-premium infographics with bull/bear catalysts, investment theses, live certified weights, and full support for both mega-caps and 10 under-the-radar niche holdings ($ENEL.MI, $GLEN.L, $ULVR.L, $PRY.MI, $1919.HK, $2318.HK, $TRIG.L, $HUM, $AZN.L, $ABT.US).
+* ⚡ **Stock News & Catalyst Follow-up Commenter**: Monitors breaking news & corporate catalysts for tracked portfolio holdings and automatically publishes professional, targeted Italian update comments under their original eToro thread.
+* 🤖 **AI Financial Journalism (Google Gemini)**: Natural, engaging financial commentary tailored for European and US markets with automatic multi-model quota fallback (`gemini-3.7-flash` → `gemini-3.6-flash` → `gemini-3.5-flash` → `gemini-2.5-flash`).
 * 🎨 **Visual Graphics Engine**: Automated high-res visual assets:
   * **16:9 Crypto Daily Card** (`crypto_card_generator.py`)
   * **1:1 Stock Focus Infographics** (`stock_focus_infographic.py`)
@@ -27,7 +28,7 @@ Built specifically for **Andrea Ravalli**'s Popular Investor portfolio on **eTor
   * **Rotating 4-Theme Allocation Pie Charts** (`pie_chart_generator.py`)
 * 🍊 **Orange Pi 5 Local Precision Scheduler**: Dual-slot cron triggers on local hardware with hour-bucket deduplication to guarantee on-the-minute execution regardless of daylight saving time (DST) shifts.
 * 🌐 **Multi-Platform Syndication**: Automated routing to **eToro Feed**, **Telegram**, **LinkedIn**, **Twitter/X**, **Bluesky**, and **Meta Threads/Facebook/Instagram**.
-* 📊 **Analytics Dashboard**: Continuous tracking of post engagement and API usage published to GitHub Pages.
+* 📊 **Interactive Analytics Dashboard (GitHub Pages)**: Live tracking of published posts, best engagement hours, platform distribution, and KPI metrics served from `/docs` on GitHub Pages.
 
 ---
 
@@ -42,6 +43,7 @@ Built specifically for **Andrea Ravalli**'s Popular Investor portfolio on **eTor
 | **`U.S. market close`** | 🕙 **22:02 / 23:02** (Mon–Fri) | Full daily wrap-up, benchmark comparisons, performance chart, pie chart, top/flop card + 3 comments | Telegram, eToro Feed, Twitter, Bluesky, Threads, FB, IG |
 | **`Weekly recap (Sat)`** | 🕙 **10:00** (Saturday) | Weekly portfolio outlook, macro recap, sector performance, **Winners & Losers Card** | Telegram, eToro Feed, LinkedIn |
 | **`Weekly recap (Sun)`** | 🕙 **22:00** (Sunday) | Upcoming catalysts, earnings preview, central bank schedule for the week ahead | Telegram, eToro Feed, LinkedIn |
+| **`Stock news monitor`** | 🔄 **Scheduled / Event** | News catalyst follow-up commenter under historical single-stock eToro threads | eToro Post Comments |
 
 ---
 
@@ -128,10 +130,13 @@ python3 test_all_sessions.py
 # 2. Test Crypto Daily Recap card generation & live data
 python3 src/crypto_card_generator.py
 
-# 3. Test Stock Focus Infographic generation
-python3 -c "import sys; sys.path.insert(0, 'src'); import stock_focus_infographic as s; s.generate_infographic('NVDA', 'output/infographic_NVDA.png')"
+# 3. Generate 10 Niche Stock Focus posts and 1:1 HD infographics
+python3 scripts/generate_niche_stock_focus.py
 
-# 4. Check syntax of Orange Pi dispatcher
+# 4. Dry-run Stock News & Catalyst Follow-up Commenter
+python3 src/stock_news_commenter.py --dry-run --ticker ENEL.MI
+
+# 5. Check syntax of Orange Pi dispatcher
 bash -n scripts/orangepi-scheduler/dispatch.sh
 ```
 

@@ -472,6 +472,226 @@ COMPANY_INFOGRAPHICS = {
         "color": (0, 113, 206),
         "domain": "walmart.com"
     },
+    "ENEL.MI": {
+        "name": "ENEL",
+        "tagline": "Clean Electrification & Smart Grid Networks",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Enel è uno dei maggiori operatori integrati al mondo nelle energie rinnovabili e nelle reti di distribuzione elettrica intelligenti.",
+        "kpis": [
+            {"label": "DIVIDEND YIELD", "val": "6.8%+", "sub": "Politica di dividendi in crescita"},
+            {"label": "CAPACITÀ RINNOVABILE", "val": ">60 GW", "sub": "Leader solare ed eolico globale"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Pilastro transizione & dividendi"},
+            {"label": "INVESTIMENTI IN RETI", "val": "€19B+", "sub": "Digitalizzazione & efficienza"},
+        ],
+        "pillars": [
+            ("Monopolio Naturale delle Reti:", "Le reti di distribuzione elettrica generano ricavi regolati stabili e protetti."),
+            ("Leadership nelle Rinnovabili:", "Capacità installata da fonti pulite in costante espansione in Europa e America."),
+            ("Remunerazione Azionisti Solida:", "Flussi di cassa operativi che garantiscono una cedola attraente e sostenibile."),
+            ("Megatrend Elettrificazione:", "La crescente domanda di energia per mobilità e data center sostiene i volumi."),
+        ],
+        "quote": "L'elettrificazione e le reti intelligenti sono il fondamento insostituibile del futuro energetico.",
+        "tags": ["#Enel", "#CleanEnergy", "#Renewables", "#Dividends", "#SmartGrids"],
+        "color": (0, 168, 150),
+        "domain": "enel.com"
+    },
+    "GLEN.L": {
+        "name": "GLENCORE",
+        "tagline": "Transition Metals & Global Commodity Trading",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Glencore è un colosso diversificato nelle materie prime, leader mondiale nell'estrazione di metalli per la transizione (rame, cobalto, nichel) e nel trading globale.",
+        "kpis": [
+            {"label": "PRODUZIONE DI RAME", "val": "1M+ Tonnellate", "sub": "Metallo chiave per AI e grid"},
+            {"label": "DIVISIONE MARKETING", "val": "EBIT $3B+", "sub": "Flussi di trading anticiclici"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Esposizione materie prime critiche"},
+            {"label": "DIVIDEND YIELD & CASH", "val": "6.0%+", "sub": "Forte rendimento per gli azionisti"},
+        ],
+        "pillars": [
+            ("Modello di Business Unico:", "Combina l'estrazione mineraria su larga scala con la più grande rete di commodity trading."),
+            ("Rame e Metalli di Transizione:", "Asset minerari di classe mondiale essenziali per elettrificazione, EV e data center."),
+            ("Generazione di Cassa Massiccia:", "Forte free cash flow distribuito tramite dividendi e riacquisto di azioni."),
+            ("Vantaggio di Scala Globale:", "Capacità di approvvigionamento e arbitraggio geografico imbattibile nei mercati fisici."),
+        ],
+        "quote": "La transizione energetica non è virtuale: richiede miliardi di tonnellate di metalli fisici.",
+        "tags": ["#Glencore", "#Copper", "#Commodities", "#EnergyTransition", "#Mining"],
+        "color": (0, 95, 140),
+        "domain": "glencore.com"
+    },
+    "ULVR.L": {
+        "name": "UNILEVER",
+        "tagline": "Global Consumer Staples & Power Brands",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Unilever è uno dei giganti mondiali dei beni di consumo quotidiano (Dove, Knorr, Rexona, Hellmann's), con presenza in 190 paesi.",
+        "kpis": [
+            {"label": "BRAND POWER", "val": "3.4B Utenti", "sub": "Usata ogni giorno da metà pianeta"},
+            {"label": "MARGINE OPERATIVO", "val": "18%+", "sub": "Pricing power e leva sui costi"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Roccia difensiva e dividendi"},
+            {"label": "DIVIDEND YIELD", "val": "3.8%+", "sub": "Decenni di cedole ininterrotte"},
+        ],
+        "pillars": [
+            ("Fossato dei Marchi Iconici:", "Oltre 30 'Power Brands' leader mondiali nei segmenti bellezza, cura personale e alimentari."),
+            ("Forte Esposizione ai Mercati Emergenti:", "Circa il 60% del fatturato proviene da mercati ad alta crescita demografica."),
+            ("Resilienza Totale all'Inflazione:", "Capacità di trasferire i rincari sui prezzi senza perdere quote di mercato."),
+            ("Flusso di Cassa Prevedibile:", "Macchina da cassa che finanzia dividendi crescenti e investimenti in brand."),
+        ],
+        "quote": "I beni essenziali di cui la gente non può fare a meno creano un valore perenne e protetto.",
+        "tags": ["#Unilever", "#ConsumerStaples", "#Dividends", "#Defensive", "#ValueInvesting"],
+        "color": (25, 45, 125),
+        "domain": "unilever.com"
+    },
+    "1919.HK": {
+        "name": "COSCO SHIPPING",
+        "tagline": "Global Maritime Logistics & Terminal Network",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "COSCO SHIPPING è il terzo operatore mondiale di trasporto marittimo container e terminal portuali, spina dorsale del commercio internazionale.",
+        "kpis": [
+            {"label": "FLOTTA CONTAINER", "val": "3.1M+ TEU", "sub": "Top 3 globale per capacità"},
+            {"label": "TERMINAL PORTUALI", "val": "370+ Ormeggi", "sub": "Pireo, Asia, Europa e Americhe"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Logistica marittima & super cash"},
+            {"label": "DIVIDEND YIELD", "val": "8.0%+", "sub": "Distribuzione cassa straordinaria"},
+        ],
+        "pillars": [
+            ("Spina Dorsale del Commercio Asia-Mondo:", "Rotte marittime strategiche che collegano i poli manifatturieri ai mercati di consumo."),
+            ("Integrazione Porti-Navi:", "La controllata COSCO Ports garantisce priorità di attracco e ricavi da terminal costanti."),
+            ("Fortezza di Liquidità e Cassa Netta:", "Enormi riserve di cassa accumulate che proteggono il bilancio e pagano cedole record."),
+            ("Flotta Moderna e a Basso Consumo:", "Navi di ultima generazione alimentate a metanolo e GNL per ridurre le emissioni."),
+        ],
+        "quote": "Senza le rotte del trasporto marittimo, l'economia globale e le catene di fornitura si fermano.",
+        "tags": ["#COSCO", "#Shipping", "#MaritimeLogistics", "#GlobalTrade", "#HighYield"],
+        "color": (15, 60, 140),
+        "domain": "lines.coscoshipping.com"
+    },
+    "2318.HK": {
+        "name": "PING AN",
+        "tagline": "Integrated Finance, Healthcare & Insurtech",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Ping An è il gigante integrato delle assicurazioni vita, danni, banking e telemedicina con oltre 230 milioni di clienti al dettaglio.",
+        "kpis": [
+            {"label": "CLIENTI AL DETTAGLIO", "val": "235M+", "sub": "Ecosistema integrato retail"},
+            {"label": "ASSET IN GESTIONE", "val": "$1.7T+", "sub": "Tra i maggiori asset owner mondiali"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Finanza & sanità asiatica"},
+            {"label": "DIVIDEND YIELD", "val": "6.5%+", "sub": "Dividendi in valuta pregiata"},
+        ],
+        "pillars": [
+            ("Modello 'Finance + Healthcare':", "Combina polizze assicurative con servizi sanitari proprietari e telemedicina."),
+            ("Insurtech e AI all'Avanguardia:", "Pioniere mondiale nell'uso di intelligenza artificiale per liquidazione sinistri e underwriting."),
+            ("Bassa Penetrazione Assicurativa:", "Crescita strutturale della classe media asiatica e della richiesta di previdenza integrativa."),
+            ("Valutazione a Fortissimo Sconto:", "Multipli compressi che offrono un elevato margine di sicurezza e potenziale di re-rating."),
+        ],
+        "quote": "La protezione della salute e del patrimonio è il bisogno primario della classe media emergente.",
+        "tags": ["#PingAn", "#Insurtech", "#Insurance", "#Healthcare", "#AsiaFinance"],
+        "color": (230, 80, 20),
+        "domain": "pingan.com"
+    },
+    "TRIG.L": {
+        "name": "TRIG",
+        "tagline": "Clean Energy Infrastructure & Renewable Yield",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "TRIG è uno dei principali fondi infrastrutturali quotati a Londra, proprietario di oltre 85 parchi eolici, solari e sistemi di accumulo a batteria in UK ed Europa.",
+        "kpis": [
+            {"label": "DIVIDEND YIELD", "val": "7.5%+", "sub": "Cedola trimestrale indicizzata"},
+            {"label": "PORTAFOGLIO ASSET", "val": "85+ Impianti", "sub": "Eolico onshore/offshore e solare"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Infrastruttura green a flusso certo"},
+            {"label": "RICAVI REGOLATI/PPA", "val": ">70%", "sub": "Prezzi dell'energia bloccati e sicuri"},
+        ],
+        "pillars": [
+            ("Flussi di Cassa Prevedibili:", "Contratti di fornitura pluriennali e sussidi governativi legati all'inflazione."),
+            ("Diversificazione Tecnologica e Geografica:", "Asset distribuiti tra Regno Unito, Francia, Germania, Spagna e Scandinavia."),
+            ("Copertura Energetica Pulita:", "Capacità generativa equivalente al consumo di oltre 1.9 milioni di abitazioni."),
+            ("Rendimento Reale Sostenibile:", "Flusso costante di dividendi finanziato dalla vendita di elettricità 100% verde."),
+        ],
+        "quote": "Investire nell'infrastruttura rinnovabile unisce la certezza dei flussi di cassa alla transizione climatica.",
+        "tags": ["#TRIG", "#Renewables", "#Infrastructure", "#CleanYield", "#Dividends"],
+        "color": (20, 150, 100),
+        "domain": "trig-ltd.com"
+    },
+    "HUM": {
+        "name": "HUMANA",
+        "tagline": "Medicare Advantage & Integrated Senior Healthcare",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Humana è il leader specializzato statunitense nella gestione sanitaria per anziani (Medicare Advantage), cliniche primarie e farmacie.",
+        "kpis": [
+            {"label": "MEMBRI MEDICARE", "val": "5.5M+", "sub": "Top 2 fornitore Medicare Advantage US"},
+            {"label": "REVENUE ANNUALE", "val": "$105B+", "sub": "Enorme scala nei servizi sanitari"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Mega-trend demografia senior"},
+            {"label": "RETE CLINICHE CENTERWELL", "val": "300+ Sedi", "sub": "Cura integrata ad alto valore"},
+        ],
+        "pillars": [
+            ("Megatrend Invecchiamento Popolazione:", "10.000 baby boomer vanno in pensione ogni giorno negli USA, allargando il mercato."),
+            ("Ecosistema Integrato CenterWell:", "Le cliniche primarie proprietarie migliorano gli esiti clinici e riducono i costi ospedalieri."),
+            ("Forte Fidelizzazione dei Pazienti:", "I piani Medicare Advantage garantiscono entrate ricorrenti finanziate dal governo federale."),
+            ("Potenziale di Recupero Margini:", "Aggiustamento dei premi e ottimizzazione dell'efficienza operativa per espandere gli utili."),
+        ],
+        "quote": "La sanità dedicata alla terza età è un servizio essenziale che cresce a prescindere dal ciclo economico.",
+        "tags": ["#Humana", "#Healthcare", "#MedicareAdvantage", "#CenterWell", "#ValueInvesting"],
+        "color": (120, 190, 32),
+        "domain": "humana.com"
+    },
+    "AZN.L": {
+        "name": "ASTRAZENECA",
+        "tagline": "Biopharma Innovation & Oncology Powerhouse",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "AstraZeneca è la seconda casa farmaceutica europea, leader mondiale nelle terapie oncologiche mirate, malattie rare e cardiovascolari.",
+        "kpis": [
+            {"label": "CRESCITA ONCOLOGIA", "val": "+20%", "sub": "Tagrisso, Enhertu e Imfinzi record"},
+            {"label": "TARGET FATTURATO 2030", "val": "$80B", "sub": "Obiettivo di 20 nuovi farmaci"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Qualità healthcare e pipeline"},
+            {"label": "INVESTIMENTI R&D", "val": "$11B+/anno", "sub": "Pipeline di ricerca tra le più ricche"},
+        ],
+        "pillars": [
+            ("Leadership Assoluta in Oncologia:", "Terapie antitumorali e anticorpi coniugati (ADC) all'avanguardia mondiale."),
+            ("Espansione nelle Malattie Rare (Alexion):", "Portafoglio terapeutico ad alto margine e senza concorrenza diretta."),
+            ("Presenza Straordinaria nei Mercati Emergenti:", "La più grande pharma occidentale in Cina e Asia per quota di mercato."),
+            ("Flusso di Cassa e Dividendi Crescenti:", "Forte conversione degli utili in liquidità a supporto di dividendi e innovazione."),
+        ],
+        "quote": "La scienza e la medicina trasformativa sono i motori più potenti per curare e creare valore decennale.",
+        "tags": ["#AstraZeneca", "#Oncology", "#Pharma", "#Biotech", "#EuropeanQuality"],
+        "color": (200, 15, 100),
+        "domain": "astrazeneca.com"
+    },
+    "ABT.US": {
+        "name": "ABBOTT",
+        "tagline": "Diversified Healthcare, Devices & Diagnostics",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Abbott è un colosso diversificato della salute: leader nei sensori per il glucosio (FreeStyle Libre), dispositivi cardiovascolari, diagnostica e nutrizione.",
+        "kpis": [
+            {"label": "FREESTYLE LIBRE", "val": "$6B+ Vendite", "sub": "Dispositivo medico più venduto al mondo"},
+            {"label": "DIVIDEND ARISTOCRAT", "val": "52+ Anni", "sub": "Oltre mezzo secolo di dividendi in crescita"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Pilastro di massima resilienza"},
+            {"label": "CRESCITA DISPOSITIVI", "val": "+13% Organico", "sub": "Innovazione cardio e neuromodulazione"},
+        ],
+        "pillars": [
+            ("Dominio Globale nel Diabete (CGM):", "Il sensore FreeStyle Libre è il punto di riferimento per milioni di pazienti."),
+            ("Diversificazione Quadripartita:", "Dispositivi medici, diagnostica, nutrizione medica e farmaci generici consolidati."),
+            ("Storico di Dividendi Imbattibile:", "Dividend Aristocrat con oltre 50 anni di aumenti consecutivi del dividendo."),
+            ("Innovazione Continua in Cardiologia:", "Clip mitraliche, stent e sensori wireless per il monitoraggio cardiaco continuo."),
+        ],
+        "quote": "Un modello a quattro pilastri crea un'azienda sanitaria capace di prosperare in ogni contesto.",
+        "tags": ["#Abbott", "#MedicalDevices", "#FreeStyleLibre", "#DividendAristocrat", "#Healthcare"],
+        "color": (0, 156, 222),
+        "domain": "abbott.com"
+    },
+    "ABT": {
+        "name": "ABBOTT",
+        "tagline": "Diversified Healthcare, Devices & Diagnostics",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "Abbott è un colosso diversificato della salute: leader nei sensori per il glucosio (FreeStyle Libre), dispositivi cardiovascolari, diagnostica e nutrizione.",
+        "kpis": [
+            {"label": "FREESTYLE LIBRE", "val": "$6B+ Vendite", "sub": "Dispositivo medico più venduto al mondo"},
+            {"label": "DIVIDEND ARISTOCRAT", "val": "52+ Anni", "sub": "Oltre mezzo secolo di dividendi in crescita"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Pilastro di massima resilienza"},
+            {"label": "CRESCITA DISPOSITIVI", "val": "+13% Organico", "sub": "Innovazione cardio e neuromodulazione"},
+        ],
+        "pillars": [
+            ("Dominio Globale nel Diabete (CGM):", "Il sensore FreeStyle Libre è il punto di riferimento per milioni di pazienti."),
+            ("Diversificazione Quadripartita:", "Dispositivi medici, diagnostica, nutrizione medica e farmaci generici consolidati."),
+            ("Storico di Dividendi Imbattibile:", "Dividend Aristocrat con oltre 50 anni di aumenti consecutivi del dividendo."),
+            ("Innovazione Continua in Cardiologia:", "Clip mitraliche, stent e sensori wireless per il monitoraggio cardiaco continuo."),
+        ],
+        "quote": "Un modello a quattro pilastri crea un'azienda sanitaria capace di prosperare in ogni contesto.",
+        "tags": ["#Abbott", "#MedicalDevices", "#FreeStyleLibre", "#DividendAristocrat", "#Healthcare"],
+        "color": (0, 156, 222),
+        "domain": "abbott.com"
+    },
 }
 
 

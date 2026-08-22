@@ -73,8 +73,6 @@ DOMAIN_MAP = {
     "TRIG.L":     "trig-ltd.com",
     "MAU.PA":     "maureletprom.fr",
     "ULVR.L":     "unilever.com",
-    "MNODL.L":    "mondigroup.com",
-    "NVTKL.L":    "novatek.ru",
     # ── Asia ────────────────────────────────────────────────────────────────
     "1211.HK":    "byd.com",
     "1919.HK":    "coscoshipping.com",
