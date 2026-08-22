@@ -426,13 +426,22 @@ def get_post_metrics(post_id: str) -> Optional[Dict[str, Any]]:
         resp = requests.get(url, headers=headers, timeout=20)
         if resp.status_code == 200:
             data = resp.json()
-            emotions = data.get("emotions", {})
-            comments = data.get("comments", {})
+            emotions_data = data.get("emotionsData", {})
+            like_data = emotions_data.get("like", {})
+            likes = like_data.get("paging", {}).get("totalCount", len(like_data.get("emotions", [])))
+
+            summary = data.get("summary", {})
+            comments = summary.get("totalCommentsAndReplies", 0)
+            if not comments:
+                comments = data.get("commentsData", {}).get("reactionPaging", {}).get("totalCount", len(data.get("commentsData", {}).get("comments", [])))
+
+            shares = summary.get("sharedCount", 0)
             return {
                 "id": data.get("id"),
                 "created": data.get("created"),
-                "likes": emotions.get("total", 0),
-                "comments": comments.get("total", 0),
+                "likes": likes,
+                "comments": comments,
+                "shares": shares,
                 "word_count": data.get("wordCount", 0),
                 "reading_time": data.get("readingTimeMinutes", 0),
                 "raw": data,

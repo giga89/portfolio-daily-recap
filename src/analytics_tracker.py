@@ -127,11 +127,14 @@ def sync_etoro_metrics() -> Dict[str, Any]:
             post_id = p["id"]
             metrics = etoro_client.get_post_metrics(post_id)
             if metrics:
-                p["likes"] = metrics.get("likes", p.get("likes", 0))
-                p["comments"] = metrics.get("comments", p.get("comments", 0))
+                p["likes"] = metrics.get("likes", 0)
+                p["comments"] = metrics.get("comments", 0)
+                p["shares"] = metrics.get("shares", 0)
                 p["last_synced"] = datetime.utcnow().isoformat()
                 updated_count += 1
 
+    # Remove any old seed/deleted posts that returned 404
+    data["posts"] = [p for p in posts if p.get("id") not in ["41f4c7dc-402a-4ce6-a7fe-49b819f074d2", "fb2dfe40-9d61-11f1-8080-800019b76646"]]
     save_local_analytics(data)
     print(f"✓ Synced engagement metrics for {updated_count} eToro posts")
     return data
@@ -376,37 +379,42 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         <div class="kpi-sub">Multi-platform feed</div>
       </div>
       <div class="kpi-card">
+        <div class="kpi-label">Like Totali Ricevuti</div>
+        <div class="kpi-value" style="color: #FF4D79;">❤️ {insights.get('total_likes', 0)}</div>
+        <div class="kpi-sub">Media: {insights.get('avg_likes', 0)} like / post</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Commenti Ricevuti</div>
+        <div class="kpi-value" style="color: var(--cyan);">💬 {insights.get('total_comments', 0)}</div>
+        <div class="kpi-sub">Media: {insights.get('avg_comments', 0)} commenti / post</div>
+      </div>
+      <div class="kpi-card">
         <div class="kpi-label">Miglior Orario Pubblicazione</div>
-        <div class="kpi-value" style="color: var(--cyan)">{insights.get('best_hour', '22:00')}</div>
-        <div class="kpi-sub">Fascia con picco di interazione</div>
+        <div class="kpi-value" style="color: var(--green);">{insights.get('best_hour', '22:00')}</div>
+        <div class="kpi-sub">Fascia con picco di engagement</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Miglior Giorno Settimana</div>
-        <div class="kpi-value" style="color: var(--green)">{insights.get('best_day', 'Martedì')}</div>
+        <div class="kpi-value" style="color: var(--purple);">{insights.get('best_day', 'Martedì')}</div>
         <div class="kpi-sub">Engagement score massimo</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Like / Reazioni Totali</div>
-        <div class="kpi-value">{insights.get('total_likes', 0)}</div>
-        <div class="kpi-sub">Avg {insights.get('avg_likes', 0)} per post</div>
       </div>
     </div>
 
     <!-- Optimization Insights Box -->
     <div class="insights-box">
-      <div class="insights-title">💡 Insight Strategici di Pubblicazione</div>
+      <div class="insights-title">💡 Insight Strategici & Formula Engagement</div>
       <div class="insights-grid">
         <div class="insight-pill">
-          <strong>⏰ Orari Chiave per eToro:</strong> 
-          Le <strong>16:15</strong> (apertura US) e le <strong>22:45</strong> (chiusura US) attirano il massimo volume di lettori attivi su Wall Street.
+          <strong>📊 Formula Engagement Score:</strong>
+          <code>(Like × 1.5) + (Commenti × 3.0)</code>. I commenti hanno peso doppio perché su eToro generano visibilità organica e fanno salire il post nel feed.
         </div>
         <div class="insight-pill">
-          <strong>🖼️ Formato Immagine Top:</strong> 
-          La <strong>Card 16:9 Top & Flop</strong> e la <strong>Stock Focus Card</strong> garantiscono visualizzazione full-width su smartphone senza tagli.
+          <strong>⏰ Orari Chiave per eToro:</strong>
+          Le <strong>16:15</strong> (apertura Wall Street) e le <strong>22:45</strong> (chiusura US) attirano il massimo volume di lettori e investitori attivi.
         </div>
         <div class="insight-pill">
-          <strong>🏷️ Cashtag Caldi:</strong> 
-          Inserire 2-3 cashtags rilevanti (es. <code>$PLTR</code>, <code>$NVDA</code>, <code>$CCJ</code>) permette al post di indicizzarsi nei feed dei singoli titoli su eToro.
+          <strong>🖼️ Formato Immagine Top:</strong>
+          La <strong>Hitachi-style Infographic</strong> e le <strong>Card 16:9</strong> garantiscono visualizzazione ad altissima risoluzione su app mobile eToro.
         </div>
       </div>
     </div>
@@ -415,7 +423,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     <div class="charts-grid">
       <div class="chart-panel">
         <div class="panel-title">
-          <span>🕒 Engagement per Orario di Pubblicazione</span>
+          <span>🕒 Engagement per Orario di Pubblicazione (CET)</span>
         </div>
         <canvas id="chartHours" height="220"></canvas>
       </div>
@@ -478,10 +486,14 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       tbody.appendChild(tr);
     }});
 
-    // Render Hours Chart
+    // Render Hours Chart (Dynamic from insightsData)
     const ctxHours = document.getElementById('chartHours').getContext('2d');
-    const hoursLabels = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
-    const hoursData = [12, 18, 25, 30, 48, 28, 42, 65];
+    const hoursSlots = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+    const hoursLabels = hoursSlots.map(h => String(h).padStart(2, '0') + ':00');
+    const hoursData = hoursSlots.map(h => {{
+      const entry = (insightsData.hourly && insightsData.hourly[String(h)]) || (insightsData.hourly && insightsData.hourly[h]);
+      return entry ? Math.round((entry.eng || 0) * 10) / 10 : 0;
+    }});
 
     new Chart(ctxHours, {{
       type: 'bar',
@@ -490,7 +502,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         datasets: [{{
           label: 'Engagement Score',
           data: hoursData,
-          backgroundColor: 'rgba(0, 212, 255, 0.7)',
+          backgroundColor: 'rgba(0, 212, 255, 0.75)',
           borderRadius: 8,
         }}]
       }},
@@ -504,17 +516,29 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       }}
     }});
 
-    // Render Days Chart
+    // Render Days Chart (Dynamic from insightsData)
     const ctxDays = document.getElementById('chartDays').getContext('2d');
-    const daysLabels = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
-    const daysData = [35, 55, 48, 52, 45, 60, 58];
+    const dayMap = [
+      {{ name: 'Lunedì', key: 'Monday' }},
+      {{ name: 'Martedì', key: 'Tuesday' }},
+      {{ name: 'Mercoledì', key: 'Wednesday' }},
+      {{ name: 'Giovedì', key: 'Thursday' }},
+      {{ name: 'Venerdì', key: 'Friday' }},
+      {{ name: 'Sabato', key: 'Saturday' }},
+      {{ name: 'Domenica', key: 'Sunday' }}
+    ];
+    const daysLabels = dayMap.map(d => d.name);
+    const daysData = dayMap.map(d => {{
+      const entry = insightsData.weekdays && insightsData.weekdays[d.key];
+      return entry ? Math.round((entry.eng || 0) * 10) / 10 : 0;
+    }});
 
     new Chart(ctxDays, {{
       type: 'line',
       data: {{
         labels: daysLabels,
         datasets: [{{
-          label: 'Interazioni Medie',
+          label: 'Engagement Score Totale',
           data: daysData,
           borderColor: '#13C636',
           backgroundColor: 'rgba(19, 198, 54, 0.15)',

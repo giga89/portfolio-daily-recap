@@ -1,27 +1,6 @@
 {
-  "last_updated": "2026-08-22T09:01:59.622879",
+  "last_updated": "2026-08-22T11:08:39.520189",
   "posts": [
-    {
-      "id": "1cc007f0-9e08-11f1-8080-800123ba667c",
-      "platform": "etoro",
-      "session": "Weekly recap (Sat)",
-      "published_at": "2026-08-22T09:01:50Z",
-      "day_of_week": "Saturday",
-      "hour_utc": 9,
-      "hour_local": 11,
-      "title": "📅 RESOCONTO SETTIMANALE (SABATO) 📆  ✅ ✅ ✅ OTTIMA SETTIMANA! 🟢: +1.35% ✅ ✅ ✅ 🏔️ D...",
-      "tickers": [
-        "1919.HK",
-        "2318.HK",
-        "1211.HK"
-      ],
-      "image_type": "winners_losers_card",
-      "likes": 0,
-      "comments": 0,
-      "shares": 0,
-      "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:52.512584"
-    },
     {
       "id": "3c859bd0-9dfa-11f1-8080-800174ac1f34",
       "platform": "etoro",
@@ -35,11 +14,11 @@
         "ABT.US"
       ],
       "image_type": "infographic_card",
-      "likes": 0,
+      "likes": 1,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:52.907280"
+      "last_synced": "2026-08-22T11:08:34.592328"
     },
     {
       "id": "d23883e0-9dfa-11f1-8080-80016ce1cf05",
@@ -54,11 +33,11 @@
         "AZN.L"
       ],
       "image_type": "infographic_card",
-      "likes": 0,
+      "likes": 2,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:53.407212"
+      "last_synced": "2026-08-22T11:08:34.940487"
     },
     {
       "id": "52ae5e60-9dfa-11f1-8080-80003592087b",
@@ -73,11 +52,11 @@
         "HUM"
       ],
       "image_type": "infographic_card",
-      "likes": 0,
+      "likes": 1,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:53.796636"
+      "last_synced": "2026-08-22T11:08:35.603953"
     },
     {
       "id": "e71fecd0-9dfa-11f1-8080-80011941e541",
@@ -92,11 +71,11 @@
         "TRIG.L"
       ],
       "image_type": "infographic_card",
-      "likes": 0,
+      "likes": 1,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:54.222409"
+      "last_synced": "2026-08-22T11:08:35.899954"
     },
     {
       "id": "2a31fd20-9dfa-11f1-8080-8000444d3348",
@@ -111,11 +90,11 @@
         "2318.HK"
       ],
       "image_type": "infographic_card",
-      "likes": 0,
+      "likes": 1,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:54.628474"
+      "last_synced": "2026-08-22T11:08:36.220033"
     },
     {
       "id": "3d9b5190-9dfa-11f1-8080-80002a83f57c",
@@ -130,11 +109,11 @@
         "1919.HK"
       ],
       "image_type": "infographic_card",
-      "likes": 0,
+      "likes": 1,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:55.009718"
+      "last_synced": "2026-08-22T11:08:36.541318"
     },
     {
       "id": "395877c0-9dfa-11f1-8080-800173c8e64f",
@@ -149,11 +128,11 @@
         "PRY.MI"
       ],
       "image_type": "infographic_card",
-      "likes": 0,
+      "likes": 1,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:55.415988"
+      "last_synced": "2026-08-22T11:08:36.914132"
     },
     {
       "id": "2d3fb250-9dfa-11f1-8080-80014090669a",
@@ -168,11 +147,11 @@
         "ULVR.L"
       ],
       "image_type": "infographic_card",
-      "likes": 0,
+      "likes": 1,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:56.045743"
+      "last_synced": "2026-08-22T11:08:37.260347"
     },
     {
       "id": "e0636070-9dfa-11f1-8080-80003b135995",
@@ -187,11 +166,11 @@
         "GLEN.L"
       ],
       "image_type": "infographic_card",
-      "likes": 0,
+      "likes": 1,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:56.444064"
+      "last_synced": "2026-08-22T11:08:37.553521"
     },
     {
       "id": "fd27fd70-9df9-11f1-8080-800101b6778e",
@@ -206,11 +185,11 @@
         "ENEL.MI"
       ],
       "image_type": "infographic_card",
-      "likes": 0,
+      "likes": 1,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:56.816668"
+      "last_synced": "2026-08-22T11:08:37.846253"
     },
     {
       "id": "7e956e10-9d9b-11f1-8080-80014a6d0d9e",
@@ -231,10 +210,10 @@
       ],
       "image_type": "winners_losers_card",
       "likes": 0,
-      "comments": 0,
+      "comments": 6,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:57.219943"
+      "last_synced": "2026-08-22T11:08:38.132674"
     },
     {
       "id": "33f50140-9d82-11f1-8080-800058c4ea47",
@@ -249,11 +228,11 @@
         "TRX"
       ],
       "image_type": "crypto_pulse_card",
-      "likes": 0,
+      "likes": 1,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:57.632813"
+      "last_synced": "2026-08-22T11:08:38.512761"
     },
     {
       "id": "dad81e00-9d7f-11f1-8080-800043fa3b90",
@@ -273,25 +252,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:58.121342"
-    },
-    {
-      "id": "fb2dfe40-9d61-11f1-8080-800019b76646",
-      "platform": "etoro",
-      "session": "Stock focus:PLTR",
-      "published_at": "2026-08-21T13:00:08.9309672Z",
-      "day_of_week": "Friday",
-      "hour_utc": 13,
-      "hour_local": 15,
-      "title": "Stock focus:PLTR — Andrea Ravalli Portfolio",
-      "tickers": [
-        "PLTR"
-      ],
-      "image_type": "infographic_card",
-      "likes": 0,
-      "comments": 0,
-      "shares": 0,
-      "url": "https://www.etoro.com/people/AndreaRavalli"
+      "last_synced": "2026-08-22T11:08:38.806925"
     },
     {
       "id": "cdf384b0-9cdd-11f1-8080-800173628dcd",
@@ -313,11 +274,11 @@
         "NOVO-B.CO"
       ],
       "image_type": "pie_chart",
-      "likes": 0,
-      "comments": 0,
+      "likes": 1,
+      "comments": 6,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:58.916744"
+      "last_synced": "2026-08-22T11:08:39.204053"
     },
     {
       "id": "080ba0c0-9ca6-11f1-8080-800145afd43e",
@@ -339,28 +300,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-22T09:01:59.291197"
-    },
-    {
-      "id": "41f4c7dc-402a-4ce6-a7fe-49b819f074d2",
-      "platform": "etoro",
-      "session": "U.S. market close",
-      "published_at": "2026-08-11T08:22:38Z",
-      "day_of_week": "Tuesday",
-      "hour_utc": 8,
-      "hour_local": 10,
-      "title": "Recap Portafoglio & Top/Flop",
-      "tickers": [
-        "PLTR",
-        "NVDA",
-        "CCJ",
-        "SX7PEX.DE"
-      ],
-      "image_type": "winners_losers_card",
-      "likes": 0,
-      "comments": 0,
-      "shares": 0,
-      "url": "https://www.etoro.com/people/AndreaRavalli"
+      "last_synced": "2026-08-22T11:08:39.520061"
     }
   ]
 }

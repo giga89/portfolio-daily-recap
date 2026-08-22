@@ -137,41 +137,46 @@
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-label">Post Totali Tracciati</div>
-        <div class="kpi-value">18</div>
+        <div class="kpi-value">15</div>
         <div class="kpi-sub">Multi-platform feed</div>
       </div>
       <div class="kpi-card">
+        <div class="kpi-label">Like Totali Ricevuti</div>
+        <div class="kpi-value" style="color: #FF4D79;">❤️ 13</div>
+        <div class="kpi-sub">Media: 0.87 like / post</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Commenti Ricevuti</div>
+        <div class="kpi-value" style="color: var(--cyan);">💬 12</div>
+        <div class="kpi-sub">Media: 0.8 commenti / post</div>
+      </div>
+      <div class="kpi-card">
         <div class="kpi-label">Miglior Orario Pubblicazione</div>
-        <div class="kpi-value" style="color: var(--cyan)">11:00 (CET)</div>
-        <div class="kpi-sub">Fascia con picco di interazione</div>
+        <div class="kpi-value" style="color: var(--green);">23:00 (CET)</div>
+        <div class="kpi-sub">Fascia con picco di engagement</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Miglior Giorno Settimana</div>
-        <div class="kpi-value" style="color: var(--green)">Saturday</div>
+        <div class="kpi-value" style="color: var(--purple);">Thursday</div>
         <div class="kpi-sub">Engagement score massimo</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Like / Reazioni Totali</div>
-        <div class="kpi-value">0</div>
-        <div class="kpi-sub">Avg 0.0 per post</div>
       </div>
     </div>
 
     <!-- Optimization Insights Box -->
     <div class="insights-box">
-      <div class="insights-title">💡 Insight Strategici di Pubblicazione</div>
+      <div class="insights-title">💡 Insight Strategici & Formula Engagement</div>
       <div class="insights-grid">
         <div class="insight-pill">
-          <strong>⏰ Orari Chiave per eToro:</strong> 
-          Le <strong>16:15</strong> (apertura US) e le <strong>22:45</strong> (chiusura US) attirano il massimo volume di lettori attivi su Wall Street.
+          <strong>📊 Formula Engagement Score:</strong>
+          <code>(Like × 1.5) + (Commenti × 3.0)</code>. I commenti hanno peso doppio perché su eToro generano visibilità organica e fanno salire il post nel feed.
         </div>
         <div class="insight-pill">
-          <strong>🖼️ Formato Immagine Top:</strong> 
-          La <strong>Card 16:9 Top & Flop</strong> e la <strong>Stock Focus Card</strong> garantiscono visualizzazione full-width su smartphone senza tagli.
+          <strong>⏰ Orari Chiave per eToro:</strong>
+          Le <strong>16:15</strong> (apertura Wall Street) e le <strong>22:45</strong> (chiusura US) attirano il massimo volume di lettori e investitori attivi.
         </div>
         <div class="insight-pill">
-          <strong>🏷️ Cashtag Caldi:</strong> 
-          Inserire 2-3 cashtags rilevanti (es. <code>$PLTR</code>, <code>$NVDA</code>, <code>$CCJ</code>) permette al post di indicizzarsi nei feed dei singoli titoli su eToro.
+          <strong>🖼️ Formato Immagine Top:</strong>
+          La <strong>Hitachi-style Infographic</strong> e le <strong>Card 16:9</strong> garantiscono visualizzazione ad altissima risoluzione su app mobile eToro.
         </div>
       </div>
     </div>
@@ -180,7 +185,7 @@
     <div class="charts-grid">
       <div class="chart-panel">
         <div class="panel-title">
-          <span>🕒 Engagement per Orario di Pubblicazione</span>
+          <span>🕒 Engagement per Orario di Pubblicazione (CET)</span>
         </div>
         <canvas id="chartHours" height="220"></canvas>
       </div>
@@ -222,8 +227,8 @@
   </div>
 
   <script>
-    const postsData = [{"id": "1cc007f0-9e08-11f1-8080-800123ba667c", "platform": "etoro", "session": "Weekly recap (Sat)", "published_at": "2026-08-22T09:01:50Z", "day_of_week": "Saturday", "hour_utc": 9, "hour_local": 11, "title": "📅 RESOCONTO SETTIMANALE (SABATO) 📆  ✅ ✅ ✅ OTTIMA SETTIMANA! 🟢: +1.35% ✅ ✅ ✅ 🏔️ D...", "tickers": ["1919.HK", "2318.HK", "1211.HK"], "image_type": "winners_losers_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:52.512584"}, {"id": "3c859bd0-9dfa-11f1-8080-800174ac1f34", "platform": "etoro", "session": "Stock focus:ABT.US", "published_at": "2026-08-22T07:20:27.9576687Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:ABT.US — Andrea Ravalli Portfolio", "tickers": ["ABT.US"], "image_type": "infographic_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:52.907280"}, {"id": "d23883e0-9dfa-11f1-8080-80016ce1cf05", "platform": "etoro", "session": "Stock focus:AZN.L", "published_at": "2026-08-22T07:20:24.1470907Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:AZN.L — Andrea Ravalli Portfolio", "tickers": ["AZN.L"], "image_type": "infographic_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:53.407212"}, {"id": "52ae5e60-9dfa-11f1-8080-80003592087b", "platform": "etoro", "session": "Stock focus:HUM", "published_at": "2026-08-22T07:20:19.9575641Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:HUM — Andrea Ravalli Portfolio", "tickers": ["HUM"], "image_type": "infographic_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:53.796636"}, {"id": "e71fecd0-9dfa-11f1-8080-80011941e541", "platform": "etoro", "session": "Stock focus:TRIG.L", "published_at": "2026-08-22T07:20:15.5925797Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:TRIG.L — Andrea Ravalli Portfolio", "tickers": ["TRIG.L"], "image_type": "infographic_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:54.222409"}, {"id": "2a31fd20-9dfa-11f1-8080-8000444d3348", "platform": "etoro", "session": "Stock focus:2318.HK", "published_at": "2026-08-22T07:20:10.9702759Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:2318.HK — Andrea Ravalli Portfolio", "tickers": ["2318.HK"], "image_type": "infographic_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:54.628474"}, {"id": "3d9b5190-9dfa-11f1-8080-80002a83f57c", "platform": "etoro", "session": "Stock focus:1919.HK", "published_at": "2026-08-22T07:20:07.2157799Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:1919.HK — Andrea Ravalli Portfolio", "tickers": ["1919.HK"], "image_type": "infographic_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:55.009718"}, {"id": "395877c0-9dfa-11f1-8080-800173c8e64f", "platform": "etoro", "session": "Stock focus:PRY.MI", "published_at": "2026-08-22T07:20:03.8936474Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:PRY.MI — Andrea Ravalli Portfolio", "tickers": ["PRY.MI"], "image_type": "infographic_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:55.415988"}, {"id": "2d3fb250-9dfa-11f1-8080-80014090669a", "platform": "etoro", "session": "Stock focus:ULVR.L", "published_at": "2026-08-22T07:20:01.1190954Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:ULVR.L — Andrea Ravalli Portfolio", "tickers": ["ULVR.L"], "image_type": "infographic_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:56.045743"}, {"id": "e0636070-9dfa-11f1-8080-80003b135995", "platform": "etoro", "session": "Stock focus:GLEN.L", "published_at": "2026-08-22T07:19:56.7459658Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:GLEN.L — Andrea Ravalli Portfolio", "tickers": ["GLEN.L"], "image_type": "infographic_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:56.444064"}, {"id": "fd27fd70-9df9-11f1-8080-800101b6778e", "platform": "etoro", "session": "Stock focus:ENEL.MI", "published_at": "2026-08-22T07:18:28.4797886Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:ENEL.MI — Andrea Ravalli Portfolio", "tickers": ["ENEL.MI"], "image_type": "infographic_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:56.816668"}, {"id": "7e956e10-9d9b-11f1-8080-80014a6d0d9e", "platform": "etoro", "session": "U.S. market close", "published_at": "2026-08-21T20:02:07.6322301Z", "day_of_week": "Friday", "hour_utc": 20, "hour_local": 22, "title": "U.S. market close — Andrea Ravalli Portfolio", "tickers": ["CCJ", "PLTR", "PPFB.DE", "VOF.L", "MRVL", "MAU.PA"], "image_type": "winners_losers_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:57.219943"}, {"id": "33f50140-9d82-11f1-8080-800058c4ea47", "platform": "etoro", "session": "Daily crypto recap", "published_at": "2026-08-21T17:00:09.4478907Z", "day_of_week": "Friday", "hour_utc": 17, "hour_local": 19, "title": "Daily crypto recap — Andrea Ravalli Portfolio", "tickers": ["TRX"], "image_type": "crypto_pulse_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:57.632813"}, {"id": "dad81e00-9d7f-11f1-8080-800043fa3b90", "platform": "etoro", "session": "U.S. market open", "published_at": "2026-08-21T16:44:07.8210825Z", "day_of_week": "Friday", "hour_utc": 16, "hour_local": 18, "title": "U.S. market open — Andrea Ravalli Portfolio", "tickers": ["WMT", "AMZN"], "image_type": "pie_chart", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:58.121342"}, {"id": "fb2dfe40-9d61-11f1-8080-800019b76646", "platform": "etoro", "session": "Stock focus:PLTR", "published_at": "2026-08-21T13:00:08.9309672Z", "day_of_week": "Friday", "hour_utc": 13, "hour_local": 15, "title": "Stock focus:PLTR — Andrea Ravalli Portfolio", "tickers": ["PLTR"], "image_type": "infographic_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli"}, {"id": "cdf384b0-9cdd-11f1-8080-800173628dcd", "platform": "etoro", "session": "us_close", "published_at": "2026-08-20T21:26:42.9017838Z", "day_of_week": "Thursday", "hour_utc": 21, "hour_local": 23, "title": "us_close — Andrea Ravalli Portfolio", "tickers": ["PPFB.DE", "TRX", "TSM", "PLTR", "LLY", "HUM", "NVDA", "NOVO-B.CO"], "image_type": "pie_chart", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:58.916744"}, {"id": "080ba0c0-9ca6-11f1-8080-800145afd43e", "platform": "etoro", "session": "copy_trading", "published_at": "2026-08-20T14:47:15.8222410Z", "day_of_week": "Thursday", "hour_utc": 14, "hour_local": 16, "title": "copy_trading — Andrea Ravalli Portfolio", "tickers": ["MSFT", "NVDA", "AMZN", "70k."], "image_type": "pie_chart", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T09:01:59.291197"}, {"id": "41f4c7dc-402a-4ce6-a7fe-49b819f074d2", "platform": "etoro", "session": "U.S. market close", "published_at": "2026-08-11T08:22:38Z", "day_of_week": "Tuesday", "hour_utc": 8, "hour_local": 10, "title": "Recap Portafoglio & Top/Flop", "tickers": ["PLTR", "NVDA", "CCJ", "SX7PEX.DE"], "image_type": "winners_losers_card", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli"}];
-    const insightsData = {"total_posts": 18, "total_likes": 0, "total_comments": 0, "avg_likes": 0.0, "avg_comments": 0.0, "best_hour": "11:00 (CET)", "best_day": "Saturday", "hourly": {"11": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "9": {"count": 10, "likes": 0, "comments": 0, "eng": 0.0}, "22": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "19": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "18": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "15": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "23": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "16": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "10": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}}, "weekdays": {"Saturday": {"count": 11, "likes": 0, "comments": 0, "eng": 0.0}, "Friday": {"count": 4, "likes": 0, "comments": 0, "eng": 0.0}, "Thursday": {"count": 2, "likes": 0, "comments": 0, "eng": 0.0}, "Tuesday": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}}, "tag_stats": {"1919.HK": {"count": 2, "likes": 0, "comments": 0, "eng": 0.0}, "2318.HK": {"count": 2, "likes": 0, "comments": 0, "eng": 0.0}, "1211.HK": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "ABT.US": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "AZN.L": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "HUM": {"count": 2, "likes": 0, "comments": 0, "eng": 0.0}, "TRIG.L": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "PRY.MI": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "ULVR.L": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "GLEN.L": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "ENEL.MI": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "CCJ": {"count": 2, "likes": 0, "comments": 0, "eng": 0.0}, "PLTR": {"count": 4, "likes": 0, "comments": 0, "eng": 0.0}, "PPFB.DE": {"count": 2, "likes": 0, "comments": 0, "eng": 0.0}, "VOF.L": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "MRVL": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "MAU.PA": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "TRX": {"count": 2, "likes": 0, "comments": 0, "eng": 0.0}, "WMT": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "AMZN": {"count": 2, "likes": 0, "comments": 0, "eng": 0.0}, "TSM": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "LLY": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "NVDA": {"count": 3, "likes": 0, "comments": 0, "eng": 0.0}, "NOVO-B.CO": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "MSFT": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "70k.": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "SX7PEX.DE": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}}, "image_stats": {"winners_losers_card": {"count": 3, "likes": 0, "comments": 0, "eng": 0.0}, "infographic_card": {"count": 11, "likes": 0, "comments": 0, "eng": 0.0}, "crypto_pulse_card": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "pie_chart": {"count": 3, "likes": 0, "comments": 0, "eng": 0.0}}};
+    const postsData = [{"id": "3c859bd0-9dfa-11f1-8080-800174ac1f34", "platform": "etoro", "session": "Stock focus:ABT.US", "published_at": "2026-08-22T07:20:27.9576687Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:ABT.US — Andrea Ravalli Portfolio", "tickers": ["ABT.US"], "image_type": "infographic_card", "likes": 1, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:34.592328"}, {"id": "d23883e0-9dfa-11f1-8080-80016ce1cf05", "platform": "etoro", "session": "Stock focus:AZN.L", "published_at": "2026-08-22T07:20:24.1470907Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:AZN.L — Andrea Ravalli Portfolio", "tickers": ["AZN.L"], "image_type": "infographic_card", "likes": 2, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:34.940487"}, {"id": "52ae5e60-9dfa-11f1-8080-80003592087b", "platform": "etoro", "session": "Stock focus:HUM", "published_at": "2026-08-22T07:20:19.9575641Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:HUM — Andrea Ravalli Portfolio", "tickers": ["HUM"], "image_type": "infographic_card", "likes": 1, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:35.603953"}, {"id": "e71fecd0-9dfa-11f1-8080-80011941e541", "platform": "etoro", "session": "Stock focus:TRIG.L", "published_at": "2026-08-22T07:20:15.5925797Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:TRIG.L — Andrea Ravalli Portfolio", "tickers": ["TRIG.L"], "image_type": "infographic_card", "likes": 1, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:35.899954"}, {"id": "2a31fd20-9dfa-11f1-8080-8000444d3348", "platform": "etoro", "session": "Stock focus:2318.HK", "published_at": "2026-08-22T07:20:10.9702759Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:2318.HK — Andrea Ravalli Portfolio", "tickers": ["2318.HK"], "image_type": "infographic_card", "likes": 1, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:36.220033"}, {"id": "3d9b5190-9dfa-11f1-8080-80002a83f57c", "platform": "etoro", "session": "Stock focus:1919.HK", "published_at": "2026-08-22T07:20:07.2157799Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:1919.HK — Andrea Ravalli Portfolio", "tickers": ["1919.HK"], "image_type": "infographic_card", "likes": 1, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:36.541318"}, {"id": "395877c0-9dfa-11f1-8080-800173c8e64f", "platform": "etoro", "session": "Stock focus:PRY.MI", "published_at": "2026-08-22T07:20:03.8936474Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:PRY.MI — Andrea Ravalli Portfolio", "tickers": ["PRY.MI"], "image_type": "infographic_card", "likes": 1, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:36.914132"}, {"id": "2d3fb250-9dfa-11f1-8080-80014090669a", "platform": "etoro", "session": "Stock focus:ULVR.L", "published_at": "2026-08-22T07:20:01.1190954Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:ULVR.L — Andrea Ravalli Portfolio", "tickers": ["ULVR.L"], "image_type": "infographic_card", "likes": 1, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:37.260347"}, {"id": "e0636070-9dfa-11f1-8080-80003b135995", "platform": "etoro", "session": "Stock focus:GLEN.L", "published_at": "2026-08-22T07:19:56.7459658Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:GLEN.L — Andrea Ravalli Portfolio", "tickers": ["GLEN.L"], "image_type": "infographic_card", "likes": 1, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:37.553521"}, {"id": "fd27fd70-9df9-11f1-8080-800101b6778e", "platform": "etoro", "session": "Stock focus:ENEL.MI", "published_at": "2026-08-22T07:18:28.4797886Z", "day_of_week": "Saturday", "hour_utc": 7, "hour_local": 9, "title": "Stock focus:ENEL.MI — Andrea Ravalli Portfolio", "tickers": ["ENEL.MI"], "image_type": "infographic_card", "likes": 1, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:37.846253"}, {"id": "7e956e10-9d9b-11f1-8080-80014a6d0d9e", "platform": "etoro", "session": "U.S. market close", "published_at": "2026-08-21T20:02:07.6322301Z", "day_of_week": "Friday", "hour_utc": 20, "hour_local": 22, "title": "U.S. market close — Andrea Ravalli Portfolio", "tickers": ["CCJ", "PLTR", "PPFB.DE", "VOF.L", "MRVL", "MAU.PA"], "image_type": "winners_losers_card", "likes": 0, "comments": 6, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:38.132674"}, {"id": "33f50140-9d82-11f1-8080-800058c4ea47", "platform": "etoro", "session": "Daily crypto recap", "published_at": "2026-08-21T17:00:09.4478907Z", "day_of_week": "Friday", "hour_utc": 17, "hour_local": 19, "title": "Daily crypto recap — Andrea Ravalli Portfolio", "tickers": ["TRX"], "image_type": "crypto_pulse_card", "likes": 1, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:38.512761"}, {"id": "dad81e00-9d7f-11f1-8080-800043fa3b90", "platform": "etoro", "session": "U.S. market open", "published_at": "2026-08-21T16:44:07.8210825Z", "day_of_week": "Friday", "hour_utc": 16, "hour_local": 18, "title": "U.S. market open — Andrea Ravalli Portfolio", "tickers": ["WMT", "AMZN"], "image_type": "pie_chart", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:38.806925"}, {"id": "cdf384b0-9cdd-11f1-8080-800173628dcd", "platform": "etoro", "session": "us_close", "published_at": "2026-08-20T21:26:42.9017838Z", "day_of_week": "Thursday", "hour_utc": 21, "hour_local": 23, "title": "us_close — Andrea Ravalli Portfolio", "tickers": ["PPFB.DE", "TRX", "TSM", "PLTR", "LLY", "HUM", "NVDA", "NOVO-B.CO"], "image_type": "pie_chart", "likes": 1, "comments": 6, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:39.204053"}, {"id": "080ba0c0-9ca6-11f1-8080-800145afd43e", "platform": "etoro", "session": "copy_trading", "published_at": "2026-08-20T14:47:15.8222410Z", "day_of_week": "Thursday", "hour_utc": 14, "hour_local": 16, "title": "copy_trading — Andrea Ravalli Portfolio", "tickers": ["MSFT", "NVDA", "AMZN", "70k."], "image_type": "pie_chart", "likes": 0, "comments": 0, "shares": 0, "url": "https://www.etoro.com/people/AndreaRavalli", "last_synced": "2026-08-22T11:08:39.520061"}];
+    const insightsData = {"total_posts": 15, "total_likes": 13, "total_comments": 12, "avg_likes": 0.87, "avg_comments": 0.8, "best_hour": "23:00 (CET)", "best_day": "Thursday", "hourly": {"9": {"count": 10, "likes": 11, "comments": 0, "eng": 16.5}, "22": {"count": 1, "likes": 0, "comments": 6, "eng": 18.0}, "19": {"count": 1, "likes": 1, "comments": 0, "eng": 1.5}, "18": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "23": {"count": 1, "likes": 1, "comments": 6, "eng": 19.5}, "16": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}}, "weekdays": {"Saturday": {"count": 10, "likes": 11, "comments": 0, "eng": 16.5}, "Friday": {"count": 3, "likes": 1, "comments": 6, "eng": 19.5}, "Thursday": {"count": 2, "likes": 1, "comments": 6, "eng": 19.5}}, "tag_stats": {"ABT.US": {"count": 1, "likes": 1, "comments": 0, "eng": 1.5}, "AZN.L": {"count": 1, "likes": 2, "comments": 0, "eng": 3.0}, "HUM": {"count": 2, "likes": 2, "comments": 6, "eng": 21.0}, "TRIG.L": {"count": 1, "likes": 1, "comments": 0, "eng": 1.5}, "2318.HK": {"count": 1, "likes": 1, "comments": 0, "eng": 1.5}, "1919.HK": {"count": 1, "likes": 1, "comments": 0, "eng": 1.5}, "PRY.MI": {"count": 1, "likes": 1, "comments": 0, "eng": 1.5}, "ULVR.L": {"count": 1, "likes": 1, "comments": 0, "eng": 1.5}, "GLEN.L": {"count": 1, "likes": 1, "comments": 0, "eng": 1.5}, "ENEL.MI": {"count": 1, "likes": 1, "comments": 0, "eng": 1.5}, "CCJ": {"count": 1, "likes": 0, "comments": 6, "eng": 18.0}, "PLTR": {"count": 2, "likes": 1, "comments": 12, "eng": 37.5}, "PPFB.DE": {"count": 2, "likes": 1, "comments": 12, "eng": 37.5}, "VOF.L": {"count": 1, "likes": 0, "comments": 6, "eng": 18.0}, "MRVL": {"count": 1, "likes": 0, "comments": 6, "eng": 18.0}, "MAU.PA": {"count": 1, "likes": 0, "comments": 6, "eng": 18.0}, "TRX": {"count": 2, "likes": 2, "comments": 6, "eng": 21.0}, "WMT": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "AMZN": {"count": 2, "likes": 0, "comments": 0, "eng": 0.0}, "TSM": {"count": 1, "likes": 1, "comments": 6, "eng": 19.5}, "LLY": {"count": 1, "likes": 1, "comments": 6, "eng": 19.5}, "NVDA": {"count": 2, "likes": 1, "comments": 6, "eng": 19.5}, "NOVO-B.CO": {"count": 1, "likes": 1, "comments": 6, "eng": 19.5}, "MSFT": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}, "70k.": {"count": 1, "likes": 0, "comments": 0, "eng": 0.0}}, "image_stats": {"infographic_card": {"count": 10, "likes": 11, "comments": 0, "eng": 16.5}, "winners_losers_card": {"count": 1, "likes": 0, "comments": 6, "eng": 18.0}, "crypto_pulse_card": {"count": 1, "likes": 1, "comments": 0, "eng": 1.5}, "pie_chart": {"count": 3, "likes": 1, "comments": 6, "eng": 19.5}}};
 
     // Render Table
     const tbody = document.getElementById('postsTableBody');
@@ -243,10 +248,14 @@
       tbody.appendChild(tr);
     });
 
-    // Render Hours Chart
+    // Render Hours Chart (Dynamic from insightsData)
     const ctxHours = document.getElementById('chartHours').getContext('2d');
-    const hoursLabels = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
-    const hoursData = [12, 18, 25, 30, 48, 28, 42, 65];
+    const hoursSlots = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+    const hoursLabels = hoursSlots.map(h => String(h).padStart(2, '0') + ':00');
+    const hoursData = hoursSlots.map(h => {
+      const entry = (insightsData.hourly && insightsData.hourly[String(h)]) || (insightsData.hourly && insightsData.hourly[h]);
+      return entry ? Math.round((entry.eng || 0) * 10) / 10 : 0;
+    });
 
     new Chart(ctxHours, {
       type: 'bar',
@@ -255,7 +264,7 @@
         datasets: [{
           label: 'Engagement Score',
           data: hoursData,
-          backgroundColor: 'rgba(0, 212, 255, 0.7)',
+          backgroundColor: 'rgba(0, 212, 255, 0.75)',
           borderRadius: 8,
         }]
       },
@@ -269,17 +278,29 @@
       }
     });
 
-    // Render Days Chart
+    // Render Days Chart (Dynamic from insightsData)
     const ctxDays = document.getElementById('chartDays').getContext('2d');
-    const daysLabels = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
-    const daysData = [35, 55, 48, 52, 45, 60, 58];
+    const dayMap = [
+      { name: 'Lunedì', key: 'Monday' },
+      { name: 'Martedì', key: 'Tuesday' },
+      { name: 'Mercoledì', key: 'Wednesday' },
+      { name: 'Giovedì', key: 'Thursday' },
+      { name: 'Venerdì', key: 'Friday' },
+      { name: 'Sabato', key: 'Saturday' },
+      { name: 'Domenica', key: 'Sunday' }
+    ];
+    const daysLabels = dayMap.map(d => d.name);
+    const daysData = dayMap.map(d => {
+      const entry = insightsData.weekdays && insightsData.weekdays[d.key];
+      return entry ? Math.round((entry.eng || 0) * 10) / 10 : 0;
+    });
 
     new Chart(ctxDays, {
       type: 'line',
       data: {
         labels: daysLabels,
         datasets: [{
-          label: 'Interazioni Medie',
+          label: 'Engagement Score Totale',
           data: daysData,
           borderColor: '#13C636',
           backgroundColor: 'rgba(19, 198, 54, 0.15)',
