@@ -1171,9 +1171,6 @@ def get_why_copy_message(five_year_return=200, avg_yearly_return=18, benchmark_p
         # Fallback if no data
         benchmark_lines = "✓ Sovraperformance vs S&P500\n✓ Sovraperformance vs MSCI World\n✓ Sovraperformance vs Euro Stoxx 50"
 
-    # Only include @AndreaRavalli tag during US market close recap
-    tag_line = "\n@AndreaRavalli" if "CLOSE" in (market_session or "").upper() else ""
-
     message = f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 PERCHÈ COPIARE QUESTO PORTAFOGLIO?
@@ -1194,8 +1191,6 @@ Raddoppio del capitale stimato in ~{time_to_double:.1f} anni
 
 🎯 Strategia di lungo termine basata su fondamentali solidi
 🔄 Ribilanciamento periodico per ottimizzare il rapporto rischio/rendimento
-
-🔗 Info & Link per copiarmi: https://bio.mega89.uk/{tag_line}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
     return message

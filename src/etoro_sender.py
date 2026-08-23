@@ -24,14 +24,6 @@ def _strip_html(text: str) -> str:
     return text.strip()
 
 
-def _add_cashtags(text: str) -> str:
-    """Ensure standard ticker mentions have cashtags for eToro feed (e.g. NVDA -> $NVDA)."""
-    # Replace ticker mentions in lines like "• NVDA +4.5%" or "NVDA:" with "$NVDA"
-    # Avoid replacing already prefixed $TICKER
-    pattern = r'(?<![\$\w])([A-Z]{2,6}(?:\.[A-Z]{2})?)(?=\s*[:\+\-\(]|\s+[\+\-]\d)'
-    return re.sub(pattern, r'$\1', text)
-
-
 def build_etoro_post_text(
     plain_recap: str,
     portfolio_daily: Optional[float] = None,
@@ -43,19 +35,19 @@ def build_etoro_post_text(
     Max 4000 chars.
     """
     clean_text = _strip_html(plain_recap)
-    tagged_text = _add_cashtags(clean_text)
 
-    # Add header if not already present
-    perf_str = f" ({portfolio_daily:+.2f}%)" if portfolio_daily is not None else ""
-    header = f"📊 Recap Portafoglio — {session_name}{perf_str}\n\n"
-
-    # Limit to 3800 characters to leave room for tags/footer
-    if len(tagged_text) > 3600:
-        tagged_text = tagged_text[:3600] + "\n\n... (recap completo su canale)"
+    # Cleanly truncate if needed to fit eToro limit (leaving room for footer)
+    if len(clean_text) > 3700:
+        cut = clean_text.rfind('\n\n', 0, 3700)
+        if cut == -1:
+            cut = clean_text.rfind('\n', 0, 3700)
+        if cut == -1:
+            cut = 3700
+        clean_text = clean_text[:cut].rstrip()
 
     footer = "\n\n💬 Cosa ne pensate della sessione di oggi? Lasciate un commento qui sotto! 👇"
     
-    post_content = f"{tagged_text}{footer}".strip()
+    post_content = f"{clean_text}{footer}".strip()
     return post_content[:3950]
 
 
