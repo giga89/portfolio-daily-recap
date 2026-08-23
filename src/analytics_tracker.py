@@ -6,8 +6,11 @@ Tracks published posts across all platforms, syncs engagement metrics (likes, co
 and generates a state-of-the-art dual-hub portal for GitHub Pages (in full English for the public hub):
   1. 🌟 Public Investor & Copier Hub (English):
      • Hero with Popular Investor metrics (+200% return, ~18% CAGR, ~4yr capital doubling)
-     • Quantitative Risk & Alpha Metrics (Risk Score 4, Sharpe 1.42, Sortino 1.95, Beta 0.84, Max DD -18.4%)
+     • Quantitative Risk & Alpha Metrics (2 Full Rows / 8 Gauge Cards: Beta, Sharpe, Sortino, Jensen's Alpha, Omega, Treynor, Info, Calmar)
      • Monthly Performance Heatmap Matrix (2020-2026 Year × Month official track record)
+     • Dividends Suite (Overview KPI, Breakdown Table, Upcoming Ex-Dates & Pay Days)
+     • Historical Drawdowns Table (Post-2020 Strategy Era: Depth, Start, End, Recovery Months)
+     • Cross-Asset Correlation & Cluster Resilience Heatmap Matrix
      • Interactive DCA (PAC) & Compound Growth Simulator with real-time sliders & projection chart
      • Stress Test & Historical Resilience Matrix (Covid 2020, Rate Shock 2022, AI Wave 2023-2024)
      • Monthly Seasonality Radar & Historical Pattern Analysis
@@ -38,7 +41,7 @@ ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
 DOCS_ASSETS_DIR = os.path.join(DOCS_DIR, "assets")
 
 MONTHLY_RETURNS = {
-    "2026": {"Jan": 3.4, "Feb": 4.1, "Mar": 1.2, "Apr": 2.8, "May": -0.9, "Jun": 1.5, "Jul": 2.2, "Aug": 1.6, "Sep": None, "Oct": None, "Nov": None, "Dec": None, "Total": 16.9},
+    "2026": {"Jan": 2.1, "Feb": 3.4, "Mar": 0.8, "Apr": 1.9, "May": -0.9, "Jun": 1.2, "Jul": 1.5, "Aug": 0.9, "Sep": None, "Oct": None, "Nov": None, "Dec": None, "Total": 11.0},
     "2025": {"Jan": 2.8, "Feb": 1.9, "Mar": -1.4, "Apr": 3.2, "May": 2.5, "Jun": 1.8, "Jul": 3.1, "Aug": -0.8, "Sep": 2.4, "Oct": 1.9, "Nov": 2.8, "Dec": 1.2, "Total": 22.4},
     "2024": {"Jan": 1.5, "Feb": 4.2, "Mar": 2.9, "Apr": -2.1, "May": 3.8, "Jun": 3.1, "Jul": 1.4, "Aug": 2.0, "Sep": 1.8, "Oct": -1.2, "Nov": 5.4, "Dec": 3.1, "Total": 28.9},
     "2023": {"Jan": 5.8, "Feb": -1.2, "Mar": 3.4, "Apr": 1.5, "May": 4.2, "Jun": 5.1, "Jul": 3.8, "Aug": -2.4, "Sep": -2.8, "Oct": -1.9, "Nov": 8.4, "Dec": 7.2, "Total": 38.6},
@@ -47,22 +50,59 @@ MONTHLY_RETURNS = {
     "2020": {"Jan": 1.2, "Feb": -3.5, "Mar": -9.2, "Apr": 11.4, "May": 6.8, "Jun": 4.5, "Jul": 7.1, "Aug": 8.2, "Sep": -2.1, "Oct": -1.4, "Nov": 14.8, "Dec": 6.5, "Total": 56.4}
 }
 
-QUANT_RISK_METRICS = {
-    "risk_score": "4 / 10",
-    "sharpe_ratio": "1.42",
-    "sortino_ratio": "1.95",
-    "beta_spx": "0.84",
-    "max_drawdown": "-18.4%",
-    "profitable_months": "74.5%",
-    "win_rate": "76.8%",
-    "profit_factor": "2.35",
-    "avg_holding": "> 14 Months",
-    "leverage": "1x (No Leverage)",
-    "short_exposure": "0% (Long-Only)",
-    "div_yield": "~2.85%",
-    "cagr": "~18.0%",
-    "total_return": "+200%"
-}
+GAUGE_METRICS = [
+    {"id": "beta", "name": "Beta vs S&P 500", "value": "0.84", "min": 0, "max": 2.0, "pos": 0.84, "desc": "Lower market volatility & defensive buffering"},
+    {"id": "sharpe", "name": "Sharpe Ratio (3Y)", "value": "1.42", "min": 0, "max": 1.5, "pos": 1.42, "desc": "High risk-adjusted excess returns"},
+    {"id": "sortino", "name": "Sortino Ratio (3Y)", "value": "1.95", "min": 0, "max": 3.0, "pos": 1.95, "desc": "Superior downside protection"},
+    {"id": "alpha", "name": "Jensen's Alpha", "value": "+7.85%", "min": -10, "max": 10, "pos": 7.85, "desc": "Annualized outperformance vs benchmark"},
+    {"id": "omega", "name": "Omega Ratio", "value": "1.85", "min": 0, "max": 2.5, "pos": 1.85, "desc": "Strong probability of gain vs loss"},
+    {"id": "treynor", "name": "Treynor Ratio", "value": "0.18", "min": 0, "max": 0.4, "pos": 0.18, "desc": "Excess return per unit of systematic risk"},
+    {"id": "info", "name": "Information Ratio", "value": "0.72", "min": -1.0, "max": 1.0, "pos": 0.72, "desc": "Consistent active management alpha"},
+    {"id": "calmar", "name": "Calmar Ratio", "value": "1.15", "min": 0, "max": 2.0, "pos": 1.15, "desc": "Annual return relative to max drawdown"},
+]
+
+DIVIDEND_BREAKDOWN = [
+    {"ticker": "TRIG.L", "name": "Renewables Infrastructure", "port_yield": "0.19%", "comp_yield": "9.83%", "dps": "$0.07"},
+    {"ticker": "1919.HK", "name": "COSCO SHIPPING Holdings", "port_yield": "0.14%", "comp_yield": "6.23%", "dps": "$0.21"},
+    {"ticker": "ENEL.MI", "name": "Enel S.p.A.", "port_yield": "0.14%", "comp_yield": "6.10%", "dps": "$0.43"},
+    {"ticker": "ENI.MI", "name": "Eni S.p.A.", "port_yield": "0.11%", "comp_yield": "4.54%", "dps": "$0.94"},
+    {"ticker": "MAU.PA", "name": "Maurel & Prom SA", "port_yield": "0.08%", "comp_yield": "4.48%", "dps": "$0.30"},
+    {"ticker": "ULVR.L", "name": "Unilever PLC", "port_yield": "0.09%", "comp_yield": "3.62%", "dps": "$1.47"},
+    {"ticker": "SX7PEX.DE", "name": "iShares European Banks", "port_yield": "0.07%", "comp_yield": "4.10%", "dps": "$1.15"},
+    {"ticker": "WDEF.L", "name": "WisdomTree Europe Income", "port_yield": "0.06%", "comp_yield": "3.40%", "dps": "$0.85"},
+    {"ticker": "GLEN.L", "name": "Glencore PLC", "port_yield": "0.07%", "comp_yield": "3.15%", "dps": "$0.09"},
+    {"ticker": "ABBV", "name": "AbbVie Inc", "port_yield": "0.08%", "comp_yield": "2.58%", "dps": "$6.06"},
+    {"ticker": "NOVO-B.CO", "name": "Novo Nordisk A/S", "port_yield": "0.06%", "comp_yield": "1.35%", "dps": "$1.20"},
+    {"ticker": "WMT", "name": "Walmart Inc", "port_yield": "0.05%", "comp_yield": "1.28%", "dps": "$0.25"},
+    {"ticker": "AVGO", "name": "Broadcom Inc", "port_yield": "0.05%", "comp_yield": "1.10%", "dps": "$0.53"},
+    {"ticker": "MSFT", "name": "Microsoft Corporation", "port_yield": "0.04%", "comp_yield": "0.75%", "dps": "$0.75"},
+]
+
+NEXT_DIVIDENDS = [
+    {"ticker": "MAU.PA", "type": "Ex-Dividend", "date": "Aug 25, 2026", "pay": "$0.45"},
+    {"ticker": "GLEN.L", "type": "Ex-Dividend", "date": "Aug 26, 2026", "pay": "$0.09"},
+    {"ticker": "MAU.PA", "type": "Pay Day", "date": "Aug 27, 2026", "pay": "$0.45"},
+    {"ticker": "WMT", "type": "Pay Day", "date": "Sep 08, 2026", "pay": "$0.25"},
+    {"ticker": "GLEN.L", "type": "Pay Day", "date": "Sep 18, 2026", "pay": "$0.09"},
+    {"ticker": "ENI.MI", "type": "Pay Day", "date": "Sep 23, 2026", "pay": "$0.24"},
+    {"ticker": "TRIG.L", "type": "Pay Day", "date": "Sep 30, 2026", "pay": "$0.07"},
+]
+
+HISTORICAL_DRAWDOWNS = [
+    {"depth": "-14.20%", "start": "Jan 2022", "end": "Dec 2022", "months": "12", "context": "Global Rate Hike & Inflation Bear Market (Contained vs Nasdaq -33.1%)"},
+    {"depth": "-9.20%", "start": "Feb 2020", "end": "Apr 2020", "months": "2", "context": "Covid-19 Global Panic Crash (Rapidly recovered in Apr/May 2020)"},
+    {"depth": "-4.67%", "start": "Feb 2026", "end": "Apr 2026", "months": "2", "context": "Mid-Cycle Technology Multiples Pullback"},
+    {"depth": "-4.04%", "start": "Jun 2026", "end": "Aug 2026", "months": "2", "context": "Summer FX & Macro Consolidation"},
+    {"depth": "-2.25%", "start": "Nov 2025", "end": "Jan 2026", "months": "2", "context": "Year-End Portfolio Profit Taking & Rebalancing"},
+]
+
+CORRELATION_CLUSTERS = [
+    {"cluster": "AI & Tech", "tech": 1.00, "pharma": 0.28, "energy": 0.14, "consumer": 0.42, "safe_haven": -0.15},
+    {"cluster": "Pharma & GLP-1", "tech": 0.28, "pharma": 1.00, "energy": 0.18, "consumer": 0.35, "safe_haven": 0.05},
+    {"cluster": "Energy & Nuclear", "tech": 0.14, "pharma": 0.18, "energy": 1.00, "consumer": 0.22, "safe_haven": 0.24},
+    {"cluster": "Consumer & Luxury", "tech": 0.42, "pharma": 0.35, "energy": 0.22, "consumer": 1.00, "safe_haven": -0.08},
+    {"cluster": "Safe Haven & Cash", "tech": -0.15, "pharma": 0.05, "energy": 0.24, "consumer": -0.08, "safe_haven": 1.00},
+]
 
 SEASONALITY_DATA = {
     "Jan": 1.94,
@@ -344,7 +384,11 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     insights_json = json.dumps(insights, ensure_ascii=False)
     holdings_json = json.dumps(HOLDINGS_DATA, ensure_ascii=False)
     monthly_json = json.dumps(MONTHLY_RETURNS, ensure_ascii=False)
-    quant_json = json.dumps(QUANT_RISK_METRICS, ensure_ascii=False)
+    gauge_json = json.dumps(GAUGE_METRICS, ensure_ascii=False)
+    div_breakdown_json = json.dumps(DIVIDEND_BREAKDOWN, ensure_ascii=False)
+    next_divs_json = json.dumps(NEXT_DIVIDENDS, ensure_ascii=False)
+    drawdowns_json = json.dumps(HISTORICAL_DRAWDOWNS, ensure_ascii=False)
+    correlation_json = json.dumps(CORRELATION_CLUSTERS, ensure_ascii=False)
     seasonality_json = json.dumps(SEASONALITY_DATA, ensure_ascii=False)
 
     html = f"""<!DOCTYPE html>
@@ -353,7 +397,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Andrea Ravalli · Portfolio Hub & Popular Investor Analytics</title>
-  <meta name="description" content="Official portfolio hub of Andrea Ravalli (eToro Popular Investor): track record (+200% since 2020), monthly returns heatmap, quantitative risk metrics, DCA compound simulator, and copier guide.">
+  <meta name="description" content="Official portfolio hub of Andrea Ravalli (eToro Popular Investor): track record (+200% since 2020), monthly returns heatmap, quantitative risk metrics, dividends breakdown, drawdown analysis, and copier guide.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -501,20 +545,114 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       color: var(--green); padding: 4px 12px; border-radius: 999px;
     }}
 
-    /* ── Quantitative Risk & Intelligence Bar ─────────────────────────────── */
-    .quant-grid {{
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 32px;
+    /* ── Performance Gauge Metrics (2 Full Rows / 8 Cards) ───────────────── */
+    .gauge-ribbon {{
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; justify-content: flex-start;
     }}
-    .quant-card {{
+    .ribbon-badge {{
+      background: rgba(15, 23, 61, 0.8); border: 1px solid var(--surface-border); border-radius: 999px;
+      padding: 6px 14px; font-size: 0.8rem; font-weight: 700; color: #CBD5E1; display: flex; align-items: center; gap: 6px;
+    }}
+    .ribbon-badge strong {{ color: var(--green); }}
+
+    .gauge-grid-8 {{
+      display: grid; grid-template-columns: repeat(1, 1fr); gap: 16px; margin-bottom: 36px;
+    }}
+    @media(min-width: 600px) {{ .gauge-grid-8 {{ grid-template-columns: repeat(2, 1fr); }} }}
+    @media(min-width: 1024px) {{ .gauge-grid-8 {{ grid-template-columns: repeat(4, 1fr); }} }}
+
+    .gauge-card {{
       background: var(--surface-card); border: 1px solid var(--surface-border);
-      border-radius: var(--radius-md); padding: 18px; text-align: center;
+      border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
+      position: relative; box-shadow: var(--shadow);
     }}
-    .quant-label {{ font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }}
-    .quant-value {{ font-size: 1.45rem; font-weight: 900; color: #FFF; font-family: 'JetBrains Mono', monospace; }}
-    .quant-value.green {{ color: var(--green); }}
-    .quant-value.gold {{ color: var(--gold); }}
-    .quant-value.cyan {{ color: var(--cyan); }}
-    .quant-desc {{ font-size: 0.72rem; color: var(--muted); margin-top: 4px; }}
+    .gauge-card:hover {{ border-color: var(--surface-border-bright); }}
+    .gauge-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }}
+    .gauge-title {{ font-size: 0.85rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }}
+    .gauge-value {{ font-size: 1.85rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; color: #FFF; margin: 4px 0 10px; }}
+    .gauge-track-wrap {{ position: relative; height: 10px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: visible; margin-bottom: 8px; }}
+    .gauge-bar-gradient {{
+      position: absolute; left: 0; top: 0; height: 100%; width: 100%; border-radius: 999px;
+      background: linear-gradient(90deg, #FF4D6D 0%, #F5B800 45%, #13C636 100%);
+    }}
+    .gauge-bar-gradient.inverse {{
+      background: linear-gradient(90deg, #13C636 0%, #F5B800 45%, #FF4D6D 100%);
+    }}
+    .gauge-pin {{
+      position: absolute; top: -4px; width: 18px; height: 18px; border-radius: 50%;
+      background: #FFF; border: 3px solid #0a0f2c; box-shadow: 0 0 8px rgba(255,255,255,0.9);
+      transform: translateX(-50%); z-index: 2;
+    }}
+    .gauge-desc {{ font-size: 0.74rem; color: var(--muted); line-height: 1.3; }}
+
+    /* ── Dividends Suite ──────────────────────────────────────────────────── */
+    .dividends-layout {{
+      display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 36px;
+    }}
+    @media(min-width: 900px) {{ .dividends-layout {{ grid-template-columns: 280px 1fr 340px; }} }}
+
+    .div-kpi-card {{
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg); padding: 24px; display: flex; flex-direction: column; justify-content: center;
+      text-align: center; box-shadow: var(--shadow);
+    }}
+    .div-kpi-big {{ font-size: 3rem; font-weight: 900; color: var(--green); text-shadow: 0 0 25px var(--green-glow); font-family: 'JetBrains Mono', monospace; }}
+    .div-kpi-label {{ font-size: 0.82rem; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }}
+    .div-kpi-subtext {{ font-size: 0.85rem; color: #CBD5E1; line-height: 1.5; margin-top: 14px; }}
+    .div-kpi-subtext strong {{ color: var(--gold); }}
+
+    .div-table-card {{
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); overflow-x: auto;
+    }}
+    .div-table-card h4 {{ font-size: 0.95rem; font-weight: 800; margin-bottom: 12px; color: #FFF; }}
+    .div-scroll-box {{ max-height: 280px; overflow-y: auto; }}
+    .mini-div-table {{ width: 100%; border-collapse: collapse; font-size: 0.82rem; }}
+    .mini-div-table th {{ padding: 8px 10px; color: var(--muted); font-size: 0.72rem; font-weight: 800; border-bottom: 1px solid var(--surface-border); text-align: left; }}
+    .mini-div-table td {{ padding: 8px 10px; border-bottom: 1px solid var(--surface-border); }}
+
+    .div-next-card {{
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow);
+    }}
+    .div-next-card h4 {{ font-size: 0.95rem; font-weight: 800; margin-bottom: 14px; color: #FFF; }}
+    .div-next-list {{ display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }}
+    .div-next-row {{
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 8px;
+      padding: 10px 12px; font-size: 0.82rem;
+    }}
+    .div-next-left {{ display: flex; align-items: center; gap: 10px; }}
+    .div-next-type {{ font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; }}
+    .div-next-type.ex {{ background: rgba(0, 212, 255, 0.15); color: var(--cyan); border: 1px solid var(--cyan); }}
+    .div-next-type.pay {{ background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }}
+
+    /* ── Drawdowns & Correlation Suite ────────────────────────────────────── */
+    .resilience-dual-grid {{
+      display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 36px;
+    }}
+    @media(min-width: 860px) {{ .resilience-dual-grid {{ grid-template-columns: 1fr 1fr; }} }}
+
+    .drawdown-card {{
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow);
+    }}
+    .drawdown-table {{ width: 100%; border-collapse: collapse; font-size: 0.84rem; }}
+    .drawdown-table th {{ padding: 10px 12px; color: var(--muted); font-size: 0.74rem; font-weight: 800; border-bottom: 1px solid var(--surface-border); text-align: left; }}
+    .drawdown-table td {{ padding: 10px 12px; border-bottom: 1px solid var(--surface-border); }}
+    .dd-depth {{ color: var(--red); font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; }}
+
+    .correlation-card {{
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow);
+    }}
+    .corr-table {{ width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: center; }}
+    .corr-table th {{ padding: 8px 6px; color: var(--muted); font-size: 0.72rem; font-weight: 800; border-bottom: 1px solid var(--surface-border); }}
+    .corr-table td {{ padding: 8px 6px; border-bottom: 1px solid var(--surface-border); font-family: 'JetBrains Mono', monospace; font-weight: 700; }}
+    .corr-cell-high {{ background: rgba(0, 212, 255, 0.25); color: #00D4FF; border-radius: 4px; padding: 2px 4px; }}
+    .corr-cell-med {{ background: rgba(245, 184, 0, 0.2); color: #F5B800; border-radius: 4px; padding: 2px 4px; }}
+    .corr-cell-low {{ background: rgba(19, 198, 54, 0.2); color: #13C636; border-radius: 4px; padding: 2px 4px; }}
+    .corr-cell-neg {{ background: rgba(157, 78, 221, 0.25); color: #d09cf7; border-radius: 4px; padding: 2px 4px; }}
 
     /* ── Monthly Performance Matrix ───────────────────────────────────────── */
     .monthly-matrix-card {{
@@ -846,54 +984,25 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         </div>
       </section>
 
-      <!-- Quantitative Risk & Intelligence Bar -->
+      <!-- Quantitative Risk & Performance Metrics (2 Full Rows / 8 Gauge Cards) -->
       <section>
         <div class="section-title">
-          <span>🛡️ Quantitative Risk & Alpha Metrics</span>
+          <span>🛡️ Quantitative Risk & Performance Metrics</span>
           <span class="tag">Institutional Discipline</span>
         </div>
 
-        <div class="quant-grid">
-          <div class="quant-card">
-            <div class="quant-label">eToro Risk Score</div>
-            <div class="quant-value green">4 / 10</div>
-            <div class="quant-desc">Balanced & controlled risk</div>
-          </div>
-          <div class="quant-card">
-            <div class="quant-label">Sharpe Ratio (3Y)</div>
-            <div class="quant-value gold">1.42</div>
-            <div class="quant-desc">Risk-adjusted return efficiency</div>
-          </div>
-          <div class="quant-card">
-            <div class="quant-label">Sortino Ratio (3Y)</div>
-            <div class="quant-value cyan">1.95</div>
-            <div class="quant-desc">Superior downside defense</div>
-          </div>
-          <div class="quant-card">
-            <div class="quant-label">Beta vs S&P 500</div>
-            <div class="quant-value">0.84</div>
-            <div class="quant-desc">Lower market volatility</div>
-          </div>
-          <div class="quant-card">
-            <div class="quant-label">Max Drawdown (3Y)</div>
-            <div class="quant-value green">-18.4%</div>
-            <div class="quant-desc">Contained vs Nasdaq (-33%)</div>
-          </div>
-          <div class="quant-card">
-            <div class="quant-label">Profitable Months</div>
-            <div class="quant-value green">74.5%</div>
-            <div class="quant-desc">Consistent winning months</div>
-          </div>
-          <div class="quant-card">
-            <div class="quant-label">Closed Trades Win Rate</div>
-            <div class="quant-value green">76.8%</div>
-            <div class="quant-desc">Profit Factor: 2.35</div>
-          </div>
-          <div class="quant-card">
-            <div class="quant-label">Portfolio Leverage</div>
-            <div class="quant-value cyan">1x (No Leverage)</div>
-            <div class="quant-desc">100% Real Long-Only Assets</div>
-          </div>
+        <!-- Strategy Profile Badge Ribbon -->
+        <div class="gauge-ribbon">
+          <div class="ribbon-badge">⭐ eToro Risk Score: <strong>3 / 10 (Low-Moderate)</strong></div>
+          <div class="ribbon-badge">⚡ Portfolio Leverage: <strong>1x (Zero Leverage)</strong></div>
+          <div class="ribbon-badge">🎯 Closed Trades Win Rate: <strong>76.8%</strong></div>
+          <div class="ribbon-badge">📈 Profitable Months: <strong>74.5%</strong></div>
+          <div class="ribbon-badge">🛡️ Exposure: <strong>100% Long-Only Real Assets</strong></div>
+        </div>
+
+        <!-- 8 Gauge Cards Grid (2 Full Rows of 4 Cards) -->
+        <div class="gauge-grid-8" id="gaugeCardsGrid">
+          <!-- Rendered via JavaScript -->
         </div>
       </section>
 
@@ -926,6 +1035,117 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             <!-- Rendered via JavaScript -->
           </tbody>
         </table>
+      </section>
+
+      <!-- ── Dividends Suite (3-Panel Layout) ───────────────────────────────── -->
+      <section>
+        <div class="section-title">
+          <span>💰 Portfolio Dividend Cashflow & Yield Suite</span>
+          <span class="tag">Compounding Engine</span>
+        </div>
+
+        <div class="dividends-layout">
+          <!-- Panel 1: Yield Overview -->
+          <div class="div-kpi-card">
+            <div class="div-kpi-label">Annualized Dividend Yield</div>
+            <div class="div-kpi-big">1.24%</div>
+            <div class="div-kpi-subtext">
+              <strong>29 out of 41</strong> instruments pay regular dividends.<br>
+              <strong>4 payments</strong> estimated in the next 30 days.<br><br>
+              Highest yield: <strong>$TRIG.L (9.83%)</strong>, <strong>$1919.HK (6.23%)</strong>, <strong>$ENEL.MI (6.10%)</strong>.<br>
+              <span style="font-size:0.75rem; color:var(--muted); margin-top:8px; display:block;">100% of dividends are automatically reinvested to accelerate compounding.</span>
+            </div>
+          </div>
+
+          <!-- Panel 2: Dividend Breakdown Table -->
+          <div class="div-table-card">
+            <h4>📊 Dividend Yield Breakdown by Holding</h4>
+            <div class="div-scroll-box">
+              <table class="mini-div-table">
+                <thead>
+                  <tr>
+                    <th>Instrument</th>
+                    <th>Port. Yield</th>
+                    <th>Company Yield</th>
+                    <th>Per Share</th>
+                  </tr>
+                </thead>
+                <tbody id="divBreakdownBody">
+                  <!-- Rendered via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Panel 3: Upcoming Dividends -->
+          <div class="div-next-card">
+            <h4>📅 Next Scheduled Dividends</h4>
+            <div class="div-next-list" id="nextDivsList">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Historical Drawdowns & Asset Correlation ───────────────────────── -->
+      <section>
+        <div class="resilience-dual-grid">
+          
+          <!-- Drawdowns Table (Strategy Inception: Post-2020) -->
+          <div class="drawdown-card">
+            <div class="section-title" style="margin-bottom: 12px; font-size: 1.15rem;">
+              <span>📉 Worst Historical Drawdowns</span>
+              <span class="tag">Since 2020 Strategy</span>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--muted); margin-bottom: 14px;">
+              Drawdown depth and duration recorded under the active multi-asset strategy (excluding pre-2020 data).
+            </p>
+            <table class="drawdown-table">
+              <thead>
+                <tr>
+                  <th>Depth</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Recovery</th>
+                  <th>Market Context</th>
+                </tr>
+              </thead>
+              <tbody id="drawdownsTableBody">
+                <!-- Rendered via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Cross-Asset Correlation Heatmap -->
+          <div class="correlation-card">
+            <div class="section-title" style="margin-bottom: 12px; font-size: 1.15rem;">
+              <span>🔗 Cross-Asset Correlation Matrix</span>
+              <span class="tag">Avg Correlation: 0.32</span>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--muted); margin-bottom: 14px;">
+              Low correlation between pillars ensures capital preservation during sector rotations.
+            </p>
+            <table class="corr-table">
+              <thead>
+                <tr>
+                  <th>Pillar</th>
+                  <th>Tech</th>
+                  <th>Pharma</th>
+                  <th>Energy</th>
+                  <th>Cons.</th>
+                  <th>Hedge</th>
+                </tr>
+              </thead>
+              <tbody id="correlationTableBody">
+                <!-- Rendered via JavaScript -->
+              </tbody>
+            </table>
+            <div style="font-size: 0.74rem; color: var(--muted); margin-top: 12px; line-height: 1.4;">
+              💡 <strong>Diversification Buffer:</strong> Safe haven gold & cash show negative correlation (<code>-0.15</code>) to tech drawdowns, buffering total portfolio volatility.
+            </div>
+          </div>
+
+        </div>
       </section>
 
       <!-- Interactive DCA & Compound Growth Simulator -->
@@ -1391,7 +1611,11 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     const insightsData = {insights_json};
     const holdingsData = {holdings_json};
     const monthlyData = {monthly_json};
-    const quantData = {quant_json};
+    const gaugeMetrics = {gauge_json};
+    const divBreakdownData = {div_breakdown_json};
+    const nextDivsData = {next_divs_json};
+    const drawdownsData = {drawdowns_json};
+    const correlationData = {correlation_json};
     const seasonalityData = {seasonality_json};
 
     // ── Navigation & Tabs ──────────────────────────────────────────────────
@@ -1446,6 +1670,44 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       checkAdminSession();
     }}
 
+    // ── 8 Quantitative Gauge Cards (2 Full Rows of 4 Cards) ───────────────
+    function renderGaugeCards() {{
+      const container = document.getElementById('gaugeCardsGrid');
+      container.innerHTML = '';
+
+      gaugeMetrics.forEach(g => {{
+        // Calculate percentage position on bar (clamped 0% to 100%)
+        let pct = ((g.pos - g.min) / (g.max - g.min)) * 100;
+        pct = Math.max(4, Math.min(96, pct));
+
+        const isInverse = (g.id === 'beta'); // For Beta, lower is greener
+
+        const card = document.createElement('div');
+        card.className = 'gauge-card';
+        card.innerHTML = `
+          <div>
+            <div class="gauge-header">
+              <span class="gauge-title">${{g.name}}</span>
+              <span style="font-size:0.75rem; color:var(--cyan); cursor:help;" title="${{g.desc}}">ⓘ</span>
+            </div>
+            <div class="gauge-value">${{g.value}}</div>
+          </div>
+          <div>
+            <div class="gauge-track-wrap">
+              <div class="gauge-bar-gradient ${{isInverse ? 'inverse' : ''}}"></div>
+              <div class="gauge-pin" style="left: ${{pct}}%;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:4px;">
+              <span>${{g.min}}</span>
+              <span>${{g.max}}</span>
+            </div>
+            <p class="gauge-desc">${{g.desc}}</p>
+          </div>
+        `;
+        container.appendChild(card);
+      }});
+    }}
+
     // ── Monthly Returns Heatmap Table ──────────────────────────────────────
     function renderMonthlyMatrix() {{
       const tbody = document.getElementById('matrixTableBody');
@@ -1475,6 +1737,92 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
         tr.innerHTML = cellsHtml;
         tbody.appendChild(tr);
+      }});
+    }}
+
+    // ── Dividends Suite Rendering ──────────────────────────────────────────
+    function renderDividendsSuite() {{
+      // 1. Breakdown Table
+      const tb = document.getElementById('divBreakdownBody');
+      tb.innerHTML = '';
+      divBreakdownData.forEach(d => {{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <img src="./assets/logos/${{d.ticker}}.png" alt="${{d.ticker}}" style="width:20px; height:20px; border-radius:50%; object-fit:contain;" onerror="this.style.display='none'">
+              <strong>$${{d.ticker}}</strong>
+            </div>
+          </td>
+          <td style="color:var(--cyan); font-weight:700;">${{d.port_yield}}</td>
+          <td style="color:var(--gold); font-weight:700;">${{d.comp_yield}}</td>
+          <td style="font-family:'JetBrains Mono',monospace;">${{d.dps}}</td>
+        `;
+        tb.appendChild(tr);
+      }});
+
+      // 2. Next Dividends
+      const list = document.getElementById('nextDivsList');
+      list.innerHTML = '';
+      nextDivsData.forEach(n => {{
+        const row = document.createElement('div');
+        row.className = 'div-next-row';
+        const isEx = n.type.includes('Ex');
+        row.innerHTML = `
+          <div class="div-next-left">
+            <img src="./assets/logos/${{n.ticker}}.png" alt="${{n.ticker}}" style="width:24px; height:24px; border-radius:50%; object-fit:contain;" onerror="this.style.display='none'">
+            <div>
+              <strong style="color:#FFF;">$${{n.ticker}}</strong>
+              <div style="font-size:0.72rem; color:var(--muted);">${{n.date}}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <span class="div-next-type ${{isEx ? 'ex' : 'pay'}}">${{n.type}}</span>
+            <div style="font-size:0.8rem; font-weight:800; color:var(--green); margin-top:2px;">${{n.pay}}</div>
+          </div>
+        `;
+        list.appendChild(row);
+      }});
+    }}
+
+    // ── Drawdowns Table (Post-2020) ─────────────────────────────────────────
+    function renderDrawdownsTable() {{
+      const tb = document.getElementById('drawdownsTableBody');
+      tb.innerHTML = '';
+      drawdownsData.forEach(d => {{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="dd-depth">${{d.depth}}</td>
+          <td>${{d.start}}</td>
+          <td>${{d.end}}</td>
+          <td><strong>${{d.months}} mo</strong></td>
+          <td style="font-size:0.78rem; color:var(--muted);">${{d.context}}</td>
+        `;
+        tb.appendChild(tr);
+      }});
+    }}
+
+    // ── Cross-Asset Correlation Matrix ─────────────────────────────────────
+    function renderCorrelationMatrix() {{
+      const tb = document.getElementById('correlationTableBody');
+      tb.innerHTML = '';
+      correlationData.forEach(c => {{
+        const tr = document.createElement('tr');
+        const getCell = (val) => {{
+          if (val === 1.0) return `<span class="corr-cell-high">1.00</span>`;
+          if (val < 0) return `<span class="corr-cell-neg">${{val.toFixed(2)}}</span>`;
+          if (val < 0.25) return `<span class="corr-cell-low">+${{val.toFixed(2)}}</span>`;
+          return `<span class="corr-cell-med">+${{val.toFixed(2)}}</span>`;
+        }};
+        tr.innerHTML = `
+          <td style="text-align:left; font-weight:700; color:#FFF;">${{c.cluster}}</td>
+          <td>${{getCell(c.tech)}}</td>
+          <td>${{getCell(c.pharma)}}</td>
+          <td>${{getCell(c.energy)}}</td>
+          <td>${{getCell(c.consumer)}}</td>
+          <td>${{getCell(c.safe_haven)}}</td>
+        `;
+        tb.appendChild(tr);
       }});
     }}
 
@@ -1611,7 +1959,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     // ── Performance Chart (Annual vs Compound) ─────────────────────────────
     let perfChartInstance = null;
     const perfYears = ['2020', '2021', '2022', '2023', '2024', '2025', '2026 YTD'];
-    const arAnnual = [56.4, 33.1, -14.2, 38.6, 28.9, 22.4, 16.9];
+    const arAnnual = [56.4, 33.1, -14.2, 38.6, 28.9, 22.4, 11.0];
     const spxAnnual = [18.4, 28.7, -18.1, 26.3, 25.0, 16.5, 9.2];
     const msciAnnual = [15.9, 21.8, -17.7, 23.8, 20.5, 14.8, 8.5];
     const euAnnual = [-5.1, 21.0, -11.7, 19.2, 12.8, 11.5, 7.1];
@@ -1676,7 +2024,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
           }}
         }});
       }} else {{
-        const arCum = [10000, 15640, 20816, 17859, 24752, 31905, 39051, 45650];
+        const arCum = [10000, 15640, 20816, 17859, 24752, 31905, 39051, 43346];
         const spxCum = [10000, 11840, 15238, 12479, 15761, 19701, 22951, 25062];
         const msciCum = [10000, 11590, 14116, 11617, 14381, 17329, 19893, 21583];
         const labelsCum = ['2020 Start', '2020 End', '2021', '2022', '2023', '2024', '2025', '2026 YTD'];
@@ -2058,7 +2406,11 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
     // ── Initial Page Load ──────────────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {{
+      renderGaugeCards();
       renderMonthlyMatrix();
+      renderDividendsSuite();
+      renderDrawdownsTable();
+      renderCorrelationMatrix();
       updateSimulator();
       renderSeasonalityChart();
       renderPerfChart('annual');
