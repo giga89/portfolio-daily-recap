@@ -43,8 +43,14 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     # Extract sheets data
     five_year_return = sheets_data['five_year_return']
     
-    # Calculate 5-year metrics
-    avg_yearly_return = five_year_return / 5
+    # Calculate CAGR (Compound Annual Growth Rate) from strategy change date (Jan 2020)
+    from datetime import date
+    strategy_start = date(2020, 1, 1)
+    years_since_start = (date.today() - strategy_start).days / 365.25
+    if years_since_start > 0 and five_year_return > 0:
+        avg_yearly_return = ((1 + five_year_return / 100) ** (1 / years_since_start) - 1) * 100
+    else:
+        avg_yearly_return = 0
     
     # Get market session from environment variable
     market_session = os.getenv('MARKET_SESSION', 'Daily recap')

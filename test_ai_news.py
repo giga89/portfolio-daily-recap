@@ -27,14 +27,14 @@ def test_ai_news():
     print("\n📝 Test 1b: 'Why Copy' Message with custom benchmarks (Bug Fix test)")
     print("-" * 60)
     mock_benchmarks = {
-        "SPX500": 100,      # Delta: 161 - 100 = +61 (outperformance)
-        "NSDQ100": 200,     # Delta: 161 - 200 = -39 (underperformance)
-        "CHINA50": 50       # Delta: 161 - 50 = +111 (outperformance)
+        "SPX500": 136,      # Delta: 200 - 136 = +64 (sovraperformance)
+        "NSDQ100": 230,     # Delta: 200 - 230 = -30 (sottoperformance)
+        "CHINA50": -8       # Delta: 200 - (-8) = +208 (sovraperformance)
     }
     bug_fix_msg = get_why_copy_message(benchmark_performance=mock_benchmarks)
     print(bug_fix_msg)
-    if "VS NSDQ100 : -39% (underperformance)" in bug_fix_msg:
-        print("✅ Bug fix verified: Negative delta correctly labeled as (underperformance)!")
+    if "VS NSDQ100 : -30% (sottoperformance)" in bug_fix_msg:
+        print("✅ Bug fix verified: Negative delta correctly labeled as (sottoperformance)!")
     else:
         print("❌ Bug fix failed: Negative delta not correctly labeled!")
     

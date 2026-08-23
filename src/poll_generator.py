@@ -76,7 +76,7 @@ POLL_TEMPLATES = [
         "tickers": ["PLTR", "LLY", "SX7PEX.DE", "WDEF.L"],
         "message": (
             "🗳️ SONDAGGIO: GESTIONE DEL RISCHIO E ASSET ALLOCATION\n\n"
-            "La nostra strategia mantiene un Risk Score eToro certificato di 3/10 con zero leva finanziaria e +195% di performance cumulata dal 2020.\n\n"
+            "La nostra strategia mantiene un Risk Score eToro certificato di 3/10 con zero leva finanziaria e +200% di performance cumulata dal 2020.\n\n"
             "Qual è il vostro approccio attuale al rapporto rischio/rendimento sui mercati?\n\n"
             "Dite la vostra nel sondaggio qui sotto! 👇"
         )

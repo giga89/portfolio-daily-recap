@@ -1143,14 +1143,14 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
 
 
 
-def get_why_copy_message(five_year_return=161, avg_yearly_return=32, benchmark_performance=None, market_session=''):
+def get_why_copy_message(five_year_return=200, avg_yearly_return=18, benchmark_performance=None, market_session=''):
     """
     Returns the fixed message explaining why to copy this portfolio.
     Only includes the @AndreaRavalli tag in U.S. market close session to avoid notification spam on other sessions.
     
     Args:
-        five_year_return: Total return since strategy change (default 161%)
-        avg_yearly_return: Average yearly return (default 32%)
+        five_year_return: Total return since strategy change (default 200%)
+        avg_yearly_return: CAGR - Compound Annual Growth Rate (default 18%)
         benchmark_performance: Dict of {etoro_ticker: performance_value}
         market_session: Current market session name
     
@@ -1180,7 +1180,7 @@ def get_why_copy_message(five_year_return=161, avg_yearly_return=32, benchmark_p
 
 📈 STORICO DELLE PERFORMANCE:
 +{five_year_return:.0f}% dal cambio di strategia (2020)
-~{avg_yearly_return:.0f}% rendimento medio annuo
+~{avg_yearly_return:.0f}% CAGR (rendimento annuo composto)
 Raddoppio del capitale stimato in ~{time_to_double:.1f} anni
 
 ✅ PUNTI DI FORZA DELLA STRATEGIA:

@@ -48,7 +48,7 @@ def get_copier_stats_text() -> str:
                 f"• <b>Risk Score</b>: {risk}/10 (profilo conservativo/moderato)\n"
                 f"• <b>Leva finanziaria</b>: 0% (solo azioni reali ed ETF fisici, zero strumenti a leva)\n"
                 f"• <b>Win Ratio posizioni</b>: {win_ratio:.1f}%\n"
-                f"• <b>Performance storica</b>: +195% dal cambio di strategia (2020), ~39% medio annuo\n"
+                f"• <b>Performance storica</b>: +200% dal cambio di strategia (2020), ~18% CAGR annuo composto\n"
                 f"• <b>Copiers attivi</b>: {copiers} investitori\n\n"
                 f"👉 Copia automatica disponibile a partire da $200 (consigliati $500+ per replicare tutte le posizioni in proporzione esatta)."
             )
@@ -62,7 +62,7 @@ def get_copier_stats_text() -> str:
         "• <b>Risk Score</b>: 3/10 (profilo conservativo/moderato)\n"
         "• <b>Leva finanziaria</b>: 0% (solo azioni ed ETF reali, zero leva)\n"
         "• <b>Win Ratio posizioni</b>: >67%\n"
-        "• <b>Performance storica</b>: +195% dal cambio di strategia (2020), ~39% medio annuo\n"
+        "• <b>Performance storica</b>: +200% dal cambio di strategia (2020), ~18% CAGR annuo composto\n"
         "• <b>Diversificazione</b>: 3 continenti (USA, Europa, Asia) su megatrend AI, Difensivi ed Energia\n\n"
         "👉 Copia automatica attiva da $200 senza alcuna commissione di gestione."
     )
