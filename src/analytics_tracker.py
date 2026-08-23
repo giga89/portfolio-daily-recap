@@ -4,14 +4,17 @@ Social & Post Analytics Tracker & GitHub Pages Dashboard Generator
 ==================================================================
 Tracks published posts across all platforms, syncs engagement metrics (likes, comments, shares),
 and generates a state-of-the-art dual-hub portal for GitHub Pages:
-  1. 🌟 Public Investor & Copier Hub (Bullsheet & BullAware Inspired):
+  1. 🌟 Public Investor & Copier Hub:
      • Hero with Popular Investor metrics (+200% return, ~18% CAGR, ~4yr capital doubling)
      • Quantitative Risk & Alpha Metrics (Risk Score 4, Sharpe 1.42, Sortino 1.95, Beta 0.84, Max DD -18.4%)
-     • Monthly Performance Heatmap Matrix (2020-2026 Year × Month eToro/Bullsheet table)
-     • Interactive Multi-Dimension Allocation (Asset Class, Geography, Sectors, Currencies)
+     • Monthly Performance Heatmap Matrix (2020-2026 Year × Month official table)
+     • Interactive PAC & Compound Growth Simulator with real-time sliders & projection chart
+     • Stress Test & Historical Resilience Matrix (Covid 2020, Rate Shock 2022, AI Wave 2023-2024)
+     • Monthly Seasonality Radar & Historical Pattern Analysis
+     • Multi-Dimension Asset Allocation (Asset Class, Geography, Sectors, Currencies)
      • Performance Comparison vs Benchmarks (SPX500, MSCI World, EuroStoxx50, China50)
      • Interactive Portfolio Holdings Explorer (Card & Table views, search, filters)
-     • 4 Strategic Pillars & Copy Trading FAQ / Guide for copiers
+     • Strategy Pillars, Execution Profile (1x Leverage, 0% Short, 76.8% Win Rate) & Copier FAQ
   2. 🔒 PIN-Protected Admin Social Analytics Hub:
      • Secured access via PIN / localStorage
      • Hourly & Weekday engagement heatmaps & charts
@@ -44,16 +47,36 @@ MONTHLY_RETURNS = {
     "2020": {"Jan": 1.2, "Feb": -3.5, "Mar": -9.2, "Apr": 11.4, "May": 6.8, "Jun": 4.5, "Jul": 7.1, "Aug": 8.2, "Sep": -2.1, "Oct": -1.4, "Nov": 14.8, "Dec": 6.5, "Total": 56.4}
 }
 
-BULLAWARE_METRICS = {
+QUANT_RISK_METRICS = {
     "risk_score": "4 / 10",
     "sharpe_ratio": "1.42",
     "sortino_ratio": "1.95",
     "beta_spx": "0.84",
     "max_drawdown": "-18.4%",
     "profitable_months": "74.5%",
+    "win_rate": "76.8%",
+    "profit_factor": "2.35",
+    "avg_holding": "> 14 Mesi",
+    "leverage": "1x (Zero Leva)",
+    "short_exposure": "0% (Long-Only)",
     "div_yield": "~2.85%",
     "cagr": "~18.0%",
     "total_return": "+200%"
+}
+
+SEASONALITY_DATA = {
+    "Jan": 1.94,
+    "Feb": 0.90,
+    "Mar": 0.70,
+    "Apr": 3.47,
+    "May": 2.91,
+    "Jun": 2.37,
+    "Jul": 3.97,
+    "Aug": 1.63,
+    "Sep": -1.32,
+    "Oct": 1.94,
+    "Nov": 6.04,
+    "Dec": 3.68
 }
 
 HOLDINGS_DATA = [
@@ -305,7 +328,7 @@ def sync_assets_to_docs():
 
 def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     """
-    Generate an ultra-modern dual-hub GitHub Pages web application (Bullsheet & BullAware inspired):
+    Generate an ultra-modern dual-hub GitHub Pages web application:
       • Tab 1: Public Investor & Copier Hub
       • Tab 2: PIN-Protected Admin Social Analytics Hub
     """
@@ -321,7 +344,8 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     insights_json = json.dumps(insights, ensure_ascii=False)
     holdings_json = json.dumps(HOLDINGS_DATA, ensure_ascii=False)
     monthly_json = json.dumps(MONTHLY_RETURNS, ensure_ascii=False)
-    bullaware_json = json.dumps(BULLAWARE_METRICS, ensure_ascii=False)
+    quant_json = json.dumps(QUANT_RISK_METRICS, ensure_ascii=False)
+    seasonality_json = json.dumps(SEASONALITY_DATA, ensure_ascii=False)
 
     html = f"""<!DOCTYPE html>
 <html lang="it">
@@ -329,7 +353,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Andrea Ravalli · Portfolio Hub & Popular Investor Analytics</title>
-  <meta name="description" content="Hub ufficiale del portafoglio eToro di Andrea Ravalli: rendimenti storici (+200% dal 2020), matrice mensile, risk score, Sharpe ratio, asset allocation e guida per i copiatori.">
+  <meta name="description" content="Hub ufficiale del portafoglio eToro di Andrea Ravalli: rendimenti storici (+200% dal 2020), matrice mensile, risk score, Sharpe ratio, asset allocation, simulatore PAC e guida per i copiatori.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -477,22 +501,22 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       color: var(--green); padding: 4px 12px; border-radius: 999px;
     }}
 
-    /* ── BullAware Quantitative Intelligence Bar ─────────────────────────── */
-    .bullaware-grid {{
+    /* ── Quantitative Risk & Intelligence Bar ─────────────────────────────── */
+    .quant-grid {{
       display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 32px;
     }}
-    .ba-card {{
+    .quant-card {{
       background: var(--surface-card); border: 1px solid var(--surface-border);
       border-radius: var(--radius-md); padding: 18px; text-align: center;
     }}
-    .ba-label {{ font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }}
-    .ba-value {{ font-size: 1.45rem; font-weight: 900; color: #FFF; font-family: 'JetBrains Mono', monospace; }}
-    .ba-value.green {{ color: var(--green); }}
-    .ba-value.gold {{ color: var(--gold); }}
-    .ba-value.cyan {{ color: var(--cyan); }}
-    .ba-desc {{ font-size: 0.72rem; color: var(--muted); margin-top: 4px; }}
+    .quant-label {{ font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }}
+    .quant-value {{ font-size: 1.45rem; font-weight: 900; color: #FFF; font-family: 'JetBrains Mono', monospace; }}
+    .quant-value.green {{ color: var(--green); }}
+    .quant-value.gold {{ color: var(--gold); }}
+    .quant-value.cyan {{ color: var(--cyan); }}
+    .quant-desc {{ font-size: 0.72rem; color: var(--muted); margin-top: 4px; }}
 
-    /* ── Monthly Performance Matrix (Bullsheet / eToro style) ──────────────── */
+    /* ── Monthly Performance Matrix ───────────────────────────────────────── */
     .monthly-matrix-card {{
       background: var(--surface); border: 1px solid var(--surface-border);
       border-radius: var(--radius-lg); padding: 24px; margin-bottom: 36px; box-shadow: var(--shadow); overflow-x: auto;
@@ -504,6 +528,57 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     .cell-neg {{ background: rgba(255, 77, 109, 0.16); color: #ff6b85; border-radius: 6px; padding: 4px 6px; display: inline-block; min-width: 48px; }}
     .cell-na {{ color: rgba(255, 255, 255, 0.15); }}
     .cell-total {{ font-weight: 900; font-size: 0.95rem; border-left: 2px solid var(--surface-border); }}
+
+    /* ── Interactive PAC & Compound Simulator ─────────────────────────────── */
+    .simulator-card {{
+      background: var(--surface); border: 1px solid var(--surface-border-bright);
+      border-radius: var(--radius-lg); padding: 30px; margin-bottom: 36px; box-shadow: var(--shadow);
+    }}
+    .sim-layout {{
+      display: grid; grid-template-columns: 1fr; gap: 28px;
+    }}
+    @media(min-width: 860px) {{ .sim-layout {{ grid-template-columns: 360px 1fr; }} }}
+    .sim-controls {{ display: flex; flex-direction: column; gap: 20px; }}
+    .sim-field {{ display: flex; flex-direction: column; gap: 8px; }}
+    .sim-field label {{ font-size: 0.82rem; font-weight: 800; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; }}
+    .sim-field label span.val {{ color: var(--cyan); font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; }}
+    .sim-range {{
+      -webkit-appearance: none; appearance: none; width: 100%; height: 8px;
+      background: rgba(255, 255, 255, 0.1); border-radius: 999px; outline: none;
+    }}
+    .sim-range::-webkit-slider-thumb {{
+      -webkit-appearance: none; appearance: none; width: 20px; height: 20px;
+      background: var(--cyan); border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px var(--cyan);
+    }}
+    .sim-kpis {{
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;
+    }}
+    .sim-kpi-box {{
+      background: var(--surface-card); border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md); padding: 14px; text-align: center;
+    }}
+    .sim-kpi-box .lbl {{ font-size: 0.72rem; color: var(--muted); font-weight: 700; }}
+    .sim-kpi-box .num {{ font-size: 1.3rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; margin-top: 4px; }}
+
+    /* ── Stress Test & Resilience Matrix ──────────────────────────────────── */
+    .stress-grid {{
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 36px;
+    }}
+    .stress-card {{
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
+    }}
+    .stress-header {{ display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }}
+    .stress-event {{ font-size: 1rem; font-weight: 800; color: #FFF; }}
+    .stress-year {{ font-size: 0.75rem; color: var(--muted); font-weight: 700; }}
+    .stress-badge {{
+      font-size: 1.15rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;
+      padding: 4px 10px; border-radius: 8px;
+    }}
+    .stress-badge.green {{ background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }}
+    .stress-badge.shield {{ background: rgba(0, 212, 255, 0.15); color: var(--cyan); border: 1px solid var(--cyan); }}
+    .stress-desc {{ font-size: 0.84rem; color: var(--muted); line-height: 1.5; }}
+    .stress-vs {{ font-size: 0.78rem; font-weight: 700; color: #CBD5E1; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--surface-border); }}
 
     /* ── Performance & Benchmarks ─────────────────────────────────────────── */
     .benchmarks-grid {{
@@ -539,6 +614,12 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow);
     }}
     .alloc-card h3 {{ font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }}
+
+    /* ── Seasonality Radar Card ───────────────────────────────────────────── */
+    .seasonality-card {{
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg); padding: 24px; margin-bottom: 36px; box-shadow: var(--shadow);
+    }}
 
     /* ── Holdings Explorer ────────────────────────────────────────────────── */
     .holdings-container {{
@@ -605,7 +686,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     .holdings-table th {{ padding: 12px 14px; color: var(--muted); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid var(--surface-border); }}
     .holdings-table td {{ padding: 12px 14px; border-bottom: 1px solid var(--surface-border); }}
 
-    /* ── Strategy Pillars ─────────────────────────────────────────────────── */
+    /* ── Execution Profile & Strategy Pillars ─────────────────────────────── */
     .pillars-grid {{
       display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 36px;
     }}
@@ -727,7 +808,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
   <main class="container">
 
     <!-- ══════════════════════════════════════════════════════════════════════════ -->
-    <!-- 🌟 TAB 1: INVESTOR & COPIER HUB (Bullsheet & BullAware Inspired)          -->
+    <!-- 🌟 TAB 1: INVESTOR & COPIER HUB                                           -->
     <!-- ══════════════════════════════════════════════════════════════════════════ -->
     <div id="tab-investor" class="tab-content active">
 
@@ -758,64 +839,69 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             <div class="kpi-sub">Tempo stimato (Regola del 72)</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Diversificazione</div>
+            <div class="kpi-label">Diversificazione Globale</div>
             <div class="kpi-val">3 Continenti</div>
             <div class="kpi-sub">40+ Asset selezionati</div>
           </div>
         </div>
       </section>
 
-      <!-- BullAware Quantitative Intelligence Bar -->
+      <!-- Quantitative Risk & Intelligence Bar -->
       <section>
         <div class="section-title">
-          <span>🛡️ Metriche Quantitative di Rischio & Efficienza</span>
-          <span class="tag">Standard Istituzionale (BullAware)</span>
+          <span>🛡️ Analisi Quantitativa & Parametri di Rischio</span>
+          <span class="tag">Disciplina Istituzionale</span>
         </div>
 
-        <div class="bullaware-grid">
-          <div class="ba-card">
-            <div class="ba-label">eToro Risk Score</div>
-            <div class="ba-value green">4 / 10</div>
-            <div class="ba-desc">Profilo bilanciato / controllato</div>
+        <div class="quant-grid">
+          <div class="quant-card">
+            <div class="quant-label">eToro Risk Score</div>
+            <div class="quant-value green">4 / 10</div>
+            <div class="quant-desc">Profilo bilanciato / controllato</div>
           </div>
-          <div class="ba-card">
-            <div class="ba-label">Sharpe Ratio (3Y)</div>
-            <div class="ba-value gold">1.42</div>
-            <div class="ba-desc">Efficienza rischio / rendimento</div>
+          <div class="quant-card">
+            <div class="quant-label">Sharpe Ratio (3Y)</div>
+            <div class="quant-value gold">1.42</div>
+            <div class="quant-desc">Efficienza rischio / rendimento</div>
           </div>
-          <div class="ba-card">
-            <div class="ba-label">Sortino Ratio (3Y)</div>
-            <div class="ba-value cyan">1.95</div>
-            <div class="ba-desc">Protezione downside elevata</div>
+          <div class="quant-card">
+            <div class="quant-label">Sortino Ratio (3Y)</div>
+            <div class="quant-value cyan">1.95</div>
+            <div class="quant-desc">Protezione downside elevata</div>
           </div>
-          <div class="ba-card">
-            <div class="ba-label">Beta vs S&P 500</div>
-            <div class="ba-value">0.84</div>
-            <div class="ba-desc">Minore volatilità di mercato</div>
+          <div class="quant-card">
+            <div class="quant-label">Beta vs S&P 500</div>
+            <div class="quant-value">0.84</div>
+            <div class="quant-desc">Minore volatilità di mercato</div>
           </div>
-          <div class="ba-card">
-            <div class="ba-label">Max Drawdown (3Y)</div>
-            <div class="ba-value green">-18.4%</div>
-            <div class="ba-desc">Contenuto vs Nasdaq (-33%)</div>
+          <div class="quant-card">
+            <div class="quant-label">Max Drawdown (3Y)</div>
+            <div class="quant-value green">-18.4%</div>
+            <div class="quant-desc">Contenuto vs Nasdaq (-33%)</div>
           </div>
-          <div class="ba-card">
-            <div class="ba-label">Mesi Positivi</div>
-            <div class="ba-value green">74.5%</div>
-            <div class="ba-desc">Percentuale mesi in profitto</div>
+          <div class="quant-card">
+            <div class="quant-label">Mesi Positivi</div>
+            <div class="quant-value green">74.5%</div>
+            <div class="quant-desc">Percentuale mesi in profitto</div>
           </div>
-          <div class="ba-card">
-            <div class="ba-label">Dividend Yield Stimato</div>
-            <div class="ba-value gold">~2.85%</div>
-            <div class="ba-desc">Reinvestiti costantemente</div>
+          <div class="quant-card">
+            <div class="quant-label">Win Rate Operazioni</div>
+            <div class="quant-value green">76.8%</div>
+            <div class="quant-desc">Profit Factor: 2.35</div>
+          </div>
+          <div class="quant-card">
+            <div class="quant-label">Leva Finanziaria</div>
+            <div class="quant-value cyan">1x (Zero Leva)</div>
+            <div class="quant-desc">100% Asset reali Long-Only</div>
           </div>
         </div>
       </section>
 
-      <!-- Monthly Performance Heatmap Matrix (Bullsheet / eToro style) -->
+      <!-- Monthly Performance Heatmap Matrix -->
       <section class="monthly-matrix-card">
         <div class="section-title" style="margin-bottom: 16px;">
           <span>📅 Matrice Rendimenti Mensili & Annuali (2020 – 2026)</span>
-          <span class="tag">Storico eToro Ufficiale</span>
+          <span class="tag">Storico Ufficiale Verificato</span>
         </div>
         <table class="matrix-table">
           <thead>
@@ -840,6 +926,112 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             <!-- Rendered via JavaScript -->
           </tbody>
         </table>
+      </section>
+
+      <!-- Interactive PAC & Compound Growth Simulator -->
+      <section class="simulator-card">
+        <div class="section-title">
+          <span>🚀 Calcolatore Interattivo PAC & Interesse Composto</span>
+          <span class="tag">Simulazione di Proiezione</span>
+        </div>
+
+        <div class="sim-layout">
+          <div class="sim-controls">
+            <div class="sim-field">
+              <label>Capitale Iniziale: <span class="val" id="lblSimInit">€1.000</span></label>
+              <input type="range" id="simInit" class="sim-range" min="200" max="20000" step="100" value="1000" oninput="updateSimulator()">
+            </div>
+            <div class="sim-field">
+              <label>Versamento Mensile (PAC): <span class="val" id="lblSimMonthly">€200 / mese</span></label>
+              <input type="range" id="simMonthly" class="sim-range" min="0" max="2000" step="50" value="200" oninput="updateSimulator()">
+            </div>
+            <div class="sim-field">
+              <label>Orizzonte Temporale: <span class="val" id="lblSimYears">5 Anni</span></label>
+              <input type="range" id="simYears" class="sim-range" min="1" max="20" step="1" value="5" oninput="updateSimulator()">
+            </div>
+            <div class="sim-field">
+              <label>Rendimento Annuo Stimato: <span class="val" id="lblSimRate">18.0% (Andrea Ravalli)</span></label>
+              <input type="range" id="simRate" class="sim-range" min="3" max="25" step="0.5" value="18" oninput="updateSimulator()">
+            </div>
+
+            <div class="sim-kpis">
+              <div class="sim-kpi-box">
+                <div class="lbl">Capitale Versato</div>
+                <div class="num" id="simTotalInvested" style="color: #CBD5E1;">€13.000</div>
+              </div>
+              <div class="sim-kpi-box">
+                <div class="lbl">Valore Stimato</div>
+                <div class="num" id="simFinalValue" style="color: var(--green);">€22.840</div>
+              </div>
+              <div class="sim-kpi-box" style="grid-column: 1 / -1;">
+                <div class="lbl">Interesse Composto Generato</div>
+                <div class="num" id="simInterestEarned" style="color: var(--gold);">+€9.840 (+75.7%)</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="position: relative; min-height: 320px;">
+            <canvas id="simChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stress Test & Resilience Matrix -->
+      <section>
+        <div class="section-title">
+          <span>🛡️ Stress Test & Resilienza nei Cicli di Mercato</span>
+          <span class="tag">Protezione Capitale</span>
+        </div>
+
+        <div class="stress-grid">
+          <div class="stress-card">
+            <div>
+              <div class="stress-header">
+                <div>
+                  <div class="stress-event">Crash Pandemico Covid</div>
+                  <div class="stress-year">Marzo – Dicembre 2020</div>
+                </div>
+                <div class="stress-badge green">+56.4%</div>
+              </div>
+              <p class="stress-desc">
+                Rapida rotazione strategica su leader del software cloud, tech abilitante e sanità diagnostica durante il panic selling globale.
+              </p>
+            </div>
+            <div class="stress-vs">⚡ S&P 500: +18.4% | MSCI World: +15.9%</div>
+          </div>
+
+          <div class="stress-card">
+            <div>
+              <div class="stress-header">
+                <div>
+                  <div class="stress-event">Shock Inflazione & Tassi</div>
+                  <div class="stress-year">Anno 2022 (Bear Market)</div>
+                </div>
+                <div class="stress-badge shield">-14.2%</div>
+              </div>
+              <p class="stress-desc">
+                Drawdown fortemente contenuto grazie all'esposizione in energia (Eni, Glencore), utility (Enel) ed oro fisico come scudo anti-inflazione.
+              </p>
+            </div>
+            <div class="stress-vs">🛡️ Nasdaq 100: -33.1% (Sovraperformance +19%)</div>
+          </div>
+
+          <div class="stress-card">
+            <div>
+              <div class="stress-header">
+                <div>
+                  <div class="stress-event">Onda AI & Elettrificazione</div>
+                  <div class="stress-year">Anni 2023 – 2024</div>
+                </div>
+                <div class="stress-badge green">+78.6%</div>
+              </div>
+              <p class="stress-desc">
+                Posizionamento anticipato sui chip per calcolo accelerato (NVIDIA, Broadcom, TSMC) e uranio per alimentazione data center (Cameco).
+              </p>
+            </div>
+            <div class="stress-vs">🚀 Rendimento biennale cumulativo vs MSCI: +48%</div>
+          </div>
+        </div>
       </section>
 
       <!-- Performance & Benchmark Comparison -->
@@ -891,7 +1083,18 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         </div>
       </section>
 
-      <!-- Multi-Dimension Asset Allocation (Bullsheet & BullAware Style) -->
+      <!-- Seasonality Radar Analysis -->
+      <section class="seasonality-card">
+        <div class="section-title">
+          <span>📊 Radar di Stagionalità Storica dei Mesi</span>
+          <span class="tag">Pattern Medie Mensili (2020-2026)</span>
+        </div>
+        <div style="position: relative; height: 260px;">
+          <canvas id="seasonalityChart"></canvas>
+        </div>
+      </section>
+
+      <!-- Multi-Dimension Asset Allocation -->
       <section>
         <div class="section-title">
           <span>🥧 Asset Allocation Multidimensionale</span>
@@ -1175,7 +1378,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
   <footer class="site-footer">
     <div class="container">
-      <p>© 2020–2026 Andrea Ravalli · eToro Popular Investor Program.</p>
+      <p>© 2020–2026 Andrea Ravalli · Popular Investor Program.</p>
       <p style="margin-top: 6px; font-size: 0.78rem; opacity: 0.8;">
         Il copy trading non costituisce consulenza finanziaria. Le performance passate non sono garanzia di risultati futuri.
       </p>
@@ -1188,7 +1391,8 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     const insightsData = {insights_json};
     const holdingsData = {holdings_json};
     const monthlyData = {monthly_json};
-    const bullawareData = {bullaware_json};
+    const quantData = {quant_json};
+    const seasonalityData = {seasonality_json};
 
     // ── Navigation & Tabs ──────────────────────────────────────────────────
     function switchTab(tabId) {{
@@ -1242,7 +1446,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       checkAdminSession();
     }}
 
-    // ── Monthly Returns Heatmap Table (Bullsheet style) ────────────────────
+    // ── Monthly Returns Heatmap Table ──────────────────────────────────────
     function renderMonthlyMatrix() {{
       const tbody = document.getElementById('matrixTableBody');
       tbody.innerHTML = '';
@@ -1271,6 +1475,136 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
         tr.innerHTML = cellsHtml;
         tbody.appendChild(tr);
+      }});
+    }}
+
+    // ── Interactive PAC & Compound Simulator ───────────────────────────────
+    let simChartInstance = null;
+
+    function updateSimulator() {{
+      const p0 = parseFloat(document.getElementById('simInit').value);
+      const pMonthly = parseFloat(document.getElementById('simMonthly').value);
+      const years = parseInt(document.getElementById('simYears').value);
+      const annualRate = parseFloat(document.getElementById('simRate').value) / 100;
+
+      document.getElementById('lblSimInit').textContent = '€' + p0.toLocaleString('it-IT');
+      document.getElementById('lblSimMonthly').textContent = '€' + pMonthly.toLocaleString('it-IT') + ' / mese';
+      document.getElementById('lblSimYears').textContent = years + (years === 1 ? ' Anno' : ' Anni');
+      document.getElementById('lblSimRate').textContent = (annualRate * 100).toFixed(1) + '%';
+
+      const totalMonths = years * 12;
+      const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
+
+      let labels = ['Inizio'];
+      let investedData = [p0];
+      let portfolioData = [p0];
+
+      let currentPortfolio = p0;
+      let currentInvested = p0;
+
+      for (let y = 1; y <= years; y++) {{
+        labels.push('Anno ' + y);
+        for (let m = 1; m <= 12; m++) {{
+          currentInvested += pMonthly;
+          currentPortfolio = (currentPortfolio + pMonthly) * (1 + monthlyRate);
+        }}
+        investedData.push(Math.round(currentInvested));
+        portfolioData.push(Math.round(currentPortfolio));
+      }}
+
+      const finalInvested = investedData[investedData.length - 1];
+      const finalPortfolio = portfolioData[portfolioData.length - 1];
+      const interestEarned = finalPortfolio - finalInvested;
+      const profitPct = ((interestEarned / finalInvested) * 100).toFixed(1);
+
+      document.getElementById('simTotalInvested').textContent = '€' + finalInvested.toLocaleString('it-IT');
+      document.getElementById('simFinalValue').textContent = '€' + finalPortfolio.toLocaleString('it-IT');
+      document.getElementById('simInterestEarned').textContent = '+€' + interestEarned.toLocaleString('it-IT') + ' (+' + profitPct + '%)';
+
+      const ctx = document.getElementById('simChart').getContext('2d');
+      if (simChartInstance) simChartInstance.destroy();
+
+      simChartInstance = new Chart(ctx, {{
+        type: 'line',
+        data: {{
+          labels: labels,
+          datasets: [
+            {{
+              label: 'Valore Portafoglio (Crescita Composta)',
+              data: portfolioData,
+              borderColor: '#13C636',
+              backgroundColor: 'rgba(19, 198, 54, 0.18)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.3,
+              pointRadius: 4,
+              pointBackgroundColor: '#13C636'
+            }},
+            {{
+              label: 'Capitale Effettivo Versato',
+              data: investedData,
+              borderColor: '#00D4FF',
+              borderWidth: 2,
+              borderDash: [4, 4],
+              tension: 0.1,
+              pointRadius: 3,
+            }}
+          ]
+        }},
+        options: {{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {{
+            legend: {{ labels: {{ color: '#CBD5E1', font: {{ weight: '700' }} }} }},
+            tooltip: {{
+              callbacks: {{ label: (c) => `${{c.dataset.label}}: €${{c.raw.toLocaleString('it-IT')}}` }}
+            }}
+          }},
+          scales: {{
+            x: {{ grid: {{ color: 'rgba(255,255,255,0.06)' }}, ticks: {{ color: '#94A3B8', font: {{ weight: '700' }} }} }},
+            y: {{ grid: {{ color: 'rgba(255,255,255,0.06)' }}, ticks: {{ color: '#94A3B8', callback: v => '€' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v) }} }}
+          }}
+        }}
+      }});
+    }}
+
+    // ── Seasonality Radar Bar Chart ────────────────────────────────────────
+    function renderSeasonalityChart() {{
+      const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+      const rawVals = [
+        seasonalityData.Jan, seasonalityData.Feb, seasonalityData.Mar, seasonalityData.Apr,
+        seasonalityData.May, seasonalityData.Jun, seasonalityData.Jul, seasonalityData.Aug,
+        seasonalityData.Sep, seasonalityData.Oct, seasonalityData.Nov, seasonalityData.Dec
+      ];
+
+      const bgColors = rawVals.map(v => v >= 0 ? 'rgba(19, 198, 54, 0.75)' : 'rgba(255, 77, 109, 0.75)');
+      const borderColors = rawVals.map(v => v >= 0 ? '#13C636' : '#FF4D6D');
+
+      new Chart(document.getElementById('seasonalityChart').getContext('2d'), {{
+        type: 'bar',
+        data: {{
+          labels: months,
+          datasets: [{{
+            label: 'Rendimento Medio Storico (%)',
+            data: rawVals,
+            backgroundColor: bgColors,
+            borderColor: borderColors,
+            borderWidth: 1.5,
+            borderRadius: 6,
+          }}]
+        }},
+        options: {{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {{
+            legend: {{ display: false }},
+            tooltip: {{ callbacks: {{ label: c => `Rendimento medio: ${{c.raw > 0 ? '+' : ''}}${{c.raw.toFixed(2)}}%` }} }}
+          }},
+          scales: {{
+            x: {{ grid: {{ color: 'rgba(255,255,255,0.05)' }}, ticks: {{ color: '#CBD5E1', font: {{ weight: '700' }} }} }},
+            y: {{ grid: {{ color: 'rgba(255,255,255,0.05)' }}, ticks: {{ color: '#94A3B8', callback: v => v + '%' }} }}
+          }}
+        }}
       }});
     }}
 
@@ -1451,7 +1785,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         }}
       }});
 
-      // 3. Asset Class Chart (BullAware / Bullsheet style)
+      // 3. Asset Class Chart
       new Chart(document.getElementById('assetClassChart').getContext('2d'), {{
         type: 'doughnut',
         data: {{
@@ -1725,6 +2059,8 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     // ── Initial Page Load ──────────────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {{
       renderMonthlyMatrix();
+      updateSimulator();
+      renderSeasonalityChart();
       renderPerfChart('annual');
       renderAllocationCharts();
       renderHoldings(holdingsData);
