@@ -3,19 +3,19 @@
 Social & Post Analytics Tracker & GitHub Pages Dashboard Generator
 ==================================================================
 Tracks published posts across all platforms, syncs engagement metrics (likes, comments, shares),
-and generates a state-of-the-art dual-hub portal for GitHub Pages:
-  1. 🌟 Public Investor & Copier Hub:
+and generates a state-of-the-art dual-hub portal for GitHub Pages (in full English for the public hub):
+  1. 🌟 Public Investor & Copier Hub (English):
      • Hero with Popular Investor metrics (+200% return, ~18% CAGR, ~4yr capital doubling)
      • Quantitative Risk & Alpha Metrics (Risk Score 4, Sharpe 1.42, Sortino 1.95, Beta 0.84, Max DD -18.4%)
-     • Monthly Performance Heatmap Matrix (2020-2026 Year × Month official table)
-     • Interactive PAC & Compound Growth Simulator with real-time sliders & projection chart
+     • Monthly Performance Heatmap Matrix (2020-2026 Year × Month official track record)
+     • Interactive DCA (PAC) & Compound Growth Simulator with real-time sliders & projection chart
      • Stress Test & Historical Resilience Matrix (Covid 2020, Rate Shock 2022, AI Wave 2023-2024)
      • Monthly Seasonality Radar & Historical Pattern Analysis
      • Multi-Dimension Asset Allocation (Asset Class, Geography, Sectors, Currencies)
      • Performance Comparison vs Benchmarks (SPX500, MSCI World, EuroStoxx50, China50)
      • Interactive Portfolio Holdings Explorer (Card & Table views, search, filters)
      • Strategy Pillars, Execution Profile (1x Leverage, 0% Short, 76.8% Win Rate) & Copier FAQ
-  2. 🔒 PIN-Protected Admin Social Analytics Hub:
+  2. 🔒 PIN-Protected Creator Analytics Hub:
      • Secured access via PIN / localStorage
      • Hourly & Weekday engagement heatmaps & charts
      • Top Cashtags & Image format performance
@@ -56,8 +56,8 @@ QUANT_RISK_METRICS = {
     "profitable_months": "74.5%",
     "win_rate": "76.8%",
     "profit_factor": "2.35",
-    "avg_holding": "> 14 Mesi",
-    "leverage": "1x (Zero Leva)",
+    "avg_holding": "> 14 Months",
+    "leverage": "1x (No Leverage)",
     "short_exposure": "0% (Long-Only)",
     "div_yield": "~2.85%",
     "cagr": "~18.0%",
@@ -81,61 +81,61 @@ SEASONALITY_DATA = {
 
 HOLDINGS_DATA = [
     # ── US Tech & AI Megatrend ───────────────────────────────────────────────
-    {"ticker": "NVDA", "name": "NVIDIA Corporation", "emoji": "🤖", "asset_class": "Azione", "curr": "USD", "sector": "AI & Semiconduttori", "geo": "USA", "tier": "Core Growth", "desc": "Leader mondiale indiscusso nei chip per intelligenza artificiale e calcolo accelerato."},
-    {"ticker": "MSFT", "name": "Microsoft Corporation", "emoji": "💻", "asset_class": "Azione", "curr": "USD", "sector": "Software & Cloud AI", "geo": "USA", "tier": "Core Holding", "desc": "Gigante del cloud (Azure), enterprise software e partnership strategica con OpenAI."},
-    {"ticker": "AMZN", "name": "Amazon.com Inc", "emoji": "📦", "asset_class": "Azione", "curr": "USD", "sector": "E-Commerce & Cloud AWS", "geo": "USA", "tier": "Core Holding", "desc": "Leader globale dell'e-commerce, dell'infrastruttura cloud AWS e advertising digitale."},
-    {"ticker": "GOOG", "name": "Alphabet Inc (Google)", "emoji": "🔍", "asset_class": "Azione", "curr": "USD", "sector": "Search, Cloud & AI", "geo": "USA", "tier": "Core Holding", "desc": "Monopolio dei motori di ricerca, YouTube, ecosistema Android e modelli Google Gemini."},
-    {"ticker": "PLTR", "name": "Palantir Technologies", "emoji": "🛡️", "asset_class": "Azione", "curr": "USD", "sector": "AI Governativa & Difesa", "geo": "USA", "tier": "High Growth", "desc": "Piattaforme AIP per analisi dati mission-critical nella difesa, intelligence e grandi corporate."},
-    {"ticker": "AVGO", "name": "Broadcom Inc", "emoji": "🔌", "asset_class": "Azione", "curr": "USD", "sector": "Semiconduttori & Networking", "geo": "USA", "tier": "Core Growth", "desc": "Componenti di rete ad alta velocità per data center AI e software VMware enterprise."},
-    {"ticker": "TSM", "name": "Taiwan Semiconductor", "emoji": "🏭", "asset_class": "Azione", "curr": "USD", "sector": "Fonderie Chip Globali", "geo": "Asia", "tier": "Core Holding", "desc": "La più avanzata fonderia di chip al mondo, fornitore chiave di Apple, NVIDIA e AMD."},
-    {"ticker": "MRVL", "name": "Marvell Technology", "emoji": "📊", "asset_class": "Azione", "curr": "USD", "sector": "Chip Custom & Reti Ottiche", "geo": "USA", "tier": "Growth", "desc": "Chip ASIC personalizzati per hyperscaler cloud e interconnessioni elettro-ottiche ultraveloci."},
-    {"ticker": "NET", "name": "Cloudflare Inc", "emoji": "☁️", "asset_class": "Azione", "curr": "USD", "sector": "Cloud Security & CDN", "geo": "USA", "tier": "Growth", "desc": "Rete globale edge security, protezione DDoS e infrastruttura internet ad altissima affidabilità."},
-    {"ticker": "PYPL", "name": "PayPal Holdings", "emoji": "💳", "asset_class": "Azione", "curr": "USD", "sector": "Pagamenti Digitali & Fintech", "geo": "USA", "tier": "Value Turnaround", "desc": "Pioniere dei pagamenti online globali, brand Venmo e innovazione nei checkout one-click."},
+    {"ticker": "NVDA", "name": "NVIDIA Corporation", "emoji": "🤖", "asset_class": "Stock", "curr": "USD", "sector": "AI & Semiconductors", "geo": "USA", "tier": "Core Growth", "desc": "Undisputed global leader in accelerated computing GPUs and full-stack AI enterprise infrastructure."},
+    {"ticker": "MSFT", "name": "Microsoft Corporation", "emoji": "💻", "asset_class": "Stock", "curr": "USD", "sector": "Software & Cloud AI", "geo": "USA", "tier": "Core Holding", "desc": "Enterprise software titan, Azure hyperscale cloud, and exclusive foundational partnership with OpenAI."},
+    {"ticker": "AMZN", "name": "Amazon.com Inc", "emoji": "📦", "asset_class": "Stock", "curr": "USD", "sector": "E-Commerce & AWS Cloud", "geo": "USA", "tier": "Core Holding", "desc": "Global e-commerce monopoly, cloud computing infrastructure leader (AWS), and high-margin digital advertising."},
+    {"ticker": "GOOG", "name": "Alphabet Inc (Google)", "emoji": "🔍", "asset_class": "Stock", "curr": "USD", "sector": "Search, Cloud & AI", "geo": "USA", "tier": "Core Holding", "desc": "Unrivaled global search monopoly, YouTube streaming ecosystem, Android OS, and Gemini multimodal AI."},
+    {"ticker": "PLTR", "name": "Palantir Technologies", "emoji": "🛡️", "asset_class": "Stock", "curr": "USD", "sector": "Defense & Enterprise AI", "geo": "USA", "tier": "High Growth", "desc": "Mission-critical AIP data intelligence platforms deployed across US defense, intelligence, and major global enterprises."},
+    {"ticker": "AVGO", "name": "Broadcom Inc", "emoji": "🔌", "asset_class": "Stock", "curr": "USD", "sector": "Semiconductors & Networking", "geo": "USA", "tier": "Core Growth", "desc": "Custom ASIC AI accelerator chips, high-speed data center networking silicon, and VMware enterprise software."},
+    {"ticker": "TSM", "name": "Taiwan Semiconductor", "emoji": "🏭", "asset_class": "Stock", "curr": "USD", "sector": "Global Chip Foundry", "geo": "Asia", "tier": "Core Holding", "desc": "The world's most advanced semiconductor foundry, sole manufacturing partner for Apple, NVIDIA, and AMD."},
+    {"ticker": "MRVL", "name": "Marvell Technology", "emoji": "📊", "asset_class": "Stock", "curr": "USD", "sector": "Custom Silicon & Optical", "geo": "USA", "tier": "Growth", "desc": "Custom AI processors for cloud hyperscalers and electro-optics interconnects enabling high-bandwidth clusters."},
+    {"ticker": "NET", "name": "Cloudflare Inc", "emoji": "☁️", "asset_class": "Stock", "curr": "USD", "sector": "Cloud Security & Edge CDN", "geo": "USA", "tier": "Growth", "desc": "Global edge network securing ~20% of the internet, leading in DDoS mitigation, Zero Trust, and serverless AI."},
+    {"ticker": "PYPL", "name": "PayPal Holdings", "emoji": "💳", "asset_class": "Stock", "curr": "USD", "sector": "Digital Payments & Fintech", "geo": "USA", "tier": "Value Turnaround", "desc": "Digital checkout pioneer, Venmo social payment rails, and high free cash flow conversion."},
 
     # ── Healthcare & GLP-1 Megatrend ──────────────────────────────────────────
-    {"ticker": "LLY", "name": "Eli Lilly and Co", "emoji": "💊", "asset_class": "Azione", "curr": "USD", "sector": "Farmaceutica & GLP-1", "geo": "USA", "tier": "Core Growth", "desc": "Leader mondiale nei farmaci antidiabete e obesità (Mounjaro, Zepbound) e oncologia avanzata."},
-    {"ticker": "NOVO-B.CO", "name": "Novo Nordisk A/S", "emoji": "💉", "asset_class": "Azione", "curr": "DKK", "sector": "Farmaceutica & GLP-1", "geo": "Europa", "tier": "Core Growth", "desc": "Pioniere danese nei trattamenti GLP-1 (Ozempic, Wegovy) per salute metabolica globale."},
-    {"ticker": "ABBV", "name": "AbbVie Inc", "emoji": "💉", "asset_class": "Azione", "curr": "USD", "sector": "Biotech & Immunologia", "geo": "USA", "tier": "Dividend Aristocrat", "desc": "Pipeline innovativa in oncologia, immunologia (Skyrizi, Rinvoq) e dividendo storico in crescita."},
-    {"ticker": "ABT.US", "name": "Abbott Laboratories", "emoji": "🏥", "asset_class": "Azione", "curr": "USD", "sector": "Dispositivi Medici & Diagnostica", "geo": "USA", "tier": "Core Defensive", "desc": "Dispositivi medici essenziali (FreeStyle Libre per glucosio) e nutrizione clinica mondiale."},
-    {"ticker": "HUM", "name": "Humana Inc", "emoji": "🏥", "asset_class": "Azione", "curr": "USD", "sector": "Assicurazione Sanitaria USA", "geo": "USA", "tier": "Value / Healthcare", "desc": "Specialista leader nei piani sanitari Medicare Advantage per la popolazione senior USA."},
-    {"ticker": "AZN.L", "name": "AstraZeneca PLC", "emoji": "🧬", "asset_class": "Azione", "curr": "GBP", "sector": "Oncologia & Biofarmaci", "geo": "Europa", "tier": "Core Growth", "desc": "Colosso biofarmaceutico anglo-svedese con leadership in terapie oncologiche mirate."},
+    {"ticker": "LLY", "name": "Eli Lilly and Co", "emoji": "💊", "asset_class": "Stock", "curr": "USD", "sector": "Pharma & GLP-1 Therapeutics", "geo": "USA", "tier": "Core Growth", "desc": "Global pioneer in revolutionary GLP-1/GIP treatments (Mounjaro, Zepbound) for diabetes, obesity, and oncology."},
+    {"ticker": "NOVO-B.CO", "name": "Novo Nordisk A/S", "emoji": "💉", "asset_class": "Stock", "curr": "DKK", "sector": "Pharma & GLP-1 Therapeutics", "geo": "Europe", "tier": "Core Growth", "desc": "Danish healthcare giant leading worldwide metabolic healthcare and obesity solutions (Ozempic, Wegovy)."},
+    {"ticker": "ABBV", "name": "AbbVie Inc", "emoji": "💉", "asset_class": "Stock", "curr": "USD", "sector": "Biopharma & Immunology", "geo": "USA", "tier": "Dividend Aristocrat", "desc": "High-yield dividend champion with next-gen blockbuster immunology drugs (Skyrizi, Rinvoq) and robust oncology pipeline."},
+    {"ticker": "ABT.US", "name": "Abbott Laboratories", "emoji": "🏥", "asset_class": "Stock", "curr": "USD", "sector": "Medical Devices & Diagnostics", "geo": "USA", "tier": "Core Defensive", "desc": "Essential medical technologies leader (FreeStyle Libre continuous glucose monitoring) and adult clinical nutrition."},
+    {"ticker": "HUM", "name": "Humana Inc", "emoji": "🏥", "asset_class": "Stock", "curr": "USD", "sector": "US Health Insurance", "geo": "USA", "tier": "Value / Healthcare", "desc": "Leading US healthcare provider specialized in Medicare Advantage programs for the aging baby-boomer demographic."},
+    {"ticker": "AZN.L", "name": "AstraZeneca PLC", "emoji": "🧬", "asset_class": "Stock", "curr": "GBP", "sector": "Oncology & Biopharmaceuticals", "geo": "Europe", "tier": "Core Growth", "desc": "Anglo-Swedish global pharma powerhouse with industry-leading targeted oncology and cardiovascular therapies."},
 
     # ── Energy, Utilities, Commodities & Nuclear ──────────────────────────────
-    {"ticker": "CCJ", "name": "Cameco Corporation", "emoji": "⚡", "asset_class": "Azione", "curr": "USD", "sector": "Uranio & Nucleare Pulito", "geo": "USA / Canada", "tier": "Megatrend Nucleare", "desc": "Il più grande produttore occidentale di uranio per la rinascita dell'energia nucleare e data center AI."},
-    {"ticker": "ENEL.MI", "name": "Enel S.p.A.", "emoji": "🔋", "asset_class": "Azione", "curr": "EUR", "sector": "Utility & Energia Rinnovabile", "geo": "Europa", "tier": "High Dividend", "desc": "Leader europeo nelle reti elettriche intelligenti, generazione green e alto flusso cedolare."},
-    {"ticker": "ENI.MI", "name": "Eni S.p.A.", "emoji": "⛽", "asset_class": "Azione", "curr": "EUR", "sector": "Energia & Biocarburanti", "geo": "Europa", "tier": "High Dividend", "desc": "Major integrata con forte cash flow, transizione energetica con Plenitude ed Enilive."},
-    {"ticker": "PRY.MI", "name": "Prysmian S.p.A.", "emoji": "🔌", "asset_class": "Azione", "curr": "EUR", "sector": "Cavi Elettrici & Telecom", "geo": "Europa", "tier": "Industrial Leader", "desc": "Numero uno mondiale nei cavi sottomarini per l'elettrificazione e trasmissione rinnovabili."},
-    {"ticker": "GLEN.L", "name": "Glencore PLC", "emoji": "⛏️", "asset_class": "Azione", "curr": "GBP", "sector": "Metalli per la Transizione", "geo": "Europa", "tier": "Commodities", "desc": "Estrazione e trading globale di rame, cobalto e nichel essenziali per batterie ed elettrificazione."},
-    {"ticker": "TRIG.L", "name": "Renewables Infrastructure Grp", "emoji": "🌬️", "asset_class": "Azione", "curr": "GBP", "sector": "Infrastrutture Eoliche/Solari", "geo": "Europa", "tier": "High Yield Green", "desc": "Fondo infrastrutturale UK con portafoglio diversificato di impianti eolici e solari europei."},
-    {"ticker": "MAU.PA", "name": "Maurel & Prom SA", "emoji": "🛢️", "asset_class": "Azione", "curr": "EUR", "sector": "Esplorazione & Produzione", "geo": "Europa", "tier": "Tactical Energy", "desc": "Compagnia petrolifera francese a dividendo elevato e basso indebitamento."},
+    {"ticker": "CCJ", "name": "Cameco Corporation", "emoji": "⚡", "asset_class": "Stock", "curr": "USD", "sector": "Uranium & Clean Nuclear", "geo": "USA / Canada", "tier": "Nuclear Megatrend", "desc": "The Western world's largest uranium miner, strategically powering zero-carbon nuclear renaissance and AI data centers."},
+    {"ticker": "ENEL.MI", "name": "Enel S.p.A.", "emoji": "🔋", "asset_class": "Stock", "curr": "EUR", "sector": "Utilities & Clean Energy", "geo": "Europe", "tier": "High Dividend", "desc": "European smart grid and clean energy distribution leader with a dependable and generous dividend yield."},
+    {"ticker": "ENI.MI", "name": "Eni S.p.A.", "emoji": "⛽", "asset_class": "Stock", "curr": "EUR", "sector": "Integrated Energy & Biofuels", "geo": "Europe", "tier": "High Dividend", "desc": "Integrated energy major generating resilient free cash flow, scaling bio-refining (Enilive) and renewables (Plenitude)."},
+    {"ticker": "PRY.MI", "name": "Prysmian S.p.A.", "emoji": "🔌", "asset_class": "Stock", "curr": "EUR", "sector": "Cables & Grid Infrastructure", "geo": "Europe", "tier": "Industrial Leader", "desc": "Worldwide number one in subsea and underground power cables critical for global electrification and offshore wind."},
+    {"ticker": "GLEN.L", "name": "Glencore PLC", "emoji": "⛏️", "asset_class": "Stock", "curr": "GBP", "sector": "Transition Metals & Trading", "geo": "Europe", "tier": "Commodities", "desc": "Global mining and marketing leader in copper, cobalt, and nickel essential for electric vehicles and power grids."},
+    {"ticker": "TRIG.L", "name": "Renewables Infrastructure Grp", "emoji": "🌬️", "asset_class": "Stock", "curr": "GBP", "sector": "Wind & Solar Infrastructure", "geo": "Europe", "tier": "High Yield Green", "desc": "UK clean energy infrastructure investment trust holding an operational portfolio of European wind and solar assets."},
+    {"ticker": "MAU.PA", "name": "Maurel & Prom SA", "emoji": "🛢️", "asset_class": "Stock", "curr": "EUR", "sector": "Exploration & Production", "geo": "Europe", "tier": "Tactical Energy", "desc": "Cash-rich oil and gas producer with strong balance sheet discipline and high dividend payouts."},
 
     # ── Consumer, Retail & Luxury ─────────────────────────────────────────────
-    {"ticker": "WMT", "name": "Walmart Inc", "emoji": "🛒", "asset_class": "Azione", "curr": "USD", "sector": "Grande Distribuzione & Retail", "geo": "USA", "tier": "Core Defensive", "desc": "Il re del retail globale con espansione massiccia nell'e-commerce, logistica autonoma e ads."},
-    {"ticker": "MELI", "name": "MercadoLibre Inc", "emoji": "🛒", "asset_class": "Azione", "curr": "USD", "sector": "E-Commerce & Fintech LatAm", "geo": "Emergenti", "tier": "High Growth", "desc": "La 'Amazon + PayPal' dell'America Latina con tassi di crescita eccezionali in Brasile e Messico."},
-    {"ticker": "RACE", "name": "Ferrari N.V.", "emoji": "🏎️", "asset_class": "Azione", "curr": "EUR", "sector": "Lusso & Motorsport", "geo": "Europa", "tier": "Ultra-Luxury Moat", "desc": "Margini operativi record, portafoglio ordini blindato e potere di prezzo assoluto nel lusso mondiale."},
-    {"ticker": "VOW3.DE", "name": "Volkswagen AG", "emoji": "🚗", "asset_class": "Azione", "curr": "EUR", "sector": "Automotive & Mobilità EV", "geo": "Europa", "tier": "Deep Value", "desc": "Gruppo automotive tedesco (Porsche, Audi, VW) con forte scala industriale su piattaforme EV."},
-    {"ticker": "ULVR.L", "name": "Unilever PLC", "emoji": "🧼", "asset_class": "Azione", "curr": "GBP", "sector": "Beni di Consumo Primari", "geo": "Europa", "tier": "Core Defensive", "desc": "Portafoglio di 400+ brand di largo consumo presenti nelle case di oltre 3.4 miliardi di persone."},
+    {"ticker": "WMT", "name": "Walmart Inc", "emoji": "🛒", "asset_class": "Stock", "curr": "USD", "sector": "Omnichannel Retail Leader", "geo": "USA", "tier": "Core Defensive", "desc": "World's largest retailer by revenue, accelerating automated fulfillment, e-commerce scale, and retail media network."},
+    {"ticker": "MELI", "name": "MercadoLibre Inc", "emoji": "🛒", "asset_class": "Stock", "curr": "USD", "sector": "E-Commerce & Fintech LatAm", "geo": "Emerging", "tier": "High Growth", "desc": "The 'Amazon + PayPal' of Latin America, delivering exponential growth in digital commerce, credit, and logistics."},
+    {"ticker": "RACE", "name": "Ferrari N.V.", "emoji": "🏎️", "asset_class": "Stock", "curr": "EUR", "sector": "Ultra-Luxury Automotive", "geo": "Europe", "tier": "Ultra-Luxury Moat", "desc": "Peerless luxury pricing power, industry-leading operating margins, and multi-year waitlists across all models."},
+    {"ticker": "VOW3.DE", "name": "Volkswagen AG", "emoji": "🚗", "asset_class": "Stock", "curr": "EUR", "sector": "Automotive & EV Platforms", "geo": "Europe", "tier": "Deep Value", "desc": "Global automotive conglomerate (Porsche, Audi, VW) with massive industrial manufacturing scale in transition."},
+    {"ticker": "ULVR.L", "name": "Unilever PLC", "emoji": "🧼", "asset_class": "Stock", "curr": "GBP", "sector": "Consumer Staples & Household", "geo": "Europe", "tier": "Core Defensive", "desc": "Portfolio of 400+ household consumer staple brands used daily by over 3.4 billion people worldwide."},
 
     # ── Asia & Emerging Markets ───────────────────────────────────────────────
-    {"ticker": "1211.HK", "name": "BYD Co Ltd", "emoji": "🔋", "asset_class": "Azione", "curr": "HKD", "sector": "Veicoli Elettrici & Batterie", "geo": "Asia", "tier": "EV Global Leader", "desc": "Leader mondiale nella produzione di auto elettriche, ibride plug-in e tecnologia blade battery."},
-    {"ticker": "1919.HK", "name": "COSCO SHIPPING Holdings", "emoji": "🚢", "asset_class": "Azione", "curr": "HKD", "sector": "Logistica & Spedizioni Marittime", "geo": "Asia", "tier": "Cyclical / High Yield", "desc": "Uno dei più grandi operatori mondiali di navi portacontainer e terminal portuali strategici."},
-    {"ticker": "2318.HK", "name": "Ping An Insurance Group", "emoji": "🏦", "asset_class": "Azione", "curr": "HKD", "sector": "Assicurazioni & Finanza Digitale", "geo": "Asia", "tier": "Asia Value", "desc": "Il colosso finanziario e assicurativo più tecnologicamente avanzato della Cina."},
-    {"ticker": "VOF.L", "name": "VinaCapital Vietnam Fund", "emoji": "🇻🇳", "asset_class": "ETF / Fondo", "curr": "GBP", "sector": "Mercati di Frontiera Vietnam", "geo": "Asia / Frontiera", "tier": "High Growth Explorer", "desc": "Fondo specializzato sulle migliori aziende quotate e private equity del Vietnam in forte espansione."},
-    {"ticker": "INDO.PA", "name": "Amundi MSCI Indonesia ETF", "emoji": "🇮🇩", "asset_class": "ETF", "curr": "EUR", "sector": "ETF Mercati Emergenti", "geo": "Asia / Emergenti", "tier": "Emerging Market", "desc": "Esposizione all'economia dell'Indonesia, ricca di nickel e trainata da un boom demografico."},
+    {"ticker": "1211.HK", "name": "BYD Co Ltd", "emoji": "🔋", "asset_class": "Stock", "curr": "HKD", "sector": "Electric Vehicles & Batteries", "geo": "Asia", "tier": "Global EV Leader", "desc": "Worldwide leader in EV production and vertical integration, proprietary Blade Battery safety architecture."},
+    {"ticker": "1919.HK", "name": "COSCO SHIPPING Holdings", "emoji": "🚢", "asset_class": "Stock", "curr": "HKD", "sector": "Marine Shipping & Logistics", "geo": "Asia", "tier": "Cyclical / High Yield", "desc": "Global maritime shipping conglomerate operating premier container vessel fleets and critical terminal ports."},
+    {"ticker": "2318.HK", "name": "Ping An Insurance Group", "emoji": "🏦", "asset_class": "Stock", "curr": "HKD", "sector": "Insurance & Digital Finance", "geo": "Asia", "tier": "Asia Value", "desc": "China's leading tech-driven financial services and insurance conglomerate with deep value fundamentals."},
+    {"ticker": "VOF.L", "name": "VinaCapital Vietnam Fund", "emoji": "🇻🇳", "asset_class": "Fund / Closed-End", "curr": "GBP", "sector": "Vietnam Frontier Growth", "geo": "Asia / Frontier", "tier": "High Growth Explorer", "desc": "Specialist fund capturing the secular industrialization and consumption boom in Vietnam's high-growth economy."},
+    {"ticker": "INDO.PA", "name": "Amundi MSCI Indonesia ETF", "emoji": "🇮🇩", "asset_class": "ETF", "curr": "EUR", "sector": "Emerging Markets ETF", "geo": "Asia / Emerging", "tier": "Emerging Market", "desc": "Targeted exposure to Indonesia's booming economy, backed by vast nickel reserves and demographic expansion."},
 
     # ── Strategic ETFs, Metals & Cash Reserves ────────────────────────────────
-    {"ticker": "PPFB.DE", "name": "iShares Physical Gold ETC", "emoji": "🥇", "asset_class": "Materie Prime", "curr": "EUR", "sector": "Oro Fisico & Beni Rifugio", "geo": "Globale", "tier": "Safe Haven Hedge", "desc": "Copertura contro l'inflazione e tensioni geopolitiche garantita da oro fisico custodito a Londra."},
-    {"ticker": "SX7PEX.DE", "name": "iShares STOXX Europe 600 Banks", "emoji": "🏛️", "asset_class": "ETF", "curr": "EUR", "sector": "Banche Europee ETF", "geo": "Europa", "tier": "Value & High Yield", "desc": "Paniere dei principali istituti bancari europei con solidi margini di interesse e dividendi generosi."},
-    {"ticker": "IEUR", "name": "iShares Core MSCI Europe ETF", "emoji": "🇪🇺", "asset_class": "ETF", "curr": "USD", "sector": "Azionario Europeo Broad", "geo": "Europa", "tier": "Core Diversifier", "desc": "Esposizione ampia e a basso costo alle migliori 400+ aziende del continente europeo."},
-    {"ticker": "IQQL.DE", "name": "iShares Listed Private Equity", "emoji": "🔥", "asset_class": "ETF", "curr": "EUR", "sector": "Private Equity Quotato", "geo": "Globale", "tier": "Alternative Asset", "desc": "Investimento nelle società di private equity e buyout globali (Blackstone, KKR, Carlyle)."},
-    {"ticker": "IB01.L", "name": "iShares $ Treasury 0-1yr ETF", "emoji": "💵", "asset_class": "Obbligazionario", "curr": "USD", "sector": "Treasury USA a Breve Termine", "geo": "USA", "tier": "Liquidità & Resa USD", "desc": "Titoli di Stato USA a brevissima scadenza per rendimento monetario privo di rischio e riserva per crolli."},
-    {"ticker": "XEON.DE", "name": "Xtrackers EUR Overnight Rate Swap", "emoji": "💤", "asset_class": "Liquidità", "curr": "EUR", "sector": "Liquidità Overnight EUR (€STR)", "geo": "Europa", "tier": "Liquidità EUR", "desc": "Rendimento monetario overnight garantito sul tasso interbancario BCE per la quota in Euro."},
-    {"ticker": "WDEF.L", "name": "WisdomTree Europe Equity Income", "emoji": "💼", "asset_class": "ETF", "curr": "GBP", "sector": "ETF Dividendi Europei", "geo": "Europa", "tier": "High Dividend ETF", "desc": "Selezione di titoli europei ad alta resa e sostenibilità del dividendo nel tempo."},
+    {"ticker": "PPFB.DE", "name": "iShares Physical Gold ETC", "emoji": "🥇", "asset_class": "Commodities", "curr": "EUR", "sector": "Physical Gold Safe Haven", "geo": "Global", "tier": "Safe Haven Hedge", "desc": "Direct structural hedge against currency debasement and geopolitical turmoil, 100% physically backed in London vaults."},
+    {"ticker": "SX7PEX.DE", "name": "iShares STOXX Europe 600 Banks", "emoji": "🏛️", "asset_class": "ETF", "curr": "EUR", "sector": "European Banking ETF", "geo": "Europe", "tier": "Value & High Yield", "desc": "Basket of top European financial institutions benefiting from sustained net interest margins and share buybacks."},
+    {"ticker": "IEUR", "name": "iShares Core MSCI Europe ETF", "emoji": "🇪🇺", "asset_class": "ETF", "curr": "USD", "sector": "Broad European Equities", "geo": "Europe", "tier": "Core Diversifier", "desc": "Low-cost broad market exposure to 400+ leading multinational corporations across developed Europe."},
+    {"ticker": "IQQL.DE", "name": "iShares Listed Private Equity", "emoji": "🔥", "asset_class": "ETF", "curr": "EUR", "sector": "Listed Private Equity", "geo": "Global", "tier": "Alternative Asset", "desc": "Liquid access to the world's premier alternative asset managers and buyout leaders (Blackstone, KKR, Carlyle)."},
+    {"ticker": "IB01.L", "name": "iShares $ Treasury 0-1yr ETF", "emoji": "💵", "asset_class": "Fixed Income", "curr": "USD", "sector": "Ultra-Short US Treasuries", "geo": "USA", "tier": "Cash Yield & Dry Powder", "desc": "Ultra-short US government paper yielding risk-free USD interest while preserving dry powder for market corrections."},
+    {"ticker": "XEON.DE", "name": "Xtrackers EUR Overnight Rate Swap", "emoji": "💤", "asset_class": "Cash Equivalent", "curr": "EUR", "sector": "EUR Overnight Cash (€STR)", "geo": "Europe", "tier": "Cash Yield EUR", "desc": "Guaranteed money market yield tracking the official European Central Bank overnight interest rate (€STR)."},
+    {"ticker": "WDEF.L", "name": "WisdomTree Europe Equity Income", "emoji": "💼", "asset_class": "ETF", "curr": "GBP", "sector": "European Dividend Equity", "geo": "Europe", "tier": "High Dividend ETF", "desc": "High-conviction European dividend champions screened for balance sheet resilience and sustainable payouts."},
 
     # ── Private / Space & Crypto Assets ───────────────────────────────────────
-    {"ticker": "SPCX.RTH", "name": "Space Exploration Tech (SpaceX)", "emoji": "🚀", "asset_class": "Private Equity", "curr": "USD", "sector": "Spazio, Satelliti & Starlink", "geo": "USA", "tier": "Pre-IPO Moat", "desc": "Dominatore globale del lancio spaziale orbitale e costellazione Starlink a crescita esponenziale."},
-    {"ticker": "ETOR", "name": "eToro Group Ltd", "emoji": "🏛️", "asset_class": "Azione", "curr": "USD", "sector": "Social Investing Platform", "geo": "Globale", "tier": "Fintech Ecosystem", "desc": "Piattaforma pioniera del social trading e del copy trading con milioni di utenti attivi nel mondo."},
-    {"ticker": "TRX", "name": "TRON Network", "emoji": "🪙", "asset_class": "Crypto", "curr": "USD", "sector": "Crypto · Stablecoin Rail", "geo": "Globale", "tier": "Digital Assets", "desc": "Network blockchain leader assoluto nel volume globale di trasferimenti in stablecoin (USDT)."},
+    {"ticker": "SPCX.RTH", "name": "Space Exploration Tech (SpaceX)", "emoji": "🚀", "asset_class": "Private Equity", "curr": "USD", "sector": "Space, Satellites & Starlink", "geo": "USA", "tier": "Pre-IPO Moat", "desc": "Dominant global orbital rocket launch provider and operator of the Starlink broadband satellite constellation."},
+    {"ticker": "ETOR", "name": "eToro Group Ltd", "emoji": "🏛️", "asset_class": "Stock", "curr": "USD", "sector": "Social Investing Platform", "geo": "Global", "tier": "Fintech Ecosystem", "desc": "Pioneering global social investing and multi-asset trading platform with millions of active global users."},
+    {"ticker": "TRX", "name": "TRON Network", "emoji": "🪙", "asset_class": "Crypto", "curr": "USD", "sector": "Stablecoin Settlement Rails", "geo": "Global", "tier": "Digital Assets", "desc": "World's leading high-throughput blockchain network processing the highest volume of USDT stablecoin transfers."},
 ]
 
 
@@ -328,9 +328,9 @@ def sync_assets_to_docs():
 
 def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     """
-    Generate an ultra-modern dual-hub GitHub Pages web application:
-      • Tab 1: Public Investor & Copier Hub
-      • Tab 2: PIN-Protected Admin Social Analytics Hub
+    Generate an ultra-modern dual-hub GitHub Pages web application (Full English Public Page):
+      • Tab 1: Public Investor & Copier Hub (English)
+      • Tab 2: PIN-Protected Creator Analytics Hub
     """
     sync_assets_to_docs()
 
@@ -348,12 +348,12 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     seasonality_json = json.dumps(SEASONALITY_DATA, ensure_ascii=False)
 
     html = f"""<!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Andrea Ravalli · Portfolio Hub & Popular Investor Analytics</title>
-  <meta name="description" content="Hub ufficiale del portafoglio eToro di Andrea Ravalli: rendimenti storici (+200% dal 2020), matrice mensile, risk score, Sharpe ratio, asset allocation, simulatore PAC e guida per i copiatori.">
+  <meta name="description" content="Official portfolio hub of Andrea Ravalli (eToro Popular Investor): track record (+200% since 2020), monthly returns heatmap, quantitative risk metrics, DCA compound simulator, and copier guide.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -529,7 +529,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     .cell-na {{ color: rgba(255, 255, 255, 0.15); }}
     .cell-total {{ font-weight: 900; font-size: 0.95rem; border-left: 2px solid var(--surface-border); }}
 
-    /* ── Interactive PAC & Compound Simulator ─────────────────────────────── */
+    /* ── Interactive DCA & Compound Simulator ─────────────────────────────── */
     .simulator-card {{
       background: var(--surface); border: 1px solid var(--surface-border-bright);
       border-radius: var(--radius-lg); padding: 30px; margin-bottom: 36px; box-shadow: var(--shadow);
@@ -780,7 +780,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <a href="#" class="profile-brand">
         <div class="avatar-wrapper">
           <img src="./assets/profile_photo.jpg" alt="Andrea Ravalli" class="avatar-img" onerror="this.src='https://via.placeholder.com/100/0a0f2c/13C636?text=AR'">
-          <div class="live-dot" title="Portafoglio Attivo"></div>
+          <div class="live-dot" title="Active Portfolio"></div>
         </div>
         <div class="brand-text">
           <h1>Andrea Ravalli <span class="badge-pi">Popular Investor</span></h1>
@@ -791,15 +791,15 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <div class="nav-controls">
         <div class="tabs-nav">
           <button class="tab-btn active" id="tab-btn-investor" onclick="switchTab('investor')">
-            💼 Hub Investitori & Copiatori
+            💼 Investor & Copier Hub
           </button>
           <button class="tab-btn admin-tab" id="tab-btn-admin" onclick="switchTab('admin')">
-            🔒 Social Analytics (Admin)
+            🔒 Creator Analytics (Admin)
           </button>
         </div>
 
         <a href="https://www.etoro.com/people/AndreaRavalli" target="_blank" rel="noopener" class="btn-copy-cta">
-          Copia su eToro 🚀
+          Copy on eToro 🚀
         </a>
       </div>
     </div>
@@ -808,40 +808,40 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
   <main class="container">
 
     <!-- ══════════════════════════════════════════════════════════════════════════ -->
-    <!-- 🌟 TAB 1: INVESTOR & COPIER HUB                                           -->
+    <!-- 🌟 TAB 1: INVESTOR & COPIER HUB (ENGLISH)                                 -->
     <!-- ══════════════════════════════════════════════════════════════════════════ -->
     <div id="tab-investor" class="tab-content active">
 
       <!-- Hero Banner -->
       <section class="hero-banner">
         <div class="hero-top">
-          <h2>Costruzione Patrimoniale di Lungo Termine</h2>
+          <h2>Long-Term Wealth Compounding Strategy</h2>
           <p>
-            Strategia di crescita globale focalizzata sui <strong>megatrend tecnologici, sanitari ed energetici</strong>. 
-            Portafoglio multi-asset ad alta efficienza di capitale, disciplina fondamentale e gestione attiva senza commissioni nascoste.
+            A high-conviction global multi-asset strategy focused on <strong>Artificial Intelligence, Metabolic Healthcare (GLP-1), and Clean Energy Infrastructure</strong>. 
+            Disciplined fundamental risk management, strong capital efficiency, and 100% skin in the game with zero management fees.
           </p>
         </div>
 
         <div class="hero-kpis">
           <div class="kpi-card">
-            <div class="kpi-label">Rendimento Totale (Dal 2020)</div>
+            <div class="kpi-label">Total Return (Since 2020)</div>
             <div class="kpi-val green">+200%</div>
-            <div class="kpi-sub">Dal cambio di strategia</div>
+            <div class="kpi-sub">Since strategy inception</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Rendimento Annuo Composto (CAGR)</div>
+            <div class="kpi-label">Compound Annual Growth (CAGR)</div>
             <div class="kpi-val gold">~18.0%</div>
-            <div class="kpi-sub">Media annua composta</div>
+            <div class="kpi-sub">Annual compounded rate</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Raddoppio del Capitale</div>
-            <div class="kpi-val cyan">~4.0 Anni</div>
-            <div class="kpi-sub">Tempo stimato (Regola del 72)</div>
+            <div class="kpi-label">Capital Doubling Time</div>
+            <div class="kpi-val cyan">~4.0 Years</div>
+            <div class="kpi-sub">Estimated (Rule of 72)</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Diversificazione Globale</div>
-            <div class="kpi-val">3 Continenti</div>
-            <div class="kpi-sub">40+ Asset selezionati</div>
+            <div class="kpi-label">Global Diversification</div>
+            <div class="kpi-val">3 Continents</div>
+            <div class="kpi-sub">40+ Selected Holdings</div>
           </div>
         </div>
       </section>
@@ -849,50 +849,50 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <!-- Quantitative Risk & Intelligence Bar -->
       <section>
         <div class="section-title">
-          <span>🛡️ Analisi Quantitativa & Parametri di Rischio</span>
-          <span class="tag">Disciplina Istituzionale</span>
+          <span>🛡️ Quantitative Risk & Alpha Metrics</span>
+          <span class="tag">Institutional Discipline</span>
         </div>
 
         <div class="quant-grid">
           <div class="quant-card">
             <div class="quant-label">eToro Risk Score</div>
             <div class="quant-value green">4 / 10</div>
-            <div class="quant-desc">Profilo bilanciato / controllato</div>
+            <div class="quant-desc">Balanced & controlled risk</div>
           </div>
           <div class="quant-card">
             <div class="quant-label">Sharpe Ratio (3Y)</div>
             <div class="quant-value gold">1.42</div>
-            <div class="quant-desc">Efficienza rischio / rendimento</div>
+            <div class="quant-desc">Risk-adjusted return efficiency</div>
           </div>
           <div class="quant-card">
             <div class="quant-label">Sortino Ratio (3Y)</div>
             <div class="quant-value cyan">1.95</div>
-            <div class="quant-desc">Protezione downside elevata</div>
+            <div class="quant-desc">Superior downside defense</div>
           </div>
           <div class="quant-card">
             <div class="quant-label">Beta vs S&P 500</div>
             <div class="quant-value">0.84</div>
-            <div class="quant-desc">Minore volatilità di mercato</div>
+            <div class="quant-desc">Lower market volatility</div>
           </div>
           <div class="quant-card">
             <div class="quant-label">Max Drawdown (3Y)</div>
             <div class="quant-value green">-18.4%</div>
-            <div class="quant-desc">Contenuto vs Nasdaq (-33%)</div>
+            <div class="quant-desc">Contained vs Nasdaq (-33%)</div>
           </div>
           <div class="quant-card">
-            <div class="quant-label">Mesi Positivi</div>
+            <div class="quant-label">Profitable Months</div>
             <div class="quant-value green">74.5%</div>
-            <div class="quant-desc">Percentuale mesi in profitto</div>
+            <div class="quant-desc">Consistent winning months</div>
           </div>
           <div class="quant-card">
-            <div class="quant-label">Win Rate Operazioni</div>
+            <div class="quant-label">Closed Trades Win Rate</div>
             <div class="quant-value green">76.8%</div>
             <div class="quant-desc">Profit Factor: 2.35</div>
           </div>
           <div class="quant-card">
-            <div class="quant-label">Leva Finanziaria</div>
-            <div class="quant-value cyan">1x (Zero Leva)</div>
-            <div class="quant-desc">100% Asset reali Long-Only</div>
+            <div class="quant-label">Portfolio Leverage</div>
+            <div class="quant-value cyan">1x (No Leverage)</div>
+            <div class="quant-desc">100% Real Long-Only Assets</div>
           </div>
         </div>
       </section>
@@ -900,26 +900,26 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <!-- Monthly Performance Heatmap Matrix -->
       <section class="monthly-matrix-card">
         <div class="section-title" style="margin-bottom: 16px;">
-          <span>📅 Matrice Rendimenti Mensili & Annuali (2020 – 2026)</span>
-          <span class="tag">Storico Ufficiale Verificato</span>
+          <span>📅 Monthly & Annual Track Record (2020 – 2026)</span>
+          <span class="tag">Official Verified History</span>
         </div>
         <table class="matrix-table">
           <thead>
             <tr>
-              <th>Anno</th>
-              <th>Gen</th>
+              <th>Year</th>
+              <th>Jan</th>
               <th>Feb</th>
               <th>Mar</th>
               <th>Apr</th>
-              <th>Mag</th>
-              <th>Giu</th>
-              <th>Lug</th>
-              <th>Ago</th>
-              <th>Set</th>
-              <th>Ott</th>
+              <th>May</th>
+              <th>Jun</th>
+              <th>Jul</th>
+              <th>Aug</th>
+              <th>Sep</th>
+              <th>Oct</th>
               <th>Nov</th>
-              <th>Dic</th>
-              <th style="border-left: 2px solid var(--surface-border);">Totale Anno</th>
+              <th>Dec</th>
+              <th style="border-left: 2px solid var(--surface-border);">Full Year</th>
             </tr>
           </thead>
           <tbody id="matrixTableBody">
@@ -928,44 +928,44 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         </table>
       </section>
 
-      <!-- Interactive PAC & Compound Growth Simulator -->
+      <!-- Interactive DCA & Compound Growth Simulator -->
       <section class="simulator-card">
         <div class="section-title">
-          <span>🚀 Calcolatore Interattivo PAC & Interesse Composto</span>
-          <span class="tag">Simulazione di Proiezione</span>
+          <span>🚀 Interactive DCA & Compound Growth Simulator</span>
+          <span class="tag">Projection Engine</span>
         </div>
 
         <div class="sim-layout">
           <div class="sim-controls">
             <div class="sim-field">
-              <label>Capitale Iniziale: <span class="val" id="lblSimInit">€1.000</span></label>
+              <label>Initial Capital: <span class="val" id="lblSimInit">$1,000</span></label>
               <input type="range" id="simInit" class="sim-range" min="200" max="20000" step="100" value="1000" oninput="updateSimulator()">
             </div>
             <div class="sim-field">
-              <label>Versamento Mensile (PAC): <span class="val" id="lblSimMonthly">€200 / mese</span></label>
+              <label>Monthly Contribution (DCA): <span class="val" id="lblSimMonthly">$200 / mo</span></label>
               <input type="range" id="simMonthly" class="sim-range" min="0" max="2000" step="50" value="200" oninput="updateSimulator()">
             </div>
             <div class="sim-field">
-              <label>Orizzonte Temporale: <span class="val" id="lblSimYears">5 Anni</span></label>
+              <label>Time Horizon: <span class="val" id="lblSimYears">5 Years</span></label>
               <input type="range" id="simYears" class="sim-range" min="1" max="20" step="1" value="5" oninput="updateSimulator()">
             </div>
             <div class="sim-field">
-              <label>Rendimento Annuo Stimato: <span class="val" id="lblSimRate">18.0% (Andrea Ravalli)</span></label>
+              <label>Estimated Annual Return: <span class="val" id="lblSimRate">18.0% (Andrea Ravalli)</span></label>
               <input type="range" id="simRate" class="sim-range" min="3" max="25" step="0.5" value="18" oninput="updateSimulator()">
             </div>
 
             <div class="sim-kpis">
               <div class="sim-kpi-box">
-                <div class="lbl">Capitale Versato</div>
-                <div class="num" id="simTotalInvested" style="color: #CBD5E1;">€13.000</div>
+                <div class="lbl">Total Capital Contributed</div>
+                <div class="num" id="simTotalInvested" style="color: #CBD5E1;">$13,000</div>
               </div>
               <div class="sim-kpi-box">
-                <div class="lbl">Valore Stimato</div>
-                <div class="num" id="simFinalValue" style="color: var(--green);">€22.840</div>
+                <div class="lbl">Projected Portfolio Value</div>
+                <div class="num" id="simFinalValue" style="color: var(--green);">$22,840</div>
               </div>
               <div class="sim-kpi-box" style="grid-column: 1 / -1;">
-                <div class="lbl">Interesse Composto Generato</div>
-                <div class="num" id="simInterestEarned" style="color: var(--gold);">+€9.840 (+75.7%)</div>
+                <div class="lbl">Compound Interest Generated</div>
+                <div class="num" id="simInterestEarned" style="color: var(--gold);">+$9,840 (+75.7%)</div>
               </div>
             </div>
           </div>
@@ -979,8 +979,8 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <!-- Stress Test & Resilience Matrix -->
       <section>
         <div class="section-title">
-          <span>🛡️ Stress Test & Resilienza nei Cicli di Mercato</span>
-          <span class="tag">Protezione Capitale</span>
+          <span>🛡️ Stress Test & Market Cycle Resilience</span>
+          <span class="tag">Capital Preservation</span>
         </div>
 
         <div class="stress-grid">
@@ -988,13 +988,13 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             <div>
               <div class="stress-header">
                 <div>
-                  <div class="stress-event">Crash Pandemico Covid</div>
-                  <div class="stress-year">Marzo – Dicembre 2020</div>
+                  <div class="stress-event">Covid Pandemic Crash</div>
+                  <div class="stress-year">March – December 2020</div>
                 </div>
                 <div class="stress-badge green">+56.4%</div>
               </div>
               <p class="stress-desc">
-                Rapida rotazione strategica su leader del software cloud, tech abilitante e sanità diagnostica durante il panic selling globale.
+                Swift tactical rotation into cloud software, enabling tech platforms, and diagnostic healthcare during global market panic.
               </p>
             </div>
             <div class="stress-vs">⚡ S&P 500: +18.4% | MSCI World: +15.9%</div>
@@ -1004,32 +1004,32 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             <div>
               <div class="stress-header">
                 <div>
-                  <div class="stress-event">Shock Inflazione & Tassi</div>
-                  <div class="stress-year">Anno 2022 (Bear Market)</div>
+                  <div class="stress-event">Inflation & Rate Hike Shock</div>
+                  <div class="stress-year">Full Year 2022 (Bear Market)</div>
                 </div>
                 <div class="stress-badge shield">-14.2%</div>
               </div>
               <p class="stress-desc">
-                Drawdown fortemente contenuto grazie all'esposizione in energia (Eni, Glencore), utility (Enel) ed oro fisico come scudo anti-inflazione.
+                Drawdown heavily mitigated by strategic allocation in energy majors (Eni, Glencore), utilities (Enel), and physical gold hedges.
               </p>
             </div>
-            <div class="stress-vs">🛡️ Nasdaq 100: -33.1% (Sovraperformance +19%)</div>
+            <div class="stress-vs">🛡️ Nasdaq 100: -33.1% (Net Outperformance +19%)</div>
           </div>
 
           <div class="stress-card">
             <div>
               <div class="stress-header">
                 <div>
-                  <div class="stress-event">Onda AI & Elettrificazione</div>
-                  <div class="stress-year">Anni 2023 – 2024</div>
+                  <div class="stress-event">AI Secular Wave & Power Grid</div>
+                  <div class="stress-year">Years 2023 – 2024</div>
                 </div>
                 <div class="stress-badge green">+78.6%</div>
               </div>
               <p class="stress-desc">
-                Posizionamento anticipato sui chip per calcolo accelerato (NVIDIA, Broadcom, TSMC) e uranio per alimentazione data center (Cameco).
+                Early conviction in accelerated computing silicon (NVIDIA, Broadcom, TSMC) and clean nuclear power for AI data centers (Cameco).
               </p>
             </div>
-            <div class="stress-vs">🚀 Rendimento biennale cumulativo vs MSCI: +48%</div>
+            <div class="stress-vs">🚀 2-Year Combined Return vs MSCI: +48%</div>
           </div>
         </div>
       </section>
@@ -1037,36 +1037,36 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <!-- Performance & Benchmark Comparison -->
       <section>
         <div class="section-title">
-          <span>📈 Performance Storica & Confronto Benchmark</span>
-          <span class="tag">Alpha Generato dal 2020</span>
+          <span>📈 Historical Performance vs Major Benchmarks</span>
+          <span class="tag">Cumulative Alpha Since 2020</span>
         </div>
 
         <div class="benchmarks-grid">
           <div class="bench-card">
             <div>
               <div class="bench-name">VS S&P 500 (SPX500)</div>
-              <div class="bench-sub">Azionario USA Broad</div>
+              <div class="bench-sub">US Large-Cap Equities</div>
             </div>
             <div class="bench-diff">+65%</div>
           </div>
           <div class="bench-card">
             <div>
               <div class="bench-name">VS MSCI World (SWDA.L)</div>
-              <div class="bench-sub">Azionario Globale Sviluppato</div>
+              <div class="bench-sub">Global Developed Equities</div>
             </div>
             <div class="bench-diff">+76%</div>
           </div>
           <div class="bench-card">
             <div>
               <div class="bench-name">VS EuroStoxx 50</div>
-              <div class="bench-sub">Top 50 Europa</div>
+              <div class="bench-sub">Top 50 European Blue-Chips</div>
             </div>
             <div class="bench-diff">+129%</div>
           </div>
           <div class="bench-card">
             <div>
               <div class="bench-name">VS China 50</div>
-              <div class="bench-sub">Azionario Cinese</div>
+              <div class="bench-sub">Chinese Large-Cap Equities</div>
             </div>
             <div class="bench-diff">+208%</div>
           </div>
@@ -1074,8 +1074,8 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
         <div class="chart-box">
           <div class="chart-controls">
-            <button class="chart-toggle-btn active" id="btn-chart-annual" onclick="togglePerfChart('annual')">Rendimenti Annuali (%)</button>
-            <button class="chart-toggle-btn" id="btn-chart-compound" onclick="togglePerfChart('compound')">Crescita Cumulativa (€10.000 Iniziali)</button>
+            <button class="chart-toggle-btn active" id="btn-chart-annual" onclick="togglePerfChart('annual')">Annual Returns (%)</button>
+            <button class="chart-toggle-btn" id="btn-chart-compound" onclick="togglePerfChart('compound')">Compound Growth ($10,000 Initial)</button>
           </div>
           <div style="position: relative; height: 360px;">
             <canvas id="perfChart"></canvas>
@@ -1086,8 +1086,8 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <!-- Seasonality Radar Analysis -->
       <section class="seasonality-card">
         <div class="section-title">
-          <span>📊 Radar di Stagionalità Storica dei Mesi</span>
-          <span class="tag">Pattern Medie Mensili (2020-2026)</span>
+          <span>📊 Monthly Seasonality Analysis</span>
+          <span class="tag">Historical Average Returns (2020-2026)</span>
         </div>
         <div style="position: relative; height: 260px;">
           <canvas id="seasonalityChart"></canvas>
@@ -1097,31 +1097,31 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <!-- Multi-Dimension Asset Allocation -->
       <section>
         <div class="section-title">
-          <span>🥧 Asset Allocation Multidimensionale</span>
-          <span class="tag">Mappa dei Rischi Bilanciata</span>
+          <span>🥧 Multi-Dimensional Asset Allocation</span>
+          <span class="tag">Balanced Risk Matrix</span>
         </div>
 
         <div class="alloc-multi-grid">
           <div class="alloc-card">
-            <h3>🌍 Distribuzione Geografica</h3>
+            <h3>🌍 Geographic Exposure</h3>
             <div style="position: relative; height: 260px;">
               <canvas id="geoChart"></canvas>
             </div>
           </div>
           <div class="alloc-card">
-            <h3>🧬 Distribuzione Settoriale & Tematica</h3>
+            <h3>🧬 Sector & Thematic Breakdown</h3>
             <div style="position: relative; height: 260px;">
               <canvas id="sectorChart"></canvas>
             </div>
           </div>
           <div class="alloc-card">
-            <h3>🧱 Asset Class Breakdown</h3>
+            <h3>🧱 Asset Class Allocation</h3>
             <div style="position: relative; height: 260px;">
               <canvas id="assetClassChart"></canvas>
             </div>
           </div>
           <div class="alloc-card">
-            <h3>💱 Esposizione Valutaria</h3>
+            <h3>💱 Currency Exposure</h3>
             <div style="position: relative; height: 260px;">
               <canvas id="currencyChart"></canvas>
             </div>
@@ -1132,26 +1132,26 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <!-- Holdings Explorer (Cards + Table View) -->
       <section class="holdings-container">
         <div class="section-title">
-          <span>🔍 Esploratore Posizioni in Portafoglio</span>
-          <span class="tag">41 Titoli Attivi</span>
+          <span>🔍 Portfolio Holdings Explorer</span>
+          <span class="tag">41 Active Positions</span>
         </div>
 
         <div class="holdings-filter-bar">
-          <input type="text" id="holdingSearch" class="search-input" placeholder="Cerca ticker, azienda, settore, valuta..." oninput="filterHoldings()">
+          <input type="text" id="holdingSearch" class="search-input" placeholder="Search ticker, company, sector, currency..." oninput="filterHoldings()">
           <div class="view-toggle-wrap">
-            <button class="btn-view active" id="btn-view-cards" onclick="setHoldingsView('cards')">🎴 Vista Card</button>
-            <button class="btn-view" id="btn-view-table" onclick="setHoldingsView('table')">📋 Vista Tabella</button>
+            <button class="btn-view active" id="btn-view-cards" onclick="setHoldingsView('cards')">🎴 Card View</button>
+            <button class="btn-view" id="btn-view-table" onclick="setHoldingsView('table')">📋 Detailed Table</button>
           </div>
         </div>
 
         <div class="filter-pills">
-          <button class="pill-btn active" onclick="setHoldingFilter('ALL', this)">Tutti (41)</button>
-          <button class="pill-btn" onclick="setHoldingFilter('AI & Semiconduttori', this)">AI & Tech</button>
-          <button class="pill-btn" onclick="setHoldingFilter('Farmaceutica & GLP-1', this)">Sanità</button>
-          <button class="pill-btn" onclick="setHoldingFilter('Energia', this)">Energia</button>
-          <button class="pill-btn" onclick="setHoldingFilter('Europa', this)">Europa</button>
+          <button class="pill-btn active" onclick="setHoldingFilter('ALL', this)">All (41)</button>
+          <button class="pill-btn" onclick="setHoldingFilter('AI & Semiconductors', this)">AI & Tech</button>
+          <button class="pill-btn" onclick="setHoldingFilter('Pharma & GLP-1', this)">Healthcare</button>
+          <button class="pill-btn" onclick="setHoldingFilter('Energy', this)">Energy</button>
+          <button class="pill-btn" onclick="setHoldingFilter('Europe', this)">Europe</button>
           <button class="pill-btn" onclick="setHoldingFilter('Asia', this)">Asia</button>
-          <button class="pill-btn" onclick="setHoldingFilter('ETF', this)">ETF & Oro</button>
+          <button class="pill-btn" onclick="setHoldingFilter('ETF', this)">ETFs & Gold</button>
         </div>
 
         <!-- Cards View -->
@@ -1165,13 +1165,13 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             <thead>
               <tr>
                 <th>Ticker</th>
-                <th>Nome Azienda</th>
+                <th>Company Name</th>
                 <th>Asset Class</th>
-                <th>Valuta</th>
-                <th>Settore</th>
-                <th>Area Geografica</th>
-                <th>Tier Portafoglio</th>
-                <th>Tesi d'Investimento</th>
+                <th>Currency</th>
+                <th>Sector</th>
+                <th>Region</th>
+                <th>Portfolio Tier</th>
+                <th>Investment Thesis</th>
               </tr>
             </thead>
             <tbody id="holdingsTableBody">
@@ -1184,30 +1184,30 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <!-- Strategy Pillars -->
       <section>
         <div class="section-title">
-          <span>🏛️ I 4 Pilastri della Strategia</span>
-          <span class="tag">Disciplina Operativa</span>
+          <span>🏛️ The 4 Core Strategy Pillars</span>
+          <span class="tag">Operational Discipline</span>
         </div>
 
         <div class="pillars-grid">
           <div class="pillar-card">
             <div class="pillar-icon">🎯</div>
-            <h3>1. Megatrend & Moat Competitivo</h3>
-            <p>Selezione esclusiva di leader globali nei settori con crescita strutturale secolare: AI, salute metabolica GLP-1 ed elettrificazione.</p>
+            <h3>1. Secular Megatrends & Economic Moats</h3>
+            <p>Exclusive selection of global market leaders with secular tailwinds: accelerated AI computing, metabolic health (GLP-1), and electrification.</p>
           </div>
           <div class="pillar-card">
             <div class="pillar-icon">🛡️</div>
-            <h3>2. Gestione Attiva del Rischio</h3>
-            <p>Diversificazione geografica su 3 continenti, copertura naturale con oro fisico, treasury USA e valute multiple (USD, EUR, GBP, HKD).</p>
+            <h3>2. Active Risk & Correlation Management</h3>
+            <p>Cross-continental diversification across 3 continents, natural hedges via physical gold, short-term US Treasuries, and multi-currency exposure.</p>
           </div>
           <div class="pillar-card">
             <div class="pillar-icon">🔄</div>
-            <h3>3. Interesse Composto & Dividendi</h3>
-            <p>Reinvestimento sistematico dei flussi cedolari ed equity per massimizzare la crescita geometrica del capitale nel tempo.</p>
+            <h3>3. Compound Interest & Reinvestment</h3>
+            <p>Systematic long-term compounding with automatic organic reinvestment of dividend flows and equity gains to maximize wealth growth.</p>
           </div>
           <div class="pillar-card">
             <div class="pillar-icon">🤝</div>
-            <h3>4. Allineamento Totale & Trasparenza</h3>
-            <p>Io investo il mio stesso capitale con voi. Replica 1:1 istantanea su eToro senza commissioni di gestione né costi nascosti.</p>
+            <h3>4. Full Skin in the Game & Transparency</h3>
+            <p>100% aligned with copiers — I invest my own personal wealth in the exact same proportions. Instant 1:1 replication with zero management fees.</p>
           </div>
         </div>
       </section>
@@ -1215,57 +1215,57 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <!-- Copier Guide & FAQ Accordion -->
       <section class="faq-container">
         <div class="section-title">
-          <span>💡 Guida & FAQ per i Copiatori</span>
+          <span>💡 Copier Guide & Frequently Asked Questions</span>
           <span class="tag">Best Practices</span>
         </div>
 
         <div class="faq-item open" onclick="toggleFaq(this)">
           <div class="faq-question">
-            <span>Come inizio a copiare il portafoglio?</span>
+            <span>How do I start copying the portfolio?</span>
             <span class="arrow">▼</span>
           </div>
           <div class="faq-answer">
-            Basta andare sul mio profilo eToro (<strong>@AndreaRavalli</strong>), cliccare sul pulsante verde <strong>"Copia"</strong>, selezionare l'importo desiderato e confermare. Il sistema replicherà automaticamente tutte le posizioni in proporzione.
+            Navigate to my eToro profile (<strong>@AndreaRavalli</strong>), click the green <strong>"Copy"</strong> button, choose your allocation amount, and confirm. The platform will automatically replicate all existing and future trades proportionally in real time.
           </div>
         </div>
 
         <div class="faq-item" onclick="toggleFaq(this)">
           <div class="faq-question">
-            <span>Perché è fondamentale spuntare "Copia operazioni aperte"?</span>
+            <span>Why is checking "Copy Open Trades" essential?</span>
             <span class="arrow">▼</span>
           </div>
           <div class="faq-answer">
-            Spuntando la casella <strong>"Copia operazioni aperte" (Copy Open Trades)</strong>, entrerai immediatamente con la composizione ottimizzata del portafoglio (tutti i 40+ titoli) al prezzo corrente, senza dover attendere le mie future aperture.
+            Checking the <strong>"Copy Open Trades"</strong> box ensures you immediately enter into the full optimized portfolio of 40+ positions at current market prices, rather than waiting for future individual order executions.
           </div>
         </div>
 
         <div class="faq-item" onclick="toggleFaq(this)">
           <div class="faq-question">
-            <span>Qual è il capitale minimo raccomandato?</span>
+            <span>What is the recommended minimum investment?</span>
             <span class="arrow">▼</span>
           </div>
           <div class="faq-answer">
-            Il minimo tecnico di eToro è di $200, ma per consentire una replica frazionata proporzionale e precisa su oltre 40 asset, consiglio un capitale iniziale di <strong>almeno $500 - $1.000</strong>.
+            While eToro's platform minimum is $200, to achieve precise fractional replication across all 40+ diversified holdings, a starting capital of <strong>at least $500 – $1,000</strong> is strongly recommended.
           </div>
         </div>
 
         <div class="faq-item" onclick="toggleFaq(this)">
           <div class="faq-question">
-            <span>Qual è l'orizzonte temporale ideale?</span>
+            <span>What is the ideal investment horizon?</span>
             <span class="arrow">▼</span>
           </div>
           <div class="faq-answer">
-            La strategia è pensata per il <strong>medio-lungo termine (3 - 5+ anni)</strong>. Questo consente di sfruttare i cicli di crescita dei megatrend e l'effetto moltiplicatore dell'interesse composto, attenuando la volatilità fisiologica di breve periodo.
+            The strategy is designed for the <strong>medium-to-long term (3 to 5+ years)</strong>. This timeframe allows secular megatrend compound growth to unfold while naturally smoothing out short-term market volatility cycles.
           </div>
         </div>
 
         <div class="faq-item" onclick="toggleFaq(this)">
           <div class="faq-question">
-            <span>Come funziona il piano di accumulo mensile (PAC)?</span>
+            <span>How does adding recurring monthly funds (DCA / PAC) work?</span>
             <span class="arrow">▼</span>
           </div>
           <div class="faq-answer">
-            Puoi aggiungere fondi alla copia in qualsiasi momento. I nuovi capitali verranno distribuiti automaticamente in modo proporzionale su tutti gli asset del portafoglio, sfruttando la tecnica del Dollar-Cost Averaging (DCA).
+            You can add funds to your active copy at any time. Any newly deposited capital is automatically distributed proportionally across all current holdings, executing an effortless Dollar-Cost Averaging (DCA) compounding process.
           </div>
         </div>
       </section>
@@ -1273,75 +1273,75 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     </div>
 
     <!-- ══════════════════════════════════════════════════════════════════════════ -->
-    <!-- 🔒 TAB 2: ADMIN SOCIAL ANALYTICS (PIN PROTECTED)                          -->
+    <!-- 🔒 TAB 2: CREATOR ANALYTICS (ADMIN - PIN PROTECTED)                       -->
     <!-- ══════════════════════════════════════════════════════════════════════════ -->
     <div id="tab-admin" class="tab-content">
 
       <!-- Login / PIN Gate -->
       <div id="adminAuthGate" class="admin-gate-box">
         <div style="font-size: 3rem; margin-bottom: 12px;">🔒</div>
-        <h3>Area Riservata Creator</h3>
-        <p>Inserisci il PIN per accedere alla dashboard avanzata di analisi e social engagement.</p>
+        <h3>Creator Private Area</h3>
+        <p>Enter your PIN to unlock the creator social engagement & performance analytics console.</p>
         <input type="password" id="adminPinInput" class="pin-input" maxlength="8" placeholder="••••" onkeydown="if(event.key==='Enter') unlockAdmin()">
         <br>
-        <button class="btn-unlock" onclick="unlockAdmin()">Sblocca Dashboard</button>
-        <p id="pinError" style="color: var(--red); font-size: 0.85rem; font-weight: 700; margin-top: 14px; display: none;">PIN non corretto. Riprova.</p>
+        <button class="btn-unlock" onclick="unlockAdmin()">Unlock Dashboard</button>
+        <p id="pinError" style="color: var(--red); font-size: 0.85rem; font-weight: 700; margin-top: 14px; display: none;">Invalid PIN. Please try again.</p>
       </div>
 
       <!-- Protected Admin Content -->
       <div id="adminProtectedContent" style="display: none;">
         
         <div class="admin-header-bar">
-          <h3>📊 Social & Post Analytics Console <span style="font-size: 0.8rem; color: var(--green); font-weight: 700;">● Autenticato</span></h3>
-          <button class="btn-lock" onclick="lockAdmin()">🔒 Blocca Accesso</button>
+          <h3>📊 Social & Post Analytics Console <span style="font-size: 0.8rem; color: var(--green); font-weight: 700;">● Authenticated</span></h3>
+          <button class="btn-lock" onclick="lockAdmin()">🔒 Lock Console</button>
         </div>
 
         <!-- KPI Grid -->
         <div class="hero-kpis" style="margin-bottom: 32px;">
           <div class="kpi-card">
-            <div class="kpi-label">Post Totali Tracciati</div>
+            <div class="kpi-label">Total Tracked Posts</div>
             <div class="kpi-val cyan" id="adm-total-posts">0</div>
-            <div class="kpi-sub">Sincronizzati con eToro</div>
+            <div class="kpi-sub">Synced with eToro API</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Like Ricevuti</div>
+            <div class="kpi-label">Total Likes Received</div>
             <div class="kpi-val green" id="adm-total-likes">0</div>
-            <div class="kpi-sub">Media per post: <span id="adm-avg-likes">0</span></div>
+            <div class="kpi-sub">Avg per post: <span id="adm-avg-likes">0</span></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Commenti Totali</div>
+            <div class="kpi-label">Total Comments</div>
             <div class="kpi-val gold" id="adm-total-comments">0</div>
-            <div class="kpi-sub">Media per post: <span id="adm-avg-comments">0</span></div>
+            <div class="kpi-sub">Avg per post: <span id="adm-avg-comments">0</span></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Miglior Orario Pubblicazione</div>
+            <div class="kpi-label">Best Posting Time</div>
             <div class="kpi-val" id="adm-best-hour">09:00 CET</div>
-            <div class="kpi-sub">Giorno top: <strong id="adm-best-day">Sabato</strong></div>
+            <div class="kpi-sub">Top day: <strong id="adm-best-day">Saturday</strong></div>
           </div>
         </div>
 
         <!-- Charts Grid -->
         <div class="admin-charts-grid">
           <div class="chart-box">
-            <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 16px;">⏰ Engagement per Fascia Oraria (CET)</h4>
+            <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 16px;">⏰ Engagement by Posting Hour (CET)</h4>
             <div style="position: relative; height: 260px;">
               <canvas id="adminHourlyChart"></canvas>
             </div>
           </div>
           <div class="chart-box">
-            <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 16px;">📅 Engagement per Giorno della Settimana</h4>
+            <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 16px;">📅 Engagement by Day of Week</h4>
             <div style="position: relative; height: 260px;">
               <canvas id="adminWeekdayChart"></canvas>
             </div>
           </div>
           <div class="chart-box">
-            <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 16px;">🏷️ Top Cashtag per Interazioni</h4>
+            <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 16px;">🏷️ Top Cashtags by Interactions</h4>
             <div style="position: relative; height: 260px;">
               <canvas id="adminTagChart"></canvas>
             </div>
           </div>
           <div class="chart-box">
-            <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 16px;">🖼️ Performance per Tipologia Immagine</h4>
+            <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 16px;">🖼️ Performance by Card Asset Type</h4>
             <div style="position: relative; height: 260px;">
               <canvas id="adminImageChart"></canvas>
             </div>
@@ -1350,17 +1350,17 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
         <!-- Posts History Table -->
         <div class="table-panel">
-          <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 16px;">📋 Registro Completo dei Post Pubblicati</h4>
+          <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 16px;">📋 Complete Published Posts Log</h4>
           <table>
             <thead>
               <tr>
-                <th>Data & Ora (CET)</th>
-                <th>Sessione</th>
-                <th>Anteprima Testo</th>
+                <th>Date & Time (CET)</th>
+                <th>Session</th>
+                <th>Post Preview</th>
                 <th>Cashtags</th>
-                <th>Tipo Card</th>
+                <th>Card Type</th>
                 <th>Likes</th>
-                <th>Commenti</th>
+                <th>Comments</th>
                 <th>Link</th>
               </tr>
             </thead>
@@ -1378,9 +1378,9 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
   <footer class="site-footer">
     <div class="container">
-      <p>© 2020–2026 Andrea Ravalli · Popular Investor Program.</p>
+      <p>© 2020–2026 Andrea Ravalli · eToro Popular Investor Program.</p>
       <p style="margin-top: 6px; font-size: 0.78rem; opacity: 0.8;">
-        Il copy trading non costituisce consulenza finanziaria. Le performance passate non sono garanzia di risultati futuri.
+        Copy trading does not amount to investment advice. Past performance is not an indication of future results.
       </p>
     </div>
   </footer>
@@ -1478,7 +1478,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       }});
     }}
 
-    // ── Interactive PAC & Compound Simulator ───────────────────────────────
+    // ── Interactive DCA & Compound Simulator ───────────────────────────────
     let simChartInstance = null;
 
     function updateSimulator() {{
@@ -1487,15 +1487,15 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       const years = parseInt(document.getElementById('simYears').value);
       const annualRate = parseFloat(document.getElementById('simRate').value) / 100;
 
-      document.getElementById('lblSimInit').textContent = '€' + p0.toLocaleString('it-IT');
-      document.getElementById('lblSimMonthly').textContent = '€' + pMonthly.toLocaleString('it-IT') + ' / mese';
-      document.getElementById('lblSimYears').textContent = years + (years === 1 ? ' Anno' : ' Anni');
+      document.getElementById('lblSimInit').textContent = '$' + p0.toLocaleString('en-US');
+      document.getElementById('lblSimMonthly').textContent = '$' + pMonthly.toLocaleString('en-US') + ' / mo';
+      document.getElementById('lblSimYears').textContent = years + (years === 1 ? ' Year' : ' Years');
       document.getElementById('lblSimRate').textContent = (annualRate * 100).toFixed(1) + '%';
 
       const totalMonths = years * 12;
       const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
 
-      let labels = ['Inizio'];
+      let labels = ['Start'];
       let investedData = [p0];
       let portfolioData = [p0];
 
@@ -1503,7 +1503,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       let currentInvested = p0;
 
       for (let y = 1; y <= years; y++) {{
-        labels.push('Anno ' + y);
+        labels.push('Year ' + y);
         for (let m = 1; m <= 12; m++) {{
           currentInvested += pMonthly;
           currentPortfolio = (currentPortfolio + pMonthly) * (1 + monthlyRate);
@@ -1517,9 +1517,9 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       const interestEarned = finalPortfolio - finalInvested;
       const profitPct = ((interestEarned / finalInvested) * 100).toFixed(1);
 
-      document.getElementById('simTotalInvested').textContent = '€' + finalInvested.toLocaleString('it-IT');
-      document.getElementById('simFinalValue').textContent = '€' + finalPortfolio.toLocaleString('it-IT');
-      document.getElementById('simInterestEarned').textContent = '+€' + interestEarned.toLocaleString('it-IT') + ' (+' + profitPct + '%)';
+      document.getElementById('simTotalInvested').textContent = '$' + finalInvested.toLocaleString('en-US');
+      document.getElementById('simFinalValue').textContent = '$' + finalPortfolio.toLocaleString('en-US');
+      document.getElementById('simInterestEarned').textContent = '+$' + interestEarned.toLocaleString('en-US') + ' (+' + profitPct + '%)';
 
       const ctx = document.getElementById('simChart').getContext('2d');
       if (simChartInstance) simChartInstance.destroy();
@@ -1530,7 +1530,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
           labels: labels,
           datasets: [
             {{
-              label: 'Valore Portafoglio (Crescita Composta)',
+              label: 'Portfolio Value (Compound Growth)',
               data: portfolioData,
               borderColor: '#13C636',
               backgroundColor: 'rgba(19, 198, 54, 0.18)',
@@ -1541,7 +1541,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
               pointBackgroundColor: '#13C636'
             }},
             {{
-              label: 'Capitale Effettivo Versato',
+              label: 'Total Capital Contributed',
               data: investedData,
               borderColor: '#00D4FF',
               borderWidth: 2,
@@ -1557,12 +1557,12 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
           plugins: {{
             legend: {{ labels: {{ color: '#CBD5E1', font: {{ weight: '700' }} }} }},
             tooltip: {{
-              callbacks: {{ label: (c) => `${{c.dataset.label}}: €${{c.raw.toLocaleString('it-IT')}}` }}
+              callbacks: {{ label: (c) => `${{c.dataset.label}}: $${{c.raw.toLocaleString('en-US')}}` }}
             }}
           }},
           scales: {{
             x: {{ grid: {{ color: 'rgba(255,255,255,0.06)' }}, ticks: {{ color: '#94A3B8', font: {{ weight: '700' }} }} }},
-            y: {{ grid: {{ color: 'rgba(255,255,255,0.06)' }}, ticks: {{ color: '#94A3B8', callback: v => '€' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v) }} }}
+            y: {{ grid: {{ color: 'rgba(255,255,255,0.06)' }}, ticks: {{ color: '#94A3B8', callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v) }} }}
           }}
         }}
       }});
@@ -1570,7 +1570,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
     // ── Seasonality Radar Bar Chart ────────────────────────────────────────
     function renderSeasonalityChart() {{
-      const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const rawVals = [
         seasonalityData.Jan, seasonalityData.Feb, seasonalityData.Mar, seasonalityData.Apr,
         seasonalityData.May, seasonalityData.Jun, seasonalityData.Jul, seasonalityData.Aug,
@@ -1585,7 +1585,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         data: {{
           labels: months,
           datasets: [{{
-            label: 'Rendimento Medio Storico (%)',
+            label: 'Historical Average Return (%)',
             data: rawVals,
             backgroundColor: bgColors,
             borderColor: borderColors,
@@ -1598,7 +1598,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
           maintainAspectRatio: false,
           plugins: {{
             legend: {{ display: false }},
-            tooltip: {{ callbacks: {{ label: c => `Rendimento medio: ${{c.raw > 0 ? '+' : ''}}${{c.raw.toFixed(2)}}%` }} }}
+            tooltip: {{ callbacks: {{ label: c => `Average return: ${{c.raw > 0 ? '+' : ''}}${{c.raw.toFixed(2)}}%` }} }}
           }},
           scales: {{
             x: {{ grid: {{ color: 'rgba(255,255,255,0.05)' }}, ticks: {{ color: '#CBD5E1', font: {{ weight: '700' }} }} }},
@@ -1679,7 +1679,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         const arCum = [10000, 15640, 20816, 17859, 24752, 31905, 39051, 45650];
         const spxCum = [10000, 11840, 15238, 12479, 15761, 19701, 22951, 25062];
         const msciCum = [10000, 11590, 14116, 11617, 14381, 17329, 19893, 21583];
-        const labelsCum = ['2020 Inizio', '2020 Fine', '2021', '2022', '2023', '2024', '2025', '2026 YTD'];
+        const labelsCum = ['2020 Start', '2020 End', '2021', '2022', '2023', '2024', '2025', '2026 YTD'];
 
         perfChartInstance = new Chart(ctx, {{
           type: 'line',
@@ -1687,7 +1687,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             labels: labelsCum,
             datasets: [
               {{
-                label: 'Andrea Ravalli Portafoglio',
+                label: 'Andrea Ravalli Portfolio',
                 data: arCum,
                 borderColor: '#13C636',
                 backgroundColor: 'rgba(19, 198, 54, 0.15)',
@@ -1723,12 +1723,12 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             plugins: {{
               legend: {{ labels: {{ color: '#CBD5E1', font: {{ weight: '700' }} }} }},
               tooltip: {{
-                callbacks: {{ label: (ctx) => `${{ctx.dataset.label}}: €${{ctx.raw.toLocaleString()}}` }}
+                callbacks: {{ label: (ctx) => `${{ctx.dataset.label}}: $${{ctx.raw.toLocaleString('en-US')}}` }}
               }}
             }},
             scales: {{
               x: {{ grid: {{ color: 'rgba(255,255,255,0.06)' }}, ticks: {{ color: '#94A3B8', font: {{ weight: '700' }} }} }},
-              y: {{ grid: {{ color: 'rgba(255,255,255,0.06)' }}, ticks: {{ color: '#94A3B8', callback: v => '€' + (v/1000) + 'k' }} }}
+              y: {{ grid: {{ color: 'rgba(255,255,255,0.06)' }}, ticks: {{ color: '#94A3B8', callback: v => '$' + (v/1000) + 'k' }} }}
             }}
           }}
         }});
@@ -1747,7 +1747,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       new Chart(document.getElementById('geoChart').getContext('2d'), {{
         type: 'doughnut',
         data: {{
-          labels: ['Nord America (USA / Canada)', 'Europa (UK, DE, IT, DK, FR)', 'Asia & Emergenti (Cina, Vietnam, Indonesia)', 'Liquidità & Overnight'],
+          labels: ['North America (USA / Canada)', 'Europe (UK, DE, IT, DK, FR)', 'Asia & Emerging (China, Vietnam, Indonesia)', 'Cash & Overnight'],
           datasets: [{{
             data: [48, 32, 15, 5],
             backgroundColor: ['#00D4FF', '#13C636', '#F5B800', '#9D4EDD'],
@@ -1765,13 +1765,13 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         type: 'doughnut',
         data: {{
           labels: [
-            'AI & Semiconduttori (24%)',
-            'Farmaceutica & GLP-1 (20%)',
-            'Energia, Nucleare & Commodities (18%)',
+            'AI & Semiconductors (24%)',
+            'Healthcare & GLP-1 (20%)',
+            'Energy, Nuclear & Commodities (18%)',
             'Enterprise Cloud & Cyber (14%)',
-            'E-Commerce & Pagamenti (10%)',
+            'E-Commerce & Digital Payments (10%)',
             'ETF & Private Equity (9%)',
-            'Liquidità EUR/USD (5%)'
+            'Cash Reserves EUR/USD (5%)'
           ],
           datasets: [{{
             data: [24, 20, 18, 14, 10, 9, 5],
@@ -1789,7 +1789,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       new Chart(document.getElementById('assetClassChart').getContext('2d'), {{
         type: 'doughnut',
         data: {{
-          labels: ['Azioni Singole (74%)', 'ETF Azionari (12%)', 'Oro Fisico & Metalli (6%)', 'Titoli di Stato / Cash (6%)', 'Crypto (2%)'],
+          labels: ['Individual Equities (74%)', 'Equity ETFs (12%)', 'Physical Gold & Metals (6%)', 'US Treasuries / Cash (6%)', 'Crypto Assets (2%)'],
           datasets: [{{
             data: [74, 12, 6, 6, 2],
             backgroundColor: ['#13C636', '#00D4FF', '#F5B800', '#9D4EDD', '#FF4D6D'],
@@ -1806,7 +1806,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       new Chart(document.getElementById('currencyChart').getContext('2d'), {{
         type: 'doughnut',
         data: {{
-          labels: ['USD - Dollaro USA (54%)', 'EUR - Euro (26%)', 'GBP - Sterlina UK (12%)', 'HKD / Altre (8%)'],
+          labels: ['USD - US Dollar (54%)', 'EUR - Euro (26%)', 'GBP - British Pound (12%)', 'HKD & Other (8%)'],
           datasets: [{{
             data: [54, 26, 12, 8],
             backgroundColor: ['#00D4FF', '#13C636', '#9D4EDD', '#F5B800'],
@@ -1842,8 +1842,8 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       tableBody.innerHTML = '';
 
       if (items.length === 0) {{
-        cardContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 40px;">Nessun titolo trovato con i criteri selezionati.</p>';
-        tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--muted);">Nessun titolo trovato.</td></tr>';
+        cardContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 40px;">No holdings found matching the search criteria.</p>';
+        tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--muted);">No holdings found.</td></tr>';
         return;
       }}
 
@@ -1880,7 +1880,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         tr.innerHTML = `
           <td><strong style="color:var(--cyan); font-family:'JetBrains Mono',monospace;">$${{h.ticker}}</strong></td>
           <td><strong>${{h.emoji}} ${{h.name}}</strong></td>
-          <td><span class="mini-tag">${{h.asset_class || 'Azione'}}</span></td>
+          <td><span class="mini-tag">${{h.asset_class || 'Stock'}}</span></td>
           <td><strong style="color:var(--gold);">${{h.curr || 'USD'}}</strong></td>
           <td>${{h.sector}}</td>
           <td>${{h.geo}}</td>
@@ -1902,9 +1902,9 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
         if (!matchesQuery) return false;
         if (activeFilter === 'ALL') return true;
-        if (activeFilter === 'Europa' && h.geo === 'Europa') return true;
+        if (activeFilter === 'Europe' && h.geo === 'Europe') return true;
         if (activeFilter === 'Asia' && h.geo.includes('Asia')) return true;
-        if (activeFilter === 'ETF' && (h.sector.includes('ETF') || h.sector.includes('Oro') || h.sector.includes('Private Equity') || h.sector.includes('Treasury') || h.sector.includes('Liquidità'))) return true;
+        if (activeFilter === 'ETF' && (h.sector.includes('ETF') || h.sector.includes('Gold') || h.sector.includes('Private Equity') || h.sector.includes('Treasury') || h.sector.includes('Cash') || h.sector.includes('Fund'))) return true;
         return h.sector.toLowerCase().includes(activeFilter.toLowerCase());
       }});
       renderHoldings(filtered);
@@ -1938,7 +1938,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       postsData.forEach(p => {{
         const tr = document.createElement('tr');
         const d = new Date(p.published_at);
-        const dateStr = d.toLocaleDateString('it-IT') + ' ' + String(p.hour_local || 0).padStart(2, '0') + ':00';
+        const dateStr = d.toLocaleDateString('en-US') + ' ' + String(p.hour_local || 0).padStart(2, '0') + ':00';
         const tagsHtml = (p.tickers || []).map(t => `<span class="ticker-badge" style="font-size:0.7rem;">$${{t}}</span>`).join(' ');
         tr.innerHTML = `
           <td>${{dateStr}}</td>
@@ -1948,7 +1948,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
           <td><code style="color:var(--cyan); font-size:0.75rem;">${{p.image_type || 'card'}}</code></td>
           <td style="color:var(--green); font-weight:800;">${{p.likes || 0}}</td>
           <td style="color:var(--gold); font-weight:800;">${{p.comments || 0}}</td>
-          <td><a href="${{p.url || 'https://www.etoro.com/people/AndreaRavalli'}}" target="_blank" style="color:var(--cyan); text-decoration:none; font-weight:700;">Apri ↗</a></td>
+          <td><a href="${{p.url || 'https://www.etoro.com/people/AndreaRavalli'}}" target="_blank" style="color:var(--cyan); text-decoration:none; font-weight:700;">Open ↗</a></td>
         `;
         tbody.appendChild(tr);
       }});
@@ -1966,7 +1966,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         data: {{
           labels: hourLabels.length ? hourLabels : ['09:00', '16:00', '18:00', '22:00'],
           datasets: [{{
-            label: 'Score Engagement Medio',
+            label: 'Average Engagement Score',
             data: hourEng.length ? hourEng : [15, 2, 3, 0],
             backgroundColor: 'rgba(0, 212, 255, 0.7)',
             borderColor: '#00D4FF',
@@ -1992,7 +1992,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         data: {{
           labels: dayLabels.length ? dayLabels : ['Saturday', 'Sunday', 'Friday', 'Thursday'],
           datasets: [{{
-            label: 'Engagement Medio',
+            label: 'Average Engagement',
             data: dayEng.length ? dayEng : [16.5, 1.5, 1.5, 1.5],
             backgroundColor: 'rgba(157, 78, 221, 0.7)',
             borderColor: '#9D4EDD',
@@ -2017,7 +2017,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         data: {{
           labels: sortedTags.map(t => '$' + t),
           datasets: [{{
-            label: 'Interazioni Totali',
+            label: 'Total Interactions',
             data: sortedTags.map(t => tags[t].eng),
             backgroundColor: 'rgba(19, 198, 54, 0.7)',
             borderColor: '#13C636',
@@ -2073,7 +2073,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html)
 
-    print(f"✅ Generated dual-hub portal: {output_path} ({len(html)} bytes)")
+    print(f"✅ Generated English dual-hub portal: {output_path} ({len(html)} bytes)")
     return output_path
 
 
