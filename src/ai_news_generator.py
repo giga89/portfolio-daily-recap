@@ -1204,6 +1204,9 @@ Raddoppio del capitale stimato in ~{time_to_double:.1f} anni
 📊 DIFFERENZIALE RISPETTO AI BENCHMARK (Dal 2020):
 {benchmark_lines.strip()}
 
+🌐 Hub & Analisi Completa Portafoglio (Dividendi, Metriche, Simulatori):
+https://giga89.github.io/portfolio-daily-recap/
+
 🎯 Strategia di lungo termine basata su fondamentali solidi
 🔄 Ribilanciamento periodico per ottimizzare il rapporto rischio/rendimento
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━

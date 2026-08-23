@@ -73,8 +73,10 @@ def _format_professional_post(plain_text: str, weekly_stats: dict = None) -> str
     footer = (
         "\n\n" + "─" * 30 + "\n"
         "Questo portfolio è gestito su eToro con una strategia "
-        "diversificata su ETF globali, titoli growth e healthcare.\n\n"
-        "🔗 Segui il portfolio: https://www.etoro.com/people/andrearavalli\n"
+        "diversificata su megatrend globali (AI, Sanità ed Energia).\n\n"
+        "🌐 Hub & Analisi Dettagliata (Dividendi, Rischio, Simulatore DCA):\n"
+        "https://giga89.github.io/portfolio-daily-recap/\n\n"
+        "🔗 Segui e copia il portfolio: https://www.etoro.com/people/andrearavalli\n"
         "📩 Iscriviti ad eToro: https://etoro.tw/46qgHLr\n\n"
         "#Portfolio #Investimenti #ETF #eToro #FinanzaPersonale #Mercati"
     )

@@ -35,19 +35,22 @@ import etoro_history
 import gist_storage
 
 
-# ── eToro constants ───────────────────────────────────────────────────────────
+# ── eToro & Hub constants ───────────────────────────────────────────────────────────
+PORTFOLIO_HUB_URL = "https://giga89.github.io/portfolio-daily-recap/"
 ETORO_PROFILE  = "https://www.etoro.com/people/andrearavalli"
 ETORO_REFERRAL = "https://etoro.tw/46qgHLr"
 
 ETORO_FOOTER_LONG = (
     "\n\n"
     "━━━━━━━━━━━━━━━━━━━━\n"
-    f"👤 Segui il mio portfolio su eToro:\n{ETORO_PROFILE}\n\n"
+    f"📊 Hub interattivo, dividendi e analisi completa:\n{PORTFOLIO_HUB_URL}\n\n"
+    f"👤 Segui e copia il mio portfolio su eToro:\n{ETORO_PROFILE}\n\n"
     f"🎁 Non sei ancora su eToro? Iscriviti gratis:\n{ETORO_REFERRAL}"
 )
 
 ETORO_FOOTER_SHORT = (
-    f"\n\n👤 {ETORO_PROFILE}\n"
+    f"\n\n📊 Hub & Dati: {PORTFOLIO_HUB_URL}\n"
+    f"👤 {ETORO_PROFILE}\n"
     f"🎁 {ETORO_REFERRAL}"
 )
 
