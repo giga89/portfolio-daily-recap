@@ -51,14 +51,94 @@ MONTHLY_RETURNS = {
 }
 
 GAUGE_METRICS = [
-    {"id": "beta", "name": "Beta vs S&P 500", "value": "0.84", "min": 0, "max": 2.0, "pos": 0.84, "desc": "Lower market volatility & defensive buffering"},
-    {"id": "sharpe", "name": "Sharpe Ratio (3Y)", "value": "1.42", "min": 0, "max": 1.5, "pos": 1.42, "desc": "High risk-adjusted excess returns"},
-    {"id": "sortino", "name": "Sortino Ratio (3Y)", "value": "1.95", "min": 0, "max": 3.0, "pos": 1.95, "desc": "Superior downside protection"},
-    {"id": "alpha", "name": "Jensen's Alpha", "value": "+7.85%", "min": -10, "max": 10, "pos": 7.85, "desc": "Annualized outperformance vs benchmark"},
-    {"id": "omega", "name": "Omega Ratio", "value": "1.85", "min": 0, "max": 2.5, "pos": 1.85, "desc": "Strong probability of gain vs loss"},
-    {"id": "treynor", "name": "Treynor Ratio", "value": "0.18", "min": 0, "max": 0.4, "pos": 0.18, "desc": "Excess return per unit of systematic risk"},
-    {"id": "info", "name": "Information Ratio", "value": "0.72", "min": -1.0, "max": 1.0, "pos": 0.72, "desc": "Consistent active management alpha"},
-    {"id": "calmar", "name": "Calmar Ratio", "value": "1.15", "min": 0, "max": 2.0, "pos": 1.15, "desc": "Annual return relative to max drawdown"},
+    {
+        "id": "beta",
+        "name": "Beta vs S&P 500",
+        "value": "0.84",
+        "min": 0,
+        "max": 2.0,
+        "pos": 0.84,
+        "desc": "Lower market volatility & defensive buffering",
+        "meaning": "Measures how much the portfolio fluctuates compared to the broad stock market (S&P 500 = 1.0).",
+        "copier_takeaway": "At 0.84, this portfolio is ~16% less volatile than the general market, providing smoother compounding and shock absorption during corrections."
+    },
+    {
+        "id": "sharpe",
+        "name": "Sharpe Ratio (3Y)",
+        "value": "1.42",
+        "min": 0,
+        "max": 1.5,
+        "pos": 1.42,
+        "desc": "High risk-adjusted excess returns",
+        "meaning": "Evaluates whether strong returns come from smart asset selection or from taking excessive risk.",
+        "copier_takeaway": "A Sharpe above 1.0 is considered good; 1.42 is exceptional. It proves the profits are generated through disciplined asset allocation rather than gambling."
+    },
+    {
+        "id": "sortino",
+        "name": "Sortino Ratio (3Y)",
+        "value": "1.95",
+        "min": 0,
+        "max": 3.0,
+        "pos": 1.95,
+        "desc": "Superior downside protection",
+        "meaning": "Similar to Sharpe, but only penalizes drops (losses), ignoring positive upside surges.",
+        "copier_takeaway": "At 1.95, it shows the strategy lets profits run freely while strictly cushioning and managing downside drawdowns."
+    },
+    {
+        "id": "alpha",
+        "name": "Jensen's Alpha",
+        "value": "+7.85%",
+        "min": -10,
+        "max": 10,
+        "pos": 7.85,
+        "desc": "Annualized outperformance vs benchmark",
+        "meaning": "The extra annualized return generated purely by active strategy above what the broad market delivered.",
+        "copier_takeaway": "Generating +7.85% annual Alpha means copying this portfolio provided ~8% extra gain per year vs passive market indexing."
+    },
+    {
+        "id": "omega",
+        "name": "Omega Ratio",
+        "value": "1.85",
+        "min": 0,
+        "max": 2.5,
+        "pos": 1.85,
+        "desc": "Strong probability of gain vs loss",
+        "meaning": "Compares the sum of all winning periods directly against the sum of all losing periods.",
+        "copier_takeaway": "At 1.85, total positive gains heavily outweigh total historical losses, tilting compounding probability strongly in your favor."
+    },
+    {
+        "id": "treynor",
+        "name": "Treynor Ratio",
+        "value": "0.18",
+        "min": 0,
+        "max": 0.4,
+        "pos": 0.18,
+        "desc": "Excess return per unit of systematic risk",
+        "meaning": "Measures how much excess return is achieved for each unit of market exposure (Beta).",
+        "copier_takeaway": "Proves that high performance does not depend on taking extreme bets or riding hype waves."
+    },
+    {
+        "id": "info",
+        "name": "Information Ratio",
+        "value": "0.72",
+        "min": -1.0,
+        "max": 1.0,
+        "pos": 0.72,
+        "desc": "Consistent active management alpha",
+        "meaning": "Measures how consistently and reliably the portfolio outperforms its reference benchmark over time.",
+        "copier_takeaway": "A ratio of 0.72 indicates steady, repeatable annual outperformance rather than single lucky trades."
+    },
+    {
+        "id": "calmar",
+        "name": "Calmar Ratio",
+        "value": "1.15",
+        "min": 0,
+        "max": 2.0,
+        "pos": 1.15,
+        "desc": "Annual return relative to max drawdown",
+        "meaning": "Compares annual return directly to the deepest peak-to-trough historical drop (Max Drawdown).",
+        "copier_takeaway": "A ratio > 1.0 means average annual gains are larger than the entire worst historical drawdown, demonstrating swift recovery power."
+    },
 ]
 
 DIVIDEND_BREAKDOWN = [
@@ -567,7 +647,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       position: relative; box-shadow: var(--shadow);
     }}
     .gauge-card:hover {{ border-color: var(--surface-border-bright); }}
-    .gauge-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }}
+    .gauge-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; position: relative; }}
     .gauge-title {{ font-size: 0.85rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }}
     .gauge-value {{ font-size: 1.85rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; color: #FFF; margin: 4px 0 10px; }}
     .gauge-track-wrap {{ position: relative; height: 10px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: visible; margin-bottom: 8px; }}
@@ -584,6 +664,95 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       transform: translateX(-50%); z-index: 2;
     }}
     .gauge-desc {{ font-size: 0.74rem; color: var(--muted); line-height: 1.3; }}
+
+    /* ── Metric Info Tooltips ────────────────────────────────────────────── */
+    .info-tooltip-wrap {{
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }}
+    .info-icon-btn {{
+      background: rgba(0, 212, 255, 0.12);
+      border: 1px solid rgba(0, 212, 255, 0.35);
+      color: var(--cyan);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }}
+    .info-icon-btn:hover, .info-tooltip-wrap:hover .info-icon-btn {{
+      background: var(--cyan);
+      color: #001224;
+      box-shadow: 0 0 12px var(--cyan-glow);
+      transform: scale(1.1);
+    }}
+    .info-tooltip-box {{
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      bottom: calc(100% + 10px);
+      right: -10px;
+      width: 280px;
+      background: rgba(10, 15, 44, 0.97);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--surface-border-bright);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 212, 255, 0.15);
+      z-index: 200;
+      transform: translateY(6px);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      text-align: left;
+    }}
+    .info-tooltip-wrap:hover .info-tooltip-box {{
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }}
+    .tooltip-title {{
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid var(--surface-border);
+      padding-bottom: 6px;
+    }}
+    .tooltip-body {{
+      font-size: 0.76rem;
+      color: #CBD5E1;
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }}
+    .tooltip-copier-box {{
+      background: rgba(19, 198, 54, 0.1);
+      border: 1px solid rgba(19, 198, 54, 0.3);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.73rem;
+      color: #a8f7b7;
+      line-height: 1.35;
+    }}
+    .tooltip-copier-box strong {{
+      color: var(--green);
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }}
 
     /* ── Dividends Suite ──────────────────────────────────────────────────── */
     .dividends-layout {{
@@ -1688,7 +1857,23 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
           <div>
             <div class="gauge-header">
               <span class="gauge-title">${{g.name}}</span>
-              <span style="font-size:0.75rem; color:var(--cyan); cursor:help;" title="${{g.desc}}">ⓘ</span>
+              <div class="info-tooltip-wrap">
+                <button type="button" class="info-icon-btn" aria-label="Learn about ${{g.name}}">ⓘ</button>
+                <div class="info-tooltip-box">
+                  <div class="tooltip-title">
+                    <span>📊</span>
+                    <span>${{g.name}}</span>
+                  </div>
+                  <div class="tooltip-body">
+                    <strong>💡 What it means:</strong><br>
+                    ${{g.meaning || g.desc}}
+                  </div>
+                  <div class="tooltip-copier-box">
+                    <strong>🎯 Takeaway for Copiers:</strong>
+                    ${{g.copier_takeaway || 'Disciplined risk control protects capital and enhances compounding.'}}
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="gauge-value">${{g.value}}</div>
           </div>
