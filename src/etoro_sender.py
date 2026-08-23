@@ -16,11 +16,17 @@ import etoro_client
 
 
 def _strip_html(text: str) -> str:
-    """Remove HTML tags used by Telegram/HTML formatters."""
+    """Remove HTML tags and markdown asterisks used by Telegram/HTML formatters."""
     text = re.sub(r"<b>(.*?)</b>", r"\1", text, flags=re.DOTALL)
     text = re.sub(r"<i>(.*?)</i>", r"\1", text, flags=re.DOTALL)
+    text = re.sub(r"<u>(.*?)</u>", r"\1", text, flags=re.DOTALL)
     text = re.sub(r"<a[^>]*>(.*?)</a>", r"\1", text, flags=re.DOTALL)
     text = re.sub(r"<[^>]+>", "", text)
+    # Remove markdown bold/italic asterisks & underscores (**text**, __text__, *text*)
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text, flags=re.DOTALL)
+    text = re.sub(r"__(.*?)__", r"\1", text, flags=re.DOTALL)
+    text = re.sub(r"(?<!\w)\*([^\*\n]+)\*(?!\w)", r"\1", text)
+    text = text.replace("**", "")
     return text.strip()
 
 

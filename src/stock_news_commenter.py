@@ -213,6 +213,7 @@ REGOLE OBBLIGATORIE:
 3. • Impatto Portafoglio: [1-2 frasi sintetiche che spiegano perché questa notizia supporta la nostra tesi di investimento a medio/lungo termine o la crescita dei fondamentali]
 4. Concludi con una brevissima domanda stimolante per la community di eToro (max 1 riga).
 5. Lunghezza totale: tra 300 e 500 caratteri. Stile sobrio, lucido, professionale. NO cliché da robot, NO 'Ciao a tutti'. NO hashtag generici.
+6. NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi).
 
 Output SOLO il testo del commento in italiano."""
 

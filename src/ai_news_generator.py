@@ -233,8 +233,8 @@ def _remove_intro_text(text):
 def sanitize_etoro_cashtags(text: str) -> str:
     """
     Ensure all $TICKER cashtags are properly isolated with whitespace on eToro.
-    eToro requires cashtags (e.g. $AAPL, $ENEL.MI) to not be enclosed in parentheses
-    e.g. ($ENEL.MI) -> $ENEL.MI
+    eToro requires cashtags (e.g. $AAPL, $ENEL.MI) to not be enclosed in parentheses or asterisks
+    e.g. ($ENEL.MI) -> $ENEL.MI, **$NVDA** -> $NVDA
     and not immediately glued to punctuation e.g. $IBE.MC. -> $IBE.MC .
     """
     if not text:
@@ -242,19 +242,23 @@ def sanitize_etoro_cashtags(text: str) -> str:
     # 1. Ensure space before '$' if attached to a letter/number
     text = re.sub(r'([A-Za-z0-9_])(\$[A-Za-z0-9])', r'\1 \2', text)
     
-    # 2. Remove enclosing parentheses or brackets around cashtags: ($TICKER) -> $TICKER
+    # 2. Remove markdown asterisks around cashtags: **$TICKER** -> $TICKER
+    text = re.sub(r'\*\*\s*(\$[A-Za-z0-9.\-_]+)\s*\*\*', r' \1 ', text)
+    text = re.sub(r'\*\s*(\$[A-Za-z0-9.\-_]+)\s*\* ', r' \1 ', text)
+
+    # 3. Remove enclosing parentheses or brackets around cashtags: ($TICKER) -> $TICKER
     text = re.sub(r'\(\s*(\$[A-Za-z0-9.\-_]+)\s*\)', r' \1 ', text)
     text = re.sub(r'\[\s*(\$[A-Za-z0-9.\-_]+)\s*\]', r' \1 ', text)
     text = re.sub(r'\(\s*(\$[A-Za-z0-9.\-_]+)', r'( \1', text)
     text = re.sub(r'(\$[A-Za-z0-9.\-_]+)\s*\)', r'\1 )', text)
     
-    # 3. Separate punctuation immediately glued to the end of a cashtag (?, !, ,, :, ;)
+    # 4. Separate punctuation immediately glued to the end of a cashtag (?, !, ,, :, ;)
     text = re.sub(r'(\$[A-Za-z0-9.\-_]+)([?!,:;])', r'\1 \2', text)
     
-    # 4. Handle trailing period at end of cashtag (e.g. '$ENEL.MI.' or '$NVDA.')
+    # 5. Handle trailing period at end of cashtag (e.g. '$ENEL.MI.' or '$NVDA.')
     text = re.sub(r'(\$[A-Za-z0-9\-_]+(?:\.[A-Za-z0-9\-_]+)*)\.(\s|$)', r'\1 .\2', text)
     
-    # 5. Clean up any excess spaces while preserving newlines
+    # 6. Clean up any excess spaces while preserving newlines
     lines = [re.sub(r'[ \t]+', ' ', line).strip() for line in text.split('\n')]
     return '\n'.join(lines)
 
@@ -267,10 +271,16 @@ def _clean_robotic_phrases(text: str) -> str:
     - 'In qualità di Andrea Ravalli...'
     - 'Io sono Andrea Ravalli...'
     And strip any '@AndreaRavalli' mentions that generate notifications to followers.
-    Also ensures cashtags are isolated and taggable on eToro.
+    Also strips markdown asterisks and ensures cashtags are isolated and taggable on eToro.
     """
     if not text:
         return text
+
+    # Remove markdown bold/italic asterisks & underscores (**text**, __text__, *text*)
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text, flags=re.DOTALL)
+    text = re.sub(r"__(.*?)__", r"\1", text, flags=re.DOTALL)
+    text = re.sub(r"(?<!\w)\*([^\*\n]+)\*(?!\w)", r"\1", text)
+    text = text.replace("**", "")
 
     patterns = [
         (r"(?i)@AndreaRavalli\b", ""),
@@ -887,6 +897,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a dei compagni investitori che seguono la tua strategia). Evita assolutamente toni formali, accademici o robotici.
+            - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona ("Nel nostro portafoglio...", "Monitoriamo...", "La mia strategia..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta MAX 3 brevi spunti o notizie principali per l'apertura europea, focalizzandoti sulle novità dei nostri titoli in portafoglio o sull'indice Euro Stoxx.
@@ -910,6 +921,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a dei compagni investitori che seguono la tua strategia). Evita assolutamente toni formali o robotici.
+            - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona ("Nel nostro portafoglio...", "Oggi all'apertura guardiamo...", "La mia strategia..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta MAX 3 brevi spunti o notizie principali per l'apertura USA, focalizzandoti sulle novità dei nostri titoli in portafoglio o sugli indici americani (S&P 500, Nasdaq).
@@ -932,6 +944,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido ed empatico. Parla apertamente di come è andata la settimana, se è stata verde o rossa, dei risultati ottenuti e delle tue sensazioni.
+            - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona. È TASSATIVAMENTE VIETATO iniziare con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai col tuo nome nel testo!
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Fai un bilancio sincero di cosa ha guidato il portafoglio in questa settimana, menzionando i movimenti principali dei nostri titoli chiave.
@@ -955,6 +968,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile naturale e chiaro. Questo post accompagnerà la classifica dei migliori titoli del portafoglio.
+            - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona. È TASSATIVAMENTE VIETATO usare formule come "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai col tuo nome nel testo!
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Spiega in modo semplice e chiaro i motivi del successo dei titoli migliori di questa settimana (massimo 2-3 titoli).
@@ -980,6 +994,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un resoconto sincero scritto a fine giornata per i tuoi compagni investitori).
+            - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona ("Chiudiamo la sessione...", "Nel nostro portafoglio...", "Oggi abbiamo osservato..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
             - È TASSATIVAMENTE VIETATO inserire menzioni o tag come @AndreaRavalli o @andrearavalli.
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"

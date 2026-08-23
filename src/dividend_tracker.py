@@ -402,6 +402,7 @@ REGOLE PER IL POST:
 4. Concludi con una domanda stimolante per la community sui dividendi / reinvestimento automatico.
 5. Includi i cashtag ({prof['cashtag']} $WDEF.L $SX7PEX.DE $ENI.MI $ABBV) e hashtag finali (#Dividendi #CashFlow #eToro #PopularInvestor #CopyTrading).
 6. Lunghezza: 900-1400 caratteri. Tono autorevole, matematico e trasparente. NO formule robotiche.
+7. NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi).
 
 Output ONLY the post text in Italian."""
 
