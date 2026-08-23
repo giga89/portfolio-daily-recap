@@ -41,13 +41,13 @@ ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
 DOCS_ASSETS_DIR = os.path.join(DOCS_DIR, "assets")
 
 MONTHLY_RETURNS = {
-    "2026": {"Jan": 2.1, "Feb": 3.4, "Mar": 0.8, "Apr": 1.9, "May": -0.9, "Jun": 1.2, "Jul": 1.5, "Aug": 0.9, "Sep": None, "Oct": None, "Nov": None, "Dec": None, "Total": 11.0},
-    "2025": {"Jan": 2.8, "Feb": 1.9, "Mar": -1.4, "Apr": 3.2, "May": 2.5, "Jun": 1.8, "Jul": 3.1, "Aug": -0.8, "Sep": 2.4, "Oct": 1.9, "Nov": 2.8, "Dec": 1.2, "Total": 22.4},
-    "2024": {"Jan": 1.5, "Feb": 4.2, "Mar": 2.9, "Apr": -2.1, "May": 3.8, "Jun": 3.1, "Jul": 1.4, "Aug": 2.0, "Sep": 1.8, "Oct": -1.2, "Nov": 5.4, "Dec": 3.1, "Total": 28.9},
-    "2023": {"Jan": 5.8, "Feb": -1.2, "Mar": 3.4, "Apr": 1.5, "May": 4.2, "Jun": 5.1, "Jul": 3.8, "Aug": -2.4, "Sep": -2.8, "Oct": -1.9, "Nov": 8.4, "Dec": 7.2, "Total": 38.6},
-    "2022": {"Jan": -4.2, "Feb": -2.1, "Mar": 2.8, "Apr": -5.4, "May": 1.2, "Jun": -4.8, "Jul": 6.2, "Aug": -1.8, "Sep": -6.1, "Oct": 4.5, "Nov": 3.8, "Dec": -4.5, "Total": -14.2},
-    "2021": {"Jan": 3.1, "Feb": 2.8, "Mar": 4.2, "Apr": 3.9, "May": 1.1, "Jun": 2.5, "Jul": 2.0, "Aug": 2.4, "Sep": -3.2, "Oct": 5.8, "Nov": 0.8, "Dec": 4.6, "Total": 33.1},
-    "2020": {"Jan": 1.2, "Feb": -3.5, "Mar": -9.2, "Apr": 11.4, "May": 6.8, "Jun": 4.5, "Jul": 7.1, "Aug": 8.2, "Sep": -2.1, "Oct": -1.4, "Nov": 14.8, "Dec": 6.5, "Total": 56.4}
+    "2026": {"Jan": 2.47, "Feb": -1.19, "Mar": -3.52, "Apr": 8.99, "May": 2.58, "Jun": -4.04, "Jul": 0.95, "Aug": 4.95, "Sep": None, "Oct": None, "Nov": None, "Dec": None, "Total": 11.03},
+    "2025": {"Jan": 3.59, "Feb": -2.47, "Mar": -2.57, "Apr": 3.18, "May": 6.99, "Jun": 5.44, "Jul": 3.71, "Aug": 3.83, "Sep": 3.39, "Oct": 2.20, "Nov": -2.25, "Dec": 0.91, "Total": 28.59},
+    "2024": {"Jan": -0.43, "Feb": 3.99, "Mar": 1.10, "Apr": -1.51, "May": 4.16, "Jun": 1.44, "Jul": 1.50, "Aug": 3.98, "Sep": 2.25, "Oct": -0.25, "Nov": 4.87, "Dec": 1.77, "Total": 25.13},
+    "2023": {"Jan": 8.62, "Feb": -2.61, "Mar": 1.03, "Apr": -1.09, "May": 0.19, "Jun": 3.72, "Jul": 4.84, "Aug": -3.39, "Sep": -1.24, "Oct": -1.86, "Nov": 6.90, "Dec": 4.74, "Total": 20.76},
+    "2022": {"Jan": -7.62, "Feb": 0.34, "Mar": 5.85, "Apr": -8.76, "May": 2.77, "Jun": -8.08, "Jul": 4.83, "Aug": -1.08, "Sep": -8.17, "Oct": 0.62, "Nov": 5.33, "Dec": -4.78, "Total": -18.72},
+    "2021": {"Jan": 15.02, "Feb": -0.87, "Mar": 8.67, "Apr": 6.12, "May": -9.45, "Jun": 3.47, "Jul": -4.26, "Aug": 6.61, "Sep": -6.80, "Oct": 6.76, "Nov": -3.90, "Dec": -3.33, "Total": 16.26},
+    "2020": {"Jan": 3.68, "Feb": -9.71, "Mar": -18.05, "Apr": 20.82, "May": 4.69, "Jun": 0.06, "Jul": 9.47, "Aug": 11.40, "Sep": -4.69, "Oct": -3.36, "Nov": 27.53, "Dec": 5.98, "Total": 47.40}
 }
 
 GAUGE_METRICS = [
@@ -89,11 +89,11 @@ NEXT_DIVIDENDS = [
 ]
 
 HISTORICAL_DRAWDOWNS = [
-    {"depth": "-14.20%", "start": "Jan 2022", "end": "Dec 2022", "months": "12", "context": "Global Rate Hike & Inflation Bear Market (Contained vs Nasdaq -33.1%)"},
-    {"depth": "-9.20%", "start": "Feb 2020", "end": "Apr 2020", "months": "2", "context": "Covid-19 Global Panic Crash (Rapidly recovered in Apr/May 2020)"},
-    {"depth": "-4.67%", "start": "Feb 2026", "end": "Apr 2026", "months": "2", "context": "Mid-Cycle Technology Multiples Pullback"},
-    {"depth": "-4.04%", "start": "Jun 2026", "end": "Aug 2026", "months": "2", "context": "Summer FX & Macro Consolidation"},
-    {"depth": "-2.25%", "start": "Nov 2025", "end": "Jan 2026", "months": "2", "context": "Year-End Portfolio Profit Taking & Rebalancing"},
+    {"depth": "-18.72%", "start": "Jan 2022", "end": "Dec 2022", "months": "12", "context": "Global Rate Hike & Inflation Bear Market (Contained vs Nasdaq -33.1%)"},
+    {"depth": "-18.05%", "start": "Feb 2020", "end": "Mar 2020", "months": "2", "context": "Covid-19 Global Panic Crash (Swiftly recovered by May 2020)"},
+    {"depth": "-9.45%", "start": "May 2021", "end": "Jun 2021", "months": "1", "context": "Post-Pandemic Growth to Value Rotation"},
+    {"depth": "-4.04%", "start": "Jun 2026", "end": "Jul 2026", "months": "1", "context": "Summer FX & Multiples Consolidation"},
+    {"depth": "-3.52%", "start": "Mar 2026", "end": "Apr 2026", "months": "1", "context": "Mid-Cycle Technology Sector Pullback"},
 ]
 
 CORRELATION_CLUSTERS = [
@@ -105,18 +105,18 @@ CORRELATION_CLUSTERS = [
 ]
 
 SEASONALITY_DATA = {
-    "Jan": 1.94,
-    "Feb": 0.90,
-    "Mar": 0.70,
-    "Apr": 3.47,
-    "May": 2.91,
-    "Jun": 2.37,
-    "Jul": 3.97,
-    "Aug": 1.63,
-    "Sep": -1.32,
-    "Oct": 1.94,
-    "Nov": 6.04,
-    "Dec": 3.68
+    "Jan": 3.62,
+    "Feb": -1.79,
+    "Mar": -1.07,
+    "Apr": 3.96,
+    "May": 1.70,
+    "Jun": 0.29,
+    "Jul": 3.01,
+    "Aug": 3.76,
+    "Sep": -2.54,
+    "Oct": 0.69,
+    "Nov": 6.41,
+    "Dec": 0.88
 }
 
 HOLDINGS_DATA = [
@@ -1211,7 +1211,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
                   <div class="stress-event">Covid Pandemic Crash</div>
                   <div class="stress-year">March – December 2020</div>
                 </div>
-                <div class="stress-badge green">+56.4%</div>
+                <div class="stress-badge green">+47.40%</div>
               </div>
               <p class="stress-desc">
                 Swift tactical rotation into cloud software, enabling tech platforms, and diagnostic healthcare during global market panic.
@@ -1227,13 +1227,13 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
                   <div class="stress-event">Inflation & Rate Hike Shock</div>
                   <div class="stress-year">Full Year 2022 (Bear Market)</div>
                 </div>
-                <div class="stress-badge shield">-14.2%</div>
+                <div class="stress-badge shield">-18.72%</div>
               </div>
               <p class="stress-desc">
                 Drawdown heavily mitigated by strategic allocation in energy majors (Eni, Glencore), utilities (Enel), and physical gold hedges.
               </p>
             </div>
-            <div class="stress-vs">🛡️ Nasdaq 100: -33.1% (Net Outperformance +19%)</div>
+            <div class="stress-vs">🛡️ Nasdaq 100: -33.1% (Net Outperformance +14.4%)</div>
           </div>
 
           <div class="stress-card">
@@ -1243,7 +1243,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
                   <div class="stress-event">AI Secular Wave & Power Grid</div>
                   <div class="stress-year">Years 2023 – 2024</div>
                 </div>
-                <div class="stress-badge green">+78.6%</div>
+                <div class="stress-badge green">+51.1%</div>
               </div>
               <p class="stress-desc">
                 Early conviction in accelerated computing silicon (NVIDIA, Broadcom, TSMC) and clean nuclear power for AI data centers (Cameco).
@@ -1959,7 +1959,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     // ── Performance Chart (Annual vs Compound) ─────────────────────────────
     let perfChartInstance = null;
     const perfYears = ['2020', '2021', '2022', '2023', '2024', '2025', '2026 YTD'];
-    const arAnnual = [56.4, 33.1, -14.2, 38.6, 28.9, 22.4, 11.0];
+    const arAnnual = [47.40, 16.26, -18.72, 20.76, 25.13, 28.59, 11.03];
     const spxAnnual = [18.4, 28.7, -18.1, 26.3, 25.0, 16.5, 9.2];
     const msciAnnual = [15.9, 21.8, -17.7, 23.8, 20.5, 14.8, 8.5];
     const euAnnual = [-5.1, 21.0, -11.7, 19.2, 12.8, 11.5, 7.1];
@@ -2024,7 +2024,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
           }}
         }});
       }} else {{
-        const arCum = [10000, 15640, 20816, 17859, 24752, 31905, 39051, 43346];
+        const arCum = [10000, 14740, 17137, 13929, 16821, 21048, 27065, 30050];
         const spxCum = [10000, 11840, 15238, 12479, 15761, 19701, 22951, 25062];
         const msciCum = [10000, 11590, 14116, 11617, 14381, 17329, 19893, 21583];
         const labelsCum = ['2020 Start', '2020 End', '2021', '2022', '2023', '2024', '2025', '2026 YTD'];
