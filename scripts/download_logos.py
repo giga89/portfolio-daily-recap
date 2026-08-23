@@ -61,6 +61,8 @@ DOMAIN_MAP = {
     "CCJ":        "cameco.com",
     "NET":        "cloudflare.com",
     "PYPL":       "paypal.com",
+    "WMT":        "walmart.com",
+    "MRVL":       "marvell.com",
     # ── European stocks ──────────────────────────────────────────────────────
     "AZN.L":      "astrazeneca.com",
     "NOVO-B.CO":  "novonordisk.com",
@@ -75,7 +77,7 @@ DOMAIN_MAP = {
     "ULVR.L":     "unilever.com",
     # ── Asia ────────────────────────────────────────────────────────────────
     "1211.HK":    "byd.com",
-    "1919.HK":    "coscoshipping.com",
+    "1919.HK":    "lines.coscoshipping.com",
     "2318.HK":    "pingan.com",
     # ── ETFs (providers) ─────────────────────────────────────────────────────
     "SX7PEX.DE":  "ishares.com",
@@ -89,6 +91,7 @@ DOMAIN_MAP = {
     "XEON.DE":    "dws.com",
     "VOF.L":      "vinacapital.com",
     # ── Other ────────────────────────────────────────────────────────────────
+    "SPCX.RTH":   "spacex.com",
     "ETOR":       "etoro.com",
     "TRX":        "tron.network",
 }

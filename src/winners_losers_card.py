@@ -127,6 +127,7 @@ _TICKER_DOMAIN_MAP = {
     "TSM":       "tsmc.com",
     "ABBV":      "abbvie.com",
     "ABT.US":    "abbott.com",
+    "ABT":       "abbott.com",
     "HUM":       "humana.com",
     "MELI":      "mercadolibre.com",
     "CCJ":       "cameco.com",
@@ -135,12 +136,31 @@ _TICKER_DOMAIN_MAP = {
     "AZN.L":     "astrazeneca.com",
     "NOVO-B.CO": "novonordisk.com",
     "ENEL.MI":   "enel.com",
+    "ENI.MI":    "eni.com",
     "PRY.MI":    "prysmiangroup.com",
     "RACE":      "ferrari.com",
     "VOW3.DE":   "volkswagenag.com",
     "GLEN.L":    "glencore.com",
     "1211.HK":   "byd.com",
+    "1919.HK":   "lines.coscoshipping.com",
     "2318.HK":   "pingan.com",
+    "WMT":       "walmart.com",
+    "MRVL":      "marvell.com",
+    "MAU.PA":    "maureletprom.fr",
+    "ULVR.L":    "unilever.com",
+    "TRIG.L":    "trig-ltd.com",
+    "SPCX.RTH":  "spacex.com",
+    "VOF.L":     "vinacapital.com",
+    "INDO.PA":   "amundi.com",
+    "PPFB.DE":   "ishares.com",
+    "SX7PEX.DE": "ishares.com",
+    "IEUR":      "ishares.com",
+    "IQQL.DE":   "ishares.com",
+    "IB01.L":    "ishares.com",
+    "WDEF.L":    "wisdomtree.com",
+    "XEON.DE":   "dws.com",
+    "ETOR":      "etoro.com",
+    "TRX":       "tron.network",
 }
 
 
@@ -196,12 +216,17 @@ def _download_logo(ticker: str, size: int = 100) -> "Image.Image | None":
     if not PIL_AVAILABLE:
         return None
     safe = ticker.replace("/", "_").replace("\\", "_")
-    repo_path = os.path.join(LOGO_DIR, f"{safe}.png")
-    if os.path.exists(repo_path) and os.path.getsize(repo_path) > 500:
-        try:
-            return _make_circular(Image.open(repo_path).convert("RGBA"), size)
-        except Exception:
-            pass
+    base = safe.split(".")[0]
+
+    # 1. Check local assets/logos under multiple filename variations
+    candidates = [f"{safe}.png", f"{base}.png", f"{safe.upper()}.png", f"{base.upper()}.png"]
+    for c in candidates:
+        repo_path = os.path.join(LOGO_DIR, c)
+        if os.path.exists(repo_path) and os.path.getsize(repo_path) > 300:
+            try:
+                return _make_circular(Image.open(repo_path).convert("RGBA"), size)
+            except Exception:
+                pass
 
     if not REQUESTS_AVAILABLE:
         return None
@@ -210,31 +235,61 @@ def _download_logo(ticker: str, size: int = 100) -> "Image.Image | None":
     cache_file = os.path.join(LOGO_CACHE_DIR, f"{safe}.png")
     if os.path.exists(cache_file):
         if time.time() - os.path.getmtime(cache_file) < 7 * 86400:
-            try: return _make_circular(Image.open(cache_file).convert("RGBA"), size)
-            except Exception: pass
+            try:
+                return _make_circular(Image.open(cache_file).convert("RGBA"), size)
+            except Exception:
+                pass
 
+    # 2. Try online sources: Google Favicon API and Tickerlogos CDN
+    domain = _TICKER_DOMAIN_MAP.get(ticker) or _TICKER_DOMAIN_MAP.get(base)
+    urls_to_try = []
+    if domain:
+        urls_to_try.append(f"https://www.google.com/s2/favicons?domain={domain}&sz=128")
+        urls_to_try.append(f"https://cdn.tickerlogos.com/{domain}")
+    
     logo_url = _fetch_logo_url_for_ticker(ticker)
-    if not logo_url:
-        return None
-    try:
-        r = _requests.get(logo_url, timeout=8)
-        if r.ok and len(r.content) > 200:
-            img = Image.open(io.BytesIO(r.content)).convert("RGBA")
-            img.save(cache_file, "PNG")
-            return _make_circular(img, size)
-    except Exception:
-        pass
+    if logo_url and logo_url not in urls_to_try:
+        urls_to_try.append(logo_url)
+
+    for url in urls_to_try:
+        try:
+            r = _requests.get(url, timeout=8, headers={"User-Agent": "Mozilla/5.0"})
+            if r.ok and len(r.content) > 200:
+                img = Image.open(io.BytesIO(r.content)).convert("RGBA")
+                img.save(cache_file, "PNG")
+                return _make_circular(img, size)
+        except Exception:
+            continue
+
     return None
 
 
+def _create_fallback_badge(ticker: str, emoji_char: str = None, size: int = 100) -> "Image.Image":
+    """Create a sleek circular badge with ticker initial or emoji as fallback."""
+    out = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(out)
+    draw.ellipse([0, 0, size - 1, size - 1], fill=(30, 35, 55, 255), outline=(70, 80, 120, 255), width=2)
+    display_txt = emoji_char if emoji_char else ticker.split(".")[0][:3]
+    f = _font(size // 3)
+    bb = draw.textbbox((0, 0), display_txt, font=f)
+    w = bb[2] - bb[0]
+    h = bb[3] - bb[1]
+    draw.text(((size - w) // 2, (size - h) // 2 - 2), display_txt, fill=(240, 240, 255, 255), font=f)
+    return out
+
+
 def _make_circular(img: "Image.Image", size: int) -> "Image.Image":
-    img = img.resize((size, size), Image.LANCZOS)
-    bg = Image.new("RGBA", (size, size), (255, 255, 255, 255))
-    bg.paste(img, (0, 0), img)
+    # If image is non-square, center on a white square canvas first
+    w, h = img.size
+    dim = max(w, h)
+    sq = Image.new("RGBA", (dim, dim), (255, 255, 255, 255))
+    sq.paste(img, ((dim - w) // 2, (dim - h) // 2), img if img.mode == "RGBA" else None)
+    sq = sq.resize((size, size), Image.LANCZOS)
+    
     mask = Image.new("L", (size, size), 0)
     ImageDraw.Draw(mask).ellipse([0, 0, size - 1, size - 1], fill=255)
     out = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    out.paste(bg, (0, 0), mask)
+    out.paste(sq, (0, 0), mask)
     return out
 
 
@@ -374,11 +429,13 @@ def generate_winners_losers_card(
         # 2. Logo placement
         logo_x = BOX_X + 30
         logo_y = y_pos + 60
-        if logo_img:
-            img.paste(logo_img, (logo_x, logo_y), logo_img)
-            text_start_x = logo_x + LOGO_SIZE + 25
-        else:
-            text_start_x = logo_x
+        actual_logo = logo_img
+        if not actual_logo:
+            emoji_char = emoji_map.get(data.get("ticker", ""), "") if emoji_map else ""
+            actual_logo = _create_fallback_badge(data["ticker"], emoji_char, LOGO_SIZE)
+
+        img.paste(actual_logo, (logo_x, logo_y), actual_logo)
+        text_start_x = logo_x + LOGO_SIZE + 25
 
         # 3. Company Name & Ticker
         company = data["company_name"]
