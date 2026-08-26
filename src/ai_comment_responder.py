@@ -6,15 +6,20 @@ Scans recent eToro posts (up to 7 days back) for genuine community comments with
 and generates balanced, high-conviction, disciplined responses aligned with
 Andrea Ravalli's Popular Investor strategy and portfolio theses.
 
-Execution Modes:
-  • --live : Automatically posts replies to eToro.
-  • --dry-run (default if no flag): Previews replies without publishing.
+Features:
+  • Scans eToro posts from the last 7 days.
+  • Automatically filters out self-comments and already-answered threads.
+  • Uses Gemini AI to craft tailored, balanced responses.
+  • Automatically publishes replies on eToro (in live mode).
+  • Sends instant rich Telegram notifications quoting the original comment,
+    the post description, date, URL, and the published AI reply.
 """
 
 import os
 import sys
 import json
 import re
+import html as html_lib
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List, Optional, Tuple
 
@@ -31,6 +36,7 @@ if os.path.exists(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(_
 
 import etoro_client
 import gist_storage
+import telegram_sender
 
 try:
     from google import genai
@@ -235,6 +241,70 @@ def _extract_comment_details(c: Dict[str, Any]) -> Tuple[str, str, str, bool, Li
     return c_id, owner_username, text, is_owner, replies
 
 
+def format_post_description(item: Dict[str, Any]) -> Tuple[str, str]:
+    """Format human-readable post description like 'Apertura US del giorno 26/08/2026'."""
+    pub_str = item.get("published_at", "")
+    date_formatted = ""
+    if pub_str:
+        try:
+            clean = pub_str.replace("Z", "+00:00")
+            dt = datetime.fromisoformat(clean)
+            date_formatted = dt.strftime("%d/%m/%Y")
+        except Exception:
+            date_formatted = pub_str[:10]
+    
+    session = item.get("session_name") or item.get("post_title") or "Post Recap"
+    clean_title = re.sub(r'[\r\n]+', ' ', session).strip()
+    if len(clean_title) > 60:
+        clean_title = clean_title[:57] + "..."
+        
+    desc = f"{clean_title}"
+    if date_formatted:
+        desc += f" del giorno {date_formatted}"
+    return desc, date_formatted
+
+
+def send_telegram_comment_notification(
+    item: Dict[str, Any],
+    reply_text: str
+) -> bool:
+    """
+    Sends a rich Telegram notification when the AI answers a community comment.
+    """
+    try:
+        post_desc, _ = format_post_description(item)
+        post_id = item.get("post_id", "")
+        post_url = f"https://www.etoro.com/posts/{post_id}" if post_id else "https://www.etoro.com/people/AndreaRavalli"
+
+        author = item.get("author", "Utente")
+        user_msg = item.get("message", "").strip()
+
+        safe_author = html_lib.escape(author)
+        safe_desc = html_lib.escape(post_desc)
+        safe_user_msg = html_lib.escape(user_msg)
+        safe_reply = html_lib.escape(reply_text)
+
+        tg_message = (
+            f"🤖 <b>Nuova Risposta Automatica su eToro!</b>\n\n"
+            f"📌 <b>Post:</b> {safe_desc}\n"
+            f"🔗 <b>Link Post:</b> <a href=\"{post_url}\">{post_url}</a>\n\n"
+            f"👤 <b>Commento di:</b> @{safe_author}\n"
+            f"💬 <b>Messaggio Utente:</b>\n<i>\"{safe_user_msg}\"</i>\n\n"
+            f"💡 <b>Risposta inviata dall'IA:</b>\n"
+            f"{safe_reply}"
+        )
+
+        ok = telegram_sender.send_telegram_message(tg_message)
+        if ok:
+            print(f"📱 Notifica Telegram inviata con successo per @{author}!")
+        else:
+            print(f"⚠️ Invio notifica Telegram non riuscito per @{author}.")
+        return ok
+    except Exception as e:
+        print(f"⚠️ Errore durante l'invio della notifica Telegram: {e}")
+        return False
+
+
 def find_unreplied_comments(
     days_back: int = 7,
     my_username: str = "AndreaRavalli"
@@ -332,6 +402,7 @@ def find_unreplied_comments(
                     "author": owner,
                     "message": c_text,
                     "post_title": p.get("title") or p.get("session_name") or "Post Recap",
+                    "session_name": p.get("session") or p.get("session_name") or "",
                     "tickers": p.get("tickers", []),
                     "published_at": p.get("published_at") or "",
                     "created_at": c.get("created") or c.get("createdAt") or ""
@@ -395,6 +466,8 @@ def process_community_replies(
             )
             if res.get("success"):
                 print(f"🎉 Risposta pubblicata con successo su eToro! ID Risposta: {res.get('id')}")
+                # Send rich Telegram notification
+                send_telegram_comment_notification(item, reply_text)
                 results.append({"status": "published", "item": item, "reply": reply_text})
             else:
                 print(f"❌ Errore pubblicazione: {res.get('error')}")

@@ -50,6 +50,8 @@ jobs:
           ETORO_API_KEY: ${{ secrets.ETORO_API_KEY }}
           ETORO_USERNAME: ${{ secrets.ETORO_USERNAME || 'AndreaRavalli' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
         run: |
