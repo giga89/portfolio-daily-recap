@@ -9,10 +9,11 @@ Andrea Ravalli's Popular Investor strategy and portfolio theses.
 Features:
   • Scans eToro posts from the last 7 days.
   • Automatically filters out self-comments and already-answered threads.
-  • Uses Gemini AI to craft tailored, balanced responses.
+  • Strict conversation depth control (max 1-2 turns): never drags discussions out.
+  • Concludes gracefully with warm wishes for life and trading/investing.
+  • Uses Gemini AI (with contextual fallback) to craft concise, disciplined responses.
   • Automatically publishes replies on eToro (in live mode).
-  • Sends instant rich Telegram notifications quoting the original comment,
-    the post description, date, URL, and the published AI reply.
+  • Sends instant rich Telegram notifications quoting the comment, post, URL, and reply.
 """
 
 import os
@@ -70,7 +71,11 @@ CORE PROFILE & STRATEGY RULES:
    - Tone: Warm, humble, appreciative, polite, yet intellectually rigorous and confident as a seasoned Popular Investor.
    - Never give individual financial advice, never promise guaranteed profits, never encourage short-term day trading or CFD leverage.
    - Never deviate from our core theses. Frame short-term volatility as normal market noise buffered by our multi-asset allocation and Risk Score 3/10.
-   - Concise: 2 to 3 short paragraphs (80-140 words), easy to read on mobile, with 2-3 well-chosen emojis.
+
+4. CONVERSATION DEPTH & CLOSING RULES:
+   - Do NOT drag discussions into long, repetitive back-and-forth threads.
+   - If this is a follow-up reply or if there isn't much substantive left to add, keep the response brief (1-2 sentences) and conclude cleanly with a warm greeting and best wishes for their life and trading journey (e.g. "Un caro saluto e i migliori auguri per la vita e per il tuo trading! 📈🤝" / "Wishing you all the best in life and trading! 📈🤝").
+   - Max length: 1 to 2 short paragraphs (50-100 words), easy to read on mobile, with 2 well-chosen emojis.
 """
 
 
@@ -92,25 +97,47 @@ def _detect_language(text: str) -> str:
     return "en" if matches >= 2 else "it"
 
 
-def _build_contextual_fallback(user_comment: str, user_author: str, tickers: List[str], lang: str) -> str:
+def _is_simple_gratitude(text: str) -> bool:
+    """Check if message is just a simple thanks or acknowledgment."""
+    msg = text.lower().strip()
+    courtesy_words = ["grazie", "grazie mille", "thanks", "thank you", "ok", "chiaro", "perfetto", "top", "good luck", "buona giornata", "ottimo", "capito", "d'accordo", "condivido", "👍", "🙏", "🤝"]
+    if len(msg) < 35 and any(cw in msg for cw in courtesy_words):
+        return True
+    return False
+
+
+def _build_contextual_fallback(user_comment: str, user_author: str, tickers: List[str], lang: str, is_follow_up: bool = False) -> str:
     """Intelligent topic-aware fallback when AI API is unavailable."""
     msg_lower = _extract_text(user_comment).lower()
     
+    # 0. If it's a follow-up or simple thank-you, conclude warmly
+    if is_follow_up or _is_simple_gratitude(msg_lower):
+        if lang == "en":
+            return (
+                f"You're very welcome, @{user_author}! 🤝\n\n"
+                "Wishing you all the best in life and in your trading journey! Happy compounding! 📈✨"
+            )
+        else:
+            return (
+                f"Grazie a te, @{user_author}! 🤝\n\n"
+                "Un caro saluto e i migliori auguri per la tua vita e per il tuo trading! A presto! 📈✨"
+            )
+
     # 1. Accumulo / Paura di ritracciamento / Volatilità / DCA
     if "accumul" in msg_lower or "paura" in msg_lower or "rintracci" in msg_lower or "ritracci" in msg_lower or "drop" in msg_lower or "crash" in msg_lower or "fear" in msg_lower:
         if lang == "en":
             return (
                 f"Great discipline, @{user_author}! 📊\n\n"
                 "Accumulating gradually through Dollar-Cost Averaging (DCA) is the best way to handle market anxiety. "
-                "In our portfolio, we maintain a certified Risk Score 3/10, zero leverage, and allocations to safe havens (Gold, Cash reserves, Dividend ETFs) specifically designed to absorb any sharp pullbacks.\n\n"
-                "Stay disciplined on the multi-year horizon and happy compounding! 🚀🤝"
+                "In our portfolio, we maintain a certified Risk Score 3/10, zero leverage, and defensive allocations (Gold, Cash reserves, Dividend ETFs) specifically designed to absorb any sharp pullbacks.\n\n"
+                "Wishing you all the best in life and trading! 🚀🤝"
             )
         else:
             return (
                 f"Ottima disciplina, @{user_author}! 📊\n\n"
                 "Accumulare con ingressi frazionati (DCA) è la strategia migliore per gestire la paura dei ritracciamenti. "
                 "Nel nostro portafoglio manteniamo volutamente un Risk Score 3/10, zero leva e coperture (Oro fisico, riserve di liquidità ed ETF a dividendo) proprio per attutire eventuali correzioni senza ansia.\n\n"
-                "Mantenendo l'orizzonte a lungo termine, i cali diventano opportunità di accumulo a prezzi migliori! 📈🤝"
+                "Un caro saluto e i migliori auguri per la tua vita e per il tuo percorso di investimenti! 📈🤝"
             )
 
     # 2. NVIDIA / Tech Earnings / Pullback
@@ -118,16 +145,16 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
         if lang == "en":
             return (
                 f"Thanks for the feedback and for following the portfolio, @{user_author}! 🤝\n\n"
-                "You make a very valid point: after such strong runs, near-term profit-taking is always a natural reaction regardless of how solid the numbers are. "
-                "However, our conviction in $NVDA remains extremely high—we actually reinforced our position recently. Between the Blackwell ramp-up and multi-year hyperscaler Capex commitments, the moat is unparalleled.\n\n"
-                "For our long-term horizon, any short-term dips just offer great compounding opportunities for copiers! 🚀📈"
+                "Near-term profit-taking is always a natural reaction after huge runs. "
+                "However, our conviction in $NVDA remains extremely high (we actually reinforced the position recently) thanks to the Blackwell ramp-up and multi-year data center Capex.\n\n"
+                "Wishing you the very best in life and trading! 🚀📈"
             )
         else:
             return (
                 f"Grazie per il commento e per il riscontro, @{user_author}! 🤝\n\n"
-                "Condivido l'analisi: dopo rally importanti, prese di profitto di breve termine sono del tutto fisiologiche. "
-                "Dal punto di vista della nostra strategia, manteniamo altissima convinzione su $NVDA (su cui abbiamo recentemente incrementato la quota): l'accelerazione dell'architettura Blackwell e i Capex pluriennali dei data center rimangono solidissimi.\n\n"
-                "Con orizzonte a 3-5 anni, la volatilità di breve è solo un'opportunità di consolidamento! 📈🚀"
+                "Prese di profitto di breve termine sono del tutto fisiologiche dopo rally importanti. "
+                "Manteniamo altissima convinzione su $NVDA (su cui abbiamo recentemente incrementato la quota): l'accelerazione dell'architettura Blackwell e i Capex dei data center rimangono solidissimi.\n\n"
+                "Un saluto cordiale e i migliori auguri per la vita e per il tuo trading! 📈🚀"
             )
 
     # 3. Palantir / Multiples / Valuation
@@ -135,14 +162,16 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
         if lang == "en":
             return (
                 f"Appreciate your question, @{user_author}! 🛡️\n\n"
-                "Valuation multiples on $PLTR are indeed demanding on traditional GAAP metrics. However, we look at the exceptional Rule of 40 score (>60%), over $4B in pure cash with zero debt, and the unprecedented commercial acceleration of AIP.\n\n"
-                "Because we manage risk at 3/10 with zero leverage, position sizing is strictly controlled to capture massive upside while buffering against drawdowns. 📊✨"
+                "Valuation multiples on $PLTR are indeed demanding, but reflect an exceptional Rule of 40 score (>60%), over $4B net cash, and accelerating commercial AIP adoption. "
+                "With our Risk Score 3/10 discipline, position sizing captures the upside while protecting against drawdowns.\n\n"
+                "Wishing you all the best in life and happy investing! 📊✨"
             )
         else:
             return (
                 f"Ottima domanda, @{user_author}! 🛡️\n\n"
-                "I multipli di $PLTR sono certamente elevati sui parametri tradizionali, ma riflettono una combinazione unica: Rule of 40 oltre il 60%, cassa netta per più di 4 miliardi e accelerazione esponenziale dei contratti commerciali AIP.\n\n"
-                "Nella nostra gestione a Risk Score 3/10 e zero leva, il dimensionamento della posizione ci permette di beneficiare della crescita esponenziale proteggendo il capitale da correzioni improvvise. 📊✨"
+                "I multipli di $PLTR sono elevati, ma riflettono una Rule of 40 oltre il 60%, oltre 4 miliardi di cassa netta e la rapida accelerazione commerciale di AIP. "
+                "Con la nostra gestione a Risk Score 3/10 e zero leva, il dimensionamento controllato protegge il capitale da correzioni improvvise.\n\n"
+                "Un caro saluto e i migliori auguri per la tua vita e per i tuoi investimenti! 📊✨"
             )
 
     # 4. Copy Trading / Minimum Capital / Strategy
@@ -150,28 +179,30 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
         if lang == "en":
             return (
                 f"Hello @{user_author}, welcome to the community! 👋\n\n"
-                "To ensure proportional replication across all ~40 holdings in the portfolio (from Big Tech to Gold and dividend ETFs), eToro recommends a minimum of $500–$1,000 with 'Copy Open Trades' selected.\n\n"
-                "Our focus is 100% on long-term compound growth (+200% since 2020) with a certified Risk Score of 3/10 and zero leverage. Happy to have you on board! 🚀💼"
+                "To ensure proportional replication across all ~40 portfolio positions, eToro recommends $500–$1,000 with 'Copy Open Trades' selected. "
+                "Our focus is 100% on long-term compounding (+200% since 2020) with Risk Score 3/10 and zero leverage.\n\n"
+                "Wishing you great success in life and trading! 🚀💼"
             )
         else:
             return (
                 f"Ciao @{user_author} e benvenuto/a nella community! 👋\n\n"
-                "Per replicare al meglio tutte le circa 40 posizioni del portafoglio (tra Tech, Healthcare, Oro ed ETF a dividendo), il capitale ideale per iniziare è tra 500$ e 1.000$, spuntando sempre l'opzione 'Copia operazioni aperte'.\n\n"
-                "La nostra strategia è impostata per il lungo termine (+200% dal 2020), con Risk Score certificato 3/10 e zero leva. A disposizione per qualsiasi dubbio! 🚀💼"
+                "Per replicare al meglio tutte le circa 40 posizioni del portafoglio, il capitale ideale per iniziare è tra 500$ e 1.000$, con spunta su 'Copia operazioni aperte'. "
+                "La nostra strategia punta al lungo termine (+200% dal 2020) con Risk Score 3/10 e zero leva.\n\n"
+                "Un caloroso saluto e i migliori auguri per il tuo percorso di investimenti! 🚀💼"
             )
 
     # General Fallback
     if lang == "en":
         return (
             f"Thanks for sharing your thoughts, @{user_author}! 🤝\n\n"
-            "Appreciate the valuable perspective. Our portfolio strategy remains firmly anchored in multi-year structural trends, low risk (Score 3/10), and zero leverage, letting fundamentals drive long-term compound gains.\n\n"
-            "Great having you in the discussion! 📈✨"
+            "Our portfolio strategy remains firmly focused on multi-year structural trends, low risk (Score 3/10), and zero leverage, letting fundamentals drive compound gains.\n\n"
+            "Wishing you all the best in life and trading! 📈✨"
         )
     else:
         return (
-            f"Grazie mille per il commento e per il riscontro, @{user_author}! 🤝\n\n"
-            "Apprezzo molto il confronto. La nostra strategia rimane saldamente focalizzata su trend secolari di lungo termine, disciplina a basso rischio (Risk Score 3/10) e zero leva, lasciando che siano i fondamentali a guidare la crescita nel tempo.\n\n"
-            "Un saluto e buon investimento! 📈✨"
+            f"Grazie mille per il commento, @{user_author}! 🤝\n\n"
+            "La nostra strategia rimane saldamente focalizzata su trend secolari di lungo termine, disciplina a basso rischio (Risk Score 3/10) e zero leva.\n\n"
+            "Un caro saluto e i migliori auguri per la tua vita e per il tuo trading! 📈✨"
         )
 
 
@@ -180,6 +211,7 @@ def generate_ai_comment_reply(
     user_author: str,
     post_context: Optional[str] = None,
     relevant_tickers: Optional[List[str]] = None,
+    is_follow_up: bool = False,
 ) -> str:
     """
     Generate a tailored, balanced reply to a community comment using Gemini AI or context engine.
@@ -188,8 +220,16 @@ def generate_ai_comment_reply(
     api_key = os.environ.get("GEMINI_API_KEY")
     lang = _detect_language(clean_text)
 
+    # Short courtesy check
+    if _is_simple_gratitude(clean_text) or is_follow_up:
+        if lang == "en":
+            return f"You're very welcome, @{user_author}! Wishing you all the best in life and trading! 📈🤝"
+        else:
+            return f"Grazie a te, @{user_author}! Un caro saluto e i migliori auguri per la vita e per il tuo trading! 📈🤝"
+
     tickers_str = ", ".join(relevant_tickers) if relevant_tickers else "N/A"
     context_snippet = f"Original Post Context: {post_context[:300]}..." if post_context else "General Portfolio Post"
+    follow_up_hint = "NOTE: This is a concise follow-up reply. Conclude the discussion cleanly with best wishes for their life and trading." if is_follow_up else "NOTE: First reply. Keep it concise, balanced, and conclude with warm best wishes."
 
     prompt = f"""
 {PORTFOLIO_SYSTEM_PROMPT}
@@ -201,6 +241,7 @@ Draft a reply to the following user comment on eToro:
 - Detected Language: {'English' if lang == 'en' else 'Italian'}
 - Related Tickers: {tickers_str}
 - Post Context: {context_snippet}
+- Instruction: {follow_up_hint}
 
 Please write the exact reply ready to be posted. Do not include markdown code blocks or quotes around the entire message, just the text.
 """
@@ -213,16 +254,16 @@ Please write the exact reply ready to be posted. Do not include markdown code bl
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     temperature=0.4,
-                    max_output_tokens=350,
+                    max_output_tokens=250,
                 )
             )
-            if response.text and len(response.text.strip()) > 20:
+            if response.text and len(response.text.strip()) > 15:
                 return response.text.strip()
         except Exception as e:
             print(f"⚠️ Gemini API note: {e}")
 
     # High-quality fallback
-    return _build_contextual_fallback(clean_text, user_author, relevant_tickers or [], lang)
+    return _build_contextual_fallback(clean_text, user_author, relevant_tickers or [], lang, is_follow_up=is_follow_up)
 
 
 def _extract_comment_details(c: Dict[str, Any]) -> Tuple[str, str, str, bool, List[Dict[str, Any]]]:
@@ -311,7 +352,7 @@ def find_unreplied_comments(
 ) -> List[Dict[str, Any]]:
     """
     Scans posts published within the last `days_back` days (default: 7) and returns
-    comments by other users without a reply from AndreaRavalli.
+    comments by other users needing a reply (max 1-2 turns per thread).
     """
     unreplied = []
     
@@ -387,28 +428,50 @@ def find_unreplied_comments(
 
             total_user_comments_found += 1
 
-            # Check if this comment already has a reply from AndreaRavalli
-            has_my_reply = False
+            # ── Thread Turn & Depth Inspection ────────────────────────────────
+            my_replies_count = 0
+            last_reply_by_me = False
+            last_user_message = c_text
+            last_user_author = owner
+
             for r in replies:
-                _, r_owner, _, r_is_self, _ = _extract_comment_details(r)
+                _, r_owner, r_text, r_is_self, _ = _extract_comment_details(r)
                 if r_is_self or r_owner.lower() == my_username.lower():
-                    has_my_reply = True
-                    break
+                    my_replies_count += 1
+                    last_reply_by_me = True
+                else:
+                    last_reply_by_me = False
+                    if r_text:
+                        last_user_message = r_text
+                    if r_owner:
+                        last_user_author = r_owner
 
-            if not has_my_reply:
-                unreplied.append({
-                    "post_id": post_id,
-                    "comment_id": c_id,
-                    "author": owner,
-                    "message": c_text,
-                    "post_title": p.get("title") or p.get("session_name") or "Post Recap",
-                    "session_name": p.get("session") or p.get("session_name") or "",
-                    "tickers": p.get("tickers", []),
-                    "published_at": p.get("published_at") or "",
-                    "created_at": c.get("created") or c.get("createdAt") or ""
-                })
+            # Rule 1: If we have already replied 2 or more times in this sub-thread, STOP.
+            if my_replies_count >= 2:
+                continue
 
-    print(f"📊 Statistiche scansione: {total_comments_scanned} commenti totali esaminati | {total_user_comments_found} commenti di utenti esterni | {len(unreplied)} in attesa di risposta.")
+            # Rule 2: If we replied last, wait for the user (nothing to answer)
+            if last_reply_by_me:
+                continue
+
+            # Rule 3: Determine if this is a follow-up (turn 2)
+            is_follow_up = (my_replies_count == 1)
+
+            unreplied.append({
+                "post_id": post_id,
+                "comment_id": c_id,
+                "author": last_user_author,
+                "message": last_user_message,
+                "post_title": p.get("title") or p.get("session_name") or "Post Recap",
+                "session_name": p.get("session") or p.get("session_name") or "",
+                "tickers": p.get("tickers", []),
+                "published_at": p.get("published_at") or "",
+                "created_at": c.get("created") or c.get("createdAt") or "",
+                "is_follow_up": is_follow_up,
+                "turn": my_replies_count + 1
+            })
+
+    print(f"📊 Statistiche scansione: {total_comments_scanned} commenti totali esaminati | {total_user_comments_found} commenti di utenti esterni | {len(unreplied)} in attesa di risposta (entro il limite turni).")
 
     return unreplied
 
@@ -441,7 +504,7 @@ def process_community_replies(
 
     for idx, item in enumerate(unreplied_comments[:max_replies], 1):
         print("─" * 65)
-        print(f"🔹 [Commento {idx}/{len(unreplied_comments)}]")
+        print(f"🔹 [Commento {idx}/{len(unreplied_comments)}] (Turno: {item.get('turn', 1)}/2 | Follow-up: {item.get('is_follow_up', False)})")
         print(f"👤 Autore Commento: @{item['author']}")
         print(f"📅 Data/Ora: {item.get('created_at', 'N/D')}")
         print(f"📌 Post: \"{item['post_title'][:80]}\" (ID: {item['post_id']})")
@@ -452,7 +515,8 @@ def process_community_replies(
             user_comment_text=item['message'],
             user_author=item['author'],
             post_context=item['post_title'],
-            relevant_tickers=item.get('tickers', [])
+            relevant_tickers=item.get('tickers', []),
+            is_follow_up=item.get('is_follow_up', False)
         )
 
         print(f"\n💡 Risposta Generata dall'IA:\n{reply_text}\n")
@@ -466,7 +530,6 @@ def process_community_replies(
             )
             if res.get("success"):
                 print(f"🎉 Risposta pubblicata con successo su eToro! ID Risposta: {res.get('id')}")
-                # Send rich Telegram notification
                 send_telegram_comment_notification(item, reply_text)
                 results.append({"status": "published", "item": item, "reply": reply_text})
             else:
