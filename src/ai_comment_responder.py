@@ -5,16 +5,6 @@ AI Community Comment Responder for eToro
 Scans recent eToro posts (up to 7 days back) for genuine community comments without a reply,
 and generates balanced, high-conviction, disciplined responses aligned with
 Andrea Ravalli's Popular Investor strategy and portfolio theses.
-
-Features:
-  • Scans posts from last 7 days & retrieves community comments via eToro API.
-  • Filters out self-comments and already-answered threads.
-  • Uses Gemini AI (with intelligent contextual fallback) strictly guarded by:
-      - Multi-year compound investing philosophy (+200% since 2020).
-      - Zero leverage, Risk Score 3/10 discipline.
-      - Grounded in official portfolio holdings and core theses.
-      - Polite, appreciative, community-oriented tone (Italian or English).
-  • Supports Dry-Run (preview/approval mode) and Live Auto-Reply mode.
 """
 
 import os
@@ -212,6 +202,29 @@ Please write the exact reply ready to be posted. Do not include markdown code bl
     return _build_contextual_fallback(user_comment_text, user_author, relevant_tickers or [], lang)
 
 
+def _extract_comment_details(c: Dict[str, Any]) -> Tuple[str, str, str, bool, List[Dict[str, Any]]]:
+    """Helper to extract (comment_id, author_username, text, is_author_self, replies) across eToro JSON formats."""
+    # 1. ID
+    c_id = str(c.get("id") or c.get("entity", {}).get("id") or "")
+
+    # 2. Owner / Username
+    owner_dict = c.get("owner") or c.get("entity", {}).get("owner") or {}
+    owner_username = owner_dict.get("username", "") or c.get("username", "")
+
+    # 3. Message / Content
+    text = c.get("message") or c.get("content") or c.get("entity", {}).get("content") or ""
+
+    # 4. Is self / AndreaRavalli
+    is_owner = c.get("requesterContext", {}).get("isOwner", False)
+    if owner_username.lower() == "andrearavalli":
+        is_owner = True
+
+    # 5. Replies
+    replies = c.get("replies") or c.get("entity", {}).get("replies") or []
+
+    return c_id, owner_username, text, is_owner, replies
+
+
 def find_unreplied_comments(
     days_back: int = 7,
     my_username: str = "AndreaRavalli"
@@ -223,7 +236,7 @@ def find_unreplied_comments(
     unreplied = []
     
     if not etoro_client.is_configured():
-        print("⚠️ eToro API not configured locally.")
+        print("⚠️ eToro API not configured.")
         return unreplied
 
     # 1. Load posts from local analytics & gist
@@ -259,7 +272,6 @@ def find_unreplied_comments(
         pub_str = p.get("published_at") or p.get("timestamp")
         if pub_str:
             try:
-                # Parse ISO date
                 clean_pub = pub_str.replace("Z", "+00:00")
                 pub_dt = datetime.fromisoformat(clean_pub)
                 if pub_dt.tzinfo is None:
@@ -273,6 +285,9 @@ def find_unreplied_comments(
 
     print(f"🔍 Trovati {len(recent_posts)} post pubblicati negli ultimi {days_back} giorni.")
 
+    total_comments_scanned = 0
+    total_user_comments_found = 0
+
     for p in recent_posts:
         post_id = p.get("id") or p.get("post_id")
         if not post_id:
@@ -282,19 +297,23 @@ def find_unreplied_comments(
         if not raw_comments:
             continue
 
-        for c in raw_comments:
-            owner = c.get("owner", {}).get("username", "") or c.get("username", "")
-            c_id = c.get("id")
-            c_text = c.get("message", "") or c.get("content", "")
+        total_comments_scanned += len(raw_comments)
 
-            if not owner or owner.lower() == my_username.lower():
+        for c in raw_comments:
+            c_id, owner, c_text, is_self, replies = _extract_comment_details(c)
+
+            if is_self or not owner or owner.lower() == my_username.lower():
                 continue
 
-            replies = c.get("replies", [])
-            has_my_reply = any(
-                (r.get("owner", {}).get("username", "") or r.get("username", "")).lower() == my_username.lower()
-                for r in replies
-            )
+            total_user_comments_found += 1
+
+            # Check if this comment has replies from AndreaRavalli
+            has_my_reply = False
+            for r in replies:
+                _, r_owner, _, r_is_self, _ = _extract_comment_details(r)
+                if r_is_self or r_owner.lower() == my_username.lower():
+                    has_my_reply = True
+                    break
 
             if not has_my_reply:
                 unreplied.append({
@@ -307,6 +326,8 @@ def find_unreplied_comments(
                     "published_at": p.get("published_at") or "",
                     "created_at": c.get("created") or c.get("createdAt") or ""
                 })
+
+    print(f"📊 Statistiche scansione: {total_comments_scanned} commenti totali esaminati | {total_user_comments_found} commenti di utenti esterni | {len(unreplied)} in attesa di risposta.")
 
     return unreplied
 
