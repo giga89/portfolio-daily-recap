@@ -330,6 +330,27 @@ def record_post(
     print(f"📊 Analytics: Recorded {platform} post {post_id} ({session_name})")
 
 
+def update_index_html_data(posts: List[Dict[str, Any]], insights: Dict[str, Any], file_path: str = DOCS_INDEX_HTML):
+    """
+    Safely injects updated postsData and insightsData into docs/index.html preserving all other markup and logic.
+    """
+    import re
+    if not os.path.exists(file_path):
+        return
+    with open(file_path, "r", encoding="utf-8") as f:
+        html = f.read()
+
+    posts_json = json.dumps(posts, ensure_ascii=False)
+    insights_json = json.dumps(insights, ensure_ascii=False)
+
+    html = re.sub(r'const postsData = \[.*?\];', f'const postsData = {posts_json};', html, count=1, flags=re.DOTALL)
+    html = re.sub(r'const insightsData = \{.*?\};', f'const insightsData = {insights_json};', html, count=1, flags=re.DOTALL)
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"✅ Updated docs/index.html with live metrics for {len(posts)} posts.")
+
+
 def sync_etoro_metrics() -> Dict[str, Any]:
     """
     Poll live engagement metrics from eToro API for all tracked posts.
@@ -341,7 +362,7 @@ def sync_etoro_metrics() -> Dict[str, Any]:
     for p in posts:
         if p.get("platform") == "etoro" and p.get("id"):
             post_id = p["id"]
-            metrics = etoro_client.get_post_metrics(post_id)
+            metrics = etoro_client.get_post_metrics(post_id, exclude_author=False)
             if metrics:
                 p["likes"] = metrics.get("likes", 0)
                 p["comments"] = metrics.get("comments", 0)
@@ -351,6 +372,8 @@ def sync_etoro_metrics() -> Dict[str, Any]:
 
     data["posts"] = [p for p in posts if p.get("id") not in ["41f4c7dc-402a-4ce6-a7fe-49b819f074d2", "fb2dfe40-9d61-11f1-8080-800019b76646"]]
     save_local_analytics(data)
+    insights = compute_insights(data)
+    update_index_html_data(data.get("posts", []), insights)
     print(f"✓ Synced engagement metrics for {updated_count} eToro posts")
     return data
 
