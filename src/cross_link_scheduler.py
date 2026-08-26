@@ -179,12 +179,12 @@ ETF_MACRO_PROFILES = {
         "question": "Preferite espormi al settore bancario tramite ETF diversificato o tramite la selezione di singoli titoli?"
     },
     "WDEF.L": {
-        "name": "WisdomTree Europe Equity Income ETF",
-        "emoji": "💼",
-        "role": "Azionario Europeo ad Alto Dividendo di Qualità",
-        "thesis": "Selezione sistematica di società europee a larga capitalizzazione con eccellente profilo di generazione di cassa e bilanci sani.",
-        "driver": "Rendimento da dividendo elevato che crea un flusso cedolare costante e riduce la volatilità complessiva del portafoglio.",
-        "question": "Quale quota del vostro portafoglio dedicate a strategie e strumenti orientati alla generazione di dividendi?"
+        "name": "WisdomTree Europe Defence ETF",
+        "emoji": "🛡️",
+        "role": "Difesa Strategica & Ri-militarizzazione Europea",
+        "thesis": "Esposizione diretta ai principali campioni europei dell'aerospazio e della difesa (Rheinmetall, Leonardo, BAE Systems, Saab, Thales).",
+        "driver": "Aumento strutturale dei budget di difesa NATO oltre il 2% del PIL e riordino pluriennale delle forniture militari europee.",
+        "question": "Ritenete che il settore della Difesa europea rimarrà un driver di crescita fondamentale per i prossimi anni?"
     },
     "INDO.PA": {
         "name": "Amundi MSCI Indonesia ETF",

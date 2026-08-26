@@ -16,7 +16,7 @@ DEFAULT_TICKERS = {
     'PPFB.DE': ('PPFB.DE', 'iShares Physical Gold ETC'),
     'SX7PEX.DE': ('EXV1.DE', 'iShares STOXX Europe 600 Banks UCITS ETF'),
     'TRIG.L': ('TRIG.L', 'The Renewables Infrastructure Group Ltd'),
-    'WDEF.L': ('WDEF.L', 'WisdomTree Europe Equity Income UCITS ETF'),
+    'WDEF.L': ('WDEF.L', 'WisdomTree Europe Defence UCITS ETF'),
     'IEUR': ('IEUR', 'iShares Core MSCI Europe ETF'),
     'IQQL.DE': ('IQQL.DE', 'iShares Listed Private Equity UCITS ETF'),
     'VOF.L': ('VOF.L', 'VinaCapital Vietnam Opportunity Fund'),
@@ -70,7 +70,7 @@ DEFAULT_EMOJIS = {
     'IEUR': '🇪🇺',     # Europe
     'IQQL.DE': '🔥',
     'IEMG': '🌍',
-    'WDEF.L': '💼',
+    'WDEF.L': '🛡️',
     'INDO.PA': '🇮🇩',
     
     # Healthcare & Pharmaceuticals
