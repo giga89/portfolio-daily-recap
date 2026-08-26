@@ -936,16 +936,26 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
     full_text = post_text + ETORO_FOOTER_LONG
     _save_post_to_artifacts("copy_trading_post.txt", "Copy Trading Post", full_text)
 
-    # 1. eToro Social Feed
-    print("\n🐂 eToro Social Feed (Copy Trading Post):")
-    if etoro_sender.etoro_client.is_configured():
-        # Use existing card as visual if available
-        visual_path = None
+    # Generate dedicated Copy Trading visual card with live eToro metrics & rotation
+    visual_path = None
+    try:
+        import copy_trading_card
+        visual_path = copy_trading_card.generate_copy_card_auto(
+            rankings_data=rankings_data,
+            portfolio_perf=portfolio_perf,
+            output_path="output/copy_trading_card.png",
+        )
+        print(f"   🖼️  Generated dedicated Copy Trading Card: {visual_path}")
+    except Exception as exc:
+        print(f"   ⚠️  Could not generate dedicated copy trading card: {exc}")
         for candidate in ["output/winners_losers.png", "output/pie_chart.png"]:
             if os.path.exists(candidate):
                 visual_path = candidate
                 break
 
+    # 1. eToro Social Feed
+    print("\n🐂 eToro Social Feed (Copy Trading Post):")
+    if etoro_sender.etoro_client.is_configured():
         ok_etoro = etoro_sender.send_etoro_post(
             text=post_text,
             image_path=visual_path,
@@ -980,7 +990,13 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
         try:
             header = "<b>🔁 COPY TRADING — IL MIO PORTFOLIO SU ETORO</b>\n\n"
-            telegram_sender.send_telegram_message((header + post_text + ETORO_FOOTER_LONG)[:4096])
+            full_tg_text = (header + post_text + ETORO_FOOTER_LONG)
+            if visual_path and os.path.exists(visual_path):
+                # Telegram photo captions are limited to 1024 chars
+                short_caption = full_tg_text[:1020]
+                telegram_sender.send_telegram_photo(visual_path, caption=short_caption)
+            else:
+                telegram_sender.send_telegram_message(full_tg_text[:4096])
             print("   ✅ Copy trading post sent to Telegram")
             results["telegram_copy_trading"] = True
         except Exception as exc:

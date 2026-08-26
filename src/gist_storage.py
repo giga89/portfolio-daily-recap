@@ -406,6 +406,34 @@ def get_current_pie_chart_type() -> str:
 
 
 # ---------------------------------------------------------------------------
+# Copy Trading card image rotation tracking
+# Rotates through: dashboard → profit → steps → dashboard …
+# ---------------------------------------------------------------------------
+
+COPY_CARD_STYLES = ['dashboard', 'profit', 'steps']
+
+
+def get_next_copy_card_style() -> str:
+    """
+    Return the next copy trading card style to use (round-robin).
+    Advances the internal counter and saves it back to Gist.
+    """
+    data = load_data()
+    idx = data.get('copy_card_index', 0)
+    style = COPY_CARD_STYLES[idx % len(COPY_CARD_STYLES)]
+    data['copy_card_index'] = (idx + 1) % len(COPY_CARD_STYLES)
+    save_data(data)
+    return style
+
+
+def get_current_copy_card_style() -> str:
+    """Return the current copy trading card style without advancing the counter."""
+    data = load_data()
+    idx = data.get('copy_card_index', 0)
+    return COPY_CARD_STYLES[idx % len(COPY_CARD_STYLES)]
+
+
+# ---------------------------------------------------------------------------
 # eToro Post & Delayed Engagement Tracking
 # ---------------------------------------------------------------------------
 
