@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-08-26T16:13:01.580695",
+  "last_updated": "2026-08-26T16:17:31.314789",
   "posts": [
     {
       "id": "cac45250-a152-11f1-8080-8000159b6b85",
@@ -18,11 +18,11 @@
         "WDEF.L"
       ],
       "image_type": "winners_losers_card",
-      "likes": 3,
-      "comments": 1,
+      "likes": 1,
+      "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-26T16:12:11.680360"
+      "last_synced": "2026-08-26T16:17:09.544085"
     },
     {
       "id": "6f6b77e0-a147-11f1-8080-80010adf1e1c",
@@ -37,11 +37,11 @@
         "PLTR"
       ],
       "image_type": "stock_focus_card",
-      "likes": 5,
+      "likes": 0,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-26T16:12:13.768613"
+      "last_synced": "2026-08-26T16:17:12.388123"
     },
     {
       "id": "700c36a0-a145-11f1-8080-8001722f2e7b",
@@ -62,11 +62,11 @@
         "TSM"
       ],
       "image_type": "copy_trading_card",
-      "likes": 3,
+      "likes": 1,
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-26T16:12:15.659606"
+      "last_synced": "2026-08-26T16:17:13.478987"
     },
     {
       "id": "b39117b0-a11d-11f1-8080-800001b1794f",
@@ -86,10 +86,10 @@
       ],
       "image_type": "winners_losers_card",
       "likes": 1,
-      "comments": 1,
+      "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-26T16:12:17.348243"
+      "last_synced": "2026-08-26T16:17:14.606938"
     },
     {
       "id": "256a3b40-a0c0-11f1-8080-800147ead856",
@@ -109,10 +109,10 @@
       ],
       "image_type": "winners_losers_card",
       "likes": 1,
-      "comments": 1,
+      "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-26T16:12:18.867285"
+      "last_synced": "2026-08-26T16:17:15.697201"
     },
     {
       "id": "f412b660-a09e-11f1-8080-80011d5d032a",
@@ -134,7 +134,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-26T16:12:20.343642"
+      "last_synced": "2026-08-26T16:17:17.906185"
     },
     {
       "id": "a7a0e820-a089-11f1-8080-800054fe8240",
@@ -153,11 +153,11 @@
         "NVDA"
       ],
       "image_type": "winners_losers_card",
-      "likes": 2,
-      "comments": 1,
+      "likes": 1,
+      "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-26T16:12:22.139048"
+      "last_synced": "2026-08-26T16:17:18.955882"
     },
     {
       "id": "9ade0100-a07e-11f1-8080-80014a7436b4",
@@ -176,7 +176,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-26T16:12:23.519951"
+      "last_synced": "2026-08-26T16:17:19.963487"
     },
     {
       "id": "63a829b0-a07c-11f1-8080-80017488585b",
@@ -201,7 +201,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-26T16:12:25.280432"
+      "last_synced": "2026-08-26T16:17:21.083263"
     },
     {
       "id": "37c3bae0-a053-11f1-8080-800002d739e8",
@@ -220,11 +220,11 @@
         "1211.HK"
       ],
       "image_type": "winners_losers_card",
-      "likes": 2,
-      "comments": 1,
+      "likes": 1,
+      "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-26T16:12:26.789715"
+      "last_synced": "2026-08-26T16:17:21.887410"
     },
     {
       "id": "1d999920-9ff7-11f1-8080-800000fbe14b",
@@ -754,7 +754,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-08-25T16:07:10.334496"
+      "last_synced": "2026-08-26T16:17:31.314705"
     }
   ]
 }
