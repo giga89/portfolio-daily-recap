@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """
-AI Community Comment Responder for eToro
-========================================
+AI Community Comment Responder for eToro (Auto-Pilot)
+=====================================================
 Scans recent eToro posts (up to 7 days back) for genuine community comments without a reply,
 and generates balanced, high-conviction, disciplined responses aligned with
 Andrea Ravalli's Popular Investor strategy and portfolio theses.
+
+Execution Modes:
+  • --live : Automatically posts replies to eToro.
+  • --dry-run (default if no flag): Previews replies without publishing.
 """
 
 import os
@@ -204,24 +208,14 @@ Please write the exact reply ready to be posted. Do not include markdown code bl
 
 def _extract_comment_details(c: Dict[str, Any]) -> Tuple[str, str, str, bool, List[Dict[str, Any]]]:
     """Helper to extract (comment_id, author_username, text, is_author_self, replies) across eToro JSON formats."""
-    # 1. ID
     c_id = str(c.get("id") or c.get("entity", {}).get("id") or "")
-
-    # 2. Owner / Username
     owner_dict = c.get("owner") or c.get("entity", {}).get("owner") or {}
     owner_username = owner_dict.get("username", "") or c.get("username", "")
-
-    # 3. Message / Content
-    text = c.get("message") or c.get("content") or c.get("entity", {}).get("content") or ""
-
-    # 4. Is self / AndreaRavalli
+    text = c.get("message") or c.get("content") or c.get("entity", {}).get("content") or c.get("entity", {}).get("message") or c.get("text") or ""
     is_owner = c.get("requesterContext", {}).get("isOwner", False)
     if owner_username.lower() == "andrearavalli":
         is_owner = True
-
-    # 5. Replies
     replies = c.get("replies") or c.get("entity", {}).get("replies") or []
-
     return c_id, owner_username, text, is_owner, replies
 
 
@@ -307,7 +301,7 @@ def find_unreplied_comments(
 
             total_user_comments_found += 1
 
-            # Check if this comment has replies from AndreaRavalli
+            # Check if this comment already has a reply from AndreaRavalli
             has_my_reply = False
             for r in replies:
                 _, r_owner, _, r_is_self, _ = _extract_comment_details(r)
@@ -333,20 +327,20 @@ def find_unreplied_comments(
 
 
 def process_community_replies(
-    dry_run: bool = True,
+    dry_run: bool = False,
     days_back: int = 7,
     max_replies: int = 10,
     my_username: str = "AndreaRavalli"
 ) -> List[Dict[str, Any]]:
     """
     Finds unreplied comments from the last `days_back` days, generates AI replies,
-    and either previews (dry-run) or posts them.
+    and publishes them (live) or previews them (dry-run).
     """
     print("=" * 70)
     print("🤖 AI COMMUNITY COMMENT RESPONDER (eToro)")
     print(f"🕒 Timestamp: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}")
     print(f"📅 Lookback Window: Ultimi {days_back} giorni")
-    print(f"⚙️ Modalità Esecuzione: {'🛡️ DRY RUN (Solo Anteprima - Nessuna Pubblicazione)' if dry_run else '🔴 LIVE AUTO-REPLY (Pubblicazione Attiva)'}")
+    print(f"⚙️ Modalità Esecuzione: {'🛡️ DRY RUN (Solo Anteprima)' if dry_run else '🚀 LIVE AUTO-REPLY (Pubblicazione Automatica)'}")
     print("=" * 70)
 
     unreplied_comments = find_unreplied_comments(days_back=days_back, my_username=my_username)
@@ -356,16 +350,16 @@ def process_community_replies(
         print("\n✅ Nessun commento della community in sospeso senza risposta trovato negli ultimi 7 giorni.")
         return results
 
-    print(f"\n📬 Trovati {len(unreplied_comments)} commenti in sospeso senza risposta. Generazione bozze in corso...\n")
+    print(f"\n📬 Trovati {len(unreplied_comments)} commenti in sospeso senza risposta. Elaborazione in corso...\n")
 
     for idx, item in enumerate(unreplied_comments[:max_replies], 1):
         print("─" * 65)
-        print(f"🔹 [Commento In Sospeso {idx}/{len(unreplied_comments)}]")
+        print(f"🔹 [Commento {idx}/{len(unreplied_comments)}]")
         print(f"👤 Autore Commento: @{item['author']}")
-        print(f"📅 Data/Ora Commento: {item.get('created_at', 'N/D')}")
-        print(f"📌 Post di Riferimento: \"{item['post_title'][:80]}\" (ID: {item['post_id']})")
+        print(f"📅 Data/Ora: {item.get('created_at', 'N/D')}")
+        print(f"📌 Post: \"{item['post_title'][:80]}\" (ID: {item['post_id']})")
         print(f"🏷️ Titoli Coinvolti: {', '.join(item.get('tickers', [])) or 'Macro/Portafoglio'}")
-        print(f"💬 Testo del Commento Utente:\n   \"{item['message']}\"")
+        print(f"💬 Testo Utente: \"{item['message']}\"")
 
         reply_text = generate_ai_comment_reply(
             user_comment_text=item['message'],
@@ -374,28 +368,28 @@ def process_community_replies(
             relevant_tickers=item.get('tickers', [])
         )
 
-        print(f"\n💡 Risposta Proposta dall'IA (Pronta per essere pubblicata):\n")
-        print(f"{reply_text}\n")
+        print(f"\n💡 Risposta Generata dall'IA:\n{reply_text}\n")
 
         if not dry_run:
+            print(f"🚀 Pubblicazione automatica in corso per @{item['author']}...")
             res = etoro_client.reply_to_comment(
                 post_id=item['post_id'],
                 comment_id=item['comment_id'],
                 message=reply_text
             )
             if res.get("success"):
-                print(f"🎉 [LIVE] Risposta pubblicata con successo su eToro! ID: {res.get('id')}")
+                print(f"🎉 Risposta pubblicata con successo su eToro! ID Risposta: {res.get('id')}")
                 results.append({"status": "published", "item": item, "reply": reply_text})
             else:
-                print(f"❌ [LIVE] Errore pubblicazione: {res.get('error')}")
+                print(f"❌ Errore pubblicazione: {res.get('error')}")
                 results.append({"status": "failed", "item": item, "error": res.get('error')})
         else:
-            print("🛡️ [DRY RUN] Nessuna azione eseguita su eToro. La risposta è solo in anteprima.")
+            print("🛡️ [DRY RUN] Nessuna azione eseguita su eToro.")
             results.append({"status": "preview", "item": item, "reply": reply_text})
 
     return results
 
 
 if __name__ == "__main__":
-    is_live = len(sys.argv) > 1 and sys.argv[1] == "--live"
-    process_community_replies(dry_run=not is_live, days_back=7)
+    is_dry = "--dry-run" in sys.argv
+    process_community_replies(dry_run=is_dry, days_back=7)
