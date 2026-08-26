@@ -355,6 +355,7 @@ def sync_etoro_metrics() -> Dict[str, Any]:
     """
     Poll live engagement metrics from eToro API for all tracked posts.
     """
+    import time
     data = load_local_analytics()
     posts = data.get("posts", [])
     updated_count = 0
@@ -363,6 +364,7 @@ def sync_etoro_metrics() -> Dict[str, Any]:
         if p.get("platform") == "etoro" and p.get("id"):
             post_id = p["id"]
             metrics = etoro_client.get_post_metrics(post_id, exclude_author=False)
+            time.sleep(0.35)  # Rate limit protection for eToro API
             if metrics:
                 p["likes"] = metrics.get("likes", 0)
                 p["comments"] = metrics.get("comments", 0)
