@@ -1,0 +1,55 @@
+name: AI Community Comment Responder
+
+on:
+  repository_dispatch:
+    types: [comment_responder, reply_comments]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Execution Mode'
+        required: true
+        type: choice
+        options:
+          - 'dry_run (Preview proposed replies only)'
+          - 'live (Publish replies to eToro)'
+        default: 'dry_run (Preview proposed replies only)'
+      max_replies:
+        description: 'Maximum comments to reply to'
+        required: false
+        default: '5'
+
+jobs:
+  respond-comments:
+    runs-on: ubuntu-latest
+    environment: Etoro
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run AI Comment Responder
+        env:
+          ETORO_USER_KEY: ${{ secrets.ETORO_USER_KEY }}
+          ETORO_API_KEY: ${{ secrets.ETORO_API_KEY }}
+          ETORO_USERNAME: ${{ secrets.ETORO_USERNAME || 'AndreaRavalli' }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+        run: |
+          MODE_FLAG=""
+          if [[ "${{ inputs.mode }}" == "live"* ]]; then
+            MODE_FLAG="--live"
+          fi
+          python src/ai_comment_responder.py ${MODE_FLAG}
