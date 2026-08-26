@@ -68,20 +68,47 @@ CORE PROFILE & STRATEGY RULES:
 """
 
 
+def _extract_text(obj: Any) -> str:
+    """Safely extracts plain string text from string, dict, or nested structure."""
+    if isinstance(obj, str):
+        return obj.strip()
+    if isinstance(obj, dict):
+        return str(obj.get("text") or obj.get("content") or obj.get("message") or "").strip()
+    return str(obj or "").strip()
+
+
 def _detect_language(text: str) -> str:
     """Detect if text is primarily English or Italian."""
+    clean_text = _extract_text(text)
     english_clues = ["the", "and", "is", "for", "with", "thanks", "great", "portfolio", "earnings", "good", "pullback", "think", "what", "why", "you", "are", "regarding"]
-    text_words = set(re.findall(r"\b[a-zA-Z]+\b", text.lower()))
+    text_words = set(re.findall(r"\b[a-zA-Z]+\b", clean_text.lower()))
     matches = sum(1 for w in english_clues if w in text_words)
     return "en" if matches >= 2 else "it"
 
 
 def _build_contextual_fallback(user_comment: str, user_author: str, tickers: List[str], lang: str) -> str:
     """Intelligent topic-aware fallback when AI API is unavailable."""
-    msg_lower = user_comment.lower()
+    msg_lower = _extract_text(user_comment).lower()
     
-    # 1. NVIDIA / Tech Earnings / Pullback
-    if "nvda" in msg_lower or "nvidia" in msg_lower or "earnings" in msg_lower or "pullback" in msg_lower:
+    # 1. Accumulo / Paura di ritracciamento / Volatilità / DCA
+    if "accumul" in msg_lower or "paura" in msg_lower or "rintracci" in msg_lower or "ritracci" in msg_lower or "drop" in msg_lower or "crash" in msg_lower or "fear" in msg_lower:
+        if lang == "en":
+            return (
+                f"Great discipline, @{user_author}! 📊\n\n"
+                "Accumulating gradually through Dollar-Cost Averaging (DCA) is the best way to handle market anxiety. "
+                "In our portfolio, we maintain a certified Risk Score 3/10, zero leverage, and allocations to safe havens (Gold, Cash reserves, Dividend ETFs) specifically designed to absorb any sharp pullbacks.\n\n"
+                "Stay disciplined on the multi-year horizon and happy compounding! 🚀🤝"
+            )
+        else:
+            return (
+                f"Ottima disciplina, @{user_author}! 📊\n\n"
+                "Accumulare con ingressi frazionati (DCA) è la strategia migliore per gestire la paura dei ritracciamenti. "
+                "Nel nostro portafoglio manteniamo volutamente un Risk Score 3/10, zero leva e coperture (Oro fisico, riserve di liquidità ed ETF a dividendo) proprio per attutire eventuali correzioni senza ansia.\n\n"
+                "Mantenendo l'orizzonte a lungo termine, i cali diventano opportunità di accumulo a prezzi migliori! 📈🤝"
+            )
+
+    # 2. NVIDIA / Tech Earnings / Pullback
+    elif "nvda" in msg_lower or "nvidia" in msg_lower or "earnings" in msg_lower or "pullback" in msg_lower:
         if lang == "en":
             return (
                 f"Thanks for the feedback and for following the portfolio, @{user_author}! 🤝\n\n"
@@ -97,7 +124,7 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
                 "Con orizzonte a 3-5 anni, la volatilità di breve è solo un'opportunità di consolidamento! 📈🚀"
             )
 
-    # 2. Palantir / Multiples / Valuation
+    # 3. Palantir / Multiples / Valuation
     elif "pltr" in msg_lower or "palantir" in msg_lower or "valutazion" in msg_lower or "multipl" in msg_lower or "p/e" in msg_lower:
         if lang == "en":
             return (
@@ -112,7 +139,7 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
                 "Nella nostra gestione a Risk Score 3/10 e zero leva, il dimensionamento della posizione ci permette di beneficiare della crescita esponenziale proteggendo il capitale da correzioni improvvise. 📊✨"
             )
 
-    # 3. Copy Trading / Minimum Capital / Strategy
+    # 4. Copy Trading / Minimum Capital / Strategy
     elif "copi" in msg_lower or "copy" in msg_lower or "minim" in msg_lower or "capitale" in msg_lower or "start" in msg_lower:
         if lang == "en":
             return (
@@ -125,21 +152,6 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
                 f"Ciao @{user_author} e benvenuto/a nella community! 👋\n\n"
                 "Per replicare al meglio tutte le circa 40 posizioni del portafoglio (tra Tech, Healthcare, Oro ed ETF a dividendo), il capitale ideale per iniziare è tra 500$ e 1.000$, spuntando sempre l'opzione 'Copia operazioni aperte'.\n\n"
                 "La nostra strategia è impostata per il lungo termine (+200% dal 2020), con Risk Score certificato 3/10 e zero leva. A disposizione per qualsiasi dubbio! 🚀💼"
-            )
-
-    # 4. Gold / Defence / Diversification vs Tech
-    elif "gold" in msg_lower or "oro" in msg_lower or "wdef" in msg_lower or "ppfb" in msg_lower or "difesa" in msg_lower or "diversif" in msg_lower:
-        if lang == "en":
-            return (
-                f"Great point, @{user_author}! ⚖️\n\n"
-                "While pure US tech offers high beta, maintaining structural allocations to Physical Gold ($PPFB.DE) and European Defence ($WDEF) is what allows us to keep a low Risk Score 3/10 and prevent severe portfolio drawdowns during macro shocks.\n\n"
-                "This asymmetric balance enables stress-free long-term compounding without sacrificing substantial upside! 🥇🛡️"
-            )
-        else:
-            return (
-                f"Ottima osservazione, @{user_author}! ⚖️\n\n"
-                "Il settore Tech offre grande spinta nei cicli rialzisti, ma includere pilastri non correlati come l'Oro fisico ($PPFB.DE) e la Difesa Europea ($WDEF.L) è proprio ciò che ci permette di mantenere un Risk Score certificato di 3/10 e proteggere il portafoglio da shock geopolitici e inflattivi.\n\n"
-                "Questo bilanciamento asimmetrico rende il compounding stabile e sostenibile negli anni! 🥇🛡️"
             )
 
     # General Fallback
@@ -166,8 +178,9 @@ def generate_ai_comment_reply(
     """
     Generate a tailored, balanced reply to a community comment using Gemini AI or context engine.
     """
+    clean_text = _extract_text(user_comment_text)
     api_key = os.environ.get("GEMINI_API_KEY")
-    lang = _detect_language(user_comment_text)
+    lang = _detect_language(clean_text)
 
     tickers_str = ", ".join(relevant_tickers) if relevant_tickers else "N/A"
     context_snippet = f"Original Post Context: {post_context[:300]}..." if post_context else "General Portfolio Post"
@@ -178,7 +191,7 @@ def generate_ai_comment_reply(
 TASK:
 Draft a reply to the following user comment on eToro:
 - User: @{user_author}
-- Comment: "{user_comment_text}"
+- Comment: "{clean_text}"
 - Detected Language: {'English' if lang == 'en' else 'Italian'}
 - Related Tickers: {tickers_str}
 - Post Context: {context_snippet}
@@ -203,7 +216,7 @@ Please write the exact reply ready to be posted. Do not include markdown code bl
             print(f"⚠️ Gemini API note: {e}")
 
     # High-quality fallback
-    return _build_contextual_fallback(user_comment_text, user_author, relevant_tickers or [], lang)
+    return _build_contextual_fallback(clean_text, user_author, relevant_tickers or [], lang)
 
 
 def _extract_comment_details(c: Dict[str, Any]) -> Tuple[str, str, str, bool, List[Dict[str, Any]]]:
@@ -211,7 +224,10 @@ def _extract_comment_details(c: Dict[str, Any]) -> Tuple[str, str, str, bool, Li
     c_id = str(c.get("id") or c.get("entity", {}).get("id") or "")
     owner_dict = c.get("owner") or c.get("entity", {}).get("owner") or {}
     owner_username = owner_dict.get("username", "") or c.get("username", "")
-    text = c.get("message") or c.get("content") or c.get("entity", {}).get("content") or c.get("entity", {}).get("message") or c.get("text") or ""
+    
+    raw_text = c.get("message") or c.get("content") or c.get("entity", {}).get("content") or c.get("entity", {}).get("message") or c.get("text") or ""
+    text = _extract_text(raw_text)
+    
     is_owner = c.get("requesterContext", {}).get("isOwner", False)
     if owner_username.lower() == "andrearavalli":
         is_owner = True
