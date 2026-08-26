@@ -643,4 +643,47 @@ def reply_to_comment(post_id: str, comment_id: str, message: str, language: str 
         return {"success": False, "error": str(e)}
 
 
+def get_comment_replies(post_id: str, comment_id: str) -> List[Dict[str, Any]]:
+    """
+    Fetch all replies for a specific comment via GET /api/v1/posts/{postId}/comments/{commentId}/replies.
+    """
+    headers = get_headers()
+    if not headers:
+        return []
+    url = f"{BASE_URL}/api/v1/posts/{post_id}/comments/{comment_id}/replies"
+    try:
+        resp = requests.get(url, headers=headers, timeout=20)
+        if resp.status_code == 200:
+            data = resp.json()
+            if isinstance(data, dict):
+                return data.get("replies", []) or data.get("comments", []) or []
+            elif isinstance(data, list):
+                return data
+        return []
+    except Exception as e:
+        print(f"⚠️ Error fetching replies for comment {comment_id}: {e}")
+        return []
+
+
+def delete_comment_reply(post_id: str, comment_id: str, reply_id: str) -> bool:
+    """
+    Delete a specific reply from a comment via DELETE /api/v1/posts/{postId}/comments/{commentId}/replies/{replyId}.
+    """
+    headers = get_headers()
+    if not headers:
+        return False
+    url = f"{BASE_URL}/api/v1/posts/{post_id}/comments/{comment_id}/replies/{reply_id}"
+    try:
+        resp = requests.delete(url, headers=headers, timeout=15)
+        if resp.status_code in (200, 204):
+            print(f"🗑️ Successfully deleted duplicate reply {reply_id}")
+            return True
+        print(f"⚠️ Failed to delete reply {reply_id} (HTTP {resp.status_code}): {resp.text}")
+        return False
+    except Exception as e:
+        print(f"⚠️ Error deleting reply {reply_id}: {e}")
+        return False
+
+
+
 
