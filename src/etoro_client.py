@@ -431,55 +431,45 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
             my_username = (post_owner.get("username") or "AndreaRavalli").lower()
             my_user_id = str(post_owner.get("id") or "8029424")
 
-            # 1. Likes Count (accurately read from summary or paging totalCount)
-            summary = data.get("summary", {})
+            # 1. External Likes (exclude author's own like)
             emotions_data = data.get("emotionsData", {})
             like_data = emotions_data.get("like", {})
             emotions_list = like_data.get("emotions", [])
 
-            total_likes_raw = (
-                summary.get("likeCount")
-                or summary.get("likesCount")
-                or like_data.get("paging", {}).get("totalCount")
-                or len(emotions_list)
-                or 0
-            )
-            likes = int(total_likes_raw)
-
-            if exclude_author:
-                author_has_liked = any(
-                    e.get("owner", {}).get("username", "").lower() == my_username
-                    or str(e.get("owner", {}).get("id")) == my_user_id
-                    for e in emotions_list
-                ) or data.get("requesterContext", {}).get("hasLiked", False)
-                if author_has_liked:
-                    likes = max(0, likes - 1)
-
-            # 2. Comments Count (accurately read from summary or /comments endpoint)
-            total_comments_raw = summary.get("commentCount") or summary.get("commentsCount")
-            if total_comments_raw is not None:
-                comments = int(total_comments_raw)
+            if exclude_author and emotions_list:
+                external_likes = [
+                    e for e in emotions_list
+                    if e.get("owner", {}).get("username", "").lower() != my_username
+                    and str(e.get("owner", {}).get("id")) != my_user_id
+                ]
+                likes = len(external_likes)
             else:
-                comments = 0
-                try:
-                    c_url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
-                    c_resp = requests.get(c_url, headers=headers, timeout=10)
-                    if c_resp.status_code == 200:
-                        c_data = c_resp.json()
-                        c_list = c_data.get("comments", [])
-                        if exclude_author:
-                            external_comments = [
-                                c for c in c_list
-                                if c.get("entity", {}).get("owner", {}).get("username", "").lower() != my_username
-                                and str(c.get("entity", {}).get("owner", {}).get("id")) != my_user_id
-                                and not c.get("requesterContext", {}).get("isOwner", False)
-                            ]
-                            comments = len(external_comments)
-                        else:
-                            comments = len(c_list)
-                except Exception:
-                    comments = 0
+                likes = like_data.get("paging", {}).get("totalCount", len(emotions_list))
 
+            # 2. External Comments (exclude author's own/bot comments)
+            comments = 0
+            try:
+                c_url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
+                c_resp = requests.get(c_url, headers=headers, timeout=10)
+                if c_resp.status_code == 200:
+                    c_data = c_resp.json()
+                    c_list = c_data.get("comments", [])
+                    if exclude_author:
+                        external_comments = [
+                            c for c in c_list
+                            if c.get("entity", {}).get("owner", {}).get("username", "").lower() != my_username
+                            and str(c.get("entity", {}).get("owner", {}).get("id")) != my_user_id
+                            and not c.get("requesterContext", {}).get("isOwner", False)
+                        ]
+                        comments = len(external_comments)
+                    else:
+                        comments = len(c_list)
+                else:
+                    comments = 0
+            except Exception:
+                comments = 0
+
+            summary = data.get("summary", {})
             shares = summary.get("sharedCount", 0)
             return {
                 "id": data.get("id"),

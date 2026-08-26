@@ -8,7 +8,9 @@ Andrea Ravalli's Popular Investor strategy and portfolio theses.
 
 Features:
   • Scans eToro posts from the last 7 days.
-  • Automatically filters out self-comments and already-answered threads.
+  • Queries live comment replies via eToro API sub-resource.
+  • Persistent state memory (data/answered_comments.json + Gist) to guarantee 100% anti-duplication.
+  • Automatic cleanup of duplicate replies if detected.
   • Strict conversation depth control (max 1-2 turns): never drags discussions out.
   • Concludes gracefully with warm wishes for life and trading/investing.
   • Uses Gemini AI (with contextual fallback) to craft concise, disciplined responses.
@@ -45,6 +47,9 @@ try:
     HAS_GENAI = True
 except ImportError:
     HAS_GENAI = False
+
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+ANSWERED_COMMENTS_FILE = os.path.join(DATA_DIR, "answered_comments.json")
 
 
 PORTFOLIO_SYSTEM_PROMPT = """
@@ -104,6 +109,81 @@ def _is_simple_gratitude(text: str) -> bool:
     if len(msg) < 35 and any(cw in msg for cw in courtesy_words):
         return True
     return False
+
+
+def load_answered_comments() -> Dict[str, Any]:
+    """Load persistent state of answered comments from local JSON and Gist."""
+    answered = {}
+    if os.path.exists(ANSWERED_COMMENTS_FILE):
+        try:
+            with open(ANSWERED_COMMENTS_FILE, "r", encoding="utf-8") as f:
+                answered.update(json.load(f))
+        except Exception:
+            pass
+
+    try:
+        gist_data = gist_storage.load_data()
+        gist_answered = gist_data.get("answered_comments", {})
+        if isinstance(gist_answered, dict):
+            answered.update(gist_answered)
+    except Exception:
+        pass
+
+    return answered
+
+
+def record_answered_comment(comment_id: str, post_id: str, author: str, reply_id: Optional[str] = None):
+    """Save answered comment state locally and sync to Gist."""
+    os.makedirs(DATA_DIR, exist_ok=True)
+    db = load_answered_comments()
+    
+    current_entry = db.get(comment_id, {
+        "post_id": post_id,
+        "author": author,
+        "first_answered_at": datetime.now(timezone.utc).isoformat(),
+        "reply_ids": []
+    })
+    
+    if reply_id and reply_id not in current_entry.get("reply_ids", []):
+        current_entry.setdefault("reply_ids", []).append(reply_id)
+    
+    current_entry["last_updated_at"] = datetime.now(timezone.utc).isoformat()
+    db[comment_id] = current_entry
+
+    try:
+        with open(ANSWERED_COMMENTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(db, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"⚠️ Warning saving local answered comments: {e}")
+
+    try:
+        gist_data = gist_storage.load_data()
+        gist_data["answered_comments"] = db
+        gist_storage.save_data(gist_data)
+    except Exception:
+        pass
+
+
+def cleanup_duplicate_replies(post_id: str, comment_id: str, my_username: str = "AndreaRavalli") -> int:
+    """
+    If multiple replies from Andrea exist on the same comment, deletes all but the first one.
+    """
+    replies = etoro_client.get_comment_replies(post_id, comment_id)
+    my_replies = []
+    for r in replies:
+        r_id, r_owner, _, r_is_self, _ = _extract_comment_details(r)
+        if r_is_self or (r_owner and r_owner.lower() == my_username.lower()):
+            my_replies.append(r_id)
+
+    deleted_count = 0
+    if len(my_replies) > 1:
+        print(f"🧹 Rilevate {len(my_replies)} risposte duplicate sul commento {comment_id}. Pulizia in corso...")
+        # Keep the first reply, delete the subsequent ones
+        for extra_id in my_replies[1:]:
+            ok = etoro_client.delete_comment_reply(post_id, comment_id, extra_id)
+            if ok:
+                deleted_count += 1
+    return deleted_count
 
 
 def _build_contextual_fallback(user_comment: str, user_author: str, tickers: List[str], lang: str, is_follow_up: bool = False) -> str:
@@ -360,6 +440,8 @@ def find_unreplied_comments(
         print("⚠️ eToro API not configured.")
         return unreplied
 
+    answered_db = load_answered_comments()
+
     # 1. Load posts from local analytics & gist
     posts_candidates = []
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -428,6 +510,19 @@ def find_unreplied_comments(
 
             total_user_comments_found += 1
 
+            # Fetch live replies for this comment sub-resource
+            live_replies = etoro_client.get_comment_replies(post_id, c_id)
+            if live_replies:
+                replies = live_replies
+
+            # Automatically cleanup duplicate replies if present
+            cleanup_duplicate_replies(post_id, c_id, my_username=my_username)
+
+            # Re-read replies after potential cleanup
+            live_replies = etoro_client.get_comment_replies(post_id, c_id)
+            if live_replies:
+                replies = live_replies
+
             # ── Thread Turn & Depth Inspection ────────────────────────────────
             my_replies_count = 0
             last_reply_by_me = False
@@ -436,7 +531,7 @@ def find_unreplied_comments(
 
             for r in replies:
                 _, r_owner, r_text, r_is_self, _ = _extract_comment_details(r)
-                if r_is_self or r_owner.lower() == my_username.lower():
+                if r_is_self or (r_owner and r_owner.lower() == my_username.lower()):
                     my_replies_count += 1
                     last_reply_by_me = True
                 else:
@@ -446,12 +541,18 @@ def find_unreplied_comments(
                     if r_owner:
                         last_user_author = r_owner
 
-            # Rule 1: If we have already replied 2 or more times in this sub-thread, STOP.
-            if my_replies_count >= 2:
+            # Persistent memory check: if comment was already answered and we have not received new replies
+            if c_id in answered_db and my_replies_count >= 1 and last_reply_by_me:
                 continue
 
-            # Rule 2: If we replied last, wait for the user (nothing to answer)
-            if last_reply_by_me:
+            # Rule 1: If we have already replied in this sub-thread and we had the last word, STOP.
+            if my_replies_count >= 1 and last_reply_by_me:
+                # Sync answered state
+                record_answered_comment(c_id, post_id, owner)
+                continue
+
+            # Rule 2: If we have already replied 2 or more times in this sub-thread, STOP.
+            if my_replies_count >= 2:
                 continue
 
             # Rule 3: Determine if this is a follow-up (turn 2)
@@ -471,7 +572,7 @@ def find_unreplied_comments(
                 "turn": my_replies_count + 1
             })
 
-    print(f"📊 Statistiche scansione: {total_comments_scanned} commenti totali esaminati | {total_user_comments_found} commenti di utenti esterni | {len(unreplied)} in attesa di risposta (entro il limite turni).")
+    print(f"📊 Statistiche scansione: {total_comments_scanned} commenti totali esaminati | {total_user_comments_found} commenti di utenti esterni | {len(unreplied)} in attesa di risposta.")
 
     return unreplied
 
@@ -529,7 +630,14 @@ def process_community_replies(
                 message=reply_text
             )
             if res.get("success"):
-                print(f"🎉 Risposta pubblicata con successo su eToro! ID Risposta: {res.get('id')}")
+                reply_id = res.get('id')
+                print(f"🎉 Risposta pubblicata con successo su eToro! ID Risposta: {reply_id}")
+                record_answered_comment(
+                    comment_id=item['comment_id'],
+                    post_id=item['post_id'],
+                    author=item['author'],
+                    reply_id=reply_id
+                )
                 send_telegram_comment_notification(item, reply_text)
                 results.append({"status": "published", "item": item, "reply": reply_text})
             else:
