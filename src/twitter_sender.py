@@ -68,10 +68,8 @@ def build_twitter_thread(
     plain_recap: str = "",
 ) -> list[str]:
     """
-    Build a 2-tweet thread optimised for X/Twitter.
-
-    Tweet 1 — Hook: result + top 3 + hashtags (≤280 chars)
-    Tweet 2 — CTA: eToro profile + referral (≤280 chars)
+    Build a 2-tweet thread in English optimised for Twitter / X.
+    Adheres strictly to X limitation of maximum 1 cashtag ($SYMBOL) per tweet.
     """
     from datetime import datetime
 
@@ -89,25 +87,26 @@ def build_twitter_thread(
     else:
         label, p_emoji = "MARKET DROP 🧨", "🆘"
 
-    date_str = datetime.now().strftime("%d/%m/%Y")
+    date_str = datetime.now().strftime("%d %b %Y")
 
     # ── Tweet 1: hook ────────────────────────────────────────────────
     lines_t1 = [
-        f"🌆 US MARKET CLOSE — {date_str}",
+        f"🌆 US Market Close — {date_str}",
         "",
         f"{p_emoji} Daily Result: {portfolio_daily:+.2f}%",
         "",
     ]
 
-    # Top 3 performers
+    # Top 3 movers: format as max 1 cashtag to satisfy X policy
     if top_performers:
-        lines_t1.append("📈 Top 3 movers today:")
-        for sym, pct in top_performers[:3]:
+        lines_t1.append("📈 Top movers today:")
+        for i, (sym, pct) in enumerate(top_performers[:3]):
             arrow = "▲" if pct >= 0 else "▼"
-            lines_t1.append(f"  {arrow} ${sym} {pct:+.2f}%")
+            sym_tag = f"${sym}" if i == 0 else sym
+            lines_t1.append(f"  {arrow} {sym_tag} {pct:+.2f}%")
         lines_t1.append("")
 
-    lines_t1.append("#Investing #Portfolio #ETF #Stocks #Finance")
+    lines_t1.append("#Investing #Stocks #ETF #Finance #Portfolio")
     tweet1 = "\n".join(lines_t1)[:280]
 
     # ── Tweet 2: CTA ─────────────────────────────────────────────────
@@ -126,23 +125,24 @@ def build_twitter_thread(
 
 def build_twitter_copy_trading_thread() -> list[str]:
     """
-    Build a 2-tweet promotional thread in English for Twitter/X with the partner link.
+    Build a 2-tweet promotional thread in English for Twitter/X with partner link.
+    Strictly max 1 cashtag ($PLTR) to comply with X API policy.
     """
     tweet1 = (
         "👋 I'm Andrea Ravalli, Popular Investor on eToro.\n\n"
         "📊 Transparent long-term investing strategy:\n"
-        "• +200% since 2020\n"
+        "• +200% cumulative since 2020\n"
         "• Risk Score 3/10 (low risk)\n"
         "• Zero leverage (1x real assets)\n"
-        "• Global diversification (AI, Healthcare, Nuclear)\n\n"
-        "$PLTR $NVDA $CCJ #eToro #CopyTrading"
+        "• Diversified: AI, Healthcare, Energy & ETFs\n\n"
+        "$PLTR #eToro #CopyTrading #Investing"
     )
     tweet2 = (
         "👤 Portfolio & Live Stats:\n"
         f"{ETORO_PROFILE}\n\n"
         "🎁 Join eToro for free via my official Partner Link:\n"
         f"{ETORO_REFERRAL}\n\n"
-        "#Investing #Finance #Portfolio"
+        "#Investing #Finance #Stocks #Portfolio"
     )
     return [tweet1[:280], tweet2[:280]]
 
