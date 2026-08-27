@@ -38,14 +38,14 @@ import gist_storage
 # ── eToro & Hub constants ───────────────────────────────────────────────────────────
 PORTFOLIO_HUB_URL = "https://giga89.github.io/portfolio-daily-recap/"
 ETORO_PROFILE  = "https://www.etoro.com/people/andrearavalli"
-ETORO_REFERRAL = "https://med.etoro.com/B10215_A132099_TClick.aspx"
+ETORO_REFERRAL = "https://etoro.tw/46qgHLr"
 
 ETORO_FOOTER_LONG = (
     "\n\n"
     "━━━━━━━━━━━━━━━━━━━━\n"
     f"📊 Hub interattivo, dividendi e analisi completa:\n{PORTFOLIO_HUB_URL}\n\n"
     f"👤 Segui e copia il mio portfolio su eToro:\n{ETORO_PROFILE}\n\n"
-    f"🎁 Iscriviti gratis su eToro (Partner Link):\n{ETORO_REFERRAL}"
+    f"🎁 Non sei ancora su eToro? Iscriviti gratis:\n{ETORO_REFERRAL}"
 )
 
 ETORO_FOOTER_SHORT = (
@@ -936,32 +936,29 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
     full_text = post_text + ETORO_FOOTER_LONG
     _save_post_to_artifacts("copy_trading_post.txt", "Copy Trading Post", full_text)
 
-    # Generate dedicated Copy Trading visual cards: Italian for eToro/TG, English for Bluesky/X
+    # 1. eToro Social Feed
+    print("\n🐂 eToro Social Feed (Copy Trading Post):")
+    if etoro_sender.etoro_client.is_configured():
+        # Use existing card as visual if available
+        visual_path = None
+    # Generate dedicated Copy Trading visual card with live eToro metrics & rotation
     visual_path = None
-    visual_path_en = None
     try:
         import copy_trading_card
         visual_path = copy_trading_card.generate_copy_card_auto(
             rankings_data=rankings_data,
             portfolio_perf=portfolio_perf,
             output_path="output/copy_trading_card.png",
-            lang="it",
         )
-        visual_path_en = copy_trading_card.generate_copy_card_auto(
-            rankings_data=rankings_data,
-            portfolio_perf=portfolio_perf,
-            output_path="output/copy_trading_card_en.png",
-            lang="en",
-        )
-        print(f"   🖼️  Generated dedicated Copy Trading Cards: IT={visual_path}, EN={visual_path_en}")
+        print(f"   🖼️  Generated dedicated Copy Trading Card: {visual_path}")
     except Exception as exc:
         print(f"   ⚠️  Could not generate dedicated copy trading card: {exc}")
         for candidate in ["output/winners_losers.png", "output/pie_chart.png"]:
             if os.path.exists(candidate):
-                visual_path = visual_path_en = candidate
+                visual_path = candidate
                 break
 
-    # 1. eToro Social Feed (Italian)
+    # 1. eToro Social Feed
     print("\n🐂 eToro Social Feed (Copy Trading Post):")
     if etoro_sender.etoro_client.is_configured():
         ok_etoro = etoro_sender.send_etoro_post(
@@ -993,13 +990,15 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
         print("   ⏭️  eToro not configured.")
         results["etoro_copy_trading"] = False
 
-    # 2. Telegram (Italian)
+    # 2. Telegram
     print("\n📨 Telegram (Copy Trading Post):")
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
         try:
             header = "<b>🔁 COPY TRADING — IL MIO PORTFOLIO SU ETORO</b>\n\n"
+            telegram_sender.send_telegram_message((header + post_text + ETORO_FOOTER_LONG)[:4096])
             full_tg_text = (header + post_text + ETORO_FOOTER_LONG)
             if visual_path and os.path.exists(visual_path):
+                # Telegram photo captions are limited to 1024 chars
                 short_caption = full_tg_text[:1020]
                 telegram_sender.send_telegram_photo(visual_path, caption=short_caption)
             else:
@@ -1012,46 +1011,6 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
     else:
         print("   ⏭️  Telegram not configured.")
         results["telegram_copy_trading"] = False
-
-    # 3. Bluesky (English Promotional Thread with English visual card)
-    print("\n🦋 Bluesky (Copy Trading Post - English):")
-    if os.environ.get("BLUESKY_HANDLE") and os.environ.get("BLUESKY_APP_PASS"):
-        try:
-            bsky_threads = bluesky_sender.build_bluesky_copy_trading_thread()
-            img_to_send = visual_path_en if (visual_path_en and os.path.exists(visual_path_en)) else visual_path
-            if img_to_send and os.path.exists(img_to_send):
-                ok_bsky = bluesky_sender.send_bluesky_thread_with_image(
-                    bsky_threads,
-                    image_path=img_to_send,
-                    image_alt="Andrea Ravalli - eToro Popular Investor Strategy & Copy Trading",
-                )
-            else:
-                ok_bsky = bluesky_sender.send_bluesky_thread(bsky_threads)
-            results["bluesky_copy_trading"] = ok_bsky
-            if ok_bsky:
-                print("   ✅ Copy trading promotional thread sent to Bluesky in English")
-        except Exception as exc:
-            print(f"   ❌ Bluesky send failed for Copy Trading: {exc}")
-            results["bluesky_copy_trading"] = False
-    else:
-        print("   ⏭️  Bluesky not configured.")
-        results["bluesky_copy_trading"] = False
-
-    # 4. Twitter/X (English Promotional Thread)
-    print("\n🐦 Twitter/X (Copy Trading Post - English):")
-    if os.environ.get("TWITTER_API_KEY") and os.environ.get("TWITTER_ACCESS_TOKEN"):
-        try:
-            x_tweets = twitter_sender.build_twitter_copy_trading_thread()
-            ok_x = twitter_sender.send_twitter_thread(x_tweets)
-            results["twitter_copy_trading"] = ok_x
-            if ok_x:
-                print("   ✅ Copy trading promotional thread sent to Twitter/X in English")
-        except Exception as exc:
-            print(f"   ❌ Twitter send failed for Copy Trading: {exc}")
-            results["twitter_copy_trading"] = False
-    else:
-        print("   ⏭️  Twitter not configured.")
-        results["twitter_copy_trading"] = False
 
     try:
         analytics_tracker.update_and_build_dashboard()

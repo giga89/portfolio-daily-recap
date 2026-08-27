@@ -24,6 +24,7 @@ BSKY_API = "https://bsky.social/xrpc"
 
 ETORO_PROFILE  = "https://www.etoro.com/people/andrearavalli"
 ETORO_REFERRAL = "https://etoro.tw/46qgHLr"
+ETORO_REFERRAL = "https://med.etoro.com/B10215_A132099_TClick.aspx"
 
 
 def _create_session(handle: str, app_pass: str) -> tuple[str, str] | tuple[None, None]:
@@ -158,7 +159,7 @@ def build_bluesky_thread(
     session_name: str = "U.S. market close",
 ) -> list[str]:
     """
-    Build a 2-post Bluesky thread in English optimised for discoverability.
+    Build a 2-post Bluesky thread optimised for discoverability.
 
     Post 1 — Performance hook + top 3 + finance hashtags (≤300 chars)
     Post 2 — eToro CTA with profile + referral links
@@ -173,38 +174,38 @@ def build_bluesky_thread(
     elif portfolio_daily > -0.5:
         label, p_emoji = "MINOR DIP 📉", "⚖️"
     elif portfolio_daily > -2.0:
-        label, p_emoji = "ROUGH DAY 💀", "🩸"
+        label, p_emoji = "ROUGH 💀", "🩸"
     else:
-        label, p_emoji = "MARKET DROP 🧨", "🆘"
+        label, p_emoji = "MARKET CRASH 🧨", "🆘"
 
     date_str = datetime.now().strftime("%d %b %Y")
 
     # ── Post 1: hook ─────────────────────────────────────────────────
     lines = [
-        f"🌆 US Market Close — {date_str}",
+        f"🌆 Portfolio — {date_str}",
         "",
-        f"{p_emoji} Daily Result: {portfolio_daily:+.2f}%",
+        f"{p_emoji} {label}: {portfolio_daily:+.2f}%",
         "",
     ]
     if top_performers:
-        lines.append("📈 Top movers today:")
+        lines.append("📈 Top performers oggi:")
         for sym, pct in top_performers[:3]:
             arrow = "▲" if pct >= 0 else "▼"
-            clean_sym = sym.replace(".", "_")
-            lines.append(f"  {arrow} #{clean_sym} {pct:+.2f}%")
+            lines.append(f"  {arrow} #{sym} {pct:+.2f}%")
         lines.append("")
-    lines.append("#Investing #Stocks #ETF #Finance #Portfolio #Markets")
+    lines.append("#Investing #Stocks #ETF #Finance #Portfolio #Mercati #Finanza")
     post1 = "\n".join(lines)[:300]
 
     # ── Post 2: CTA ──────────────────────────────────────────────────
     post2 = (
-        "👤 Follow & copy my portfolio on eToro:\n"
+        "👤 Segui il mio portfolio su eToro:\n"
         f"{ETORO_PROFILE}\n"
         "\n"
-        "🎁 Join eToro with my official Partner Link:\n"
+        "🎁 Non sei ancora su eToro? Iscriviti gratis:\n"
+        "🎁 Iscriviti gratis su eToro (Partner Link):\n"
         f"{ETORO_REFERRAL}\n"
         "\n"
-        "#eToro #CopyTrading #Investing #Finance"
+        "#eToro #CopyTrading #Investimenti #Finanza"
     )
 
     return [post1, post2[:300]]
@@ -214,25 +215,25 @@ def build_bluesky_copy_trading_thread(
     gain_pct: str = "+200%",
 ) -> list[str]:
     """
-    Build a dedicated 2-post Bluesky promotional thread in English explaining
+    Build a dedicated 2-post Bluesky promotional thread explaining
     Andrea Ravalli's Popular Investor strategy and Copy Trading.
     """
     post1 = (
-        "👋 Hello! I'm Andrea Ravalli, Popular Investor on eToro.\n\n"
-        "📊 Transparent long-term investing strategy:\n"
-        f"• {gain_pct} cumulative since 2020\n"
-        "• Risk Score 3/10 (conservative)\n"
-        "• Zero leverage (1x real assets)\n"
-        "• Diversified: AI, Healthcare, Nuclear & ETFs\n\n"
-        "#eToro #CopyTrading #Investing"
+        "👋 Ciao a tutti! Sono Andrea Ravalli, Popular Investor su eToro.\n\n"
+        "📊 Strategia trasparente a lungo termine:\n"
+        f"• {gain_pct} cumulativo dal 2020\n"
+        "• Risk Score 3/10 (basso rischio)\n"
+        "• Zero leva (1x)\n"
+        "• Diversificazione: AI, Big Tech, Sanità, Nucleare ed ETF\n\n"
+        "#eToro #CopyTrading #Investimenti"
     )
 
     post2 = (
-        "📈 You can follow or automatically copy my strategy:\n"
+        "📈 Puoi seguire o copiare in automatico la mia strategia:\n"
         f"{ETORO_PROFILE}\n\n"
-        "🎁 Join eToro with my official Partner Link:\n"
+        "🎁 Iscriviti gratis su eToro con il mio link Partner ufficiale:\n"
         f"{ETORO_REFERRAL}\n\n"
-        "#Finance #Portfolio #Stocks #Investing"
+        "#Finanza #Portfolio #Stocks"
     )
 
     return [post1[:300], post2[:300]]
