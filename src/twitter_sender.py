@@ -25,8 +25,9 @@ except ImportError:
 
 TWEET_URL = "https://api.twitter.com/2/tweets"
 
-ETORO_PROFILE  = "https://www.etoro.com/people/andrearavalli"
-ETORO_REFERRAL = "https://med.etoro.com/B10215_A132099_TClick.aspx"
+PORTFOLIO_HUB_URL = "https://giga89.github.io/portfolio-daily-recap/?source=x&lang=en"
+ETORO_PROFILE     = "https://www.etoro.com/people/andrearavalli"
+ETORO_REFERRAL    = "https://med.etoro.com/B10215_A132099_TClick.aspx"
 
 
 def _get_oauth():
@@ -68,8 +69,10 @@ def build_twitter_thread(
     plain_recap: str = "",
 ) -> list[str]:
     """
-    Build a 2-tweet thread in English optimised for Twitter / X.
-    Adheres strictly to X limitation of maximum 1 cashtag ($SYMBOL) per tweet.
+    Build a 2-tweet thread optimised for X/Twitter.
+
+    Tweet 1 — Hook: result + top 3 + hashtags (≤280 chars)
+    Tweet 2 — CTA: eToro profile + referral (≤280 chars)
     """
     from datetime import datetime
 
@@ -87,26 +90,25 @@ def build_twitter_thread(
     else:
         label, p_emoji = "MARKET DROP 🧨", "🆘"
 
-    date_str = datetime.now().strftime("%d %b %Y")
+    date_str = datetime.now().strftime("%d/%m/%Y")
 
     # ── Tweet 1: hook ────────────────────────────────────────────────
     lines_t1 = [
-        f"🌆 US Market Close — {date_str}",
+        f"🌆 US MARKET CLOSE — {date_str}",
         "",
         f"{p_emoji} Daily Result: {portfolio_daily:+.2f}%",
         "",
     ]
 
-    # Top 3 movers: format as max 1 cashtag to satisfy X policy
+    # Top 3 performers
     if top_performers:
-        lines_t1.append("📈 Top movers today:")
-        for i, (sym, pct) in enumerate(top_performers[:3]):
+        lines_t1.append("📈 Top 3 movers today:")
+        for sym, pct in top_performers[:3]:
             arrow = "▲" if pct >= 0 else "▼"
-            sym_tag = f"${sym}" if i == 0 else sym
-            lines_t1.append(f"  {arrow} {sym_tag} {pct:+.2f}%")
+            lines_t1.append(f"  {arrow} ${sym} {pct:+.2f}%")
         lines_t1.append("")
 
-    lines_t1.append("#Investing #Stocks #ETF #Finance #Portfolio")
+    lines_t1.append("#Investing #Portfolio #ETF #Stocks #Finance")
     tweet1 = "\n".join(lines_t1)[:280]
 
     # ── Tweet 2: CTA ─────────────────────────────────────────────────
@@ -138,8 +140,8 @@ def build_twitter_copy_trading_thread() -> list[str]:
         "$PLTR #eToro #CopyTrading #Investing"
     )
     tweet2 = (
-        "👤 Portfolio & Live Stats:\n"
-        f"{ETORO_PROFILE}\n\n"
+        "📊 Interactive Hub & Live Stats:\n"
+        f"{PORTFOLIO_HUB_URL}\n\n"
         "🎁 Join eToro for free via my official Partner Link:\n"
         f"{ETORO_REFERRAL}\n\n"
         "#Investing #Finance #Stocks #Portfolio"

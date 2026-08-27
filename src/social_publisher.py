@@ -37,19 +37,22 @@ import gist_storage
 
 # ── eToro & Hub constants ───────────────────────────────────────────────────────────
 PORTFOLIO_HUB_URL = "https://giga89.github.io/portfolio-daily-recap/"
-ETORO_PROFILE  = "https://www.etoro.com/people/andrearavalli"
-ETORO_REFERRAL = "https://etoro.tw/46qgHLr"
+PORTFOLIO_HUB_TG  = "https://giga89.github.io/portfolio-daily-recap/?source=telegram&lang=it"
+PORTFOLIO_HUB_X   = "https://giga89.github.io/portfolio-daily-recap/?source=x&lang=en"
+PORTFOLIO_HUB_BSKY= "https://giga89.github.io/portfolio-daily-recap/?source=bluesky&lang=en"
+ETORO_PROFILE     = "https://www.etoro.com/people/andrearavalli"
+ETORO_REFERRAL    = "https://med.etoro.com/B10215_A132099_TClick.aspx"
 
 ETORO_FOOTER_LONG = (
     "\n\n"
     "━━━━━━━━━━━━━━━━━━━━\n"
-    f"📊 Hub interattivo, dividendi e analisi completa:\n{PORTFOLIO_HUB_URL}\n\n"
+    f"📊 Hub interattivo, dividendi e analisi completa:\n{PORTFOLIO_HUB_TG}\n\n"
     f"👤 Segui e copia il mio portfolio su eToro:\n{ETORO_PROFILE}\n\n"
-    f"🎁 Non sei ancora su eToro? Iscriviti gratis:\n{ETORO_REFERRAL}"
+    f"🎁 Iscriviti gratis su eToro (Partner Link):\n{ETORO_REFERRAL}"
 )
 
 ETORO_FOOTER_SHORT = (
-    f"\n\n📊 Hub & Dati: {PORTFOLIO_HUB_URL}\n"
+    f"\n\n📊 Hub & Dati: {PORTFOLIO_HUB_TG}\n"
     f"👤 {ETORO_PROFILE}\n"
     f"🎁 {ETORO_REFERRAL}"
 )

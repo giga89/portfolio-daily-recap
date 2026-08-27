@@ -22,9 +22,9 @@ from datetime import datetime, timezone
 
 BSKY_API = "https://bsky.social/xrpc"
 
-ETORO_PROFILE  = "https://www.etoro.com/people/andrearavalli"
-ETORO_REFERRAL = "https://etoro.tw/46qgHLr"
-ETORO_REFERRAL = "https://med.etoro.com/B10215_A132099_TClick.aspx"
+PORTFOLIO_HUB_URL = "https://giga89.github.io/portfolio-daily-recap/?source=bluesky&lang=en"
+ETORO_PROFILE     = "https://www.etoro.com/people/andrearavalli"
+ETORO_REFERRAL    = "https://med.etoro.com/B10215_A132099_TClick.aspx"
 
 
 def _create_session(handle: str, app_pass: str) -> tuple[str, str] | tuple[None, None]:
@@ -215,25 +215,25 @@ def build_bluesky_copy_trading_thread(
     gain_pct: str = "+200%",
 ) -> list[str]:
     """
-    Build a dedicated 2-post Bluesky promotional thread explaining
+    Build a dedicated 2-post Bluesky promotional thread in English explaining
     Andrea Ravalli's Popular Investor strategy and Copy Trading.
     """
     post1 = (
-        "👋 Ciao a tutti! Sono Andrea Ravalli, Popular Investor su eToro.\n\n"
-        "📊 Strategia trasparente a lungo termine:\n"
-        f"• {gain_pct} cumulativo dal 2020\n"
-        "• Risk Score 3/10 (basso rischio)\n"
-        "• Zero leva (1x)\n"
-        "• Diversificazione: AI, Big Tech, Sanità, Nucleare ed ETF\n\n"
-        "#eToro #CopyTrading #Investimenti"
+        "👋 Hello! I'm Andrea Ravalli, Popular Investor on eToro.\n\n"
+        "📊 Transparent long-term investing strategy:\n"
+        f"• {gain_pct} cumulative since 2020\n"
+        "• Risk Score 3/10 (conservative)\n"
+        "• Zero leverage (1x real assets)\n"
+        "• Diversified: AI, Healthcare, Energy & ETFs\n\n"
+        "#eToro #CopyTrading #Investing"
     )
 
     post2 = (
-        "📈 Puoi seguire o copiare in automatico la mia strategia:\n"
-        f"{ETORO_PROFILE}\n\n"
-        "🎁 Iscriviti gratis su eToro con il mio link Partner ufficiale:\n"
+        "📊 Interactive Hub & Portfolio Analytics:\n"
+        f"{PORTFOLIO_HUB_URL}\n\n"
+        "🎁 Join eToro with my official Partner Link:\n"
         f"{ETORO_REFERRAL}\n\n"
-        "#Finanza #Portfolio #Stocks"
+        "#Finance #Portfolio #Stocks #Investing"
     )
 
     return [post1[:300], post2[:300]]

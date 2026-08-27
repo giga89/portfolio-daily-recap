@@ -1072,6 +1072,58 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     tr:hover td {{ background: rgba(255,255,255,0.02); }}
 
     /* ── Footer ───────────────────────────────────────────────────────────── */
+    /* ── Smart Partner Conversion Banner ── */
+    .smart-partner-banner {{
+      background: linear-gradient(90deg, #071f12 0%, #0a1b38 50%, #170d30 100%);
+      border-bottom: 2px solid rgba(19, 198, 54, 0.45);
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
+      padding: 10px 0;
+      position: sticky; top: 0; z-index: 1000;
+      animation: bannerSlideDown 0.35s ease;
+    }}
+    @keyframes bannerSlideDown {{
+      from {{ transform: translateY(-100%); opacity: 0; }}
+      to {{ transform: translateY(0); opacity: 1; }}
+    }}
+    .banner-inner {{
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 14px;
+    }}
+    .banner-badge {{
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(19, 198, 54, 0.15); border: 1px solid var(--green);
+      color: var(--green); padding: 4px 10px; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      white-space: nowrap;
+    }}
+    .pulse-dot {{
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 8px var(--green);
+      animation: bannerPulse 1.5s infinite;
+    }}
+    @keyframes bannerPulse {{
+      0%, 100% {{ opacity: 1; transform: scale(1); }}
+      50% {{ opacity: 0.4; transform: scale(0.85); }}
+    }}
+    .banner-content {{ flex: 1; min-width: 260px; }}
+    .banner-content p {{ font-size: 0.90rem; color: #FFF; line-height: 1.35; }}
+    .banner-sub {{ font-size: 0.76rem; color: var(--muted); font-weight: 500; display: block; margin-top: 2px; }}
+    .banner-actions {{ display: flex; align-items: center; gap: 10px; }}
+    .btn-partner-cta {{
+      background: linear-gradient(135deg, #13C636, #00D4FF);
+      color: #00160a; font-weight: 900; font-size: 0.85rem;
+      padding: 7px 16px; border-radius: 999px; text-decoration: none;
+      box-shadow: 0 0 15px rgba(19, 198, 54, 0.4); white-space: nowrap;
+      transition: transform 0.2s ease, box-shadow 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
+    }}
+    .btn-partner-cta:hover {{ transform: scale(1.03); box-shadow: 0 0 25px rgba(0, 212, 255, 0.6); }}
+    .btn-banner-close {{
+      background: transparent; border: none; color: var(--muted);
+      font-size: 1.1rem; cursor: pointer; padding: 4px 8px; line-height: 1;
+      transition: color 0.2s ease;
+    }}
+    .btn-banner-close:hover {{ color: #FFF; }}
+
     footer.site-footer {{
       margin-top: 60px; text-align: center; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--surface-border);
       padding-top: 30px;
@@ -2589,6 +2641,57 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       }});
     }}
 
+    // ── Smart Partner Banner & External Referrer Detection ──────────────────
+    function initPartnerBanner() {{
+      if (sessionStorage.getItem("etoro_partner_banner_closed") === "true") return;
+
+      const params = new URLSearchParams(window.location.search);
+      const source = (params.get("source") || params.get("utm_source") || "").toLowerCase();
+      const ref = (params.get("ref") || "").toLowerCase();
+      const langParam = (params.get("lang") || navigator.language || "").toLowerCase();
+      const referrer = document.referrer.toLowerCase();
+
+      // Check if visitor is arriving from external channels (X, Bluesky, Telegram, search, etc.)
+      const isExternal = source || ref || (referrer && !referrer.includes("etoro.com")) || (!referrer && !sessionStorage.getItem("visited_hub_before"));
+      sessionStorage.setItem("visited_hub_before", "true");
+
+      if (!isExternal) return;
+
+      const isIt = langParam.startsWith("it") || source === "telegram";
+      const banner = document.getElementById("smart-partner-banner");
+      const badge = document.getElementById("banner-badge-text");
+      const mainText = document.getElementById("banner-main-text");
+      const subText = document.getElementById("banner-sub-text");
+      const ctaBtn = document.getElementById("banner-cta-btn");
+
+      if (isIt) {{
+        if (badge) badge.textContent = "Partner Ufficiale eToro";
+        if (mainText) mainText.innerHTML = "<strong>Non sei ancora registrato su eToro?</strong> Iscriviti gratis e copia in automatico il portafoglio con 1 click.";
+        if (subText) subText.textContent = "Zero commissioni di gestione · 100% azioni reali ed ETF (1x) · Risk Score 3/10";
+        if (ctaBtn) ctaBtn.textContent = "🚀 Registrati Gratis su eToro";
+      }} else {{
+        if (badge) badge.textContent = "Official eToro Partner";
+        if (mainText) mainText.innerHTML = "<strong>New to eToro?</strong> Create a free account and automatically copy Andrea Ravalli\'s portfolio with 1 click.";
+        if (subText) subText.textContent = "Zero management fees · 100% real underlying assets · Risk Score 3/10";
+        if (ctaBtn) ctaBtn.textContent = "🚀 Join & Copy on eToro";
+      }}
+
+      if (banner) banner.style.display = "block";
+
+      // Dynamically update site header CTA to Partner Link for external visitors
+      const headerCta = document.querySelector(".btn-copy-cta");
+      if (headerCta) {{
+        headerCta.href = "https://med.etoro.com/B10215_A132099_TClick.aspx";
+        headerCta.textContent = isIt ? "Iscriviti & Copia 🚀" : "Join & Copy on eToro 🚀";
+      }}
+    }}
+
+    function dismissPartnerBanner() {{
+      const banner = document.getElementById("smart-partner-banner");
+      if (banner) banner.style.display = "none";
+      sessionStorage.setItem("etoro_partner_banner_closed", "true");
+    }}
+
     // ── Initial Page Load ──────────────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {{
       renderGaugeCards();
@@ -2601,6 +2704,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       renderPerfChart('annual');
       renderAllocationCharts();
       renderHoldings(holdingsData);
+      initPartnerBanner();
     }});
   </script>
 </body>
