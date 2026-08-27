@@ -25,9 +25,24 @@ except ImportError:
 
 TWEET_URL = "https://api.twitter.com/2/tweets"
 
-PORTFOLIO_HUB_URL = "https://giga89.github.io/portfolio-daily-recap/?source=x&lang=en"
-ETORO_PROFILE     = "https://www.etoro.com/people/andrearavalli"
-ETORO_REFERRAL    = "https://med.etoro.com/B10215_A132099_TClick.aspx"
+ETORO_PROFILE  = "https://www.etoro.com/people/andrearavalli"
+ETORO_PARTNER_BASE = "https://med.etoro.com/B10215_A132099_TClick.aspx"
+PORTFOLIO_HUB_BASE = "https://giga89.github.io/portfolio-daily-recap/"
+
+
+def get_twitter_etoro_url(campaign: str = "recap") -> str:
+    """Return tracked eToro partner referral link for Twitter/X."""
+    sub_id = f"twitter_{campaign}".replace(" ", "_").lower()[:30]
+    return f"{ETORO_PARTNER_BASE}?SubAffiliateID={sub_id}"
+
+
+def get_twitter_hub_url(campaign: str = "us_close", content: str = None) -> str:
+    """Return tracked GitHub Pages Hub URL with UTM parameters for Twitter/X."""
+    camp = campaign.replace(" ", "_").lower()[:20]
+    url = f"{PORTFOLIO_HUB_BASE}?utm_source=twitter&utm_campaign={camp}"
+    if content:
+        url += f"&utm_content={content.replace(' ', '_').lower()[:15]}"
+    return url
 
 
 def _get_oauth():
@@ -69,10 +84,10 @@ def build_twitter_thread(
     plain_recap: str = "",
 ) -> list[str]:
     """
-    Build a 2-tweet thread optimised for X/Twitter.
+    Build a 2-tweet thread optimised for X/Twitter with tracked URLs.
 
-    Tweet 1 — Hook: result + top 3 + hashtags (≤280 chars)
-    Tweet 2 — CTA: eToro profile + referral (≤280 chars)
+    Tweet 1 — Hook: result + top 3 + hashtags (<=280 chars)
+    Tweet 2 — CTA: eToro profile + partner link + hub (<=280 chars)
     """
     from datetime import datetime
 
@@ -111,40 +126,40 @@ def build_twitter_thread(
     lines_t1.append("#Investing #Portfolio #ETF #Stocks #Finance")
     tweet1 = "\n".join(lines_t1)[:280]
 
-    # ── Tweet 2: CTA ─────────────────────────────────────────────────
+    # ── Tweet 2: CTA with Tracked Links ──────────────────────────────
+    partner_url = get_twitter_etoro_url(campaign="us_close")
+    hub_url = get_twitter_hub_url(campaign="us_close")
+
     tweet2 = (
-        f"👤 Follow & copy my portfolio on eToro:\n"
-        f"{ETORO_PROFILE}\n"
-        f"\n"
-        f"🎁 Join eToro with my official Partner Link:\n"
-        f"{ETORO_REFERRAL}\n"
-        f"\n"
-        f"#eToro #CopyTrading #Investing #Finance"
+        f"📊 Live Hub: {hub_url}\n\n"
+        f"👤 Copy on eToro: {ETORO_PROFILE}\n\n"
+        f"🎁 Join eToro (Partner Link): {partner_url}"
     )
 
-    return [tweet1, tweet2[:280]]
+    return [tweet1[:280], tweet2[:280]]
 
 
 def build_twitter_copy_trading_thread() -> list[str]:
     """
-    Build a 2-tweet promotional thread in English for Twitter/X with partner link.
-    Strictly max 1 cashtag ($PLTR) to comply with X API policy.
+    Build a 2-tweet promotional thread in English for Twitter/X with tracked partner link.
     """
     tweet1 = (
         "👋 I'm Andrea Ravalli, Popular Investor on eToro.\n\n"
         "📊 Transparent long-term investing strategy:\n"
-        "• +200% cumulative since 2020\n"
+        "• +200% since 2020 (~18% CAGR)\n"
         "• Risk Score 3/10 (low risk)\n"
         "• Zero leverage (1x real assets)\n"
-        "• Diversified: AI, Healthcare, Energy & ETFs\n\n"
-        "$PLTR #eToro #CopyTrading #Investing"
+        "• Global diversification (AI, Healthcare, Nuclear)\n\n"
+        "$PLTR $NVDA $CCJ #eToro #CopyTrading"
     )
+
+    partner_url = get_twitter_etoro_url(campaign="copy")
+    hub_url = get_twitter_hub_url(campaign="copy")
+
     tweet2 = (
-        "📊 Interactive Hub & Live Stats:\n"
-        f"{PORTFOLIO_HUB_URL}\n\n"
-        "🎁 Join eToro for free via my official Partner Link:\n"
-        f"{ETORO_REFERRAL}\n\n"
-        "#Investing #Finance #Stocks #Portfolio"
+        f"📊 Live Hub: {hub_url}\n\n"
+        f"👤 Copy on eToro: {ETORO_PROFILE}\n\n"
+        f"🎁 Free Signup (Partner Link): {partner_url}"
     )
     return [tweet1[:280], tweet2[:280]]
 

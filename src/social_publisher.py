@@ -37,25 +37,51 @@ import gist_storage
 
 # ── eToro & Hub constants ───────────────────────────────────────────────────────────
 PORTFOLIO_HUB_URL = "https://giga89.github.io/portfolio-daily-recap/"
-PORTFOLIO_HUB_TG  = "https://giga89.github.io/portfolio-daily-recap/?source=telegram&lang=it"
-PORTFOLIO_HUB_X   = "https://giga89.github.io/portfolio-daily-recap/?source=x&lang=en"
-PORTFOLIO_HUB_BSKY= "https://giga89.github.io/portfolio-daily-recap/?source=bluesky&lang=en"
-ETORO_PROFILE     = "https://www.etoro.com/people/andrearavalli"
-ETORO_REFERRAL    = "https://med.etoro.com/B10215_A132099_TClick.aspx"
+ETORO_PROFILE  = "https://www.etoro.com/people/andrearavalli"
+ETORO_REFERRAL = "https://med.etoro.com/B10215_A132099_TClick.aspx"
+ETORO_PARTNER_BASE = "https://med.etoro.com/B10215_A132099_TClick.aspx"
 
-ETORO_FOOTER_LONG = (
-    "\n\n"
-    "━━━━━━━━━━━━━━━━━━━━\n"
-    f"📊 Hub interattivo, dividendi e analisi completa:\n{PORTFOLIO_HUB_TG}\n\n"
-    f"👤 Segui e copia il mio portfolio su eToro:\n{ETORO_PROFILE}\n\n"
-    f"🎁 Iscriviti gratis su eToro (Partner Link):\n{ETORO_REFERRAL}"
-)
 
-ETORO_FOOTER_SHORT = (
-    f"\n\n📊 Hub & Dati: {PORTFOLIO_HUB_TG}\n"
-    f"👤 {ETORO_PROFILE}\n"
-    f"🎁 {ETORO_REFERRAL}"
-)
+def build_tracked_hub_url(platform: str = "telegram", campaign: str = "recap", content: str = None) -> str:
+    """Generate tracked GitHub Pages Hub URL with platform UTM parameters."""
+    plat = platform.replace(" ", "_").lower()
+    camp = campaign.replace(" ", "_").lower()
+    url = f"{PORTFOLIO_HUB_URL}?utm_source={plat}&utm_medium=social&utm_campaign={camp}"
+    if content:
+        url += f"&utm_content={content.replace(' ', '_').lower()[:30]}"
+    return url
+
+
+def build_tracked_etoro_url(platform: str = "telegram", campaign: str = "recap") -> str:
+    """Generate tracked eToro partner link with SubAffiliateID for official eToro partner reports."""
+    sub_id = f"{platform}_{campaign}".replace(" ", "_").lower()[:30]
+    return f"{ETORO_PARTNER_BASE}?SubAffiliateID={sub_id}"
+
+
+def build_etoro_footer_long(platform: str = "telegram", campaign: str = "recap", content: str = None) -> str:
+    hub_url = build_tracked_hub_url(platform, campaign, content)
+    partner_url = build_tracked_etoro_url(platform, campaign)
+    return (
+        "\n\n"
+        "━━━━━━━━━━━━━━━━━━━━\n"
+        f"📊 Hub interattivo, dividendi e analisi completa:\n{hub_url}\n\n"
+        f"👤 Segui e copia il mio portfolio su eToro:\n{ETORO_PROFILE}\n\n"
+        f"🎁 Non sei ancora su eToro? Iscriviti gratis (Link Partner):\n{partner_url}"
+    )
+
+
+def build_etoro_footer_short(platform: str = "telegram", campaign: str = "recap") -> str:
+    hub_url = build_tracked_hub_url(platform, campaign)
+    partner_url = build_tracked_etoro_url(platform, campaign)
+    return (
+        f"\n\n📊 Hub & Dati: {hub_url}\n"
+        f"👤 {ETORO_PROFILE}\n"
+        f"🎁 {partner_url}"
+    )
+
+
+ETORO_FOOTER_LONG = build_etoro_footer_long("telegram", "recap")
+ETORO_FOOTER_SHORT = build_etoro_footer_short("telegram", "recap")
 
 # Session name constants
 SESSION_US_CLOSE                 = "U.S. market close"
@@ -717,6 +743,31 @@ def _publish_stock_focus_post(ticker: str = None) -> dict:
         print("   ⏭️  Telegram not configured.")
         results["telegram_stock_focus"] = False
 
+    # 4. Bluesky send (FinSky Asset Deep Dive thread with Infographic)
+    if os.environ.get("BLUESKY_HANDLE") and os.environ.get("BLUESKY_APP_PASS"):
+        try:
+            from portfolio_manager import load_config
+            cfg = load_config()
+            comp_name = cfg.get("tickers", {}).get(ticker_sym, [None, ticker_sym])[1]
+            bsky_posts = bluesky_sender.build_bluesky_stock_focus_thread(
+                ticker=ticker_sym,
+                company_name=comp_name,
+                thesis=post_text[:150],
+            )
+            if card_path and os.path.exists(card_path):
+                ok_bsky = bluesky_sender.send_bluesky_thread_with_image(
+                    bsky_posts,
+                    image_path=card_path,
+                    image_alt=f"Stock Focus Deep Dive - ${ticker_sym}",
+                )
+            else:
+                ok_bsky = bluesky_sender.send_bluesky_thread(bsky_posts)
+            results["bluesky_stock_focus"] = ok_bsky
+            print(f"   {'✅' if ok_bsky else '❌'} Stock Focus sent to Bluesky (#FinSky)")
+        except Exception as exc:
+            print(f"   ⚠️ Bluesky stock focus send failed: {exc}")
+            results["bluesky_stock_focus"] = False
+
     try:
         analytics_tracker.update_and_build_dashboard()
     except Exception:
@@ -1014,6 +1065,35 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
     else:
         print("   ⏭️  Telegram not configured.")
         results["telegram_copy_trading"] = False
+
+    # 3. Bluesky (Copy Trading Educational Thread in English)
+    if os.environ.get("BLUESKY_HANDLE") and os.environ.get("BLUESKY_APP_PASS"):
+        try:
+            bsky_posts = bluesky_sender.build_bluesky_copy_trading_thread()
+            if visual_path and os.path.exists(visual_path):
+                ok_bsky = bluesky_sender.send_bluesky_thread_with_image(
+                    bsky_posts,
+                    image_path=visual_path,
+                    image_alt="Andrea Ravalli - eToro Copy Trading Portfolio",
+                )
+            else:
+                ok_bsky = bluesky_sender.send_bluesky_thread(bsky_posts)
+            results["bluesky_copy_trading"] = ok_bsky
+            print(f"   {'✅' if ok_bsky else '❌'} Copy trading thread sent to Bluesky (#FinSky)")
+        except Exception as exc:
+            print(f"   ⚠️ Bluesky copy trading send failed: {exc}")
+            results["bluesky_copy_trading"] = False
+
+    # 4. Twitter / X (Copy Trading Educational Thread)
+    if os.environ.get("TWITTER_API_KEY") and os.environ.get("TWITTER_ACCESS_TOKEN"):
+        try:
+            tweets = twitter_sender.build_twitter_copy_trading_thread()
+            ok_tw = twitter_sender.send_twitter_thread(tweets)
+            results["twitter_copy_trading"] = ok_tw
+            print(f"   {'✅' if ok_tw else '❌'} Copy trading thread sent to Twitter/X")
+        except Exception as exc:
+            print(f"   ⚠️ Twitter copy trading send failed: {exc}")
+            results["twitter_copy_trading"] = False
 
     try:
         analytics_tracker.update_and_build_dashboard()

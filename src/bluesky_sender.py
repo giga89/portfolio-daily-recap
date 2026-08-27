@@ -22,9 +22,24 @@ from datetime import datetime, timezone
 
 BSKY_API = "https://bsky.social/xrpc"
 
-PORTFOLIO_HUB_URL = "https://giga89.github.io/portfolio-daily-recap/?source=bluesky&lang=en"
-ETORO_PROFILE     = "https://www.etoro.com/people/andrearavalli"
-ETORO_REFERRAL    = "https://med.etoro.com/B10215_A132099_TClick.aspx"
+ETORO_PROFILE  = "https://www.etoro.com/people/andrearavalli"
+ETORO_PARTNER_BASE = "https://med.etoro.com/B10215_A132099_TClick.aspx"
+PORTFOLIO_HUB_BASE = "https://giga89.github.io/portfolio-daily-recap/"
+
+
+def get_bluesky_etoro_url(campaign: str = "recap") -> str:
+    """Return tracked eToro partner referral link for Bluesky."""
+    sub_id = f"bsky_{campaign}".replace(" ", "_").lower()[:20]
+    return f"{ETORO_PARTNER_BASE}?SubAffiliateID={sub_id}"
+
+
+def get_bluesky_hub_url(campaign: str = "us_close", content: str = None) -> str:
+    """Return tracked GitHub Pages Hub URL with UTM parameters for Bluesky."""
+    camp = campaign.replace(" ", "_").lower()[:20]
+    url = f"{PORTFOLIO_HUB_BASE}?utm_source=bluesky&utm_campaign={camp}"
+    if content:
+        url += f"&utm_content={content.replace(' ', '_').lower()[:15]}"
+    return url
 
 
 def _create_session(handle: str, app_pass: str) -> tuple[str, str] | tuple[None, None]:
@@ -44,8 +59,8 @@ def _create_session(handle: str, app_pass: str) -> tuple[str, str] | tuple[None,
 
 def _detect_facets(text: str) -> list:
     """
-    Detect URLs, #hashtags and @mentions → AT Protocol rich-text facets.
-    Required for links and tags to be clickable/searchable on Bluesky.
+    Detect URLs, #hashtags, $cashtags, and @mentions -> AT Protocol rich-text facets.
+    Required for links, tags and mentions to be clickable and searchable on Bluesky.
     """
     import re
     facets = []
@@ -54,6 +69,8 @@ def _detect_facets(text: str) -> list:
         (re.compile(r"https?://[^\s]+"),
          lambda m: {"$type": "app.bsky.richtext.facet#link", "uri": m.group()}),
         (re.compile(r"#(\w+)"),
+         lambda m: {"$type": "app.bsky.richtext.facet#tag", "tag": m.group(1)}),
+        (re.compile(r"\$([A-Z0-9]{2,6}(?:\.[A-Z]{2})?)"),
          lambda m: {"$type": "app.bsky.richtext.facet#tag", "tag": m.group(1)}),
         (re.compile(r"@([\w.]+)"),
          lambda m: {"$type": "app.bsky.richtext.facet#mention",
@@ -151,64 +168,61 @@ def _upload_image_blob(jwt: str, image_path: str) -> dict | None:
         return None
 
 
-
-
 def build_bluesky_thread(
     portfolio_daily: float,
     top_performers: list,
     session_name: str = "U.S. market close",
 ) -> list[str]:
     """
-    Build a 2-post Bluesky thread optimised for discoverability.
+    Build an English, high-engagement 2-post Bluesky thread optimized for #FinSky.
 
-    Post 1 — Performance hook + top 3 + finance hashtags (≤300 chars)
-    Post 2 — eToro CTA with profile + referral links
+    Post 1 — Thesis & Performance hook + top movers + discussion question (<=300 chars)
+    Post 2 — eToro CTA with tracked Hub + Partner referral link (<=300 chars)
     """
-    # Performance label
     if portfolio_daily > 2.0:
         label, p_emoji = "TO THE MOON 🚀", "🔥"
     elif portfolio_daily > 0.5:
-        label, p_emoji = "GREAT GREEN 🍀", "✅"
+        label, p_emoji = "GREEN DAY 🍀", "✅"
     elif portfolio_daily >= 0:
-        label, p_emoji = "SLIGHT GAINS 🌿", "🌱"
+        label, p_emoji = "STEADY GAINS 🌿", "🌱"
     elif portfolio_daily > -0.5:
-        label, p_emoji = "MINOR DIP 📉", "⚖️"
+        label, p_emoji = "MILD DIP 📉", "⚖️"
     elif portfolio_daily > -2.0:
-        label, p_emoji = "ROUGH 💀", "🩸"
+        label, p_emoji = "PULLBACK 💀", "🩸"
     else:
-        label, p_emoji = "MARKET CRASH 🧨", "🆘"
+        label, p_emoji = "MARKET DROP 🧨", "🆘"
 
     date_str = datetime.now().strftime("%d %b %Y")
 
-    # ── Post 1: hook ─────────────────────────────────────────────────
+    # ── Post 1: Hook & Discussion for FinSky ────────────────────────
     lines = [
-        f"🌆 Portfolio — {date_str}",
-        "",
-        f"{p_emoji} {label}: {portfolio_daily:+.2f}%",
+        f"🌆 US Market Close · {date_str}",
+        f"{p_emoji} Portfolio: {portfolio_daily:+.2f}% (+200% since 2020)",
         "",
     ]
     if top_performers:
-        lines.append("📈 Top performers oggi:")
+        movers = []
         for sym, pct in top_performers[:3]:
             arrow = "▲" if pct >= 0 else "▼"
-            lines.append(f"  {arrow} #{sym} {pct:+.2f}%")
+            movers.append(f"{arrow} ${sym} {pct:+.1f}%")
+        lines.append("📈 Movers: " + " · ".join(movers))
         lines.append("")
-    lines.append("#Investing #Stocks #ETF #Finance #Portfolio #Mercati #Finanza")
+
+    lines.append("💬 What's your highest conviction tech or energy play for 2026?")
+    lines.append("#FinSky #Investing #Stocks #AI #Portfolio")
     post1 = "\n".join(lines)[:300]
 
-    # ── Post 2: CTA ──────────────────────────────────────────────────
+    # ── Post 2: Tracked CTA & Links ────────────────────────────────
+    hub_url = get_bluesky_hub_url(campaign="us_close")
+    partner_url = get_bluesky_etoro_url(campaign="us_close")
+
     post2 = (
-        "👤 Segui il mio portfolio su eToro:\n"
-        f"{ETORO_PROFILE}\n"
-        "\n"
-        "🎁 Non sei ancora su eToro? Iscriviti gratis:\n"
-        "🎁 Iscriviti gratis su eToro (Partner Link):\n"
-        f"{ETORO_REFERRAL}\n"
-        "\n"
-        "#eToro #CopyTrading #Investimenti #Finanza"
+        f"📊 Live Track Record & Metrics:\n{hub_url}\n\n"
+        f"👤 Copy on eToro:\n{ETORO_PROFILE}\n\n"
+        f"🚀 Free Signup (Partner Link):\n{partner_url}"
     )
 
-    return [post1, post2[:300]]
+    return [post1[:300], post2[:300]]
 
 
 def build_bluesky_copy_trading_thread(
@@ -219,21 +233,51 @@ def build_bluesky_copy_trading_thread(
     Andrea Ravalli's Popular Investor strategy and Copy Trading.
     """
     post1 = (
-        "👋 Hello! I'm Andrea Ravalli, Popular Investor on eToro.\n\n"
-        "📊 Transparent long-term investing strategy:\n"
-        f"• {gain_pct} cumulative since 2020\n"
-        "• Risk Score 3/10 (conservative)\n"
-        "• Zero leverage (1x real assets)\n"
-        "• Diversified: AI, Healthcare, Energy & ETFs\n\n"
-        "#eToro #CopyTrading #Investing"
+        "👋 Andrea Ravalli · eToro Popular Investor\n\n"
+        "📊 Long-Term Multi-Asset Strategy:\n"
+        f"• {gain_pct} cumulative return since 2020 (~18% CAGR)\n"
+        "• 3/10 Risk Score · 0% Leverage (1x real assets)\n"
+        "• Core: AI, Semiconductors, Healthcare & Nuclear Energy\n\n"
+        "#FinSky #Investing #Stocks #Portfolio"
     )
 
+    hub_url = get_bluesky_hub_url(campaign="copy")
+    partner_url = get_bluesky_etoro_url(campaign="copy")
+
     post2 = (
-        "📊 Interactive Hub & Portfolio Analytics:\n"
-        f"{PORTFOLIO_HUB_URL}\n\n"
-        "🎁 Join eToro with my official Partner Link:\n"
-        f"{ETORO_REFERRAL}\n\n"
-        "#Finance #Portfolio #Stocks #Investing"
+        f"📈 1-Click Copy Trading:\n{ETORO_PROFILE}\n\n"
+        f"📊 Live Hub & Metrics:\n{hub_url}\n\n"
+        f"🎁 Free Signup (Partner Link):\n{partner_url}"
+    )
+
+    return [post1[:300], post2[:300]]
+
+
+def build_bluesky_stock_focus_thread(
+    ticker: str,
+    company_name: str = None,
+    thesis: str = None,
+) -> list[str]:
+    """
+    Build a dedicated Stock Focus thread for Bluesky (#FinSky).
+    """
+    name_str = f" ({company_name})" if company_name else ""
+    t_summary = (thesis[:90] + "...") if thesis else "High-conviction core compounder in our portfolio."
+
+    post1 = (
+        f"🔍 ASSET DEEP DIVE: ${ticker}{name_str}\n\n"
+        f"💡 Thesis: {t_summary}\n\n"
+        f"💬 Are you holding ${ticker} for the long haul?\n\n"
+        f"#FinSky #{ticker} #Investing #Stocks #AI"
+    )
+
+    hub_url = get_bluesky_hub_url(campaign="focus", content=ticker)
+    partner_url = get_bluesky_etoro_url(campaign=f"focus_{ticker}")
+
+    post2 = (
+        f"📊 Portfolio Holdings:\n{hub_url}\n\n"
+        f"👤 Copy on eToro: {ETORO_PROFILE}\n\n"
+        f"🚀 Join eToro (Partner Link):\n{partner_url}"
     )
 
     return [post1[:300], post2[:300]]

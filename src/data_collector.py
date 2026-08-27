@@ -209,18 +209,33 @@ def main():
     except Exception as exc:
         print(f"Warning: cover image generation failed: {exc}")
 
-    # Generate Top & Flop card (16:9 landscape format)
+    # Generate Top & Flop card or Market Meme Card
     engagement_card_path = None
     try:
+        import random
+        import meme_generator
         from config import EMOJI_MAP
-        engagement_card_path = winners_losers_card.build_card_from_stock_data(
-            stock_data=stock_data,
-            session_name=market_session,
-            emoji_map=EMOJI_MAP,
-            output_path='output/winners_losers.png',
-        )
+
+        # Use Meme Card on extreme days (|daily| >= 1.5%) or with 35% random rotation at US Close
+        use_meme = abs(portfolio_daily) >= 1.5 or (random.random() < 0.35 and "close" in market_session.lower())
+        
+        if use_meme:
+            print("🎭 Generating Contextual Market Meme Card...")
+            top_performers = social_publisher._extract_top_performers("", stock_data)
+            engagement_card_path = meme_generator.generate_meme_card(
+                portfolio_daily=portfolio_daily,
+                top_performers=top_performers,
+                lang="it"
+            )
+        else:
+            engagement_card_path = winners_losers_card.build_card_from_stock_data(
+                stock_data=stock_data,
+                session_name=market_session,
+                emoji_map=EMOJI_MAP,
+                output_path='output/winners_losers.png',
+            )
     except Exception as exc:
-        print(f"Warning: Top & Flop card generation failed: {exc}")
+        print(f"Warning: Visual card generation failed: {exc}")
 
     # Generate pie chart (alternates each session via Gist counter)
     pie_chart_path = None
