@@ -158,7 +158,7 @@ def build_bluesky_thread(
     session_name: str = "U.S. market close",
 ) -> list[str]:
     """
-    Build a 2-post Bluesky thread optimised for discoverability.
+    Build a 2-post Bluesky thread in English optimised for discoverability.
 
     Post 1 — Performance hook + top 3 + finance hashtags (≤300 chars)
     Post 2 — eToro CTA with profile + referral links
@@ -173,40 +173,69 @@ def build_bluesky_thread(
     elif portfolio_daily > -0.5:
         label, p_emoji = "MINOR DIP 📉", "⚖️"
     elif portfolio_daily > -2.0:
-        label, p_emoji = "ROUGH 💀", "🩸"
+        label, p_emoji = "ROUGH DAY 💀", "🩸"
     else:
-        label, p_emoji = "MARKET CRASH 🧨", "🆘"
+        label, p_emoji = "MARKET DROP 🧨", "🆘"
 
     date_str = datetime.now().strftime("%d %b %Y")
 
     # ── Post 1: hook ─────────────────────────────────────────────────
     lines = [
-        f"🌆 Portfolio — {date_str}",
+        f"🌆 US Market Close — {date_str}",
         "",
-        f"{p_emoji} {label}: {portfolio_daily:+.2f}%",
+        f"{p_emoji} Daily Result: {portfolio_daily:+.2f}%",
         "",
     ]
     if top_performers:
-        lines.append("📈 Top performers oggi:")
+        lines.append("📈 Top movers today:")
         for sym, pct in top_performers[:3]:
             arrow = "▲" if pct >= 0 else "▼"
-            lines.append(f"  {arrow} #{sym} {pct:+.2f}%")
+            clean_sym = sym.replace(".", "_")
+            lines.append(f"  {arrow} #{clean_sym} {pct:+.2f}%")
         lines.append("")
-    lines.append("#Investing #Stocks #ETF #Finance #Portfolio #Mercati #Finanza")
+    lines.append("#Investing #Stocks #ETF #Finance #Portfolio #Markets")
     post1 = "\n".join(lines)[:300]
 
     # ── Post 2: CTA ──────────────────────────────────────────────────
     post2 = (
-        "👤 Segui il mio portfolio su eToro:\n"
+        "👤 Follow & copy my portfolio on eToro:\n"
         f"{ETORO_PROFILE}\n"
         "\n"
-        "🎁 Non sei ancora su eToro? Iscriviti gratis:\n"
+        "🎁 Join eToro with my official Partner Link:\n"
         f"{ETORO_REFERRAL}\n"
         "\n"
-        "#eToro #CopyTrading #Investimenti #Finanza"
+        "#eToro #CopyTrading #Investing #Finance"
     )
 
     return [post1, post2[:300]]
+
+
+def build_bluesky_copy_trading_thread(
+    gain_pct: str = "+200%",
+) -> list[str]:
+    """
+    Build a dedicated 2-post Bluesky promotional thread in English explaining
+    Andrea Ravalli's Popular Investor strategy and Copy Trading.
+    """
+    post1 = (
+        "👋 Hello! I'm Andrea Ravalli, Popular Investor on eToro.\n\n"
+        "📊 Transparent long-term investing strategy:\n"
+        f"• {gain_pct} cumulative since 2020\n"
+        "• Risk Score 3/10 (conservative)\n"
+        "• Zero leverage (1x real assets)\n"
+        "• Diversified: AI, Healthcare, Nuclear & ETFs\n\n"
+        "#eToro #CopyTrading #Investing"
+    )
+
+    post2 = (
+        "📈 You can follow or automatically copy my strategy:\n"
+        f"{ETORO_PROFILE}\n\n"
+        "🎁 Join eToro with my official Partner Link:\n"
+        f"{ETORO_REFERRAL}\n\n"
+        "#Finance #Portfolio #Stocks #Investing"
+    )
+
+    return [post1[:300], post2[:300]]
 
 
 def send_bluesky_thread(posts: list[str]) -> bool:

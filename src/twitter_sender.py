@@ -25,8 +25,8 @@ except ImportError:
 
 TWEET_URL = "https://api.twitter.com/2/tweets"
 
-ETORO_PROFILE  = "etoro.com/people/andrearavalli"
-ETORO_REFERRAL = "etoro.tw/46qgHLr"
+ETORO_PROFILE  = "https://www.etoro.com/people/andrearavalli"
+ETORO_REFERRAL = "https://med.etoro.com/B10215_A132099_TClick.aspx"
 
 
 def _get_oauth():
@@ -85,23 +85,23 @@ def build_twitter_thread(
     elif portfolio_daily > -0.5:
         label, p_emoji = "MINOR DIP 📉", "⚖️"
     elif portfolio_daily > -2.0:
-        label, p_emoji = "ROUGH 💀", "🩸"
+        label, p_emoji = "ROUGH DAY 💀", "🩸"
     else:
-        label, p_emoji = "MARKET CRASH 🧨", "🆘"
+        label, p_emoji = "MARKET DROP 🧨", "🆘"
 
     date_str = datetime.now().strftime("%d/%m/%Y")
 
     # ── Tweet 1: hook ────────────────────────────────────────────────
     lines_t1 = [
-        f"🌆 PORTFOLIO UPDATE — {date_str}",
+        f"🌆 US MARKET CLOSE — {date_str}",
         "",
-        f"{p_emoji} {label}: {portfolio_daily:+.2f}%",
+        f"{p_emoji} Daily Result: {portfolio_daily:+.2f}%",
         "",
     ]
 
     # Top 3 performers
     if top_performers:
-        lines_t1.append("📈 Top 3 oggi:")
+        lines_t1.append("📈 Top 3 movers today:")
         for sym, pct in top_performers[:3]:
             arrow = "▲" if pct >= 0 else "▼"
             lines_t1.append(f"  {arrow} ${sym} {pct:+.2f}%")
@@ -112,16 +112,39 @@ def build_twitter_thread(
 
     # ── Tweet 2: CTA ─────────────────────────────────────────────────
     tweet2 = (
-        f"👤 Segui il mio portfolio su eToro:\n"
+        f"👤 Follow & copy my portfolio on eToro:\n"
         f"{ETORO_PROFILE}\n"
         f"\n"
-        f"🎁 Non sei ancora su eToro? Iscriviti gratis:\n"
+        f"🎁 Join eToro with my official Partner Link:\n"
         f"{ETORO_REFERRAL}\n"
         f"\n"
-        f"#eToro #CopyTrading #Investimenti #Finanza"
+        f"#eToro #CopyTrading #Investing #Finance"
     )
 
     return [tweet1, tweet2[:280]]
+
+
+def build_twitter_copy_trading_thread() -> list[str]:
+    """
+    Build a 2-tweet promotional thread in English for Twitter/X with the partner link.
+    """
+    tweet1 = (
+        "👋 I'm Andrea Ravalli, Popular Investor on eToro.\n\n"
+        "📊 Transparent long-term investing strategy:\n"
+        "• +200% since 2020\n"
+        "• Risk Score 3/10 (low risk)\n"
+        "• Zero leverage (1x real assets)\n"
+        "• Global diversification (AI, Healthcare, Nuclear)\n\n"
+        "$PLTR $NVDA $CCJ #eToro #CopyTrading"
+    )
+    tweet2 = (
+        "👤 Portfolio & Live Stats:\n"
+        f"{ETORO_PROFILE}\n\n"
+        "🎁 Join eToro for free via my official Partner Link:\n"
+        f"{ETORO_REFERRAL}\n\n"
+        "#Investing #Finance #Portfolio"
+    )
+    return [tweet1[:280], tweet2[:280]]
 
 
 def send_twitter_post(text: str) -> bool:

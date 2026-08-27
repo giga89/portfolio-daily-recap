@@ -151,7 +151,7 @@ def _create_base_canvas() -> Image.Image:
     return base
 
 
-def _draw_footer(base: Image.Image, footer_y: int = 612):
+def _draw_footer(base: Image.Image, footer_y: int = 612, lang: str = "it"):
     """Draw clean branding footer with verified avatar and profile link."""
     draw = ImageDraw.Draw(base)
     draw.line([(80, footer_y), (CARD_W - 80, footer_y)], fill=(35, 48, 72, 180), width=1)
@@ -164,8 +164,9 @@ def _draw_footer(base: Image.Image, footer_y: int = 612):
     f_footer = _font(16)
     f_url    = _reg_font(15)
 
+    sub_footer = "Verified eToro Profile · Global Multi-Asset Strategy" if lang == "en" else "Profilo Verificato eToro · Strategia Multi-Asset Globale"
     draw.text((146, footer_y + 22), AUTHOR_TEXT, fill=C_WHITE, font=f_footer)
-    draw.text((146, footer_y + 46), "Profilo Verificato eToro · Strategia Multi-Asset Globale", fill=C_MUTED, font=f_url)
+    draw.text((146, footer_y + 46), sub_footer, fill=C_MUTED, font=f_url)
 
     # Clean profile URL
     url_display = URL_TEXT
@@ -182,9 +183,10 @@ def generate_copy_dashboard_card(
     risk_score: int = 3,
     win_rate: float = 67.6,
     historical_return: str = "+200%",
-    highlight_badge: str = "100% COPIATORI IN PROFITTO",
-    subtitle: str = "REPLICA AUTOMATICA · ZERO COMMISSIONI · PIENO CONTROLLO",
+    highlight_badge: Optional[str] = None,
+    subtitle: Optional[str] = None,
     output_path: str = "output/copy_trading_card.png",
+    lang: str = "it",
 ) -> str:
     """Generate Style 1: Dashboard with 2 Hero Stats and 4 Key Pillars."""
     if not PIL_AVAILABLE:
@@ -223,7 +225,41 @@ def generate_copy_dashboard_card(
     draw = ImageDraw.Draw(base)
     draw.text((tag_x + 28, header_y + 6), tag_text, fill=C_GREEN, font=f_header_tag)
 
-    main_title = "TRASPARENZA & NUMERI DELLA COMMUNITY"
+    if lang == "en":
+        main_title = "TRANSPARENCY & COMMUNITY PERFORMANCE"
+        subtitle = subtitle or "AUTOMATIC REPLICATION · ZERO MANAGEMENT FEES · FULL CONTROL"
+        highlight_badge = highlight_badge or "100% PROFITABLE COPIERS"
+        left_lbl = "ACTIVE COPIERS"
+        left_sub1 = "• Real investors copying every trade in real-time."
+        left_sub2 = "• 1:1 proportional automatic copy with zero fees."
+        r_badge_txt = "DISCIPLINED RISK MANAGEMENT"
+        r_lbl = "RISK SCORE (LOW)"
+        r_sub1 = "• 100% real underlying stocks & physical ETFs, no leverage."
+        r_sub2 = "• Capital preservation & strict drawdown control."
+        kpis = [
+            {"num": historical_return, "num_color": C_GREEN, "title": "TRACK RECORD", "desc": "Cumulative gain since 2020 (~18% CAGR)"},
+            {"num": f"{win_rate:.1f}%", "num_color": C_CYAN, "title": "WIN RATIO", "desc": "Profitable closed positions ratio"},
+            {"num": "100%", "num_color": C_GOLD, "title": "SKIN IN GAME", "desc": "Investing my personal capital in exact parity"},
+            {"num": "$200", "num_color": C_WHITE, "title": "MIN COPY", "desc": "$500+ recommended for full parity"},
+        ]
+    else:
+        main_title = "TRASPARENZA & NUMERI DELLA COMMUNITY"
+        subtitle = subtitle or "REPLICA AUTOMATICA · ZERO COMMISSIONI · PIENO CONTROLLO"
+        highlight_badge = highlight_badge or "100% COPIATORI IN PROFITTO"
+        left_lbl = "COPIATORI ATTIVI"
+        left_sub1 = "• Investitori reali che replicano ogni operazione in tempo reale."
+        left_sub2 = "• Replicazione proporzionale automatica 1:1 con zero commissioni."
+        r_badge_txt = "GESTIONE DEL RISCHIO DISCIPLINATA"
+        r_lbl = "RISK SCORE (BASSO)"
+        r_sub1 = "• 100% azioni reali ed ETF fisici, zero leva finanziaria."
+        r_sub2 = "• Protezione del capitale e controllo rigoroso della volatilità."
+        kpis = [
+            {"num": historical_return, "num_color": C_GREEN, "title": "TRACK RECORD", "desc": "Rendimento totale dal 2020 (~18% CAGR annuo)"},
+            {"num": f"{win_rate:.1f}%", "num_color": C_CYAN, "title": "WIN RATIO", "desc": "Percentuale posizioni chiuse in profitto"},
+            {"num": "100%", "num_color": C_GOLD, "title": "ALLINEAMENTO", "desc": "Investo il mio capitale nelle stesse quote"},
+            {"num": "$200", "num_color": C_WHITE, "title": "MINIMO COPIA", "desc": "Consigliati $500+ per replica completa"},
+        ]
+
     mt_bb = draw.textbbox((0, 0), main_title, font=f_main_title)
     draw.text(((CARD_W - (mt_bb[2] - mt_bb[0])) // 2, header_y + 36), main_title, fill=C_WHITE, font=f_main_title)
 
@@ -262,12 +298,11 @@ def generate_copy_dashboard_card(
     draw.text((left_x + 36, hero_y + 26), badge_txt, fill=C_GREEN, font=f_badge)
 
     draw.text((left_x + 24, hero_y + 58), f"{copiers_count}", fill=C_WHITE, font=f_hero_num)
-    draw.text((left_x + 24 + draw.textbbox((0, 0), f"{copiers_count}", font=f_hero_num)[2] + 16, hero_y + 76), "COPIATORI ATTIVI", fill=C_GREEN, font=f_hero_lbl)
-    draw.text((left_x + 24, hero_y + 138), "• Investitori reali che replicano ogni operazione in tempo reale.", fill=C_MUTED, font=f_hero_sub)
-    draw.text((left_x + 24, hero_y + 164), "• Replicazione proporzionale automatica 1:1 con zero commissioni.", fill=C_MUTED, font=f_hero_sub)
+    draw.text((left_x + 24 + draw.textbbox((0, 0), f"{copiers_count}", font=f_hero_num)[2] + 16, hero_y + 76), left_lbl, fill=C_GREEN, font=f_hero_lbl)
+    draw.text((left_x + 24, hero_y + 138), left_sub1, fill=C_MUTED, font=f_hero_sub)
+    draw.text((left_x + 24, hero_y + 164), left_sub2, fill=C_MUTED, font=f_hero_sub)
 
     # Content Right Hero
-    r_badge_txt = "GESTIONE DEL RISCHIO DISCIPLINATA"
     rb_bb = draw.textbbox((0, 0), r_badge_txt, font=f_badge)
     rb_w = rb_bb[2] - rb_bb[0] + 24
     rb_layer = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
@@ -278,9 +313,9 @@ def generate_copy_dashboard_card(
     draw.text((right_x + 36, hero_y + 26), r_badge_txt, fill=C_CYAN, font=f_badge)
 
     draw.text((right_x + 24, hero_y + 58), f"{risk_score}/10", fill=C_WHITE, font=f_hero_num)
-    draw.text((right_x + 24 + draw.textbbox((0, 0), f"{risk_score}/10", font=f_hero_num)[2] + 16, hero_y + 76), "RISK SCORE (BASSO)", fill=C_CYAN, font=f_hero_lbl)
-    draw.text((right_x + 24, hero_y + 138), "• 100% azioni reali ed ETF fisici, zero leva finanziaria.", fill=C_MUTED, font=f_hero_sub)
-    draw.text((right_x + 24, hero_y + 164), "• Protezione del capitale e controllo rigoroso della volatilità.", fill=C_MUTED, font=f_hero_sub)
+    draw.text((right_x + 24 + draw.textbbox((0, 0), f"{risk_score}/10", font=f_hero_num)[2] + 16, hero_y + 76), r_lbl, fill=C_CYAN, font=f_hero_lbl)
+    draw.text((right_x + 24, hero_y + 138), r_sub1, fill=C_MUTED, font=f_hero_sub)
+    draw.text((right_x + 24, hero_y + 164), r_sub2, fill=C_MUTED, font=f_hero_sub)
 
     # 3. Four Lower Pillars
     kpi_y = 412
@@ -288,13 +323,6 @@ def generate_copy_dashboard_card(
     total_kpi_w = CARD_W - 160
     kpi_w = (total_kpi_w - (kpi_gap * 3)) // 4
     kpi_h = 160
-
-    kpis = [
-        {"num": historical_return, "num_color": C_GREEN, "title": "TRACK RECORD", "desc": "Rendimento totale dal 2020 (~18% CAGR annuo)"},
-        {"num": f"{win_rate:.1f}%", "num_color": C_CYAN, "title": "WIN RATIO", "desc": "Percentuale posizioni chiuse in profitto"},
-        {"num": "100%", "num_color": C_GOLD, "title": "ALLINEAMENTO", "desc": "Investo il mio capitale nelle stesse quote"},
-        {"num": "$200", "num_color": C_WHITE, "title": "MINIMO COPIA", "desc": "Consigliati $500+ per replica completa"},
-    ]
 
     cards_layer = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
     cd = ImageDraw.Draw(cards_layer)
@@ -317,7 +345,7 @@ def generate_copy_dashboard_card(
         if l2: draw.text((cx + 18, kpi_y + 118), l2.strip(), fill=C_MUTED, font=f_kpi_sub)
 
     # 4. Footer
-    _draw_footer(base, footer_y=612)
+    _draw_footer(base, footer_y=612, lang=lang)
 
     base.convert("RGB").save(output_path, "PNG", quality=95)
     return output_path
@@ -333,6 +361,7 @@ def generate_copy_profit_focus_card(
     win_rate: float = 67.6,
     historical_return: str = "+200%",
     output_path: str = "output/copy_trading_card_profit.png",
+    lang: str = "it",
 ) -> str:
     """Generate Style 2: High impact 100% Copiatori in profitto focus card."""
     if not PIL_AVAILABLE:
@@ -377,14 +406,77 @@ def generate_copy_profit_focus_card(
     base = Image.alpha_composite(base, mega_layer)
     draw = ImageDraw.Draw(base)
 
-    badge_hero = "TRAGUARDO COMMUNITY ETORO"
+    if lang == "en":
+        badge_hero = "ETORO COMMUNITY MILESTONE"
+        mega_title = "100% OF COPIERS IN PROFIT"
+        mega_desc1 = f"• All {copiers_count} active copiers currently replicating the portfolio are in positive territory."
+        mega_desc2 = "• Achieved through long-term discipline, zero leverage, and high-conviction quality stocks."
+        cols = [
+            {
+                "badge": "COMMUNITY TRUST",
+                "val": f"{copiers_count} Active Copiers",
+                "val_color": C_GREEN,
+                "title": "Instant 1:1 Mirroring",
+                "d1": "Real-time automated trade replication.",
+                "d2": "Min $200 ($500+ recommended).",
+                "d3": "Zero management / performance fees.",
+            },
+            {
+                "badge": "CAPITAL PRESERVATION",
+                "val": f"Risk {risk_score}/10",
+                "val_color": C_CYAN,
+                "title": "Low Risk & No Leverage",
+                "d1": "100% real stocks & physical ETFs.",
+                "d2": "Zero leveraged CFD contracts.",
+                "d3": "Strict drawdown & volatility control.",
+            },
+            {
+                "badge": "PROVEN TRACK RECORD",
+                "val": f"{historical_return} Since 2020",
+                "val_color": C_GOLD,
+                "title": f"Win Rate {win_rate:.1f}%",
+                "d1": "~18% annual compound CAGR.",
+                "d2": "Over 8 years investing on eToro.",
+                "d3": "Personal capital fully aligned.",
+            },
+        ]
+    else:
+        badge_hero = "TRAGUARDO COMMUNITY ETORO"
+        mega_title = "100% DEI COPIATORI IN PROFITTO"
+        mega_desc1 = f"• Tutti i {copiers_count} investitori che copiano attualmente il portafoglio registrano un saldo positivo."
+        mega_desc2 = "• Risultato ottenuto grazie a un approccio disciplinato, zero leva e selezione di aziende di qualità globale."
+        cols = [
+            {
+                "badge": "FIDUCIA COMMUNITY",
+                "val": f"{copiers_count} Investitori",
+                "val_color": C_GREEN,
+                "title": "Copia Istantanea 1:1",
+                "d1": "Replicazione automatica in tempo reale.",
+                "d2": "Minimo $200 (consigliati $500+).",
+                "d3": "Zero commissioni di gestione.",
+            },
+            {
+                "badge": "PROTEZIONE CAPITALE",
+                "val": f"Risk {risk_score}/10",
+                "val_color": C_CYAN,
+                "title": "Basso Rischio & No Leva",
+                "d1": "100% azioni reali ed ETF fisici.",
+                "d2": "Zero CFD a leva speculativa.",
+                "d3": "Controllo rigoroso del Max DD.",
+            },
+            {
+                "badge": "STORICO COMPROVATO",
+                "val": f"{historical_return} dal 2020",
+                "val_color": C_GOLD,
+                "title": f"Win Rate {win_rate:.1f}%",
+                "d1": "~18% CAGR annuo composto.",
+                "d2": "Oltre 8 anni di presenza su eToro.",
+                "d3": "Investo il mio capitale personale.",
+            },
+        ]
+
     draw.text((mega_x + 36, mega_y + 24), badge_hero, fill=C_GOLD, font=_font(13))
-    
-    mega_title = "100% DEI COPIATORI IN PROFITTO"
     draw.text((mega_x + 36, mega_y + 54), mega_title, fill=C_WHITE, font=f_mega_num)
-    
-    mega_desc1 = f"• Tutti i {copiers_count} investitori che copiano attualmente il portafoglio registrano un saldo positivo."
-    mega_desc2 = "• Risultato ottenuto grazie a un approccio disciplinato, zero leva e selezione di aziende di qualità globale."
     draw.text((mega_x + 36, mega_y + 132), mega_desc1, fill=C_WHITE, font=f_hero_desc)
     draw.text((mega_x + 36, mega_y + 164), mega_desc2, fill=C_MUTED, font=f_hero_desc)
 
@@ -393,36 +485,6 @@ def generate_copy_profit_focus_card(
     box_gap = 24
     box_w = (mega_w - (box_gap * 2)) // 3
     box_h = 255
-
-    cols = [
-        {
-            "badge": "FIDUCIA COMMUNITY",
-            "val": f"{copiers_count} Investitori",
-            "val_color": C_GREEN,
-            "title": "Copia Istantanea 1:1",
-            "d1": "Replicazione automatica in tempo reale.",
-            "d2": "Minimo $200 (consigliati $500+).",
-            "d3": "Zero commissioni di gestione.",
-        },
-        {
-            "badge": "PROTEZIONE CAPITALE",
-            "val": f"Risk {risk_score}/10",
-            "val_color": C_CYAN,
-            "title": "Basso Rischio & No Leva",
-            "d1": "100% azioni reali ed ETF fisici.",
-            "d2": "Zero CFD a leva speculativa.",
-            "d3": "Controllo rigoroso del Max DD.",
-        },
-        {
-            "badge": "STORICO COMPROVATO",
-            "val": f"{historical_return} dal 2020",
-            "val_color": C_GOLD,
-            "title": f"Win Rate {win_rate:.1f}%",
-            "d1": "~18% CAGR annuo composto.",
-            "d2": "Oltre 8 anni di presenza su eToro.",
-            "d3": "Investo il mio capitale personale.",
-        },
-    ]
 
     col_layer = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
     cd = ImageDraw.Draw(col_layer)
@@ -443,7 +505,7 @@ def generate_copy_profit_focus_card(
         draw.text((cx + 24, box_y + 194), f"• {col['d3']}", fill=C_MUTED, font=f_col_sub)
 
     # 4. Footer
-    _draw_footer(base, footer_y=612)
+    _draw_footer(base, footer_y=612, lang=lang)
 
     base.convert("RGB").save(output_path, "PNG", quality=95)
     return output_path
@@ -459,6 +521,7 @@ def generate_copy_steps_card(
     win_rate: float = 67.6,
     historical_return: str = "+200%",
     output_path: str = "output/copy_trading_card_steps.png",
+    lang: str = "it",
 ) -> str:
     """Generate Style 3: Visual 3-step onboarding guide."""
     if not PIL_AVAILABLE:
@@ -489,11 +552,76 @@ def generate_copy_steps_card(
     draw = ImageDraw.Draw(base)
     draw.text((tag_x + 28, header_y + 6), tag_text, fill=C_GREEN, font=f_top_tag)
 
-    main_title = "COPIA IL PORTAFOGLIO IN 3 SEMPLICI PASSI"
+    if lang == "en":
+        tag_text = "QUICK GUIDE · HOW COPY TRADING WORKS"
+        main_title = "START COPYING THE PORTFOLIO IN 3 STEPS"
+        sub_txt = f"{copiers_count} Active Copiers  ·  Risk Score {risk_score}/10  ·  {historical_return} Since 2020  ·  Win Rate {win_rate:.1f}%"
+        steps = [
+            {
+                "step": "STEP 1",
+                "title": "Choose Amount",
+                "color": C_GREEN,
+                "badge": "Min $200 ($500+ recommended)",
+                "p1": "Start copying with any amount from $200 upwards.",
+                "p2": "Zero management fees: copying on eToro is completely free.",
+                "p3": "Your funds remain safely in your private account in your name.",
+            },
+            {
+                "step": "STEP 2",
+                "title": "Auto Replication",
+                "color": C_CYAN,
+                "badge": "Real-time 1:1 execution",
+                "p1": "Every new buy or rebalance is mirrored automatically.",
+                "p2": "Exact proportional weights matched to your allocated capital.",
+                "p3": "Zero operational stress: no need to watch charts all day.",
+            },
+            {
+                "step": "STEP 3",
+                "title": "Full Control",
+                "color": C_GOLD,
+                "badge": "Immediate liquidity anytime",
+                "p1": "Add or withdraw funds at any time with a single click.",
+                "p2": "Pause or stop copying instantly without lock-up periods or fees.",
+                "p3": "100% transparency on every open stock and ETF holding.",
+            },
+        ]
+    else:
+        tag_text = "GUIDA RAPIDA · COME FUNZIONA IL COPY TRADING"
+        main_title = "COPIA IL PORTAFOGLIO IN 3 SEMPLICI PASSI"
+        sub_txt = f"{copiers_count} Copiatori Attivi  ·  Risk Score {risk_score}/10  ·  {historical_return} dal 2020  ·  Win Rate {win_rate:.1f}%"
+        steps = [
+            {
+                "step": "PASSO 1",
+                "title": "Scegli l'Importo",
+                "color": C_GREEN,
+                "badge": "Minimo $200 (consigliati $500+)",
+                "p1": "Puoi iniziare a copiare con qualsiasi cifra a partire da $200.",
+                "p2": "Zero costi di gestione: la copia su eToro è completamente gratuita.",
+                "p3": "Il tuo capitale resta sempre nel tuo conto privato, intestato a te.",
+            },
+            {
+                "step": "PASSO 2",
+                "title": "Replica Automatica",
+                "color": C_CYAN,
+                "badge": "Replicazione 1:1 in tempo reale",
+                "p1": "Ogni acquisto o ribilanciamento si clona istantaneamente.",
+                "p2": "Stesse percentuali e pesi, in proporzione esatta al tuo capitale.",
+                "p3": "Zero stress operativo: non devi monitorare i mercati ogni minuto.",
+            },
+            {
+                "step": "PASSO 3",
+                "title": "Pieno Controllo",
+                "color": C_GOLD,
+                "badge": "Libertà & Liquidità immediata",
+                "p1": "Puoi aggiungere o ritirare fondi in qualsiasi momento con un click.",
+                "p2": "Puoi mettere in pausa o chiudere la copia all'istante, senza penali.",
+                "p3": "Trasparenza totale su ogni singola posizione aperta.",
+            },
+        ]
+
     mt_bb = draw.textbbox((0, 0), main_title, font=f_main_title)
     draw.text(((CARD_W - (mt_bb[2] - mt_bb[0])) // 2, header_y + 36), main_title, fill=C_WHITE, font=f_main_title)
 
-    sub_txt = f"{copiers_count} Copiatori Attivi  ·  Risk Score {risk_score}/10  ·  {historical_return} dal 2020  ·  Win Rate {win_rate:.1f}%"
     st_bb = draw.textbbox((0, 0), sub_txt, font=f_sub)
     draw.text(((CARD_W - (st_bb[2] - st_bb[0])) // 2, header_y + 80), sub_txt, fill=C_MUTED, font=f_sub)
 
@@ -505,36 +633,6 @@ def generate_copy_steps_card(
     total_w = CARD_W - 160
     step_w = (total_w - (step_gap * 2)) // 3
     step_h = 415
-
-    steps = [
-        {
-            "step": "PASSO 1",
-            "title": "Scegli l'Importo",
-            "color": C_GREEN,
-            "badge": "Minimo $200 (consigliati $500+)",
-            "p1": "Puoi iniziare a copiare con qualsiasi cifra a partire da $200.",
-            "p2": "Zero costi di gestione: la copia su eToro è completamente gratuita.",
-            "p3": "Il tuo capitale resta sempre nel tuo conto privato, intestato a te.",
-        },
-        {
-            "step": "PASSO 2",
-            "title": "Replica Automatica",
-            "color": C_CYAN,
-            "badge": "Replicazione 1:1 in tempo reale",
-            "p1": "Ogni acquisto o ribilanciamento si clona istantaneamente.",
-            "p2": "Stesse percentuali e pesi, in proporzione esatta al tuo capitale.",
-            "p3": "Zero stress operativo: non devi monitorare i mercati ogni minuto.",
-        },
-        {
-            "step": "PASSO 3",
-            "title": "Pieno Controllo",
-            "color": C_GOLD,
-            "badge": "Libertà & Liquidità immediata",
-            "p1": "Puoi aggiungere o ritirare fondi in qualsiasi momento con un click.",
-            "p2": "Puoi mettere in pausa o chiudere la copia all'istante, senza penali.",
-            "p3": "Trasparenza totale su ogni singola posizione aperta.",
-        },
-    ]
 
     steps_layer = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
     sd = ImageDraw.Draw(steps_layer)
@@ -575,7 +673,7 @@ def generate_copy_steps_card(
         y = _draw_wrapped(f"• {s['p3']}", y)
 
     # 3. Footer
-    _draw_footer(base, footer_y=612)
+    _draw_footer(base, footer_y=612, lang=lang)
 
     base.convert("RGB").save(output_path, "PNG", quality=95)
     return output_path
@@ -590,6 +688,7 @@ def generate_copy_card_auto(
     portfolio_perf: Optional[float] = None,
     style: Optional[str] = None,
     output_path: str = "output/copy_trading_card.png",
+    lang: str = "it",
 ) -> str:
     """
     Auto-generate the most fitting Copy Trading card with live metrics from eToro.
@@ -641,6 +740,7 @@ def generate_copy_card_auto(
             win_rate=win_rate,
             historical_return=hist_return,
             output_path=output_path,
+            lang=lang,
         )
     elif style == "steps":
         return generate_copy_steps_card(
@@ -649,6 +749,7 @@ def generate_copy_card_auto(
             win_rate=win_rate,
             historical_return=hist_return,
             output_path=output_path,
+            lang=lang,
         )
     else:
         return generate_copy_dashboard_card(
@@ -656,9 +757,8 @@ def generate_copy_card_auto(
             risk_score=risk,
             win_rate=win_rate,
             historical_return=hist_return,
-            highlight_badge="100% COPIATORI IN PROFITTO",
-            subtitle="REPLICA AUTOMATICA · ZERO COMMISSIONI · PIENO CONTROLLO",
             output_path=output_path,
+            lang=lang,
         )
 
 
