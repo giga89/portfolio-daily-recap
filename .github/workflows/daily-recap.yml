@@ -372,6 +372,15 @@ jobs:
               print(f"Session '{session}' does not need dedup marking.")
           PYEOF
 
+      - name: Sync eToro Likes & Rebuild Analytics Dashboard
+        if: steps.dedup_check.outputs.skip != 'true'
+        env:
+          ETORO_USER_KEY: ${{ secrets.ETORO_USER_KEY }}
+          ETORO_API_KEY: ${{ secrets.ETORO_API_KEY }}
+          ETORO_USERNAME: ${{ secrets.ETORO_USERNAME || 'AndreaRavalli' }}
+        run: |
+          python -c "import sys; sys.path.insert(0, 'src'); import analytics_tracker; analytics_tracker.update_and_build_dashboard()"
+
       - name: Update GitHub Pages Dashboard & Analytics
         if: steps.dedup_check.outputs.skip != 'true'
         run: |

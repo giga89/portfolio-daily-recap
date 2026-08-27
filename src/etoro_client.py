@@ -431,22 +431,27 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
             my_username = (post_owner.get("username") or "AndreaRavalli").lower()
             my_user_id = str(post_owner.get("id") or "8029424")
 
-            # 1. External Likes (exclude author's own like)
+            # 1. Official Likes calculation (using totalCount from paging / summary)
             emotions_data = data.get("emotionsData", {})
             like_data = emotions_data.get("like", {})
             emotions_list = like_data.get("emotions", [])
+            summary = data.get("summary", {})
+
+            total_likes = like_data.get("paging", {}).get("totalCount")
+            if total_likes is None:
+                total_likes = summary.get("likesCount", summary.get("likeCount", len(emotions_list)))
 
             if exclude_author and emotions_list:
-                external_likes = [
-                    e for e in emotions_list
-                    if e.get("owner", {}).get("username", "").lower() != my_username
-                    and str(e.get("owner", {}).get("id")) != my_user_id
-                ]
-                likes = len(external_likes)
+                author_liked = any(
+                    e.get("owner", {}).get("username", "").lower() == my_username
+                    or str(e.get("owner", {}).get("id")) == my_user_id
+                    for e in emotions_list
+                )
+                likes = max(0, total_likes - (1 if author_liked else 0))
             else:
-                likes = like_data.get("paging", {}).get("totalCount", len(emotions_list))
+                likes = total_likes
 
-            # 2. External Comments (exclude author's own/bot comments)
+            # 2. Official Comments calculation (using totalCount from comments paging)
             comments = 0
             try:
                 c_url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
@@ -454,20 +459,21 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
                 if c_resp.status_code == 200:
                     c_data = c_resp.json()
                     c_list = c_data.get("comments", [])
-                    if exclude_author:
-                        external_comments = [
-                            c for c in c_list
-                            if c.get("entity", {}).get("owner", {}).get("username", "").lower() != my_username
-                            and str(c.get("entity", {}).get("owner", {}).get("id")) != my_user_id
-                            and not c.get("requesterContext", {}).get("isOwner", False)
-                        ]
-                        comments = len(external_comments)
+                    total_comments = c_data.get("paging", {}).get("totalCount", len(c_list))
+                    if exclude_author and c_list:
+                        author_comments = sum(
+                            1 for c in c_list
+                            if c.get("entity", {}).get("owner", {}).get("username", "").lower() == my_username
+                            or str(c.get("entity", {}).get("owner", {}).get("id")) == my_user_id
+                            or c.get("requesterContext", {}).get("isOwner", False)
+                        )
+                        comments = max(0, total_comments - author_comments)
                     else:
-                        comments = len(c_list)
+                        comments = total_comments
                 else:
-                    comments = 0
+                    comments = summary.get("commentsCount", summary.get("commentCount", 0))
             except Exception:
-                comments = 0
+                comments = summary.get("commentsCount", summary.get("commentCount", 0))
 
             summary = data.get("summary", {})
             shares = summary.get("sharedCount", 0)

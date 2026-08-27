@@ -352,6 +352,10 @@ def sync_etoro_metrics() -> Dict[str, Any]:
     data["posts"] = [p for p in posts if p.get("id") not in ["41f4c7dc-402a-4ce6-a7fe-49b819f074d2", "fb2dfe40-9d61-11f1-8080-800019b76646"]]
     save_local_analytics(data)
     print(f"✓ Synced engagement metrics for {updated_count} eToro posts")
+    try:
+        generate_html_dashboard()
+    except Exception as e:
+        print(f"⚠️ Error rebuilding HTML dashboard after metric sync: {e}")
     return data
 
 
