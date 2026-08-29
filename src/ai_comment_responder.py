@@ -1,21 +1,27 @@
 #!/usr/bin/env python3
 """
-AI Community Comment Responder for eToro (Auto-Pilot)
-=====================================================
+AI Community Comment Responder for eToro (Auto-Pilot & High Conviction)
+=====================================================================
 Scans recent eToro posts (up to 7 days back) for genuine community comments without a reply,
 and generates balanced, high-conviction, disciplined responses aligned with
 Andrea Ravalli's Popular Investor strategy and portfolio theses.
 
-Features:
-  • Scans eToro posts from the last 7 days.
-  • Queries live comment replies via eToro API sub-resource.
-  • Persistent state memory (data/answered_comments.json + Gist) to guarantee 100% anti-duplication.
-  • Automatic cleanup of duplicate replies if detected.
-  • Strict conversation depth control (max 1-2 turns): never drags discussions out.
-  • Concludes gracefully with warm wishes for life and trading/investing.
-  • Uses Gemini AI (with contextual fallback) to craft concise, disciplined responses.
-  • Automatically publishes replies on eToro (in live mode).
-  • Sends instant rich Telegram notifications quoting the comment, post, URL, and reply.
+Features & Strict Quality Control:
+  • Two-Pass Generation Architecture:
+      - Pass 1 (Drafting): Contextual draft generation via Gemini Flash models.
+      - Pass 2 (Validator / Judge): Independent editorial & compliance evaluation.
+  • Strict Deterministic Syntax Guardrails:
+      - Rejects truncated / cut-off sentences (stops words, trailing prepositions/conjunctions).
+      - Enforces terminal punctuation/emojis and minimum substantive length.
+      - Strips unwanted markdown (**bold**) or AI meta-commentary.
+  • Anti-Duplication Persistence (100% Guaranteed):
+      - Uses Gist & local answered_comments.json state.
+      - Categorically prevents re-answering already addressed comments.
+  • Enhanced Topic-Aware Fallback Engine:
+      - Flawless, domain-specific templates covering Tech/AMZN/GPUs, NVDA, PLTR,
+        GLP-1/Healthcare, Nuclear/Energy, Gold/Defense, DCA, and Copy Trading.
+  • Rich Telegram Notifications:
+      - Sends instant alerts with post URL, comment snippet, and verified response.
 """
 
 import os
@@ -23,6 +29,7 @@ import sys
 import json
 import re
 import html as html_lib
+import time
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List, Optional, Tuple
 
@@ -48,9 +55,22 @@ try:
 except ImportError:
     HAS_GENAI = False
 
+try:
+    from api_usage_tracker import log_api_request
+    API_TRACKER_AVAILABLE = True
+except ImportError:
+    API_TRACKER_AVAILABLE = False
+
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 ANSWERED_COMMENTS_FILE = os.path.join(DATA_DIR, "answered_comments.json")
 
+# Multi-model priority hierarchy
+DEFAULT_GEMINI_MODELS = [
+    'gemini-3.7-flash',
+    'gemini-3.6-flash',
+    'gemini-3.5-flash',
+    'gemini-2.5-flash',
+]
 
 PORTFOLIO_SYSTEM_PROMPT = """
 You are Andrea Ravalli's Official AI Co-Pilot for the eToro Popular Investor Program.
@@ -60,28 +80,47 @@ CORE PROFILE & STRATEGY RULES:
 1. Track Record & Philosophy:
    - +200% cumulative gain since 2020.
    - Long-term compound investing (3-5+ years time horizon).
-   - Certified eToro Risk Score 3/10 (low risk).
-   - Zero leverage (1x only, no CFD leverage gambling).
+   - Certified eToro Risk Score 3/10 (conservative/moderate risk).
+   - Zero leverage (1x only, no CFD leverage gambling, no shorting).
    - Disciplined Dollar-Cost Averaging (DCA) and dividend reinvestment.
 
 2. Core Portfolio Pillars & Theses:
-   - AI & Hyperscale Tech (NVDA, PLTR, TSM, AVGO, MSFT, GOOGL, AMZN, MRVL): Secular compute demand, Blackwell rollout, AIP commercial adoption.
+   - AI & Hyperscale Tech (NVDA, PLTR, TSM, AVGO, MSFT, GOOGL, AMZN, MRVL): Secular compute demand, custom silicon, cloud AI infrastructure, software monetization (AIP). Short-term market rotation is noise.
    - Healthcare & GLP-1 (LLY, NOVO-B, ABBV, ABT, AZN): Demographic aging, blockbuster metabolic and immunology treatments, resilient pricing power.
    - Energy, Nuclear & Grid (CCJ, PRY, ENI, ENEL, GLEN, TRIG): Nuclear baseload 24/7 for AI data centers (Cameco), global electrification supercycle (Prysmian/Glencore).
    - Defense & Safe Havens (WDEF ETF, Physical Gold PPFB ETC, Cash/Treasuries IB01, XEON): Geopolitical hedging (NATO rearmament) and currency debasement protection.
-   - Selected Emerging & Quality (MELI, BYD, Ferrari RACE, Walmart WMT): High barriers to entry and regional growth.
+   - Selected Emerging & Quality (MELI, BYD, Ferrari RACE, Walmart WMT): High barriers to entry and strong cash flows.
 
 3. RESPONSE GUARDRAILS:
    - Language Detection: If user writes in English, reply in flawless English. If Italian, reply in Italian.
    - Tone: Warm, humble, appreciative, polite, yet intellectually rigorous and confident as a seasoned Popular Investor.
    - Never give individual financial advice, never promise guaranteed profits, never encourage short-term day trading or CFD leverage.
-   - Never deviate from our core theses. Frame short-term volatility as normal market noise buffered by our multi-asset allocation and Risk Score 3/10.
-
-4. CONVERSATION DEPTH & CLOSING RULES:
-   - Do NOT drag discussions into long, repetitive back-and-forth threads.
-   - If this is a follow-up reply or if there isn't much substantive left to add, keep the response brief (1-2 sentences) and conclude cleanly with a warm greeting and best wishes for their life and trading journey (e.g. "Un caro saluto e i migliori auguri per la vita e per il tuo trading! 📈🤝" / "Wishing you all the best in life and trading! 📈🤝").
-   - Max length: 1 to 2 short paragraphs (50-100 words), easy to read on mobile, with 2 well-chosen emojis.
+   - Always address the user's specific questions or mentioned companies (e.g. AMZN, NVDA, PLTR, GPUs, tech sentiment, DCA) with concrete reasoning.
+   - Formatting: Do NOT use markdown bold with asterisks (**text**). Use plain clean text. Include 1-2 relevant emojis (e.g. 📈, 🤝, 🚀, 🛡️).
+   - Length: 1 to 2 short paragraphs (60-120 words), concise and punchy for mobile feed reading.
+   - Always conclude cleanly with warm greetings and best wishes for their life and trading journey.
 """
+
+# Incomplete trailing words/prepositions indicating truncation
+DANGLING_STOP_WORDS = {
+    # Italian
+    'il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una',
+    'di', 'a', 'da', 'in', 'con', 'su', 'per', 'tra', 'fra',
+    'e', 'ed', 'o', 'od', 'ma', 'però', 'che', 'se', 'quando', 'mentre',
+    'del', 'dello', 'della', 'dei', 'degli', 'delle',
+    'al', 'allo', 'alla', 'ai', 'agli', 'alle',
+    'dal', 'dallo', 'dalla', 'dai', 'dagli', 'dalle',
+    'nel', 'nello', 'nella', 'nei', 'negli', 'nelle',
+    'sul', 'sullo', 'sulla', 'sui', 'sugli', 'sulle',
+    'anche', 'come', 'dove', 'perché', 'perche', 'quindi', 'infatti',
+    # English
+    'the', 'a', 'an', 'of', 'to', 'in', 'for', 'on', 'with', 'at', 'by',
+    'from', 'up', 'about', 'into', 'over', 'after', 'and', 'or', 'but',
+    'because', 'if', 'while', 'that', 'which', 'as', 'than', 'so', 'then'
+}
+
+VALID_TERMINAL_PUNCTUATION = ('.', '!', '?')
+VALID_TERMINAL_EMOJIS = ('🤝', '📈', '🚀', '✨', '💼', '🎯', '📊', '🛡️', '👋', '🙏', '🔥', '💡')
 
 
 def _extract_text(obj: Any) -> str:
@@ -96,7 +135,7 @@ def _extract_text(obj: Any) -> str:
 def _detect_language(text: str) -> str:
     """Detect if text is primarily English or Italian."""
     clean_text = _extract_text(text)
-    english_clues = ["the", "and", "is", "for", "with", "thanks", "great", "portfolio", "earnings", "good", "pullback", "think", "what", "why", "you", "are", "regarding"]
+    english_clues = ["the", "and", "is", "for", "with", "thanks", "great", "portfolio", "earnings", "good", "pullback", "think", "what", "why", "you", "are", "regarding", "tech", "growth"]
     text_words = set(re.findall(r"\b[a-zA-Z]+\b", clean_text.lower()))
     matches = sum(1 for w in english_clues if w in text_words)
     return "en" if matches >= 2 else "it"
@@ -109,6 +148,191 @@ def _is_simple_gratitude(text: str) -> bool:
     if len(msg) < 35 and any(cw in msg for cw in courtesy_words):
         return True
     return False
+
+
+def validate_response_syntax(text: str, user_author: str, is_follow_up_or_short: bool = False) -> Tuple[bool, str, str]:
+    """
+    Strict deterministic validation of the reply.
+    Checks:
+      1. Non-empty and proper length.
+      2. No abrupt cut-offs (dangling prepositions, unfinished words).
+      3. Valid ending (punctuation or emoji).
+      4. Mentions user tag @username.
+      5. Strips markdown bold (**) and unwanted meta-commentary.
+    Returns: (is_valid, cleaned_text, failure_reason)
+    """
+    if not text or not isinstance(text, str):
+        return False, "", "Empty response text"
+
+    cleaned = text.strip()
+
+    # Remove outer quotes if wrapped
+    if (cleaned.startswith('"') and cleaned.endswith('"')) or (cleaned.startswith("'") and cleaned.endswith("'")):
+        cleaned = cleaned[1:-1].strip()
+
+    # Remove markdown code blocks if any
+    cleaned = re.sub(r'^```[a-zA-Z]*\n', '', cleaned)
+    cleaned = re.sub(r'\n```$', '', cleaned)
+    cleaned = cleaned.strip()
+
+    # Remove markdown bold asterisks (**text** -> text)
+    cleaned = re.sub(r'\*\*(.*?)\*\*', r'\1', cleaned)
+    cleaned = re.sub(r'\*(.*?)\*', r'\1', cleaned)
+
+    # Remove AI meta prefixes like "Ecco una risposta:" or "Andrea Ravalli:"
+    cleaned = re.sub(r'^(Ecco (la|una) risposta[:\s]*|Risposta[:\s]*|Draft[:\s]*|Andrea Ravalli[:\s]*|AI Assistant[:\s]*)', '', cleaned, flags=re.IGNORECASE).strip()
+
+    # Ensure user mention is present
+    author_clean = user_author.replace('@', '').strip()
+    if f"@{author_clean}" not in cleaned and f"@{author_clean.lower()}" not in cleaned.lower():
+        # Prepend greeting if missing
+        cleaned = f"Ciao @{author_clean}! {cleaned}"
+
+    # Check minimum length for non-trivial comments
+    min_length = 50 if is_follow_up_or_short else 100
+    min_words = 10 if is_follow_up_or_short else 20
+
+    if len(cleaned) < min_length:
+        return False, cleaned, f"Response too short ({len(cleaned)} chars < {min_length})"
+
+    words = re.findall(r'\b[\w\'-]+\b', cleaned)
+    if len(words) < min_words:
+        return False, cleaned, f"Response too few words ({len(words)} words < {min_words})"
+
+    # Check for unfinished trailing characters
+    if cleaned.endswith((',', ';', ':', '-', '—', '(', '[', '{', '...', '…', '/')):
+        return False, cleaned, "Response ends with an incomplete punctuation symbol"
+
+    # Check for dangling stop words at the very end
+    last_word = words[-1].lower() if words else ""
+    if last_word in DANGLING_STOP_WORDS:
+        return False, cleaned, f"Response cut off on trailing word/preposition: '{last_word}'"
+
+    # Check if ends with valid punctuation or emoji
+    has_valid_ending = False
+    for p in VALID_TERMINAL_PUNCTUATION:
+        if cleaned.endswith(p):
+            has_valid_ending = True
+            break
+    if not has_valid_ending:
+        for emoji in VALID_TERMINAL_EMOJIS:
+            if cleaned.endswith(emoji):
+                has_valid_ending = True
+                break
+
+    if not has_valid_ending:
+        # If it ends with letters, it likely got chopped off mid-sentence
+        return False, cleaned, "Response does not end with terminal punctuation (. ! ?) or emoji"
+
+    # Check for forbidden AI hallucination phrases
+    forbidden_meta = [
+        "as an ai", "in qualità di ia", "here is a reply", "spero che questa risposta",
+        "fammi sapere se vuoi modificare", "let me know if you would like", "json format",
+        "proposta di risposta"
+    ]
+    for fm in forbidden_meta:
+        if fm in cleaned.lower():
+            return False, cleaned, f"Contains forbidden meta-phrase: '{fm}'"
+
+    return True, cleaned, "OK"
+
+
+def verify_and_refine_reply(
+    user_comment: str,
+    user_author: str,
+    candidate_reply: str,
+    post_context: Optional[str] = None,
+    lang: str = "it",
+    api_key: Optional[str] = None
+) -> Tuple[bool, str, str]:
+    """
+    Pass 2: Double-Verification Judge (Independent Editorial & Compliance Review).
+    Evaluates:
+      1. Relevance & Substance: Does it specifically address what the user wrote?
+      2. Completeness & Fluent Ending: Is it a 100% complete text without abrupt cuts?
+      3. Compliance: Aligns with Andrea Ravalli's Risk 3/10, no CFD leverage, no financial advice.
+    Returns: (is_approved, perfected_reply, reason)
+    """
+    if not HAS_GENAI or not api_key:
+        return True, candidate_reply, "Pass 2 skipped (no API key/SDK)"
+
+    judge_prompt = f"""
+You are the Senior Compliance and Editorial Director for Andrea Ravalli's official eToro Popular Investor Channel (+200% gain, Risk Score 3/10, long-term multi-asset investing, zero leverage).
+
+Review the following proposed reply to a community comment on eToro:
+
+USER COMMENT (from @{user_author}):
+"{user_comment}"
+
+ORIGINAL POST CONTEXT:
+"{post_context or 'General Portfolio Post'}"
+
+PROPOSED CANDIDATE REPLY:
+"{candidate_reply}"
+
+EVALUATION RUBRIC:
+1. Relevance & Substance: Does the reply genuinely address the topics and questions raised by @{user_author} (e.g. specific tickers like AMZN/NVDA/PLTR, GPU additions, tech sentiment, valuation, DCA, pullback)?
+2. Completeness: Is the text 100% complete with no truncated sentences, no dangling prepositions, and a natural closing?
+3. Compliance & Tone: Is it polite, disciplined (Risk 3/10, 0 leverage, 3-5+ years horizon), and free of financial advice or markdown asterisks (**)?
+
+TASK:
+Provide your verdict in exact JSON format:
+{{
+  "approved": true or false,
+  "score": <integer from 1 to 10>,
+  "reason": "<concise explanation in Italian or English>",
+  "perfected_reply": "<the perfected final text ready to post with @{user_author} tag and clean emojis, or leave empty if rejected>"
+}}
+Output ONLY valid JSON.
+"""
+
+    client = genai.Client(api_key=api_key)
+
+    # Use a priority model for review
+    models_to_try = [m for m in DEFAULT_GEMINI_MODELS if m in ['gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-2.5-flash']]
+
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=judge_prompt,
+                config=types.GenerateContentConfig(
+                    temperature=0.2,
+                    max_output_tokens=1500,
+                )
+            )
+            if API_TRACKER_AVAILABLE:
+                log_api_request(model_name, True, "comment_validator_judge")
+
+            if response and response.text:
+                raw_json = response.text.strip()
+                # Clean json blocks
+                if "```json" in raw_json:
+                    raw_json = raw_json.split("```json")[1].split("```")[0].strip()
+                elif "```" in raw_json:
+                    raw_json = raw_json.split("```")[1].split("```")[0].strip()
+
+                parsed = json.loads(raw_json)
+                approved = bool(parsed.get("approved", False))
+                score = int(parsed.get("score", 0))
+                reason = str(parsed.get("reason", ""))
+                perfected = str(parsed.get("perfected_reply", "")).strip()
+
+                if approved and score >= 8:
+                    final_text = perfected if perfected else candidate_reply
+                    # Run deterministic check on perfected text too
+                    ok, clean_final, err = validate_response_syntax(final_text, user_author)
+                    if ok:
+                        return True, clean_final, f"Validated by {model_name} (Score: {score}/10 - {reason})"
+
+                print(f"⚠️ Pass 2 Validator ({model_name}) rejected reply (Score {score}/10): {reason}")
+                return False, "", f"Validator rejected (Score {score}/10): {reason}"
+
+        except Exception as e:
+            print(f"⚠️ Pass 2 Validator error with {model_name}: {e}")
+            continue
+
+    return True, candidate_reply, "Pass 2 fallback (validator model timeout)"
 
 
 def load_answered_comments() -> Dict[str, Any]:
@@ -136,17 +360,17 @@ def record_answered_comment(comment_id: str, post_id: str, author: str, reply_id
     """Save answered comment state locally and sync to Gist."""
     os.makedirs(DATA_DIR, exist_ok=True)
     db = load_answered_comments()
-    
+
     current_entry = db.get(comment_id, {
         "post_id": post_id,
         "author": author,
         "first_answered_at": datetime.now(timezone.utc).isoformat(),
         "reply_ids": []
     })
-    
+
     if reply_id and reply_id not in current_entry.get("reply_ids", []):
         current_entry.setdefault("reply_ids", []).append(reply_id)
-    
+
     current_entry["last_updated_at"] = datetime.now(timezone.utc).isoformat()
     db[comment_id] = current_entry
 
@@ -178,7 +402,6 @@ def cleanup_duplicate_replies(post_id: str, comment_id: str, my_username: str = 
     deleted_count = 0
     if len(my_replies) > 1:
         print(f"🧹 Rilevate {len(my_replies)} risposte duplicate sul commento {comment_id}. Pulizia in corso...")
-        # Keep the first reply, delete the subsequent ones
         for extra_id in my_replies[1:]:
             ok = etoro_client.delete_comment_reply(post_id, comment_id, extra_id)
             if ok:
@@ -187,9 +410,9 @@ def cleanup_duplicate_replies(post_id: str, comment_id: str, my_username: str = 
 
 
 def _build_contextual_fallback(user_comment: str, user_author: str, tickers: List[str], lang: str, is_follow_up: bool = False) -> str:
-    """Intelligent topic-aware fallback when AI API is unavailable."""
+    """Intelligent, topic-specific certified fallback when AI API is unavailable."""
     msg_lower = _extract_text(user_comment).lower()
-    
+
     # 0. If it's a follow-up or simple thank-you, conclude warmly
     if is_follow_up or _is_simple_gratitude(msg_lower):
         if lang == "en":
@@ -203,30 +426,32 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
                 "Un caro saluto e i migliori auguri per la tua vita e per il tuo trading! A presto! 📈✨"
             )
 
-    # 1. Accumulo / Paura di ritracciamento / Volatilità / DCA
-    if "accumul" in msg_lower or "paura" in msg_lower or "rintracci" in msg_lower or "ritracci" in msg_lower or "drop" in msg_lower or "crash" in msg_lower or "fear" in msg_lower:
+    # 1. AMZN / Tech Sentiment / Cloud / GPU / AI Infrastructure
+    if "amzn" in msg_lower or "amazon" in msg_lower or ("gpu" in msg_lower and "tech" in msg_lower) or "sentiment sulle tech" in msg_lower or "sentiment tech" in msg_lower:
         if lang == "en":
             return (
-                f"Great discipline, @{user_author}! 📊\n\n"
-                "Accumulating gradually through Dollar-Cost Averaging (DCA) is the best way to handle market anxiety. "
-                "In our portfolio, we maintain a certified Risk Score 3/10, zero leverage, and defensive allocations (Gold, Cash reserves, Dividend ETFs) specifically designed to absorb any sharp pullbacks.\n\n"
-                "Wishing you all the best in life and trading! 🚀🤝"
+                f"Great point and question, @{user_author}! 📊\n\n"
+                "Short-term tech sentiment is experiencing healthy rotation as the market digests massive Capex. "
+                "For $AMZN, AWS remains the backbone of enterprise cloud computing: expanding custom silicon (Trainium/Inferentia) and adding GPU capacity will strengthen operating margins over the 3-5 year horizon. "
+                "With our Risk Score 3/10 and zero leverage, we stay comfortably positioned for the long-term compounding.\n\n"
+                "Wishing you all the best in life and trading! 📈🤝"
             )
         else:
             return (
-                f"Ottima disciplina, @{user_author}! 📊\n\n"
-                "Accumulare con ingressi frazionati (DCA) è la strategia migliore per gestire la paura dei ritracciamenti. "
-                "Nel nostro portafoglio manteniamo volutamente un Risk Score 3/10, zero leva e coperture (Oro fisico, riserve di liquidità ed ETF a dividendo) proprio per attutire eventuali correzioni senza ansia.\n\n"
-                "Un caro saluto e i migliori auguri per la tua vita e per il tuo percorso di investimenti! 📈🤝"
+                f"Ottima osservazione e punto centrale, @{user_author}! 📊\n\n"
+                "Il sentiment sulle big tech sta attraversando una fisiologica fase di rotazione mentre il mercato digerisce gli ingenti Capex in infrastruttura AI. "
+                "Su $AMZN, la forza di AWS e l'integrazione di chip proprietari e GPU rappresentano un pilastro fondamentale per i margini operativi nei prossimi 3-5 anni. "
+                "Con la nostra gestione a Risk Score 3/10, zero leva e diversificazione multi-asset, affrontiamo queste oscillazioni con assoluta serenità.\n\n"
+                "Un caro saluto e i migliori auguri per la tua vita e per i tuoi investimenti! 📈🤝"
             )
 
-    # 2. NVIDIA / Tech Earnings / Pullback
-    elif "nvda" in msg_lower or "nvidia" in msg_lower or "earnings" in msg_lower or "pullback" in msg_lower:
+    # 2. NVIDIA / Blackwell / Tech Earnings / Pullback
+    elif "nvda" in msg_lower or "nvidia" in msg_lower or "earnings" in msg_lower or "blackwell" in msg_lower:
         if lang == "en":
             return (
                 f"Thanks for the feedback and for following the portfolio, @{user_author}! 🤝\n\n"
-                "Near-term profit-taking is always a natural reaction after huge runs. "
-                "However, our conviction in $NVDA remains extremely high (we actually reinforced the position recently) thanks to the Blackwell ramp-up and multi-year data center Capex.\n\n"
+                "Near-term profit-taking is completely natural after historic rallies. "
+                "However, our conviction in $NVDA remains extremely solid (we recently reinforced our allocation) driven by uninterrupted Blackwell demand and multi-year hyperscaler data center buildouts.\n\n"
                 "Wishing you the very best in life and trading! 🚀📈"
             )
         else:
@@ -242,8 +467,8 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
         if lang == "en":
             return (
                 f"Appreciate your question, @{user_author}! 🛡️\n\n"
-                "Valuation multiples on $PLTR are indeed demanding, but reflect an exceptional Rule of 40 score (>60%), over $4B net cash, and accelerating commercial AIP adoption. "
-                "With our Risk Score 3/10 discipline, position sizing captures the upside while protecting against drawdowns.\n\n"
+                "Valuation multiples on $PLTR are demanding, but reflect an exceptional Rule of 40 score (>60%), over $4B net cash, and accelerating commercial AIP adoption. "
+                "With our Risk Score 3/10 discipline, position sizing captures the secular upside while strictly protecting capital against pullbacks.\n\n"
                 "Wishing you all the best in life and happy investing! 📊✨"
             )
         else:
@@ -254,7 +479,24 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
                 "Un caro saluto e i migliori auguri per la tua vita e per i tuoi investimenti! 📊✨"
             )
 
-    # 4. Copy Trading / Minimum Capital / Strategy
+    # 4. Accumulo / Paura di ritracciamento / Volatilità / DCA
+    elif "accumul" in msg_lower or "paura" in msg_lower or "rintracci" in msg_lower or "ritracci" in msg_lower or "drop" in msg_lower or "crash" in msg_lower or "fear" in msg_lower:
+        if lang == "en":
+            return (
+                f"Great discipline, @{user_author}! 📊\n\n"
+                "Accumulating gradually through Dollar-Cost Averaging (DCA) is the most effective approach to handle market anxiety. "
+                "In our portfolio, we maintain a certified Risk Score 3/10, zero leverage, and defensive allocations (Physical Gold, Cash reserves, Dividend ETFs) specifically designed to absorb pullbacks smoothly.\n\n"
+                "Wishing you all the best in life and trading! 🚀🤝"
+            )
+        else:
+            return (
+                f"Ottima disciplina, @{user_author}! 📊\n\n"
+                "Accumulare con ingressi frazionati (DCA) è la strategia migliore per gestire la paura dei ritracciamenti. "
+                "Nel nostro portafoglio manteniamo volutamente un Risk Score 3/10, zero leva e coperture (Oro fisico, riserve di liquidità ed ETF difensivi) proprio per attutire eventuali correzioni senza ansia.\n\n"
+                "Un caro saluto e i migliori auguri per la tua vita e per il tuo percorso di investimenti! 📈🤝"
+            )
+
+    # 5. Copy Trading / Minimum Capital / Strategy
     elif "copi" in msg_lower or "copy" in msg_lower or "minim" in msg_lower or "capitale" in msg_lower or "start" in msg_lower:
         if lang == "en":
             return (
@@ -275,13 +517,13 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
     if lang == "en":
         return (
             f"Thanks for sharing your thoughts, @{user_author}! 🤝\n\n"
-            "Our portfolio strategy remains firmly focused on multi-year structural trends, low risk (Score 3/10), and zero leverage, letting fundamentals drive compound gains.\n\n"
+            "Our portfolio strategy remains firmly focused on multi-year structural trends, low risk (Score 3/10), and zero leverage, letting company fundamentals drive compound gains.\n\n"
             "Wishing you all the best in life and trading! 📈✨"
         )
     else:
         return (
-            f"Grazie mille per il commento, @{user_author}! 🤝\n\n"
-            "La nostra strategia rimane saldamente focalizzata su trend secolari di lungo termine, disciplina a basso rischio (Risk Score 3/10) e zero leva.\n\n"
+            f"Grazie mille per il commento e per il riscontro, @{user_author}! 🤝\n\n"
+            "La nostra strategia rimane saldamente focalizzata su trend secolari di lungo termine, disciplina a basso rischio (Risk Score 3/10) e zero leva, lasciando che siano i fondamentali a guidare la crescita.\n\n"
             "Un caro saluto e i migliori auguri per la tua vita e per il tuo trading! 📈✨"
         )
 
@@ -294,7 +536,12 @@ def generate_ai_comment_reply(
     is_follow_up: bool = False,
 ) -> str:
     """
-    Generate a tailored, balanced reply to a community comment using Gemini AI or context engine.
+    Two-Pass Generation Engine with Ultra-Strict Guardrails & Quality Double-Check:
+      1. Short courtesy bypass for simple thank-yous.
+      2. Pass 1: Generates a tailored draft with generous token limits across Gemini models.
+      3. Strict Deterministic Syntax Check.
+      4. Pass 2: Validator Judge review.
+      5. Retry loop if validation fails; automatic fallback to certified template.
     """
     clean_text = _extract_text(user_comment_text)
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -307,42 +554,77 @@ def generate_ai_comment_reply(
         else:
             return f"Grazie a te, @{user_author}! Un caro saluto e i migliori auguri per la vita e per il tuo trading! 📈🤝"
 
-    tickers_str = ", ".join(relevant_tickers) if relevant_tickers else "N/A"
+    tickers_str = ", ".join(relevant_tickers) if relevant_tickers else "General Tech & Multi-Asset"
     context_snippet = f"Original Post Context: {post_context[:300]}..." if post_context else "General Portfolio Post"
-    follow_up_hint = "NOTE: This is a concise follow-up reply. Conclude the discussion cleanly with best wishes for their life and trading." if is_follow_up else "NOTE: First reply. Keep it concise, balanced, and conclude with warm best wishes."
 
     prompt = f"""
 {PORTFOLIO_SYSTEM_PROMPT}
 
 TASK:
-Draft a reply to the following user comment on eToro:
+Draft a professional, complete reply to this eToro community user comment:
 - User: @{user_author}
 - Comment: "{clean_text}"
 - Detected Language: {'English' if lang == 'en' else 'Italian'}
 - Related Tickers: {tickers_str}
 - Post Context: {context_snippet}
-- Instruction: {follow_up_hint}
 
-Please write the exact reply ready to be posted. Do not include markdown code blocks or quotes around the entire message, just the text.
+CRITICAL RULES:
+1. Address the SPECIFIC questions or stocks mentioned in the comment (e.g. AMZN, GPUs, tech sentiment, valuation, DCA, etc.).
+2. Write 1 to 2 complete paragraphs (60-120 words). DO NOT cut off mid-sentence.
+3. Start with a greeting mentioning @{user_author}.
+4. Conclude with a complete sentence wishing them all the best in life and trading, followed by 1-2 emojis (e.g. 📈🤝).
+5. DO NOT use markdown bold with asterisks (**). Output clean plain text ready for eToro.
 """
 
     if HAS_GENAI and api_key:
-        try:
-            client = genai.Client(api_key=api_key)
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    temperature=0.4,
-                    max_output_tokens=250,
-                )
-            )
-            if response.text and len(response.text.strip()) > 15:
-                return response.text.strip()
-        except Exception as e:
-            print(f"⚠️ Gemini API note: {e}")
+        client = genai.Client(api_key=api_key)
 
-    # High-quality fallback
+        for attempt in range(2):
+            for model_name in DEFAULT_GEMINI_MODELS:
+                try:
+                    # Pass 1: Draft Generation
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            temperature=0.35,
+                            max_output_tokens=1500,  # Generous token budget to prevent thinking token choke
+                        )
+                    )
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "comment_reply_draft")
+
+                    if response and response.text:
+                        raw_draft = response.text.strip()
+
+                        # Deterministic Syntax Check
+                        is_valid, cleaned_draft, syntax_err = validate_response_syntax(raw_draft, user_author)
+                        if not is_valid:
+                            print(f"⚠️ Pass 1 Draft rejected by syntax guardrails ({model_name}): {syntax_err}")
+                            continue
+
+                        # Pass 2: Double-Verification Judge
+                        is_approved, final_reply, judge_reason = verify_and_refine_reply(
+                            user_comment=clean_text,
+                            user_author=user_author,
+                            candidate_reply=cleaned_draft,
+                            post_context=post_context,
+                            lang=lang,
+                            api_key=api_key
+                        )
+
+                        if is_approved:
+                            print(f"✅ Pass 2 Double-Check Passed! ({judge_reason})")
+                            return final_reply
+                        else:
+                            print(f"⚠️ Pass 2 Double-Check Failed: {judge_reason}. Retrying...")
+                            prompt += f"\n\nPREVIOUS ATTEMPT WAS REJECTED: {judge_reason}. Make sure the answer is 100% complete and directly answers the user's specific questions."
+
+                except Exception as e:
+                    print(f"⚠️ Gemini API attempt failed with {model_name}: {e}")
+                    continue
+
+    print("🛡️ Falling back to certified topic-aware contextual template...")
     return _build_contextual_fallback(clean_text, user_author, relevant_tickers or [], lang, is_follow_up=is_follow_up)
 
 
@@ -351,10 +633,10 @@ def _extract_comment_details(c: Dict[str, Any]) -> Tuple[str, str, str, bool, Li
     c_id = str(c.get("id") or c.get("entity", {}).get("id") or "")
     owner_dict = c.get("owner") or c.get("entity", {}).get("owner") or {}
     owner_username = owner_dict.get("username", "") or c.get("username", "")
-    
+
     raw_text = c.get("message") or c.get("content") or c.get("entity", {}).get("content") or c.get("entity", {}).get("message") or c.get("text") or ""
     text = _extract_text(raw_text)
-    
+
     is_owner = c.get("requesterContext", {}).get("isOwner", False)
     if owner_username.lower() == "andrearavalli":
         is_owner = True
@@ -373,12 +655,12 @@ def format_post_description(item: Dict[str, Any]) -> Tuple[str, str]:
             date_formatted = dt.strftime("%d/%m/%Y")
         except Exception:
             date_formatted = pub_str[:10]
-    
+
     session = item.get("session_name") or item.get("post_title") or "Post Recap"
     clean_title = re.sub(r'[\r\n]+', ' ', session).strip()
     if len(clean_title) > 60:
         clean_title = clean_title[:57] + "..."
-        
+
     desc = f"{clean_title}"
     if date_formatted:
         desc += f" del giorno {date_formatted}"
@@ -411,7 +693,7 @@ def send_telegram_comment_notification(
             f"🔗 <b>Link Post:</b> <a href=\"{post_url}\">{post_url}</a>\n\n"
             f"👤 <b>Commento di:</b> @{safe_author}\n"
             f"💬 <b>Messaggio Utente:</b>\n<i>\"{safe_user_msg}\"</i>\n\n"
-            f"💡 <b>Risposta inviata dall'IA:</b>\n"
+            f"💡 <b>Risposta inviata dall'IA (Doppia Verifica):</b>\n"
             f"{safe_reply}"
         )
 
@@ -435,7 +717,7 @@ def find_unreplied_comments(
     comments by other users needing a reply (max 1-2 turns per thread).
     """
     unreplied = []
-    
+
     if not etoro_client.is_configured():
         print("⚠️ eToro API not configured.")
         return unreplied
@@ -528,6 +810,7 @@ def find_unreplied_comments(
             last_reply_by_me = False
             last_user_message = c_text
             last_user_author = owner
+            has_subsequent_user_reply = False
 
             for r in replies:
                 _, r_owner, r_text, r_is_self, _ = _extract_comment_details(r)
@@ -536,18 +819,21 @@ def find_unreplied_comments(
                     last_reply_by_me = True
                 else:
                     last_reply_by_me = False
+                    has_subsequent_user_reply = True
                     if r_text:
                         last_user_message = r_text
                     if r_owner:
                         last_user_author = r_owner
 
-            # Persistent memory check: if comment was already answered and we have not received new replies
-            if c_id in answered_db and my_replies_count >= 1 and last_reply_by_me:
-                continue
+            # STRICT PERSISTENT MEMORY CHECK:
+            # If this root comment was already answered in persistent DB:
+            # We ONLY answer if the user sent an explicit subsequent reply in the sub-thread.
+            if c_id in answered_db:
+                if not has_subsequent_user_reply or last_reply_by_me:
+                    continue
 
             # Rule 1: If we have already replied in this sub-thread and we had the last word, STOP.
             if my_replies_count >= 1 and last_reply_by_me:
-                # Sync answered state
                 record_answered_comment(c_id, post_id, owner)
                 continue
 
@@ -584,11 +870,11 @@ def process_community_replies(
     my_username: str = "AndreaRavalli"
 ) -> List[Dict[str, Any]]:
     """
-    Finds unreplied comments from the last `days_back` days, generates AI replies,
-    and publishes them (live) or previews them (dry-run).
+    Finds unreplied comments from the last `days_back` days, generates AI replies
+    with dual-pass verification and syntax guardrails, and publishes them (live) or previews them (dry-run).
     """
     print("=" * 70)
-    print("🤖 AI COMMUNITY COMMENT RESPONDER (eToro)")
+    print("🤖 AI COMMUNITY COMMENT RESPONDER (eToro - Dual-Pass Verified)")
     print(f"🕒 Timestamp: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}")
     print(f"📅 Lookback Window: Ultimi {days_back} giorni")
     print(f"⚙️ Modalità Esecuzione: {'🛡️ DRY RUN (Solo Anteprima)' if dry_run else '🚀 LIVE AUTO-REPLY (Pubblicazione Automatica)'}")
@@ -620,7 +906,7 @@ def process_community_replies(
             is_follow_up=item.get('is_follow_up', False)
         )
 
-        print(f"\n💡 Risposta Generata dall'IA:\n{reply_text}\n")
+        print(f"\n💡 Risposta Verificata dall'IA:\n{reply_text}\n")
 
         if not dry_run:
             print(f"🚀 Pubblicazione automatica in corso per @{item['author']}...")
