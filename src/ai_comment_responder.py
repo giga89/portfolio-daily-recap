@@ -813,32 +813,62 @@ CRITICAL RULES:
 def _extract_comment_details(c: Dict[str, Any], my_username: str = "AndreaRavalli") -> Tuple[str, str, str, bool, List[Dict[str, Any]]]:
     """Helper to extract (comment_id, author_username, text, is_author_self, replies) across eToro JSON formats."""
     c_id = str(c.get("id") or c.get("commentId") or c.get("entity", {}).get("id") or "")
-    owner_dict = c.get("owner") or c.get("user") or c.get("author") or c.get("entity", {}).get("owner") or {}
-    owner_username = (
-        owner_dict.get("username")
-        or owner_dict.get("userName")
-        or c.get("username")
-        or c.get("userName")
-        or ""
+    owner_dict = (
+        c.get("owner")
+        or c.get("user")
+        or c.get("author")
+        or c.get("entity", {}).get("owner")
+        or c.get("entity", {}).get("user")
+        or c.get("entity", {}).get("author")
+        or {}
     )
+    if isinstance(owner_dict, str):
+        owner_username = owner_dict.strip()
+    elif isinstance(owner_dict, dict):
+        owner_username = (
+            owner_dict.get("username")
+            or owner_dict.get("userName")
+            or owner_dict.get("nickname")
+            or owner_dict.get("nickName")
+            or owner_dict.get("name")
+            or owner_dict.get("displayName")
+            or c.get("username")
+            or c.get("userName")
+            or c.get("author")
+            or ""
+        ).strip()
+    else:
+        owner_username = ""
 
     raw_text = (
         c.get("message")
         or c.get("content")
         or c.get("text")
+        or c.get("comment")
         or c.get("entity", {}).get("content")
         or c.get("entity", {}).get("message")
+        or c.get("entity", {}).get("text")
         or ""
     )
     text = _extract_text(raw_text)
 
     # Strictly check username to determine if it was posted by Andrea
-    is_owner = bool(owner_username and owner_username.strip().lower() == my_username.strip().lower())
+    is_owner = bool(
+        owner_username
+        and (
+            owner_username.lower() in [
+                my_username.lower(),
+                "andrearavalli",
+                "andrea ravalli",
+                "andrea",
+            ]
+        )
+    )
     
     replies = c.get("replies") or c.get("entity", {}).get("replies") or []
     if isinstance(replies, dict):
         replies = replies.get("items", []) or replies.get("comments", []) or []
-    return c_id, owner_username, text, is_owner, replies
+    return c_id, owner_username or "Utente", text, is_owner, replies
 
 
 def format_post_description(item: Dict[str, Any]) -> Tuple[str, str]:
@@ -984,6 +1014,7 @@ def find_unreplied_comments(
 
         for c in raw_comments:
             c_id, owner, c_text, is_self, replies = _extract_comment_details(c, my_username=my_username)
+            print(f"🔎 Commento {c_id[:8]} su post {post_id[:8]}: autore='{owner}' | is_self={is_self} | testo='{c_text[:35]}...' | replies={len(replies)}")
 
             # Fetch live replies if not embedded
             if not replies:
@@ -992,7 +1023,7 @@ def find_unreplied_comments(
                     replies = live_replies
 
             # If the root comment is from Andrea AND there are no replies, nothing to do
-            is_root_self = bool(is_self or (owner and owner.lower() == my_username.lower()))
+            is_root_self = bool(is_self or (owner and owner.lower() in [my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"]))
             if is_root_self and not replies:
                 continue
 
@@ -1005,7 +1036,7 @@ def find_unreplied_comments(
 
             for r in replies:
                 _, r_owner, r_text, r_is_self, _ = _extract_comment_details(r, my_username=my_username)
-                if r_is_self or (r_owner and r_owner.lower() == my_username.lower()):
+                if r_is_self or (r_owner and r_owner.lower() in [my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"]):
                     my_replies_count += 1
                     last_reply_by_me = True
                 else:
@@ -1017,7 +1048,7 @@ def find_unreplied_comments(
                         last_user_author = r_owner
 
             # If there was never any user comment in this entire sub-thread, skip
-            if not last_user_author or last_user_author.lower() == my_username.lower() or not last_user_message:
+            if not last_user_author or last_user_author.lower() in [my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"] or not last_user_message:
                 continue
 
             total_user_comments_found += 1
@@ -1027,11 +1058,13 @@ def find_unreplied_comments(
             # We ONLY answer if the user sent an explicit subsequent reply in the sub-thread.
             if c_id in answered_db:
                 if not has_subsequent_user_reply or last_reply_by_me:
+                    print(f"ℹ️ Commento {c_id[:8]} da @{last_user_author} già evaso in memoria persistente.")
                     continue
 
             # Rule 1: If we have already replied in this sub-thread and we had the last word, STOP.
             if last_reply_by_me:
                 record_answered_comment(c_id, post_id, last_user_author)
+                print(f"ℹ️ Commento {c_id[:8]} da @{last_user_author}: ultima risposta già nostra ({my_replies_count} risposte).")
                 continue
 
             # Rule 2: If we have already replied 2 or more times to this user in this sub-thread, STOP.
