@@ -41,6 +41,9 @@ ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
 DOCS_ASSETS_DIR = os.path.join(DOCS_DIR, "assets")
 
 MONTHLY_RETURNS = {
+MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+MONTHLY_RETURNS_BASELINE = {
     "2026": {"Jan": 2.47, "Feb": -1.19, "Mar": -3.52, "Apr": 8.99, "May": 2.58, "Jun": -4.04, "Jul": 0.95, "Aug": 4.95, "Sep": None, "Oct": None, "Nov": None, "Dec": None, "Total": 11.03},
     "2025": {"Jan": 3.59, "Feb": -2.47, "Mar": -2.57, "Apr": 3.18, "May": 6.99, "Jun": 5.44, "Jul": 3.71, "Aug": 3.83, "Sep": 3.39, "Oct": 2.20, "Nov": -2.25, "Dec": 0.91, "Total": 28.59},
     "2024": {"Jan": -0.43, "Feb": 3.99, "Mar": 1.10, "Apr": -1.51, "May": 4.16, "Jun": 1.44, "Jul": 1.50, "Aug": 3.98, "Sep": 2.25, "Oct": -0.25, "Nov": 4.87, "Dec": 1.77, "Total": 25.13},
@@ -49,6 +52,76 @@ MONTHLY_RETURNS = {
     "2021": {"Jan": 15.02, "Feb": -0.87, "Mar": 8.67, "Apr": 6.12, "May": -9.45, "Jun": 3.47, "Jul": -4.26, "Aug": 6.61, "Sep": -6.80, "Oct": 6.76, "Nov": -3.90, "Dec": -3.33, "Total": 16.26},
     "2020": {"Jan": 3.68, "Feb": -9.71, "Mar": -18.05, "Apr": 20.82, "May": 4.69, "Jun": 0.06, "Jul": 9.47, "Aug": 11.40, "Sep": -4.69, "Oct": -3.36, "Nov": 27.53, "Dec": 5.98, "Total": 47.40}
 }
+
+
+def get_dynamic_monthly_returns() -> Dict[str, Dict[str, Optional[float]]]:
+    """
+    Dynamically loads and synchronizes monthly returns:
+    1. From eToro Public API /api/v2/portfolios/{username}/gain/monthly if configured
+    2. From Gist storage cache
+    3. Merged with baseline history.
+    """
+    returns_matrix = {k: dict(v) for k, v in MONTHLY_RETURNS_BASELINE.items()}
+
+    # 1. Load from Gist if available
+    try:
+        gist_data = gist_storage.load_data()
+        gist_monthly = gist_data.get("monthly_returns")
+        if isinstance(gist_monthly, dict):
+            for year, months in gist_monthly.items():
+                if year not in returns_matrix:
+                    returns_matrix[year] = {}
+                for m, val in months.items():
+                    if val is not None:
+                        returns_matrix[year][m] = float(val)
+    except Exception:
+        pass
+
+    # 2. Sync from official eToro API if credentials are configured
+    if etoro_client.is_configured():
+        try:
+            gain_history = etoro_client.fetch_gain_history(granularity="monthly")
+            if gain_history:
+                for entry in gain_history:
+                    date_str = str(entry.get("date", entry.get("Date", "")))
+                    gain_val = entry.get("gain", entry.get("Gain", None))
+                    if date_str and gain_val is not None:
+                        try:
+                            year = date_str[:4]
+                            month_idx = int(date_str[5:7]) - 1
+                            if 0 <= month_idx < 12 and int(year) >= 2020:
+                                month_abbr = MONTH_NAMES[month_idx]
+                                if year not in returns_matrix:
+                                    returns_matrix[year] = {m: None for m in MONTH_NAMES}
+                                    returns_matrix[year]["Total"] = None
+                                returns_matrix[year][month_abbr] = round(float(gain_val), 2)
+                        except Exception:
+                            pass
+
+                # Recompute Annual Total compound for each year
+                for year, months in returns_matrix.items():
+                    compound = 1.0
+                    has_val = False
+                    for m in MONTH_NAMES:
+                        val = months.get(m)
+                        if val is not None:
+                            compound *= (1.0 + float(val) / 100.0)
+                            has_val = True
+                    if has_val:
+                        months["Total"] = round((compound - 1.0) * 100.0, 2)
+
+                # Persist updated matrix to Gist
+                try:
+                    gist_data = gist_storage.load_data()
+                    gist_data["monthly_returns"] = returns_matrix
+                    gist_storage.save_data(gist_data)
+                except Exception:
+                    pass
+        except Exception as e:
+            print(f"⚠️ Note syncing monthly returns from eToro API: {e}")
+
+    return returns_matrix
+
 
 GAUGE_METRICS = [
     {
@@ -486,6 +559,8 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     insights_json = json.dumps(insights, ensure_ascii=False)
     holdings_json = json.dumps(HOLDINGS_DATA, ensure_ascii=False)
     monthly_json = json.dumps(MONTHLY_RETURNS, ensure_ascii=False)
+    monthly_data = get_dynamic_monthly_returns()
+    monthly_json = json.dumps(monthly_data, ensure_ascii=False)
     gauge_json = json.dumps(GAUGE_METRICS, ensure_ascii=False)
     div_breakdown_json = json.dumps(DIVIDEND_BREAKDOWN, ensure_ascii=False)
     next_divs_json = json.dumps(NEXT_DIVIDENDS, ensure_ascii=False)
