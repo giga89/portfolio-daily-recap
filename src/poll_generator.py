@@ -416,16 +416,16 @@ def publish_etoro_poll(
 
     market_ids = etoro_client.get_market_ids_for_tickers(all_tickers)
 
-    # Format prominent cashtags and hashtags footer for maximum feed discovery
+    # Format prominent cashtags footer for maximum feed discovery
     cashtags_str = " ".join([f"${t.replace('$', '')}" for t in all_tickers[:8]])
-    tag_footer = (
-        f"\n\n📌 {cashtags_str}\n"
-        f"🏷️ #eToro #Sondaggio #Investimenti #CopyTrading #PopularInvestor\n\n"
-        f"👤 Segui il mio portafoglio: https://www.etoro.com/people/andrearavalli"
-    )
+    footer_parts = []
+    if cashtags_str:
+        footer_parts.append(f"📌 {cashtags_str}")
+    footer_parts.append("👤 Segui il mio portafoglio: https://www.etoro.com/people/andrearavalli")
+    tag_footer = "\n\n" + "\n\n".join(footer_parts)
 
     full_message = message.strip()
-    if not any(tag.lower() in full_message.lower() for tag in ["#etoro", "#sondaggio"]):
+    if "andrearavalli" not in full_message.lower():
         full_message += tag_footer
 
     print(f"📌 Poll Title: {title}")
