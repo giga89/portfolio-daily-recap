@@ -14,6 +14,7 @@ Supports:
 
 import os
 import json
+import time
 import requests
 from typing import Dict, Any, Optional, List, Tuple
 
@@ -414,6 +415,7 @@ def create_post(
 def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict[str, Any]]:
     """
     Fetch engagement metrics (likes, comments, content) for a specific eToro post.
+    Filters out author self-likes and automated author comments if exclude_author is True.
     Filters out author self-likes if exclude_author is True.
     Includes retry with exponential backoff on HTTP 429 rate limits.
     GET /api/v1/posts/{postId}
@@ -423,6 +425,13 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
         return None
 
     url = f"{BASE_URL}/api/v1/posts/{post_id}"
+    try:
+        resp = requests.get(url, headers=headers, timeout=20)
+        if resp.status_code == 200:
+            data = resp.json()
+            post_owner = data.get("post", {}).get("owner", {})
+            my_username = (post_owner.get("username") or "AndreaRavalli").lower()
+            my_user_id = str(post_owner.get("id") or "8029424")
     for attempt in range(3):
         try:
             resp = requests.get(url, headers=headers, timeout=20)
@@ -432,11 +441,24 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
                 my_username = (post_owner.get("username") or "AndreaRavalli").lower()
                 my_user_id = str(post_owner.get("id") or "8029424")
 
+            # 1. External Likes (exclude author's own like)
+            emotions_data = data.get("emotionsData", {})
+            like_data = emotions_data.get("like", {})
+            emotions_list = like_data.get("emotions", [])
                 summary = data.get("summary", {})
                 emotions_data = data.get("emotionsData", {})
                 like_data = emotions_data.get("like", {})
                 emotions_list = like_data.get("emotions", [])
 
+            if exclude_author and emotions_list:
+                external_likes = [
+                    e for e in emotions_list
+                    if e.get("owner", {}).get("username", "").lower() != my_username
+                    and str(e.get("owner", {}).get("id")) != my_user_id
+                ]
+                likes = len(external_likes)
+            else:
+                likes = like_data.get("paging", {}).get("totalCount", len(emotions_list))
                 # Total likes from summary or paging totalCount
                 total_likes = (
                     summary.get("likeCount")
@@ -446,6 +468,24 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
                     or 0
                 )
 
+            # 2. External Comments (exclude author's own/bot comments)
+            comments = 0
+            try:
+                c_url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
+                c_resp = requests.get(c_url, headers=headers, timeout=10)
+                if c_resp.status_code == 200:
+                    c_data = c_resp.json()
+                    c_list = c_data.get("comments", [])
+                    if exclude_author:
+                        external_comments = [
+                            c for c in c_list
+                            if c.get("entity", {}).get("owner", {}).get("username", "").lower() != my_username
+                            and str(c.get("entity", {}).get("owner", {}).get("id")) != my_user_id
+                            and not c.get("requesterContext", {}).get("isOwner", False)
+                        ]
+                        comments = len(external_comments)
+                    else:
+                        comments = len(c_list)
                 # Check if author liked the post
                 author_liked = (
                     data.get("requesterContext", {}).get("hasLiked", False)
@@ -459,8 +499,25 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
                 if exclude_author and author_liked and total_likes > 0:
                     likes = total_likes - 1
                 else:
+                    comments = 0
+            except Exception:
+                comments = 0
                     likes = total_likes
 
+            summary = data.get("summary", {})
+            shares = summary.get("sharedCount", 0)
+            return {
+                "id": data.get("id"),
+                "created": data.get("created"),
+                "likes": likes,
+                "comments": comments,
+                "shares": shares,
+                "word_count": data.get("wordCount", 0),
+                "reading_time": data.get("readingTimeMinutes", 0),
+                "raw": data,
+            }
+        else:
+            print(f"⚠️ Failed to get metrics for post {post_id} (HTTP {resp.status_code})")
                 # Total comments from summary
                 comments = (
                     summary.get("commentCount")
@@ -492,6 +549,9 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
         except Exception as e:
             print(f"⚠️ Error fetching post metrics for {post_id}: {e}")
             return None
+    except Exception as e:
+        print(f"⚠️ Error fetching post metrics: {e}")
+        return None
     return None
 
 
