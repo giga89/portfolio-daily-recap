@@ -432,9 +432,12 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
             my_user_id = str(post_owner.get("id") or "8029424")
 
             # 1. External Likes (exclude author's own like)
+            # 1. Total Likes from eToro API
             emotions_data = data.get("emotionsData", {})
             like_data = emotions_data.get("like", {})
             emotions_list = like_data.get("emotions", [])
+            summary = data.get("summary", {})
+            req_ctx = data.get("requesterContext", {})
 
             if exclude_author and emotions_list:
                 external_likes = [
@@ -443,10 +446,38 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
                     and str(e.get("owner", {}).get("id")) != my_user_id
                 ]
                 likes = len(external_likes)
+            # Try all standard eToro total like fields in order of authority:
+            total_likes = like_data.get("paging", {}).get("totalCount")
+            if total_likes is None:
+                total_likes = summary.get("likedCount")
+            if total_likes is None:
+                total_likes = summary.get("likesCount")
+            if total_likes is None:
+                total_likes = like_data.get("totalCount")
+            if total_likes is None:
+                total_likes = len(emotions_list)
+
+            total_likes = int(total_likes or 0)
+
+            if exclude_author:
+                author_liked = False
+                if req_ctx.get("isLiked") or req_ctx.get("isReacted"):
+                    author_liked = True
+                elif like_data.get("hasUserReacted"):
+                    author_liked = True
+                else:
+                    for e in emotions_list:
+                        e_owner = e.get("owner", {})
+                        if (e_owner.get("username") or "").lower() == my_username or str(e_owner.get("id")) == my_user_id:
+                            author_liked = True
+                            break
+                likes = max(0, total_likes - (1 if author_liked else 0))
             else:
                 likes = like_data.get("paging", {}).get("totalCount", len(emotions_list))
+                likes = total_likes
 
             # 2. External Comments (exclude author's own/bot comments)
+            # 2. Total Comments from eToro API
             comments = 0
             try:
                 c_url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
@@ -462,15 +493,34 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
                             and not c.get("requesterContext", {}).get("isOwner", False)
                         ]
                         comments = len(external_comments)
+                    c_total = c_data.get("paging", {}).get("totalCount")
+                    if c_total is None:
+                        c_total = len(c_list)
+                    c_total = int(c_total or 0)
+
+                    if exclude_author and c_list:
+                        author_comments_count = sum(
+                            1 for c in c_list
+                            if (c.get("entity", {}).get("owner", {}).get("username") or "").lower() == my_username
+                            or str(c.get("entity", {}).get("owner", {}).get("id")) == my_user_id
+                            or c.get("requesterContext", {}).get("isOwner", False)
+                        )
+                        comments = max(0, c_total - author_comments_count)
                     else:
                         comments = len(c_list)
+                        comments = c_total
                 else:
                     comments = 0
+                    summary_comments = summary.get("commentsCount") or summary.get("totalCommentsAndReplies") or summary.get("commentCount") or 0
+                    comments = int(summary_comments)
             except Exception:
                 comments = 0
+                summary_comments = summary.get("commentsCount") or summary.get("totalCommentsAndReplies") or summary.get("commentCount") or 0
+                comments = int(summary_comments)
 
             summary = data.get("summary", {})
             shares = summary.get("sharedCount", 0)
+            shares = int(summary.get("sharedCount") or summary.get("sharesCount") or summary.get("shares") or 0)
             return {
                 "id": data.get("id"),
                 "created": data.get("created"),
