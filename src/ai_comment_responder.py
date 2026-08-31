@@ -985,25 +985,22 @@ def find_unreplied_comments(
         for c in raw_comments:
             c_id, owner, c_text, is_self, replies = _extract_comment_details(c, my_username=my_username)
 
-            if is_self or (owner and owner.lower() == my_username.lower()):
-                continue
-
-            if not owner:
-                owner = "Utente"
-
-            total_user_comments_found += 1
-
-            # Fetch live replies for this comment sub-resource if not already present
+            # Fetch live replies if not embedded
             if not replies:
                 live_replies = etoro_client.get_comment_replies(post_id, c_id)
                 if live_replies:
                     replies = live_replies
 
-            # ── Thread Turn & Depth Inspection ────────────────────────────────
-            my_replies_count = 0
-            last_reply_by_me = False
-            last_user_message = c_text
-            last_user_author = owner
+            # If the root comment is from Andrea AND there are no replies, nothing to do
+            is_root_self = bool(is_self or (owner and owner.lower() == my_username.lower()))
+            if is_root_self and not replies:
+                continue
+
+            # Count turns & find the last speaker in the sub-thread
+            my_replies_count = 1 if is_root_self else 0
+            last_reply_by_me = is_root_self
+            last_user_message = c_text if not is_root_self else ""
+            last_user_author = owner if not is_root_self else ""
             has_subsequent_user_reply = False
 
             for r in replies:
@@ -1019,6 +1016,12 @@ def find_unreplied_comments(
                     if r_owner:
                         last_user_author = r_owner
 
+            # If there was never any user comment in this entire sub-thread, skip
+            if not last_user_author or last_user_author.lower() == my_username.lower() or not last_user_message:
+                continue
+
+            total_user_comments_found += 1
+
             # STRICT PERSISTENT MEMORY CHECK:
             # If this root comment was already answered in persistent DB:
             # We ONLY answer if the user sent an explicit subsequent reply in the sub-thread.
@@ -1027,16 +1030,19 @@ def find_unreplied_comments(
                     continue
 
             # Rule 1: If we have already replied in this sub-thread and we had the last word, STOP.
-            if my_replies_count >= 1 and last_reply_by_me:
-                record_answered_comment(c_id, post_id, owner)
+            if last_reply_by_me:
+                record_answered_comment(c_id, post_id, last_user_author)
                 continue
 
-            # Rule 2: If we have already replied 2 or more times in this sub-thread, STOP.
-            if my_replies_count >= 2:
+            # Rule 2: If we have already replied 2 or more times to this user in this sub-thread, STOP.
+            max_allowed_replies = 3 if is_root_self else 2
+            if my_replies_count >= max_allowed_replies:
                 continue
 
-            # Rule 3: Determine if this is a follow-up (turn 2)
-            is_follow_up = (my_replies_count == 1)
+            # Rule 3: Determine if this is a follow-up (turn >= 2)
+            is_follow_up = (my_replies_count >= 1 and not is_root_self) or (my_replies_count >= 2 and is_root_self)
+
+            print(f"🎯 Trovato commento da rispondere! @{last_user_author} su post {post_id[:8]}: \"{last_user_message[:50]}...\" (turn={my_replies_count + 1})")
 
             unreplied.append({
                 "post_id": post_id,
