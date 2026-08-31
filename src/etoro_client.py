@@ -620,9 +620,10 @@ def get_post_comments(post_id: str) -> List[Dict[str, Any]]:
     if not headers:
         return []
     url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
+    params = {"pageSize": 50, "limit": 50, "count": 50, "page": 1}
     for attempt in range(3):
         try:
-            resp = requests.get(url, headers=headers, timeout=20)
+            resp = requests.get(url, headers=headers, params=params, timeout=20)
             if resp.status_code == 200:
                 data = resp.json()
                 if isinstance(data, list):
@@ -683,18 +684,29 @@ def get_comment_replies(post_id: str, comment_id: str) -> List[Dict[str, Any]]:
     if not headers:
         return []
     url = f"{BASE_URL}/api/v1/posts/{post_id}/comments/{comment_id}/replies"
+    params = {"pageSize": 50, "limit": 50, "count": 50, "page": 1}
     for attempt in range(3):
         try:
-            resp = requests.get(url, headers=headers, timeout=20)
+            resp = requests.get(url, headers=headers, params=params, timeout=20)
             if resp.status_code == 200:
                 data = resp.json()
                 if isinstance(data, dict):
-                    return data.get("replies", []) or data.get("comments", []) or data.get("items", []) or []
+                    replies = (
+                        data.get("replies")
+                        or data.get("items")
+                        or data.get("results")
+                        or data.get("data")
+                        or data.get("comments")
+                        or []
+                    )
+                    if isinstance(replies, list):
+                        return replies
                 elif isinstance(data, list):
                     return data
                 return []
             elif resp.status_code == 429:
                 wait_sec = (attempt + 1) * 2
+                print(f"⏳ Rate limited on replies for comment {comment_id}. Backing off {wait_sec}s...")
                 time.sleep(wait_sec)
                 continue
             return []
