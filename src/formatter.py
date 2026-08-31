@@ -195,8 +195,8 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     available_candidates = [c for c in unique_candidates if c.upper() not in normalized_history]
     
     # Filter by region if morning open
-    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L']
-    US_TICKERS = ['AMZN', 'AVGO', 'GOOG', 'LLY', 'MSFT', 'NET', 'PLTR', 'PYPL', 'TSM', 'ABBV', 'ABT', 'ABT.US', 'CCJ', 'HUM', 'MELI', 'IB01.L']
+    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'ULVR.L', 'MAU.PA', 'SX7PEX.DE', 'IEUR', 'WDEF.L', 'IQQL.DE', 'PPFB.DE', 'XEON.DE']
+    US_TICKERS = ['NVDA', 'MSFT', 'AMZN', 'GOOG', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY', 'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'MELI', 'IB01.L']
     
     if "EUROPEAN" in session_upper and "OPEN" in session_upper:
         available_candidates = [c for c in available_candidates if c.upper() in [t.upper() for t in EUROPEAN_TICKERS]]

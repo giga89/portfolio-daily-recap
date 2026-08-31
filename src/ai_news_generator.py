@@ -823,8 +823,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
     if not market_session:
         market_session = os.environ.get('MARKET_SESSION', 'Daily recap')
         
-    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L']
-    US_TICKERS = ['AMZN', 'AVGO', 'GOOG', 'LLY', 'MSFT', 'NET', 'PLTR', 'PYPL', 'TSM', 'ABBV', 'ABT', 'ABT.US', 'CCJ', 'HUM', 'MELI', 'IB01.L']
+    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'ULVR.L', 'MAU.PA', 'SX7PEX.DE', 'IEUR', 'WDEF.L', 'IQQL.DE', 'PPFB.DE', 'XEON.DE']
+    US_TICKERS = ['NVDA', 'MSFT', 'AMZN', 'GOOG', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY', 'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'MELI', 'IB01.L']
     
     allowed_tickers = None
     session_upper = market_session.upper()
@@ -893,7 +893,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             CONTESTO PORTAFOGLIO EUROPEO:
             I principali titoli europei del nostro portafoglio su cui concentrarsi sono:
-            AstraZeneca (AZN.L), Novo Nordisk (NOVO-B.CO), Enel (ENEL.MI), Eni (ENI.MI), Prysmian (PRY.MI), Ferrari (RACE), Volkswagen (VOW3.DE), Glencore (GLEN.L).
+            AstraZeneca (AZN.L), Novo Nordisk (NOVO-B.CO), Enel (ENEL.MI), Eni (ENI.MI), Prysmian (PRY.MI), Ferrari (RACE), Volkswagen (VOW3.DE), Glencore (GLEN.L), Unilever (ULVR.L), Maurel & Prom (MAU.PA).
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a dei compagni investitori che seguono la tua strategia). Evita assolutamente toni formali, accademici o robotici.
@@ -917,7 +917,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             CONTESTO PORTAFOGLIO USA:
             I principali titoli USA del nostro portafoglio su cui concentrarsi sono:
-            NVIDIA (NVDA), Microsoft (MSFT), Amazon (AMZN), Eli Lilly (LLY), Palantir (PLTR), Broadcom (AVGO), Cloudflare (NET), PayPal (PYPL), Taiwan Semiconductor (TSM), AbbVie (ABBV), Abbott (ABT).
+            NVIDIA (NVDA), Microsoft (MSFT), Amazon (AMZN), Alphabet (GOOG), Eli Lilly (LLY), Palantir (PLTR), Broadcom (AVGO), Marvell (MRVL), Walmart (WMT), Taiwan Semiconductor (TSM), AbbVie (ABBV), Abbott (ABT.US), Cameco (CCJ), Humana (HUM), MercadoLibre (MELI).
             
             LINEE GUIDA PER IL TESTO:
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a dei compagni investitori che seguono la tua strategia). Evita assolutamente toni formali o robotici.
