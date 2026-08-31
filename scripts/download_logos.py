@@ -88,7 +88,6 @@ DOMAIN_MAP = {
     "WDEF.L":     "wisdomtree.com",
     "INDO.PA":    "amundi.com",
     "PPFB.DE":    "ishares.com",
-    "XEON.DE":    "dws.com",
     "VOF.L":      "vinacapital.com",
     # ── Other ────────────────────────────────────────────────────────────────
     "SPCX.RTH":   "spacex.com",

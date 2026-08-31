@@ -39,8 +39,7 @@
         "VOF.L": "🇻🇳",
         "VOW3.DE": "🚗",
         "WDEF.L": "🛡️",
-        "WMT": "🛒",
-        "XEON.DE": "💤"
+        "WMT": "🛒"
     },
     "tickers": {
         "1211.HK": [
@@ -202,10 +201,6 @@
         "WMT": [
             "WMT",
             "Walmart Inc."
-        ],
-        "XEON.DE": [
-            "XEON.DE",
-            "Xtrackers II EUR Overnight Rate Swap UCITS ETF"
         ]
     }
 }

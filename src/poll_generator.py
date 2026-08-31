@@ -105,9 +105,9 @@ POLL_TEMPLATES = [
             "Copertura indispensabile (5-10%)",
             "Ottimo trend rialzista",
             "Preferisco titoli a dividendo",
-            "Meglio liquidità o bond ($XEON)",
+            "Meglio bond/liquidità ($IB01)",
         ],
-        "tickers": ["PPFB.DE", "IB01.L", "XEON.DE"],
+        "tickers": ["PPFB.DE", "IB01.L"],
         "message": (
             "🗳️ SONDAGGIO: ORO FISICO E BENI RIFUGIO ($PPFB.DE)\n\n"
             "Manteniamo in portafoglio una quota strutturale di Oro fisico tramite ETC ($PPFB.DE) come scudo contro svalutazione monetaria e shock macroeconomici.\n\n"

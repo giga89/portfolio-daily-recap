@@ -88,7 +88,7 @@ CORE PROFILE & STRATEGY RULES:
    - AI & Hyperscale Tech (NVDA, PLTR, TSM, AVGO, MSFT, GOOGL, AMZN, MRVL): Secular compute demand, custom silicon, cloud AI infrastructure, software monetization (AIP). Short-term market rotation is noise.
    - Healthcare & GLP-1 (LLY, NOVO-B, ABBV, ABT, AZN): Demographic aging, blockbuster metabolic and immunology treatments, resilient pricing power.
    - Energy, Nuclear & Grid (CCJ, PRY, ENI, ENEL, GLEN, TRIG): Nuclear baseload 24/7 for AI data centers (Cameco), global electrification supercycle (Prysmian/Glencore).
-   - Defense & Safe Havens (WDEF ETF, Physical Gold PPFB ETC, Cash/Treasuries IB01, XEON): Geopolitical hedging (NATO rearmament) and currency debasement protection.
+   - Defense & Safe Havens (WDEF ETF, Physical Gold PPFB ETC, Cash/Treasuries IB01): Geopolitical hedging (NATO rearmament) and currency debasement protection.
    - Selected Emerging & Quality (MELI, BYD, Ferrari RACE, Walmart WMT): High barriers to entry and strong cash flows.
 
 3. RESPONSE GUARDRAILS:

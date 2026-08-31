@@ -85,7 +85,6 @@ SECTOR_MAP: dict[str, str] = {
     'BTC':     'Crypto',
     # Bonds / Cash
     'IB01.L':  'Bonds & Cash',
-    'XEON.DE': 'Bonds & Cash',
     # Global ETF / Diversified
     'SWDA':    'Global ETF',
     'VWCE.L':  'Global ETF',
@@ -93,7 +92,7 @@ SECTOR_MAP: dict[str, str] = {
     'IEUR':    'Global ETF',
     'IQQL.DE': 'Global ETF',
     'INDO.PA': 'Global ETF',
-    'WDEF.L':  'Global ETF',
+    'WDEF.L': 'Global ETF',
 }
 
 # Maps eToro ticker symbols to geographic labels
@@ -108,7 +107,7 @@ GEO_MAP: dict[str, str] = {
     'GLEN.L': 'Europe', 'VOW3.DE': 'Europe', 'RACE': 'Europe',
     'PRY.MI': 'Europe', 'MAU.PA': 'Europe', 'SX7PEX.DE': 'Europe',
     'TRIG.L': 'Europe', 'WDEF.L': 'Europe', 'IEUR': 'Europe',
-    'IB01.L': 'Europe', 'XEON.DE': 'Europe', 'IQQL.DE': 'Europe',
+    'IB01.L': 'USA', 'IQQL.DE': 'Europe',
     # Asia / Pacific
     '2318.HK': 'Asia', '9618.HK': 'Asia', '1919.HK': 'Asia', 'TSM': 'Asia',
     'NVO': 'Europe',  # Novo Nordisk - Denmark

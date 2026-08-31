@@ -75,7 +75,6 @@ SECTOR_TAGS = {
     "IEUR":      "ETF azionario Europa",
     "WDEF.L":    "ETF dividendi Europa",
     "IB01.L":    "Treasury USA 0-1yr",
-    "XEON.DE":   "Liquidità overnight EUR",
     "IQQL.DE":   "ETF quality MSCI World",
     "IEMG":      "ETF mercati emergenti",
     "1211.HK":   "Auto elettriche · BYD",
@@ -158,7 +157,6 @@ _TICKER_DOMAIN_MAP = {
     "IQQL.DE":   "ishares.com",
     "IB01.L":    "ishares.com",
     "WDEF.L":    "wisdomtree.com",
-    "XEON.DE":   "dws.com",
     "ETOR":      "etoro.com",
     "TRX":       "tron.network",
 }

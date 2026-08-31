@@ -55,7 +55,6 @@ MARKET_IDS = {
     "IEUR": 3150,
     "WDEF.L": 3297,
     "PPFB.DE": 2941,
-    "XEON.DE": 10559,
     "IB01.L": 1442,
     "INDO.PA": 15327,
     "IQQL.DE": 2913,
