@@ -614,45 +614,79 @@ def like_post(post_id: str) -> bool:
 def get_post_comments(post_id: str) -> List[Dict[str, Any]]:
     """
     Fetch all comments on a specific post via GET /api/v1/posts/{postId}/comments.
+    Paginates across page indices (0, 1, 2) to retrieve all comments.
     Includes retry with backoff on HTTP 429 rate limits.
     """
     headers = get_headers()
     if not headers:
         return []
     url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
-    params = {"pageSize": 50, "limit": 50, "count": 50, "page": 1}
-    for attempt in range(3):
-        try:
-            resp = requests.get(url, headers=headers, params=params, timeout=20)
-            if resp.status_code == 200:
-                data = resp.json()
-                if isinstance(data, list):
-                    return data
-                if isinstance(data, dict):
-                    comments = (
-                        data.get("comments")
-                        or data.get("items")
-                        or data.get("results")
-                        or data.get("data")
-                        or data.get("commentsData")
-                        or data.get("post", {}).get("comments")
-                        or []
-                    )
+    all_comments = []
+    seen_ids = set()
+
+    for page in [0, 1, 2]:
+        params = {"pageSize": 50, "take": 50, "limit": 50, "count": 50, "page": page}
+        for attempt in range(3):
+            try:
+                resp = requests.get(url, headers=headers, params=params, timeout=20)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    comments = []
+                    if isinstance(data, list):
+                        comments = data
+                    elif isinstance(data, dict):
+                        comments = (
+                            data.get("comments")
+                            or data.get("items")
+                            or data.get("results")
+                            or data.get("data")
+                            or data.get("commentsData")
+                            or data.get("post", {}).get("comments")
+                            or []
+                        )
                     if isinstance(comments, list):
-                        return comments
-                return []
-            elif resp.status_code == 429:
-                wait_sec = (attempt + 1) * 2
-                print(f"⏳ Rate limited on comments for {post_id}. Backing off {wait_sec}s...")
-                time.sleep(wait_sec)
-                continue
-            else:
-                print(f"⚠️ get_post_comments for {post_id} returned HTTP {resp.status_code}: {resp.text[:120]}")
-                return []
-        except Exception as e:
-            print(f"⚠️ Error fetching comments for post {post_id}: {e}")
-            return []
-    return []
+                        new_found = 0
+                        for c in comments:
+                            c_id = str(c.get("id") or c.get("commentId") or c.get("entity", {}).get("id") or "")
+                            if c_id and c_id not in seen_ids:
+                                seen_ids.add(c_id)
+                                all_comments.append(c)
+                                new_found += 1
+                            elif not c_id:
+                                all_comments.append(c)
+                                new_found += 1
+                        if new_found == 0:
+                            break
+                    break
+                elif resp.status_code == 429:
+                    wait_sec = (attempt + 1) * 2
+                    print(f"⏳ Rate limited on comments for {post_id}. Backing off {wait_sec}s...")
+                    time.sleep(wait_sec)
+                    continue
+                else:
+                    break
+            except Exception as e:
+                print(f"⚠️ Error fetching comments for post {post_id}: {e}")
+                break
+
+    # Fallback to GET /api/v1/posts/{post_id} if no comments found
+    if not all_comments:
+        post_url = f"{BASE_URL}/api/v1/posts/{post_id}"
+        try:
+            p_resp = requests.get(post_url, headers=headers, timeout=15)
+            if p_resp.status_code == 200:
+                p_data = p_resp.json()
+                raw_c = p_data.get("comments") or p_data.get("items") or p_data.get("commentsData") or []
+                if isinstance(raw_c, list):
+                    for c in raw_c:
+                        c_id = str(c.get("id") or c.get("commentId") or c.get("entity", {}).get("id") or "")
+                        if c_id and c_id not in seen_ids:
+                            seen_ids.add(c_id)
+                            all_comments.append(c)
+        except Exception:
+            pass
+
+    return all_comments
 
 
 def reply_to_comment(post_id: str, comment_id: str, message: str, language: str = "it") -> Dict[str, Any]:
