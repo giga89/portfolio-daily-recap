@@ -335,11 +335,9 @@ def sync_etoro_metrics() -> Dict[str, Any]:
     posts = data.get("posts", [])
     updated_count = 0
 
-    import time
     for p in posts:
         if p.get("platform") == "etoro" and p.get("id"):
             post_id = p["id"]
-            time.sleep(0.2)
             metrics = etoro_client.get_post_metrics(post_id)
             if metrics:
                 p["likes"] = metrics.get("likes", 0)
