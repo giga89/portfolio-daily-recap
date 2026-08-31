@@ -47,5 +47,41 @@
       "16704f0a-800e-4639-be41-1992a06895e8"
     ],
     "last_updated_at": "2026-08-29T19:20:15.105307+00:00"
+  },
+  "68677884-aa55-45e6-a0f3-0d531000bcb6": {
+    "post_id": "a39643e0-a540-11f1-8080-800016bed651",
+    "author": "YoandroRosabal",
+    "first_answered_at": "2026-08-31T16:13:31.692776+00:00",
+    "reply_ids": [
+      "65aa78bb-cb00-4857-9eb5-0b7620458567"
+    ],
+    "last_updated_at": "2026-08-31T16:13:31.692792+00:00"
+  },
+  "ad7899ef-a147-42fb-a288-8ebf193546ba": {
+    "post_id": "9f680180-a2e5-11f1-8080-80016d37d882",
+    "author": "EquityFund",
+    "first_answered_at": "2026-08-31T16:14:47.260498+00:00",
+    "reply_ids": [
+      "ba411169-0b67-46d7-9698-239b5e215a85"
+    ],
+    "last_updated_at": "2026-08-31T16:14:47.260514+00:00"
+  },
+  "ead94dee-eff5-4546-a6fa-f5325d5ef2e1": {
+    "post_id": "cac45250-a152-11f1-8080-8000159b6b85",
+    "author": "Maikollbe",
+    "first_answered_at": "2026-08-31T16:15:28.228363+00:00",
+    "reply_ids": [
+      "33ce4a96-7e98-4470-9319-7064c1c6a5c1"
+    ],
+    "last_updated_at": "2026-08-31T16:15:28.228379+00:00"
+  },
+  "6e4fd1d6-79a1-4d77-b797-828711c8cb2d": {
+    "post_id": "cac45250-a152-11f1-8080-8000159b6b85",
+    "author": "Marcofree79",
+    "first_answered_at": "2026-08-31T16:16:23.916055+00:00",
+    "reply_ids": [
+      "baedb461-a424-49ad-8732-4e237d0be3c8"
+    ],
+    "last_updated_at": "2026-08-31T16:16:23.916070+00:00"
   }
 }
