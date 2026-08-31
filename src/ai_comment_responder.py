@@ -853,6 +853,7 @@ def _extract_comment_details(c: Dict[str, Any], my_username: str = "AndreaRavall
     text = _extract_text(raw_text)
 
     # Strictly check username to determine if it was posted by Andrea
+    is_owner = bool(owner_username and owner_username.strip().lower() == my_username.strip().lower())
     is_owner = bool(
         owner_username
         and (
@@ -868,6 +869,7 @@ def _extract_comment_details(c: Dict[str, Any], my_username: str = "AndreaRavall
     replies = c.get("replies") or c.get("entity", {}).get("replies") or []
     if isinstance(replies, dict):
         replies = replies.get("items", []) or replies.get("comments", []) or []
+    return c_id, owner_username, text, is_owner, replies
     return c_id, owner_username or "Utente", text, is_owner, replies
 
 
@@ -1007,6 +1009,8 @@ def find_unreplied_comments(
 
         time.sleep(0.3)  # Gentle delay to prevent eToro API HTTP 429 rate limit
         raw_comments = etoro_client.get_post_comments(post_id)
+        post_title_short = (p.get("title") or p.get("session_name") or "Post")[:35].replace('\n', ' ')
+        print(f"📄 Post {post_id[:8]} ({post_title_short}...): trovati {len(raw_comments)} commenti")
         if not raw_comments:
             continue
 

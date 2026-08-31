@@ -628,13 +628,17 @@ def get_post_comments(post_id: str) -> List[Dict[str, Any]]:
                 if isinstance(data, list):
                     return data
                 if isinstance(data, dict):
-                    return (
+                    comments = (
                         data.get("comments")
                         or data.get("items")
                         or data.get("results")
                         or data.get("data")
+                        or data.get("commentsData")
+                        or data.get("post", {}).get("comments")
                         or []
                     )
+                    if isinstance(comments, list):
+                        return comments
                 return []
             elif resp.status_code == 429:
                 wait_sec = (attempt + 1) * 2
@@ -642,6 +646,7 @@ def get_post_comments(post_id: str) -> List[Dict[str, Any]]:
                 time.sleep(wait_sec)
                 continue
             else:
+                print(f"⚠️ get_post_comments for {post_id} returned HTTP {resp.status_code}: {resp.text[:120]}")
                 return []
         except Exception as e:
             print(f"⚠️ Error fetching comments for post {post_id}: {e}")
