@@ -606,20 +606,39 @@ def like_post(post_id: str) -> bool:
 def get_post_comments(post_id: str) -> List[Dict[str, Any]]:
     """
     Fetch all comments on a specific post via GET /api/v1/posts/{postId}/comments.
+    Includes retry with backoff on HTTP 429 rate limits.
     """
     headers = get_headers()
     if not headers:
         return []
     url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
-    try:
-        resp = requests.get(url, headers=headers, timeout=20)
-        if resp.status_code == 200:
-            data = resp.json()
-            return data.get("comments", []) if isinstance(data, dict) else []
-        return []
-    except Exception as e:
-        print(f"⚠️ Error fetching comments for post {post_id}: {e}")
-        return []
+    for attempt in range(3):
+        try:
+            resp = requests.get(url, headers=headers, timeout=20)
+            if resp.status_code == 200:
+                data = resp.json()
+                if isinstance(data, list):
+                    return data
+                if isinstance(data, dict):
+                    return (
+                        data.get("comments")
+                        or data.get("items")
+                        or data.get("results")
+                        or data.get("data")
+                        or []
+                    )
+                return []
+            elif resp.status_code == 429:
+                wait_sec = (attempt + 1) * 2
+                print(f"⏳ Rate limited on comments for {post_id}. Backing off {wait_sec}s...")
+                time.sleep(wait_sec)
+                continue
+            else:
+                return []
+        except Exception as e:
+            print(f"⚠️ Error fetching comments for post {post_id}: {e}")
+            return []
+    return []
 
 
 def reply_to_comment(post_id: str, comment_id: str, message: str, language: str = "it") -> Dict[str, Any]:
@@ -645,23 +664,31 @@ def reply_to_comment(post_id: str, comment_id: str, message: str, language: str 
 def get_comment_replies(post_id: str, comment_id: str) -> List[Dict[str, Any]]:
     """
     Fetch all replies for a specific comment via GET /api/v1/posts/{postId}/comments/{commentId}/replies.
+    Includes retry with backoff on HTTP 429 rate limits.
     """
     headers = get_headers()
     if not headers:
         return []
     url = f"{BASE_URL}/api/v1/posts/{post_id}/comments/{comment_id}/replies"
-    try:
-        resp = requests.get(url, headers=headers, timeout=20)
-        if resp.status_code == 200:
-            data = resp.json()
-            if isinstance(data, dict):
-                return data.get("replies", []) or data.get("comments", []) or []
-            elif isinstance(data, list):
-                return data
-        return []
-    except Exception as e:
-        print(f"⚠️ Error fetching replies for comment {comment_id}: {e}")
-        return []
+    for attempt in range(3):
+        try:
+            resp = requests.get(url, headers=headers, timeout=20)
+            if resp.status_code == 200:
+                data = resp.json()
+                if isinstance(data, dict):
+                    return data.get("replies", []) or data.get("comments", []) or data.get("items", []) or []
+                elif isinstance(data, list):
+                    return data
+                return []
+            elif resp.status_code == 429:
+                wait_sec = (attempt + 1) * 2
+                time.sleep(wait_sec)
+                continue
+            return []
+        except Exception as e:
+            print(f"⚠️ Error fetching replies for comment {comment_id}: {e}")
+            return []
+    return []
 
 
 def delete_comment_reply(post_id: str, comment_id: str, reply_id: str) -> bool:

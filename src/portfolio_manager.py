@@ -10,6 +10,7 @@ except ImportError:
 # REAL ACTIVE ASSETS IN ANDREA RAVALLI'S ETORO PORTFOLIO
 DEFAULT_TICKERS = {
     # Cash, Fixed Income & Macro ETFs
+    'XEON.DE': ('XEON.DE', 'Xtrackers II EUR Overnight Rate Swap UCITS ETF'),
     'IB01.L': ('IB01.L', 'iShares $ Treasury Bond 0-1yr UCITS ETF'),
     'INDO.PA': ('INDO.PA', 'Amundi MSCI Indonesia UCITS ETF Acc'),
     'PPFB.DE': ('PPFB.DE', 'iShares Physical Gold ETC'),
@@ -113,6 +114,7 @@ DEFAULT_EMOJIS = {
     'MELI': '🛒',
     'PYPL': '💳',
     'GLEN.L': '⛏️',
+    'XEON.DE': '💤',    # EUR overnight rate (cash/liquidity)
     'IB01.L': '💵',    # US Treasury short-term bonds
     '1919.HK': '🚢',
     '2318.HK': '🏦',
@@ -145,15 +147,15 @@ def load_config():
                 "tickers": gist_tickers,
                 "emojis": gist_emojis
             }
-            # Auto-migration for bad/removed tickers
+            # Auto-migration for bad tickers
             needs_save = False
-            # Purge any Russian / untradeable / sold assets
-            for removed_t in ["MNODL.L", "NVTKL.L", "XEON.DE", "NET", "PYPL"]:
-                if removed_t in config["tickers"]:
-                    config["tickers"].pop(removed_t, None)
+            # Purge any Russian / untradeable assets
+            for russian_t in ["MNODL.L", "NVTKL.L"]:
+                if russian_t in config["tickers"]:
+                    config["tickers"].pop(russian_t, None)
                     needs_save = True
-                if removed_t in config.get("emojis", {}):
-                    config["emojis"].pop(removed_t, None)
+                if russian_t in config.get("emojis", {}):
+                    config["emojis"].pop(russian_t, None)
                     needs_save = True
             if "ABT.US" not in config["tickers"]:
                 config["tickers"]["ABT.US"] = ["ABT", "Abbott Laboratories"]
@@ -192,7 +194,11 @@ def load_config():
                 config["tickers"]["NOVO-B.CO"] = ["NOVO-B.CO", "Novo Nordisk"]
                 needs_save = True
 
-            # Ensure IB01.L is configured
+            # Add new positions: XEON.DE and IB01.L
+            if "XEON.DE" not in config["tickers"]:
+                config["tickers"]["XEON.DE"] = ["XEON.DE", "Xtrackers II EUR Overnight Rate Swap UCITS ETF"]
+                config["emojis"]["XEON.DE"] = "💤"
+                needs_save = True
             if "IB01.L" not in config["tickers"]:
                 config["tickers"]["IB01.L"] = ["IB01.L", "iShares Treasury Bond 0-1yr UCITS ETF"]
                 config["emojis"]["IB01.L"] = "💵"
@@ -426,20 +432,11 @@ MULTI_TAG_MAP = {
     'ENI': ['$ENI.MI', '$E'],
     'NOVO-B.CO': ['$NOVO-B.CO', '$NVO'],
     'AZN.L': ['$AZN.L', '$AZN'],
-    '1211.HK': ['$1211.HK', '$BYDDY'],
-    '1919.HK': ['$1919.HK', '$CICOY'],
-    '2318.HK': ['$2318.HK', '$PNGAY'],
-    'RACE': ['$RACE', '$RACE.MI'],
     '1211.HK': ['$1211.HK'],
     '1919.HK': ['$1919.HK'],
     '2318.HK': ['$2318.HK'],
     'RACE': ['$RACE'],
     'ULVR.L': ['$ULVR.L', '$UL'],
-    'VOW3.DE': ['$VOW3.DE', '$VWAGY'],
-    'ABT.US': ['$ABT.US', '$ABT'],
-    'ABT': ['$ABT.US', '$ABT'],
-    'PRY.MI': ['$PRY.MI', '$PRY'],
-    'ENEL.MI': ['$ENEL.MI', '$ENLAY'],
     'VOW3.DE': ['$VOW3.DE'],
     'ABT.US': ['$ABT'],
     'ABT': ['$ABT'],
@@ -481,10 +478,12 @@ RELATED_TICKERS_MAP = {
     'SX7PEX.DE': ['$BAC', '$JPM', '$HSBA.L'],
     'IEUR': ['$VGK', '$EZU', '$FEZ'],
     'IQQL.DE': ['$QUAL', '$IWDA.L', '$VWCE.L'],
+    'IEMG': ['$EEM', '$VWO', '$IEMG'],
     'WDEF.L': ['$RHM.DE', '$BA.L', '$LMT'],
-    'INDO.PA': ['$EIDO', '$INDO.PA'],
+    'INDO.PA': ['$EIDO', '$INDO.PA', '$IEMG'],
     'PPFB.DE': ['$GLD', '$IAU', '$SLV'],
-    'IB01.L': ['$SHY', '$BIL'],
+    'XEON.DE': ['$CSH2.PA', '$XEON.DE', '$IB01.L'],
+    'IB01.L': ['$SHY', '$BIL', '$XEON.DE'],
     'TRIG.L': ['$UKW.L', '$FSFL.L', '$ENEL.MI'],
     'VOF.L': ['$VNM', '$VEIL.L', '$VOF.L'],
     'TRX': ['$BTC', '$ETH', '$SOL'],

@@ -144,10 +144,188 @@ def _detect_language(text: str) -> str:
 def _is_simple_gratitude(text: str) -> bool:
     """Check if message is just a simple thanks or acknowledgment."""
     msg = text.lower().strip()
-    courtesy_words = ["grazie", "grazie mille", "thanks", "thank you", "ok", "chiaro", "perfetto", "top", "good luck", "buona giornata", "ottimo", "capito", "d'accordo", "condivido", "👍", "🙏", "🤝"]
-    if len(msg) < 35 and any(cw in msg for cw in courtesy_words):
+    if any(q in msg for q in ["?", "cosa", "come", "quanto", "perch", "target", "prezzo", "consigli", "chiuso", "aperto", "entr", "view on"]):
+        return False
+    courtesy_words = ["grazie", "grazie mille", "thanks", "thank you", "ok", "chiaro", "perfetto", "top", "good luck", "buona giornata", "complimenti", "ottimo", "capito", "d'accordo", "condivido", "a presto", "buon trading", "👍", "🙏", "🤝"]
+    if len(msg) < 45 and any(cw in msg for cw in courtesy_words):
         return True
     return False
+
+
+# ─── Andrea Ravalli Style Archive & Few-Shot Learning ──────────────────────────
+
+DEFAULT_ANDREA_STYLE_SEEDS = [
+    {
+        "id": "seed_dca_strategy_it",
+        "user_comment": "Ha senso entrare adesso con tutto il capitale o meglio fare un PAC?",
+        "andrea_reply": "Ciao @utente! Con la nostra strategia a Risk Score 3/10 e orizzonte pluriennale, suggerisco sempre un approccio graduale tramite Dollar-Cost Averaging (DCA). Dividere il capitale in ingressi periodici ti permette di non preoccuparti del timing di breve termine e di sfruttare la volatilità come alleata. Un caro saluto e buon trading! 📈🤝",
+        "language": "it",
+        "source": "seed"
+    },
+    {
+        "id": "seed_nvda_blackwell_it",
+        "user_comment": "Cosa ne pensi del ritracciamento di NVIDIA? Conviene tenere?",
+        "andrea_reply": "Grazie per la domanda, @utente! Prese di profitto dopo rally importanti sono del tutto fisiologiche. La nostra tesi su $NVDA rimane intatta: la domanda per l'architettura Blackwell e i piani di Capex dei giganti del cloud rimangono solidissimi per i prossimi 3-5 anni. Manteniamo la posizione con disciplina senza farci condizionare dal rumore di breve termine. 🚀📊",
+        "language": "it",
+        "source": "seed"
+    },
+    {
+        "id": "seed_copy_minimum_it",
+        "user_comment": "Quanto capitale consigli per iniziare a copiare il portafoglio?",
+        "andrea_reply": "Ciao @utente! Il minimo per copiare su eToro è di 200$, ma per replicare fedelmente tutti i 40 titoli del portafoglio e ricevere le quote frazionate di ogni dividendo suggerisco di partire da almeno 500$-1000$, impostando l'opzione di copiare i trade aperti. Un caro saluto e benvenuto a bordo! 🤝✨",
+        "language": "it",
+        "source": "seed"
+    },
+    {
+        "id": "seed_cameco_energy_en",
+        "user_comment": "Why are you holding Cameco and Prysmian in the portfolio?",
+        "andrea_reply": "Hi @user! Great question. Cameco ($CCJ) and Prysmian ($PRY.MI) represent two foundational pillars of our infrastructure thesis: 24/7 carbon-free nuclear baseload and global high-voltage grid electrification, both driven by massive datacenter energy demands. We are positioned for multi-year structural growth with 0 leverage. Wishing you the best in your trading! 📈🤝",
+        "language": "en",
+        "source": "seed"
+    },
+    {
+        "id": "seed_palantir_valuation_it",
+        "user_comment": "Palantir non ti sembra troppo cara a questi multipli?",
+        "andrea_reply": "Ottimo punto, @utente! I multipli di $PLTR sono certamente elevati se confrontati con il software tradizionale, ma la crescita di AIP (Artificial Intelligence Platform) e l'espansione dei contratti commerciali USA confermano un pricing power quasi monopolistico. Gestiamo la posizione con un peso ponderato per beneficiare del rialzo proteggendo il capitale con il nostro Risk 3/10. Un saluto cordiale! 🛡️📊",
+        "language": "it",
+        "source": "seed"
+    }
+]
+
+
+def load_andrea_style_archive() -> List[Dict[str, Any]]:
+    """
+    Loads authentic Andrea Ravalli replies from Gist storage.
+    If Gist is empty, returns the high-quality seed dataset.
+    """
+    archive = []
+    try:
+        gist_archive = gist_storage.get_andrea_style_archive()
+        if gist_archive and isinstance(gist_archive, list):
+            archive.extend(gist_archive)
+    except Exception as e:
+        print(f"⚠️ Warning loading style archive from Gist: {e}")
+
+    # Fallback to seeds if empty
+    if not archive:
+        archive = list(DEFAULT_ANDREA_STYLE_SEEDS)
+
+    return archive
+
+
+def format_style_examples_for_prompt(
+    user_comment: str,
+    lang: str = "it",
+    relevant_tickers: Optional[List[str]] = None,
+    max_examples: int = 3
+) -> str:
+    """
+    Formats the most relevant authentic replies written by Andrea Ravalli
+    into a structured few-shot prompt block.
+    """
+    archive = load_andrea_style_archive()
+    if not archive:
+        return ""
+
+    # Filter by language
+    matching = [r for r in archive if r.get("language", "it") == lang]
+    if not matching:
+        matching = archive
+
+    # Score by relevance to user query
+    user_lower = user_comment.lower()
+    tickers = [t.lower().replace('$', '') for t in (relevant_tickers or [])]
+
+    scored = []
+    for item in matching:
+        score = 0
+        q_text = item.get("user_comment", "").lower()
+        r_text = item.get("andrea_reply", "").lower()
+
+        # Check ticker matches
+        for t in tickers:
+            if t in q_text or t in r_text:
+                score += 5
+
+        # Check keyword matches
+        for kw in ["pac", "dca", "copi", "copy", "leva", "leverage", "blackwell", "capex", "divid", "multipl", "risk", "rischio", "cameco", "pltr", "nvda"]:
+            if kw in user_lower and (kw in q_text or kw in r_text):
+                score += 3
+
+        scored.append((score, item))
+
+    # Sort descending by score
+    scored.sort(key=lambda x: x[0], reverse=True)
+    selected = [item for _, item in scored[:max_examples]]
+
+    lines = [
+        "────────────────────────────────────────────────────────────",
+        "AUTHENTIC ANDREA RAVALLI WRITING STYLE & VOICE (FEW-SHOT EXAMPLES):",
+        "Adopt Andrea's exact tone, polite structure, greetings, and closing signatures:",
+    ]
+
+    for idx, ex in enumerate(selected, 1):
+        q = ex.get("user_comment", "").strip()
+        r = ex.get("andrea_reply", "").strip()
+        lines.append(f"\n[Style Example {idx}]")
+        lines.append(f"User Comment: \"{q}\"")
+        lines.append(f"Andrea's Authentic Reply:\n\"{r}\"")
+
+    lines.append("────────────────────────────────────────────────────────────\n")
+    return "\n".join(lines)
+
+
+def harvest_andrea_replies_to_archive(days_back: int = 30, my_username: str = "AndreaRavalli") -> int:
+    """
+    Scans published posts and harvests replies personally authored by Andrea Ravalli,
+    saving them into the persistent Gist style archive.
+    """
+    if not etoro_client.is_configured():
+        return 0
+
+    posts = []
+    try:
+        posts_candidates = []
+        local_path = os.path.join(DATA_DIR, "post_analytics.json")
+        if os.path.exists(local_path):
+            with open(local_path, "r", encoding="utf-8") as f:
+                posts_candidates.extend(json.load(f).get("posts", []))
+        gist_data = gist_storage.load_data()
+        posts_candidates.extend(gist_data.get("published_posts", []))
+        for p in posts_candidates:
+            pid = p.get("id") or p.get("post_id")
+            if pid and pid not in [x.get("id") for x in posts]:
+                posts.append(p)
+    except Exception:
+        pass
+
+    harvested = []
+    for p in posts:
+        pid = p.get("id") or p.get("post_id")
+        if not pid:
+            continue
+        comments = etoro_client.get_post_comments(pid)
+        for c in comments:
+            cid, owner, text, is_self, replies = _extract_comment_details(c, my_username=my_username)
+            if not replies:
+                replies = etoro_client.get_comment_replies(pid, cid)
+            for r in replies:
+                rid, r_owner, r_text, r_is_self, _ = _extract_comment_details(r, my_username=my_username)
+                if (r_is_self or (r_owner and r_owner.lower() == my_username.lower())) and len(r_text) > 20:
+                    lang = _detect_language(r_text)
+                    harvested.append({
+                        "id": f"harvested_{rid}",
+                        "post_id": pid,
+                        "user_comment": text,
+                        "andrea_reply": r_text,
+                        "language": lang,
+                        "source": "harvested_etoro"
+                    })
+
+    if harvested:
+        added = gist_storage.upsert_andrea_style_replies(harvested)
+        return added
+    return 0
 
 
 def validate_response_syntax(text: str, user_author: str, is_follow_up_or_short: bool = False) -> Tuple[bool, str, str]:
@@ -413,8 +591,8 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
     """Intelligent, topic-specific certified fallback when AI API is unavailable."""
     msg_lower = _extract_text(user_comment).lower()
 
-    # 0. If it's a follow-up or simple thank-you, conclude warmly
-    if is_follow_up or _is_simple_gratitude(msg_lower):
+    # 0. If it's a simple thank-you or courtesy acknowledgment, conclude warmly
+    if _is_simple_gratitude(msg_lower):
         if lang == "en":
             return (
                 f"You're very welcome, @{user_author}! 🤝\n\n"
@@ -548,7 +726,7 @@ def generate_ai_comment_reply(
     lang = _detect_language(clean_text)
 
     # Short courtesy check
-    if _is_simple_gratitude(clean_text) or is_follow_up:
+    if _is_simple_gratitude(clean_text):
         if lang == "en":
             return f"You're very welcome, @{user_author}! Wishing you all the best in life and trading! 📈🤝"
         else:
@@ -557,8 +735,12 @@ def generate_ai_comment_reply(
     tickers_str = ", ".join(relevant_tickers) if relevant_tickers else "General Tech & Multi-Asset"
     context_snippet = f"Original Post Context: {post_context[:300]}..." if post_context else "General Portfolio Post"
 
+    few_shot_block = format_style_examples_for_prompt(clean_text, lang=lang, relevant_tickers=relevant_tickers)
+
     prompt = f"""
 {PORTFOLIO_SYSTEM_PROMPT}
+
+{few_shot_block}
 
 TASK:
 Draft a professional, complete reply to this eToro community user comment:
@@ -628,19 +810,34 @@ CRITICAL RULES:
     return _build_contextual_fallback(clean_text, user_author, relevant_tickers or [], lang, is_follow_up=is_follow_up)
 
 
-def _extract_comment_details(c: Dict[str, Any]) -> Tuple[str, str, str, bool, List[Dict[str, Any]]]:
+def _extract_comment_details(c: Dict[str, Any], my_username: str = "AndreaRavalli") -> Tuple[str, str, str, bool, List[Dict[str, Any]]]:
     """Helper to extract (comment_id, author_username, text, is_author_self, replies) across eToro JSON formats."""
-    c_id = str(c.get("id") or c.get("entity", {}).get("id") or "")
-    owner_dict = c.get("owner") or c.get("entity", {}).get("owner") or {}
-    owner_username = owner_dict.get("username", "") or c.get("username", "")
+    c_id = str(c.get("id") or c.get("commentId") or c.get("entity", {}).get("id") or "")
+    owner_dict = c.get("owner") or c.get("user") or c.get("author") or c.get("entity", {}).get("owner") or {}
+    owner_username = (
+        owner_dict.get("username")
+        or owner_dict.get("userName")
+        or c.get("username")
+        or c.get("userName")
+        or ""
+    )
 
-    raw_text = c.get("message") or c.get("content") or c.get("entity", {}).get("content") or c.get("entity", {}).get("message") or c.get("text") or ""
+    raw_text = (
+        c.get("message")
+        or c.get("content")
+        or c.get("text")
+        or c.get("entity", {}).get("content")
+        or c.get("entity", {}).get("message")
+        or ""
+    )
     text = _extract_text(raw_text)
 
-    is_owner = c.get("requesterContext", {}).get("isOwner", False)
-    if owner_username.lower() == "andrearavalli":
-        is_owner = True
+    # Strictly check username to determine if it was posted by Andrea
+    is_owner = bool(owner_username and owner_username.strip().lower() == my_username.strip().lower())
+    
     replies = c.get("replies") or c.get("entity", {}).get("replies") or []
+    if isinstance(replies, dict):
+        replies = replies.get("items", []) or replies.get("comments", []) or []
     return c_id, owner_username, text, is_owner, replies
 
 
@@ -778,6 +975,7 @@ def find_unreplied_comments(
         if not post_id:
             continue
 
+        time.sleep(0.3)  # Gentle delay to prevent eToro API HTTP 429 rate limit
         raw_comments = etoro_client.get_post_comments(post_id)
         if not raw_comments:
             continue
@@ -785,25 +983,21 @@ def find_unreplied_comments(
         total_comments_scanned += len(raw_comments)
 
         for c in raw_comments:
-            c_id, owner, c_text, is_self, replies = _extract_comment_details(c)
+            c_id, owner, c_text, is_self, replies = _extract_comment_details(c, my_username=my_username)
 
-            if is_self or not owner or owner.lower() == my_username.lower():
+            if is_self or (owner and owner.lower() == my_username.lower()):
                 continue
+
+            if not owner:
+                owner = "Utente"
 
             total_user_comments_found += 1
 
-            # Fetch live replies for this comment sub-resource
-            live_replies = etoro_client.get_comment_replies(post_id, c_id)
-            if live_replies:
-                replies = live_replies
-
-            # Automatically cleanup duplicate replies if present
-            cleanup_duplicate_replies(post_id, c_id, my_username=my_username)
-
-            # Re-read replies after potential cleanup
-            live_replies = etoro_client.get_comment_replies(post_id, c_id)
-            if live_replies:
-                replies = live_replies
+            # Fetch live replies for this comment sub-resource if not already present
+            if not replies:
+                live_replies = etoro_client.get_comment_replies(post_id, c_id)
+                if live_replies:
+                    replies = live_replies
 
             # ── Thread Turn & Depth Inspection ────────────────────────────────
             my_replies_count = 0
@@ -813,7 +1007,7 @@ def find_unreplied_comments(
             has_subsequent_user_reply = False
 
             for r in replies:
-                _, r_owner, r_text, r_is_self, _ = _extract_comment_details(r)
+                _, r_owner, r_text, r_is_self, _ = _extract_comment_details(r, my_username=my_username)
                 if r_is_self or (r_owner and r_owner.lower() == my_username.lower()):
                     my_replies_count += 1
                     last_reply_by_me = True
