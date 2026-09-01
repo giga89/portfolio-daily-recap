@@ -15,7 +15,9 @@ from ai_comment_responder import (
     _build_contextual_fallback,
     _detect_language,
     _is_simple_gratitude,
-    generate_ai_comment_reply
+    generate_ai_comment_reply,
+    is_third_party_mention,
+    is_ignore_or_opt_out
 )
 
 
@@ -104,6 +106,25 @@ class TestAICommentValidator(unittest.TestCase):
         """Should detect Italian and English accurately."""
         self.assertEqual(_detect_language("What do you think about the pullback in tech?"), "en")
         self.assertEqual(_detect_language("Cosa ne pensi del ritracciamento del settore tech?"), "it")
+
+    def test_third_party_mention_filter(self):
+        """Comments addressed to other users must be recognized as third party."""
+        self.assertTrue(is_third_party_mention("@xm49fvqjtm 🤔"))
+        self.assertTrue(is_third_party_mention("@Marcofree79 ma volevi una risposta da me?"))
+        self.assertFalse(is_third_party_mention("@AndreaRavalli cosa ne pensi di Nvidia?"))
+        self.assertFalse(is_third_party_mention("@andrearavalli come vedi i mercati?"))
+        self.assertFalse(is_third_party_mention("Cosa ne pensi di NVDA?"))
+
+    def test_ignore_or_opt_out_filter(self):
+        """Pure emojis or opt-out phrases must be ignored."""
+        self.assertTrue(is_ignore_or_opt_out("🤔"))
+        self.assertTrue(is_ignore_or_opt_out("👍"))
+        self.assertTrue(is_ignore_or_opt_out("@xm49fvqjtm 🤔"))
+        self.assertTrue(is_ignore_or_opt_out("@AndreaRavalli non era rivolto a te il mio emoji."))
+        self.assertTrue(is_ignore_or_opt_out("non era per te"))
+        self.assertTrue(is_ignore_or_opt_out("non parlavo con te"))
+        self.assertFalse(is_ignore_or_opt_out("Come vedi il titolo Cameco nel lungo periodo?"))
+        self.assertFalse(is_ignore_or_opt_out("@AndreaRavalli hai notizie su Palantir?"))
 
 
 if __name__ == "__main__":

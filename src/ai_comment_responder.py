@@ -810,6 +810,64 @@ CRITICAL RULES:
     return _build_contextual_fallback(clean_text, user_author, relevant_tickers or [], lang, is_follow_up=is_follow_up)
 
 
+def is_third_party_mention(text: str, my_username: str = "AndreaRavalli") -> bool:
+    """
+    Check if a comment starts by tagging another user (e.g. '@xm49fvqjtm ...')
+    and is not addressed to Andrea Ravalli.
+    """
+    clean = _extract_text(text).strip()
+    if not clean.startswith('@'):
+        return False
+
+    match = re.match(r'^@([a-zA-Z0-9_.-]+)', clean)
+    if not match:
+        return False
+
+    tagged_user = match.group(1).lower()
+    self_names = [my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"]
+    return tagged_user not in self_names
+
+
+def is_ignore_or_opt_out(text: str) -> bool:
+    """
+    Check if a comment is purely emojis, non-verbal, or an explicit opt-out
+    (e.g. 'non era rivolto a te', 'non parlavo con te', '👍', '🤔').
+    """
+    clean = _extract_text(text).strip()
+    if not clean:
+        return True
+
+    # Strip leading @mentions
+    stripped = re.sub(r'^(@[a-zA-Z0-9_.-]+\s*)+', '', clean).strip()
+    if not stripped:
+        return True
+
+    # Opt-out / dismissal phrases
+    opt_out_phrases = [
+        "non era rivolto a te",
+        "non era per te",
+        "non parlavo con te",
+        "non mi riferivo a te",
+        "non a te",
+        "sbagliato persona",
+        "not for you",
+        "not talking to you",
+        "not meant for you",
+        "stop",
+    ]
+    stripped_lower = stripped.lower()
+    for phrase in opt_out_phrases:
+        if phrase in stripped_lower:
+            return True
+
+    # Check if text contains only emojis/symbols and no letters or numbers
+    has_alphanumeric = bool(re.search(r'[a-zA-Z0-9]', stripped))
+    if not has_alphanumeric:
+        return True
+
+    return False
+
+
 def _extract_comment_details(c: Dict[str, Any], my_username: str = "AndreaRavalli") -> Tuple[str, str, str, bool, List[Dict[str, Any]]]:
     """Helper to extract (comment_id, author_username, text, is_author_self, replies) across eToro JSON formats."""
     c_id = str(c.get("id") or c.get("commentId") or c.get("entity", {}).get("id") or "")
@@ -852,19 +910,23 @@ def _extract_comment_details(c: Dict[str, Any], my_username: str = "AndreaRavall
     )
     text = _extract_text(raw_text)
 
-    # Strictly check username to determine if it was posted by Andrea
+    # Strictly check username and self flags to determine if it was posted by Andrea
+    is_self_flag = bool(c.get("isSelf") or c.get("isMyComment") or c.get("isAuthor") or c.get("isOwner"))
     is_owner = bool(
-        owner_username
-        and (
-            owner_username.lower() in [
-                my_username.lower(),
-                "andrearavalli",
-                "andrea ravalli",
-                "andrea",
-            ]
+        is_self_flag
+        or (
+            owner_username
+            and (
+                owner_username.lower() in [
+                    my_username.lower(),
+                    "andrearavalli",
+                    "andrea ravalli",
+                    "andrea",
+                ]
+            )
         )
     )
-    
+
     replies = c.get("replies") or c.get("entity", {}).get("replies") or []
     if isinstance(replies, dict):
         replies = replies.get("items", []) or replies.get("comments", []) or []
@@ -941,7 +1003,7 @@ def find_unreplied_comments(
 ) -> List[Dict[str, Any]]:
     """
     Scans posts published within the last `days_back` days (default: 7) and returns
-    comments by other users needing a reply (max 1-2 turns per thread).
+    comments by other users needing a reply (STRICT 1-shot: max 1 reply per thread, no loops/duplicates).
     """
     unreplied = []
 
@@ -1016,82 +1078,66 @@ def find_unreplied_comments(
             c_id, owner, c_text, is_self, replies = _extract_comment_details(c, my_username=my_username)
             print(f"🔎 Commento {c_id[:8]} su post {post_id[:8]}: autore='{owner}' | is_self={is_self} | testo='{c_text[:35]}...' | replies={len(replies)}")
 
+            # 1. Skip if this is Andrea's own root comment
+            if is_self or (owner and owner.lower() in [my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"]):
+                continue
+
+            # 2. Strict check: already answered in persistent storage -> SKIP
+            if c_id in answered_db:
+                print(f"ℹ️ Commento {c_id[:8]} da @{owner} già evaso in memoria persistente.")
+                continue
+
             # Fetch live replies if not embedded
             if not replies:
                 live_replies = etoro_client.get_comment_replies(post_id, c_id)
                 if live_replies:
                     replies = live_replies
 
-            # If the root comment is from Andrea AND there are no replies, nothing to do
-            is_root_self = bool(is_self or (owner and owner.lower() in [my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"]))
-            if is_root_self and not replies:
+            # 3. Check if Andrea has already replied anywhere in the thread (immediate or subsequent)
+            has_my_reply = False
+            for r in replies:
+                _, r_owner, _, r_is_self, _ = _extract_comment_details(r, my_username=my_username)
+                if r_is_self or (r_owner and r_owner.lower() in [my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"]):
+                    has_my_reply = True
+                    break
+
+            if has_my_reply:
+                # Mark in persistent storage to avoid re-fetching replies on future runs
+                record_answered_comment(c_id, post_id, owner)
+                print(f"ℹ️ Commento {c_id[:8]} da @{owner}: già presente una risposta di Andrea nel thread. Skip.")
                 continue
 
-            # Count turns & find the last speaker in the sub-thread
-            my_replies_count = 1 if is_root_self else 0
-            last_reply_by_me = is_root_self
-            last_user_message = c_text if not is_root_self else ""
-            last_user_author = owner if not is_root_self else ""
-            has_subsequent_user_reply = False
+            # 4. Filter third-party tag mentions (e.g. '@someone_else ...')
+            if is_third_party_mention(c_text, my_username=my_username):
+                record_answered_comment(c_id, post_id, owner)
+                print(f"ℹ️ Commento {c_id[:8]} da @{owner} rivolto a terzi. Skip.")
+                continue
 
-            for r in replies:
-                _, r_owner, r_text, r_is_self, _ = _extract_comment_details(r, my_username=my_username)
-                if r_is_self or (r_owner and r_owner.lower() in [my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"]):
-                    my_replies_count += 1
-                    last_reply_by_me = True
-                else:
-                    last_reply_by_me = False
-                    has_subsequent_user_reply = True
-                    if r_text:
-                        last_user_message = r_text
-                    if r_owner:
-                        last_user_author = r_owner
-
-            # If there was never any user comment in this entire sub-thread, skip
-            if not last_user_author or last_user_author.lower() in [my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"] or not last_user_message:
+            # 5. Filter pure emojis / non-verbal / opt-out comments
+            if is_ignore_or_opt_out(c_text):
+                record_answered_comment(c_id, post_id, owner)
+                print(f"ℹ️ Commento {c_id[:8]} da @{owner} è un'emoji o opt-out. Skip.")
                 continue
 
             total_user_comments_found += 1
 
-            # STRICT PERSISTENT MEMORY CHECK:
-            # If this root comment was already answered in persistent DB:
-            # We ONLY answer if the user sent an explicit subsequent reply in the sub-thread.
-            if c_id in answered_db:
-                if not has_subsequent_user_reply or last_reply_by_me:
-                    print(f"ℹ️ Commento {c_id[:8]} da @{last_user_author} già evaso in memoria persistente.")
-                    continue
-
-            # Rule 1: If we have already replied in this sub-thread and we had the last word, STOP.
-            if last_reply_by_me:
-                record_answered_comment(c_id, post_id, last_user_author)
-                print(f"ℹ️ Commento {c_id[:8]} da @{last_user_author}: ultima risposta già nostra ({my_replies_count} risposte).")
-                continue
-
-            # Rule 2: If we have already replied 2 or more times to this user in this sub-thread, STOP.
-            max_allowed_replies = 3 if is_root_self else 2
-            if my_replies_count >= max_allowed_replies:
-                continue
-
-            # Rule 3: Determine if this is a follow-up (turn >= 2)
-            is_follow_up = (my_replies_count >= 1 and not is_root_self) or (my_replies_count >= 2 and is_root_self)
-
-            print(f"🎯 Trovato commento da rispondere! @{last_user_author} su post {post_id[:8]}: \"{last_user_message[:50]}...\" (turn={my_replies_count + 1})")
+            print(f"🎯 Trovato commento da rispondere! @{owner} su post {post_id[:8]}: \"{c_text[:50]}...\"")
 
             unreplied.append({
                 "post_id": post_id,
                 "comment_id": c_id,
-                "author": last_user_author,
-                "message": last_user_message,
+                "author": owner,
+                "message": c_text,
                 "post_title": p.get("title") or p.get("session_name") or "Post Recap",
                 "session_name": p.get("session") or p.get("session_name") or "",
                 "tickers": p.get("tickers", []),
                 "published_at": p.get("published_at") or "",
                 "created_at": c.get("created") or c.get("createdAt") or "",
-                "is_follow_up": is_follow_up,
-                "turn": my_replies_count + 1
+                "is_follow_up": False,
+                "turn": 1
             })
 
-    print(f"📊 Statistiche scansione: {total_comments_scanned} commenti totali esaminati | {total_user_comments_found} commenti di utenti esterni | {len(unreplied)} in attesa di risposta.")
+    print(f"📊 Statistiche scansione: {total_comments_scanned} commenti totali esaminati | {total_user_comments_found} commenti idonei di utenti esterni | {len(unreplied)} in attesa di risposta.")
 
     return unreplied
 
