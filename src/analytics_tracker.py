@@ -41,6 +41,7 @@ ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
 DOCS_ASSETS_DIR = os.path.join(DOCS_DIR, "assets")
 
 MONTHLY_RETURNS = {
+    "2026": {"Jan": 2.47, "Feb": -1.19, "Mar": -3.52, "Apr": 8.99, "May": 2.58, "Jun": -4.04, "Jul": 0.95, "Aug": 3.95, "Sep": None, "Oct": None, "Nov": None, "Dec": None, "Total": 9.97},
     "2026": {"Jan": 2.47, "Feb": -1.19, "Mar": -3.52, "Apr": 8.99, "May": 2.58, "Jun": -4.04, "Jul": 0.95, "Aug": 3.45, "Sep": None, "Oct": None, "Nov": None, "Dec": None, "Total": 9.45},
     "2025": {"Jan": 3.59, "Feb": -2.47, "Mar": -2.57, "Apr": 3.18, "May": 6.99, "Jun": 5.44, "Jul": 3.71, "Aug": 3.83, "Sep": 3.39, "Oct": 2.20, "Nov": -2.25, "Dec": 0.91, "Total": 28.59},
     "2024": {"Jan": -0.43, "Feb": 3.99, "Mar": 1.10, "Apr": -1.51, "May": 4.16, "Jun": 1.44, "Jul": 1.50, "Aug": 3.98, "Sep": 2.25, "Oct": -0.25, "Nov": 4.87, "Dec": 1.77, "Total": 25.13},
@@ -318,6 +319,7 @@ SEASONALITY_DATA = {
     "May": 1.70,
     "Jun": 0.29,
     "Jul": 3.01,
+    "Aug": 3.76,
     "Aug": 3.54,
     "Sep": -2.54,
     "Oct": 0.69,
@@ -626,6 +628,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     next_divs_json = json.dumps(NEXT_DIVIDENDS, ensure_ascii=False)
     drawdowns_json = json.dumps(HISTORICAL_DRAWDOWNS, ensure_ascii=False)
     correlation_json = json.dumps(CORRELATION_CLUSTERS, ensure_ascii=False)
+    seasonality_json = json.dumps(SEASONALITY_DATA, ensure_ascii=False)
     seasonality_data = compute_seasonality(monthly_data)
     seasonality_json = json.dumps(seasonality_data, ensure_ascii=False)
     current_year = datetime.now().year
@@ -2434,6 +2437,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     // ── Performance Chart (Annual vs Compound) ─────────────────────────────
     let perfChartInstance = null;
     const perfYears = ['2020', '2021', '2022', '2023', '2024', '2025', '2026 YTD'];
+    const arAnnual = [47.40, 16.26, -18.72, 20.76, 25.13, 28.59, 11.03];
     const spxAnnual = [18.4, 28.7, -18.1, 26.3, 25.0, 16.5, 9.2];
     const msciAnnual = [15.9, 21.8, -17.7, 23.8, 20.5, 14.8, 8.5];
     const euAnnual = [-5.1, 21.0, -11.7, 19.2, 12.8, 11.5, 7.1];
@@ -2470,6 +2474,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             datasets: [
               {{
                 label: 'Andrea Ravalli (+200%)',
+                data: arAnnual,
                 data: getArAnnual(),
                 backgroundColor: 'rgba(19, 198, 54, 0.85)',
                 borderColor: '#13C636',
@@ -2518,6 +2523,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
           }}
         }});
       }} else {{
+        const arCum = [10000, 14740, 17137, 13929, 16821, 21048, 27065, 30050];
         const arCum = getArCumulative();
         const spxCum = [10000, 11840, 15238, 12479, 15761, 19701, 22951, 25062];
         const msciCum = [10000, 11590, 14116, 11617, 14381, 17329, 19893, 21583];
