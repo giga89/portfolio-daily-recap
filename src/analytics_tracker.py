@@ -28,7 +28,7 @@ and generates a state-of-the-art dual-hub portal for GitHub Pages (in full Engli
 import os
 import json
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 import etoro_client
 import gist_storage
@@ -41,7 +41,7 @@ ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
 DOCS_ASSETS_DIR = os.path.join(DOCS_DIR, "assets")
 
 MONTHLY_RETURNS = {
-    "2026": {"Jan": 2.47, "Feb": -1.19, "Mar": -3.52, "Apr": 8.99, "May": 2.58, "Jun": -4.04, "Jul": 0.95, "Aug": 4.95, "Sep": None, "Oct": None, "Nov": None, "Dec": None, "Total": 11.03},
+    "2026": {"Jan": 2.47, "Feb": -1.19, "Mar": -3.52, "Apr": 8.99, "May": 2.58, "Jun": -4.04, "Jul": 0.95, "Aug": 3.45, "Sep": None, "Oct": None, "Nov": None, "Dec": None, "Total": 9.45},
     "2025": {"Jan": 3.59, "Feb": -2.47, "Mar": -2.57, "Apr": 3.18, "May": 6.99, "Jun": 5.44, "Jul": 3.71, "Aug": 3.83, "Sep": 3.39, "Oct": 2.20, "Nov": -2.25, "Dec": 0.91, "Total": 28.59},
     "2024": {"Jan": -0.43, "Feb": 3.99, "Mar": 1.10, "Apr": -1.51, "May": 4.16, "Jun": 1.44, "Jul": 1.50, "Aug": 3.98, "Sep": 2.25, "Oct": -0.25, "Nov": 4.87, "Dec": 1.77, "Total": 25.13},
     "2023": {"Jan": 8.62, "Feb": -2.61, "Mar": 1.03, "Apr": -1.09, "May": 0.19, "Jun": 3.72, "Jul": 4.84, "Aug": -3.39, "Sep": -1.24, "Oct": -1.86, "Nov": 6.90, "Dec": 4.74, "Total": 20.76},
@@ -49,6 +49,132 @@ MONTHLY_RETURNS = {
     "2021": {"Jan": 15.02, "Feb": -0.87, "Mar": 8.67, "Apr": 6.12, "May": -9.45, "Jun": 3.47, "Jul": -4.26, "Aug": 6.61, "Sep": -6.80, "Oct": 6.76, "Nov": -3.90, "Dec": -3.33, "Total": 16.26},
     "2020": {"Jan": 3.68, "Feb": -9.71, "Mar": -18.05, "Apr": 20.82, "May": 4.69, "Jun": 0.06, "Jul": 9.47, "Aug": 11.40, "Sep": -4.69, "Oct": -3.36, "Nov": 27.53, "Dec": 5.98, "Total": 47.40}
 }
+
+
+def fetch_monthly_returns_matrix(start_year: int = 2020) -> Dict[str, Dict[str, Optional[float]]]:
+    """
+    Dynamically fetch and compute official monthly and annual returns matrix from eToro.
+    Prioritizes official eToro API, falls back to public userstats endpoint,
+    calculates real-time MTD for the active month, and falls back to default constants if offline.
+    """
+    import requests
+    months_map = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    curr_date = datetime.now()
+    curr_year = curr_date.year
+    curr_month_idx = curr_date.month - 1
+
+    # 1. Official eToro Public API (if configured with API credentials)
+    if etoro_client.is_configured():
+        try:
+            gain_data = etoro_client.fetch_gain_history(granularity="monthly")
+            if gain_data:
+                matrix: Dict[str, Dict[str, Any]] = {}
+                for y in range(start_year, curr_year + 1):
+                    matrix[str(y)] = {m: None for m in months_map}
+                    matrix[str(y)]["Total"] = 0.0
+
+                for entry in gain_data:
+                    date_str = str(entry.get("date", ""))
+                    if len(date_str) >= 7:
+                        year = date_str[:4]
+                        if int(year) >= start_year:
+                            m_idx = int(date_str[5:7]) - 1
+                            if 0 <= m_idx < 12:
+                                if year not in matrix:
+                                    matrix[year] = {m: None for m in months_map}
+                                    matrix[year]["Total"] = 0.0
+                                matrix[year][months_map[m_idx]] = round(float(entry.get("gain", 0.0)), 2)
+
+                # Compounding Total per year
+                for year, row in matrix.items():
+                    compound = 1.0
+                    has_val = False
+                    for m in months_map:
+                        val = row.get(m)
+                        if val is not None:
+                            compound *= (1.0 + float(val) / 100.0)
+                            has_val = True
+                    if has_val:
+                        row["Total"] = round((compound - 1.0) * 100.0, 2)
+
+                if matrix:
+                    print(f"✓ Fetched {len(matrix)} years of monthly returns via official eToro API")
+                    return matrix
+        except Exception as e:
+            print(f"⚠️ Error fetching monthly returns via official API: {e}")
+
+    # 2. Public eToro userstats endpoint fallback (reliable & publicly accessible)
+    try:
+        cid = 7743547
+        url = f"https://www.etoro.com/sapi/userstats/gain/cid/{cid}/history?IncludeSimulation=true"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "application/json",
+        }
+        resp = requests.get(url, headers=headers, timeout=15)
+        if resp.status_code == 200:
+            stats_data = resp.json()
+            matrix: Dict[str, Dict[str, Any]] = {}
+            for y in range(start_year, curr_year + 1):
+                matrix[str(y)] = {m: None for m in months_map}
+                matrix[str(y)]["Total"] = 0.0
+
+            for entry in stats_data.get("monthly", []):
+                start = entry.get("start", "")
+                if len(start) >= 7:
+                    year = start[:4]
+                    if int(year) >= start_year:
+                        m_idx = int(start[5:7]) - 1
+                        if 0 <= m_idx < 12:
+                            if year not in matrix:
+                                matrix[year] = {m: None for m in months_map}
+                                matrix[year]["Total"] = 0.0
+                            matrix[year][months_map[m_idx]] = round(float(entry.get("gain", 0.0)), 2)
+
+            yearly_map = {}
+            for entry in stats_data.get("yearly", []):
+                start = entry.get("start", "")
+                if len(start) >= 4:
+                    yearly_map[start[:4]] = round(float(entry.get("gain", 0.0)), 2)
+
+            # Check if current month in current year needs MTD estimation from YTD
+            curr_year_str = str(curr_year)
+            if curr_year_str in matrix:
+                curr_month_name = months_map[curr_month_idx]
+                if matrix[curr_year_str][curr_month_name] is None and curr_year_str in yearly_map:
+                    prev_comp = 1.0
+                    for idx in range(curr_month_idx):
+                        m_val = matrix[curr_year_str][months_map[idx]]
+                        if m_val is not None:
+                            prev_comp *= (1.0 + float(m_val) / 100.0)
+                    ytd_val = yearly_map[curr_year_str]
+                    if prev_comp > 0:
+                        mtd_val = round(((1.0 + ytd_val / 100.0) / prev_comp - 1.0) * 100.0, 2)
+                        if abs(mtd_val) >= 0.01:
+                            matrix[curr_year_str][curr_month_name] = mtd_val
+
+            for year, row in matrix.items():
+                if year in yearly_map:
+                    row["Total"] = yearly_map[year]
+                else:
+                    compound = 1.0
+                    has_val = False
+                    for m in months_map:
+                        val = row.get(m)
+                        if val is not None:
+                            compound *= (1.0 + float(val) / 100.0)
+                            has_val = True
+                    if has_val:
+                        row["Total"] = round((compound - 1.0) * 100.0, 2)
+
+            if matrix:
+                print(f"✓ Fetched {len(matrix)} years of monthly returns via eToro userstats API")
+                return matrix
+    except Exception as e:
+        print(f"⚠️ Error fetching monthly returns via userstats API: {e}")
+
+    print("ℹ️ Using default cached MONTHLY_RETURNS")
+    return MONTHLY_RETURNS
 
 GAUGE_METRICS = [
     {
@@ -192,12 +318,23 @@ SEASONALITY_DATA = {
     "May": 1.70,
     "Jun": 0.29,
     "Jul": 3.01,
-    "Aug": 3.76,
+    "Aug": 3.54,
     "Sep": -2.54,
     "Oct": 0.69,
     "Nov": 6.41,
     "Dec": 0.88
 }
+
+
+def compute_seasonality(monthly_data: Dict[str, Dict[str, Optional[float]]]) -> Dict[str, float]:
+    """Dynamically compute average historical monthly returns across all years."""
+    months_map = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    seasonality = {}
+    for mon in months_map:
+        vals = [monthly_data[y][mon] for y in monthly_data if monthly_data.get(y, {}).get(mon) is not None]
+        seasonality[mon] = round(sum(vals) / len(vals), 2) if vals else 0.0
+    return seasonality
+
 
 HOLDINGS_DATA = [
     # ── US Tech & AI Megatrend ───────────────────────────────────────────────
@@ -266,7 +403,7 @@ def load_local_analytics() -> Dict[str, Any]:
             print(f"⚠️ Error reading local analytics file: {e}")
 
     return {
-        "last_updated": datetime.utcnow().isoformat(),
+        "last_updated": datetime.now(timezone.utc).isoformat(),
         "posts": []
     }
 
@@ -274,7 +411,7 @@ def load_local_analytics() -> Dict[str, Any]:
 def save_local_analytics(data: Dict[str, Any]):
     """Save analytics database to local disk."""
     os.makedirs(os.path.dirname(ANALYTICS_FILE), exist_ok=True)
-    data["last_updated"] = datetime.utcnow().isoformat()
+    data["last_updated"] = datetime.now(timezone.utc).isoformat()
     with open(ANALYTICS_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
@@ -298,7 +435,7 @@ def record_post(
         if p.get("id") == post_id and p.get("platform") == platform:
             return
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     if not tickers:
         import re
         found = re.findall(r"\$([A-Z0-9]{2,6}(?:\.[A-Z]{2})?)", text)
@@ -343,7 +480,7 @@ def sync_etoro_metrics() -> Dict[str, Any]:
                 p["likes"] = metrics.get("likes", 0)
                 p["comments"] = metrics.get("comments", 0)
                 p["shares"] = metrics.get("shares", 0)
-                p["last_synced"] = datetime.utcnow().isoformat()
+                p["last_synced"] = datetime.now(timezone.utc).isoformat()
                 updated_count += 1
 
     data["posts"] = [p for p in posts if p.get("id") not in ["41f4c7dc-402a-4ce6-a7fe-49b819f074d2", "fb2dfe40-9d61-11f1-8080-800019b76646"]]
@@ -482,13 +619,16 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     posts_json = json.dumps(posts, ensure_ascii=False)
     insights_json = json.dumps(insights, ensure_ascii=False)
     holdings_json = json.dumps(HOLDINGS_DATA, ensure_ascii=False)
-    monthly_json = json.dumps(MONTHLY_RETURNS, ensure_ascii=False)
+    monthly_data = fetch_monthly_returns_matrix()
+    monthly_json = json.dumps(monthly_data, ensure_ascii=False)
     gauge_json = json.dumps(GAUGE_METRICS, ensure_ascii=False)
     div_breakdown_json = json.dumps(DIVIDEND_BREAKDOWN, ensure_ascii=False)
     next_divs_json = json.dumps(NEXT_DIVIDENDS, ensure_ascii=False)
     drawdowns_json = json.dumps(HISTORICAL_DRAWDOWNS, ensure_ascii=False)
     correlation_json = json.dumps(CORRELATION_CLUSTERS, ensure_ascii=False)
-    seasonality_json = json.dumps(SEASONALITY_DATA, ensure_ascii=False)
+    seasonality_data = compute_seasonality(monthly_data)
+    seasonality_json = json.dumps(seasonality_data, ensure_ascii=False)
+    current_year = datetime.now().year
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -1249,7 +1389,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <!-- Monthly Performance Heatmap Matrix -->
       <section class="monthly-matrix-card">
         <div class="section-title" style="margin-bottom: 16px;">
-          <span>📅 Monthly & Annual Track Record (2020 – 2026)</span>
+          <span>📅 Monthly & Annual Track Record (2020 – {current_year})</span>
           <span class="tag">Official Verified History</span>
         </div>
         <table class="matrix-table">
@@ -2294,10 +2434,29 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     // ── Performance Chart (Annual vs Compound) ─────────────────────────────
     let perfChartInstance = null;
     const perfYears = ['2020', '2021', '2022', '2023', '2024', '2025', '2026 YTD'];
-    const arAnnual = [47.40, 16.26, -18.72, 20.76, 25.13, 28.59, 11.03];
     const spxAnnual = [18.4, 28.7, -18.1, 26.3, 25.0, 16.5, 9.2];
     const msciAnnual = [15.9, 21.8, -17.7, 23.8, 20.5, 14.8, 8.5];
     const euAnnual = [-5.1, 21.0, -11.7, 19.2, 12.8, 11.5, 7.1];
+
+    function getArAnnual() {{
+      const baseYears = ['2020', '2021', '2022', '2023', '2024', '2025'];
+      const annual = baseYears.map(y => (monthlyData[y] && monthlyData[y].Total !== undefined) ? monthlyData[y].Total : 0);
+      if (monthlyData['2026'] && monthlyData['2026'].Total !== undefined) {{
+        annual.push(monthlyData['2026'].Total);
+      }}
+      return annual;
+    }}
+
+    function getArCumulative() {{
+      const annual = getArAnnual();
+      let running = 10000;
+      const cum = [10000];
+      annual.forEach(ret => {{
+        running = Math.round(running * (1 + ret / 100));
+        cum.push(running);
+      }});
+      return cum;
+    }}
 
     function renderPerfChart(mode = 'annual') {{
       const ctx = document.getElementById('perfChart').getContext('2d');
@@ -2311,7 +2470,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             datasets: [
               {{
                 label: 'Andrea Ravalli (+200%)',
-                data: arAnnual,
+                data: getArAnnual(),
                 backgroundColor: 'rgba(19, 198, 54, 0.85)',
                 borderColor: '#13C636',
                 borderWidth: 2,
@@ -2359,7 +2518,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
           }}
         }});
       }} else {{
-        const arCum = [10000, 14740, 17137, 13929, 16821, 21048, 27065, 30050];
+        const arCum = getArCumulative();
         const spxCum = [10000, 11840, 15238, 12479, 15761, 19701, 22951, 25062];
         const msciCum = [10000, 11590, 14116, 11617, 14381, 17329, 19893, 21583];
         const labelsCum = ['2020 Start', '2020 End', '2021', '2022', '2023', '2024', '2025', '2026 YTD'];
