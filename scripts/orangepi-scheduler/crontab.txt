@@ -66,3 +66,8 @@
 0 20 * * 0    /opt/portfolio-dispatch/dispatch.sh weekly_sun >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 0 21 * * 0    /opt/portfolio-dispatch/dispatch.sh weekly_sun >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
+# ── Nightly Dashboard & Metrics Sync (Daily at 02:00 CET) ────────────────────
+# 02:00 CEST = 00:00 UTC / 02:00 CET = 01:00 UTC
+0 0 * * *     /opt/portfolio-dispatch/dispatch.sh dashboard_sync >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
+

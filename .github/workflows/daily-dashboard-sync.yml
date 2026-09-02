@@ -1,0 +1,60 @@
+name: Nightly Dashboard & Portfolio Sync
+# ==============================================================================
+# Refreshes the GitHub Pages dashboard every night at 02:00 CEST / 01:00 CET (00:00 UTC).
+# Syncs live eToro post engagement, live monthly returns, risk metrics, and builds docs/index.html.
+# ==============================================================================
+
+on:
+  schedule:
+    # 00:00 UTC = 02:00 CEST (summer) / 01:00 CET (winter)
+    - cron: '0 0 * * *'
+  repository_dispatch:
+    types: [dashboard_sync, refresh_dashboard]
+  workflow_dispatch:
+
+jobs:
+  sync-dashboard:
+    runs-on: ubuntu-latest
+    environment: Etoro
+    permissions:
+      contents: write
+      pages: write
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Sync eToro Metrics & Rebuild Dashboard
+        env:
+          ETORO_USER_KEY: ${{ secrets.ETORO_USER_KEY }}
+          ETORO_API_KEY: ${{ secrets.ETORO_API_KEY }}
+          ETORO_USERNAME: ${{ secrets.ETORO_USERNAME || 'AndreaRavalli' }}
+          GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python src/analytics_tracker.py
+
+      - name: Commit & Push Updated Dashboard
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/ data/ 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "Dashboard is already up to date. No changes to commit."
+          else
+            git commit -m "chore(dashboard): nightly refresh of metrics & track record [skip ci]"
+            git push origin main || echo "Git push failed or branch protected"
+          fi

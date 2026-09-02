@@ -286,13 +286,13 @@ DIVIDEND_BREAKDOWN = [
 ]
 
 NEXT_DIVIDENDS = [
-    {"ticker": "MAU.PA", "type": "Ex-Dividend", "date": "Aug 25, 2026", "pay": "$0.45"},
-    {"ticker": "GLEN.L", "type": "Ex-Dividend", "date": "Aug 26, 2026", "pay": "$0.09"},
-    {"ticker": "MAU.PA", "type": "Pay Day", "date": "Aug 27, 2026", "pay": "$0.45"},
     {"ticker": "WMT", "type": "Pay Day", "date": "Sep 08, 2026", "pay": "$0.25"},
     {"ticker": "GLEN.L", "type": "Pay Day", "date": "Sep 18, 2026", "pay": "$0.09"},
     {"ticker": "ENI.MI", "type": "Pay Day", "date": "Sep 23, 2026", "pay": "$0.24"},
     {"ticker": "TRIG.L", "type": "Pay Day", "date": "Sep 30, 2026", "pay": "$0.07"},
+    {"ticker": "ABBV", "type": "Ex-Dividend", "date": "Oct 15, 2026", "pay": "$1.55"},
+    {"ticker": "ENEL.MI", "type": "Ex-Dividend", "date": "Oct 19, 2026", "pay": "$0.22"},
+    {"ticker": "ENEL.MI", "type": "Pay Day", "date": "Oct 21, 2026", "pay": "$0.22"},
 ]
 
 HISTORICAL_DRAWDOWNS = [

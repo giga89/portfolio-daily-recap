@@ -43,6 +43,7 @@ case "$SESSION" in
     us_close)              SESSION_NAME="U.S. market close" ;;
     weekly_sat)            SESSION_NAME="Weekly recap (Sat)" ;;
     weekly_sun)            SESSION_NAME="Weekly recap (Sun)" ;;
+    dashboard_sync)        SESSION_NAME="Daily Dashboard Sync" ;;
     *)
         echo "ERROR: Unknown session '$SESSION'" >&2
         exit 1
