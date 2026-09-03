@@ -216,6 +216,73 @@ DIVIDEND_PROFILES = {
     },
 }
 
+# Calendar mapping for dividend distribution ex-dates (month, approx_day, tranche_label)
+DIVIDEND_CALENDAR = {
+    "ENI.MI": [(3, 23, "Tranche 3"), (5, 20, "Saldo"), (9, 21, "Tranche 1"), (11, 20, "Tranche 2")],
+    "ENEL.MI": [(1, 22, "Acconto"), (7, 22, "Saldo")],
+    "WDEF.L": [(6, 15, "Semestrale H1"), (12, 15, "Semestrale H2")],
+    "SX7PEX.DE": [(6, 15, "Semestrale H1"), (12, 15, "Semestrale H2")],
+    "VOW3.DE": [(5, 25, "Annuale")],
+    "ABBV": [(1, 15, "Q1"), (4, 15, "Q2"), (7, 15, "Q3"), (10, 15, "Q4")],
+    "ABT.US": [(1, 14, "Q1"), (4, 14, "Q2"), (7, 14, "Q3"), (10, 14, "Q4")],
+    "AZN.L": [(2, 20, "Interim"), (8, 15, "Final")],
+    "GLEN.L": [(5, 10, "Tranche 1"), (9, 10, "Tranche 2")],
+    "TRIG.L": [(3, 15, "Q1"), (6, 15, "Q2"), (9, 15, "Q3"), (12, 15, "Q4")],
+    "ULVR.L": [(2, 20, "Q1"), (5, 20, "Q2"), (8, 20, "Q3"), (11, 20, "Q4")],
+    "WMT": [(3, 15, "Q1"), (5, 15, "Q2"), (8, 15, "Q3"), (12, 15, "Q4")],
+    "MSFT": [(2, 15, "Q1"), (5, 15, "Q2"), (8, 15, "Q3"), (11, 15, "Q4")],
+    "AVGO": [(3, 20, "Q1"), (6, 20, "Q2"), (9, 21, "Q3"), (12, 20, "Q4")],
+}
+
+
+def find_next_dividend_candidate(days_ahead: int = 25) -> Optional[Tuple[str, str, Dict[str, Any]]]:
+    """
+    Search across all portfolio dividend holdings for an upcoming ex-dividend date
+    within the next `days_ahead` days that has not yet been announced in Gist storage.
+    Returns: (ticker, cycle_key, candidate_info) or None
+    """
+    now = datetime.now(timezone.utc)
+    current_year = now.year
+    candidates = []
+
+    for ticker, dates in DIVIDEND_CALENDAR.items():
+        for month, day, tranche in dates:
+            # Check for ex-date in current year
+            try:
+                ex_date = datetime(current_year, month, day, tzinfo=timezone.utc)
+            except ValueError:
+                continue
+
+            delta_days = (ex_date - now).total_seconds() / 86400.0
+
+            # If the date has passed this year, check for early next year if near year end
+            if delta_days < -1:
+                try:
+                    ex_date = datetime(current_year + 1, month, day, tzinfo=timezone.utc)
+                    delta_days = (ex_date - now).total_seconds() / 86400.0
+                except ValueError:
+                    continue
+
+            # Check if within window (e.g. 0 to 25 days before ex-date)
+            if 0 <= delta_days <= days_ahead:
+                cycle_key = f"{ex_date.year}_{month}"
+                if not gist_storage.is_dividend_announced(ticker, cycle_key):
+                    candidates.append({
+                        "ticker": ticker,
+                        "cycle_key": cycle_key,
+                        "ex_date": ex_date,
+                        "delta_days": delta_days,
+                        "tranche": tranche,
+                    })
+
+    if not candidates:
+        return None
+
+    # Sort candidates by closest upcoming ex-date
+    candidates.sort(key=lambda c: c["delta_days"])
+    top = candidates[0]
+    return top["ticker"], top["cycle_key"], top
+
 
 def fetch_dynamic_dividend_metrics(ticker: str) -> Dict[str, Any]:
     """
@@ -434,9 +501,11 @@ def publish_dividend_post(
     ticker: str,
     weight_override: Optional[float] = None,
     dry_run: bool = False,
+    cycle_key: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Generate and publish a dedicated dividend announcement post to eToro & Telegram.
+    Attaches high-impact dividend infographic.
     """
     print("=" * 65)
     print(f"💰 DIVIDEND POST GENERATOR — Ticker: ${ticker}")
@@ -472,9 +541,25 @@ def publish_dividend_post(
     title, post_text = generate_dividend_post_text(calc_data)
     clean_text = _strip_html(post_text)
 
+    # Generate dedicated dividend infographic (e.g. ENI_DIVIDEND)
+    card_path = f"output/infographic_{ticker}_DIVIDEND.png"
+    try:
+        import stock_focus_infographic
+        card_key = f"{ticker}_DIVIDEND" if f"{ticker}_DIVIDEND" in stock_focus_infographic.COMPANY_INFOGRAPHICS else ticker
+        card_path = stock_focus_infographic.generate_stock_infographic(
+            ticker=card_key,
+            output_path=card_path,
+        )
+    except Exception as exc:
+        print(f"ℹ️ Dedicated dividend infographic fallback: {exc}")
+        if not os.path.exists(card_path):
+            card_path = None
+
     print("\n" + "-" * 55)
     print(f"📝 GENERATED DIVIDEND POST PREVIEW:\n")
     print(clean_text)
+    if card_path and os.path.exists(card_path):
+        print(f"🖼️ Attached Infographic: {card_path}")
     print("-" * 55 + "\n")
 
     if dry_run:
@@ -485,6 +570,7 @@ def publish_dividend_post(
             "ticker": ticker,
             "title": title,
             "text": clean_text,
+            "card_path": card_path,
         }
 
     results = {}
@@ -492,7 +578,10 @@ def publish_dividend_post(
     # 1. eToro Social Feed
     print("\n🐂 eToro Social Feed (Dividend Announcement):")
     if etoro_sender.etoro_client.is_configured():
-        ok_etoro = etoro_sender.send_etoro_post(text=clean_text)
+        ok_etoro = etoro_sender.send_etoro_post(
+            text=clean_text,
+            image_path=card_path if (card_path and os.path.exists(card_path)) else None,
+        )
         results["etoro_dividend_post"] = ok_etoro
         if ok_etoro and etoro_sender.LAST_PUBLISHED_POST_ID:
             gist_storage.save_last_etoro_post(
@@ -508,6 +597,11 @@ def publish_dividend_post(
                 image_type="dividend_card",
                 tickers=[ticker],
             )
+            # Mark dividend announced in Gist dedup storage
+            now_utc = datetime.now(timezone.utc)
+            actual_cycle = cycle_key or f"{now_utc.year}_{now_utc.month}"
+            gist_storage.mark_dividend_announced(ticker, actual_cycle, etoro_sender.LAST_PUBLISHED_POST_ID)
+            print(f"   🔒 Recorded dividend announcement dedup key: {ticker}_{actual_cycle}")
     else:
         print("   ⏭️  eToro not configured.")
         results["etoro_dividend_post"] = False
@@ -516,7 +610,10 @@ def publish_dividend_post(
     print("\n📨 Telegram (Dividend Announcement):")
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
         try:
-            telegram_sender.send_telegram_message(clean_text)
+            if card_path and os.path.exists(card_path) and hasattr(telegram_sender, "send_telegram_photo"):
+                telegram_sender.send_telegram_photo(card_path, caption=clean_text)
+            else:
+                telegram_sender.send_telegram_message(clean_text)
             print("   ✅ Dividend post sent to Telegram")
             results["telegram_dividend_post"] = True
         except Exception as e:
@@ -539,11 +636,24 @@ def publish_dividend_post(
 
 
 if __name__ == "__main__":
-    cli_ticker = "ENI.MI"
     cli_dry_run = "--dry-run" in sys.argv
+    cli_auto = "--auto" in sys.argv
+    cli_ticker = None
+
     for arg in sys.argv[1:]:
         if not arg.startswith("-"):
             cli_ticker = arg.upper().replace("$", "")
             break
 
-    publish_dividend_post(ticker=cli_ticker, dry_run=cli_dry_run)
+    if cli_auto or not cli_ticker or cli_ticker == "AUTO":
+        print("🤖 Autonomous Dividend Announcement Scan Mode...")
+        candidate = find_next_dividend_candidate(days_ahead=25)
+        if candidate:
+            target_ticker, c_key, c_info = candidate
+            print(f"🎯 Found upcoming dividend to announce: ${target_ticker} (Ex-date: {c_info['ex_date'].strftime('%d %B %Y')}, in {c_info['delta_days']:.1f} days, Tranche: {c_info['tranche']})")
+            publish_dividend_post(ticker=target_ticker, dry_run=cli_dry_run, cycle_key=c_key)
+        else:
+            print("ℹ️ No upcoming dividends within announcement window or all already announced. Exiting cleanly.")
+            sys.exit(0)
+    else:
+        publish_dividend_post(ticker=cli_ticker, dry_run=cli_dry_run)

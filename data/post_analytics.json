@@ -1,6 +1,27 @@
 {
-  "last_updated": "2026-09-03T20:05:28.670654+00:00",
+  "last_updated": "2026-09-03T20:50:26.500654+00:00",
   "posts": [
+    {
+      "id": "172b6de0-a7d9-11f1-8080-80004aafa515",
+      "platform": "etoro",
+      "session": "Stock focus",
+      "published_at": "2026-09-03T20:50:26Z",
+      "day_of_week": "Thursday",
+      "hour_utc": 20,
+      "hour_local": 22,
+      "title": "🚀 TRIMESTRALE RECORD PER BROADCOM: L'INFRASTRUTTURA AI ACCELERA  🔌  Ieri sera a...",
+      "tickers": [
+        "AVGO",
+        "NVDA",
+        "TSM",
+        "MRVL"
+      ],
+      "image_type": "stock_focus_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
     {
       "id": "a3b64c00-a7d2-11f1-8080-8001546c604e",
       "platform": "etoro",

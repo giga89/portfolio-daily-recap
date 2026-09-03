@@ -1,15 +1,18 @@
 name: Publish Dividend Announcement
 
 on:
+  # ── Automatic Scheduled Cron: Mon & Thu at 07:45 UTC (09:45 CET) ──
+  schedule:
+    - cron: '45 7 * * 1,4'
   repository_dispatch:
     types: [dividend_post, publish_dividend]
   workflow_dispatch:
     inputs:
       ticker:
-        description: 'Portfolio Ticker for Dividend Announcement (e.g. ENI.MI, WDEF.L, ABBV, VOW3.DE)'
-        required: true
+        description: 'Portfolio Ticker for Dividend Announcement (e.g. AUTO, ENI.MI, WDEF.L, ABBV)'
+        required: false
         type: string
-        default: 'ENI.MI'
+        default: 'AUTO'
       dry_run:
         description: 'Dry Run (preview post without publishing to eToro)'
         required: false
@@ -48,10 +51,16 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TICKER_INPUT: ${{ inputs.ticker || 'ENI.MI' }}
+          TICKER_INPUT: ${{ inputs.ticker || 'AUTO' }}
           DRY_RUN_INPUT: ${{ inputs.dry_run }}
         run: |
-          ARGS="${TICKER_INPUT}"
+          ARGS=""
+          TICKER="${TICKER_INPUT}"
+          if [ -n "$TICKER" ] && [ "$TICKER" != "AUTO" ]; then
+            ARGS="$TICKER"
+          else
+            ARGS="--auto"
+          fi
           if [ "$DRY_RUN_INPUT" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi

@@ -619,4 +619,36 @@ def upsert_andrea_style_replies(new_replies: list) -> int:
     return added_count
 
 
+# ---------------------------------------------------------------------------
+# Dividend Announcement Deduplication
+# ---------------------------------------------------------------------------
 
+def is_dividend_announced(ticker: str, cycle_key: str) -> bool:
+    """Check if a dividend announcement for ticker and cycle_key was already published."""
+    ticker = ticker.replace('$', '').upper().strip()
+    data = load_data()
+    announced = data.get('announced_dividends', {})
+    key = f"{ticker}_{cycle_key}"
+    return key in announced
+
+
+def mark_dividend_announced(
+    ticker: str,
+    cycle_key: str,
+    post_id: str = None,
+) -> bool:
+    """Record that a dividend was announced for a specific ticker and cycle."""
+    from datetime import datetime, timezone
+    ticker = ticker.replace('$', '').upper().strip()
+    data = load_data()
+    announced = data.get('announced_dividends', {})
+    key = f"{ticker}_{cycle_key}"
+    announced[key] = {
+        'ticker': ticker,
+        'cycle_key': cycle_key,
+        'post_id': str(post_id or ''),
+        'announced_at': datetime.now(timezone.utc).isoformat(),
+    }
+    data['announced_dividends'] = announced
+    _invalidate_cache()
+    return save_data(data)

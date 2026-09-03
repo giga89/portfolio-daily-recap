@@ -70,4 +70,7 @@
 # 02:00 CEST = 00:00 UTC / 02:00 CET = 01:00 UTC
 0 0 * * *     /opt/portfolio-dispatch/dispatch.sh dashboard_sync >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-
+# ── Dividend Announcement Check (Mon & Thu mornings) ───────────
+# 09:45 local (CET/CEST) → 07:45 UTC (summer) / 08:45 UTC (winter)
+45 7 * * 1,4   /opt/portfolio-dispatch/dispatch.sh dividend_post >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+45 8 * * 1,4   /opt/portfolio-dispatch/dispatch.sh dividend_post >> /opt/portfolio-dispatch/logs/cron.log 2>&1

@@ -384,6 +384,28 @@ COMPANY_INFOGRAPHICS = {
         "color": (255, 204, 0),
         "domain": "eni.com"
     },
+    "ENI_DIVIDEND": {
+        "name": "ENI",
+        "tagline": "Dividendi & Cash Flow · Stacco 21 Settembre 2026",
+        "title": "CASH FLOW PASSIVO & REMUNERAZIONE",
+        "subtitle": "Eni S.p.A. ($ENI.MI) — Prossimo stacco dividendo il 21 Settembre 2026: cassa liquida passiva, Risk Score 3/10 e zero leva.",
+        "kpis": [
+            {"label": "DIVIDEND YIELD ANNUO", "val": "6.8%", "sub": "Tra i più generosi d'Europa"},
+            {"label": "TRANCHE IN ARRIVO", "val": "€0.25", "sub": "Per azione (Stacco 21 Sett)"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Pilastro generatore di cassa"},
+            {"label": "IMPATTO COPIER ($10K)", "val": "+$6.70", "sub": "Cassa accreditata netta"},
+        ],
+        "pillars": [
+            ("Flusso di Cassa Trimestrale:", "4 tranche all'anno che incrementano la liquidità disponibile sul conto senza vendere azioni."),
+            ("Strategia Satellitare Generativa:", "Gli spin-off di Plenitude ed Enilive finanziano dividendi sostenibili e buyback continui."),
+            ("Protezione del Capitale & Rischio 3/10:", "Profilo difensivo a zero leva finanziaria, ideale per preservare il patrimonio dei copier."),
+            ("Rendimento Portafoglio (~3%):", "L'intera allocazione genera circa $300/anno su $10.000 in pura cassa passiva non vincolata."),
+        ],
+        "quote": "I veri investitori non inseguono la volatilità: raccolgono dividendi costanti e sfruttano l'interesse composto.",
+        "tags": ["#Eni", "#Dividendi", "#CashFlow", "#PopularInvestor", "#CopyTrading"],
+        "color": (235, 175, 0),
+        "domain": "eni.com"
+    },
     "PRY.MI": {
         "name": "PRYSMIAN",
         "tagline": "Cabling Systems & Energy Transition",
@@ -471,6 +493,28 @@ COMPANY_INFOGRAPHICS = {
         "tags": ["#Walmart", "#Retail", "#Omnichannel", "#ConsumerStaples", "#ValueInvesting"],
         "color": (0, 113, 206),
         "domain": "walmart.com"
+    },
+    "AVGO": {
+        "name": "BROADCOM",
+        "tagline": "Custom AI Silicon & AI Networking",
+        "title": "Q3 RECORD EARNINGS & TESI D'INVESTIMENTO",
+        "subtitle": "Broadcom è il leader mondiale negli switch di rete per cluster AI, nei chip ASIC custom per hyperscaler e nel software enterprise VMware.",
+        "kpis": [
+            {"label": "FATTURATO Q3 FY26", "val": "$29.6B", "sub": "+86% YoY record assoluto"},
+            {"label": "CHIP AI SEMICONDUCTOR", "val": "$16.7B", "sub": "+221% YoY ($21.7B guida Q4)"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Pilastro AI & Infrastructure"},
+            {"label": "UTILE PER AZIONE (EPS)", "val": "$3.32", "sub": "Battute le stime ($3.16)"},
+        ],
+        "pillars": [
+            ("Monopolio Networking AI:", "Switch Tomahawk e Jericho indispensabili per connettere cluster di decine di migliaia di GPU."),
+            ("Chip ASIC Custom:", "Progetta e co-sviluppa acceleratori AI proprietari per i maggiori hyperscaler mondiali."),
+            ("Cash Flow VMware:", "Integrazione ad altissima marginalità con oltre l'80% di ricavi software ricorrenti."),
+            ("Ritorno di Capitale:", "Dividendo trimestrale di $0,65/azione e target di distribuire il 50% del Free Cash Flow."),
+        ],
+        "quote": "Non esiste intelligenza artificiale scalabile senza l'infrastruttura di silicio e networking di Broadcom.",
+        "tags": ["#Broadcom", "#AVGO", "#Semiconductors", "#ArtificialIntelligence", "#VMware"],
+        "color": (204, 0, 0),
+        "domain": "broadcom.com"
     },
     "ENEL.MI": {
         "name": "ENEL",
@@ -714,10 +758,11 @@ def _fetch_logo(ticker: str, domain: str = None) -> Optional["Image.Image"]:
     if not PIL_AVAILABLE:
         return None
     clean = ticker.replace("$", "").strip().upper()
-    base_sym = clean.split(".")[0]
+    resolved_ticker = clean.replace("_DIVIDEND", ".MI") if "_DIVIDEND" in clean else clean
+    base_sym = resolved_ticker.split(".")[0]
 
     # 1. Check committed assets/logos/
-    for check_sym in [clean, base_sym, f"{clean}.US" if "." not in clean else None]:
+    for check_sym in [resolved_ticker, base_sym, f"{base_sym}.US" if "." not in resolved_ticker else None]:
         if not check_sym:
             continue
         repo_path = os.path.join(LOGO_DIR, f"{check_sym}.png")
@@ -759,9 +804,12 @@ def _fetch_logo(ticker: str, domain: str = None) -> Optional["Image.Image"]:
 def _get_live_weight_for_ticker(ticker: str) -> str:
     """Fetch live weight from portfolio / eToro API, formatted with percentage."""
     clean = ticker.replace("$", "").strip().upper()
+    resolved_ticker = clean.replace("_DIVIDEND", ".MI") if "_DIVIDEND" in clean else clean
     try:
         from finance_fetcher import fetch_portfolio_weights
         weights = fetch_portfolio_weights()
+        if resolved_ticker in weights and weights[resolved_ticker] > 0:
+            return f"{weights[resolved_ticker]:.2f}%"
         if clean in weights and weights[clean] > 0:
             return f"{weights[clean]:.2f}%"
     except Exception:
@@ -1051,9 +1099,14 @@ def generate_stock_infographic(
     
     # Left Header Pill
     f_pill = _font(15, bold=True)
-    pill_text = f"PERCHÉ INVESTO IN ${clean_ticker}"
-    draw.rounded_rectangle([85, mid_y + 24, 85 + 320, mid_y + 60], radius=10, fill=(16, 24, 40, 255))
-    draw.text((105, mid_y + 32), pill_text, fill=(255, 255, 255, 255), font=f_pill)
+    display_sym = clean_ticker.replace("_DIVIDEND", ".MI")
+    pill_text = f"PERCHÉ INVESTO IN ${display_sym}" if "_DIVIDEND" not in clean_ticker else f"PERCHÉ PUNTO SUI DIVIDENDI ${display_sym}"
+    try:
+        pill_w = int(f_pill.getlength(pill_text) + 36)
+    except Exception:
+        pill_w = 330
+    draw.rounded_rectangle([85, mid_y + 24, 85 + pill_w, mid_y + 60], radius=10, fill=(16, 24, 40, 255))
+    draw.text((103, mid_y + 32), pill_text, fill=(255, 255, 255, 255), font=f_pill)
 
     f_bullet_title = _font(18, bold=True)
     f_bullet_desc = _font(15, bold=False)
