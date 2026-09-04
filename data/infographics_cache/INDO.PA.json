@@ -1,0 +1,59 @@
+{
+  "name": "AMUNDI MSCI INDONESIA UCITS ETF ACC",
+  "tagline": "Il motore emergente del Sud-est",
+  "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+  "subtitle": "Esposizione strategica alla principale economia del Sud-est asiatico, trainata da demografia favorevole e transizione energetica globale.",
+  "kpis": [
+    {
+      "label": "CRESCITA PIL INDONESIA",
+      "val": "+5.0%",
+      "sub": "Forte crescita economica strutturale"
+    },
+    {
+      "label": "TER (COSTO ETF)",
+      "val": "0.45%",
+      "sub": "Costo di gestione annuo competitivo"
+    },
+    {
+      "label": "PESO IN PORTAFOGLIO",
+      "val": "2.44%",
+      "sub": "Allocazione gestita nel portafoglio"
+    },
+    {
+      "label": "SETTORE DOMINANTE",
+      "val": "55%+",
+      "sub": "Forte esposizione al settore finanziario"
+    }
+  ],
+  "pillars": [
+    [
+      "Fossato Competitivo:",
+      "Replica efficiente dell'indice MSCI Indonesia, coprendo le aziende leader con massima liquidità."
+    ],
+    [
+      "Catalizzatore di Crescita:",
+      "Leadership globale nel nichel e integrazione verticale nella filiera delle batterie per veicoli elettrici."
+    ],
+    [
+      "Solidità e Finanze:",
+      "Banche indonesiane altamente redditizie e debito pubblico nazionale tra i più bassi dei mercati emergenti."
+    ],
+    [
+      "Visione Decennale:",
+      "L'ascesa della classe media e la digitalizzazione guideranno l'Indonesia tra le prime economie mondiali entro il 2030."
+    ]
+  ],
+  "quote": "Catturare la crescita della più dinamica economia del Sud-est asiatico attraverso i suoi campioni nazionali.",
+  "tags": [
+    "#INDO_PA",
+    "#EmergingMarkets",
+    "#Indonesia",
+    "#ETF",
+    "#Growth"
+  ],
+  "color": [
+    0,
+    112,
+    192
+  ]
+}
