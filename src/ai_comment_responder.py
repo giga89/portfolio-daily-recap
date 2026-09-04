@@ -71,6 +71,23 @@ DEFAULT_GEMINI_MODELS = [
     'gemini-3.5-flash',
     'gemini-2.5-flash',
 ]
+# Multi-model priority hierarchy starting from the best reasoning model
+try:
+    from ai_model_cascade import DEFAULT_GEMINI_MODELS, REVIEWER_GEMINI_MODELS
+except ImportError:
+    try:
+        from src.ai_model_cascade import DEFAULT_GEMINI_MODELS, REVIEWER_GEMINI_MODELS
+    except ImportError:
+        DEFAULT_GEMINI_MODELS = [
+            'gemini-3.1-pro',
+            'gemini-3.8-flash',
+            'gemini-3.7-flash',
+            'gemini-3.6-flash',
+            'gemini-3.5-flash',
+            'gemini-2.5-flash',
+        ]
+        REVIEWER_GEMINI_MODELS = list(DEFAULT_GEMINI_MODELS)
+
 
 PORTFOLIO_SYSTEM_PROMPT = """
 You are Andrea Ravalli's Official AI Co-Pilot for the eToro Popular Investor Program.
@@ -434,6 +451,41 @@ def verify_and_refine_reply(
     if not HAS_GENAI or not api_key:
         return True, candidate_reply, "Pass 2 skipped (no API key/SDK)"
 
+    try:
+        from post_verifier import verify_post_deterministic, extract_cashtags, PORTFOLIO_ASSETS_METADATA
+    except ImportError:
+        try:
+            from src.post_verifier import verify_post_deterministic, extract_cashtags, PORTFOLIO_ASSETS_METADATA
+        except ImportError:
+            verify_post_deterministic = None
+            extract_cashtags = lambda s: []
+            PORTFOLIO_ASSETS_METADATA = {}
+
+    # Stage 1: Deterministic verification on candidate reply
+    det_ok = True
+    det_issues = []
+    if verify_post_deterministic:
+        det_ok, det_issues, _ = verify_post_deterministic(candidate_reply)
+
+    # Collect metadata for any tickers mentioned by user or in reply
+    mentioned_tickers = set(extract_cashtags(user_comment) + extract_cashtags(candidate_reply))
+    meta_lines = []
+    for t in mentioned_tickers:
+        if t in PORTFOLIO_ASSETS_METADATA:
+            meta = PORTFOLIO_ASSETS_METADATA[t]
+            meta_lines.append(
+                f"• ${t} ({meta.get('name')}):\n"
+                f"  - Settore: {meta.get('sector')}\n"
+                f"  - Dividendi: {'SÌ' if meta.get('is_dividend_paying') else 'NO (ACCUMULAZIONE / ZERO CEDOLE DISTRIBUITE)'}\n"
+                f"  - Politica: {meta.get('dividend_policy')}\n"
+                f"  - Tesi: {meta.get('thesis')}"
+            )
+    meta_context = "\n".join(meta_lines) if meta_lines else "Nessun asset specifico di portafoglio coinvolto."
+
+    criticism_note = ""
+    if not det_ok:
+        criticism_note = f"\n⚠️ CRITICAL WARNING FOR REVIEWER: Deterministic fast-gate flagged violations in candidate reply: {det_issues}. You MUST rectify these in 'perfected_reply' or reject."
+
     judge_prompt = f"""
 You are the Senior Compliance and Editorial Director for Andrea Ravalli's official eToro Popular Investor Channel (+200% gain, Risk Score 3/10, long-term multi-asset investing, zero leverage).
 
@@ -448,10 +500,18 @@ ORIGINAL POST CONTEXT:
 PROPOSED CANDIDATE REPLY:
 "{candidate_reply}"
 
+OFFICIAL CERTIFIED METADATA (SINGLE SOURCE OF TRUTH):
+{meta_context}
+{criticism_note}
+
 EVALUATION RUBRIC:
 1. Relevance & Substance: Does the reply genuinely address the topics and questions raised by @{user_author} (e.g. specific tickers like AMZN/NVDA/PLTR, GPU additions, tech sentiment, valuation, DCA, pullback)?
 2. Completeness: Is the text 100% complete with no truncated sentences, no dangling prepositions, and a natural closing?
 3. Compliance & Tone: Is it polite, disciplined (Risk 3/10, 0 leverage, 3-5+ years horizon), and free of financial advice or markdown asterisks (**)?
+1. Factual Accuracy: Strict adherence to certified metadata. If an asset is accumulating ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), NEVER claim it pays dividends. NEVER mention purged assets like XEON.
+2. Relevance & Substance: Does the reply genuinely address the topics and questions raised by @{user_author}?
+3. Completeness & Ending: 100% complete text, no dangling prepositions, natural closing with valid punctuation/emoji.
+4. Compliance & Tone: Polite, disciplined (Risk 3/10, 0 leverage, 3-5+ years horizon), no financial advice, NO markdown bold asterisks (**).
 
 TASK:
 Provide your verdict in exact JSON format:
@@ -468,14 +528,19 @@ Output ONLY valid JSON.
 
     # Use a priority model for review
     models_to_try = [m for m in DEFAULT_GEMINI_MODELS if m in ['gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-2.5-flash']]
+    # Use prioritized reviewer models starting with the best reasoning model
+    reviewers = [m for m in REVIEWER_GEMINI_MODELS if m in DEFAULT_GEMINI_MODELS] or DEFAULT_GEMINI_MODELS
 
     for model_name in models_to_try:
+    for model_name in reviewers:
         try:
+            print(f"   🔍 Community Reply Auditor running on model: {model_name}...")
             response = client.models.generate_content(
                 model=model_name,
                 contents=judge_prompt,
                 config=types.GenerateContentConfig(
                     temperature=0.2,
+                    temperature=0.1,
                     max_output_tokens=1500,
                 )
             )
@@ -501,6 +566,11 @@ Output ONLY valid JSON.
                     # Run deterministic check on perfected text too
                     ok, clean_final, err = validate_response_syntax(final_text, user_author)
                     if ok:
+                        if verify_post_deterministic:
+                            f_ok, f_issues, clean_final = verify_post_deterministic(clean_final)
+                            if not f_ok:
+                                print(f"⚠️ Pass 2 Perfected text failed deterministic gate: {f_issues}")
+                                return False, "", f"Deterministic rule violation: {f_issues}"
                         return True, clean_final, f"Validated by {model_name} (Score: {score}/10 - {reason})"
 
                 print(f"⚠️ Pass 2 Validator ({model_name}) rejected reply (Score {score}/10): {reason}")
@@ -508,9 +578,16 @@ Output ONLY valid JSON.
 
         except Exception as e:
             print(f"⚠️ Pass 2 Validator error with {model_name}: {e}")
+            err_s = str(e).lower()
+            if "429" in err_s or "quota" in err_s:
+                print(f"   ⏳ Reviewer {model_name} quota/rate limit (429). Pausing 2s...")
+                time.sleep(2.0)
+            else:
+                print(f"⚠️ Pass 2 Validator error with {model_name}: {e}")
             continue
 
     return True, candidate_reply, "Pass 2 fallback (validator model timeout)"
+
 
 
 def load_answered_comments() -> Dict[str, Any]:
@@ -804,6 +881,13 @@ CRITICAL RULES:
 
                 except Exception as e:
                     print(f"⚠️ Gemini API attempt failed with {model_name}: {e}")
+                    err_s = str(e).lower()
+                    if "429" in err_s or "quota" in err_s or "resource_exhausted" in err_s:
+                        wait_t = 3.0 * (attempt + 1)
+                        print(f"   ⏳ Model {model_name} quota/rate limit (429). Pausing {wait_t:.1f}s before trying next...")
+                        time.sleep(wait_t)
+                    else:
+                        print(f"⚠️ Gemini API attempt failed with {model_name}: {e}")
                     continue
 
     print("🛡️ Falling back to certified topic-aware contextual template...")
@@ -1188,6 +1272,22 @@ def process_community_replies(
         print(f"\n💡 Risposta Verificata dall'IA:\n{reply_text}\n")
 
         if not dry_run:
+            # Pre-flight Gatekeeper Check
+            try:
+                from post_verifier import verify_and_clean_comment
+                ok_gate, reply_text, gate_audit = verify_and_clean_comment(
+                    text=reply_text,
+                    user_comment=item.get('message'),
+                    user_author=item.get('author'),
+                    run_ai_review=False
+                )
+                if not ok_gate:
+                    print(f"🛑 COMMUNITY REPLY BLOCKED BY PRE-FLIGHT GATEKEEPER: {gate_audit.get('issues')}")
+                    results.append({"status": "blocked_by_gatekeeper", "item": item, "issues": gate_audit.get('issues')})
+                    continue
+            except Exception as gate_err:
+                print(f"⚠️ Pre-flight gatekeeper check warning: {gate_err}")
+
             print(f"🚀 Pubblicazione automatica in corso per @{item['author']}...")
             res = etoro_client.reply_to_comment(
                 post_id=item['post_id'],

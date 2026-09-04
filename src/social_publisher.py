@@ -667,6 +667,15 @@ def _publish_stock_focus_post(ticker: str = None) -> dict:
         print("⚠️ Stock focus post text empty, skipping publish.")
         return {"telegram_stock_focus": False, "etoro_stock_focus": False}
 
+    try:
+        from post_verifier import verify_post_deterministic
+        is_clean, issues, post_text = verify_post_deterministic(post_text, primary_ticker=ticker_sym)
+        if not is_clean:
+            print(f"🛑 Stock focus post blocked from publishing: {issues}")
+            return {"telegram_stock_focus": False, "etoro_stock_focus": False}
+    except Exception as v_err:
+        print(f"⚠️ Verifier check warning: {v_err}")
+
     full_text = post_text + ETORO_FOOTER_LONG
     _save_post_to_artifacts(f"stock_focus_{ticker_sym}.txt", f"Stock Focus - {ticker_sym}", full_text)
 

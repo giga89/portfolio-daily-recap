@@ -868,9 +868,33 @@ def fetch_dynamic_company_infographic_data(ticker: str) -> dict:
             from google import genai
             from google.genai import types
 
+            try:
+                from ai_model_cascade import DEFAULT_GEMINI_MODELS
+            except ImportError:
+                from src.ai_model_cascade import DEFAULT_GEMINI_MODELS
+
+            try:
+                from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+            except ImportError:
+                from src.portfolio_manager import PORTFOLIO_ASSETS_METADATA
+
+            meta = PORTFOLIO_ASSETS_METADATA.get(clean_ticker, {})
+            is_div_paying = meta.get("is_dividend_paying", False)
+            div_note = (
+                "NOTA TASSATIVA SUI DIVIDENDI: Questo asset è ad ACCUMULAZIONE (zero dividendi/cedole distribuite). "
+                "NON citare MAI dividendi o cedole nei KPI, pilastri o quote. Usa invece FREE CASH FLOW, MARGINE o CRESCITA."
+                if not is_div_paying else
+                f"Politica dividendi certificata: {meta.get('dividend_policy', 'Dividendi regolari')}."
+            )
+
             client = genai.Client(api_key=api_key)
             prompt = f"""Analizza in profondità l'azienda {company_name} (${clean_ticker}).
+            prompt = f"""Analizza in profondità l'azienda o ETF {company_name} (${clean_ticker}).
+Settore ufficiale: {meta.get('sector', 'N/A')}.
+Tesi core: {meta.get('thesis', 'N/A')}.
+{div_note}
 Il peso attuale in portafoglio è: {live_weight}.
+
 Fornisci in formato JSON strutturato (senza markdown extra):
 {{
   "name": "{company_name.upper()}",
@@ -882,6 +906,7 @@ Fornisci in formato JSON strutturato (senza markdown extra):
     {{"label": "KPI 2 (es. MARGINE OPERATIVO)", "val": "DATO ATTUALE (es. 35%)", "sub": "breve dettaglio"}},
     {{"label": "PESO IN PORTAFOGLIO", "val": "{live_weight}", "sub": "Allocazione gestita nel portafoglio"}},
     {{"label": "KPI 4 (es. CASSA / DIVIDENDI)", "val": "DATO ATTUALE (es. $5B+)", "sub": "breve dettaglio"}}
+    {{"label": "KPI 4 (es. GENERAZIONE CASSA" if not is_div_paying else "KPI 4 (es. DIVIDENDI / CASSA", "val": "DATO ATTUALE (es. $5B+)", "sub": "breve dettaglio"}}
   ],
   "pillars": [
     ["Fossato Competitivo:", "Spiegazione del moat o barriere all'entrata in 1 riga."],
@@ -896,6 +921,7 @@ Fornisci in formato JSON strutturato (senza markdown extra):
 
             config_gen = types.GenerateContentConfig(
                 temperature=0.3,
+                temperature=0.2,
                 response_mime_type="application/json"
             )
 
@@ -920,8 +946,48 @@ Fornisci in formato JSON strutturato (senza markdown extra):
                 except Exception as m_err:
                     print(f"   ⚠️ Infographic generation model {model_name} failed: {m_err}")
                     time.sleep(1)
+            models_to_try = list(DEFAULT_GEMINI_MODELS)
+            for idx, model_name in enumerate(models_to_try):
+                for attempt in range(2):
+                    try:
+                        print(f"   🤖 Trying infographic model ({idx+1}/{len(models_to_try)}): {model_name}...")
+                        res = client.models.generate_content(
+                            model=model_name,
+                            contents=prompt,
+                            config=config_gen,
+                        )
+                        if res and res.text:
+                            parsed = json.loads(res.text)
+                            if parsed.get("name") and parsed.get("kpis"):
+                                for k in parsed.get("kpis", []):
+                                    if "PESO" in k.get("label", "").upper():
+                                        k["val"] = live_weight
+                                    # Anti-hallucination check on KPI
+                                    if not is_div_paying and ("DIVIDEND" in k.get("label", "").upper() or "CEDOL" in k.get("label", "").upper()):
+                                        k["label"] = "GENERAZIONE CASSA"
+                                        k["sub"] = "NAV ad accumulazione"
+
+                                # Anti-hallucination check on pillars
+                                if not is_div_paying:
+                                    for pillar in parsed.get("pillars", []):
+                                        if len(pillar) >= 2 and ("dividendo" in pillar[1].lower() or "cedola" in pillar[1].lower()):
+                                            pillar[1] = pillar[1].replace("dividendo", "rendimento del capitale").replace("cedola", "NAV")
+
+                                with open(cache_file, "w", encoding="utf-8") as f:
+                                    json.dump(parsed, f, indent=2, ensure_ascii=False)
+                                print(f"✓ Dynamically generated, verified and cached AI infographic data for {clean_ticker} using {model_name}")
+                                return parsed
+                    except Exception as m_err:
+                        err_str = str(m_err).lower()
+                        if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str:
+                            print(f"   ⏳ Infographic model {model_name} quota/rate limit (429). Waiting 3s...")
+                            time.sleep(3.0)
+                            continue
+                        print(f"   ⚠️ Infographic generation model {model_name} failed: {m_err}")
+                        break
         except Exception as exc:
             print(f"⚠️ Dynamic Gemini infographic generation fallback for {clean_ticker}: {exc}")
+
 
     return {
         "name": company_name.upper(),

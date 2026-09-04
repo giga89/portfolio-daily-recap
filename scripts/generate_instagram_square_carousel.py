@@ -438,6 +438,7 @@ def render_slide_5() -> Image.Image:
         ("Risorse & Difesa", "25%", ["Cameco", "Difesa UE", "Oro Fisico"], ACCENT_GOLD),
         ("Healthcare & Dividendi", "20%", ["Eli Lilly", "AbbVie", "Novo Nordisk"], ACCENT_GREEN),
         ("Liquidita' Remunerata", "15%", ["XEON (Monetario EUR)", "IB01 (Treasury US)"], ACCENT_PURPLE),
+        ("Liquidita' Remunerata", "15%", ["IB01 (Treasury US)"], ACCENT_PURPLE),
     ]
 
     card_y = 265

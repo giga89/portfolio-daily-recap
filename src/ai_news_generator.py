@@ -45,6 +45,21 @@ DEFAULT_GEMINI_MODELS = [
     'gemini-3.5-flash',       # Advanced financial context & reasoning (5 RPM, 20 RPD)
     'gemini-2.5-flash',       # Robust standard model (5 RPM, 20 RPD)
 ]
+try:
+    from ai_model_cascade import DEFAULT_GEMINI_MODELS
+except ImportError:
+    try:
+        from src.ai_model_cascade import DEFAULT_GEMINI_MODELS
+    except ImportError:
+        DEFAULT_GEMINI_MODELS = [
+            'gemini-3.1-pro',       # Flagship Deep Reasoning model (Best quality)
+            'gemini-3.8-flash',     # Newest Flagship Flash model
+            'gemini-3.7-flash',     # Most intelligent & capable
+            'gemini-3.6-flash',     # High capability 3.x series
+            'gemini-3.5-flash',     # Advanced financial context & reasoning
+            'gemini-2.5-flash',     # Robust standard model
+        ]
+
 
 
 def _throttle_request(delay: float = 2.0):
@@ -306,6 +321,31 @@ def _clean_robotic_phrases(text: str) -> str:
     cleaned = sanitize_etoro_cashtags(cleaned)
     return cleaned.strip()
 
+
+def _run_post_verification(
+    text: str,
+    primary_ticker: str = None,
+    session_name: str = None,
+    generator_model: str = None,
+    run_ai_review: bool = True,
+) -> tuple[bool, str]:
+    """Helper to run pre-publication verification and auto-correction on generated content."""
+    try:
+        from post_verifier import verify_and_clean_post
+        approved, final_text, audit = verify_and_clean_post(
+            text=text,
+            primary_ticker=primary_ticker,
+            session_name=session_name,
+            generator_model=generator_model,
+            run_ai_review=run_ai_review,
+        )
+        if not approved:
+            print(f"⚠️ Post rejected by verifier: {audit.get('explanation')}")
+            return False, ""
+        return True, final_text
+    except Exception as exc:
+        print(f"⚠️ Post verification warning: {exc}")
+        return True, text
 
 
 def _remove_market_section_tags(text):
@@ -719,6 +759,17 @@ Impact and outlook summary...
                     recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
                     
                     return "\n" + recap_text + "\n"
+                    # Pre-publication double-check
+                    approved, verified_text = _run_post_verification(
+                        recap_text,
+                        session_name="Monthly recap",
+                        generator_model=model_name,
+                    )
+                    if not approved or not verified_text:
+                        print(f"⚠️ Monthly recap rejected by verifier ({model_name}), trying next model...")
+                        continue
+
+                    return "\n" + verified_text + "\n"
                 else:
                     print(f"⚠️  Empty response from {model_name}")
                     continue
@@ -729,6 +780,12 @@ Impact and outlook summary...
                 if API_TRACKER_AVAILABLE:
                     log_api_request(model_name, False, "monthly_recap")
                 
+                # Quota / rate limit (429) backoff
+                if '429' in error_msg or 'quota' in error_msg or 'resource_exhausted' in error_msg:
+                    print(f"   ⏳ Model {model_name} quota/rate limited (429). Waiting 3s before cascading...")
+                    time.sleep(3.0)
+                    continue
+
                 # 503 UNAVAILABLE — retry with 10-minute intervals up to 5 times
                 if '503' in error_msg or 'unavailable' in error_msg:
                     max_503_retries = 5
@@ -1050,6 +1107,18 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                     recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
                     recap_text = _clean_robotic_phrases(recap_text)
                     
+
+                    # Pre-publication double-check
+                    approved, verified_text = _run_post_verification(
+                        recap_text,
+                        session_name=market_session or "Daily recap",
+                        generator_model=model_name,
+                    )
+                    if not approved or not verified_text:
+                        print(f"⚠️ Market news recap rejected by verifier ({model_name}), trying next model...")
+                        continue
+                    recap_text = verified_text
+
                     # Update rotation history with the tags actually selected for the post
                     if selected_tags:
                         update_rotation_history(selected_tags)
@@ -1069,6 +1138,13 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                 if API_TRACKER_AVAILABLE:
                     log_api_request(model_name, False, "daily_recap")
                 
+                # 429 QUOTA / RATE LIMIT — brief pause before cascading
+                if '429' in error_msg or 'quota' in error_msg or 'resource_exhausted' in error_msg:
+                    print(f"   ⏳ Model {model_name} quota/rate limited (429). Pausing 3s before cascading...")
+                    time.sleep(3.0)
+                    last_error = model_error
+                    continue
+
                 # 503 UNAVAILABLE at EU open (07:00 UTC) on gemini-2.5-flash typically
                 # lasts 30-50 minutes. Retry with 10-minute intervals (up to 5 times = 50 min
                 # max) before giving up and trying the next model.
@@ -1288,6 +1364,16 @@ Output ONLY the post text, no introduction or explanation."""
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "decision_post")
                     return response.text.strip()
+                    raw_text = response.text.strip()
+                    approved, verified_text = _run_post_verification(
+                        raw_text,
+                        session_name="Decision post",
+                        generator_model=model_name,
+                    )
+                    if not approved or not verified_text:
+                        print(f"⚠️ Decision post rejected by verifier ({model_name}), trying next model...")
+                        continue
+                    return verified_text
             except Exception as exc:
                 print(f"⚠️ Decision post model {model_name} failed: {exc}")
                 time.sleep(1)
@@ -1380,6 +1466,16 @@ Output ONLY the post text, no introduction or explanation."""
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "empathy_post")
                     return response.text.strip()
+                    raw_text = response.text.strip()
+                    approved, verified_text = _run_post_verification(
+                        raw_text,
+                        session_name="Empathy post",
+                        generator_model=model_name,
+                    )
+                    if not approved or not verified_text:
+                        print(f"⚠️ Empathy post rejected by verifier ({model_name}), trying next model...")
+                        continue
+                    return verified_text
             except Exception as exc:
                 print(f"⚠️ Empathy post model {model_name} failed: {exc}")
                 time.sleep(1)
@@ -1525,6 +1621,16 @@ Output ONLY the Italian post text, no introduction or wrapping."""
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "copy_trading_post")
                     return response.text.strip()
+                    raw_text = response.text.strip()
+                    approved, verified_text = _run_post_verification(
+                        raw_text,
+                        session_name="Copy trading post",
+                        generator_model=model_name,
+                    )
+                    if not approved or not verified_text:
+                        print(f"⚠️ Copy trading post rejected by verifier ({model_name}), trying next model...")
+                        continue
+                    return verified_text
             except Exception as exc:
                 print(f"⚠️ Copy trading post model {model_name} failed: {exc}")
                 time.sleep(1)
@@ -1588,6 +1694,7 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
         tuple: (ticker_symbol, formatted_post_text)
     """
     from portfolio_manager import load_config, get_ticker_all_tags, get_related_tickers
+    from portfolio_manager import load_config, get_ticker_all_tags, get_related_tickers, get_asset_metadata
     from gist_storage import get_used_stock_focus_tickers, save_used_stock_focus_ticker
     import random
 
@@ -1605,6 +1712,7 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
 
     # Exclude money market ETFs, physical metal ETFs, and frozen Russian assets from stock focus candidates
     stock_candidates = sorted([t for t in tickers.keys() if t not in ['IB01.L', 'PPFB.DE', 'MNODL.L', 'NVTKL.L']])
+    stock_candidates = sorted([t for t in tickers.keys() if t not in ['IB01.L', 'XEON.DE', 'PPFB.DE', 'MNODL.L', 'NVTKL.L']])
     if not stock_candidates:
         stock_candidates = sorted(list(tickers.keys()))
 
@@ -1624,6 +1732,11 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
             ticker = pool[seed_idx]
 
     save_used_stock_focus_ticker(ticker)
+    meta = get_asset_metadata(ticker)
+    yahoo_ticker = meta.get("yahoo_ticker", ticker)
+    company_name = meta.get("name", tickers.get(ticker, [ticker, ticker])[1])
+    primary_tags = meta.get("primary_tags") or get_ticker_all_tags(ticker)
+    related_tags = meta.get("related_tickers") or get_related_tickers(ticker)
 
     yahoo_ticker, company_name = tickers[ticker]
     primary_tags = get_ticker_all_tags(ticker)
@@ -1632,7 +1745,19 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
     primary_tags_str = " ".join(primary_tags)
     related_tags_str = " ".join(related_tags)
 
+    sector_str = meta.get("sector", "Settore")
+    asset_class_str = meta.get("asset_class", "Stock")
+    thesis_str = meta.get("thesis", "")
+    dividend_policy_str = meta.get("dividend_policy", "Nessuna informazione")
+    is_dividend = meta.get("is_dividend_paying", False)
+    upsides = meta.get("upside_catalysts", [])
+    downsides = meta.get("downside_risks", [])
+
+    upsides_formatted = "\n".join([f"• {u}" for u in upsides]) if upsides else "• Crescita fondamentale e posizionamento competitivo"
+    downsides_formatted = "\n".join([f"• {d}" for d in downsides]) if downsides else "• Rischi macroeconomici e di settore"
+
     print(f"📌 Generating Stock Focus post for {ticker} ({company_name})...")
+    print(f"   Sector: {sector_str} | Asset Class: {asset_class_str} | Div Paying: {is_dividend}")
     print(f"   Primary tags: {primary_tags_str} | Related tags: {related_tags_str}")
 
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -1653,16 +1778,35 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
     except Exception:
         pass
 
+    dividend_constraint = (
+        "DIVIETO ASSOLUTO DI PARLARE DI DIVIDENDI O CEDOLE: questo asset è ad ACCUMULAZIONE (Acc) o non stacca dividendi. NON usare mai parole come 'dividendo', 'cedola', 'flusso cedolare', 'income', 'rendimento da dividendo' o 'payout'! Concentrati al 100% sulla crescita del capitale, trend industriale e tesi fondamentale."
+        if not is_dividend
+        else f"POLITICA DIVIDENDI CERTIFICATA: {dividend_policy_str}. Se citi i dividendi, attieniti scrupolosamente a questi dati senza esagerare."
+    )
+
     prompt = f"""Sei un investitore privato esperto su eToro.
 Scrivi un post di approfondimento e analisi su un singolo titolo presente nel nostro portafoglio.
+Scrivi un post di approfondimento e analisi fondamentale su un singolo strumento presente nel nostro portafoglio.
 
 TITOLO IN FOCUS:
 - Azienda: {company_name}
+DATI VERIFICATI E CERTIFICATI DELLO STRUMENTO IN FOCUS:
+- Strumento: {company_name}
 - Ticker: {ticker} (Yahoo: {yahoo_ticker})
 {weight_str}- Tag principali da includere nel testo: {primary_tags_str}
+- Tipo Asset: {asset_class_str}
+- Settore / Industria: {sector_str}
+{weight_str}- Politica Dividendi Reale: {dividend_policy_str}
+- Tesi di Investimento Reale: {thesis_str}
+- Catalizzatori di Crescita Certificati (Upside):
+{upsides_formatted}
+- Rischi di Mercato Certificati (Downside):
+{downsides_formatted}
+- Tag principali da includere nel testo: {primary_tags_str}
 - Tag di titoli correlati/competitor da includere nel testo: {related_tags_str}
 
 REGOLE PER IL TESTO (in ITALIANO):
+REGOLE MANDATARIE PER IL TESTO (in ITALIANO):
 1. Titolo iniziale accattivante: "🔍 FOCUS ASSET: Perché ho in portafoglio {company_name} {primary_tags[0]}" (SENZA parentesi tonde attorno al tag!)
 2. Spiega brevemente LA TESI DI INVESTIMENTO ("Perché ho questo titolo"). Se indicato il peso in portafoglio, citalo con precisione ({weight_str.strip() if weight_str else ''}).
 3. IMPORTANTE: Parla in prima persona in modo naturale ("Nel mio portafoglio...", "Punto su questa azienda perché..."). È SEVERAMENTE VIETATO usare formule come "Come Andrea Ravalli..." o presentarti per nome!
@@ -1672,12 +1816,25 @@ REGOLE PER IL TESTO (in ITALIANO):
 7. Mantieni un tono trasparente, professionale ed esaustivo ma facile da leggere (massimo 1400 caratteri).
 8. Usa solo emoji standard universalmente supportate (🔍, 🚀, ⚠️, 📊, 👇, 👤, 🎁).
 9. REGOLE CASHTAG ETORO: Ogni cashtag (es. {primary_tags_str}) DEVE avere sempre uno spazio prima e dopo per essere cliccabile su eToro. NON racchiudere MAI i cashtag tra parentesi tonde (scrivi ad es. "...competitor come $IBE.MC e $RWE.DE" invece di "($IBE.MC)") e NON incollare punteggiatura al tag (scrivi "$EDP.LS ?" invece di "$EDP.LS?").
+2. Spiega con precisione LA TESI DI INVESTIMENTO ("Perché ho questo strumento in portafoglio"). Se indicato il peso, citalo con precisione ({weight_str.strip() if weight_str else ''}).
+3. IMPORTANTE: Parla in prima persona in modo naturale ("Nel mio portafoglio...", "Punto su questo asset perché..."). È SEVERAMENTE VIETATO usare formule come "Come Andrea Ravalli..." o presentarti per nome!
+4. Sezione "🚀 POSSIBILI UPSIDE": 2-3 catalizzatori principali basati rigorosamente sui punti forniti sopra.
+5. Sezione "⚠️ POSSIBILI DOWNSIDE": 2-3 rischi principali basati rigorosamente sui rischi forniti sopra.
+6. GUARDRAIL ANTI-ALLUCINAZIONE DIVIDENDI:
+   {dividend_constraint}
+7. GUARDRAIL ANTI-ALLUCINAZIONE SETTORE:
+   È SEVERAMENTE VIETATO alterare il settore dell'asset o confonderlo con altri strumenti. Parla solo ed esclusivamente del business/settore certificato ({sector_str}).
+8. Inserisci in modo fluido ed organico i tag principali ({primary_tags_str}) e i tag dei titoli correlati ({related_tags_str}) nel testo.
+9. Mantieni un tono trasparente, professionale ed esaustivo ma facile da leggere (massimo 1400 caratteri).
+10. Usa solo emoji standard universalmente supportate (🔍, 🚀, ⚠️, 📊, 👇, 👤, 🎁).
+11. REGOLE CASHTAG ETORO: Ogni cashtag (es. {primary_tags_str}) DEVE avere sempre uno spazio prima e dopo per essere cliccabile su eToro. NON racchiudere MAI i cashtag tra parentesi tonde (scrivi ad es. "...competitor come $IBE.MC e $RWE.DE" invece di "($IBE.MC)") e NON incollare punteggiatura al tag (scrivi "$EDP.LS ?" invece di "$EDP.LS?").
 
 Output ONLY the post text in Italian, no extra conversational preamble."""
 
     try:
         client = genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.85)
+        config_gen = types.GenerateContentConfig(temperature=0.7)
 
         for model_name in models_to_try:
             try:
@@ -1691,7 +1848,19 @@ Output ONLY the post text in Italian, no extra conversational preamble."""
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "stock_focus_post")
                     cleaned_post = _clean_robotic_phrases(response.text.strip())
+                    approved, verified_text = _run_post_verification(
+                        cleaned_post,
+                        primary_ticker=ticker,
+                        session_name=f"Stock focus ({ticker})",
+                        generator_model=model_name,
+                    )
+                    if not approved or not verified_text:
+                        print(f"⚠️ Stock focus post on {ticker} rejected by verifier ({model_name}), trying next model...")
+                        continue
+                    save_used_stock_focus_ticker(ticker)
+                    cleaned_post = _clean_robotic_phrases(response.text.strip())
                     return ticker, cleaned_post
+                    return ticker, verified_text
             except Exception as exc:
                 print(f"⚠️ Stock focus model {model_name} failed: {exc}")
                 time.sleep(1)
@@ -1764,6 +1933,16 @@ Output ONLY the post text in Italian."""
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "portfolio_outlook_post")
                     return response.text.strip()
+                    raw_text = response.text.strip()
+                    approved, verified_text = _run_post_verification(
+                        raw_text,
+                        session_name="Weekly portfolio outlook",
+                        generator_model=model_name,
+                    )
+                    if not approved or not verified_text:
+                        print(f"⚠️ Portfolio outlook rejected by verifier ({model_name}), trying next model...")
+                        continue
+                    return verified_text
             except Exception as exc:
                 print(f"⚠️ Portfolio outlook model {model_name} failed: {exc}")
                 time.sleep(1)
@@ -1827,6 +2006,16 @@ Output ONLY the post text in Italian."""
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "macro_outlook_post")
                     return response.text.strip()
+                    raw_text = response.text.strip()
+                    approved, verified_text = _run_post_verification(
+                        raw_text,
+                        session_name="Weekly macro outlook",
+                        generator_model=model_name,
+                    )
+                    if not approved or not verified_text:
+                        print(f"⚠️ Macro outlook rejected by verifier ({model_name}), trying next model...")
+                        continue
+                    return verified_text
             except Exception as exc:
                 print(f"⚠️ Macro outlook model {model_name} failed: {exc}")
                 time.sleep(1)
@@ -1958,6 +2147,15 @@ Output ONLY the post text in Italian."""
                         log_api_request(model_name, True, "crypto_daily_post")
                     cleaned_post = _clean_robotic_phrases(response.text.strip())
                     return "Daily crypto recap", cleaned_post
+                    approved, verified_text = _run_post_verification(
+                        cleaned_post,
+                        session_name="Daily crypto recap",
+                        generator_model=model_name,
+                    )
+                    if not approved or not verified_text:
+                        print(f"⚠️ Crypto recap rejected by verifier ({model_name}), trying next model...")
+                        continue
+                    return "Daily crypto recap", verified_text
             except Exception as exc:
                 print(f"⚠️ Crypto recap model {model_name} failed: {exc}")
                 time.sleep(1)

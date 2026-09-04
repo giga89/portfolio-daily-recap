@@ -103,6 +103,16 @@ def send_etoro_post(
 
     clean_content = _strip_html(text)
     try:
+        from post_verifier import verify_post_deterministic, clean_etoro_formatting
+        clean_content = clean_etoro_formatting(clean_content)
+        is_clean, issues, clean_content = verify_post_deterministic(clean_content)
+        if not is_clean:
+            print(f"🛑 ETORO POST BLOCKED BY PRE-PUBLICATION GATE: {issues}")
+            return False
+    except Exception as e_ver:
+        print(f"⚠️ Pre-publication verifier check in etoro_sender: {e_ver}")
+
+    try:
         from ai_news_generator import sanitize_etoro_cashtags
         clean_content = sanitize_etoro_cashtags(clean_content)
     except Exception:

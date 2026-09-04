@@ -506,6 +506,19 @@ def add_post_comment(
     Add a comment to an existing eToro post.
     POST /api/v1/posts/{postId}/comments
     """
+    # Pre-send verification gate
+    try:
+        from post_verifier import verify_post_deterministic, clean_etoro_formatting
+        clean_msg = clean_etoro_formatting(message)
+        is_clean, issues, clean_msg = verify_post_deterministic(clean_msg)
+        critical_issues = [i for i in issues if i.startswith("CRITICAL")]
+        if critical_issues:
+            print(f"🛑 ETORO COMMENT BLOCKED BY PRE-SEND GATE: {critical_issues[0]}")
+            return {"success": False, "error": f"Pre-send verification gate blocked comment: {critical_issues[0]}"}
+        message = clean_msg
+    except Exception as v_err:
+        pass
+
     headers = get_headers()
     if not headers:
         return {"success": False, "error": "eToro API not configured"}
@@ -693,11 +706,25 @@ def reply_to_comment(post_id: str, comment_id: str, message: str, language: str 
     """
     Reply to a specific comment on an eToro post via POST /api/v1/posts/{postId}/comments/{commentId}/replies.
     """
+    # Pre-send verification gate
+    try:
+        from post_verifier import verify_post_deterministic, clean_etoro_formatting
+        clean_msg = clean_etoro_formatting(message)
+        is_clean, issues, clean_msg = verify_post_deterministic(clean_msg)
+        critical_issues = [i for i in issues if i.startswith("CRITICAL")]
+        if critical_issues:
+            print(f"🛑 ETORO REPLY BLOCKED BY PRE-SEND GATE: {critical_issues[0]}")
+            return {"success": False, "error": f"Pre-send verification gate blocked reply: {critical_issues[0]}"}
+        message = clean_msg
+    except Exception as v_err:
+        pass
+
     headers = get_headers()
     if not headers:
         return {"success": False, "error": "eToro API not configured"}
     headers["Content-Type"] = "application/json"
     url = f"{BASE_URL}/api/v1/posts/{post_id}/comments/{comment_id}/replies"
+
     body = {"message": message, "language": language}
     try:
         resp = requests.post(url, headers=headers, json=body, timeout=20)

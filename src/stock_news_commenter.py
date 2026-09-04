@@ -58,6 +58,21 @@ DEFAULT_GEMINI_MODELS = [
     'gemini-3.5-flash',
     'gemini-2.5-flash',
 ]
+try:
+    from ai_model_cascade import DEFAULT_GEMINI_MODELS
+except ImportError:
+    try:
+        from src.ai_model_cascade import DEFAULT_GEMINI_MODELS
+    except ImportError:
+        DEFAULT_GEMINI_MODELS = [
+            'gemini-3.1-pro',
+            'gemini-3.8-flash',
+            'gemini-3.7-flash',
+            'gemini-3.6-flash',
+            'gemini-3.5-flash',
+            'gemini-2.5-flash',
+        ]
+
 
 # Keywords indicating operational, financial, or strategic catalysts
 CATALYST_KEYWORDS = [
@@ -218,8 +233,17 @@ REGOLE OBBLIGATORIE:
 Output SOLO il testo del commento in italiano."""
 
     try:
+        from post_verifier import verify_and_clean_comment
+    except ImportError:
+        try:
+            from src.post_verifier import verify_and_clean_comment
+        except ImportError:
+            verify_and_clean_comment = None
+
+    try:
         client = genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.6)
+        config_gen = types.GenerateContentConfig(temperature=0.4)
 
         for model_name in DEFAULT_GEMINI_MODELS:
             try:
@@ -236,10 +260,54 @@ Output SOLO il testo del commento in italiano."""
             except Exception as exc:
                 print(f"   ⚠️ Gemini {model_name} failed: {exc}")
                 continue
+        for idx, model_name in enumerate(DEFAULT_GEMINI_MODELS):
+            for attempt in range(2):
+                try:
+                    print(f"   🤖 Trying model for catalyst comment ({idx+1}/{len(DEFAULT_GEMINI_MODELS)}): {model_name}...")
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=config_gen,
+                    )
+                    if response and response.text:
+                        out = response.text.strip()
+                        if API_TRACKER_AVAILABLE:
+                            log_api_request(model_name, True, "stock_news_catalyst_comment")
+
+                        # Pass 2: Double-Check & Anti-Hallucination Gate
+                        if verify_and_clean_comment:
+                            approved, verified_text, audit_info = verify_and_clean_comment(
+                                text=out,
+                                primary_ticker=ticker,
+                                generator_model=model_name,
+                                run_ai_review=True,
+                            )
+                            if approved and verified_text:
+                                print(f"   ✅ Catalyst comment passed dual-check ({model_name})!")
+                                return verified_text
+                            else:
+                                print(f"   ⚠️ Catalyst comment failed verification ({model_name}), trying next model...")
+                                break
+                        return out
+
+                except Exception as exc:
+                    err_s = str(exc).lower()
+                    if "429" in err_s or "quota" in err_s or "resource_exhausted" in err_s:
+                        wait_t = 3.0 * (attempt + 1)
+                        print(f"   ⏳ Rate limit/Quota (429) on {model_name}. Pausing {wait_t:.1f}s...")
+                        time.sleep(wait_t)
+                        continue
+                    print(f"   ⚠️ Gemini {model_name} failed: {exc}")
+                    break
     except Exception as e:
         print(f"⚠️ Gemini client error: {e}")
 
+    # Fallback text also verified
+    if verify_and_clean_comment:
+        _, clean_fb, _ = verify_and_clean_comment(fallback_text, primary_ticker=ticker, run_ai_review=False)
+        return clean_fb or fallback_text
     return fallback_text
+
 
 
 def run_stock_news_commenter(
@@ -337,6 +405,17 @@ def run_stock_news_commenter(
                 if not etoro_client.is_configured():
                     print("   ❌ eToro API not configured. Cannot post comment.")
                     break
+
+                # Pre-flight Gatekeeper Check
+                if verify_and_clean_comment:
+                    ok_gate, clean_text, audit_info = verify_and_clean_comment(
+                        text=clean_text,
+                        primary_ticker=sym,
+                        run_ai_review=False
+                    )
+                    if not ok_gate:
+                        print(f"   🛑 CATALYST COMMENT BLOCKED BY GATEKEEPER: {audit_info.get('issues')}")
+                        continue
 
                 res = etoro_client.add_post_comment(
                     post_id=post_id,

@@ -6,7 +6,7 @@ Instagram Carousel Generator (v2): +200% eToro Milestone Story (6 Slides)
 - Prominently features Andrea's Central Park photo.
 - Clean luxury dark gradient background (NO checkerboard / grid artifacts).
 - Perfectly aligned stat cards and unified chip styling for portfolio assets.
-- Clear, intuitive representation for Liquidity (XEON, IB01).
+- Clear, intuitive representation for Liquidity (IB01).
 """
 
 import os
@@ -650,7 +650,7 @@ def render_slide_5() -> Image.Image:
             "Liquidità Remunerata",
             "10 - 15%",
             "Cassa remunerata al 3-4% annuo, pronta per comprare i crolli di mercato.",
-            ["XEON (Monetario EUR)", "IB01 (Treasury US 0-1y)"],
+            ["IB01 (Treasury US 0-1y)"],
             ACCENT_PURPLE
         ),
     ]

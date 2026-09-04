@@ -74,8 +74,10 @@ SECTOR_TAGS = {
     "SX7PEX.DE": "Banche europee ETF",
     "IEUR":      "ETF azionario Europa",
     "WDEF.L":    "ETF dividendi Europa",
+    "WDEF.L":    "ETF Difesa europea",
     "IB01.L":    "Treasury USA 0-1yr",
     "IQQL.DE":   "ETF quality MSCI World",
+    "IQQL.DE":   "Private Equity ETF",
     "IEMG":      "ETF mercati emergenti",
     "1211.HK":   "Auto elettriche · BYD",
     "1919.HK":   "Shipping · COSCO",
@@ -83,10 +85,15 @@ SECTOR_TAGS = {
     "TRX":       "Crypto · TRON",
     "ETOR":      "eToro Group",
     "PPFB.DE":   "Metalli fisici ETF",
+    "PPFB.DE":   "Oro fisico ETC",
     "ULVR.L":    "Beni di consumo · Unilever",
     "VOF.L":     "Vietnam · mercati emergenti",
     "INDO.PA":   "Indonesia · ETF",
     "MAU.PA":    "Petrolio · esplorazione",
+    "WMT":       "Retail · e-commerce",
+    "MRVL":      "Chip custom · ottica AI",
+    "SPCX.RTH":  "SpaceX · aerospazio",
+    "XEON.DE":   "Liquidità EUR · swap",
 }
 
 SESSION_LABELS = {

@@ -57,8 +57,26 @@ DEFAULT_GEMINI_MODELS = [
     'gemini-3.5-flash',
     'gemini-2.5-flash',
 ]
+try:
+    from ai_model_cascade import DEFAULT_GEMINI_MODELS
+except ImportError:
+    try:
+        from src.ai_model_cascade import DEFAULT_GEMINI_MODELS
+    except ImportError:
+        DEFAULT_GEMINI_MODELS = [
+            'gemini-3.1-pro',
+            'gemini-3.8-flash',
+            'gemini-3.7-flash',
+            'gemini-3.6-flash',
+            'gemini-3.5-flash',
+            'gemini-2.5-flash',
+        ]
+
 
 # Baseline dividend profiles for portfolio holdings
+from portfolio_manager import get_asset_metadata
+
+# Baseline dividend profiles for verified dividend-paying portfolio holdings
 DIVIDEND_PROFILES = {
     "ENI.MI": {
         "name": "Eni S.p.A.",
@@ -98,8 +116,10 @@ DIVIDEND_PROFILES = {
         "cashtag": "$SX7PEX.DE",
         "emoji": "🏛️",
         "sector": "ETF Bancario Europeo",
+        "sector": "ETF Bancario Europeo ad Alto Rendimento",
         "annual_yield_pct": 7.2,
         "frequency": "Semestrale",
+        "frequency": "Semestrale (Giugno / Dicembre)",
         "tranche_pct": 3.6,
         "approx_dps": "Distribuzione semestrale",
         "thesis": "Bilanci blindati dei primari istituti bancari europei con coefficienti patrimoniali ai massimi e buyback massicci.",
@@ -133,6 +153,7 @@ DIVIDEND_PROFILES = {
         "sector": "Dispositivi Medici & Diagnostica (Dividend King)",
         "annual_yield_pct": 2.1,
         "frequency": "Trimestrale",
+        "frequency": "Trimestrale (Feb/Mag/Ago/Nov)",
         "tranche_pct": 0.52,
         "approx_dps": "$0,55 per azione",
         "thesis": "Stabilità secolare nei dispositivi cardiovascolari, FreeStyle Libre per il diabete e nutrizione clinica.",
@@ -144,6 +165,7 @@ DIVIDEND_PROFILES = {
         "sector": "Oncologia & Biotecnologie",
         "annual_yield_pct": 2.8,
         "frequency": "Semestrale",
+        "frequency": "Semestrale (Febbraio / Agosto)",
         "tranche_pct": 1.4,
         "approx_dps": "$1,97 semestrale",
         "thesis": "Leader nell'oncologia di precisione e nelle malattie rare con solida pipeline di farmaci blockbuster.",
@@ -155,6 +177,7 @@ DIVIDEND_PROFILES = {
         "sector": "Materie Prime & Rame/Cobalto per la Transizione",
         "annual_yield_pct": 4.8,
         "frequency": "Semestrale",
+        "frequency": "Semestrale (Maggio / Settembre)",
         "tranche_pct": 2.4,
         "approx_dps": "Distribuzione cassa semestrale",
         "thesis": "Attore cardine nella fornitura globale di rame, nichel e materie prime essenziali per i data center e la rete elettrica.",
@@ -166,6 +189,7 @@ DIVIDEND_PROFILES = {
         "sector": "Infrastrutture Eoliche & Solari UK/EU",
         "annual_yield_pct": 7.4,
         "frequency": "Trimestrale",
+        "frequency": "Trimestrale (Mar/Giu/Set/Dic)",
         "tranche_pct": 1.85,
         "approx_dps": "7,18p per azione/anno",
         "thesis": "Contratti di fornitura energetica a lungo termine indicizzati all'inflazione con dividendi costanti.",
@@ -177,6 +201,7 @@ DIVIDEND_PROFILES = {
         "sector": "Beni di Largo Consumo & Brand Difensivi",
         "annual_yield_pct": 3.6,
         "frequency": "Trimestrale",
+        "frequency": "Trimestrale (Mar/Giu/Set/Dic)",
         "tranche_pct": 0.9,
         "approx_dps": "€0,43 per azione",
         "thesis": "Brand iconici globali con forte potere di prezzo e domanda anelastica in tutte le condizioni macroeconomiche.",
@@ -188,6 +213,7 @@ DIVIDEND_PROFILES = {
         "sector": "Retail Omnicanale & Logistica",
         "annual_yield_pct": 1.3,
         "frequency": "Trimestrale",
+        "frequency": "Trimestrale (Mar/Mag/Ago/Dic)",
         "tranche_pct": 0.32,
         "approx_dps": "$0,2075 post-split",
         "thesis": "Oltre 50 anni consecutivi di aumenti del dividendo, scala logistica ineguagliata ed espansione ad alta marginalità.",
@@ -199,6 +225,7 @@ DIVIDEND_PROFILES = {
         "sector": "Software Enterprise & Cloud Azure",
         "annual_yield_pct": 0.8,
         "frequency": "Trimestrale",
+        "frequency": "Trimestrale (Feb/Mag/Ago/Nov)",
         "tranche_pct": 0.20,
         "approx_dps": "$0,75 per azione",
         "thesis": "Fortezza finanziaria AAA con dividendo costantemente in crescita a doppia cifra accompagnato da reinvestimento massiccio in AI.",
@@ -210,13 +237,93 @@ DIVIDEND_PROFILES = {
         "sector": "Semiconductors & AI Networking",
         "annual_yield_pct": 1.4,
         "frequency": "Trimestrale",
+        "frequency": "Trimestrale (Mar/Giu/Set/Dic)",
         "tranche_pct": 0.35,
         "approx_dps": "$0,53 post-split",
         "thesis": "Politica di payout con target di distribuire il 50% del Free Cash Flow dell'anno precedente in dividendi.",
     },
+    "1919.HK": {
+        "name": "COSCO SHIPPING Holdings Co Ltd",
+        "cashtag": "$1919.HK",
+        "emoji": "🚢",
+        "sector": "Logistica Marittima Globale & Terminal Portuali",
+        "annual_yield_pct": 6.2,
+        "frequency": "Semestrale (Giugno / Ottobre)",
+        "tranche_pct": 3.1,
+        "approx_dps": "Distribuzione cassa semestrale",
+        "thesis": "Spina dorsale del commercio marittimo mondiale con cassa netta massiccia e dividendi straordinari.",
+    },
+    "MAU.PA": {
+        "name": "Etablissements Maurel & Prom SA",
+        "cashtag": "$MAU.PA",
+        "emoji": "🛢️",
+        "sector": "Esplorazione & Produzione Idrocarburi",
+        "annual_yield_pct": 4.5,
+        "frequency": "Annuale (Luglio)",
+        "tranche_pct": 4.5,
+        "approx_dps": "€0,30 per azione",
+        "thesis": "Produttore petrolifero indipendente a cassa netta positiva e dividendi generosi.",
+    },
+    "NOVO-B.CO": {
+        "name": "Novo Nordisk A/S",
+        "cashtag": "$NOVO-B.CO",
+        "emoji": "💉",
+        "sector": "Farmaceutica & Trattamenti GLP-1",
+        "annual_yield_pct": 1.4,
+        "frequency": "Semestrale (Marzo / Agosto)",
+        "tranche_pct": 0.7,
+        "approx_dps": "Distribuzione semestrale DKK",
+        "thesis": "Leadership mondiale nel diabete e obesità con crescita continua della remunerazione.",
+    },
+    "2318.HK": {
+        "name": "Ping An Insurance Group",
+        "cashtag": "$2318.HK",
+        "emoji": "🏦",
+        "sector": "Assicurazioni & Finanza Digitale Asia",
+        "annual_yield_pct": 6.5,
+        "frequency": "Semestrale (Giugno / Ottobre)",
+        "tranche_pct": 3.25,
+        "approx_dps": "Distribuzione semestrale HKD",
+        "thesis": "Colosso assicurativo asiatico con dividendi costanti e multipli a forte sconto.",
+    },
+    "IQQL.DE": {
+        "name": "iShares Listed Private Equity ETF",
+        "cashtag": "$IQQL.DE",
+        "emoji": "🔥",
+        "sector": "Private Equity Quotato & Gestori Alternativi",
+        "annual_yield_pct": 3.5,
+        "frequency": "Semestrale (Maggio / Novembre)",
+        "tranche_pct": 1.75,
+        "approx_dps": "Distribuzione semestrale EUR",
+        "thesis": "Accesso liquido ai giganti del private equity mondiale con stacco cedolare semestrale.",
+    },
+    "IEUR": {
+        "name": "iShares Core MSCI Europe ETF",
+        "cashtag": "$IEUR",
+        "emoji": "🇪🇺",
+        "sector": "Azionario Europeo Broad Market",
+        "annual_yield_pct": 2.5,
+        "frequency": "Semestrale (Giugno / Dicembre)",
+        "tranche_pct": 1.25,
+        "approx_dps": "Distribuzione semestrale USD",
+        "thesis": "Esposizione diversificata alle blue chip europee con stacchi semestrali.",
+    },
+    "VOF.L": {
+        "name": "VinaCapital Vietnam Opportunity Fund",
+        "cashtag": "$VOF.L",
+        "emoji": "🇻🇳",
+        "sector": "Azionario Frontier Market Vietnam",
+        "annual_yield_pct": 1.5,
+        "frequency": "Semestrale (Marzo / Ottobre)",
+        "tranche_pct": 0.75,
+        "approx_dps": "Distribuzione semestrale USD/GBP",
+        "thesis": "Fondo chiuso sulla crescita manifatturiera del Vietnam con dividendo semestrale.",
+    },
 }
 
 # Calendar mapping for dividend distribution ex-dates (month, approx_day, tranche_label)
+# NOTE: Accumulating ETFs (e.g. WDEF.L, INDO.PA, IB01.L, XEON.DE) and Commodities (PPFB.DE) are EXCLUDED.
+# NOTE: Accumulating ETFs (e.g. WDEF.L, INDO.PA, IB01.L) and Commodities (PPFB.DE) are EXCLUDED.
 DIVIDEND_CALENDAR = {
     "ENI.MI": [(3, 23, "Tranche 3"), (5, 20, "Saldo"), (9, 21, "Tranche 1"), (11, 20, "Tranche 2")],
     "ENEL.MI": [(1, 22, "Acconto"), (7, 22, "Saldo")],
@@ -232,6 +339,13 @@ DIVIDEND_CALENDAR = {
     "WMT": [(3, 15, "Q1"), (5, 15, "Q2"), (8, 15, "Q3"), (12, 15, "Q4")],
     "MSFT": [(2, 15, "Q1"), (5, 15, "Q2"), (8, 15, "Q3"), (11, 15, "Q4")],
     "AVGO": [(3, 20, "Q1"), (6, 20, "Q2"), (9, 21, "Q3"), (12, 20, "Q4")],
+    "1919.HK": [(6, 10, "Final"), (10, 15, "Interim")],
+    "MAU.PA": [(7, 5, "Annuale")],
+    "NOVO-B.CO": [(3, 25, "Final"), (8, 15, "Interim")],
+    "2318.HK": [(6, 5, "Final"), (10, 20, "Interim")],
+    "IQQL.DE": [(5, 15, "Semestrale H1"), (11, 15, "Semestrale H2")],
+    "IEUR": [(6, 20, "Semestrale H1"), (12, 20, "Semestrale H2")],
+    "VOF.L": [(3, 15, "Interim"), (10, 15, "Final")],
 }
 
 
@@ -436,11 +550,13 @@ Per chi sta copiando la nostra strategia o valuta di allocare $10.000:
 
 📊 RENDIMENTO COMPLESSIVO ANNUO DA DIVIDENDI:
 L'intero portafoglio (grazie al mix di ETF a distribuzione come $WDEF.L, $SX7PEX.DE e titoli solidi come $ENI.MI, $ENEL.MI, $ABBV) genera un flusso dividendi medio aggregato del ~3,0% annuo.
+L'intero portafoglio (grazie al mix di ETF a distribuzione come $SX7PEX.DE e titoli solidi come $ENI.MI, $ENEL.MI, $ABBV, $TRIG.L) genera un flusso dividendi medio aggregato del ~3,0% annuo.
 Su $10.000 copiati, questo si traduce in circa ${annual_tot_usd:.0f} all'anno di puro flusso di cassa passivo, che alimenta la liquidità senza dover vendere alcuna azione.
 
 💬 Reinvestite i dividendi che ricevete in cassa o preferite accumulare liquidità per nuove opportunità? Dite la vostra nei commenti! 👇
 
 📌 {prof['cashtag']} $WDEF.L $SX7PEX.DE $ENI.MI $ABBV
+📌 {prof['cashtag']} $SX7PEX.DE $ENI.MI $ENEL.MI $ABBV $TRIG.L
 🏷️ #Dividendi #CashFlow #eToro #PopularInvestor #Investimenti #CopyTrading
 👤 Segui e copia il portafoglio: https://www.etoro.com/people/andrearavalli"""
 
@@ -468,6 +584,7 @@ REGOLE PER IL POST:
 3. Includi la simulazione chiara su $10.000 di copia.
 4. Concludi con una domanda stimolante per la community sui dividendi / reinvestimento automatico.
 5. Includi i cashtag ({prof['cashtag']} $WDEF.L $SX7PEX.DE $ENI.MI $ABBV) e hashtag finali (#Dividendi #CashFlow #eToro #PopularInvestor #CopyTrading).
+5. Includi i cashtag ({prof['cashtag']} $SX7PEX.DE $ENI.MI $ENEL.MI $ABBV $TRIG.L) e hashtag finali (#Dividendi #CashFlow #eToro #PopularInvestor #CopyTrading).
 6. Lunghezza: 900-1400 caratteri. Tono autorevole, matematico e trasparente. NO formule robotiche.
 7. NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi).
 
@@ -476,6 +593,7 @@ Output ONLY the post text in Italian."""
     try:
         client = genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.7)
+        config_gen = types.GenerateContentConfig(temperature=0.5)
 
         for model_name in DEFAULT_GEMINI_MODELS:
             try:
@@ -491,6 +609,28 @@ Output ONLY the post text in Italian."""
             except Exception as exc:
                 print(f"   ⚠️ Gemini {model_name} failed: {exc}")
                 continue
+        for idx, model_name in enumerate(DEFAULT_GEMINI_MODELS):
+            for attempt in range(2):
+                try:
+                    print(f"   🤖 Trying dividend model ({idx+1}/{len(DEFAULT_GEMINI_MODELS)}): {model_name}...")
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=config_gen,
+                    )
+                    if response and response.text:
+                        if API_TRACKER_AVAILABLE:
+                            log_api_request(model_name, True, "dividend_announcement_post")
+                        return f"Dividendi: {prof['cashtag']}", response.text.strip()
+                except Exception as exc:
+                    err_s = str(exc).lower()
+                    if "429" in err_s or "quota" in err_s or "resource_exhausted" in err_s:
+                        wait_t = 3.0 * (attempt + 1)
+                        print(f"   ⏳ Model {model_name} quota/rate limit (429). Pausing {wait_t:.1f}s...")
+                        time.sleep(wait_t)
+                        continue
+                    print(f"   ⚠️ Gemini {model_name} failed: {exc}")
+                    break
     except Exception as e:
         print(f"⚠️ Gemini client error: {e}")
 
@@ -513,11 +653,25 @@ def publish_dividend_post(
     print(f"⚙️  Mode: {'DRY RUN' if dry_run else 'LIVE PUBLISH'}")
     print("=" * 65)
 
+    # Validate dividend paying eligibility
+    meta = get_asset_metadata(ticker)
+    if not meta.get("is_dividend_paying", False) and ticker not in DIVIDEND_PROFILES:
+        print(f"❌ REJECTED: {ticker} ({meta.get('name')}) is NOT a dividend-distributing asset.")
+        print(f"   Policy: {meta.get('dividend_policy')}")
+        return {
+            "success": False,
+            "error": f"{ticker} is not a dividend paying asset ({meta.get('dividend_policy')})",
+            "ticker": ticker
+        }
+
     DEFAULT_WEIGHTS = {
         "ENI.MI": 3.94, "ENEL.MI": 2.94, "WDEF.L": 3.50, "SX7PEX.DE": 3.43,
+        "ENI.MI": 3.94, "ENEL.MI": 2.94, "SX7PEX.DE": 3.43,
         "VOW3.DE": 1.24, "ABBV": 2.80, "ABT.US": 2.20, "AZN.L": 2.10,
         "GLEN.L": 2.50, "TRIG.L": 2.20, "ULVR.L": 2.00, "WMT": 1.80,
         "MSFT": 2.19, "AVGO": 1.50, "MAU.PA": 2.00,
+        "MSFT": 2.19, "AVGO": 1.50, "MAU.PA": 2.00, "1919.HK": 2.12,
+        "NOVO-B.CO": 2.00, "2318.HK": 1.06,
     }
 
     # Determine live weight
@@ -554,6 +708,25 @@ def publish_dividend_post(
         print(f"ℹ️ Dedicated dividend infographic fallback: {exc}")
         if not os.path.exists(card_path):
             card_path = None
+
+    try:
+        from post_verifier import verify_and_clean_post
+        approved, verified_text, audit = verify_and_clean_post(
+            clean_text,
+            primary_ticker=ticker,
+            session_name=f"Dividend: {ticker}",
+            run_ai_review=True,
+        )
+        if not approved:
+            print(f"❌ Dividend post rejected by post_verifier: {audit.get('explanation')}")
+            return {
+                "success": False,
+                "error": f"Post verifier rejected: {audit.get('explanation')}",
+                "ticker": ticker
+            }
+        clean_text = verified_text
+    except Exception as v_err:
+        print(f"⚠️ Post verifier check warning: {v_err}")
 
     print("\n" + "-" * 55)
     print(f"📝 GENERATED DIVIDEND POST PREVIEW:\n")
