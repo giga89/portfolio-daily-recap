@@ -39,6 +39,14 @@ import analytics_tracker
 from etoro_sender import _strip_html
 
 try:
+    from post_verifier import verify_and_clean_comment
+except ImportError:
+    try:
+        from src.post_verifier import verify_and_clean_comment
+    except ImportError:
+        verify_and_clean_comment = None
+
+try:
     from google import genai
     from google.genai import types
     GENAI_AVAILABLE = True
