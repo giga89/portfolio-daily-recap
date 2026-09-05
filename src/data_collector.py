@@ -216,18 +216,32 @@ def main():
         import meme_generator
         from config import EMOJI_MAP
 
-        # Use Meme Card on extreme days (|daily| >= 1.5%) or with 35% random rotation at US Close
-        use_meme = abs(portfolio_daily) >= 1.5 or (random.random() < 0.35 and "close" in market_session.lower())
-        
+        # Higher meme rotation probability:
+        # 1. Notable market move (|daily| >= 0.8%): 85% chance for sentiment meme
+        # 2. US Close / Daily Recap: 65% chance (previously 35%)
+        # 3. Weekend recap sessions: 50% chance (previously 0%)
+        # 4. Open / other sessions: 40% chance (previously 0%)
+        session_lower = market_session.lower()
+        if abs(portfolio_daily) >= 0.8:
+            use_meme = random.random() < 0.85
+        elif "close" in session_lower or "daily" in session_lower or "recap" in session_lower:
+            use_meme = random.random() < 0.65
+        elif is_weekly or "weekend" in session_lower:
+            use_meme = random.random() < 0.50
+        else:
+            use_meme = random.random() < 0.40
+
         if use_meme:
-            print("🎭 Generating Contextual Market Meme Card...")
+            print("🎭 Generating Contextual Market Meme Card (elevated probability)...")
             top_performers = social_publisher._extract_top_performers("", stock_data)
             engagement_card_path = meme_generator.generate_meme_card(
                 portfolio_daily=portfolio_daily,
                 top_performers=top_performers,
-                lang="it"
+                lang="it",
+                is_weekend=is_weekly,
             )
         else:
+            print("📊 Generating Top & Flop (Winners & Losers) Card...")
             engagement_card_path = winners_losers_card.build_card_from_stock_data(
                 stock_data=stock_data,
                 session_name=market_session,

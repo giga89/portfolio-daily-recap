@@ -296,11 +296,13 @@ def publish_all(
         # Send engagement card to boost interaction
         if ok and engagement_card_path and os.path.exists(engagement_card_path):
             try:
+                is_meme = "meme" in os.path.basename(engagement_card_path).lower()
+                caption = "🎭 Market Meme del giorno! Lascia un commento qui sotto! ⬇️" if is_meme else "💬 Lascia un commento qui sotto! ⬇️"
                 telegram_sender.send_telegram_photo(
                     engagement_card_path,
-                    caption="💬 Lascia un commento qui sotto! ⬇️",
+                    caption=caption,
                 )
-                print("   💬 Engagement card sent to Telegram")
+                print(f"   {'🎭 Meme card' if is_meme else '💬 Engagement card'} sent to Telegram")
             except Exception as exc:
                 print(f"   ⚠️ Engagement card send failed: {exc}")
     else:
@@ -424,12 +426,13 @@ def publish_all(
         results["etoro"] = ok
         if ok:
             real_pid = etoro_sender.LAST_PUBLISHED_POST_ID or f"recap_{market_session.replace(' ', '_').lower()}_{datetime.utcnow().strftime('%Y%m%d_%H%M')}"
+            card_is_meme = bool(card_to_upload and "meme" in os.path.basename(card_to_upload).lower())
             analytics_tracker.record_post(
                 platform="etoro",
                 post_id=real_pid,
                 session_name=market_session,
                 text=etoro_text,
-                image_type="winners_losers_card" if card_to_upload == engagement_card_path else "chart",
+                image_type="meme_card" if card_is_meme else ("winners_losers_card" if card_to_upload == engagement_card_path else "chart"),
                 tickers=[s[0] for s in top_performers] if top_performers else [],
             )
             if etoro_sender.LAST_PUBLISHED_POST_ID:
