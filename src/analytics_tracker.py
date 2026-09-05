@@ -2475,7 +2475,6 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             datasets: [
               {{
                 label: 'Andrea Ravalli (+200%)',
-                data: arAnnual,
                 data: getArAnnual(),
                 backgroundColor: 'rgba(19, 198, 54, 0.85)',
                 borderColor: '#13C636',
@@ -2524,7 +2523,6 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
           }}
         }});
       }} else {{
-        const arCum = [10000, 14740, 17137, 13929, 16821, 21048, 27065, 30050];
         const arCum = getArCumulative();
         const spxCum = [10000, 11840, 15238, 12479, 15761, 19701, 22951, 25062];
         const msciCum = [10000, 11590, 14116, 11617, 14381, 17329, 19893, 21583];
