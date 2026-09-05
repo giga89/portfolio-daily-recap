@@ -32,6 +32,8 @@ import urllib.request
 import urllib.error
 
 ACTIVE_MODELS = [
+    ("gemini-3.1-pro-preview", "3.1 Pro Preview - Flagship Deep Reasoning (5 RPM / 20 RPD)"),
+    ("gemini-3.8-flash", "3.8 Flash - Newest Flash Flagship (5 RPM / 20 RPD)"),
     ("gemini-3.7-flash", "3.7 Flash - Massima intelligenza (5 RPM / 20 RPD)"),
     ("gemini-3.6-flash", "3.6 Flash - Alta intelligenza (5 RPM / 20 RPD)"),
     ("gemini-3.5-flash", "3.5 Flash - Veloce e contestualizzato (5 RPM / 20 RPD)"),
