@@ -481,11 +481,16 @@ def audit_comment_with_ai_reviewer(
                 reviewer_model = m
                 break
 
+    if user_comment:
+        user_context_info = f'Utente: @{user_author}\nCommento: "{user_comment}"'
+    else:
+        user_context_info = 'N/A (Commento autonomo su catalyst o notizia)'
+
     prompt = f"""Sei il Lead Compliance and Fact-Checking Auditor per il canale eToro di Andrea Ravalli (+200%, Risk 3/10, multi-asset, zero leva).
 Verifica con la massima severità la seguente RISPOSTA / COMMENTO per la community prima della pubblicazione:
 
 CONTESTO UTENTE / DOMANDA ORIGINALE:
-{f'Utente: @{user_author}\nCommento: "{user_comment}"' if user_comment else 'N/A (Commento autonomo su catalyst o notizia)'}
+{user_context_info}
 
 METADATI CERTIFICATI PORTAFOGLIO (SINGLE SOURCE OF TRUTH):
 {meta_context}
