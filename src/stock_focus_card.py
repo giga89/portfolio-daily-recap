@@ -68,14 +68,16 @@ TICKER_THEMES = {
     "0005.HK": {"sector": "Banca Globale & Wealth Management Asia", "domain": "hsbc.com", "thesis": "Hub finanziario chiave per i flussi di capitale tra Europa e Asia.", "color": (219, 0, 17)},
     "1211.HK": {"sector": "Veicoli Elettrici & Batterie EV", "domain": "byd.com", "thesis": "Integrazione verticale completa dalle batterie alla produzione su larga scala.", "color": (30, 144, 255)},
     "WMT": {"sector": "Retail Globale & Logistica Omnicanale", "domain": "walmart.com", "thesis": "Dominio nella grande distribuzione, crescita continua dell'e-commerce e margini dalla pubblicità retail.", "color": (0, 113, 206)},
-    t: {
-        "sector": m.get("sector", "Settore"),
-        "domain": m.get("domain", f"{t.lower()}.com"),
-        "thesis": m.get("thesis", ""),
-        "color": m.get("color", (0, 200, 255))
-    }
-    for t, m in PORTFOLIO_ASSETS_METADATA.items()
 }
+
+for t, m in PORTFOLIO_ASSETS_METADATA.items():
+    if t not in TICKER_THEMES:
+        TICKER_THEMES[t] = {
+            "sector": m.get("sector", "Settore"),
+            "domain": m.get("domain", f"{t.lower()}.com"),
+            "thesis": m.get("thesis", ""),
+            "color": m.get("color", (0, 200, 255))
+        }
 
 
 def _font(size: int) -> "ImageFont.FreeTypeFont":

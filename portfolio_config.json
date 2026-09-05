@@ -4,23 +4,18 @@
         "1919.HK": "🚢",
         "2318.HK": "🏦",
         "ABBV": "💉",
-        "ABT": "🏥",
         "ABT.US": "🏥",
         "AMZN": "📦",
-        "AVGO": "💻",
         "AVGO": "🔌",
         "AZN.L": "🧬",
         "CCJ": "⚡",
-        "DB1.DE": "📊",
         "ENEL.MI": "🔋",
-        "ENI": "⛽",
         "ENI.MI": "⛽",
         "ETOR": "🏛️",
         "GLEN.L": "⛏️",
         "GOOG": "🔍",
         "HUM": "🏥",
         "IB01.L": "💵",
-        "IEMG": "🌍",
         "IEUR": "🇪🇺",
         "INDO.PA": "🇮🇩",
         "IQQL.DE": "🔥",
@@ -29,13 +24,11 @@
         "MELI": "🛒",
         "MRVL": "📊",
         "MSFT": "💻",
-        "NET": "☁️",
         "NOVO-B.CO": "💉",
         "NVDA": "🤖",
         "PLTR": "🛡️",
         "PPFB.DE": "🥇",
         "PRY.MI": "🔌",
-        "PYPL": "💳",
         "RACE": "🏎️",
         "SPCX.RTH": "🚀",
         "SX7PEX.DE": "🏛️",
@@ -45,10 +38,7 @@
         "ULVR.L": "🧼",
         "VOF.L": "🇻🇳",
         "VOW3.DE": "🚗",
-        "VWCE.L": "🌐",
         "WDEF.L": "🛡️",
-        "WMT": "🛒",
-        "XEON.DE": "💤"
         "WMT": "🛒"
     },
     "tickers": {
@@ -211,10 +201,6 @@
         "WMT": [
             "WMT",
             "Walmart Inc."
-        ],
-        "XEON.DE": [
-            "XEON.DE",
-            "Xtrackers II EUR Overnight Rate Swap UCITS ETF"
         ]
     }
 }

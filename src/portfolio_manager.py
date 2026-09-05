@@ -216,17 +216,7 @@ def load_config():
                 config["tickers"]["NOVO-B.CO"] = ["NOVO-B.CO", "Novo Nordisk"]
                 needs_save = True
 
-            # Add new positions: XEON.DE and IB01.L
-            if "XEON.DE" not in config["tickers"]:
-                config["tickers"]["XEON.DE"] = ["XEON.DE", "Xtrackers II EUR Overnight Rate Swap UCITS ETF"]
-                config["emojis"]["XEON.DE"] = "💤"
-            # Ensure purged positions are removed: XEON.DE
-            if "XEON.DE" in config.get("tickers", {}):
-                del config["tickers"]["XEON.DE"]
-                needs_save = True
-            if "XEON.DE" in config.get("emojis", {}):
-                del config["emojis"]["XEON.DE"]
-                needs_save = True
+            # Add new positions: IB01.L
             if "IB01.L" not in config["tickers"]:
                 config["tickers"]["IB01.L"] = ["IB01.L", "iShares Treasury Bond 0-1yr UCITS ETF"]
             # Ensure purged positions are removed: XEON.DE and legacy unheld assets
@@ -1248,7 +1238,6 @@ PORTFOLIO_ASSETS_METADATA = {
             "Rischio di cambio per investitori la cui valuta di base non è il dollaro USA"
         ],
         "related_tickers": ["$SHY", "$BIL", "$XEON.DE"], "primary_tags": ["$IB01.L"]
-        "related_tickers": ["$SHY", "$BIL", "$TLT"], "primary_tags": ["$IB01.L"]
     },
     "XEON.DE": {
         "ticker": "XEON.DE", "yahoo_ticker": "XEON.DE", "name": "Xtrackers II EUR Overnight Rate Swap UCITS ETF", "emoji": "💤",

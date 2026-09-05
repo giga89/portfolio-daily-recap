@@ -887,8 +887,8 @@ def fetch_dynamic_company_infographic_data(ticker: str) -> dict:
                 f"Politica dividendi certificata: {meta.get('dividend_policy', 'Dividendi regolari')}."
             )
 
+            kpi4_label = "KPI 4 (es. GENERAZIONE CASSA)" if not is_div_paying else "KPI 4 (es. DIVIDENDI / CASSA)"
             client = genai.Client(api_key=api_key)
-            prompt = f"""Analizza in profondità l'azienda {company_name} (${clean_ticker}).
             prompt = f"""Analizza in profondità l'azienda o ETF {company_name} (${clean_ticker}).
 Settore ufficiale: {meta.get('sector', 'N/A')}.
 Tesi core: {meta.get('thesis', 'N/A')}.
@@ -905,8 +905,7 @@ Fornisci in formato JSON strutturato (senza markdown extra):
     {{"label": "KPI 1 (es. CRESCITA RICAVI)", "val": "DATO ATTUALE (es. +25%)", "sub": "breve dettaglio"}},
     {{"label": "KPI 2 (es. MARGINE OPERATIVO)", "val": "DATO ATTUALE (es. 35%)", "sub": "breve dettaglio"}},
     {{"label": "PESO IN PORTAFOGLIO", "val": "{live_weight}", "sub": "Allocazione gestita nel portafoglio"}},
-    {{"label": "KPI 4 (es. CASSA / DIVIDENDI)", "val": "DATO ATTUALE (es. $5B+)", "sub": "breve dettaglio"}}
-    {{"label": "KPI 4 (es. GENERAZIONE CASSA" if not is_div_paying else "KPI 4 (es. DIVIDENDI / CASSA", "val": "DATO ATTUALE (es. $5B+)", "sub": "breve dettaglio"}}
+    {{"label": "{kpi4_label}", "val": "DATO ATTUALE (es. $5B+)", "sub": "breve dettaglio"}}
   ],
   "pillars": [
     ["Fossato Competitivo:", "Spiegazione del moat o barriere all'entrata in 1 riga."],
@@ -920,7 +919,6 @@ Fornisci in formato JSON strutturato (senza markdown extra):
 }}"""
 
             config_gen = types.GenerateContentConfig(
-                temperature=0.3,
                 temperature=0.2,
                 response_mime_type="application/json"
             )

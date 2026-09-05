@@ -526,12 +526,9 @@ Output ONLY valid JSON.
 
     client = genai.Client(api_key=api_key)
 
-    # Use a priority model for review
-    models_to_try = [m for m in DEFAULT_GEMINI_MODELS if m in ['gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-2.5-flash']]
     # Use prioritized reviewer models starting with the best reasoning model
     reviewers = [m for m in REVIEWER_GEMINI_MODELS if m in DEFAULT_GEMINI_MODELS] or DEFAULT_GEMINI_MODELS
 
-    for model_name in models_to_try:
     for model_name in reviewers:
         try:
             print(f"   🔍 Community Reply Auditor running on model: {model_name}...")
@@ -539,7 +536,6 @@ Output ONLY valid JSON.
                 model=model_name,
                 contents=judge_prompt,
                 config=types.GenerateContentConfig(
-                    temperature=0.2,
                     temperature=0.1,
                     max_output_tokens=1500,
                 )
