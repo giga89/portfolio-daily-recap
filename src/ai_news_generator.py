@@ -782,6 +782,29 @@ Impact and outlook summary...
                 
                 # Quota / rate limit (429) backoff
                 if '429' in error_msg or 'quota' in error_msg or 'resource_exhausted' in error_msg:
+                    # If tools were active, the 429 may be specifically on Google Search tool.
+                    # Attempt generation with this same model without tools first before cascading.
+                    if config and getattr(config, 'tools', None):
+                        print(f"   ℹ️ Model {model_name} search tool rate-limited (429), trying without search tool...")
+                        try:
+                            time.sleep(2.0)
+                            response = client.models.generate_content(
+                                model=model_name,
+                                contents=prompt,
+                                config=types.GenerateContentConfig(temperature=0.7)
+                            )
+                            if response and response.text:
+                                print(f"✅ Monthly recap generated using {model_name} (direct, no tools)!")
+                                if API_TRACKER_AVAILABLE:
+                                    log_api_request(model_name, True, "monthly_recap")
+                                recap_text = response.text.strip()
+                                recap_text = _remove_intro_text(recap_text)
+                                recap_text = _remove_market_section_tags(recap_text)
+                                recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                                return "\n" + recap_text + "\n"
+                        except Exception as e_notools:
+                            print(f"   Direct attempt without tools also failed: {e_notools}")
+
                     print(f"   ⏳ Model {model_name} quota/rate limited (429). Waiting 6s before cascading...")
                     time.sleep(6.0)
                     continue
@@ -1140,6 +1163,41 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                 
                 # 429 QUOTA / RATE LIMIT — pause before cascading
                 if '429' in error_msg or 'quota' in error_msg or 'resource_exhausted' in error_msg:
+                    # If search tools were active, the 429 quota exhaustion could be on the Google Search Tool.
+                    # Attempt direct generation with this same high-intelligence model without search tool.
+                    if config and getattr(config, 'tools', None):
+                        print(f"   ℹ️ Model {model_name} search tool rate-limited (429), trying without search tool...")
+                        try:
+                            time.sleep(2.0)
+                            response = client.models.generate_content(
+                                model=model_name,
+                                contents=prompt,
+                                config=types.GenerateContentConfig(temperature=0.7)
+                            )
+                            if response and response.text:
+                                print(f"✅ AI news recap generated successfully using {model_name} (direct, no tools)!")
+                                if API_TRACKER_AVAILABLE:
+                                    log_api_request(model_name, True, "daily_recap")
+                                recap_text = response.text.strip()
+                                recap_text = _remove_intro_text(recap_text)
+                                recap_text = _remove_market_section_tags(recap_text)
+                                recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
+                                recap_text = _clean_robotic_phrases(recap_text)
+                                approved, verified_text = _run_post_verification(
+                                    recap_text,
+                                    session_name=market_session or "Daily recap",
+                                    generator_model=model_name,
+                                )
+                                if approved and verified_text:
+                                    recap_text = verified_text
+                                    if selected_tags:
+                                        update_rotation_history(selected_tags)
+                                    if GIST_STORAGE_AVAILABLE:
+                                        save_to_history(recap_text)
+                                    return "\n" + recap_text + "\n"
+                        except Exception as e_notools:
+                            print(f"   Direct attempt without tools for {model_name} also failed: {e_notools}")
+
                     print(f"   ⏳ Model {model_name} quota/rate limited (429). Pausing 6s before cascading...")
                     time.sleep(6.0)
                     last_error = model_error
