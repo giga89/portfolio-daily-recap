@@ -1,0 +1,30 @@
+name: AI Model Cascade Test Suite
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ai-models:
+    name: Test All AI Models
+    runs-on: ubuntu-latest
+    environment: Etoro
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Comprehensive AI Model Test Suite
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python scripts/test_all_ai_models.py

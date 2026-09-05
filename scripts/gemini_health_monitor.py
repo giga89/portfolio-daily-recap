@@ -52,7 +52,7 @@ def test_model(api_key: str, model_name: str, client=None) -> dict:
                 model=model_name,
                 contents='Reply with only the word "OK"',
                 config=types.GenerateContentConfig(
-                    max_output_tokens=5,
+                    max_output_tokens=150,
                     temperature=0.0
                 )
             )
