@@ -52,12 +52,12 @@ except ImportError:
         from src.ai_model_cascade import DEFAULT_GEMINI_MODELS
     except ImportError:
         DEFAULT_GEMINI_MODELS = [
-            'gemini-3.1-pro',       # Flagship Deep Reasoning model (Best quality)
-            'gemini-3.8-flash',     # Newest Flagship Flash model
-            'gemini-3.7-flash',     # Most intelligent & capable
-            'gemini-3.6-flash',     # High capability 3.x series
-            'gemini-3.5-flash',     # Advanced financial context & reasoning
-            'gemini-2.5-flash',     # Robust standard model
+            'gemini-3.1-pro-preview', # Flagship Deep Reasoning model (Best quality)
+            'gemini-3.8-flash',       # Newest Flagship Flash model
+            'gemini-3.7-flash',       # Most intelligent & capable
+            'gemini-3.6-flash',       # High capability 3.x series
+            'gemini-3.5-flash',       # Advanced financial context & reasoning
+            'gemini-2.5-flash',       # Robust standard model
         ]
 
 
@@ -782,8 +782,8 @@ Impact and outlook summary...
                 
                 # Quota / rate limit (429) backoff
                 if '429' in error_msg or 'quota' in error_msg or 'resource_exhausted' in error_msg:
-                    print(f"   ⏳ Model {model_name} quota/rate limited (429). Waiting 3s before cascading...")
-                    time.sleep(3.0)
+                    print(f"   ⏳ Model {model_name} quota/rate limited (429). Waiting 6s before cascading...")
+                    time.sleep(6.0)
                     continue
 
                 # 503 UNAVAILABLE — retry with 10-minute intervals up to 5 times
@@ -1138,10 +1138,10 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                 if API_TRACKER_AVAILABLE:
                     log_api_request(model_name, False, "daily_recap")
                 
-                # 429 QUOTA / RATE LIMIT — brief pause before cascading
+                # 429 QUOTA / RATE LIMIT — pause before cascading
                 if '429' in error_msg or 'quota' in error_msg or 'resource_exhausted' in error_msg:
-                    print(f"   ⏳ Model {model_name} quota/rate limited (429). Pausing 3s before cascading...")
-                    time.sleep(3.0)
+                    print(f"   ⏳ Model {model_name} quota/rate limited (429). Pausing 6s before cascading...")
+                    time.sleep(6.0)
                     last_error = model_error
                     continue
 
@@ -2157,8 +2157,14 @@ Output ONLY the post text in Italian."""
                         continue
                     return "Daily crypto recap", verified_text
             except Exception as exc:
+                err_str = str(exc).lower()
+                is_quota = '429' in err_str or 'quota' in err_str or 'resource_exhausted' in err_str
                 print(f"⚠️ Crypto recap model {model_name} failed: {exc}")
-                time.sleep(1)
+                if is_quota:
+                    print(f"   ⏳ Model {model_name} rate limited (429). Pausing 6s before cascading...")
+                    time.sleep(6.0)
+                else:
+                    time.sleep(1.0)
 
         print("❌ All models failed for crypto recap post, using fallback")
         return "Daily crypto recap", fallback_text

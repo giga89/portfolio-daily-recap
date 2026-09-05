@@ -8,13 +8,12 @@ quota exhaustion, rate limits (429), or temporary outages (503) by
 waiting (exponential backoff) and cascading to next-tier models.
 
 Hierarchy:
-  1. gemini-3.1-pro   - Flagship Deep Reasoning model (Best intelligence & financial synthesis)
-  2. gemini-3.8-flash - Newest Flagship Flash model (Ultra-fast, top intelligence)
-  3. gemini-3.7-flash - High-capability 3.x series
-  4. gemini-3.6-flash - Advanced reasoning & workflow
-  5. gemini-3.5-flash - High throughput financial context
-  6. gemini-2.5-pro   - Proven legacy Pro fallback
-  7. gemini-2.5-flash - High reliability baseline fallback
+  1. gemini-3.1-pro-preview - Flagship Deep Reasoning model (Best intelligence & financial synthesis)
+  2. gemini-3.8-flash       - Newest Flagship Flash model (Ultra-fast, top intelligence)
+  3. gemini-3.7-flash       - High-capability 3.x series
+  4. gemini-3.6-flash       - Advanced reasoning & workflow
+  5. gemini-3.5-flash       - High throughput financial context
+  6. gemini-2.5-flash       - High reliability baseline fallback
 """
 
 import time
@@ -39,18 +38,17 @@ except ImportError:
 
 # Prioritized cascade: Smartest -> Standard fallback
 DEFAULT_GEMINI_MODELS: List[str] = [
-    'gemini-3.1-pro',    # Flagship Deep Reasoning (Best quality & analytical depth)
-    'gemini-3.8-flash',  # Newest Flash flagship (Fast & state-of-the-art)
-    'gemini-3.7-flash',  # High-intelligence 3.x series
-    'gemini-3.6-flash',  # Advanced reasoning & agentic workflow
-    'gemini-3.5-flash',  # Financial context & reasoning
-    'gemini-2.5-pro',    # Robust legacy Pro fallback
-    'gemini-2.5-flash',  # High reliability baseline
+    'gemini-3.1-pro-preview',  # Flagship Deep Reasoning (Best quality & analytical depth)
+    'gemini-3.8-flash',        # Newest Flash flagship (Fast & state-of-the-art)
+    'gemini-3.7-flash',        # High-intelligence 3.x series
+    'gemini-3.6-flash',        # Advanced reasoning & agentic workflow
+    'gemini-3.5-flash',        # Financial context & reasoning
+    'gemini-2.5-flash',        # High reliability baseline
 ]
 
 # Models for the adversarial reviewer / double-check judge (ensures dual-model diversity)
 REVIEWER_GEMINI_MODELS: List[str] = [
-    'gemini-3.1-pro',
+    'gemini-3.1-pro-preview',
     'gemini-3.8-flash',
     'gemini-3.7-flash',
     'gemini-3.6-flash',
@@ -66,7 +64,7 @@ def execute_with_model_cascade(
     task_name: str = "ai_task",
     preferred_models: Optional[List[str]] = None,
     max_quota_retries: int = 2,
-    base_backoff_seconds: float = 3.0,
+    base_backoff_seconds: float = 5.0,
 ) -> Tuple[Optional[str], Optional[str]]:
     """
     Executes a prompt against the Gemini API using the prioritized model cascade.

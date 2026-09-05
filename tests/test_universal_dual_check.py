@@ -3,7 +3,7 @@
 Test Suite: Universal Dual-Check & AI Model Cascade
 ===================================================
 Verifies:
-1. Prioritized AI Model Cascade starts with the smartest reasoning models (gemini-3.1-pro, gemini-3.8-flash, etc.).
+1. Prioritized AI Model Cascade starts with the smartest reasoning models (gemini-3.1-pro-preview, gemini-3.8-flash, etc.).
 2. Deterministic & AI double-check for comments and user replies.
 3. Strict blocking of purged assets (XEON.DE).
 4. Strict blocking of dividend claims on accumulating ETFs (WDEF.L, INDO.PA, IB01.L, PPFB.DE).
@@ -27,12 +27,12 @@ import etoro_client
 
 def test_model_cascade_priority():
     print("\n--- Test 1: Prioritized AI Model Cascade ---")
-    assert DEFAULT_GEMINI_MODELS[0] == 'gemini-3.1-pro', f"Top model should be gemini-3.1-pro, got {DEFAULT_GEMINI_MODELS[0]}"
+    assert DEFAULT_GEMINI_MODELS[0] == 'gemini-3.1-pro-preview', f"Top model should be gemini-3.1-pro-preview, got {DEFAULT_GEMINI_MODELS[0]}"
     assert DEFAULT_GEMINI_MODELS[1] == 'gemini-3.8-flash', f"Second model should be gemini-3.8-flash, got {DEFAULT_GEMINI_MODELS[1]}"
     assert 'gemini-3.7-flash' in DEFAULT_GEMINI_MODELS
     assert 'gemini-2.5-flash' in DEFAULT_GEMINI_MODELS
-    assert REVIEWER_GEMINI_MODELS[0] == 'gemini-3.1-pro'
-    print("✅ Model cascade prioritized hierarchy verified (gemini-3.1-pro -> gemini-3.8-flash -> gemini-3.7-flash -> ...)!")
+    assert REVIEWER_GEMINI_MODELS[0] == 'gemini-3.1-pro-preview'
+    print("✅ Model cascade prioritized hierarchy verified (gemini-3.1-pro-preview -> gemini-3.8-flash -> gemini-3.7-flash -> ...)!")
 
 
 def test_purged_asset_xeon_blocked():
