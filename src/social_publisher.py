@@ -207,6 +207,7 @@ def publish_all(
             portfolio_weekly=portfolio_weekly,
             portfolio_weights=portfolio_weights,
             pie_chart_path=pie_chart_path,
+            engagement_card_path=engagement_card_path,
         ))
         return results
 
@@ -231,14 +232,18 @@ def publish_all(
         print("\n" + "=" * 60)
         print(f"📅 SATURDAY SESSION — Weekly Portfolio Outlook")
         print("=" * 60)
-        results.update(_publish_weekly_portfolio_outlook())
+        results.update(_publish_weekly_portfolio_outlook(
+            engagement_card_path=engagement_card_path,
+        ))
         return results
 
     if is_macro_outlook:
         print("\n" + "=" * 60)
         print(f"🌍 SATURDAY SESSION — Weekly Global Macro Outlook")
         print("=" * 60)
-        results.update(_publish_weekly_macro_outlook())
+        results.update(_publish_weekly_macro_outlook(
+            engagement_card_path=engagement_card_path,
+        ))
         return results
 
     if is_copy_trading:
@@ -492,6 +497,7 @@ def _publish_monday_posts(
     portfolio_weekly: float = None,
     portfolio_weights: dict = None,
     pie_chart_path: str = None,
+    engagement_card_path: str = None,
 ) -> dict:
     """
     Generate and send Monday decision + empathy posts to Telegram.
@@ -552,19 +558,20 @@ def _publish_monday_posts(
     # 3. eToro Social Feed for Empathy Post
     print("\n🐂 eToro Social Feed (Empathy Post):")
     if etoro_sender.etoro_client.is_configured() and empathy_text:
-        top_flop_img = "output/winners_losers.png"
+        card_to_upload = engagement_card_path if (engagement_card_path and os.path.exists(engagement_card_path)) else ("output/winners_losers.png" if os.path.exists("output/winners_losers.png") else None)
         ok_etoro = etoro_sender.send_etoro_post(
             text=empathy_text,
-            image_path=top_flop_img if os.path.exists(top_flop_img) else None,
+            image_path=card_to_upload,
         )
         results["etoro_empathy"] = ok_etoro
         if ok_etoro:
+            card_is_meme = bool(card_to_upload and "meme" in os.path.basename(card_to_upload).lower())
             analytics_tracker.record_post(
                 platform="etoro",
                 post_id=f"empathy_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
                 session_name="Monday decision / Empathy",
                 text=empathy_text,
-                image_type="winners_losers_card",
+                image_type="meme_card" if card_is_meme else "winners_losers_card",
             )
     else:
         results["etoro_empathy"] = False
@@ -788,7 +795,7 @@ def _publish_stock_focus_post(ticker: str = None) -> dict:
     return results
 
 
-def _publish_weekly_portfolio_outlook() -> dict:
+def _publish_weekly_portfolio_outlook(engagement_card_path: str = None) -> dict:
     """Publish Saturday Portfolio Outlook post to Telegram and eToro."""
     results = {}
     post_text = ai_news_generator.generate_weekly_portfolio_outlook()
@@ -799,21 +806,22 @@ def _publish_weekly_portfolio_outlook() -> dict:
     full_text = post_text + ETORO_FOOTER_LONG
     _save_post_to_artifacts("weekly_portfolio_outlook.txt", "Weekly Portfolio Outlook", full_text)
 
-    # eToro send with Winners & Losers card if available
+    # eToro send with Meme / Winners & Losers card if available
     if etoro_sender.etoro_client.is_configured():
-        top_flop_img = "output/winners_losers.png"
+        card_to_upload = engagement_card_path if (engagement_card_path and os.path.exists(engagement_card_path)) else ("output/winners_losers.png" if os.path.exists("output/winners_losers.png") else None)
         ok_etoro = etoro_sender.send_etoro_post(
             text=post_text,
-            image_path=top_flop_img if os.path.exists(top_flop_img) else None,
+            image_path=card_to_upload,
         )
         results["etoro_portfolio_outlook"] = ok_etoro
         if ok_etoro:
+            card_is_meme = bool(card_to_upload and "meme" in os.path.basename(card_to_upload).lower())
             analytics_tracker.record_post(
                 platform="etoro",
                 post_id=f"outlook_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
                 session_name="Weekly portfolio outlook",
                 text=post_text,
-                image_type="winners_losers_card",
+                image_type="meme_card" if card_is_meme else "winners_losers_card",
             )
     else:
         results["etoro_portfolio_outlook"] = False
@@ -833,7 +841,7 @@ def _publish_weekly_portfolio_outlook() -> dict:
     return results
 
 
-def _publish_weekly_macro_outlook() -> dict:
+def _publish_weekly_macro_outlook(engagement_card_path: str = None) -> dict:
     """Publish Saturday Global Macro Outlook post to Telegram and eToro."""
     results = {}
     post_text = ai_news_generator.generate_weekly_macro_outlook()
@@ -846,12 +854,21 @@ def _publish_weekly_macro_outlook() -> dict:
 
     # eToro send
     if etoro_sender.etoro_client.is_configured():
-        top_flop_img = "output/winners_losers.png"
+        card_to_upload = engagement_card_path if (engagement_card_path and os.path.exists(engagement_card_path)) else ("output/winners_losers.png" if os.path.exists("output/winners_losers.png") else None)
         ok_etoro = etoro_sender.send_etoro_post(
             text=post_text,
-            image_path=top_flop_img if os.path.exists(top_flop_img) else None,
+            image_path=card_to_upload,
         )
         results["etoro_macro_outlook"] = ok_etoro
+        if ok_etoro:
+            card_is_meme = bool(card_to_upload and "meme" in os.path.basename(card_to_upload).lower())
+            analytics_tracker.record_post(
+                platform="etoro",
+                post_id=f"macro_{datetime.utcnow().strftime('%Y%m%d_%H%M')}",
+                session_name="Weekly macro outlook",
+                text=post_text,
+                image_type="meme_card" if card_is_meme else "winners_losers_card",
+            )
     else:
         results["etoro_macro_outlook"] = False
 
