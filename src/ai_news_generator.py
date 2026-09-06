@@ -310,6 +310,20 @@ def _clean_robotic_phrases(text: str) -> str:
     for pat, repl in patterns:
         cleaned = re.sub(pat, repl, cleaned)
 
+    # Auto-correct frequent LLM hallucinations for ETF identities
+    # $WDEF.L is WisdomTree Europe Defence UCITS ETF (EU defense/aerospace, accumulating, NO dividends), NEVER Europe Equity Income or "Windows"!
+    etf_identity_patterns = [
+        (r"(?i)WisdomTree\s+Europe\s+Equity\s+Income(?:\s+UCITS\s+ETF)?", "WisdomTree Europe Defence UCITS ETF"),
+        (r"(?i)Windows\s+Europe\s+(?:Equity|Quity)\s+Income(?:\s+UCITS\s+ETF)?", "WisdomTree Europe Defence UCITS ETF"),
+        (r"(?i)Europe\s+Equity\s+Income(?:\s+UCITS\s+ETF)?", "WisdomTree Europe Defence UCITS ETF"),
+        (r"(?i)European\s+Equity\s+Income(?:\s+UCITS\s+ETF)?", "WisdomTree Europe Defence UCITS ETF"),
+        (r"(?i)WisdomTree\s+Europe\s+Income", "WisdomTree Europe Defence UCITS ETF"),
+        (r"(?i)Windows\s+Europe\s+Defence", "WisdomTree Europe Defence"),
+        (r"(?i)Windows\s+Europe", "WisdomTree Europe"),
+    ]
+    for pat, repl in etf_identity_patterns:
+        cleaned = re.sub(pat, repl, cleaned)
+
     # Clean up any leftover empty lines or double spaces
     cleaned = re.sub(r"[ \t]+", " ", cleaned)
     cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
@@ -965,6 +979,14 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         # Build dynamic greeting and closing question for this session
         dynamic_greeting = _get_dynamic_greeting(session_upper)
         closing_question_instruction = _get_closing_question_instruction(session_upper)
+
+        asset_identity_rules = (
+            "- REGOLE IDENTITÀ ASSET (TASSATIVE): $WDEF.L è WisdomTree Europe Defence UCITS ETF "
+            "(difesa e aerospazio UE, ad accumulazione, ZERO dividendi/cedole). È SEVERAMENTE VIETATO chiamarlo "
+            "'WisdomTree Europe Equity Income', 'Windows Europe' o attribuirgli dividendi! "
+            "$IQQL.DE è iShares Listed Private Equity UCITS ETF (Private Equity, es. KKR, Blackstone), NON World Quality. "
+            "Nessuna menzione di XEON (dismesso dal portafoglio)."
+        )
         
         if "EUROPEAN" in session_upper and "OPEN" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura dei mercati europei.
@@ -979,6 +1001,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a dei compagni investitori che seguono la tua strategia). Evita assolutamente toni formali, accademici o robotici.
             - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona ("Nel nostro portafoglio...", "Monitoriamo...", "La mia strategia..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
+            {asset_identity_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta MAX 3 brevi spunti o notizie principali per l'apertura europea, focalizzandoti sulle novità dei nostri titoli in portafoglio o sull'indice Euro Stoxx.
             - {tag_instruction}
@@ -1003,6 +1026,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a dei compagni investitori che seguono la tua strategia). Evita assolutamente toni formali o robotici.
             - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona ("Nel nostro portafoglio...", "Oggi all'apertura guardiamo...", "La mia strategia..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
+            {asset_identity_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta MAX 3 brevi spunti o notizie principali per l'apertura USA, focalizzandoti sulle novità dei nostri titoli in portafoglio o sugli indici americani (S&P 500, Nasdaq).
             - {tag_instruction}
@@ -1026,6 +1050,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             - Scrivi in ITALIANO con uno stile estremamente naturale, fluido ed empatico. Parla apertamente di come è andata la settimana, se è stata verde o rossa, dei risultati ottenuti e delle tue sensazioni.
             - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona. È TASSATIVAMENTE VIETATO iniziare con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai col tuo nome nel testo!
+            {asset_identity_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Fai un bilancio sincero di cosa ha guidato il portafoglio in questa settimana, menzionando i movimenti principali dei nostri titoli chiave.
             - Spiega brevemente cosa terremo d'occhio per la prossima settimana.
@@ -1050,6 +1075,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             - Scrivi in ITALIANO con uno stile naturale e chiaro. Questo post accompagnerà la classifica dei migliori titoli del portafoglio.
             - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona. È TASSATIVAMENTE VIETATO usare formule come "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai col tuo nome nel testo!
+            {asset_identity_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Spiega in modo semplice e chiaro i motivi del successo dei titoli migliori di questa settimana (massimo 2-3 titoli).
             - Collega queste performance alla nostra tesi d'investimento di lungo termine, rassicurando i copiatori sulla bontà delle nostre scelte.
@@ -1077,6 +1103,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona ("Chiudiamo la sessione...", "Nel nostro portafoglio...", "Oggi abbiamo osservato..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
             - È TASSATIVAMENTE VIETATO inserire menzioni o tag come @AndreaRavalli o @andrearavalli.
+            {asset_identity_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta un breve quadro della giornata di borsa (S&P 500, Nasdaq, mercati europei) e spiega l'impatto diretto sui titoli del nostro portafoglio.
             - {tag_instruction}
@@ -1421,8 +1448,7 @@ Output ONLY the post text, no introduction or explanation."""
                     print(f"✅ Decision post generated with {model_name}")
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "decision_post")
-                    return response.text.strip()
-                    raw_text = response.text.strip()
+                    raw_text = _clean_robotic_phrases(response.text.strip())
                     approved, verified_text = _run_post_verification(
                         raw_text,
                         session_name="Decision post",
@@ -1523,8 +1549,7 @@ Output ONLY the post text, no introduction or explanation."""
                     print(f"✅ Empathy post generated with {model_name}")
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "empathy_post")
-                    return response.text.strip()
-                    raw_text = response.text.strip()
+                    raw_text = _clean_robotic_phrases(response.text.strip())
                     approved, verified_text = _run_post_verification(
                         raw_text,
                         session_name="Empathy post",
@@ -1678,8 +1703,7 @@ Output ONLY the Italian post text, no introduction or wrapping."""
                     print(f"✅ Copy trading post generated with {model_name}")
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "copy_trading_post")
-                    return response.text.strip()
-                    raw_text = response.text.strip()
+                    raw_text = _clean_robotic_phrases(response.text.strip())
                     approved, verified_text = _run_post_verification(
                         raw_text,
                         session_name="Copy trading post",
@@ -1796,10 +1820,6 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
     primary_tags = meta.get("primary_tags") or get_ticker_all_tags(ticker)
     related_tags = meta.get("related_tickers") or get_related_tickers(ticker)
 
-    yahoo_ticker, company_name = tickers[ticker]
-    primary_tags = get_ticker_all_tags(ticker)
-    related_tags = get_related_tickers(ticker)
-
     primary_tags_str = " ".join(primary_tags)
     related_tags_str = " ".join(related_tags)
 
@@ -1843,18 +1863,14 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
     )
 
     prompt = f"""Sei un investitore privato esperto su eToro.
-Scrivi un post di approfondimento e analisi su un singolo titolo presente nel nostro portafoglio.
 Scrivi un post di approfondimento e analisi fondamentale su un singolo strumento presente nel nostro portafoglio.
 
-TITOLO IN FOCUS:
-- Azienda: {company_name}
 DATI VERIFICATI E CERTIFICATI DELLO STRUMENTO IN FOCUS:
 - Strumento: {company_name}
 - Ticker: {ticker} (Yahoo: {yahoo_ticker})
-{weight_str}- Tag principali da includere nel testo: {primary_tags_str}
-- Tipo Asset: {asset_class_str}
+{weight_str}- Tipo Asset: {asset_class_str}
 - Settore / Industria: {sector_str}
-{weight_str}- Politica Dividendi Reale: {dividend_policy_str}
+- Politica Dividendi Reale: {dividend_policy_str}
 - Tesi di Investimento Reale: {thesis_str}
 - Catalizzatori di Crescita Certificati (Upside):
 {upsides_formatted}
@@ -1863,25 +1879,16 @@ DATI VERIFICATI E CERTIFICATI DELLO STRUMENTO IN FOCUS:
 - Tag principali da includere nel testo: {primary_tags_str}
 - Tag di titoli correlati/competitor da includere nel testo: {related_tags_str}
 
-REGOLE PER IL TESTO (in ITALIANO):
 REGOLE MANDATARIE PER IL TESTO (in ITALIANO):
 1. Titolo iniziale accattivante: "🔍 FOCUS ASSET: Perché ho in portafoglio {company_name} {primary_tags[0]}" (SENZA parentesi tonde attorno al tag!)
-2. Spiega brevemente LA TESI DI INVESTIMENTO ("Perché ho questo titolo"). Se indicato il peso in portafoglio, citalo con precisione ({weight_str.strip() if weight_str else ''}).
-3. IMPORTANTE: Parla in prima persona in modo naturale ("Nel mio portafoglio...", "Punto su questa azienda perché..."). È SEVERAMENTE VIETATO usare formule come "Come Andrea Ravalli..." o presentarti per nome!
-4. Sezione "🚀 POSSIBILI UPSIDE": 2-3 catalizzatori principali di crescita, trend o punti di forza aziendali.
-5. Sezione "⚠️ POSSIBILI DOWNSIDE": 2-3 rischi principali, venti contrari o sfide di mercato/settore.
-6. Inserisci in modo fluido ed organico i tag principali ({primary_tags_str}) e i tag dei titoli correlati ({related_tags_str}) nel testo.
-7. Mantieni un tono trasparente, professionale ed esaustivo ma facile da leggere (massimo 1400 caratteri).
-8. Usa solo emoji standard universalmente supportate (🔍, 🚀, ⚠️, 📊, 👇, 👤, 🎁).
-9. REGOLE CASHTAG ETORO: Ogni cashtag (es. {primary_tags_str}) DEVE avere sempre uno spazio prima e dopo per essere cliccabile su eToro. NON racchiudere MAI i cashtag tra parentesi tonde (scrivi ad es. "...competitor come $IBE.MC e $RWE.DE" invece di "($IBE.MC)") e NON incollare punteggiatura al tag (scrivi "$EDP.LS ?" invece di "$EDP.LS?").
 2. Spiega con precisione LA TESI DI INVESTIMENTO ("Perché ho questo strumento in portafoglio"). Se indicato il peso, citalo con precisione ({weight_str.strip() if weight_str else ''}).
 3. IMPORTANTE: Parla in prima persona in modo naturale ("Nel mio portafoglio...", "Punto su questo asset perché..."). È SEVERAMENTE VIETATO usare formule come "Come Andrea Ravalli..." o presentarti per nome!
 4. Sezione "🚀 POSSIBILI UPSIDE": 2-3 catalizzatori principali basati rigorosamente sui punti forniti sopra.
 5. Sezione "⚠️ POSSIBILI DOWNSIDE": 2-3 rischi principali basati rigorosamente sui rischi forniti sopra.
 6. GUARDRAIL ANTI-ALLUCINAZIONE DIVIDENDI:
    {dividend_constraint}
-7. GUARDRAIL ANTI-ALLUCINAZIONE SETTORE:
-   È SEVERAMENTE VIETATO alterare il settore dell'asset o confonderlo con altri strumenti. Parla solo ed esclusivamente del business/settore certificato ({sector_str}).
+7. GUARDRAIL ANTI-ALLUCINAZIONE SETTORE & IDENTITÀ:
+   È SEVERAMENTE VIETATO alterare il settore dell'asset o confonderlo con altri strumenti. Parla solo ed esclusivamente del business/settore certificato ({sector_str}). Se l'asset è $WDEF.L, si tratta di WisdomTree Europe Defence UCITS ETF (difesa e aerospazio UE ad accumulazione, ZERO dividendi), MAI Equity Income o 'Windows Europe'.
 8. Inserisci in modo fluido ed organico i tag principali ({primary_tags_str}) e i tag dei titoli correlati ({related_tags_str}) nel testo.
 9. Mantieni un tono trasparente, professionale ed esaustivo ma facile da leggere (massimo 1400 caratteri).
 10. Usa solo emoji standard universalmente supportate (🔍, 🚀, ⚠️, 📊, 👇, 👤, 🎁).
@@ -1891,7 +1898,6 @@ Output ONLY the post text in Italian, no extra conversational preamble."""
 
     try:
         client = genai.Client(api_key=api_key)
-        config_gen = types.GenerateContentConfig(temperature=0.85)
         config_gen = types.GenerateContentConfig(temperature=0.7)
 
         for model_name in models_to_try:

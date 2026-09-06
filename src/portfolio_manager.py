@@ -10,7 +10,6 @@ except ImportError:
 # REAL ACTIVE ASSETS IN ANDREA RAVALLI'S ETORO PORTFOLIO
 DEFAULT_TICKERS = {
     # Cash, Fixed Income & Macro ETFs
-    'XEON.DE': ('XEON.DE', 'Xtrackers II EUR Overnight Rate Swap UCITS ETF'),
     'IB01.L': ('IB01.L', 'iShares $ Treasury Bond 0-1yr UCITS ETF'),
     'INDO.PA': ('INDO.PA', 'Amundi MSCI Indonesia UCITS ETF Acc'),
     'PPFB.DE': ('PPFB.DE', 'iShares Physical Gold ETC'),
@@ -64,20 +63,15 @@ DEFAULT_TICKERS = {
 }
 
 DEFAULT_EMOJIS = {
-    # ETFs
-    # ETFs & Funds
-    'SX7PEX.DE': '🏛️', # Banking
-    'VWCE.L': '🌐',
-    'IEUR': '🇪🇺',     # Europe
-    'IQQL.DE': '🔥',
-    'IEMG': '🌍',
-    'WDEF.L': '🛡️',
-    'INDO.PA': '🇮🇩',
-    'IQQL.DE': '🔥',   # Listed Private Equity
-    'WDEF.L': '🛡️',    # Defence
-    'INDO.PA': '🇮🇩',   # Indonesia
+    # Cash, Fixed Income & Macro ETFs
     'IB01.L': '💵',    # US Treasury short-term bonds
+    'INDO.PA': '🇮🇩',   # Indonesia
     'PPFB.DE': '🥇',   # Physical Gold
+    'SX7PEX.DE': '🏛️', # Banking
+    'TRIG.L': '🌬️',    # Renewables (Wind/Solar)
+    'WDEF.L': '🛡️',    # European Defence
+    'IEUR': '🇪🇺',     # Europe
+    'IQQL.DE': '🔥',   # Listed Private Equity
     'VOF.L': '🇻🇳',     # Vietnam Opportunity Fund
     
     # Healthcare & Pharmaceuticals
@@ -90,60 +84,41 @@ DEFAULT_EMOJIS = {
     'HUM': '🏥',
     
     # Technology & Semiconductors
-    'AVGO': '💻',
     'AVGO': '🔌',
     'NVDA': '🤖',
     'TSM': '🏭',
     'MSFT': '💻',
-
     'AMZN': '📦',
     'GOOG': '🔍',
     'PLTR': '🛡️',
     'NET': '☁️',
     'MRVL': '📊',
     
-    # Energy & Nuclear
     # Energy, Utilities & Commodities
     'CCJ': '⚡',
     'ENEL.MI': '🔋',
     'ENI.MI': '⛽',
     'ENI': '⛽',
-    
-    # Crypto & Retail
-    'TRX': '🪙',
-    'ETOR': '🏛️',
-    'WMT': '🛒',
-    
-    # Financial Services & Others
-    'DB1.DE': '📊',
-    'TRIG.L': '🌬️',    # Renewables (Wind/Solar)
     'GLEN.L': '⛏️',
-    'TRIG.L': '🌬️',    # Renewables
     'MAU.PA': '🛢️',
     'PRY.MI': '🔌',
     
     # Automotive, Luxury & Industrials
     'RACE': '🏎️',
     'VOW3.DE': '🚗',
-    'MELI': '🛒',
-    'PYPL': '💳',
-    'GLEN.L': '⛏️',
-    'XEON.DE': '💤',    # EUR overnight rate (cash/liquidity)
-    'IB01.L': '💵',    # US Treasury short-term bonds
     '1919.HK': '🚢',
-    '2318.HK': '🏦',
     '1211.HK': '🔋',   # BYD
-    'PPFB.DE': '🥇',   # Physical Gold/Metals
     'ULVR.L': '🧼',    # Unilever
-    'VOF.L': '🇻🇳',     # Vietnam Opportunity Fund
     
     # E-Commerce, Fintech, Pre-IPO, Retail & Crypto
     'MELI': '🛒',
     'WMT': '🛒',
-    '2318.HK': '🏦',
     'ETOR': '🏛️',
+    '2318.HK': '🏦',
     'SPCX.RTH': '🚀',
     'TRX': '🪙',
+    'DB1.DE': '📊',
+    'PYPL': '💳',
 }
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../portfolio_config.json')
@@ -506,18 +481,14 @@ RELATED_TICKERS_MAP = {
     '2318.HK': ['$2628.HK', '$3968.HK', '$939.HK'],
     'SX7PEX.DE': ['$BAC', '$JPM', '$HSBA.L'],
     'IEUR': ['$VGK', '$EZU', '$FEZ'],
-    'IQQL.DE': ['$QUAL', '$IWDA.L', '$VWCE.L'],
-    'IEMG': ['$EEM', '$VWO', '$IEMG'],
-    'IQQL.DE': ['$QUAL', '$IWDA.L', '$EXV1.DE'],
+    'IQQL.DE': ['$BX', '$KKR', '$PSP'],
+    'IEMG': ['$EEM', '$VWO'],
     'WDEF.L': ['$RHM.DE', '$BA.L', '$LMT'],
-    'INDO.PA': ['$EIDO', '$INDO.PA', '$IEMG'],
-    'INDO.PA': ['$EIDO', '$INDO.PA'],
+    'INDO.PA': ['$EIDO', '$IEMG'],
     'PPFB.DE': ['$GLD', '$IAU', '$SLV'],
-    'XEON.DE': ['$CSH2.PA', '$XEON.DE', '$IB01.L'],
-    'IB01.L': ['$SHY', '$BIL', '$XEON.DE'],
     'IB01.L': ['$SHY', '$BIL', '$TLT'],
     'TRIG.L': ['$UKW.L', '$FSFL.L', '$ENEL.MI'],
-    'VOF.L': ['$VNM', '$VEIL.L', '$VOF.L'],
+    'VOF.L': ['$VNM', '$VEIL.L'],
     'TRX': ['$BTC', '$ETH', '$SOL'],
     'AZN.L': ['$LLY', '$NOVO-B.CO', '$PFE'],
 }

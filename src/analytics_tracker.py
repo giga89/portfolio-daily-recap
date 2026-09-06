@@ -41,7 +41,6 @@ ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
 DOCS_ASSETS_DIR = os.path.join(DOCS_DIR, "assets")
 
 MONTHLY_RETURNS = {
-    "2026": {"Jan": 2.47, "Feb": -1.19, "Mar": -3.52, "Apr": 8.99, "May": 2.58, "Jun": -4.04, "Jul": 0.95, "Aug": 3.95, "Sep": None, "Oct": None, "Nov": None, "Dec": None, "Total": 9.97},
     "2026": {"Jan": 2.47, "Feb": -1.19, "Mar": -3.52, "Apr": 8.99, "May": 2.58, "Jun": -4.04, "Jul": 0.95, "Aug": 3.45, "Sep": None, "Oct": None, "Nov": None, "Dec": None, "Total": 9.45},
     "2025": {"Jan": 3.59, "Feb": -2.47, "Mar": -2.57, "Apr": 3.18, "May": 6.99, "Jun": 5.44, "Jul": 3.71, "Aug": 3.83, "Sep": 3.39, "Oct": 2.20, "Nov": -2.25, "Dec": 0.91, "Total": 28.59},
     "2024": {"Jan": -0.43, "Feb": 3.99, "Mar": 1.10, "Apr": -1.51, "May": 4.16, "Jun": 1.44, "Jul": 1.50, "Aug": 3.98, "Sep": 2.25, "Oct": -0.25, "Nov": 4.87, "Dec": 1.77, "Total": 25.13},
@@ -276,7 +275,6 @@ DIVIDEND_BREAKDOWN = [
     {"ticker": "MAU.PA", "name": "Maurel & Prom SA", "port_yield": "0.08%", "comp_yield": "4.48%", "dps": "$0.30"},
     {"ticker": "ULVR.L", "name": "Unilever PLC", "port_yield": "0.09%", "comp_yield": "3.62%", "dps": "$1.47"},
     {"ticker": "SX7PEX.DE", "name": "iShares European Banks", "port_yield": "0.07%", "comp_yield": "4.10%", "dps": "$1.15"},
-    {"ticker": "WDEF.L", "name": "WisdomTree Europe Income", "port_yield": "0.06%", "comp_yield": "3.40%", "dps": "$0.85"},
     {"ticker": "GLEN.L", "name": "Glencore PLC", "port_yield": "0.07%", "comp_yield": "3.15%", "dps": "$0.09"},
     {"ticker": "ABBV", "name": "AbbVie Inc", "port_yield": "0.08%", "comp_yield": "2.58%", "dps": "$6.06"},
     {"ticker": "NOVO-B.CO", "name": "Novo Nordisk A/S", "port_yield": "0.06%", "comp_yield": "1.35%", "dps": "$1.20"},
@@ -319,7 +317,6 @@ SEASONALITY_DATA = {
     "May": 1.70,
     "Jun": 0.29,
     "Jul": 3.01,
-    "Aug": 3.76,
     "Aug": 3.54,
     "Sep": -2.54,
     "Oct": 0.69,

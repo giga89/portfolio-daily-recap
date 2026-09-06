@@ -92,12 +92,49 @@ DIVIDEND_NEGATIONS = [
     r'ad\s+accumulazione\s+senza\s+dividendi',
 ]
 
+# Specific forbidden identity and strategy misconceptions per asset
+ASSET_IDENTITY_FORBIDDEN_TERMS = {
+    "WDEF.L": [
+        (r'\b(?:wisdomtree\s+)?europe\s+equity\s+income\b', "WisdomTree Europe Equity Income (WDEF.L è WisdomTree Europe Defence UCITS ETF)"),
+        (r'\bwindows\s+europe\b', "Windows Europe (allucinazione evidente da WisdomTree Europe)"),
+        (r'\bequity\s+income\b', "Equity Income (WDEF.L è Difesa & Aerospazio Europeo ad accumulazione, non Equity Income)"),
+        (r'\beurope\s+income\b', "Europe Income (WDEF.L è Difesa & Aerospazio Europeo ad accumulazione, non Europe Income)"),
+        (r'\beuropean\s+income\b', "European Income (WDEF.L è Difesa & Aerospazio Europeo ad accumulazione, non European Income)"),
+        (r'\bdividendi\s+europa\b', "Dividendi Europa (WDEF.L è ad accumulazione, settore Difesa)"),
+        (r'\bdividendi\s+europei\b', "Dividendi Europei (WDEF.L è ad accumulazione, settore Difesa)"),
+        (r'\bincome\s+etf\b', "Income ETF (WDEF.L è ad accumulazione, settore Difesa)"),
+    ],
+    "WDEF": [
+        (r'\b(?:wisdomtree\s+)?europe\s+equity\s+income\b', "WisdomTree Europe Equity Income (WDEF è WisdomTree Europe Defence UCITS ETF)"),
+        (r'\bwindows\s+europe\b', "Windows Europe (allucinazione evidente da WisdomTree Europe)"),
+        (r'\bequity\s+income\b', "Equity Income (WDEF è Difesa & Aerospazio Europeo ad accumulazione, non Equity Income)"),
+        (r'\beurope\s+income\b', "Europe Income (WDEF è Difesa & Aerospazio Europeo ad accumulazione, non Europe Income)"),
+        (r'\beuropean\s+income\b', "European Income (WDEF è Difesa & Aerospazio Europeo ad accumulazione, non European Income)"),
+        (r'\bdividendi\s+europa\b', "Dividendi Europa (WDEF è ad accumulazione, settore Difesa)"),
+        (r'\bdividendi\s+europei\b', "Dividendi Europei (WDEF è ad accumulazione, settore Difesa)"),
+        (r'\bincome\s+etf\b', "Income ETF (WDEF è ad accumulazione, settore Difesa)"),
+    ],
+    "IQQL.DE": [
+        (r'\bworld\s+quality\b', "World Quality (IQQL.DE è Listed Private Equity, non World Quality)"),
+        (r'\bquality\s+msci\b', "Quality MSCI (IQQL.DE è Listed Private Equity, non MSCI Quality)"),
+        (r'\bmsci\s+world\b', "MSCI World (IQQL.DE replica l'indice S&P Listed Private Equity)"),
+    ],
+}
+
+GLOBAL_FORBIDDEN_HALLUCINATIONS = [
+    (r'\bwindows\s+europe\b', "Windows Europe (allucinazione evidente da WisdomTree Europe)"),
+    (r'\bwisdomtree\s+europe\s+equity\s+income\b', "WisdomTree Europe Equity Income (non presente in portafoglio; WDEF.L è Europe Defence)"),
+    (r'\beurope\s+equity\s+income\b', "Europe Equity Income (non presente in portafoglio; WDEF.L è Europe Defence)"),
+    (r'\bwindows\s+europe\s+quity\s+income\b', "Windows Europe Quity Income (allucinazione evidente)"),
+]
+
 
 def clean_etoro_formatting(text: str) -> str:
     """
     Remove formatting elements that break on eToro or look messy:
     - Markdown asterisks `**bold**`, `*italic*`, `__bold__`
     - Parentheses wrapping cashtags e.g. '($NVDA)' -> ' $NVDA '
+    - Auto-sanitizes common LLM hallucinations regarding asset identities (e.g. WDEF -> Defence, not Income)
     """
     if not text:
         return ""
@@ -110,6 +147,33 @@ def clean_etoro_formatting(text: str) -> str:
 
     # Fix parenthesized cashtags: '($TICKER)' -> ' $TICKER '
     cleaned = re.sub(r'\(\$([A-Za-z0-9\.\-]+)\)', r' $\1 ', cleaned)
+
+    # Auto-sanitize frequent LLM identity hallucinations
+    # $WDEF.L is WisdomTree Europe Defence UCITS ETF (EU Defense & Aerospace), NEVER Europe Equity Income or "Windows"!
+    cleaned = re.sub(
+        r'WisdomTree\s+Europe\s+Equity\s+Income(?:\s+UCITS\s+ETF)?',
+        'WisdomTree Europe Defence UCITS ETF',
+        cleaned,
+        flags=re.IGNORECASE
+    )
+    cleaned = re.sub(
+        r'Windows\s+Europe\s+(?:Equity|Quity)\s+Income(?:\s+UCITS\s+ETF)?',
+        'WisdomTree Europe Defence UCITS ETF',
+        cleaned,
+        flags=re.IGNORECASE
+    )
+    cleaned = re.sub(
+        r'Windows\s+Europe\s+Defence(?:\s+UCITS\s+ETF)?',
+        'WisdomTree Europe Defence UCITS ETF',
+        cleaned,
+        flags=re.IGNORECASE
+    )
+    cleaned = re.sub(
+        r'Windows\s+Europe',
+        'WisdomTree Europe',
+        cleaned,
+        flags=re.IGNORECASE
+    )
 
     # Clean multiple spaces caused by regex replacements
     cleaned = re.sub(r' +', ' ', cleaned)
@@ -163,12 +227,32 @@ def verify_post_deterministic(text: str, primary_ticker: Optional[str] = None) -
     has_plain_div_word = bool(re.search(r'\b(dividendo|dividendi|cedola|cedole)\b', text_lower))
     has_negation = any(re.search(n, text_lower) for n in DIVIDEND_NEGATIONS)
 
+    # 0. Global severe hallucination check (runs on original text and cleaned_text)
+    for pattern, reason in GLOBAL_FORBIDDEN_HALLUCINATIONS:
+        if re.search(pattern, text, flags=re.IGNORECASE) or re.search(pattern, cleaned_text, flags=re.IGNORECASE):
+            issues.append(f"CRITICAL: {reason}.")
+
     # Check for purged assets that must never appear in active communications
     for tag in tickers_to_check:
         if tag in ("XEON.DE", "XEON"):
             issues.append(
                 f"CRITICAL: L'asset ${tag} è stato definitivamente dismesso dal portafoglio e non deve comparire in alcun post o commento."
             )
+
+    # Check for forbidden identity and strategy misconceptions per asset
+    all_check_tags = list(tickers_to_check)
+    if primary_clean and primary_clean not in all_check_tags:
+        all_check_tags.append(primary_clean)
+    if re.search(r'\bwdef\b', text, flags=re.IGNORECASE) and "WDEF.L" not in all_check_tags and "WDEF" not in all_check_tags:
+        all_check_tags.append("WDEF.L")
+
+    for tag in all_check_tags:
+        if tag in ASSET_IDENTITY_FORBIDDEN_TERMS:
+            for pattern, reason in ASSET_IDENTITY_FORBIDDEN_TERMS[tag]:
+                if re.search(pattern, text, flags=re.IGNORECASE) or re.search(pattern, cleaned_text, flags=re.IGNORECASE):
+                    issues.append(
+                        f"CRITICAL: L'asset ${tag} è associato a termini vietati/errati: {reason}."
+                    )
 
     # 1. Primary Ticker Check (if post focuses on a specific asset)
     if primary_clean and primary_clean in PORTFOLIO_ASSETS_METADATA:
@@ -294,9 +378,8 @@ TESTO DEL POST DA REVISIONARE:
 =========================
 REGOLE DI VERIFICA TASSATIVE:
 =========================
-1. VERIFICA DIVIDENDI (CRITICA): Se un asset ha 'Paga Dividendi: NO (ACCUMULAZIONE / ZERO CEDOLE DISTRIBUITE)' (come ad esempio $WDEF.L, $INDO.PA, $IB01.L, $XEON.DE, $PPFB.DE), il post NON DEVE IN ALCUN MODO attribuirgli dividendi, cedole, rendimenti da dividendo o considerarlo un asset di "income/reddito da dividendo". Se questa allucinazione è presente, DEVI CORREGGERLA spiegando che l'asset capitalizza tutti i proventi nel NAV ad accumulazione, oppure rimuovere ogni riferimento ai dividendi.
 1. VERIFICA DIVIDENDI (CRITICA): Se un asset ha 'Paga Dividendi: NO (ACCUMULAZIONE / ZERO CEDOLE DISTRIBUITE)' (come ad esempio $WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), il post NON DEVE IN ALCUN MODO attribuirgli dividendi, cedole, rendimenti da dividendo o considerarlo un asset di "income/reddito da dividendo". Se questa allucinazione è presente, DEVI CORREGGERLA spiegando che l'asset capitalizza tutti i proventi nel NAV ad accumulazione, oppure rimuovere ogni riferimento ai dividendi.
-2. VERIFICA IDENTITÀ & SETTORE: Il nome dell'azienda o dell'ETF e il settore devono corrispondere esattamente ai dati ufficiali. (Es: $WDEF.L è WisdomTree Europe Defence UCITS ETF, settore Difesa e Aerospazio europeo, NON Equity Income).
+2. VERIFICA IDENTITÀ & SETTORE: Il nome dell'azienda o dell'ETF e il settore devono corrispondere esattamente ai dati ufficiali. (Es: $WDEF.L è WisdomTree Europe Defence UCITS ETF, settore Difesa e Aerospazio europeo ad accumulazione, MAI Equity Income o 'Windows Europe'; $IQQL.DE è iShares Listed Private Equity UCITS ETF, settore Private Equity, NON MSCI World Quality).
 3. FORMATTAZIONE ETORO: Rimuovi qualsiasi markdown bold '**' o '__' perché eToro non lo supporta. I cashtag devono avere lo spazio prima e dopo (es. ' $NVDA ').
 4. DECISIONE:
    - Se il post è perfetto e veritiero -> decision: "APPROVE", verified_text: il testo originale pulito.
