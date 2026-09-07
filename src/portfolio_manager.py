@@ -19,6 +19,7 @@ DEFAULT_TICKERS = {
     'IEUR': ('IEUR', 'iShares Core MSCI Europe ETF'),
     'IQQL.DE': ('IQQL.DE', 'iShares Listed Private Equity UCITS ETF'),
     'VOF.L': ('VOF.L', 'VinaCapital Vietnam Opportunity Fund'),
+    'WCLD.L': ('WCLD.L', 'WisdomTree Cloud Computing UCITS ETF'),
     
     # Healthcare & Pharma
     'ABT.US': ('ABT', 'Abbott Laboratories'),
@@ -40,7 +41,6 @@ DEFAULT_TICKERS = {
     
     # Energy, Nuclear, Utilities & Commodities
     'ENI.MI': ('ENI.MI', 'Eni S.p.A.'),
-    'MAU.PA': ('MAU.PA', 'Etablissements Maurel & Prom SA'),
     'ENEL.MI': ('ENEL.MI', 'Enel S.p.A.'),
     'CCJ': ('CCJ', 'Cameco Corp.'),
     'GLEN.L': ('GLEN.L', 'Glencore PLC'),
@@ -73,6 +73,7 @@ DEFAULT_EMOJIS = {
     'IEUR': '🇪🇺',     # Europe
     'IQQL.DE': '🔥',   # Listed Private Equity
     'VOF.L': '🇻🇳',     # Vietnam Opportunity Fund
+    'WCLD.L': '☁️',    # Cloud Computing & SaaS ETF
     
     # Healthcare & Pharmaceuticals
     'AZN.L': '🧬',
@@ -100,7 +101,6 @@ DEFAULT_EMOJIS = {
     'ENI.MI': '⛽',
     'ENI': '⛽',
     'GLEN.L': '⛏️',
-    'MAU.PA': '🛢️',
     'PRY.MI': '🔌',
     
     # Automotive, Luxury & Industrials
@@ -194,14 +194,19 @@ def load_config():
             # Add new positions: IB01.L
             if "IB01.L" not in config["tickers"]:
                 config["tickers"]["IB01.L"] = ["IB01.L", "iShares Treasury Bond 0-1yr UCITS ETF"]
-            # Ensure purged positions are removed: XEON.DE and legacy unheld assets
-            for purged in ["XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL"]:
+            # Ensure purged positions are removed: XEON.DE, MAU.PA and legacy unheld assets
+            for purged in ["XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA"]:
                 if purged in config.get("tickers", {}):
                     del config["tickers"][purged]
                     needs_save = True
                 if purged in config.get("emojis", {}):
                     del config["emojis"][purged]
                     needs_save = True
+
+            if "WCLD.L" not in config.get("tickers", {}):
+                config["tickers"]["WCLD.L"] = ["WCLD.L", "WisdomTree Cloud Computing UCITS ETF"]
+                config["emojis"]["WCLD.L"] = "☁️"
+                needs_save = True
 
             if "IB01.L" not in config.get("tickers", {}):
                 config["tickers"]["IB01.L"] = ["IB01.L", "iShares $ Treasury Bond 0-1yr UCITS ETF"]
@@ -470,7 +475,7 @@ RELATED_TICKERS_MAP = {
     'ENI.MI': ['$SHEL', '$TTE', '$BP'],
     'ETOR': ['$HOOD', '$COIN', '$IBKR'],
     'GLEN.L': ['$RIO.L', '$BHP.L', '$AAL.L'],
-    'MAU.PA': ['$TTE', '$ENI.MI', '$SHEL'],
+    'WCLD.L': ['$MSFT', '$PLTR', '$CRM', '$NOW', '$DDOG'],
     'PRY.MI': ['$NEX.PA', '$NKT.CO', '$ENEL.MI'],
     'RACE': ['$VOW3.DE', '$MBG.DE', '$P911.DE'],
     'VOW3.DE': ['$RACE', '$MBG.DE', '$BMW.DE'],
@@ -882,24 +887,24 @@ PORTFOLIO_ASSETS_METADATA = {
         ],
         "related_tickers": ["$UKW.L", "$FSFL.L", "$ENEL.MI"], "primary_tags": ["$TRIG.L"]
     },
-    "MAU.PA": {
-        "ticker": "MAU.PA", "yahoo_ticker": "MAU.PA", "name": "Etablissements Maurel & Prom SA", "emoji": "🛢️",
-        "asset_class": "Stock", "sector": "Esplorazione & Produzione Idrocarburi", "geo": "Europe", "tier": "Tactical Energy",
-        "is_dividend_paying": True, "dividend_policy": "Distribuzione annuale con dividend yield generoso (~4.5%) e politica di remunerazione legata al free cash flow", "annual_yield_pct": 4.5, "frequency": "Annuale (Luglio)",
-        "domain": "maureletprom.fr", "color": (180, 140, 50),
-        "desc": "Cash-rich oil and gas producer with strong balance sheet discipline and high dividend payouts.",
-        "thesis": "Produttore petrolifero indipendente caratterizzato da cassa netta positiva, costi di estrazione contenuti, asset strategici in Gabon, Angola e Tanzania, e una politica di remunerazione degli azionisti generosa.",
+    "WCLD.L": {
+        "ticker": "WCLD.L", "yahoo_ticker": "WCLD.L", "name": "WisdomTree Cloud Computing UCITS ETF", "emoji": "☁️",
+        "asset_class": "ETF", "sector": "Cloud Computing & Enterprise SaaS", "geo": "USA / Global", "tier": "Next-Gen Cloud ETF",
+        "is_dividend_paying": False, "dividend_policy": "Ad accumulazione (Acc) - tutti i proventi vengono automaticamente reinvestiti nel fondo, nessun dividendo distribuito", "annual_yield_pct": 0.0, "frequency": "Accumulazione (Nessun Dividendo)",
+        "domain": "wisdomtree.com", "color": (41, 128, 185),
+        "desc": "UCITS ETF tracking the BVP Nasdaq Emerging Cloud Index, capturing pure-play enterprise software and cloud (SaaS) leaders benefiting from the AI monetization cycle.",
+        "thesis": "Esposizione pura e diversificata ai leader globali del software cloud enterprise e del modello SaaS (BVP Nasdaq Emerging Cloud Index). Dopo il rally dei semiconduttori, il software applicativo rappresenta il livello della catena del valore che monetizzerà i guadagni di produttività dell'AI attraverso ricavi ricorrenti e margini elevati.",
         "upside_catalysts": [
-            "Monetizzazione della produzione di gas in Tanzania e asset petroliferi consolidati in Gabon",
-            "Crescita dei dividendi supportata dalla solida posizione di cassa netta",
-            "Opportunità di M&A e incremento delle riserve certe 2P"
+            "Monetizzazione enterprise dell'AI integrata nei software applicativi (agenti autonomi, copilot e automazione dei flussi di lavoro)",
+            "Forte leva operativa, margini lordi elevati (>70%) e robusta generazione di Free Cash Flow al maturare delle piattaforme SaaS",
+            "Rotazione settoriale dei flussi d'investimento dal comparto hardware/semiconduttori (già ampiamente prezzato) verso il software applicativo a multipli compressi"
         ],
         "downside_risks": [
-            "Sensibilità al prezzo del barile di greggio sui mercati internazionali",
-            "Rischio paese legato al quadro politico e regolatorio in Africa centrale",
-            "Tempi di approvazione per il rimpatrio dei flussi di cassa operativi"
+            "Sensibilità delle valutazioni 'growth' all'andamento dei tassi d'interesse a lungo termine",
+            "Possibile allungamento dei cicli di vendita dei budget IT aziendali in contesti macroeconomici incerti",
+            "Concorrenza tra hyperscaler e vendor SaaS specializzati"
         ],
-        "related_tickers": ["$TTE", "$ENI.MI", "$SHEL"], "primary_tags": ["$MAU.PA"]
+        "related_tickers": ["$MSFT", "$PLTR", "$CRM", "$NOW", "$DDOG"], "primary_tags": ["$WCLD.L"]
     },
 
     # ── Consumer, Retail & Luxury ─────────────────────────────────────────────

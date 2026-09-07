@@ -20,7 +20,6 @@
         "INDO.PA": "🇮🇩",
         "IQQL.DE": "🔥",
         "LLY": "💊",
-        "MAU.PA": "🛢️",
         "MELI": "🛒",
         "MRVL": "📊",
         "MSFT": "💻",
@@ -39,7 +38,8 @@
         "VOF.L": "🇻🇳",
         "VOW3.DE": "🚗",
         "WDEF.L": "🛡️",
-        "WMT": "🛒"
+        "WMT": "🛒",
+        "WCLD.L": "☁️"
     },
     "tickers": {
         "1211.HK": [
@@ -122,10 +122,6 @@
             "LLY",
             "Eli Lilly and Co"
         ],
-        "MAU.PA": [
-            "MAU.PA",
-            "Etablissements Maurel & Prom SA"
-        ],
         "MELI": [
             "MELI",
             "MercadoLibre Inc"
@@ -201,6 +197,10 @@
         "WMT": [
             "WMT",
             "Walmart Inc."
+        ],
+        "WCLD.L": [
+            "WCLD.L",
+            "WisdomTree Cloud Computing UCITS ETF"
         ]
     }
 }

@@ -232,17 +232,6 @@ DIVIDEND_PROFILES = {
         "approx_dps": "Distribuzione cassa semestrale",
         "thesis": "Spina dorsale del commercio marittimo mondiale con cassa netta massiccia e dividendi straordinari.",
     },
-    "MAU.PA": {
-        "name": "Etablissements Maurel & Prom SA",
-        "cashtag": "$MAU.PA",
-        "emoji": "🛢️",
-        "sector": "Esplorazione & Produzione Idrocarburi",
-        "annual_yield_pct": 4.5,
-        "frequency": "Annuale (Luglio)",
-        "tranche_pct": 4.5,
-        "approx_dps": "€0,30 per azione",
-        "thesis": "Produttore petrolifero indipendente a cassa netta positiva e dividendi generosi.",
-    },
     "NOVO-B.CO": {
         "name": "Novo Nordisk A/S",
         "cashtag": "$NOVO-B.CO",
@@ -317,7 +306,6 @@ DIVIDEND_CALENDAR = {
     "MSFT": [(2, 15, "Q1"), (5, 15, "Q2"), (8, 15, "Q3"), (11, 15, "Q4")],
     "AVGO": [(3, 20, "Q1"), (6, 20, "Q2"), (9, 21, "Q3"), (12, 20, "Q4")],
     "1919.HK": [(6, 10, "Final"), (10, 15, "Interim")],
-    "MAU.PA": [(7, 5, "Annuale")],
     "NOVO-B.CO": [(3, 25, "Final"), (8, 15, "Interim")],
     "2318.HK": [(6, 5, "Final"), (10, 20, "Interim")],
     "IQQL.DE": [(5, 15, "Semestrale H1"), (11, 15, "Semestrale H2")],
@@ -641,7 +629,7 @@ def publish_dividend_post(
         "ENI.MI": 3.94, "ENEL.MI": 2.94, "SX7PEX.DE": 3.43,
         "VOW3.DE": 1.24, "ABBV": 2.80, "ABT.US": 2.20, "AZN.L": 2.10,
         "GLEN.L": 2.50, "TRIG.L": 2.20, "ULVR.L": 2.00, "WMT": 1.80,
-        "MSFT": 2.19, "AVGO": 1.50, "MAU.PA": 2.00, "1919.HK": 2.12,
+        "MSFT": 2.19, "AVGO": 1.50, "1919.HK": 2.12,
         "NOVO-B.CO": 2.00, "2318.HK": 1.06,
     }
 

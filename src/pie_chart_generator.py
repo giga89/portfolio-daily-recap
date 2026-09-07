@@ -49,6 +49,7 @@ SECTOR_MAP: dict[str, str] = {
     'AAPL': 'AI & Tech',
     'PLTR': 'AI & Tech',
     'NET':  'AI & Tech',
+    'WCLD.L': 'AI & Tech',
     # Healthcare / Pharma
     'LLY':     'Healthcare',
     'NVO':     'Healthcare',
@@ -66,7 +67,6 @@ SECTOR_MAP: dict[str, str] = {
     'ETOR':    'Finance',
     # Energy / Commodities / Materials
     'ENI.MI':  'Energy & Resources',
-    'MAU.PA':  'Energy & Resources',
     'GLEN.L':  'Energy & Resources',
     'CCJ':     'Energy & Resources',
     'ENEL.MI': 'Energy & Resources',
@@ -101,11 +101,11 @@ GEO_MAP: dict[str, str] = {
     'NVDA': 'USA', 'AMD': 'USA', 'AVGO': 'USA', 'MSFT': 'USA', 'GOOG': 'USA',
     'AMZN': 'USA', 'META': 'USA', 'AAPL': 'USA', 'PLTR': 'USA', 'NET': 'USA',
     'LLY': 'USA', 'ABT': 'USA', 'ABT.US': 'USA', 'ABBV': 'USA', 'HUM': 'USA',
-    'CCJ': 'USA', 'PYPL': 'USA', 'ETOR': 'USA', 'IEMG': 'USA', 'MELI': 'USA',
+    'CCJ': 'USA', 'PYPL': 'USA', 'ETOR': 'USA', 'IEMG': 'USA', 'MELI': 'USA', 'WCLD.L': 'USA',
     # Europe
     'AZN.L': 'Europe', 'ENEL.MI': 'Europe', 'ENI.MI': 'Europe',
     'GLEN.L': 'Europe', 'VOW3.DE': 'Europe', 'RACE': 'Europe',
-    'PRY.MI': 'Europe', 'MAU.PA': 'Europe', 'SX7PEX.DE': 'Europe',
+    'PRY.MI': 'Europe', 'SX7PEX.DE': 'Europe',
     'TRIG.L': 'Europe', 'WDEF.L': 'Europe', 'IEUR': 'Europe',
     'IB01.L': 'USA', 'IQQL.DE': 'Europe',
     # Asia / Pacific

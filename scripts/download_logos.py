@@ -73,7 +73,6 @@ DOMAIN_MAP = {
     "VOW3.DE":    "volkswagenag.com",
     "GLEN.L":     "glencore.com",
     "TRIG.L":     "trig-ltd.com",
-    "MAU.PA":     "maureletprom.fr",
     "ULVR.L":     "unilever.com",
     # ── Asia ────────────────────────────────────────────────────────────────
     "1211.HK":    "byd.com",
@@ -86,6 +85,7 @@ DOMAIN_MAP = {
     "IEMG":       "ishares.com",
     "IB01.L":     "ishares.com",
     "WDEF.L":     "wisdomtree.com",
+    "WCLD.L":     "wisdomtree.com",
     "INDO.PA":    "amundi.com",
     "PPFB.DE":    "ishares.com",
     "VOF.L":      "vinacapital.com",

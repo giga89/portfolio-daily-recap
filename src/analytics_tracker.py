@@ -272,7 +272,6 @@ DIVIDEND_BREAKDOWN = [
     {"ticker": "1919.HK", "name": "COSCO SHIPPING Holdings", "port_yield": "0.14%", "comp_yield": "6.23%", "dps": "$0.21"},
     {"ticker": "ENEL.MI", "name": "Enel S.p.A.", "port_yield": "0.14%", "comp_yield": "6.10%", "dps": "$0.43"},
     {"ticker": "ENI.MI", "name": "Eni S.p.A.", "port_yield": "0.11%", "comp_yield": "4.54%", "dps": "$0.94"},
-    {"ticker": "MAU.PA", "name": "Maurel & Prom SA", "port_yield": "0.08%", "comp_yield": "4.48%", "dps": "$0.30"},
     {"ticker": "ULVR.L", "name": "Unilever PLC", "port_yield": "0.09%", "comp_yield": "3.62%", "dps": "$1.47"},
     {"ticker": "SX7PEX.DE", "name": "iShares European Banks", "port_yield": "0.07%", "comp_yield": "4.10%", "dps": "$1.15"},
     {"ticker": "GLEN.L", "name": "Glencore PLC", "port_yield": "0.07%", "comp_yield": "3.15%", "dps": "$0.09"},
@@ -361,7 +360,6 @@ HOLDINGS_DATA = [
     {"ticker": "PRY.MI", "name": "Prysmian S.p.A.", "emoji": "🔌", "asset_class": "Stock", "curr": "EUR", "sector": "Cables & Grid Infrastructure", "geo": "Europe", "tier": "Industrial Leader", "desc": "Worldwide number one in subsea and underground power cables critical for global electrification and offshore wind."},
     {"ticker": "GLEN.L", "name": "Glencore PLC", "emoji": "⛏️", "asset_class": "Stock", "curr": "GBP", "sector": "Transition Metals & Trading", "geo": "Europe", "tier": "Commodities", "desc": "Global mining and marketing leader in copper, cobalt, and nickel essential for electric vehicles and power grids."},
     {"ticker": "TRIG.L", "name": "Renewables Infrastructure Grp", "emoji": "🌬️", "asset_class": "Stock", "curr": "GBP", "sector": "Wind & Solar Infrastructure", "geo": "Europe", "tier": "High Yield Green", "desc": "UK clean energy infrastructure investment trust holding an operational portfolio of European wind and solar assets."},
-    {"ticker": "MAU.PA", "name": "Maurel & Prom SA", "emoji": "🛢️", "asset_class": "Stock", "curr": "EUR", "sector": "Exploration & Production", "geo": "Europe", "tier": "Tactical Energy", "desc": "Cash-rich oil and gas producer with strong balance sheet discipline and high dividend payouts."},
 
     # ── Consumer, Retail & Luxury ─────────────────────────────────────────────
     {"ticker": "WMT", "name": "Walmart Inc", "emoji": "🛒", "asset_class": "Stock", "curr": "USD", "sector": "Omnichannel Retail Leader", "geo": "USA", "tier": "Core Defensive", "desc": "World's largest retailer by revenue, accelerating automated fulfillment, e-commerce scale, and retail media network."},
@@ -385,6 +383,7 @@ HOLDINGS_DATA = [
     {"ticker": "IB01.L", "name": "iShares $ Treasury 0-1yr ETF", "emoji": "💵", "asset_class": "Fixed Income", "curr": "USD", "sector": "Ultra-Short US Treasuries", "geo": "USA", "tier": "Cash Yield & Dry Powder", "desc": "Ultra-short US government paper yielding risk-free USD interest while preserving dry powder for market corrections."},
     {"ticker": "XEON.DE", "name": "Xtrackers II EUR Overnight Rate Swap", "emoji": "💤", "asset_class": "Fixed Income", "curr": "EUR", "sector": "Overnight EUR Cash Yield", "geo": "Europe", "tier": "Cash Yield & Dry Powder", "desc": "Euro money market ETF tracking interbank €STR with daily capital compounding, zero duration risk, and capital preservation."},
     {"ticker": "WDEF.L", "name": "WisdomTree Europe Defence", "emoji": "🛡️", "asset_class": "ETF", "curr": "GBP", "sector": "European Defence Equity", "geo": "Europe", "tier": "Strategic Defence ETF", "desc": "Targeted exposure to leading European aerospace and defence companies benefiting from structural NATO rearmament."},
+    {"ticker": "WCLD.L", "name": "WisdomTree Cloud Computing ETF", "emoji": "☁️", "asset_class": "ETF", "curr": "USD", "sector": "Cloud Computing & Enterprise SaaS", "geo": "USA / Global", "tier": "Next-Gen Cloud ETF", "desc": "UCITS ETF tracking BVP Nasdaq Emerging Cloud Index capturing pure-play enterprise cloud software (SaaS) leaders benefiting from AI monetization."},
 
     # ── Private / Space & Crypto Assets ───────────────────────────────────────
     {"ticker": "SPCX.RTH", "name": "Space Exploration Tech (SpaceX)", "emoji": "🚀", "asset_class": "Private Equity", "curr": "USD", "sector": "Space, Satellites & Starlink", "geo": "USA", "tier": "Pre-IPO Moat", "desc": "Dominant global orbital rocket launch provider and operator of the Starlink broadband satellite constellation."},
