@@ -597,6 +597,8 @@ def publish_etoro_poll(
         if len(full_message) > 1000:
             full_message = smart_truncate(full_message, max_chars=1000)
 
+    # Final sanitization of full message
+    full_message = _clean_no_hashtags(full_message)[:1000].strip()
     # Double check total length: if still > 1000, smart-truncate the body again
     if len(full_message) > 1000:
         available = 1000 - len(tag_footer) - 5

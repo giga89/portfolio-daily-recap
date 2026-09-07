@@ -25,10 +25,36 @@ def main():
     """
     Main function to orchestrate data collection and recap generation
     """
-    
-    print("Starting daily portfolio recap generation...~")
-    print("=" * 50)
-    
+    market_session = os.getenv('MARKET_SESSION', 'Daily recap')
+    print("=" * 60)
+    print(f"Starting portfolio session: '{market_session}'")
+    print(f"Timestamp: {pd.Timestamp.now(tz='UTC').strftime('%Y-%m-%d %H:%M:%S UTC')}")
+    print("=" * 60)
+
+    # ── Check Market Holidays & Special Routing ─────────────────────────────
+    import market_calendar
+    holiday_action = market_calendar.should_skip_or_meme_session(market_session)
+
+    if holiday_action["action"] == "SKIP":
+        print(f"🛑 SESSION SKIPPED: {holiday_action['reason']}")
+        os.makedirs('output', exist_ok=True)
+        with open('output/recap.txt', 'w', encoding='utf-8') as f:
+            f.write(f"🛑 SESSION SKIPPED: {holiday_action['reason']}\n")
+        print("Done. Exiting cleanly.")
+        sys.exit(0)
+
+    if holiday_action["action"] == "HOLIDAY_MEME":
+        print(f"🏖️ HOLIDAY DETECTED: {holiday_action['holiday_name']} ({holiday_action['market']} markets closed)")
+        print(f"🎭 Publishing Holiday Theme Meme card for '{market_session}'...")
+        res = market_calendar.publish_holiday_meme_session(
+            session_name=market_session,
+            holiday_name=holiday_action["holiday_name"],
+            market=holiday_action["market"],
+            output_dir='output'
+        )
+        print("Holiday Meme session completed successfully:", res)
+        sys.exit(0)
+
     # Step 1: Get yfinance data for all symbols
     stock_data = finance_fetcher.fetch_stock_data()
     print(f"Successfully fetched data for {len(stock_data)} symbols")

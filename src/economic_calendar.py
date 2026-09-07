@@ -137,6 +137,7 @@ def smart_truncate(text: str, max_chars: int = 700) -> str:
 def _sanitize_macro_poll(data: Dict[str, Any]) -> Dict[str, Any]:
     """Sanitize poll data to strictly comply with eToro limits and hashtag prohibition."""
     raw_title = data.get("title") or "Eventi Macro della Settimana: quale guiderà i mercati? 🗓️"
+    title = _clean_no_hashtags(raw_title)[:200].strip()
     title = smart_truncate(_clean_no_hashtags(raw_title), 200)
 
     raw_options = data.get("options") or []
@@ -157,9 +158,11 @@ def _sanitize_macro_poll(data: Dict[str, Any]) -> Dict[str, Any]:
     cleaned_options = cleaned_options[:4]
 
     raw_message = data.get("message") or ""
+    message = _clean_no_hashtags(raw_message)[:950].strip()
     # Smart truncate cleanly to 700 chars max, leaving abundant space for the footer
     message = smart_truncate(_clean_no_hashtags(raw_message), 700)
 
+    tickers = data.get("tickers") or ["SPX500", "NSDQ100"]
     tickers = data.get("tickers") or ["SPX500", "NSDQ100", "EURUSD"]
     clean_tickers = [t.replace("$", "").strip().upper() for t in tickers if t]
 
@@ -194,13 +197,18 @@ def fetch_macro_calendar_gemini() -> Optional[Dict[str, Any]]:
 Sei un analista finanziario professionista e gestore di portafoglio.
 Data odierna: {today_str}.
 
+Cerca sul web i principali EVENTI MACROECONOMICI (Economic Calendar) previsti per QUESTA SETTIMANA (dal lunedì al venerdì) con particolare attenzione a USA ed Europa (es. CPI inflazione USA, decisioni tassi BCE o Federal Reserve, Non-Farm Payrolls, discorsi Powell/Lagarde, PPI, PIL).
 Cerca sul web i principali EVENTI MACROECONOMICI (Economic Calendar) previsti per QUESTA SETTIMANA (da lunedì a venerdì) con particolare attenzione a USA ed Europa (es. CPI inflazione USA, decisioni tassi BCE o Federal Reserve, Non-Farm Payrolls, discorsi Powell/Lagarde, PPI, PIL, vendite al dettaglio).
 
 Genera un sondaggio d'impatto per il feed social di eToro, strutturato in JSON valido.
+REGOLE TASSATIVE:
 REGOLE TASSATIVE DI FORMATTAZIONE:
 1. 'poll_title': Titolo/domanda del sondaggio (massimo 150 caratteri). Es: "Eventi Macro della Settimana: quale guiderà i mercati? 🗓️"
+2. 'options': Array di 3 o 4 opzioni sintetiche degli eventi più importanti.
 2. 'options': Array di esattamente 4 opzioni sintetiche degli eventi più importanti.
    ATTENZIONE LIMITE RIGIDO ETORO: CIASCUNA OPZIONE DEVE ESSERE AL MASSIMO DI 28 CARATTERI!
+   Esempi validi (<28 car): "Inflazione USA (CPI)", "Decisione Tassi BCE", "Dati Occupazione NFP", "Altro (nei commenti)".
+3. 'message': Testo del post in italiano impeccabile (tra 400 e 700 caratteri). Spiega brevemente gli appuntamenti chiave della settimana con giorni indicativi, il contesto per i mercati azionari e invita la community a votare e commentare.
    Esempi validi (<28 car): "Decisione Tassi BCE", "Inflazione USA (CPI)", "PPI USA", "Altro (nei commenti)".
 3. 'message': Il post DEVE essere formattato OBBLIGATORIAMENTE come CALENDARIO GIORNO PER GIORNO con elenco puntato da Lunedì a Venerdì, seguito dalla chiamata all'azione per votare.
    Esempio di struttura:
@@ -218,6 +226,7 @@ REGOLE TASSATIVE DI FORMATTAZIONE:
 
    VINCOLO DI LUNGHEZZA FONDAMENTALE: Il testo del 'message' deve essere tra 400 e 600 caratteri massimi (CONCISO, frasi complete, NESSUNA interruzione o troncamento a metà).
    DIVIETO ASSOLUTO DI HASHTAG: NON usare MAI il carattere '#' né hashtag (es. NO #eToro, NO #Trading). Usa solo cashtag come $SPX500, $NSDQ100.
+4. 'tickers': Array di simboli relativi ai mercati impattati (es. ["SPX500", "NSDQ100"]).
 4. 'tickers': Array di simboli relativi ai mercati impattati (es. ["SPX500", "NSDQ100", "EURUSD"]).
 
 Restituisci SOLO il blocco JSON nel seguente formato:
@@ -225,6 +234,7 @@ Restituisci SOLO il blocco JSON nel seguente formato:
   "poll_title": "...",
   "options": ["...", "...", "...", "..."],
   "message": "...",
+  "tickers": ["SPX500", "NSDQ100"]
   "tickers": ["SPX500", "NSDQ100", "EURUSD"]
 }}
 """
@@ -309,6 +319,7 @@ def fetch_macro_calendar_feed() -> Optional[Dict[str, Any]]:
                             unique.append((e["country"], title_clean, e.get("date", "")))
 
                     options = []
+                    details = []
                     for country, title, _ in unique[:3]:
                         # Translate / shorten to <= 28 chars
                         short_title = title
@@ -335,6 +346,7 @@ def fetch_macro_calendar_feed() -> Optional[Dict[str, Any]]:
                         if len(opt_str) > 28:
                             opt_str = opt_str[:28].rstrip()
                         options.append(opt_str)
+                        details.append(f"• {country}: {title}")
 
                     options.append("Altro (nei commenti)")
                     options = options[:4]

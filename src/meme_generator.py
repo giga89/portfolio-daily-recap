@@ -252,12 +252,46 @@ MEME_CATALOG = {
             "mood_emoji": "🛋️",
             "badge_color": "#6366F1"
         }
+    ],
+    "HOLIDAY": [
+        {
+            "template": "pablo_escobar.jpg",
+            "title": "🛋️ MERCATI IN FESTA",
+            "top_text": "IO CHE ASPETTO CHE RIAPRA IL MERCATO",
+            "bottom_text": "MENTRE LA BORSA È IN VACANZA PER {holiday_name} 🏖️",
+            "en_top": "ME WAITING FOR MARKETS TO REOPEN",
+            "en_bottom": "WHILE THE EXCHANGE IS CLOSED FOR {holiday_name} 🏖️",
+            "mood_emoji": "🛋️",
+            "badge_color": "#6366F1"
+        },
+        {
+            "template": "waiting_skeleton.jpg",
+            "title": "⏳ ATTENDENDO IL MERCATO",
+            "top_text": "QUANDO LA BORSA È CHIUSA PER FESTIVITÀ",
+            "bottom_text": "E TU NON VEDI L'ORA CHE RIAPRA DOMANI 🌿",
+            "en_top": "WHEN MARKETS ARE CLOSED FOR HOLIDAY",
+            "en_bottom": "AND YOU CAN'T WAIT FOR TOMORROW'S OPEN 🌿",
+            "mood_emoji": "☕",
+            "badge_color": "#8B5CF6"
+        },
+        {
+            "template": "two_bus_passengers.jpg",
+            "title": "🏖️ GIORNATA DI RELAX SUI MERCATI",
+            "top_text": "I DAY TRADER CHE NON SANNO COSA FARE SENZA BORSA",
+            "bottom_text": "I LONG-TERM INVESTOR CHE SI GODONO LA FESTIVITÀ ☕",
+            "en_top": "DAY TRADERS STRESSED WITHOUT LIVE CANDLES",
+            "en_bottom": "LONG-TERM INVESTORS ENJOYING THE HOLIDAY RELAX ☕",
+            "mood_emoji": "🌴",
+            "badge_color": "#10B981"
+        }
     ]
 }
 
 
-def determine_sentiment(portfolio_daily: float, is_weekend: bool = False) -> str:
+def determine_sentiment(portfolio_daily: float, is_weekend: bool = False, is_holiday: bool = False) -> str:
     """Classify market sentiment key based on daily performance."""
+    if is_holiday:
+        return "HOLIDAY"
     if is_weekend:
         return "WEEKEND"
     if portfolio_daily >= 1.5:
@@ -277,6 +311,8 @@ def generate_meme_card(
     top_performers: list = None,
     lang: str = "it",
     is_weekend: bool = False,
+    is_holiday: bool = False,
+    holiday_name: str = None,
     forced_template: str = None,
     aspect_ratio: str = "16:9"  # "16:9" (1280x720) or "1:1" (1080x1080)
 ) -> str:
@@ -288,7 +324,7 @@ def generate_meme_card(
       • Places the un-stretched meme sharply inside a rounded studio frame with subtle drop shadow.
       • Header bar with dynamic glowing daily % pill + footer with ticker pills and verified branding.
     """
-    sentiment = determine_sentiment(portfolio_daily, is_weekend)
+    sentiment = determine_sentiment(portfolio_daily, is_weekend, is_holiday)
     catalog = MEME_CATALOG.get(sentiment, MEME_CATALOG["BULL_STEADY"])
 
     if forced_template:
@@ -361,8 +397,11 @@ def generate_meme_card(
     title_text = meme_data["title"]
     draw.text((28, (header_h - 26) // 2), title_text, font=f_title, fill="#FFFFFF")
 
-    # Daily Return Pill Badge
-    if is_weekend:
+    # Daily Return / Status Pill Badge
+    if is_holiday:
+        pill_text = (holiday_name or "MARKET HOLIDAY").upper()[:18]
+        pill_bg = (99, 102, 241, 255)
+    elif is_weekend:
         pill_text = "WEEKEND RECAP"
         pill_bg = (99, 102, 241, 255)
     else:
@@ -370,7 +409,7 @@ def generate_meme_card(
         pill_text = f"{sign}{portfolio_daily:.2f}% {meme_data['mood_emoji']}"
         pill_bg = (16, 185, 129, 255) if portfolio_daily >= 0 else (239, 68, 68, 255)
 
-    pill_w, pill_h = 170, 38
+    pill_w, pill_h = 180 if is_holiday else 170, 38
     pill_x, pill_y = W - pill_w - 28, (header_h - pill_h) // 2
     draw.rounded_rectangle([(pill_x, pill_y), (pill_x + pill_w, pill_y + pill_h)], radius=19, fill=pill_bg)
     
@@ -383,7 +422,13 @@ def generate_meme_card(
     content_bottom = H - footer_h - 12
 
     # 1. Top Punchline Text
-    top_text = meme_data["en_top"] if lang == "en" else meme_data["top_text"]
+    h_display = holiday_name or "la Festività"
+    raw_top = meme_data["en_top"] if lang == "en" else meme_data["top_text"]
+    try:
+        top_text = raw_top.format(holiday_name=h_display)
+    except Exception:
+        top_text = raw_top
+
     f_meme_top = _get_font(top_font_size, bold=True)
     top_bbox = draw.textbbox((0, 0), top_text, font=f_meme_top)
     top_tw = top_bbox[2] - top_bbox[0]
@@ -393,7 +438,11 @@ def generate_meme_card(
     draw.text(((W - top_tw) // 2, top_y), top_text, font=f_meme_top, fill="#00D4FF")
 
     # 2. Bottom Punchline Text
-    bottom_text = meme_data["en_bottom"] if lang == "en" else meme_data["bottom_text"]
+    raw_bottom = meme_data["en_bottom"] if lang == "en" else meme_data["bottom_text"]
+    try:
+        bottom_text = raw_bottom.format(holiday_name=h_display)
+    except Exception:
+        bottom_text = raw_bottom
     f_meme_bot = _get_font(bot_font_size, bold=True)
     bot_bbox = draw.textbbox((0, 0), bottom_text, font=f_meme_bot)
     bot_tw = bot_bbox[2] - bot_bbox[0]

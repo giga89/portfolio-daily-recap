@@ -50,6 +50,7 @@ class TestPollArchitecture(unittest.TestCase):
         self.assertEqual(economic_calendar.smart_truncate(short_text, 100), short_text)
 
     def test_monday_macro_poll_structure(self):
+        """Verify Monday Macro poll structure and constraints."""
         """Verify Monday Macro poll structure, calendar formatting, and limits."""
         poll = economic_calendar.get_weekly_macro_poll()
         self.assertIn("title", poll)
