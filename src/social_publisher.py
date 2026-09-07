@@ -1006,6 +1006,7 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
         return results
 
     # Ensure prominent cashtags and hashtags for eToro feeds and social visibility
+    # Ensure prominent cashtags for eToro feeds and social visibility (NO # hashtags)
     core_cashtags = ["$PLTR", "$NVDA", "$CCJ", "$MSFT", "$AMZN", "$SX7PEX.DE", "$TSM"]
     tag_suffix = ""
     if not any(tag.lower() in post_text.lower() for tag in core_cashtags):

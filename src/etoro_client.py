@@ -76,6 +76,14 @@ MARKET_IDS = {
     "WMT": 1035,
     "SPCX.RTH": 15623,
     "TRX": 100026,
+
+    # Major Market Indices & Currencies
+    "SPX500": 27,
+    "NSDQ100": 28,
+    "DJ30": 29,
+    "EURUSD": 1,
+    "GER40": 32,
+    "UK100": 31,
 }
 
 

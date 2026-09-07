@@ -27,6 +27,9 @@ def _strip_html(text: str) -> str:
     text = re.sub(r"__(.*?)__", r"\1", text, flags=re.DOTALL)
     text = re.sub(r"(?<!\w)\*([^\*\n]+)\*(?!\w)", r"\1", text)
     text = text.replace("**", "")
+    # Remove '#' hashtags (useless on eToro, only $cashtags work)
+    text = re.sub(r"#([A-Za-z0-9_]+)", "", text)
+    text = re.sub(r"[ \t]+", " ", text)
     return text.strip()
 
 
