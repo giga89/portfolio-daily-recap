@@ -30,8 +30,27 @@ class TestPollArchitecture(unittest.TestCase):
         self.assertIn("$NVDA", cleaned)
         self.assertIn("Che ne dite?", cleaned)
 
+    def test_smart_truncate(self):
+        """Verify that smart_truncate never cuts mid-word and preserves complete sentences."""
+        long_text = (
+            "Prima frase completa con dettagli importanti. "
+            "Seconda frase che contiene spiegazioni molto ampie sui tassi e sui mercati. "
+            "Terza frase finale che conclude il discorso."
+        )
+        # Should cut at end of second sentence without cutting words
+        truncated = economic_calendar.smart_truncate(long_text, max_chars=130)
+        self.assertLessEqual(len(truncated), 130)
+        self.assertTrue(truncated.endswith("."))
+        self.assertNotIn("..", truncated)  # not cut mid-sentence with ellipsis if sentence terminator found
+        self.assertIn("Seconda frase", truncated)
+        self.assertNotIn("Terza frase", truncated)
+
+        # Text shorter than max_chars should remain intact
+        short_text = "Frase breve intatta."
+        self.assertEqual(economic_calendar.smart_truncate(short_text, 100), short_text)
+
     def test_monday_macro_poll_structure(self):
-        """Verify Monday Macro poll structure and constraints."""
+        """Verify Monday Macro poll structure, calendar formatting, and limits."""
         poll = economic_calendar.get_weekly_macro_poll()
         self.assertIn("title", poll)
         self.assertIn("options", poll)
@@ -51,6 +70,13 @@ class TestPollArchitecture(unittest.TestCase):
         # Message <= 1000 chars, no '#' hashtags
         self.assertLessEqual(len(poll["message"]), 1000)
         self.assertNotIn("#", poll["message"])
+
+        # Check Day-by-Day Calendar format
+        msg = poll["message"]
+        self.assertIn("CALENDARIO MACRO", msg)
+        self.assertIn("Lunedì", msg)
+        self.assertIn("Venerdì", msg)
+        self.assertIn("▪️", msg)
 
     def test_wednesday_thematic_poll_structure(self):
         """Verify Wednesday Thematic poll templates."""

@@ -31,53 +31,63 @@ FALLBACK_MACRO_TEMPLATES = [
         "title": "Macro della settimana: quale catalizzatore guiderà i mercati? 🗓️",
         "options": [
             "Inflazione USA (CPI/PPI)",
-            "Decisioni Tassi Banche Cent.",
+            "Decisioni Tassi BCE/Fed",
             "Dati Occupazione & NFP",
-            "Altro (dite nei commenti)",
+            "Altro (nei commenti)",
         ],
         "tickers": ["SPX500", "NSDQ100", "EURUSD"],
         "message": (
-            "🗓️ CALENDARIO ECONOMICO: I PRINCIPALI APPUNTAMENTI DELLA SETTIMANA\n\n"
-            "Inizia una nuova settimana sui mercati globali tra dati macroeconomici, "
-            "interventi dei banchieri centrali e monitoraggio dei rendimenti obbligazionari.\n\n"
-            "Con gli indici azionari ($SPX500, $NSDQ100) sui massimi relativi, la reazione "
-            "ai dati su inflazione, tassi e mercato del lavoro determinerà la direzione dei flussi.\n\n"
-            "Quale evento ritenete più decisivo per guidare il sentiment nei prossimi giorni?\n\n"
-            "Votate il sondaggio con 1 tap e condividete le vostre attese nei commenti! 👇"
+            "🗓️ CALENDARIO MACRO DELLA SETTIMANA\n\n"
+            "I market mover più attesi da monitorare sui mercati:\n"
+            "▪️ Lunedì: Apertura mercati e monitoraggio flussi azionari\n"
+            "▪️ Martedì: Dati bilancia commerciale e aste governative\n"
+            "▪️ Mercoledì: Scorte energetiche e discorsi banchieri centrali\n"
+            "▪️ Giovedì: Decisioni tassi d'interesse & PPI prezzi produzione\n"
+            "▪️ Venerdì: Inflazione (CPI) & report occupazione USA\n\n"
+            "Quale tra questi catalizzatori peserà di più sui mercati?\n"
+            "Votate con 1 tap qui sotto e condividete la vostra visione nei commenti! 👇"
         ),
     },
     {
-        "title": "Banche Centrali & Tassi: quale fattore peserà di più? 🏦",
+        "title": "Banche Centrali & Tassi: quale catalizzatore peserà di più? 🏦",
         "options": [
             "Tassi & Discorsi Fed",
             "Politica Monetaria BCE",
             "Rendimenti Bond & Spread",
-            "Altro (scrivi sotto)",
+            "Altro (nei commenti)",
         ],
         "tickers": ["SPX500", "NSDQ100", "SX7PEX.DE", "IB01.L"],
         "message": (
-            "🗓️ SONDAGGIO MACRO: FOCUS SU BANCHE CENTRALI E LIQUIDITÀ\n\n"
-            "La traiettoria dei tassi di interesse guida le valutazioni sia dei titoli growth ad alta crescita ($PLTR, $NVDA) "
-            "sia del comparto obbligazionario ($IB01.L) e bancario ($SX7PEX.DE).\n\n"
-            "Tra indicazioni della Fed e decisioni della BCE, su quale fronte vi aspettate le maggiori sorprese per i mercati?\n\n"
-            "Esprimete il vostro voto e commentate con la vostra strategia! 👇"
+            "🗓️ CALENDARIO MACRO: FOCUS BANCHE CENTRALI E TASSI\n\n"
+            "I principali appuntamenti monetari della settimana:\n"
+            "▪️ Lunedì: Analisi della curva dei rendimenti obbligazionari\n"
+            "▪️ Martedì: Interventi esponenti Federal Reserve\n"
+            "▪️ Mercoledì: Riunioni preparatorie e minute di politica monetaria\n"
+            "▪️ Giovedì: Decisione ufficiale sui tassi d'interesse BCE\n"
+            "▪️ Venerdì: Dati su inflazione attesa e fiducia dei consumatori\n\n"
+            "Su quale fronte vi aspettate la maggiore volatilità per azioni e bond?\n"
+            "Esprimete il vostro voto e commentate la vostra strategia! 👇"
         ),
     },
     {
-        "title": "Dati Macro USA vs Europa: quale sorpresa muoverà le borse? 📊",
+        "title": "Dati USA vs Europa: quale sorpresa muoverà i mercati? 📊",
         "options": [
             "Inflazione & Consumi USA",
             "PIL & Manifattura Europa",
             "Trimestrali & Outlook",
-            "Prezzo Petrolio & Energia",
+            "Altro (nei commenti)",
         ],
         "tickers": ["SPX500", "IEUR", "ENI.MI"],
         "message": (
-            "🗓️ SONDAGGIO SETTIMANALE: DIVERGENZE ECONOMICHE GLOBALI\n\n"
-            "Tra la resilienza dei consumi statunitensi e le sfide di crescita del continente europeo ($IEUR), "
-            "gli operatori scrutano i nuovi report macro per calibrare le posizioni azionarie.\n\n"
-            "Quale tra questi fattori avrà il maggiore impatto sulle performance dei vostri portafogli questa settimana?\n\n"
-            "Votate e fateci sapere il vostro punto di vista nei commenti! 👇"
+            "🗓️ CALENDARIO MACRO: USA ED EUROPA A CONFRONTO\n\n"
+            "Gli appuntamenti economici più attesi dell'ottava:\n"
+            "▪️ Lunedì: Reazione iniziale dei listini europei e Wall Street\n"
+            "▪️ Martedì: Indici PMI manifatturieri e dei servizi Eurozona\n"
+            "▪️ Mercoledì: Dati su consumi e vendite al dettaglio USA\n"
+            "▪️ Giovedì: Report inflazione all'ingrosso (PPI) e sussidi disoccupazione\n"
+            "▪️ Venerdì: Indice prezzi al consumo (CPI) e sentiment Michigan\n\n"
+            "Quale area geografica o catalizzatore determinerà la direzione dei flussi?\n"
+            "Votate nel sondaggio e scrivete la vostra analisi nei commenti! 👇"
         ),
     },
 ]
@@ -91,10 +101,43 @@ def _clean_no_hashtags(text: str) -> str:
     return cleaned.strip()
 
 
+def smart_truncate(text: str, max_chars: int = 700) -> str:
+    """
+    Truncates text cleanly without cutting mid-word or mid-sentence.
+    Prioritizes sentence boundaries (. ! ? \n) to avoid abrupt cutoffs.
+    """
+    cleaned = text.strip()
+    if len(cleaned) <= max_chars:
+        return cleaned
+
+    sub = cleaned[:max_chars]
+
+    # Search for sentence terminators (. ! ?) followed by whitespace, newline, or end
+    sentence_matches = list(re.finditer(r'([.!?])(\s+|\n+|$)', sub))
+    if sentence_matches:
+        last_match = sentence_matches[-1]
+        cutoff = last_match.start() + 1
+        candidate = sub[:cutoff].strip()
+        if len(candidate) >= max_chars * 0.25:
+            return candidate
+
+    # Fallback to last newline (e.g. at the end of a calendar bullet line)
+    last_nl = sub.rfind('\n')
+    if last_nl > max_chars * 0.25:
+        return sub[:last_nl].strip()
+
+    # Fallback to last word boundary
+    last_space = sub.rfind(' ')
+    if last_space > 0:
+        return sub[:last_space].strip() + "..."
+
+    return sub.strip()
+
+
 def _sanitize_macro_poll(data: Dict[str, Any]) -> Dict[str, Any]:
     """Sanitize poll data to strictly comply with eToro limits and hashtag prohibition."""
     raw_title = data.get("title") or "Eventi Macro della Settimana: quale guiderà i mercati? 🗓️"
-    title = _clean_no_hashtags(raw_title)[:200].strip()
+    title = smart_truncate(_clean_no_hashtags(raw_title), 200)
 
     raw_options = data.get("options") or []
     cleaned_options: List[str] = []
@@ -114,9 +157,10 @@ def _sanitize_macro_poll(data: Dict[str, Any]) -> Dict[str, Any]:
     cleaned_options = cleaned_options[:4]
 
     raw_message = data.get("message") or ""
-    message = _clean_no_hashtags(raw_message)[:950].strip()
+    # Smart truncate cleanly to 700 chars max, leaving abundant space for the footer
+    message = smart_truncate(_clean_no_hashtags(raw_message), 700)
 
-    tickers = data.get("tickers") or ["SPX500", "NSDQ100"]
+    tickers = data.get("tickers") or ["SPX500", "NSDQ100", "EURUSD"]
     clean_tickers = [t.replace("$", "").strip().upper() for t in tickers if t]
 
     return {
@@ -150,24 +194,38 @@ def fetch_macro_calendar_gemini() -> Optional[Dict[str, Any]]:
 Sei un analista finanziario professionista e gestore di portafoglio.
 Data odierna: {today_str}.
 
-Cerca sul web i principali EVENTI MACROECONOMICI (Economic Calendar) previsti per QUESTA SETTIMANA (dal lunedì al venerdì) con particolare attenzione a USA ed Europa (es. CPI inflazione USA, decisioni tassi BCE o Federal Reserve, Non-Farm Payrolls, discorsi Powell/Lagarde, PPI, PIL).
+Cerca sul web i principali EVENTI MACROECONOMICI (Economic Calendar) previsti per QUESTA SETTIMANA (da lunedì a venerdì) con particolare attenzione a USA ed Europa (es. CPI inflazione USA, decisioni tassi BCE o Federal Reserve, Non-Farm Payrolls, discorsi Powell/Lagarde, PPI, PIL, vendite al dettaglio).
 
 Genera un sondaggio d'impatto per il feed social di eToro, strutturato in JSON valido.
-REGOLE TASSATIVE:
+REGOLE TASSATIVE DI FORMATTAZIONE:
 1. 'poll_title': Titolo/domanda del sondaggio (massimo 150 caratteri). Es: "Eventi Macro della Settimana: quale guiderà i mercati? 🗓️"
-2. 'options': Array di 3 o 4 opzioni sintetiche degli eventi più importanti.
+2. 'options': Array di esattamente 4 opzioni sintetiche degli eventi più importanti.
    ATTENZIONE LIMITE RIGIDO ETORO: CIASCUNA OPZIONE DEVE ESSERE AL MASSIMO DI 28 CARATTERI!
-   Esempi validi (<28 car): "Inflazione USA (CPI)", "Decisione Tassi BCE", "Dati Occupazione NFP", "Altro (nei commenti)".
-3. 'message': Testo del post in italiano impeccabile (tra 400 e 700 caratteri). Spiega brevemente gli appuntamenti chiave della settimana con giorni indicativi, il contesto per i mercati azionari e invita la community a votare e commentare.
+   Esempi validi (<28 car): "Decisione Tassi BCE", "Inflazione USA (CPI)", "PPI USA", "Altro (nei commenti)".
+3. 'message': Il post DEVE essere formattato OBBLIGATORIAMENTE come CALENDARIO GIORNO PER GIORNO con elenco puntato da Lunedì a Venerdì, seguito dalla chiamata all'azione per votare.
+   Esempio di struttura:
+   🗓️ CALENDARIO MACRO DELLA SETTIMANA
+
+   I principali market mover da seguire giorno per giorno:
+   ▪️ Lunedì: [sintesi evento o avvio ottava]
+   ▪️ Martedì: [sintesi evento]
+   ▪️ Mercoledì: [sintesi evento]
+   ▪️ Giovedì: [sintesi evento, es. Tassi BCE & PPI USA]
+   ▪️ Venerdì: [sintesi evento, es. Inflazione CPI USA]
+
+   Quale tra questi appuntamenti guiderà maggiormente i mercati?
+   Votate nel sondaggio qui sotto con 1 tap! 👇
+
+   VINCOLO DI LUNGHEZZA FONDAMENTALE: Il testo del 'message' deve essere tra 400 e 600 caratteri massimi (CONCISO, frasi complete, NESSUNA interruzione o troncamento a metà).
    DIVIETO ASSOLUTO DI HASHTAG: NON usare MAI il carattere '#' né hashtag (es. NO #eToro, NO #Trading). Usa solo cashtag come $SPX500, $NSDQ100.
-4. 'tickers': Array di simboli relativi ai mercati impattati (es. ["SPX500", "NSDQ100"]).
+4. 'tickers': Array di simboli relativi ai mercati impattati (es. ["SPX500", "NSDQ100", "EURUSD"]).
 
 Restituisci SOLO il blocco JSON nel seguente formato:
 {{
   "poll_title": "...",
   "options": ["...", "...", "...", "..."],
   "message": "...",
-  "tickers": ["SPX500", "NSDQ100"]
+  "tickers": ["SPX500", "NSDQ100", "EURUSD"]
 }}
 """
 
@@ -201,7 +259,7 @@ Restituisci SOLO il blocco JSON nel seguente formato:
                             "title": parsed.get("poll_title") or parsed.get("title"),
                             "options": parsed.get("options"),
                             "message": parsed.get("message"),
-                            "tickers": parsed.get("tickers") or ["SPX500", "NSDQ100"],
+                            "tickers": parsed.get("tickers") or ["SPX500", "NSDQ100", "EURUSD"],
                         }
                         sanitized = _sanitize_macro_poll(poll_data)
                         print(f"✅ Successfully generated Macro Calendar poll via Gemini ({model}) with Live Search!")
@@ -251,46 +309,89 @@ def fetch_macro_calendar_feed() -> Optional[Dict[str, Any]]:
                             unique.append((e["country"], title_clean, e.get("date", "")))
 
                     options = []
-                    details = []
-                    for country, title, dt_str in unique[:3]:
+                    for country, title, _ in unique[:3]:
                         # Translate / shorten to <= 28 chars
                         short_title = title
                         if "CPI" in title:
-                            short_title = f"Inflazione (CPI)"
+                            short_title = "Inflazione (CPI)"
                         elif "PPI" in title:
-                            short_title = f"Prezzi Prod. (PPI)"
+                            short_title = "Prezzi Prod. (PPI)"
                         elif "Monetary Policy" in title or "Statement" in title:
-                            short_title = f"Comunicato Tassi"
+                            short_title = "Comunicato Tassi"
                         elif "Refinancing Rate" in title or "Interest Rate" in title:
-                            short_title = f"Decisione Tassi"
+                            short_title = "Decisione Tassi"
                         elif "Press Conference" in title:
-                            short_title = f"Conferenza Stampa"
+                            short_title = "Conferenza Stampa"
                         elif "Employment" in title or "Payrolls" in title:
-                            short_title = f"Dati Lavoro (NFP)"
+                            short_title = "Dati Lavoro (NFP)"
                         elif "GDP" in title:
-                            short_title = f"Dati PIL"
+                            short_title = "Dati PIL"
                         elif "Retail Sales" in title:
-                            short_title = f"Vendite Dettaglio"
+                            short_title = "Vendite Dettaglio"
                         elif "PMI" in title:
-                            short_title = f"Indici PMI"
+                            short_title = "Indici PMI"
 
                         opt_str = f"[{country}] {short_title}".strip()
                         if len(opt_str) > 28:
                             opt_str = opt_str[:28].rstrip()
                         options.append(opt_str)
-                        details.append(f"• {country}: {title}")
 
                     options.append("Altro (nei commenti)")
                     options = options[:4]
 
+                    # Group events into Day-by-Day Calendar
+                    day_names = {0: "Lunedì", 1: "Martedì", 2: "Mercoledì", 3: "Giovedì", 4: "Venerdì"}
+                    default_descs = {
+                        0: "Avvio settimana e monitoraggio flussi azionari",
+                        1: "Dati macroeconomici e aste di titoli di stato",
+                        2: "Scorte energetiche e discorsi banche centrali",
+                        3: "Decisioni tassi BCE e dati prezzi produzione (PPI)",
+                        4: "Report inflazione (CPI) e dati sulla fiducia",
+                    }
+                    day_events: Dict[int, List[str]] = {i: [] for i in range(5)}
+                    for e in high_events:
+                        dt_val = e.get("date", "")
+                        try:
+                            dt_obj = datetime.fromisoformat(dt_val)
+                            dow = dt_obj.weekday()
+                            if dow in day_events:
+                                title_c = e["title"].split(" m/m")[0].split(" y/y")[0].strip()
+                                ctry = e.get("country", "")
+                                if "CPI" in title_c:
+                                    item_t = "Inflazione (CPI)"
+                                elif "PPI" in title_c:
+                                    item_t = "Prezzi Prod. (PPI)"
+                                elif "Refinancing Rate" in title_c or "Interest Rate" in title_c:
+                                    item_t = f"Tassi {ctry}"
+                                elif "Monetary Policy" in title_c:
+                                    item_t = f"Comunicato {ctry}"
+                                elif "Employment" in title_c or "Payrolls" in title_c:
+                                    item_t = f"Dati Lavoro {ctry}"
+                                elif "GDP" in title_c:
+                                    item_t = f"PIL {ctry}"
+                                else:
+                                    item_t = f"{title_c} ({ctry})"
+                                if item_t not in day_events[dow]:
+                                    day_events[dow].append(item_t)
+                        except Exception:
+                            pass
+
+                    calendar_bullets = []
+                    for dow in range(5):
+                        dname = day_names[dow]
+                        evts = day_events[dow]
+                        if evts:
+                            line_desc = " & ".join(evts[:2])
+                        else:
+                            line_desc = default_descs[dow]
+                        calendar_bullets.append(f"▪️ {dname}: {line_desc}")
+
                     message = (
-                        "🗓️ CALENDARIO ECONOMICO: GLI APPUNTAMENTI CLOU DELLA SETTIMANA\n\n"
-                        "Settimana ricca di catalizzatori macroeconomici con potenziale impatto elevato "
-                        "sulla volatilità di $SPX500, $NSDQ100 e tassi d'interesse.\n\n"
-                        "I dati più attesi includono:\n"
-                        f"{chr(10).join(details)}\n\n"
-                        "Quale tra questi market mover guiderà maggiormente il trend dei mercati?\n\n"
-                        "Votate l'opzione e lasciate la vostra analisi nei commenti! 👇"
+                        "🗓️ CALENDARIO MACRO DELLA SETTIMANA\n\n"
+                        "I principali market mover da seguire giorno per giorno:\n"
+                        + "\n".join(calendar_bullets)
+                        + "\n\nQuale tra questi appuntamenti guiderà maggiormente il trend dei mercati?\n"
+                        "Votate con 1 tap nel sondaggio e dite la vostra nei commenti! 👇"
                     )
 
                     return _sanitize_macro_poll({

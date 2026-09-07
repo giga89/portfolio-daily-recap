@@ -28,6 +28,7 @@ import etoro_client
 import gist_storage
 import analytics_tracker
 from etoro_sender import _strip_html
+from economic_calendar import smart_truncate
 
 
 POLL_TEMPLATES = [
@@ -385,18 +386,21 @@ def generate_monday_macro_poll() -> Dict[str, Any]:
             "title": "Macro della settimana: quale catalizzatore guiderà i mercati? 🗓️",
             "options": [
                 "Inflazione USA (CPI/PPI)",
-                "Decisione Tassi Centrali",
+                "Decisione Tassi BCE/Fed",
                 "Dati Occupazione USA",
                 "Altro (nei commenti)",
             ],
             "tickers": ["SPX500", "NSDQ100", "EURUSD"],
             "message": (
-                "🗓️ CALENDARIO ECONOMICO: I GRANDI APPUNTAMENTI DELLA SETTIMANA\n\n"
-                "Inizia una nuova settimana di contrattazioni sui mercati globali tra dati macroeconomici, "
-                "dichiarazioni dei banchieri centrali e rendimenti obbligazionari.\n\n"
-                "Con gli indici azionari ($SPX500, $NSDQ100) sotto i riflettori, quale catalizzatore "
-                "ritenete più decisivo per orientare i flussi nei prossimi giorni?\n\n"
-                "Votate il sondaggio con 1 tap e condividete la vostra analisi nei commenti! 👇"
+                "🗓️ CALENDARIO MACRO DELLA SETTIMANA\n\n"
+                "I market mover più attesi da monitorare sui mercati:\n"
+                "▪️ Lunedì: Apertura mercati e posizionamento flussi azionari\n"
+                "▪️ Martedì: Dati bilancia commerciale e aste governative\n"
+                "▪️ Mercoledì: Scorte energetiche e discorsi banchieri centrali\n"
+                "▪️ Giovedì: Decisioni tassi d'interesse & PPI prezzi produzione\n"
+                "▪️ Venerdì: Inflazione (CPI) & report occupazione USA\n\n"
+                "Quale tra questi catalizzatori peserà di più sui mercati?\n"
+                "Votate con 1 tap nel sondaggio e dite la vostra nei commenti! 👇"
             ),
         }
 
@@ -583,10 +587,27 @@ def publish_etoro_poll(
 
     full_message = message.strip()
     if "andrearavalli" not in full_message.lower():
-        full_message += tag_footer
+        # Reserve room for footer so full_message NEVER exceeds eToro 1000-char limit
+        footer_len = len(tag_footer)
+        max_body_allowed = 1000 - footer_len - 5
+        if len(full_message) > max_body_allowed:
+            full_message = smart_truncate(full_message, max_chars=max_body_allowed)
+        full_message = full_message.strip() + tag_footer
+    else:
+        if len(full_message) > 1000:
+            full_message = smart_truncate(full_message, max_chars=1000)
 
-    # Final sanitization of full message
-    full_message = _clean_no_hashtags(full_message)[:1000].strip()
+    # Double check total length: if still > 1000, smart-truncate the body again
+    if len(full_message) > 1000:
+        available = 1000 - len(tag_footer) - 5
+        body_part = smart_truncate(message, max_chars=available)
+        full_message = body_part.strip() + tag_footer
+
+    # Clean hashtags one final time
+    full_message = _clean_no_hashtags(full_message).strip()
+    if len(full_message) > 1000:
+        # Ultimate fallback without cutting words
+        full_message = smart_truncate(full_message, max_chars=1000)
 
     print(f"📌 Poll Title: {title}")
     print(f"📌 Options ({len(options)}): {options}")
