@@ -4,15 +4,12 @@ on:
   # ── Primary trigger: Orange Pi 5 local scheduler ────────────────────────────
   repository_dispatch:
     types: [community_poll, publish_poll, poll]
-  # ── Fallback: GitHub Actions cron (Mon-Fri 10:30 UTC = 12:30 ITA) ───────────
   # ── Fallback: GitHub Actions cron (Mon, Wed, Fri 10:30 UTC = 12:30 ITA) ───
   schedule:
-    - cron: '30 10 * * 1-5'
     - cron: '30 10 * * 1,3,5'
   workflow_dispatch:
     inputs:
       poll_template:
-        description: 'Poll Template to publish (leave auto for rotation)'
         description: 'Poll Template to publish (auto=Monday Macro, Wednesday Thematic, Friday Performers)'
         required: false
         type: choice
