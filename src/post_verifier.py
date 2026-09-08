@@ -254,6 +254,14 @@ def verify_post_deterministic(text: str, primary_ticker: Optional[str] = None) -
                         f"CRITICAL: L'asset ${tag} è associato a termini vietati/errati: {reason}."
                     )
 
+    # Check for forbidden claims regarding copy trading profit guarantee
+    if re.search(r'\b100%\s*(?:dei\s+)?copiatori\s+in\s+profitto\b', cleaned_text, flags=re.IGNORECASE) or \
+       re.search(r'\btutti\s+i\s+copiatori\s+in\s+profitto\b', cleaned_text, flags=re.IGNORECASE) or \
+       re.search(r'\b100%\s*(?:of\s+)?copiers\s+in\s+profit\b', cleaned_text, flags=re.IGNORECASE):
+        issues.append(
+            "CRITICAL: Non è consentito affermare '100% dei copiatori in profitto' (claim non conforme alle linee guida)."
+        )
+
     # 1. Primary Ticker Check (if post focuses on a specific asset)
     if primary_clean and primary_clean in PORTFOLIO_ASSETS_METADATA:
         meta = PORTFOLIO_ASSETS_METADATA[primary_clean]

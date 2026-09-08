@@ -4,7 +4,7 @@ Copy Trading Card Generator — Landscape 16:9 (1280x720)
 ======================================================
 Generates high-impact visual cards dedicated to eToro Copy Trading:
   • Style 1 (DASHBOARD): "Community Trust & KPI Hub" (Live Copiers, Risk Score, 4 Pillars)
-  • Style 2 (PROFIT_FOCUS): "100% Copiatori in Profitto" (Mega social proof & confidence badge)
+  • Style 2 (PHILOSOPHY_FOCUS): "Crescita Costante & Zero Leva" (Disciplined approach & risk management)
   • Style 3 (HOW_IT_WORKS): "Come Funziona la Copia in 3 Passi" (Step-by-step visual onboarding)
 
 Pulls live certified data from eToro APIs (copiers count, risk score, win ratio, historical return)
@@ -228,7 +228,7 @@ def generate_copy_dashboard_card(
     if lang == "en":
         main_title = "TRANSPARENCY & COMMUNITY PERFORMANCE"
         subtitle = subtitle or "AUTOMATIC REPLICATION · ZERO MANAGEMENT FEES · FULL CONTROL"
-        highlight_badge = highlight_badge or "100% PROFITABLE COPIERS"
+        highlight_badge = highlight_badge or "AUTOMATIC 1:1 REPLICATION"
         left_lbl = "ACTIVE COPIERS"
         left_sub1 = "• Real investors copying every trade in real-time."
         left_sub2 = "• 1:1 proportional automatic copy with zero fees."
@@ -245,7 +245,7 @@ def generate_copy_dashboard_card(
     else:
         main_title = "TRASPARENZA & NUMERI DELLA COMMUNITY"
         subtitle = subtitle or "REPLICA AUTOMATICA · ZERO COMMISSIONI · PIENO CONTROLLO"
-        highlight_badge = highlight_badge or "100% COPIATORI IN PROFITTO"
+        highlight_badge = highlight_badge or "REPLICA AUTOMATICA 1:1"
         left_lbl = "COPIATORI ATTIVI"
         left_sub1 = "• Investitori reali che replicano ogni operazione in tempo reale."
         left_sub2 = "• Replicazione proporzionale automatica 1:1 con zero commissioni."
@@ -352,7 +352,7 @@ def generate_copy_dashboard_card(
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# STYLE 2: PROFIT & SOCIAL PROOF HERO ("100% DEI COPIATORI IN PROFITTO")
+# STYLE 2: DISCIPLINED GROWTH & RISK MANAGEMENT HERO
 # ══════════════════════════════════════════════════════════════════════════
 
 def generate_copy_profit_focus_card(
@@ -363,7 +363,7 @@ def generate_copy_profit_focus_card(
     output_path: str = "output/copy_trading_card_profit.png",
     lang: str = "it",
 ) -> str:
-    """Generate Style 2: High impact 100% Copiatori in profitto focus card."""
+    """Generate Style 2: High impact disciplined growth and zero leverage card."""
     if not PIL_AVAILABLE:
         return ""
 
@@ -407,10 +407,10 @@ def generate_copy_profit_focus_card(
     draw = ImageDraw.Draw(base)
 
     if lang == "en":
-        badge_hero = "ETORO COMMUNITY MILESTONE"
-        mega_title = "100% OF COPIERS IN PROFIT"
-        mega_desc1 = f"• All {copiers_count} active copiers currently replicating the portfolio are in positive territory."
-        mega_desc2 = "• Achieved through long-term discipline, zero leverage, and high-conviction quality stocks."
+        badge_hero = "DISCIPLINED INVESTMENT STRATEGY"
+        mega_title = "STEADY GROWTH & ZERO LEVERAGE"
+        mega_desc1 = f"• A community of {copiers_count} active investors replicating a globally diversified portfolio."
+        mega_desc2 = "• 100% real stocks and physical ETFs, zero leveraged CFDs, disciplined risk control (Risk 3/10)."
         cols = [
             {
                 "badge": "COMMUNITY TRUST",
@@ -441,10 +441,10 @@ def generate_copy_profit_focus_card(
             },
         ]
     else:
-        badge_hero = "TRAGUARDO COMMUNITY ETORO"
-        mega_title = "100% DEI COPIATORI IN PROFITTO"
-        mega_desc1 = f"• Tutti i {copiers_count} investitori che copiano attualmente il portafoglio registrano un saldo positivo."
-        mega_desc2 = "• Risultato ottenuto grazie a un approccio disciplinato, zero leva e selezione di aziende di qualità globale."
+        badge_hero = "APPROCCIO DISCIPLINATO ETORO"
+        mega_title = "CRESCITA COSTANTE & ZERO LEVA"
+        mega_desc1 = f"• Una community di {copiers_count} investitori che replicano un portafoglio diversificato globale."
+        mega_desc2 = "• 100% azioni reali ed ETF fisici, zero derivati a leva e controllo rigoroso del rischio (Risk 3/10)."
         cols = [
             {
                 "badge": "FIDUCIA COMMUNITY",

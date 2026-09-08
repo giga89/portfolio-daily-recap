@@ -172,6 +172,16 @@ class TestUniversalDualCheck(unittest.TestCase):
             f"Found duplicate dictionary keys in codebase: {all_duplicates}"
         )
 
+    def test_copiers_in_profit_claim_blocked(self):
+        """Claims like '100% dei copiatori in profitto' must be strictly blocked by deterministic gate."""
+        bad_post = "Grande traguardo per la community: 100% dei copiatori in profitto sul nostro portafoglio!"
+        is_ok, issues, _ = verify_post_deterministic(bad_post)
+        self.assertFalse(is_ok, "100% copiatori in profitto claim must be rejected")
+        self.assertTrue(any("100% dei copiatori in profitto" in i for i in issues))
+
+        ok_post, _, audit = verify_and_clean_post(bad_post, run_ai_review=False)
+        self.assertFalse(ok_post, "Post with 100% copiatori in profitto must fail verification")
+
 
 if __name__ == "__main__":
     unittest.main()
