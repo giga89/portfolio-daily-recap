@@ -97,23 +97,29 @@ def send_etoro_post(
         else:
             print("   ⚠️ Media upload failed, continuing with text-only post.")
 
-    # Automatically resolve all mentioned cashtags to eToro market IDs
-    found_tickers = re.findall(r"\$([A-Za-z0-9\.\-]+)", text)
-    market_ids = etoro_client.get_market_ids_for_tickers(found_tickers)
-    valid_tickers = [t for t in found_tickers if t.upper() in etoro_client.MARKET_IDS]
-    if market_ids:
-        print(f"   🏷️ Tagged eToro markets: {valid_tickers} -> IDs {market_ids}")
-
     clean_content = _strip_html(text)
     try:
-        from post_verifier import verify_post_deterministic, clean_etoro_formatting
+        from post_verifier import verify_post_deterministic, clean_etoro_formatting, limit_cashtags
         clean_content = clean_etoro_formatting(clean_content)
+        clean_content = limit_cashtags(clean_content, max_tags=4)
         is_clean, issues, clean_content = verify_post_deterministic(clean_content)
         if not is_clean:
             print(f"🛑 ETORO POST BLOCKED BY PRE-PUBLICATION GATE: {issues}")
             return False
     except Exception as e_ver:
         print(f"⚠️ Pre-publication verifier check in etoro_sender: {e_ver}")
+
+    # Automatically resolve all mentioned cashtags to eToro market IDs (strictly max 4, unique)
+    found_tickers = re.findall(r"\$([A-Za-z0-9\.\-]+)", clean_content)
+    unique_tickers = []
+    for t in found_tickers:
+        tu = t.upper()
+        if tu in etoro_client.MARKET_IDS and tu not in [x.upper() for x in unique_tickers]:
+            unique_tickers.append(t)
+    valid_tickers = unique_tickers[:4]
+    market_ids = etoro_client.get_market_ids_for_tickers(valid_tickers)
+    if market_ids:
+        print(f"   🏷️ Tagged eToro markets (max 4): {valid_tickers} -> IDs {market_ids}")
 
     try:
         from ai_news_generator import sanitize_etoro_cashtags

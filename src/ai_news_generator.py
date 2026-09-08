@@ -342,10 +342,12 @@ def _run_post_verification(
     session_name: str = None,
     generator_model: str = None,
     run_ai_review: bool = True,
+    max_tags: int = MAX_TAGS_PER_POST,
+    allowed_tickers: list = None,
 ) -> tuple[bool, str]:
     """Helper to run pre-publication verification and auto-correction on generated content."""
     try:
-        from post_verifier import verify_and_clean_post
+        from post_verifier import verify_and_clean_post, limit_cashtags
         approved, final_text, audit = verify_and_clean_post(
             text=text,
             primary_ticker=primary_ticker,
@@ -356,6 +358,11 @@ def _run_post_verification(
         if not approved:
             print(f"⚠️ Post rejected by verifier: {audit.get('explanation')}")
             return False, ""
+        # Defensive safeguard: strictly re-enforce tag budget post-verification
+        if allowed_tickers:
+            final_text = _limit_tags_in_text(final_text, allowed_tickers, max_tags)
+        else:
+            final_text = limit_cashtags(final_text, max_tags=max_tags)
         return True, final_text
     except Exception as exc:
         print(f"⚠️ Post verification warning: {exc}")
@@ -1163,11 +1170,13 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                         recap_text,
                         session_name=market_session or "Daily recap",
                         generator_model=model_name,
+                        max_tags=max_tags,
+                        allowed_tickers=all_allowed_for_validation,
                     )
                     if not approved or not verified_text:
                         print(f"⚠️ Market news recap rejected by verifier ({model_name}), trying next model...")
                         continue
-                    recap_text = verified_text
+                    recap_text = _limit_tags_in_text(verified_text, all_allowed_for_validation, max_tags)
 
                     # Update rotation history with the tags actually selected for the post
                     if selected_tags:
@@ -1214,9 +1223,11 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
                                     recap_text,
                                     session_name=market_session or "Daily recap",
                                     generator_model=model_name,
+                                    max_tags=max_tags,
+                                    allowed_tickers=all_allowed_for_validation,
                                 )
                                 if approved and verified_text:
-                                    recap_text = verified_text
+                                    recap_text = _limit_tags_in_text(verified_text, all_allowed_for_validation, max_tags)
                                     if selected_tags:
                                         update_rotation_history(selected_tags)
                                     if GIST_STORAGE_AVAILABLE:

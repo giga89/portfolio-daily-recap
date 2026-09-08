@@ -201,6 +201,41 @@ def extract_cashtags(text: str) -> List[str]:
     return unique_tags
 
 
+def limit_cashtags(text: str, max_tags: int = 4) -> str:
+    """
+    Strictly enforce a maximum of max_tags unique cashtags ($TICKER) in text.
+    For any ticker beyond max_tags, strips the '$' leaving it as plain text.
+    Preserves currency amounts like $100, $5.000 untouched.
+    """
+    if not text:
+        return text
+    if max_tags <= 0:
+        return re.sub(r'\$([A-Za-z][A-Za-z0-9\.\-]*)', r'\1', text)
+
+    seen_unique = []
+
+    def repl(match):
+        raw_ticker = match.group(1)
+        # Skip pure numerical / currency values
+        if re.match(r'^\d+(?:[.,]\d+)*$', raw_ticker):
+            return match.group(0)
+
+        t_upper = raw_ticker.upper()
+        if t_upper in seen_unique:
+            return f"${raw_ticker}"
+
+        if len(seen_unique) < max_tags:
+            seen_unique.append(t_upper)
+            return f"${raw_ticker}"
+
+        # Exceeded limit: strip '$' and keep ticker as plain text
+        return raw_ticker
+
+    cleaned = re.sub(r'\$([A-Za-z0-9\.\-]+)', repl, text)
+    cleaned = re.sub(r' +', ' ', cleaned)
+    return cleaned.strip()
+
+
 def verify_post_deterministic(text: str, primary_ticker: Optional[str] = None) -> Tuple[bool, List[str], str]:
     """
     Fast, rule-based verification against PORTFOLIO_ASSETS_METADATA.
@@ -213,6 +248,12 @@ def verify_post_deterministic(text: str, primary_ticker: Optional[str] = None) -
 
     if not cleaned_text:
         return False, ["Il testo del post è vuoto."], ""
+
+    # Check and strictly limit cashtags to maximum 4
+    raw_tickers = extract_cashtags(cleaned_text)
+    if len(raw_tickers) > 4:
+        issues.append(f"WARNING: Il post conteneva {len(raw_tickers)} cashtag (superiore al limite di 4). Ridotti a 4.")
+        cleaned_text = limit_cashtags(cleaned_text, max_tags=4)
 
     # Collect tickers to verify
     tickers_to_check = extract_cashtags(cleaned_text)
@@ -389,7 +430,8 @@ REGOLE DI VERIFICA TASSATIVE:
 1. VERIFICA DIVIDENDI (CRITICA): Se un asset ha 'Paga Dividendi: NO (ACCUMULAZIONE / ZERO CEDOLE DISTRIBUITE)' (come ad esempio $WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), il post NON DEVE IN ALCUN MODO attribuirgli dividendi, cedole, rendimenti da dividendo o considerarlo un asset di "income/reddito da dividendo". Se questa allucinazione è presente, DEVI CORREGGERLA spiegando che l'asset capitalizza tutti i proventi nel NAV ad accumulazione, oppure rimuovere ogni riferimento ai dividendi.
 2. VERIFICA IDENTITÀ & SETTORE: Il nome dell'azienda o dell'ETF e il settore devono corrispondere esattamente ai dati ufficiali. (Es: $WDEF.L è WisdomTree Europe Defence UCITS ETF, settore Difesa e Aerospazio europeo ad accumulazione, MAI Equity Income o 'Windows Europe'; $IQQL.DE è iShares Listed Private Equity UCITS ETF, settore Private Equity, NON MSCI World Quality).
 3. FORMATTAZIONE ETORO: Rimuovi qualsiasi markdown bold '**' o '__' perché eToro non lo supporta. I cashtag devono avere lo spazio prima e dopo (es. ' $NVDA ').
-4. DECISIONE:
+4. REGOLA ASSOLUTA SUI CASHTAG ($TICKER): Nel post finale possono esserci al MASSIMO 4 cashtag in totale. Se un'azienda o ETF è citata nel testo SENZA il simbolo $, NON trasformarla in cashtag (NON aggiungere il prefisso $). NON aggiungere MAI nuovi cashtag che non erano già presenti con il prefisso $ nel testo da revisionare.
+5. DECISIONE:
    - Se il post è perfetto e veritiero -> decision: "APPROVE", verified_text: il testo originale pulito.
    - Se il post contiene inesattezze o allucinazioni ma è correggibile preservando struttura e stile -> decision: "AUTO_CORRECT", verified_text: il testo integralmente corretto e bonificato.
    - Se il post è totalmente fuorviante, incoerente o dannoso -> decision: "REJECT", verified_text: "".
@@ -493,12 +535,12 @@ def verify_and_clean_post(
             print(f"      Explanation: {audit_data.get('explanation')}")
             for h in audit_data.get("hallucinations_detected", []):
                 print(f"      • Fixed hallucination: {h}")
-            final_text = clean_etoro_formatting(verified_text)
+            final_text = limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4)
             return True, final_text, audit_data
 
         # APPROVE
         print(f"   ✅ POST APPROVED BY AI REVIEWER.")
-        return True, clean_etoro_formatting(verified_text), audit_data
+        return True, limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4), audit_data
 
     # If AI review not available or skipped, use deterministic outcome
     if not is_clean:
@@ -508,7 +550,7 @@ def verify_and_clean_post(
             print(f"   ❌ POST BLOCKED by Deterministic Gate (Critical rule violation without AI corrector): {critical_issues[0]}")
             return False, "", {"decision": "REJECT", "issues": issues}
 
-    return True, cleaned_text, {"decision": "APPROVE", "issues": issues}
+    return True, limit_cashtags(cleaned_text, max_tags=4), {"decision": "APPROVE", "issues": issues}
 
 
 def audit_comment_with_ai_reviewer(

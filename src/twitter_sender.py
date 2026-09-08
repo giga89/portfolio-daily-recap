@@ -115,12 +115,13 @@ def build_twitter_thread(
         "",
     ]
 
-    # Top 3 performers
+    # Top 3 performers (X/Twitter Free API v2 restricts posts to maximum 1 cashtag)
     if top_performers:
         lines_t1.append("📈 Top 3 movers today:")
-        for sym, pct in top_performers[:3]:
+        for idx, (sym, pct) in enumerate(top_performers[:3]):
             arrow = "▲" if pct >= 0 else "▼"
-            lines_t1.append(f"  {arrow} ${sym} {pct:+.2f}%")
+            prefix = "$" if idx == 0 else ""
+            lines_t1.append(f"  {arrow} {prefix}{sym} {pct:+.2f}%")
         lines_t1.append("")
 
     lines_t1.append("#Investing #Portfolio #ETF #Stocks #Finance")
@@ -150,7 +151,7 @@ def build_twitter_copy_trading_thread() -> list[str]:
         "• Risk Score 3/10 (low risk)\n"
         "• Zero leverage (1x real assets)\n"
         "• Global diversification (AI, Healthcare, Nuclear)\n\n"
-        "$PLTR $NVDA $CCJ #eToro #CopyTrading"
+        "$PLTR NVDA CCJ #eToro #CopyTrading"
     )
 
     partner_url = get_twitter_etoro_url(campaign="copy")
