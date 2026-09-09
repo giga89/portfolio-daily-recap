@@ -1,0 +1,59 @@
+{
+  "name": "ABBVIE",
+  "tagline": "Eccellenza biofarmaceutica e dividendi storici",
+  "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+  "subtitle": "Transizione post-Humira vinta con Skyrizi e Rinvoq, sostenuta da Botox e oltre cinquant'anni di dividendi crescenti.",
+  "kpis": [
+    {
+      "label": "RICAVI SKYRIZI/RINVOQ",
+      "val": ">$27B",
+      "sub": "target guidato entro il 2027"
+    },
+    {
+      "label": "DIVIDEND YIELD",
+      "val": "~3.7%",
+      "sub": "Dividend King con 50+ anni di rincari"
+    },
+    {
+      "label": "PESO IN PORTAFOGLIO",
+      "val": "2.99%",
+      "sub": "Allocazione gestita nel portafoglio"
+    },
+    {
+      "label": "FREE CASH FLOW",
+      "val": ">$18B",
+      "sub": "robusta cassa operativa annuale"
+    }
+  ],
+  "pillars": [
+    [
+      "Fossato Competitivo:",
+      "Brevetti impenetrabili in immunologia e leadership nella medicina estetica grazie al marchio Botox."
+    ],
+    [
+      "Catalizzatore di Crescita:",
+      "I nuovi blockbuster Skyrizi e Rinvoq stanno compensando a ritmi record il calo di Humira."
+    ],
+    [
+      "Solidità e Finanze:",
+      "Flussi di cassa eccezionali a supporto di una cedola ultra-affidabile certificata Dividend King."
+    ],
+    [
+      "Visione Decennale:",
+      "Pipeline R&D diversificata tra oncologia e neuroscienze per garantire crescita e dividendi stabili."
+    ]
+  ],
+  "quote": "Superare il cliff di Humira ha dimostrato la forza straordinaria della nostra pipeline d'innovazione.",
+  "tags": [
+    "#ABBV",
+    "#Biopharma",
+    "#DividendKing",
+    "#Immunology",
+    "#LongTerm"
+  ],
+  "color": [
+    15,
+    32,
+    67
+  ]
+}
