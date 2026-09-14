@@ -306,6 +306,36 @@ def determine_sentiment(portfolio_daily: float, is_weekend: bool = False, is_hol
         return "BEAR_CRASH"
 
 
+def should_use_meme(
+    portfolio_daily: float,
+    market_session: str = "Daily recap",
+    is_weekly: bool = False,
+    rng=None,
+) -> bool:
+    """
+    Decide whether to use a sentiment meme card vs Top & Flop (Winners & Losers) card.
+
+    Probabilities:
+    - Movimenti più marcati (|portfolio_daily| >= 0.5%): 66% probabilità di meme (2/3 dei casi).
+    - Movimento contenuto (-0.5% < portfolio_daily < 0.5%):
+      - La sera (sessione close, daily, recap): 33% probabilità di meme (1/3 dei casi).
+      - Altre sessioni (open / weekend): 33% probabilità di meme.
+    """
+    r = rng.random() if rng is not None else random.random()
+    session_lower = (market_session or "").lower()
+    is_evening = "close" in session_lower or "daily" in session_lower or "recap" in session_lower
+
+    if abs(portfolio_daily) >= 0.5:
+        return r < 0.66
+    elif is_evening:
+        return r < 0.33
+    elif is_weekly or "weekend" in session_lower:
+        return r < 0.33
+    else:
+        return r < 0.33
+
+
+
 def generate_meme_card(
     portfolio_daily: float = 1.45,
     top_performers: list = None,

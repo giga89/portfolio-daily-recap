@@ -32,7 +32,7 @@ import urllib.request
 import urllib.error
 
 ACTIVE_MODELS = [
-    ("gemini-3.1-pro-preview", "3.1 Pro Preview - Flagship Deep Reasoning (5 RPM / 20 RPD)"),
+    ("gemini-3.1-pro-preview", "3.1 Pro Preview - Flagship Deep Reasoning (Richiede Pay-as-you-go / 0 RPM Free Tier)"),
     ("gemini-3.8-flash", "3.8 Flash - Newest Flash Flagship (5 RPM / 20 RPD)"),
     ("gemini-3.7-flash", "3.7 Flash - Massima intelligenza (5 RPM / 20 RPD)"),
     ("gemini-3.6-flash", "3.6 Flash - Alta intelligenza (5 RPM / 20 RPD)"),
@@ -144,13 +144,22 @@ def run_health_check(notify_always: bool = False) -> int:
     print(f"📊 Summary: {ok_count}/{len(ACTIVE_MODELS)} models operational | {quota_exceeded_count} quota exceeded")
     print("=" * 60)
 
-    # Determine if Telegram notification should be sent
-    should_alert = (quota_exceeded_count > 0) or (ok_count == 0) or notify_always
+    # Pro models require a paid billing account on Google AI Studio.
+    # Count quota exhaustion on standard operational models (Flash tier)
+    flash_quota_exceeded_count = sum(
+        1 for m, _ in ACTIVE_MODELS
+        if "pro" not in m.lower() and results.get(m, {}).get("status") == "quota_exceeded"
+    )
+
+    # Determine if Telegram notification should be sent:
+    # Alert only if all models fail OR an active operational Flash model is exhausted, or manual override
+    is_alert = (flash_quota_exceeded_count > 0) or (ok_count == 0)
+    should_alert = is_alert or notify_always
 
     if should_alert:
         print("📡 Preparing Telegram notification...")
-        header_emoji = "🚨" if (quota_exceeded_count > 0 or ok_count == 0) else "ℹ️"
-        title = "ALLERTA STATO GEMINI API" if (quota_exceeded_count > 0 or ok_count == 0) else "REPORT STATO GEMINI API"
+        header_emoji = "🚨" if is_alert else "ℹ️"
+        title = "ALLERTA STATO GEMINI API" if is_alert else "REPORT STATO GEMINI API"
 
         lines = [
             f"{header_emoji} <b>{title}</b> {header_emoji}",
@@ -163,7 +172,10 @@ def run_health_check(notify_always: bool = False) -> int:
             if res["status"] == "ok":
                 lines.append(f"• <b>{model_name}</b>: ✅ Attivo ({res['latency']}ms)")
             elif res["status"] == "quota_exceeded":
-                lines.append(f"• <b>{model_name}</b>: 🔴 <b>Quota Esaurita (429)</b>")
+                if "pro" in model_name.lower():
+                    lines.append(f"• <b>{model_name}</b>: ℹ️ Non disponibile su Free Tier (Richiede Pay-as-you-go)")
+                else:
+                    lines.append(f"• <b>{model_name}</b>: 🔴 <b>Quota Esaurita (429)</b>")
             elif res["status"] == "unavailable":
                 lines.append(f"• <b>{model_name}</b>: ⚠️ Temporaneamente non disponibile (503)")
             else:
@@ -171,10 +183,10 @@ def run_health_check(notify_always: bool = False) -> int:
 
         if ok_count == 0:
             lines.append("\n❌ <b>TUTTI I MODELLI SONO BLOCCATI!</b> La generazione post e news AI fallirà fino al reset o attivazione fatturazione.")
-        elif quota_exceeded_count > 0:
+        elif flash_quota_exceeded_count > 0:
             lines.append(f"\n⚠️ <i>Nota: {ok_count} modelli sono ancora operativi e interverranno tramite fallback automatico.</i>")
         else:
-            lines.append("\n✅ <i>Tutti i bucket di quota sono operativi.</i>")
+            lines.append(f"\n✅ <i>Modelli gratuiti operativi ({ok_count}/{len(ACTIVE_MODELS)}). Fallback perfettamente funzionante.</i>")
 
         lines.append("\n🔗 <a href='https://aistudio.google.com/app/apikey'>Google AI Studio Dashboard</a>")
 

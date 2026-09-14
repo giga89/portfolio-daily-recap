@@ -57,5 +57,45 @@ class TestMemeCard(unittest.TestCase):
             pass
 
 
+    def test_should_use_meme_probabilities(self):
+        """
+        Verify that:
+        - Movimenti più marcati (|daily| >= 0.5%) have 66% probability.
+        - Movimento contenuto (-0.5% < daily < 0.5%) in evening sessions has 33% probability.
+        """
+        class MockRng:
+            def __init__(self, val):
+                self.val = val
+            def random(self):
+                return self.val
+
+        # 1. Movimenti più marcati (|daily| >= 0.5%) -> 66% chance (< 0.66)
+        # Bull move >= +0.5%
+        self.assertTrue(meme_generator.should_use_meme(0.50, market_session="U.S. market close", rng=MockRng(0.65)))
+        self.assertFalse(meme_generator.should_use_meme(0.50, market_session="U.S. market close", rng=MockRng(0.66)))
+        self.assertFalse(meme_generator.should_use_meme(1.20, market_session="U.S. market close", rng=MockRng(0.70)))
+        # Bear move <= -0.5%
+        self.assertTrue(meme_generator.should_use_meme(-0.50, market_session="U.S. market close", rng=MockRng(0.65)))
+        self.assertFalse(meme_generator.should_use_meme(-0.50, market_session="U.S. market close", rng=MockRng(0.66)))
+        self.assertTrue(meme_generator.should_use_meme(-1.50, market_session="Daily recap", rng=MockRng(0.50)))
+
+        # 2. Movimento contenuto (-0.5% < daily < 0.5%) la sera -> 33% chance (< 0.33)
+        # US Market Close
+        self.assertTrue(meme_generator.should_use_meme(0.20, market_session="U.S. market close", rng=MockRng(0.32)))
+        self.assertFalse(meme_generator.should_use_meme(0.20, market_session="U.S. market close", rng=MockRng(0.33)))
+        self.assertFalse(meme_generator.should_use_meme(0.20, market_session="U.S. market close", rng=MockRng(0.50)))
+        # Daily recap
+        self.assertTrue(meme_generator.should_use_meme(-0.15, market_session="Daily recap", rng=MockRng(0.30)))
+        self.assertFalse(meme_generator.should_use_meme(-0.15, market_session="Daily recap", rng=MockRng(0.34)))
+        # Contained sideways
+        self.assertTrue(meme_generator.should_use_meme(0.00, market_session="Evening close recap", rng=MockRng(0.32)))
+        self.assertFalse(meme_generator.should_use_meme(0.00, market_session="Evening close recap", rng=MockRng(0.33)))
+
+        # 3. Movimento contenuto in sessioni diurne / altre -> 33% chance
+        self.assertTrue(meme_generator.should_use_meme(0.05, market_session="European market open", rng=MockRng(0.32)))
+        self.assertFalse(meme_generator.should_use_meme(0.05, market_session="European market open", rng=MockRng(0.34)))
+
+
 if __name__ == '__main__':
     unittest.main()
+

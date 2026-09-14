@@ -103,6 +103,14 @@ def execute_with_model_cascade(
                 is_503 = "503" in err_str or "unavailable" in err_str or "overloaded" in err_str
 
                 if is_quota:
+                    if 'pro' in model_name.lower():
+                        # Pro preview models require Pay-as-you-go billing. On Free Tier, quota is 0.
+                        # Fail-fast immediately to Flash flagship instead of wasting 30s in backoff retries.
+                        print(f"   ℹ️ Model {model_name} (Pro) returned 429 (requires paid tier / 0 RPM on Free Tier). Cascading immediately to Flash...")
+                        if API_TRACKER_AVAILABLE:
+                            log_api_request(model_name, False, task_name)
+                        break
+
                     wait_time = base_backoff_seconds * (attempt + 1)
                     print(f"   ⏳ Model {model_name} quota/rate limit (429). Waiting {wait_time:.1f}s before fallback...")
                     time.sleep(wait_time)
