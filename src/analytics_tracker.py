@@ -1362,17 +1362,77 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     .holding-desc {{ font-size: 0.82rem; color: var(--muted); margin-bottom: 14px; flex-grow: 1; }}
     .holding-tags {{ display: flex; gap: 6px; flex-wrap: wrap; }}
     .mini-tag {{
-      font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px;
-      background: rgba(255, 255, 255, 0.05); color: #CBD5E1; border: 1px solid var(--surface-border);
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #CBD5E1;
+      border: 1px solid var(--surface-border);
+      line-height: 1.2;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
     }}
-    .mini-tag.tier {{ color: var(--gold); border-color: rgba(245, 184, 0, 0.3); background: rgba(245, 184, 0, 0.08); }}
-    .mini-tag.weight-pill {{ color: var(--cyan); border-color: rgba(0, 212, 255, 0.4); background: rgba(0, 212, 255, 0.12); font-weight: 800; }}
+    .mini-tag.tier {{
+      color: var(--gold);
+      border-color: rgba(245, 184, 0, 0.3);
+      background: rgba(245, 184, 0, 0.08);
+      white-space: nowrap;
+    }}
+    .mini-tag.weight-pill {{
+      color: var(--cyan);
+      border-color: rgba(0, 212, 255, 0.4);
+      background: rgba(0, 212, 255, 0.12);
+      font-weight: 800;
+      white-space: nowrap;
+    }}
 
     /* Detailed Table Mode */
-    .holdings-table-view {{ display: none; overflow-x: auto; }}
-    .holdings-table {{ width: 100%; border-collapse: collapse; min-width: 800px; font-size: 0.88rem; }}
-    .holdings-table th {{ padding: 12px 14px; color: var(--muted); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid var(--surface-border); }}
-    .holdings-table td {{ padding: 12px 14px; border-bottom: 1px solid var(--surface-border); }}
+    .holdings-table-view {{
+      display: none;
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--surface-border);
+    }}
+    .holdings-table {{
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+      font-size: 0.88rem;
+    }}
+    .holdings-table th {{
+      padding: 12px 14px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--surface-border);
+      background: rgba(255, 255, 255, 0.02);
+      white-space: nowrap;
+      text-align: left;
+      vertical-align: middle;
+    }}
+    .holdings-table td {{
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--surface-border);
+      vertical-align: middle;
+    }}
+    .holdings-table tr:hover td {{
+      background: rgba(255, 255, 255, 0.02);
+    }}
+    .holdings-table td.cell-nowrap,
+    .holdings-table td:nth-child(1),
+    .holdings-table td:nth-child(3),
+    .holdings-table td:nth-child(4),
+    .holdings-table td:nth-child(5),
+    .holdings-table td:nth-child(6),
+    .holdings-table td:nth-child(7),
+    .holdings-table td:nth-child(8) {{
+      white-space: nowrap;
+    }}
 
     /* ── Execution Profile & Strategy Pillars ─────────────────────────────── */
     .pillars-grid {{
