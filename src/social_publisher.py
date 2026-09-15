@@ -16,6 +16,7 @@ eToro profile + referral link appended to all posts.
 """
 
 import os
+from datetime import datetime
 from datetime import datetime, timezone
 
 import telegram_sender
