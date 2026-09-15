@@ -32,9 +32,14 @@
 32 14 * * 1-5  /opt/portfolio-dispatch/dispatch.sh us_open  >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
 # ── Daily Crypto Pulse & Sentiment Recap ─────────────────────────────────────
-# 18:00 local (CET/CEST) → 16:00 UTC (summer) / 17:00 UTC (winter)
-0 16 * * *     /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 17 * * *     /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# Mon-Sat: 18:00 local (CET/CEST) → 16:00 UTC (summer) / 17:00 UTC (winter)
+0 16 * * 1-6   /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+0 17 * * 1-6   /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
+# Sunday Crypto Pulse (early afternoon to leave room for evening outlook):
+# 14:00 local (CET/CEST) → 12:00 UTC (summer) / 13:00 UTC (winter)
+0 12 * * 0     /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+0 13 * * 0     /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
 
 # ── U.S. Market Close ────────────────────────────────────────────────────────
@@ -57,15 +62,15 @@
 30 21 * * *   /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 30 22 * * *   /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── Weekly Recap (Saturday) ──────────────────────────────────────────────────
-# 10:00 CET = 09:00 UTC (summer: 08:00 UTC)
-0 8 * * 6     /opt/portfolio-dispatch/dispatch.sh weekly_sat >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 9 * * 6     /opt/portfolio-dispatch/dispatch.sh weekly_sat >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── Saturday: Copy Trading Education & Megatrend Deep-Dive ───────────────────
+# 12:00 local (CET/CEST) → 10:00 UTC (summer) / 11:00 UTC (winter)
+0 10 * * 6    /opt/portfolio-dispatch/dispatch.sh copy_trading >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+0 11 * * 6    /opt/portfolio-dispatch/dispatch.sh copy_trading >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── Weekly Recap (Sunday) ────────────────────────────────────────────────────
-# 22:00 CET = 21:00 UTC (summer: 20:00 UTC)
-0 20 * * 0    /opt/portfolio-dispatch/dispatch.sh weekly_sun >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 21 * * 0    /opt/portfolio-dispatch/dispatch.sh weekly_sun >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── Sunday: Weekly Macro & Portfolio Outlook (Week Ahead Preview) ────────────
+# 18:00 local (CET/CEST) → 16:00 UTC (summer) / 17:00 UTC (winter)
+0 16 * * 0    /opt/portfolio-dispatch/dispatch.sh weekly_sun >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+0 17 * * 0    /opt/portfolio-dispatch/dispatch.sh weekly_sun >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
 # ── Nightly Dashboard & Metrics Sync (Daily at 02:00 CET) ────────────────────
 # 02:00 CEST = 00:00 UTC / 02:00 CET = 01:00 UTC

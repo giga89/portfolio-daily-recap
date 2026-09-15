@@ -16,7 +16,7 @@ eToro profile + referral link appended to all posts.
 """
 
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 import telegram_sender
 import twitter_sender
@@ -154,6 +154,68 @@ def _extract_top_performers(plain_text: str, stock_data: dict = None) -> list:
     return performers[:5]
 
 
+def check_cooldown_and_similarity(session_name: str, min_cooldown_minutes: int = 75) -> tuple[bool, str]:
+    """
+    Prevent publishing posts too similar or too close in time (< 75 minutes),
+    which leads to algorithmic suppression and feed cannibalization on eToro.
+    Can be bypassed by setting FORCE_RUN=true.
+    """
+    if os.environ.get("FORCE_RUN", "false").lower() == "true":
+        return True, "FORCE_RUN is enabled, bypassing cooldown check."
+
+    now = datetime.now(timezone.utc)
+    last_dt = None
+    last_session = ""
+
+    # 1. Check Gist storage
+    try:
+        last_post_gist = gist_storage.get_last_etoro_post()
+        if last_post_gist and last_post_gist.get("created_at"):
+            raw_ts = str(last_post_gist["created_at"]).replace("Z", "+00:00")
+            last_dt = datetime.fromisoformat(raw_ts)
+            last_session = last_post_gist.get("session_name", "")
+    except Exception as e:
+        print(f"   ⚠️ Error checking Gist last post for cooldown: {e}")
+
+    # 2. Check local analytics database as supplement
+    try:
+        analytics_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "post_analytics.json")
+        if os.path.exists(analytics_file):
+            import json
+            with open(analytics_file, "r", encoding="utf-8") as f:
+                p_data = json.load(f)
+                posts = p_data.get("posts", [])
+                if posts:
+                    latest_p = posts[-1]
+                    for p in posts:
+                        p_date = p.get("published_at", "")
+                        if p_date and p_date > latest_p.get("published_at", ""):
+                            latest_p = p
+                    pub_str = latest_p.get("published_at")
+                    if pub_str:
+                        dt = datetime.fromisoformat(str(pub_str).replace("Z", "+00:00"))
+                        if last_dt is None or dt > last_dt:
+                            last_dt = dt
+                            last_session = latest_p.get("session", "")
+    except Exception as e:
+        print(f"   ⚠️ Error checking local analytics for cooldown: {e}")
+
+    if last_dt:
+        elapsed_mins = (now - last_dt).total_seconds() / 60.0
+        if elapsed_mins < min_cooldown_minutes:
+            reason = (f"COOLDOWN ACTIVE: Last post ('{last_session}') was published only {elapsed_mins:.1f} minutes ago "
+                      f"(minimum interval is {min_cooldown_minutes}m). Aborting to prevent feed cannibalization.")
+            return False, reason
+
+        # Also check similarity of session name if under 6 hours (360 min)
+        if elapsed_mins < 360 and session_name.strip().lower() == last_session.strip().lower():
+            reason = (f"DUPLICATE SESSION GUARD: Session '{session_name}' ran {elapsed_mins:.1f} minutes ago (< 360m). "
+                      f"Aborting to avoid duplicate post.")
+            return False, reason
+
+    return True, "Cooldown check passed."
+
+
 def publish_all(
     recap_file_path: str,
     image_path: str = None,
@@ -186,6 +248,16 @@ def publish_all(
     portfolio_weekly  = data.get("portfolio_weekly", None)
 
     market_session = os.environ.get("MARKET_SESSION", "Daily recap")
+
+    # Anti-Spam / Cooldown Guard
+    can_publish, cooldown_reason = check_cooldown_and_similarity(market_session, min_cooldown_minutes=75)
+    if not can_publish:
+        print("\n" + "🛑" * 30)
+        print(f"🛑 PUBLISHING BLOCKED BY ANTI-SPAM & COOLDOWN GUARD")
+        print(f"   {cooldown_reason}")
+        print("   Set FORCE_RUN=true to bypass if this was an intentional manual trigger.")
+        print("🛑" * 30 + "\n")
+        return {"blocked_by_cooldown": True, "reason": cooldown_reason}
     is_us_close          = SESSION_US_CLOSE.lower() in market_session.lower()
     is_weekly            = any(s.lower() in market_session.lower()
                                for s in [SESSION_WEEKLY_SAT, SESSION_WEEKLY_SUN, "weekly"])

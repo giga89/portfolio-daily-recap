@@ -55,6 +55,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "Dashboard is already up to date. No changes to commit."
           else
-            git commit -m "chore(dashboard): nightly refresh of metrics & track record [skip ci]"
+            git commit -m "chore(dashboard): nightly refresh of metrics & track record"
             git push origin main || echo "Git push failed or branch protected"
           fi

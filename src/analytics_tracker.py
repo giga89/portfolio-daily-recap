@@ -381,7 +381,6 @@ HOLDINGS_DATA = [
     {"ticker": "IEUR", "name": "iShares Core MSCI Europe ETF", "emoji": "🇪🇺", "asset_class": "ETF", "curr": "USD", "sector": "Broad European Equities", "geo": "Europe", "tier": "Core Diversifier", "desc": "Low-cost broad market exposure to 400+ leading multinational corporations across developed Europe."},
     {"ticker": "IQQL.DE", "name": "iShares Listed Private Equity", "emoji": "🔥", "asset_class": "ETF", "curr": "EUR", "sector": "Listed Private Equity", "geo": "Global", "tier": "Alternative Asset", "desc": "Liquid access to the world's premier alternative asset managers and buyout leaders (Blackstone, KKR, Carlyle)."},
     {"ticker": "IB01.L", "name": "iShares $ Treasury 0-1yr ETF", "emoji": "💵", "asset_class": "Fixed Income", "curr": "USD", "sector": "Ultra-Short US Treasuries", "geo": "USA", "tier": "Cash Yield & Dry Powder", "desc": "Ultra-short US government paper yielding risk-free USD interest while preserving dry powder for market corrections."},
-    {"ticker": "XEON.DE", "name": "Xtrackers II EUR Overnight Rate Swap", "emoji": "💤", "asset_class": "Fixed Income", "curr": "EUR", "sector": "Overnight EUR Cash Yield", "geo": "Europe", "tier": "Cash Yield & Dry Powder", "desc": "Euro money market ETF tracking interbank €STR with daily capital compounding, zero duration risk, and capital preservation."},
     {"ticker": "WDEF.L", "name": "WisdomTree Europe Defence", "emoji": "🛡️", "asset_class": "ETF", "curr": "GBP", "sector": "European Defence Equity", "geo": "Europe", "tier": "Strategic Defence ETF", "desc": "Targeted exposure to leading European aerospace and defence companies benefiting from structural NATO rearmament."},
     {"ticker": "WCLD.L", "name": "WisdomTree Cloud Computing ETF", "emoji": "☁️", "asset_class": "ETF", "curr": "USD", "sector": "Cloud Computing & Enterprise SaaS", "geo": "USA / Global", "tier": "Next-Gen Cloud ETF", "desc": "UCITS ETF tracking BVP Nasdaq Emerging Cloud Index capturing pure-play enterprise cloud software (SaaS) leaders benefiting from AI monetization."},
 
@@ -629,12 +628,17 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     seasonality_data = compute_seasonality(monthly_data)
     seasonality_json = json.dumps(seasonality_data, ensure_ascii=False)
     current_year = datetime.now().year
+    now_utc = datetime.now(timezone.utc)
+    sync_human = now_utc.strftime("%d %b %Y, %H:%M UTC")
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Andrea Ravalli · Portfolio Hub & Popular Investor Analytics</title>
   <meta name="description" content="Official portfolio hub of Andrea Ravalli (eToro Popular Investor): track record (+200% since 2020), monthly returns heatmap, quantitative risk metrics, dividends breakdown, drawdown analysis, and copier guide.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -737,6 +741,30 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       display: inline-flex; align-items: center; gap: 6px; border: none;
     }}
     .btn-copy-cta:hover {{ transform: translateY(-2px); box-shadow: 0 0 30px var(--green-glow); }}
+
+    .live-status-pill {{
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(19, 198, 54, 0.12); border: 1px solid rgba(19, 198, 54, 0.35);
+      border-radius: 999px; padding: 6px 14px; font-size: 0.78rem; font-weight: 700;
+      color: var(--green); white-space: nowrap;
+    }}
+    .pulse-indicator {{
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 8px var(--green);
+      animation: pulseGlow 2s infinite; flex-shrink: 0;
+    }}
+    @keyframes pulseGlow {{
+      0% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(19, 198, 54, 0.7); }}
+      70% {{ transform: scale(1.1); box-shadow: 0 0 0 6px rgba(19, 198, 54, 0); }}
+      100% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(19, 198, 54, 0); }}
+    }}
+    .hero-live-badge {{
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--surface-border);
+      border-radius: 999px; padding: 4px 12px; font-size: 0.8rem; font-weight: 600;
+      color: var(--muted); margin-top: 14px;
+    }}
+    .hero-live-badge strong {{ color: var(--green); }}
 
     /* ── Tab Views ────────────────────────────────────────────────────────── */
     .tab-content {{ display: none; }}
@@ -1307,6 +1335,11 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       </a>
 
       <div class="nav-controls">
+        <div class="live-status-pill" title="Auto-synced with eToro Public API">
+          <span class="pulse-indicator"></span>
+          <span>eToro Verified · <strong id="liveSyncTime">{sync_human}</strong></span>
+        </div>
+
         <div class="tabs-nav">
           <button class="tab-btn active" id="tab-btn-investor" onclick="switchTab('investor')">
             💼 Investor & Copier Hub
@@ -1338,6 +1371,10 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             A high-conviction global multi-asset strategy focused on <strong>Artificial Intelligence, Metabolic Healthcare (GLP-1), and Clean Energy Infrastructure</strong>. 
             Disciplined fundamental risk management, strong capital efficiency, and 100% skin in the game with zero management fees.
           </p>
+          <div class="hero-live-badge">
+            <span class="pulse-indicator"></span>
+            <span>Real-time Verified Performance · Last synced: <strong>{sync_human}</strong></span>
+          </div>
         </div>
 
         <div class="hero-kpis">

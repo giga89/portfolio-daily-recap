@@ -11,8 +11,8 @@ on:
     - cron: '15 14 * * 1-5'   # US open fallback:    14:15 UTC (16:15 ITA)
     - cron: '20 16 * * *'     # Daily crypto recap:  16:20 UTC (18:20 ITA)
     - cron: '45 20 * * 1-5'   # US close fallback:   20:45 UTC (22:45 ITA)
-    - cron: '30 9 * * 6'      # Weekly recap (Sat):  09:30 UTC
-    - cron: '30 21 * * 0'     # Weekly recap (Sun):  21:30 UTC
+    - cron: '0 10 * * 6'      # Saturday Copy Trading: 10:00 UTC (12:00 ITA)
+    - cron: '0 16 * * 0'      # Weekly recap / Sunday Outlook: 16:00 UTC (18:00 ITA)
     - cron: '30 11 * * 1-5'   # Copy trading post:   11:30 UTC (13:30 ITA)
   workflow_dispatch:  # Allows manual trigger
     inputs:
@@ -112,9 +112,9 @@ jobs:
                 SESSION_NAME="Daily crypto recap" ;;
               "45 20 * * 1-5")
                 SESSION_NAME="U.S. market close" ;;
-              "30 9 * * 6")
-                SESSION_NAME="Weekly recap (Sat)" ;;
-              "30 21 * * 0")
+              "0 10 * * 6")
+                SESSION_NAME="Copy trading post" ;;
+              "0 16 * * 0")
                 SESSION_NAME="Weekly recap (Sun)" ;;
               "30 11 * * 1-5")
                 SESSION_NAME="Copy trading post" ;;
@@ -381,6 +381,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to docs or analytics database."
           else
-            git commit -m "chore(analytics): update social analytics dashboard & post history [skip ci]"
+            git commit -m "chore(analytics): update social analytics dashboard & post history"
             git push origin main || echo "Git push failed or branch protected"
           fi
