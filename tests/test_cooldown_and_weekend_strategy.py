@@ -140,6 +140,51 @@ class TestCooldownAndWeekendStrategy(unittest.TestCase):
         self.assertIn("sol-pill", content)
         self.assertIn("Solana", content)
 
+    def test_github_workflows_syntax_and_bash_validity(self):
+        """Ensure all GitHub Actions workflow YAML files are valid and all embedded bash run steps pass syntax check."""
+        import glob
+        import re
+        import subprocess
+        import tempfile
+        import yaml
+
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        workflows_dir = os.path.join(repo_root, ".github", "workflows")
+        workflow_files = glob.glob(os.path.join(workflows_dir, "*.yml"))
+        self.assertTrue(len(workflow_files) > 0, "At least one workflow file must exist.")
+
+        for yml in workflow_files:
+            # 1. Validate YAML parsing
+            with open(yml, "r", encoding="utf-8") as f:
+                content = f.read()
+            data = yaml.safe_load(content)
+            self.assertIsInstance(data, dict, f"{yml} must parse as a valid YAML mapping")
+
+            # 2. Validate run scripts with bash -n
+            jobs = data.get("jobs", {})
+            for job_name, job in jobs.items():
+                steps = job.get("steps", [])
+                for i, step in enumerate(steps):
+                    run_script = step.get("run")
+                    if run_script:
+                        # Replace GitHub template syntax ${{ ... }} with dummy text
+                        clean_script = re.sub(r"\$\{\{.*?\}\}", "MOCK_EXPR", run_script)
+                        with tempfile.NamedTemporaryFile("w", suffix=".sh") as tf:
+                            tf.write(clean_script)
+                            tf.flush()
+                            res = subprocess.run(["bash", "-n", tf.name], capture_output=True, text=True)
+                            self.assertEqual(
+                                res.returncode,
+                                0,
+                                f"Syntax error in {os.path.basename(yml)} (job: {job_name}, step: {step.get('name', i)}):\n{res.stderr}",
+                            )
+
+            # 3. Check for accidental duplicate git commit statements
+            lines = content.splitlines()
+            for idx in range(len(lines) - 1):
+                if "git commit" in lines[idx] and "git commit" in lines[idx + 1]:
+                    self.fail(f"Consecutive duplicate 'git commit' found in {os.path.basename(yml)} lines {idx+1}-{idx+2}")
+
 
 if __name__ == "__main__":
     unittest.main()
