@@ -112,6 +112,34 @@ class TestCooldownAndWeekendStrategy(unittest.TestCase):
         holdings_sub = content[idx_holdings:end_holdings]
         self.assertNotIn("XEON", holdings_sub, "XEON.DE must not be present in active holdingsData.")
 
+    def test_dynamic_portfolio_weights_and_allocations(self):
+        """Verify that weights normalize to 100% and dynamic allocation distributions sum to 100%."""
+        weights = analytics_tracker.load_portfolio_weights()
+        self.assertTrue(len(weights) >= 40)
+        total_w = sum(weights.values())
+        self.assertAlmostEqual(total_w, 100.0, delta=0.1, msg="Portfolio weights must sum to 100%")
+
+        holdings_with_weights = [dict(h, weight=weights.get(h["ticker"], 1.0)) for h in analytics_tracker.HOLDINGS_DATA]
+        alloc = analytics_tracker.compute_allocation_distributions(holdings_with_weights)
+
+        for category in ["geo", "sector", "asset_class", "currency"]:
+            cat_sum = sum(alloc[category].values())
+            self.assertAlmostEqual(cat_sum, 100.0, delta=0.1, msg=f"Allocation '{category}' must sum to 100%")
+
+    def test_nomadz_referral_integration(self):
+        """Verify Nomadz referral link, code y453MHFA, Solana mention, and modal popup are present in docs/index.html."""
+        html_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "index.html")
+        self.assertTrue(os.path.exists(html_path))
+        with open(html_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        self.assertIn("https://nomadz.xyz/sign-up?referralCode=y453MHFA", content)
+        self.assertIn("y453MHFA", content)
+        self.assertIn("nomadzModal", content)
+        self.assertIn("openNomadzModal", content)
+        self.assertIn("sol-pill", content)
+        self.assertIn("Solana", content)
+
 
 if __name__ == "__main__":
     unittest.main()

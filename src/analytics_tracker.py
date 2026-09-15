@@ -381,7 +381,6 @@ HOLDINGS_DATA = [
     {"ticker": "IEUR", "name": "iShares Core MSCI Europe ETF", "emoji": "🇪🇺", "asset_class": "ETF", "curr": "USD", "sector": "Broad European Equities", "geo": "Europe", "tier": "Core Diversifier", "desc": "Low-cost broad market exposure to 400+ leading multinational corporations across developed Europe."},
     {"ticker": "IQQL.DE", "name": "iShares Listed Private Equity", "emoji": "🔥", "asset_class": "ETF", "curr": "EUR", "sector": "Listed Private Equity", "geo": "Global", "tier": "Alternative Asset", "desc": "Liquid access to the world's premier alternative asset managers and buyout leaders (Blackstone, KKR, Carlyle)."},
     {"ticker": "IB01.L", "name": "iShares $ Treasury 0-1yr ETF", "emoji": "💵", "asset_class": "Fixed Income", "curr": "USD", "sector": "Ultra-Short US Treasuries", "geo": "USA", "tier": "Cash Yield & Dry Powder", "desc": "Ultra-short US government paper yielding risk-free USD interest while preserving dry powder for market corrections."},
-    {"ticker": "XEON.DE", "name": "Xtrackers II EUR Overnight Rate Swap", "emoji": "💤", "asset_class": "Fixed Income", "curr": "EUR", "sector": "Overnight EUR Cash Yield", "geo": "Europe", "tier": "Cash Yield & Dry Powder", "desc": "Euro money market ETF tracking interbank €STR with daily capital compounding, zero duration risk, and capital preservation."},
     {"ticker": "WDEF.L", "name": "WisdomTree Europe Defence", "emoji": "🛡️", "asset_class": "ETF", "curr": "GBP", "sector": "European Defence Equity", "geo": "Europe", "tier": "Strategic Defence ETF", "desc": "Targeted exposure to leading European aerospace and defence companies benefiting from structural NATO rearmament."},
     {"ticker": "WCLD.L", "name": "WisdomTree Cloud Computing ETF", "emoji": "☁️", "asset_class": "ETF", "curr": "USD", "sector": "Cloud Computing & Enterprise SaaS", "geo": "USA / Global", "tier": "Next-Gen Cloud ETF", "desc": "UCITS ETF tracking BVP Nasdaq Emerging Cloud Index capturing pure-play enterprise cloud software (SaaS) leaders benefiting from AI monetization."},
 
@@ -390,6 +389,187 @@ HOLDINGS_DATA = [
     {"ticker": "ETOR", "name": "eToro Group Ltd", "emoji": "🏛️", "asset_class": "Stock", "curr": "USD", "sector": "Social Investing Platform", "geo": "Global", "tier": "Fintech Ecosystem", "desc": "Pioneering global social investing and multi-asset trading platform with millions of active global users."},
     {"ticker": "TRX", "name": "TRON Network", "emoji": "🪙", "asset_class": "Crypto", "curr": "USD", "sector": "Stablecoin Settlement Rails", "geo": "Global", "tier": "Digital Assets", "desc": "World's leading high-throughput blockchain network processing the highest volume of USDT stablecoin transfers."},
 ]
+
+PORTFOLIO_WEIGHTS_FILE = os.path.join(os.path.dirname(ANALYTICS_FILE), "portfolio_weights.json")
+
+BASELINE_WEIGHTS: Dict[str, float] = {
+    # US Tech & AI Megatrend (30.0%)
+    "NVDA": 5.5,
+    "MSFT": 4.5,
+    "AMZN": 4.0,
+    "GOOG": 4.0,
+    "PLTR": 3.5,
+    "AVGO": 3.5,
+    "TSM": 3.0,
+    "MRVL": 2.0,
+    # Healthcare & GLP-1 (17.5%)
+    "LLY": 4.5,
+    "NOVO-B.CO": 4.0,
+    "ABBV": 3.0,
+    "AZN.L": 2.5,
+    "ABT.US": 2.0,
+    "HUM": 1.5,
+    # Energy, Nuclear, Utilities & Industrials (15.5%)
+    "CCJ": 3.5,
+    "ENEL.MI": 3.0,
+    "ENI.MI": 2.5,
+    "PRY.MI": 2.5,
+    "GLEN.L": 2.0,
+    "TRIG.L": 2.0,
+    # Strategic ETFs, Gold & Treasuries (21.0%)
+    "PPFB.DE": 5.0,
+    "IB01.L": 4.0,
+    "SX7PEX.DE": 3.0,
+    "IEUR": 2.5,
+    "WDEF.L": 2.5,
+    "IQQL.DE": 2.0,
+    "WCLD.L": 2.0,
+    # Asia & Emerging Markets (8.0%)
+    "1211.HK": 2.0,
+    "1919.HK": 1.5,
+    "2318.HK": 1.5,
+    "VOF.L": 1.5,
+    "INDO.PA": 1.5,
+    # Consumer, Retail & Luxury (8.0%)
+    "WMT": 2.0,
+    "RACE": 2.0,
+    "MELI": 1.5,
+    "ULVR.L": 1.5,
+    "VOW3.DE": 1.0,
+    # Alternative / Space & Crypto (4.0%)
+    "SPCX.RTH": 1.5,
+    "TRX": 1.5,
+    "ETOR": 1.0,
+}
+
+
+def load_portfolio_weights() -> Dict[str, float]:
+    """
+    Fetch exact portfolio weights from eToro API or BullAware if available,
+    fall back to cached data/portfolio_weights.json,
+    and guarantee normalized 100.0% coverage across all active HOLDINGS_DATA.
+    """
+    weights = {}
+    try:
+        if etoro_client.is_configured():
+            weights = etoro_client.fetch_portfolio_weights()
+    except Exception as e:
+        print(f"ℹ️ Could not fetch weights directly from etoro_client: {e}")
+
+    if not weights:
+        try:
+            from finance_fetcher import fetch_portfolio_weights_from_bullaware
+            weights = fetch_portfolio_weights_from_bullaware() or {}
+        except Exception:
+            pass
+
+    if not weights and os.path.exists(PORTFOLIO_WEIGHTS_FILE):
+        try:
+            with open(PORTFOLIO_WEIGHTS_FILE, "r", encoding="utf-8") as f:
+                weights = json.load(f)
+        except Exception as e:
+            print(f"⚠️ Error reading {PORTFOLIO_WEIGHTS_FILE}: {e}")
+
+    if weights:
+        try:
+            os.makedirs(os.path.dirname(PORTFOLIO_WEIGHTS_FILE), exist_ok=True)
+            with open(PORTFOLIO_WEIGHTS_FILE, "w", encoding="utf-8") as f:
+                json.dump(weights, f, indent=2)
+        except Exception:
+            pass
+
+    final_raw = {}
+    total_raw = 0.0
+    for h in HOLDINGS_DATA:
+        ticker = h["ticker"]
+        w = weights.get(ticker)
+        if w is None:
+            # Check alternative symbols (e.g. without dot)
+            base = ticker.split(".")[0]
+            w = weights.get(base, BASELINE_WEIGHTS.get(ticker, 1.0))
+        final_raw[ticker] = float(w)
+        total_raw += float(w)
+
+    if total_raw > 0:
+        normalized = {t: round((w / total_raw) * 100.0, 2) for t, w in final_raw.items()}
+        diff = round(100.0 - sum(normalized.values()), 2)
+        top_ticker = max(normalized, key=normalized.get)
+        normalized[top_ticker] = round(normalized[top_ticker] + diff, 2)
+        return normalized
+
+    return BASELINE_WEIGHTS
+
+
+def compute_allocation_distributions(holdings_with_weights: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Dynamically compute aggregated allocations by Geography, Sector, Asset Class, and Currency
+    derived from real position weights.
+    """
+    from collections import defaultdict
+    geo_totals: Dict[str, float] = defaultdict(float)
+    sector_totals: Dict[str, float] = defaultdict(float)
+    asset_class_totals: Dict[str, float] = defaultdict(float)
+    currency_totals: Dict[str, float] = defaultdict(float)
+
+    for h in holdings_with_weights:
+        w = float(h.get("weight", 0.0))
+        geo = h.get("geo", "Global")
+        sector = h.get("sector", "Other")
+        ac = h.get("asset_class", "Stock")
+        curr = h.get("curr", "USD")
+
+        # Geography grouping
+        if "USA" in geo or "Canada" in geo:
+            geo_key = "North America (USA / Canada)"
+        elif geo == "Europe":
+            geo_key = "Europe (UK, DE, IT, DK, FR)"
+        elif any(k in geo for k in ["Asia", "Emerging", "Frontier"]):
+            geo_key = "Asia & Emerging Markets"
+        else:
+            geo_key = "Global / Alternative Assets"
+        geo_totals[geo_key] += w
+
+        # Sector grouping
+        if any(s in sector for s in ["AI", "Semiconductor", "Software", "Cloud", "Silicon", "Defense"]):
+            sec_key = "AI, Cloud & Tech"
+        elif any(s in sector for s in ["Pharma", "GLP-1", "Bio", "Medical", "Health", "Oncology"]):
+            sec_key = "Healthcare & GLP-1"
+        elif any(s in sector for s in ["Energy", "Nuclear", "Uranium", "Utilities", "Cables", "Metals", "Solar", "Wind"]):
+            sec_key = "Energy, Nuclear & Grid"
+        elif any(s in sector for s in ["Gold", "Banks", "Europe Equities", "Private Equity", "Defence Equity", "ETF", "Treasuries"]):
+            sec_key = "Strategic ETFs & Gold"
+        elif any(s in sector for s in ["Retail", "Automotive", "Luxury", "E-Commerce", "Staples"]):
+            sec_key = "Consumer, Retail & Luxury"
+        else:
+            sec_key = "Fintech, Space & Crypto"
+        sector_totals[sec_key] += w
+
+        # Asset Class grouping
+        if ac == "Stock":
+            ac_key = "Individual Equities"
+        elif ac in ["ETF", "Fund / Closed-End"]:
+            ac_key = "Equity ETFs & Funds"
+        elif ac == "Commodities":
+            ac_key = "Physical Gold Safe Haven"
+        elif ac == "Fixed Income":
+            ac_key = "US Treasuries & Cash"
+        elif ac == "Crypto":
+            ac_key = "Digital Assets (Crypto)"
+        elif ac == "Private Equity":
+            ac_key = "Private Equity"
+        else:
+            ac_key = "Alternative Assets"
+        asset_class_totals[ac_key] += w
+
+        # Currency grouping
+        currency_totals[curr] += w
+
+    return {
+        "geo": {k: round(v, 2) for k, v in sorted(geo_totals.items(), key=lambda x: x[1], reverse=True)},
+        "sector": {k: round(v, 2) for k, v in sorted(sector_totals.items(), key=lambda x: x[1], reverse=True)},
+        "asset_class": {k: round(v, 2) for k, v in sorted(asset_class_totals.items(), key=lambda x: x[1], reverse=True)},
+        "currency": {k: round(v, 2) for k, v in sorted(currency_totals.items(), key=lambda x: x[1], reverse=True)},
+    }
 
 
 def load_local_analytics() -> Dict[str, Any]:
@@ -617,7 +797,20 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
     posts_json = json.dumps(posts, ensure_ascii=False)
     insights_json = json.dumps(insights, ensure_ascii=False)
-    holdings_json = json.dumps(HOLDINGS_DATA, ensure_ascii=False)
+
+    weights_map = load_portfolio_weights()
+    holdings_with_weights = []
+    for h in HOLDINGS_DATA:
+        item = dict(h)
+        item["weight"] = weights_map.get(h["ticker"], 1.0)
+        holdings_with_weights.append(item)
+    holdings_with_weights.sort(key=lambda x: x.get("weight", 0.0), reverse=True)
+    holdings_count = len(holdings_with_weights)
+
+    alloc_distributions = compute_allocation_distributions(holdings_with_weights)
+    alloc_json = json.dumps(alloc_distributions, ensure_ascii=False)
+    holdings_json = json.dumps(holdings_with_weights, ensure_ascii=False)
+
     monthly_data = fetch_monthly_returns_matrix()
     monthly_json = json.dumps(monthly_data, ensure_ascii=False)
     gauge_json = json.dumps(GAUGE_METRICS, ensure_ascii=False)
@@ -625,7 +818,6 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     next_divs_json = json.dumps(NEXT_DIVIDENDS, ensure_ascii=False)
     drawdowns_json = json.dumps(HISTORICAL_DRAWDOWNS, ensure_ascii=False)
     correlation_json = json.dumps(CORRELATION_CLUSTERS, ensure_ascii=False)
-    seasonality_json = json.dumps(SEASONALITY_DATA, ensure_ascii=False)
     seasonality_data = compute_seasonality(monthly_data)
     seasonality_json = json.dumps(seasonality_data, ensure_ascii=False)
     current_year = datetime.now().year
@@ -1174,6 +1366,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       background: rgba(255, 255, 255, 0.05); color: #CBD5E1; border: 1px solid var(--surface-border);
     }}
     .mini-tag.tier {{ color: var(--gold); border-color: rgba(245, 184, 0, 0.3); background: rgba(245, 184, 0, 0.08); }}
+    .mini-tag.weight-pill {{ color: var(--cyan); border-color: rgba(0, 212, 255, 0.4); background: rgba(0, 212, 255, 0.12); font-weight: 800; }}
 
     /* Detailed Table Mode */
     .holdings-table-view {{ display: none; overflow-x: auto; }}
@@ -1259,58 +1452,98 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     td {{ padding: 14px 16px; border-bottom: 1px solid var(--surface-border); color: var(--text); }}
     tr:hover td {{ background: rgba(255,255,255,0.02); }}
 
-    /* ── Footer ───────────────────────────────────────────────────────────── */
-    /* ── Smart Partner Conversion Banner ── */
-    .smart-partner-banner {{
-      background: linear-gradient(90deg, #071f12 0%, #0a1b38 50%, #170d30 100%);
-      border-bottom: 2px solid rgba(19, 198, 54, 0.45);
-      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
-      padding: 10px 0;
-      position: sticky; top: 0; z-index: 1000;
-      animation: bannerSlideDown 0.35s ease;
+    /* ── Nomadz Referral & Modal Styles ─────────────────────────────────── */
+    .btn-nomadz-badge {{
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, rgba(157, 78, 221, 0.22), rgba(0, 212, 255, 0.18));
+      border: 1px solid rgba(157, 78, 221, 0.55); border-radius: 999px;
+      color: #FFF; padding: 7px 16px; font-size: 0.82rem; font-weight: 800;
+      cursor: pointer; transition: all 0.25s ease;
+      box-shadow: 0 0 15px rgba(157, 78, 221, 0.25);
     }}
-    @keyframes bannerSlideDown {{
-      from {{ transform: translateY(-100%); opacity: 0; }}
-      to {{ transform: translateY(0); opacity: 1; }}
+    .btn-nomadz-badge:hover {{
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(157, 78, 221, 0.45);
+      border-color: var(--cyan);
     }}
-    .banner-inner {{
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 14px;
+    .sol-pill {{
+      background: linear-gradient(135deg, #9945FF, #14F195);
+      color: #000; font-size: 0.68rem; font-weight: 900;
+      padding: 2px 7px; border-radius: 6px; letter-spacing: 0.03em;
     }}
-    .banner-badge {{
-      display: flex; align-items: center; gap: 6px;
-      background: rgba(19, 198, 54, 0.15); border: 1px solid var(--green);
-      color: var(--green); padding: 4px 10px; border-radius: 999px;
-      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
-      white-space: nowrap;
+
+    /* Modal Backdrop & Container */
+    .nomadz-modal-overlay {{
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(3, 6, 23, 0.85);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
     }}
-    .pulse-dot {{
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--green); box-shadow: 0 0 8px var(--green);
-      animation: bannerPulse 1.5s infinite;
+    .nomadz-modal-card {{
+      background: linear-gradient(180deg, #0e173e 0%, #080d24 100%);
+      border: 1px solid rgba(157, 78, 221, 0.45);
+      border-radius: var(--radius-lg);
+      max-width: 540px; width: 100%; padding: 36px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(157, 78, 221, 0.25);
+      position: relative; animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }}
-    @keyframes bannerPulse {{
-      0%, 100% {{ opacity: 1; transform: scale(1); }}
-      50% {{ opacity: 0.4; transform: scale(0.85); }}
+    @keyframes modalFadeIn {{
+      from {{ opacity: 0; transform: scale(0.95) translateY(10px); }}
+      to {{ opacity: 1; transform: scale(1) translateY(0); }}
     }}
-    .banner-content {{ flex: 1; min-width: 260px; }}
-    .banner-content p {{ font-size: 0.90rem; color: #FFF; line-height: 1.35; }}
-    .banner-sub {{ font-size: 0.76rem; color: var(--muted); font-weight: 500; display: block; margin-top: 2px; }}
-    .banner-actions {{ display: flex; align-items: center; gap: 10px; }}
-    .btn-partner-cta {{
-      background: linear-gradient(135deg, #13C636, #00D4FF);
-      color: #00160a; font-weight: 900; font-size: 0.85rem;
-      padding: 7px 16px; border-radius: 999px; text-decoration: none;
-      box-shadow: 0 0 15px rgba(19, 198, 54, 0.4); white-space: nowrap;
-      transition: transform 0.2s ease, box-shadow 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
+    .nomadz-modal-close {{
+      position: absolute; top: 18px; right: 18px;
+      background: rgba(255, 255, 255, 0.08); border: none;
+      color: var(--muted); font-size: 1.3rem; width: 36px; height: 36px;
+      border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
     }}
-    .btn-partner-cta:hover {{ transform: scale(1.03); box-shadow: 0 0 25px rgba(0, 212, 255, 0.6); }}
-    .btn-banner-close {{
-      background: transparent; border: none; color: var(--muted);
-      font-size: 1.1rem; cursor: pointer; padding: 4px 8px; line-height: 1;
-      transition: color 0.2s ease;
+    .nomadz-modal-close:hover {{ color: #FFF; background: rgba(255, 255, 255, 0.18); }}
+    .nomadz-pill-header {{
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(157, 78, 221, 0.15); border: 1px solid rgba(157, 78, 221, 0.4);
+      border-radius: 999px; padding: 4px 12px; font-size: 0.75rem; font-weight: 800;
+      color: #d8b4fe; margin-bottom: 14px;
     }}
-    .btn-banner-close:hover {{ color: #FFF; }}
+    .nomadz-code-box {{
+      background: rgba(3, 6, 23, 0.9); border: 1px dashed rgba(157, 78, 221, 0.6);
+      border-radius: var(--radius-md); padding: 14px 18px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin: 20px 0; gap: 12px;
+    }}
+    .nomadz-code-val {{
+      font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; font-weight: 800;
+      color: var(--cyan); letter-spacing: 0.05em;
+    }}
+    .btn-copy-code {{
+      background: rgba(0, 212, 255, 0.15); border: 1px solid var(--cyan);
+      color: var(--cyan); border-radius: 999px; padding: 6px 14px; font-size: 0.8rem;
+      font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }}
+    .btn-copy-code:hover {{ background: var(--cyan); color: #001224; }}
+    .btn-nomadz-action {{
+      display: block; text-align: center; width: 100%;
+      background: linear-gradient(135deg, #9945FF, #00D4FF);
+      color: #001224; font-weight: 900; text-decoration: none;
+      padding: 14px 24px; border-radius: 999px; font-size: 1rem;
+      box-shadow: 0 0 25px rgba(153, 69, 255, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }}
+    .btn-nomadz-action:hover {{
+      transform: translateY(-2px); box-shadow: 0 0 35px rgba(153, 69, 255, 0.6);
+    }}
+
+    /* ── Lifestyle & Web3 Travel Perks Card in Page ────────────────────────── */
+    .nomadz-hub-card {{
+      background: linear-gradient(135deg, rgba(15, 23, 61, 0.95), rgba(8, 13, 36, 0.95));
+      border: 1px solid rgba(157, 78, 221, 0.35); border-radius: var(--radius-lg);
+      padding: 32px; margin: 36px 0; display: grid; grid-template-columns: 1.3fr 1fr;
+      gap: 30px; align-items: center; box-shadow: var(--shadow);
+    }}
+    @media (max-width: 860px) {{
+      .nomadz-hub-card {{ grid-template-columns: 1fr; }}
+    }}
 
     footer.site-footer {{
       margin-top: 60px; text-align: center; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--surface-border);
@@ -1336,6 +1569,10 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       </a>
 
       <div class="nav-controls">
+        <button class="btn-nomadz-badge" onclick="openNomadzModal()" title="Nomadz Travel Perks & Solana Discounts">
+          ✈️ Nomadz Partner <span class="sol-pill">-$SOL</span>
+        </button>
+
         <div class="live-status-pill" title="Auto-synced with eToro Public API">
           <span class="pulse-indicator"></span>
           <span>eToro Verified · <strong id="liveSyncTime">{sync_human}</strong></span>
@@ -1771,7 +2008,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       <section class="holdings-container">
         <div class="section-title">
           <span>🔍 Portfolio Holdings Explorer</span>
-          <span class="tag">41 Active Positions</span>
+          <span class="tag">{holdings_count} Active Positions</span>
         </div>
 
         <div class="holdings-filter-bar">
@@ -1783,7 +2020,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         </div>
 
         <div class="filter-pills">
-          <button class="pill-btn active" onclick="setHoldingFilter('ALL', this)">All (41)</button>
+          <button class="pill-btn active" onclick="setHoldingFilter('ALL', this)">All ({holdings_count})</button>
           <button class="pill-btn" onclick="setHoldingFilter('AI & Semiconductors', this)">AI & Tech</button>
           <button class="pill-btn" onclick="setHoldingFilter('Pharma & GLP-1', this)">Healthcare</button>
           <button class="pill-btn" onclick="setHoldingFilter('Energy', this)">Energy</button>
@@ -1804,6 +2041,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
               <tr>
                 <th>Ticker</th>
                 <th>Company Name</th>
+                <th>Weight (%)</th>
                 <th>Asset Class</th>
                 <th>Currency</th>
                 <th>Sector</th>
@@ -1846,6 +2084,51 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             <div class="pillar-icon">🤝</div>
             <h3>4. Full Skin in the Game & Transparency</h3>
             <p>100% aligned with copiers — I invest my own personal wealth in the exact same proportions. Instant 1:1 replication with zero management fees.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Lifestyle & Web3 Travel Perks (Nomadz Partnership) ─────────────── -->
+      <section>
+        <div class="section-title">
+          <span>🌍 Lifestyle & Web3 Perks</span>
+          <span class="tag">Exclusive Travel Discount</span>
+        </div>
+
+        <div class="nomadz-hub-card">
+          <div>
+            <div class="nomadz-pill-header">
+              <span>✈️ Official Travel Partner</span>
+              <span class="sol-pill">🟣 Extra Solana Discount</span>
+            </div>
+            <h3 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 12px; color: #FFF;">
+              Discounted Stays & Coliving Worldwide with Nomadz
+            </h3>
+            <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 16px; line-height: 1.6;">
+              As part of our community lifestyle perks, enjoy discounted stays, boutique hotels, and coliving hubs globally on <strong>Nomadz</strong>.
+              Pay directly with <strong>Solana ($SOL)</strong> at checkout to unlock an exclusive additional on-chain discount!
+            </p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <span class="mini-tag" style="border-color: rgba(157, 78, 221, 0.5); color: #d8b4fe;">🏨 Stays & Coliving Worldwide</span>
+              <span class="mini-tag" style="border-color: rgba(20, 241, 149, 0.5); color: #14F195;">⚡ Pay with $SOL for Extra Discount</span>
+              <span class="mini-tag" style="border-color: rgba(0, 212, 255, 0.5); color: var(--cyan);">🔑 Referral Code: y453MHFA</span>
+            </div>
+          </div>
+
+          <div style="background: rgba(3, 6, 23, 0.6); border: 1px solid var(--surface-border-bright); border-radius: var(--radius-md); padding: 24px; text-align: center;">
+            <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 800; color: var(--muted); margin-bottom: 6px;">
+              Your Exclusive Referral Code
+            </div>
+            <div class="nomadz-code-box" style="margin: 10px 0 18px;">
+              <span class="nomadz-code-val">y453MHFA</span>
+              <button class="btn-copy-code" onclick="copyNomadzCode(this)">📋 Copy</button>
+            </div>
+            <a href="https://nomadz.xyz/sign-up?referralCode=y453MHFA" target="_blank" rel="noopener" class="btn-nomadz-action">
+              Claim Discount on Nomadz.xyz ↗
+            </a>
+            <div style="font-size: 0.72rem; color: var(--muted); margin-top: 10px;">
+              Valid on all upcoming stays. Pay in $SOL for maximum savings.
+            </div>
           </div>
         </div>
       </section>
@@ -2102,11 +2385,71 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     </div>
   </footer>
 
+  <!-- ── Nomadz Interactive Modal Popup ── -->
+  <div id="nomadzModal" class="nomadz-modal-overlay" onclick="if(event.target===this) closeNomadzModal()">
+    <div class="nomadz-modal-card">
+      <button class="nomadz-modal-close" onclick="closeNomadzModal()">✕</button>
+      
+      <div class="nomadz-pill-header">
+        <span>✈️ Curated Community Perks</span>
+        <span class="sol-pill">🟣 Solana Discount</span>
+      </div>
+
+      <h3 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 8px; color: #FFF;">
+        Nomadz × Andrea Ravalli
+      </h3>
+      <p style="font-size: 0.88rem; color: var(--muted); margin-bottom: 20px;">
+        Exclusive accommodation perks and digital nomad housing discounts for our investor community.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; font-size: 0.88rem;">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+          <div style="font-size: 1.2rem;">🏨</div>
+          <div>
+            <strong style="color: #FFF;">Discounted Stays Globally:</strong>
+            <div style="color: var(--muted); font-size: 0.82rem;">Access curated hotels, villas, and remote-work hubs with instant savings.</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+          <div style="font-size: 1.2rem;">⚡</div>
+          <div>
+            <strong style="color: #14F195;">Extra Discount with Solana ($SOL):</strong>
+            <div style="color: var(--muted); font-size: 0.82rem;">Pay on-chain in $SOL at checkout to unlock additional exclusive price reductions.</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+          <div style="font-size: 1.2rem;">🤝</div>
+          <div>
+            <strong style="color: var(--cyan);">100% Free Signup:</strong>
+            <div style="color: var(--muted); font-size: 0.82rem;">Instant access with referral code <code>y453MHFA</code> automatically applied.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nomadz-code-box">
+        <div>
+          <div style="font-size: 0.72rem; color: var(--muted); text-transform: uppercase; font-weight: 700;">Referral Code</div>
+          <div class="nomadz-code-val">y453MHFA</div>
+        </div>
+        <button class="btn-copy-code" onclick="copyNomadzCode(this)">📋 Copy Code</button>
+      </div>
+
+      <a href="https://nomadz.xyz/sign-up?referralCode=y453MHFA" target="_blank" rel="noopener" class="btn-nomadz-action" style="margin-bottom: 12px;">
+        Sign Up on Nomadz.xyz ↗
+      </a>
+      
+      <button onclick="closeNomadzModal()" style="background: none; border: none; color: var(--muted); font-size: 0.82rem; cursor: pointer; display: block; margin: 0 auto; text-decoration: underline;">
+        Continue exploring portfolio
+      </button>
+    </div>
+  </div>
+
   <!-- ── Injected Data & JavaScript Logic ── -->
   <script>
     const postsData = {posts_json};
     const insightsData = {insights_json};
     const holdingsData = {holdings_json};
+    const allocDistributions = {alloc_json};
     const monthlyData = {monthly_json};
     const gaugeMetrics = {gauge_json};
     const divBreakdownData = {div_breakdown_json};
@@ -2114,6 +2457,45 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     const drawdownsData = {drawdowns_json};
     const correlationData = {correlation_json};
     const seasonalityData = {seasonality_json};
+
+    // ── Nomadz Modal Handlers ───────────────────────────────────────────────
+    function openNomadzModal() {{
+      document.getElementById('nomadzModal').style.display = 'flex';
+    }}
+
+    function closeNomadzModal() {{
+      document.getElementById('nomadzModal').style.display = 'none';
+      try {{
+        localStorage.setItem('nomadz_modal_dismissed', 'true');
+      }} catch (e) {{}}
+    }}
+
+    function copyNomadzCode(btn) {{
+      navigator.clipboard.writeText('y453MHFA').then(() => {{
+        const original = btn.innerHTML;
+        btn.innerHTML = '✓ Copied!';
+        btn.style.background = 'var(--green)';
+        btn.style.color = '#00160a';
+        btn.style.borderColor = 'var(--green)';
+        setTimeout(() => {{
+          btn.innerHTML = original;
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }}, 2500);
+      }}).catch(() => {{
+        prompt('Copy referral code:', 'y453MHFA');
+      }});
+    }}
+
+    // Gentle auto-open after 15 seconds if never dismissed
+    setTimeout(() => {{
+      try {{
+        if (!localStorage.getItem('nomadz_modal_dismissed')) {{
+          openNomadzModal();
+        }}
+      }} catch (e) {{}}
+    }}, 15000);
 
     // ── Navigation & Tabs ──────────────────────────────────────────────────
     function switchTab(tabId) {{
@@ -2624,14 +3006,16 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
     // ── Multi-Dimension Asset Allocation Charts ───────────────────────────
     function renderAllocationCharts() {{
-      // 1. Geo Chart
+      // 1. Geo Chart (Dynamic)
+      const geoLabels = Object.keys(allocDistributions.geo).map(k => `${{k}} (${{allocDistributions.geo[k]}}%)`);
+      const geoData = Object.values(allocDistributions.geo);
       new Chart(document.getElementById('geoChart').getContext('2d'), {{
         type: 'doughnut',
         data: {{
-          labels: ['North America (USA / Canada)', 'Europe (UK, DE, IT, DK, FR)', 'Asia & Emerging (China, Vietnam, Indonesia)', 'Cash & Overnight'],
+          labels: geoLabels,
           datasets: [{{
-            data: [48, 32, 15, 5],
-            backgroundColor: ['#00D4FF', '#13C636', '#F5B800', '#9D4EDD'],
+            data: geoData,
+            backgroundColor: ['#00D4FF', '#13C636', '#F5B800', '#9D4EDD', '#FF4D6D'],
             borderWidth: 2, borderColor: '#0a0f2c',
           }}]
         }},
@@ -2641,21 +3025,15 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         }}
       }});
 
-      // 2. Sector Chart
+      // 2. Sector Chart (Dynamic)
+      const secLabels = Object.keys(allocDistributions.sector).map(k => `${{k}} (${{allocDistributions.sector[k]}}%)`);
+      const secData = Object.values(allocDistributions.sector);
       new Chart(document.getElementById('sectorChart').getContext('2d'), {{
         type: 'doughnut',
         data: {{
-          labels: [
-            'AI & Semiconductors (24%)',
-            'Healthcare & GLP-1 (20%)',
-            'Energy, Nuclear & Commodities (18%)',
-            'Enterprise Cloud & Cyber (14%)',
-            'E-Commerce & Digital Payments (10%)',
-            'ETF & Private Equity (9%)',
-            'Cash Reserves EUR/USD (5%)'
-          ],
+          labels: secLabels,
           datasets: [{{
-            data: [24, 20, 18, 14, 10, 9, 5],
+            data: secData,
             backgroundColor: ['#13C636', '#00D4FF', '#F5B800', '#9D4EDD', '#FF4D6D', '#38BDF8', '#64748B'],
             borderWidth: 2, borderColor: '#0a0f2c',
           }}]
@@ -2666,14 +3044,16 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         }}
       }});
 
-      // 3. Asset Class Chart
+      // 3. Asset Class Chart (Dynamic)
+      const acLabels = Object.keys(allocDistributions.asset_class).map(k => `${{k}} (${{allocDistributions.asset_class[k]}}%)`);
+      const acData = Object.values(allocDistributions.asset_class);
       new Chart(document.getElementById('assetClassChart').getContext('2d'), {{
         type: 'doughnut',
         data: {{
-          labels: ['Individual Equities (74%)', 'Equity ETFs (12%)', 'Physical Gold & Metals (6%)', 'US Treasuries / Cash (6%)', 'Crypto Assets (2%)'],
+          labels: acLabels,
           datasets: [{{
-            data: [74, 12, 6, 6, 2],
-            backgroundColor: ['#13C636', '#00D4FF', '#F5B800', '#9D4EDD', '#FF4D6D'],
+            data: acData,
+            backgroundColor: ['#13C636', '#00D4FF', '#F5B800', '#9D4EDD', '#FF4D6D', '#38BDF8'],
             borderWidth: 2, borderColor: '#0a0f2c',
           }}]
         }},
@@ -2683,14 +3063,16 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         }}
       }});
 
-      // 4. Currency Exposure Chart
+      // 4. Currency Exposure Chart (Dynamic)
+      const currLabels = Object.keys(allocDistributions.currency).map(k => `${{k}} (${{allocDistributions.currency[k]}}%)`);
+      const currData = Object.values(allocDistributions.currency);
       new Chart(document.getElementById('currencyChart').getContext('2d'), {{
         type: 'doughnut',
         data: {{
-          labels: ['USD - US Dollar (54%)', 'EUR - Euro (26%)', 'GBP - British Pound (12%)', 'HKD & Other (8%)'],
+          labels: currLabels,
           datasets: [{{
-            data: [54, 26, 12, 8],
-            backgroundColor: ['#00D4FF', '#13C636', '#9D4EDD', '#F5B800'],
+            data: currData,
+            backgroundColor: ['#00D4FF', '#13C636', '#9D4EDD', '#F5B800', '#FF4D6D'],
             borderWidth: 2, borderColor: '#0a0f2c',
           }}]
         }},
@@ -2724,7 +3106,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
       if (items.length === 0) {{
         cardContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 40px;">No holdings found matching the search criteria.</p>';
-        tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--muted);">No holdings found.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--muted);">No holdings found.</td></tr>';
         return;
       }}
 
@@ -2748,6 +3130,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             <p class="holding-desc">${{h.desc}}</p>
           </div>
           <div class="holding-tags">
+            <span class="mini-tag weight-pill">⚖️ ${{(h.weight || 0).toFixed(2)}}%</span>
             <span class="mini-tag">${{h.sector}}</span>
             <span class="mini-tag">${{h.geo}}</span>
             <span class="mini-tag">${{h.curr}}</span>
@@ -2761,6 +3144,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         tr.innerHTML = `
           <td><strong style="color:var(--cyan); font-family:'JetBrains Mono',monospace;">$${{h.ticker}}</strong></td>
           <td><strong>${{h.emoji}} ${{h.name}}</strong></td>
+          <td><strong style="color:var(--cyan); font-family:'JetBrains Mono',monospace;">${{(h.weight || 0).toFixed(2)}}%</strong></td>
           <td><span class="mini-tag">${{h.asset_class || 'Stock'}}</span></td>
           <td><strong style="color:var(--gold);">${{h.curr || 'USD'}}</strong></td>
           <td>${{h.sector}}</td>
