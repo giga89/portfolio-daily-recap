@@ -8,6 +8,7 @@ Twitter/X, Bluesky, Telegram, and LinkedIn without stretching.
 """
 
 import os
+import re
 import random
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageStat
@@ -20,6 +21,22 @@ PROFILE_PHOTO_PATH = os.path.join(REPO_ROOT, "assets", "profile_photo.jpg")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(MEMES_DIR, exist_ok=True)
+
+# ── Emoji Sanitizer for Image Rendering ─────────────────────────────────────
+# TTF fonts (Inter, Liberation, DejaVu) on Linux do not support color emojis.
+# Rendering raw emojis produces '.notdef' / tofu glyphs (square/rectangle boxes).
+EMOJI_PATTERN = re.compile(
+    r"[\U00010000-\U0010ffff]|[\u2600-\u27bf]|[\u2300-\u23ff]|[\u2b50-\u2b55]|[\ufe00-\ufe0f]|[\u200d]",
+    flags=re.UNICODE
+)
+
+def clean_text_for_rendering(text: str) -> str:
+    """Strip emojis and unsupported glyphs to prevent .notdef / tofu box rendering artifacts in PIL."""
+    if not text:
+        return ""
+    cleaned = EMOJI_PATTERN.sub("", text)
+    return re.sub(r"\s+", " ", cleaned).strip()
+
 
 # ── Font Helper ─────────────────────────────────────────────────────────────
 def _get_font(size: int, bold: bool = True):
@@ -45,30 +62,39 @@ MEME_CATALOG = {
         {
             "template": "gatsby_cheers.jpg",
             "title": "🥂 CHEERS TO THE BULLS!",
+            "title": "CHEERS TO THE BULLS!",
             "top_text": "QUANDO $PLTR E I TECH COMPOUNDER",
             "bottom_text": "GUIDANO IL PORTAFOGLIO A NUOVI MASSIMI 🚀",
+            "bottom_text": "GUIDANO IL PORTAFOGLIO A NUOVI MASSIMI",
             "en_top": "WHEN THE AI & TECH COMPOUNDERS",
             "en_bottom": "CARRY THE ENTIRE PORTFOLIO TO THE MOON 🥂🚀",
+            "en_bottom": "CARRY THE ENTIRE PORTFOLIO TO THE MOON",
             "mood_emoji": "🔥",
             "badge_color": "#10B981"
         },
         {
             "template": "stonks.jpg",
             "title": "📈 STONKS ONLY GO UP",
+            "title": "STONKS ONLY GO UP",
             "top_text": "CHI FA TRADING A LEVA: LIQUIDATO",
             "bottom_text": "NOI CON 100% AZIONI REALI E RISK 3/10: 📈 STONKS",
+            "bottom_text": "NOI CON 100% AZIONI REALI E RISK 3/10: STONKS",
             "en_top": "20X LEVERAGE TRADERS: LIQUIDATED",
             "en_bottom": "US WITH 100% REAL ASSETS & RISK SCORE 3/10: 📈 STONKS",
+            "en_bottom": "US WITH 100% REAL ASSETS & RISK SCORE 3/10: STONKS",
             "mood_emoji": "🚀",
             "badge_color": "#10B981"
         },
         {
             "template": "disaster_girl.jpg",
             "title": "🔥 SHORTS GETTING BURNED",
+            "title": "SHORTS GETTING BURNED",
             "top_text": "I BEAR CHE PREVEDEVANO IL CRASH IMMINENTE",
             "bottom_text": "NOI CHE INCASSIAMO UN ALTRO GREEN DAY 🍀",
+            "bottom_text": "NOI CHE INCASSIAMO UN ALTRO GREEN DAY",
             "en_top": "DOOMERS PREDICTING A MARKET CRASH",
             "en_bottom": "US ENJOYING ANOTHER MASSIVE GREEN DAY 🍀🔥",
+            "en_bottom": "US ENJOYING ANOTHER MASSIVE GREEN DAY",
             "mood_emoji": "😈",
             "badge_color": "#10B981"
         }
@@ -77,16 +103,20 @@ MEME_CATALOG = {
         {
             "template": "honest_work.png",
             "title": "🌾 HONEST COMPOUNDING",
+            "title": "HONEST COMPOUNDING",
             "top_text": "+0.75% OGGI. NIENTE LEVE FOLLI 50X",
             "bottom_text": "SOLO 100% AZIONI REALI, DIVIDENDI E COMPOUNDING 🌾",
+            "bottom_text": "SOLO 100% AZIONI REALI, DIVIDENDI E COMPOUNDING",
             "en_top": "+0.75% TODAY. NO CRAZY 50X LEVERAGE",
             "en_bottom": "IT AIN'T MUCH, BUT IT'S HONEST COMPOUND WORK 🌾",
+            "en_bottom": "IT AIN'T MUCH, BUT IT'S HONEST COMPOUND WORK",
             "mood_emoji": "🌾",
             "badge_color": "#10B981"
         },
         {
             "template": "two_bus_passengers.jpg",
             "title": "🚌 DUE MODI DI VIVERE LA GIORNATA",
+            "title": "DUE MODI DI VIVERE LA GIORNATA",
             "top_text": "CHI GUARDA IL GRAFICO AD 1 MINUTO CON ANSIA",
             "bottom_text": "CHI FA COPY TRADING A BASSO RISCHIO E DORME SERENO",
             "en_top": "DAY TRADERS STRESSED OVER 1-MIN CANDLES",
@@ -97,30 +127,38 @@ MEME_CATALOG = {
         {
             "template": "epic_handshake.jpg",
             "title": "🤝 THE PERFECT ALLIANCE",
+            "title": "THE PERFECT ALLIANCE",
             "top_text": "CRESCITA TECNOLOGICA (AI & CHIPS)",
             "bottom_text": "DIVIDENDI SOLIDI & ZERO LEVA = COMPOUNDING 🌿",
+            "bottom_text": "DIVIDENDI SOLIDI & ZERO LEVA = COMPOUNDING",
             "en_top": "GROWTH MEGATRENDS (AI & TECH)",
             "en_bottom": "CASH FLOW & 0% LEVERAGE = LONG TERM COMPOUNDING 🤝",
+            "en_bottom": "CASH FLOW & 0% LEVERAGE = LONG TERM COMPOUNDING",
             "mood_emoji": "🤝",
             "badge_color": "#06B6D4"
         },
         {
             "template": "expanding_brain.jpg",
             "title": "🧠 INVESTING EVOLUTION",
+            "title": "INVESTING EVOLUTION",
             "top_text": "INSEGUIRE LE MEME COIN CON LEVA 50X",
             "bottom_text": "COPIARE UN PORTAFOGLIO +200% DAL 2020 SENZA STRESS",
             "en_top": "CHASING RANDOM PENNY STOCKS",
             "en_bottom": "1-CLICK COPYING A +200% TRACK RECORD WITH 3/10 RISK 🧠",
+            "en_bottom": "1-CLICK COPYING A +200% TRACK RECORD WITH 3/10 RISK",
             "mood_emoji": "💡",
             "badge_color": "#8B5CF6"
         },
         {
             "template": "change_my_mind.jpg",
             "title": "☕ CHANGE MY MIND",
+            "title": "CHANGE MY MIND",
             "top_text": "IL COPY TRADING SU AZIONI REALI A BASSO RISCHIO",
             "bottom_text": "BATTE IL 90% DEL TRADING FAI-DA-TE. CHANGE MY MIND. ☕",
+            "bottom_text": "BATTE IL 90% DEL TRADING FAI-DA-TE. CHANGE MY MIND.",
             "en_top": "DISCIPLINED LOW-RISK COPY TRADING",
             "en_bottom": "BEATS 90% OF EMOTIONAL DAY TRADING. CHANGE MY MIND. ☕",
+            "en_bottom": "BEATS 90% OF EMOTIONAL DAY TRADING. CHANGE MY MIND.",
             "mood_emoji": "☕",
             "badge_color": "#38BDF8"
         }
@@ -129,40 +167,50 @@ MEME_CATALOG = {
         {
             "template": "trade_offer.jpg",
             "title": "🤝 TRADE OFFER",
+            "title": "TRADE OFFER",
             "top_text": "IO RICEVO: VOLATILITÀ QUASI ZERO",
             "bottom_text": "TU RICEVI: DIVIDENDI ACCUMULATI E TEMPO LIBERO",
             "en_top": "I RECEIVE: FLAT MARKET ACTION",
             "en_bottom": "YOU RECEIVE: SOLID DIVIDENDS & FREE TIME ⏳",
+            "en_bottom": "YOU RECEIVE: SOLID DIVIDENDS & FREE TIME",
             "mood_emoji": "⚖️",
             "badge_color": "#38BDF8"
         },
         {
             "template": "waiting_skeleton.jpg",
             "title": "⏳ WAITING FOR THE DIP",
+            "title": "WAITING FOR THE DIP",
             "top_text": "IO CHE ASPETTO CHE IL MERCATO CROLLI",
             "bottom_text": "PERCHÉ 'I GURU HANNO DETTO CHE È TROPPO CARO'",
             "en_top": "WAITING FOR THE BIG CRASH",
             "en_bottom": "BECAUSE 'EXPERTS SAID MARKET IS AT THE TOP' SINCE 2022 ⏳",
+            "en_bottom": "BECAUSE 'EXPERTS SAID MARKET IS AT THE TOP' SINCE 2022",
             "mood_emoji": "💀",
             "badge_color": "#64748B"
         },
         {
             "template": "two_buttons.jpg",
             "title": "🔴 TOUGH CHOICE",
+            "title": "TOUGH CHOICE",
             "top_text": "COMPRARE ALTRE AZIONI REAL ESTATE & ENERGIA",
             "bottom_text": "O RAFFORZARE I COMPOUNDER TECH SULLA PARITÀ? 🤔",
+            "bottom_text": "O RAFFORZARE I COMPOUNDER TECH SULLA PARITÀ?",
             "en_top": "ADD MORE DIVIDEND DIVIDENDS",
             "en_bottom": "OR ACCUMULATE CORE TECH LEADERS ON FLAT DAYS? 🤔",
+            "en_bottom": "OR ACCUMULATE CORE TECH LEADERS ON FLAT DAYS?",
             "mood_emoji": "🤔",
             "badge_color": "#F59E0B"
         },
         {
             "template": "distracted_boyfriend.jpg",
             "title": "👀 DISTRACTED BY COMPOUNDERS",
+            "title": "DISTRACTED BY COMPOUNDERS",
             "top_text": "TRADING SPECULATIVO E LEVE PAZZE",
             "bottom_text": "NOI: PORTAFOGLIO MULTI-ASSET DIVERSIFICATO 👀",
+            "bottom_text": "NOI: PORTAFOGLIO MULTI-ASSET DIVERSIFICATO",
             "en_top": "HIGH RISK PENNY STOCKS & 20X LEVERAGE",
             "en_bottom": "US: QUALITY MULTI-ASSET COMPOUNDERS 👀",
+            "en_bottom": "US: QUALITY MULTI-ASSET COMPOUNDERS",
             "mood_emoji": "👀",
             "badge_color": "#EC4899"
         }
@@ -171,40 +219,52 @@ MEME_CATALOG = {
         {
             "template": "this_is_fine.jpg",
             "title": "☕ THIS IS FINE",
+            "title": "THIS IS FINE",
             "top_text": "IL MERCATO RITRACCIA DEL -0.9%",
             "bottom_text": "NOI CON ZERO LEVA E CASSA PRONTA PER IL DIP ☕",
+            "bottom_text": "NOI CON ZERO LEVA E CASSA PRONTA PER IL DIP",
             "en_top": "MARKET DIPS -0.9% TODAY",
             "en_bottom": "US CHILLING WITH ZERO LEVERAGE & CASH READY ☕",
+            "en_bottom": "US CHILLING WITH ZERO LEVERAGE & CASH READY",
             "mood_emoji": "☕",
             "badge_color": "#EF4444"
         },
         {
             "template": "woman_yelling_cat.jpg",
             "title": "😼 CALM AS A CAT",
+            "title": "CALM AS A CAT",
             "top_text": "I TRADER A LEVA CHE VANNO IN PANICO",
             "bottom_text": "NOI SERENI CON ZERO LEVA E RISK SCORE 3/10 😼",
+            "bottom_text": "NOI SERENI CON ZERO LEVA E RISK SCORE 3/10",
             "en_top": "LEVERAGE TRADERS PANICKING OVER MINOR PULLBACKS",
             "en_bottom": "US CHILLING WITH ZERO LEVERAGE & 3/10 RISK 😼",
+            "en_bottom": "US CHILLING WITH ZERO LEVERAGE & 3/10 RISK",
             "mood_emoji": "😼",
             "badge_color": "#F59E0B"
         },
         {
             "template": "clown_makeup.jpg",
             "title": "🎪 THE TIMING CYCLE",
+            "title": "THE TIMING CYCLE",
             "top_text": "1. Compro il dip · 2. Scende ancora",
             "bottom_text": "3. Vendo sul panico · 4. Rimbalzo +4% il giorno dopo 🤡",
+            "bottom_text": "3. Vendo sul panico · 4. Rimbalzo +4% il giorno dopo",
             "en_top": "1. Buy the dip · 2. It dips more",
             "en_bottom": "3. Panic sell the bottom · 4. +4% rally the next morning 🤡",
+            "en_bottom": "3. Panic sell the bottom · 4. +4% rally the next morning",
             "mood_emoji": "🎪",
             "badge_color": "#F59E0B"
         },
         {
             "template": "uno_draw_25.jpg",
             "title": "🃏 UNO DRAW 25",
+            "title": "UNO DRAW 25",
             "top_text": "VENDERE SUL PANICO PER UN DIP DEL -1%",
             "bottom_text": "OPPURE PESCARE 25 CARTE E MANTENERE IL RISK 3/10 🃏",
+            "bottom_text": "OPPURE PESCARE 25 CARTE E MANTENERE IL RISK 3/10",
             "en_top": "PANIC SELL AT THE FIRST -1% MARKET PULLBACK",
             "en_bottom": "OR DRAW 25 AND STICK TO DISCIPLINED 3/10 RISK 🃏",
+            "en_bottom": "OR DRAW 25 AND STICK TO DISCIPLINED 3/10 RISK",
             "mood_emoji": "🃏",
             "badge_color": "#EF4444"
         }
@@ -213,26 +273,33 @@ MEME_CATALOG = {
         {
             "template": "this_is_fine.jpg",
             "title": "☕ THIS IS FINE (EXTREME)",
+            "title": "THIS IS FINE (EXTREME)",
             "top_text": "QUANDO TUTTO IL MERCATO È PROFONDAMENTE ROSSO",
             "bottom_text": "MA LA TUA TESI D'INVESTIMENTO A 5 ANNI È INVIOLATA ☕",
+            "bottom_text": "MA LA TUA TESI D'INVESTIMENTO A 5 ANNI È INVIOLATA",
             "en_top": "WHEN THE ENTIRE MARKET IS BURNING RED",
             "en_bottom": "BUT YOUR 5-YEAR MULTI-ASSET THESIS REMAINS BULLETPROOF ☕🔥",
+            "en_bottom": "BUT YOUR 5-YEAR MULTI-ASSET THESIS REMAINS BULLETPROOF",
             "mood_emoji": "☕",
             "badge_color": "#DC2626"
         },
         {
             "template": "drowning_kid.jpg",
             "title": "🏊‍♂️ MARKET LIQUIDITY",
+            "title": "MARKET LIQUIDITY",
             "top_text": "IL MERCATO CHE SOSTIENE SOLO IL MOMENTUM",
             "bottom_text": "I SOLIDI COMPOUNDER A SCONTO CHE ASPETTANO IL REBOUND 🏊‍♂️",
+            "bottom_text": "I SOLIDI COMPOUNDER A SCONTO CHE ASPETTANO IL REBOUND",
             "en_top": "HYPED MOMENTUM STOCKS CRASHING HARD",
             "en_bottom": "SOLID CASH-FLOW LEADERS QUIETLY ACCUMULATING 🏊‍♂️",
+            "en_bottom": "SOLID CASH-FLOW LEADERS QUIETLY ACCUMULATING",
             "mood_emoji": "🏊‍♂️",
             "badge_color": "#DC2626"
         },
         {
             "template": "pablo_escobar.jpg",
             "title": "🌧️ WAITING FOR THE REBOUND",
+            "title": "WAITING FOR THE REBOUND",
             "top_text": "IO CHE GUARDO IL PORTAFOGLIO OGGI",
             "bottom_text": "SAPENDO CHE DAL 2020 ABBIAMO SUPERATO OGNI TEMPESTA (+200%)",
             "en_top": "LOOKING AT RED CHARTS TODAY",
@@ -245,6 +312,7 @@ MEME_CATALOG = {
         {
             "template": "pablo_escobar.jpg",
             "title": "🛋️ WEEKEND MOOD",
+            "title": "WEEKEND MOOD",
             "top_text": "IO IL SABATO E LA DOMENICA",
             "bottom_text": "ASPETTANDO CHE RIAPRA WALL STREET LUNEDÌ ALLE 15:30",
             "en_top": "ME DURING THE WEEKEND",
@@ -257,30 +325,39 @@ MEME_CATALOG = {
         {
             "template": "pablo_escobar.jpg",
             "title": "🛋️ MERCATI IN FESTA",
+            "title": "MERCATI IN FESTA",
             "top_text": "IO CHE ASPETTO CHE RIAPRA IL MERCATO",
             "bottom_text": "MENTRE LA BORSA È IN VACANZA PER {holiday_name} 🏖️",
+            "bottom_text": "MENTRE LA BORSA È IN VACANZA PER {holiday_name}",
             "en_top": "ME WAITING FOR MARKETS TO REOPEN",
             "en_bottom": "WHILE THE EXCHANGE IS CLOSED FOR {holiday_name} 🏖️",
+            "en_bottom": "WHILE THE EXCHANGE IS CLOSED FOR {holiday_name}",
             "mood_emoji": "🛋️",
             "badge_color": "#6366F1"
         },
         {
             "template": "waiting_skeleton.jpg",
             "title": "⏳ ATTENDENDO IL MERCATO",
+            "title": "ATTENDENDO IL MERCATO",
             "top_text": "QUANDO LA BORSA È CHIUSA PER FESTIVITÀ",
             "bottom_text": "E TU NON VEDI L'ORA CHE RIAPRA DOMANI 🌿",
+            "bottom_text": "E TU NON VEDI L'ORA CHE RIAPRA DOMANI",
             "en_top": "WHEN MARKETS ARE CLOSED FOR HOLIDAY",
             "en_bottom": "AND YOU CAN'T WAIT FOR TOMORROW'S OPEN 🌿",
+            "en_bottom": "AND YOU CAN'T WAIT FOR TOMORROW'S OPEN",
             "mood_emoji": "☕",
             "badge_color": "#8B5CF6"
         },
         {
             "template": "two_bus_passengers.jpg",
             "title": "🏖️ GIORNATA DI RELAX SUI MERCATI",
+            "title": "GIORNATA DI RELAX SUI MERCATI",
             "top_text": "I DAY TRADER CHE NON SANNO COSA FARE SENZA BORSA",
             "bottom_text": "I LONG-TERM INVESTOR CHE SI GODONO LA FESTIVITÀ ☕",
+            "bottom_text": "I LONG-TERM INVESTOR CHE SI GODONO LA FESTIVITÀ",
             "en_top": "DAY TRADERS STRESSED WITHOUT LIVE CANDLES",
             "en_bottom": "LONG-TERM INVESTORS ENJOYING THE HOLIDAY RELAX ☕",
+            "en_bottom": "LONG-TERM INVESTORS ENJOYING THE HOLIDAY RELAX",
             "mood_emoji": "🌴",
             "badge_color": "#10B981"
         }
@@ -425,11 +502,14 @@ def generate_meme_card(
     f_badge = _get_font(20, bold=True)
 
     title_text = meme_data["title"]
+    title_text = clean_text_for_rendering(meme_data["title"])
     draw.text((28, (header_h - 26) // 2), title_text, font=f_title, fill="#FFFFFF")
 
     # Daily Return / Status Pill Badge
+    # Daily Return / Status Pill Badge (Clean text, no emojis to avoid .notdef/tofu artifacts)
     if is_holiday:
         pill_text = (holiday_name or "MARKET HOLIDAY").upper()[:18]
+        pill_text = clean_text_for_rendering((holiday_name or "MARKET HOLIDAY").upper()[:18])
         pill_bg = (99, 102, 241, 255)
     elif is_weekend:
         pill_text = "WEEKEND RECAP"
@@ -437,9 +517,15 @@ def generate_meme_card(
     else:
         sign = "+" if portfolio_daily >= 0 else ""
         pill_text = f"{sign}{portfolio_daily:.2f}% {meme_data['mood_emoji']}"
+        pill_text = f"{sign}{portfolio_daily:.2f}%"
         pill_bg = (16, 185, 129, 255) if portfolio_daily >= 0 else (239, 68, 68, 255)
 
     pill_w, pill_h = 180 if is_holiday else 170, 38
+    pill_text = clean_text_for_rendering(pill_text)
+    bbox = draw.textbbox((0, 0), pill_text, font=f_badge)
+    tw = bbox[2] - bbox[0]
+    pill_w = max(110, tw + 36)
+    pill_h = 38
     pill_x, pill_y = W - pill_w - 28, (header_h - pill_h) // 2
     draw.rounded_rectangle([(pill_x, pill_y), (pill_x + pill_w, pill_y + pill_h)], radius=19, fill=pill_bg)
     
@@ -453,11 +539,13 @@ def generate_meme_card(
 
     # 1. Top Punchline Text
     h_display = holiday_name or "la Festività"
+    h_display = clean_text_for_rendering(holiday_name or "la Festività")
     raw_top = meme_data["en_top"] if lang == "en" else meme_data["top_text"]
     try:
         top_text = raw_top.format(holiday_name=h_display)
     except Exception:
         top_text = raw_top
+    top_text = clean_text_for_rendering(top_text)
 
     f_meme_top = _get_font(top_font_size, bold=True)
     top_bbox = draw.textbbox((0, 0), top_text, font=f_meme_top)
@@ -473,6 +561,8 @@ def generate_meme_card(
         bottom_text = raw_bottom.format(holiday_name=h_display)
     except Exception:
         bottom_text = raw_bottom
+    bottom_text = clean_text_for_rendering(bottom_text)
+
     f_meme_bot = _get_font(bot_font_size, bold=True)
     bot_bbox = draw.textbbox((0, 0), bottom_text, font=f_meme_bot)
     bot_tw = bot_bbox[2] - bot_bbox[0]

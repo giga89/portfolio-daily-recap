@@ -38,6 +38,28 @@ class TestMemeCard(unittest.TestCase):
                     f"Template {m['template']} not found for sentiment {sentiment}"
                 )
 
+    def test_clean_text_for_rendering(self):
+        """Verify that clean_text_for_rendering strips emojis and handles whitespace."""
+        self.assertEqual(meme_generator.clean_text_for_rendering("😼 CALM AS A CAT"), "CALM AS A CAT")
+        self.assertEqual(meme_generator.clean_text_for_rendering("-0.66% 😼"), "-0.66%")
+        self.assertEqual(meme_generator.clean_text_for_rendering("A NUOVI MASSIMI 🚀"), "A NUOVI MASSIMI")
+        self.assertEqual(meme_generator.clean_text_for_rendering("US ENJOYING ANOTHER MASSIVE GREEN DAY 🍀🔥"), "US ENJOYING ANOTHER MASSIVE GREEN DAY")
+        self.assertEqual(meme_generator.clean_text_for_rendering("🏊‍♂️ MARKET LIQUIDITY"), "MARKET LIQUIDITY")
+        self.assertEqual(meme_generator.clean_text_for_rendering(""), "")
+        self.assertEqual(meme_generator.clean_text_for_rendering(None), "")
+
+    def test_meme_catalog_rendered_fields_clean(self):
+        """Ensure no raw emojis exist in title, top_text, bottom_text, en_top, en_bottom."""
+        for sentiment, memes in meme_generator.MEME_CATALOG.items():
+            for m in memes:
+                for field in ["title", "top_text", "bottom_text", "en_top", "en_bottom"]:
+                    val = m.get(field, "")
+                    cleaned = meme_generator.clean_text_for_rendering(val)
+                    self.assertEqual(
+                        val, cleaned,
+                        f"Field '{field}' in sentiment '{sentiment}' template '{m.get('template')}' contains unrendered emoji: {val}"
+                    )
+
     def test_generate_meme_card(self):
         """Test generating a card and verifying output image properties."""
         test_path = meme_generator.generate_meme_card(
