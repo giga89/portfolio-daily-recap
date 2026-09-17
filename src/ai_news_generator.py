@@ -558,6 +558,101 @@ def _clean_robotic_phrases(text: str) -> str:
     return cleaned.strip()
 
 
+def ensure_thematic_emojis(text: str, session_name: Optional[str] = None) -> str:
+    """
+    Ensures that every micro-topic paragraph starts with a consistent, thematic emoticon:
+    - Stocks: uses mapped emoji from EMOJI_MAP / portfolio_config.json (e.g. $MRVL -> 📊, $WDEF.L -> 🛡️, $1919.HK -> 🚢).
+    - Macro: uses session emoji (🌍 for EU, 🇺🇸 for US open, 🌆 for US close).
+    - Agenda: uses 📅.
+    - Fallback: uses '🔹' as requested by user if no specific emoji is known.
+    - Preserves greetings and closing community questions cleanly.
+    """
+    if not text:
+        return text
+
+    try:
+        from config import EMOJI_MAP
+    except Exception:
+        EMOJI_MAP = {}
+
+    session_upper = (session_name or "").upper()
+    is_eu = "EUROPEAN" in session_upper or "EU" in session_upper
+    is_us_open = ("U.S." in session_upper or "US" in session_upper) and "OPEN" in session_upper
+    is_weekly = "WEEKLY" in session_upper
+    macro_default_emoji = "🌍" if is_eu else ("🇺🇸" if is_us_open else ("📊" if is_weekly else "🌆"))
+
+    blocks = [b.strip() for b in re.split(r'\n\s*\n', text) if b.strip()]
+    formatted_blocks = []
+
+    def _starts_with_emoji_or_bullet(s: str) -> bool:
+        if not s:
+            return False
+        if s.startswith(('•', '-', '*', '✓', '▪', '▫', '►', '🔹', '🔸', '🏆', '🥇', '🥈', '🥉')):
+            return True
+        first_c = s[0]
+        # Emojis and symbol bullets: non-alphanumeric, non-bracket, non-quote, non-currency
+        if not (first_c.isalnum() or first_c in ('$', '"', "'", '(', '[', '¿', '¡', '#', '@', '{', '<', '/')):
+            return True
+        return False
+
+    for idx, block in enumerate(blocks):
+        # 1. Skip footers / disclaimer / hashtags / links
+        if block.startswith(('📌', '👤', '#', 'http')):
+            formatted_blocks.append(block)
+            continue
+
+        # 2. Greeting (first block, short, no finance metrics)
+        is_greeting = (
+            idx == 0 and len(block) < 160 and
+            not re.search(r'\$[A-Za-z0-9\.\-]+', block) and
+            not re.search(r'[+-]?\d+[\.,]?\d*%', block)
+        )
+        if is_greeting:
+            formatted_blocks.append(block)
+            continue
+
+        # 3. Community engagement question (last or second-to-last block, ends with ?)
+        is_question = (
+            idx >= len(blocks) - 2 and '?' in block and len(block) < 240 and
+            any(w in block.lower() for w in ['commenti', 'voi come', 'cosa ne pensate', 'dite la vostra', 'come avete vissuto'])
+        )
+        if is_question:
+            formatted_blocks.append(block)
+            continue
+
+        # 4. Body paragraph: check if it already has an emoji or bullet
+        lines = [l.strip() for l in block.split('\n') if l.strip()]
+        new_lines = []
+        for line in lines:
+            if _starts_with_emoji_or_bullet(line):
+                new_lines.append(line)
+            else:
+                # Need to determine appropriate emoji or bullet
+                macro_index_tags = {'NSDQ100', 'SPX500', 'SX7PEX.DE', 'EUSTX50', 'CHINA50', 'SWDA.L'}
+                stock_match = re.search(r'\$([A-Za-z0-9\.\-]+)', line)
+                matched_ticker = stock_match.group(1).upper() if stock_match else ""
+
+                is_agenda = any(w in line.lower() for w in ['agenda', 'appuntamenti', 'dati macro', 'calendario', 'market movers', 'sussidi', 'disoccupazione'])
+                is_macro = (
+                    matched_ticker in macro_index_tags or
+                    any(w in line.lower() for w in ['futures', 'wall street', 'listini', 's&p', 'nasdaq', 'stoxx', 'sentiment', 'seduta americana', 'seduta europea', 'vecchio continente'])
+                )
+
+                if is_agenda:
+                    new_lines.append(f"📅 {line}")
+                elif is_macro:
+                    new_lines.append(f"{macro_default_emoji} {line}")
+                elif matched_ticker:
+                    stk_emoji = EMOJI_MAP.get(matched_ticker) or EMOJI_MAP.get(matched_ticker.split('.')[0]) or '🔹'
+                    new_lines.append(f"{stk_emoji} {line}")
+                else:
+                    new_lines.append(f"🔹 {line}")
+
+        formatted_blocks.append('\n'.join(new_lines))
+
+    return '\n\n'.join(formatted_blocks)
+
+
 def _run_post_verification(
     text: str,
     primary_ticker: str = None,
@@ -1185,9 +1280,9 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             niche1 = niche[0] if len(niche) > 0 else '1919.HK'
             macro_tag = 'SX7PEX.DE'
             selected_tags = [fav1, fav2, niche1]
-            emoji_fav1 = EMOJI_MAP.get(fav1, '💊')
-            emoji_fav2 = EMOJI_MAP.get(fav2, '⚡')
-            emoji_niche = EMOJI_MAP.get(niche1, '🚢')
+            emoji_fav1 = EMOJI_MAP.get(fav1) or EMOJI_MAP.get(fav1.split('.')[0]) or '🔹'
+            emoji_fav2 = EMOJI_MAP.get(fav2) or EMOJI_MAP.get(fav2.split('.')[0]) or '🔹'
+            emoji_niche = EMOJI_MAP.get(niche1) or EMOJI_MAP.get(niche1.split('.')[0]) or '🔹'
             selected_tags_str = f"${fav1}, ${fav2}, ${niche1}, ${macro_tag}"
             tag_instruction = f"""
 - REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE 4 tag con il simbolo $ nel testo: ${fav1}, ${fav2}, ${niche1}, ${macro_tag}. Non uno di meno, non uno di più.
@@ -1201,9 +1296,9 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             niche1 = niche[0] if len(niche) > 0 else 'CCJ'
             macro_tag = 'NSDQ100'
             selected_tags = [fav1, fav2, niche1]
-            emoji_fav1 = EMOJI_MAP.get(fav1, '🤖')
-            emoji_fav2 = EMOJI_MAP.get(fav2, '💻')
-            emoji_niche = EMOJI_MAP.get(niche1, '⚡')
+            emoji_fav1 = EMOJI_MAP.get(fav1) or EMOJI_MAP.get(fav1.split('.')[0]) or '🔹'
+            emoji_fav2 = EMOJI_MAP.get(fav2) or EMOJI_MAP.get(fav2.split('.')[0]) or '🔹'
+            emoji_niche = EMOJI_MAP.get(niche1) or EMOJI_MAP.get(niche1.split('.')[0]) or '🔹'
             selected_tags_str = f"${fav1}, ${fav2}, ${niche1}, ${macro_tag}"
             tag_instruction = f"""
 - REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE 4 tag con il simbolo $ nel testo: ${fav1}, ${fav2}, ${niche1}, ${macro_tag}. Non uno di meno, non uno di più.
@@ -1213,6 +1308,10 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         elif is_us_close:
             top_gainers = _get_top_gainers_with_news(stock_data=stock_data, count=4)
             g1, g2, g3, g4 = top_gainers[0], top_gainers[1], top_gainers[2], top_gainers[3]
+            emoji_g1 = EMOJI_MAP.get(g1['ticker']) or EMOJI_MAP.get(g1['ticker'].split('.')[0]) or '🔹'
+            emoji_g2 = EMOJI_MAP.get(g2['ticker']) or EMOJI_MAP.get(g2['ticker'].split('.')[0]) or '🔹'
+            emoji_g3 = EMOJI_MAP.get(g3['ticker']) or EMOJI_MAP.get(g3['ticker'].split('.')[0]) or '🔹'
+            emoji_g4 = EMOJI_MAP.get(g4['ticker']) or EMOJI_MAP.get(g4['ticker'].split('.')[0]) or '🔹'
             selected_tags = [g1['ticker'], g2['ticker'], g3['ticker'], g4['ticker']]
             selected_tags_str = ', '.join([f"${t}" for t in selected_tags])
             tag_instruction = f"""
@@ -1351,7 +1450,14 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
 
             STRUTTURA RIGIDA DEI 5 MICROTEMI A EMOTICON (TASSATIVO):
             - NON USARE NUMERI PER ORDINARE I MICROTEMI (È SEVERAMENTE VIETATO usare elenchi numerati come '1)', '2)', '3)', '4)', '5)' o '1.', '2.').
-            - Ogni microtema DEVE iniziare con la sua emoticon tematica dedicata, separato da uno stacco di riga:
+            - OGNI microtema DEVE iniziare TASSATIVAMENTE con la sua emoticon dedicata all'inizio della prima riga:
+              * Microtema 1 DEVE iniziare con: 🌍
+              * Microtema 2 DEVE iniziare con: 📅
+              * Microtema 3 DEVE iniziare con: {emoji_fav1}
+              * Microtema 4 DEVE iniziare con: {emoji_fav2}
+              * Microtema 5 DEVE iniziare con: {emoji_niche}
+            - Se per qualsiasi motivo non sai cosa mettere, usa il simbolo di elenco '🔹'.
+            - NON omettere mai l'emoticon a inizio riga per nessun microtema.
 
             🌍 MICRO-TEMA 1: Sentiment generale con macro news (globali)
                Panoramica sintetica sui mercati asiatici ed europei in apertura, materie prime (petrolio, gas) o tassi. Includi il tag ${macro_tag}.
@@ -1393,7 +1499,14 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
 
             STRUTTURA RIGIDA DEI 5 MICROTEMI A EMOTICON (TASSATIVO):
             - NON USARE NUMERI PER ORDINARE I MICROTEMI (È SEVERAMENTE VIETATO usare elenchi numerati come '1)', '2)', '3)', '4)', '5)' o '1.', '2.').
-            - Ogni microtema DEVE iniziare con la sua emoticon tematica dedicata, separato da uno stacco di riga:
+            - OGNI microtema DEVE iniziare TASSATIVAMENTE con la sua emoticon dedicata all'inizio della prima riga:
+              * Microtema 1 DEVE iniziare con: 🇺🇸
+              * Microtema 2 DEVE iniziare con: 📅
+              * Microtema 3 DEVE iniziare con: {emoji_fav1}
+              * Microtema 4 DEVE iniziare con: {emoji_fav2}
+              * Microtema 5 DEVE iniziare con: {emoji_niche}
+            - Se per qualsiasi motivo non sai cosa mettere, usa il simbolo di elenco '🔹'.
+            - NON omettere mai l'emoticon a inizio riga per nessun microtema.
 
             🇺🇸 MICRO-TEMA 1: Sentiment generale con macro news
                Panoramica su futures di Wall Street, rendimenti obbligazionari Treasury a 10 anni e rotazione settoriale. Includi il tag ${macro_tag}.
@@ -1437,21 +1550,28 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
 
             STRUTTURA RIGIDA DEI 5 MICROTEMI A EMOTICON (TASSATIVO):
             - NON USARE NUMERI PER ORDINARE I MICROTEMI (È SEVERAMENTE VIETATO usare elenchi numerati come '1)', '2)', '3)', '4)', '5)' o '1.', '2.').
-            - Ogni microtema DEVE iniziare con la sua emoticon tematica dedicata, separato da uno stacco di riga:
+            - OGNI microtema DEVE iniziare TASSATIVAMENTE con la sua emoticon dedicata all'inizio della prima riga:
+              * Microtema 1 DEVE iniziare con: 🌆 (oppure 🔹)
+              * Microtema 2 DEVE iniziare con: {emoji_g1}
+              * Microtema 3 DEVE iniziare con: {emoji_g2}
+              * Microtema 4 DEVE iniziare con: {emoji_g3}
+              * Microtema 5 DEVE iniziare con: {emoji_g4}
+            - Se per qualsiasi motivo non sai cosa mettere, usa il simbolo di elenco '🔹'.
+            - NON omettere mai l'emoticon a inizio riga per nessun microtema.
 
             🌆 MICRO-TEMA 1: Riepilogo rapido di cose successe che hanno mosso l'indice oggi
                Sintesi a bocce ferme di cosa ha guidato S&P 500 e Nasdaq oggi (reazione ai dati macro, rendimenti, flussi settoriali).
 
-            🏆 MICRO-TEMA 2: ${g1['ticker']} ({g1['daily_change']:+.2f}%)
+            {emoji_g1} MICRO-TEMA 2: ${g1['ticker']} ({g1['daily_change']:+.2f}%)
                Titolo del portafoglio con la più grande variazione positiva di oggi. Spiega la notizia reale e il catalizzatore che lo ha portato a muoversi così: {g1['news_snippet']}.
 
-            🥇 MICRO-TEMA 3: ${g2['ticker']} ({g2['daily_change']:+.2f}%)
+            {emoji_g2} MICRO-TEMA 3: ${g2['ticker']} ({g2['daily_change']:+.2f}%)
                Secondo titolo per variazione positiva. Spiega la notizia reale e il catalizzatore del movimento: {g2['news_snippet']}.
 
-            🥈 MICRO-TEMA 4: ${g3['ticker']} ({g3['daily_change']:+.2f}%)
+            {emoji_g3} MICRO-TEMA 4: ${g3['ticker']} ({g3['daily_change']:+.2f}%)
                Terzo titolo per variazione positiva. Spiega la notizia reale e il catalizzatore del movimento: {g3['news_snippet']}.
 
-            🥉 MICRO-TEMA 5: ${g4['ticker']} ({g4['daily_change']:+.2f}%)
+            {emoji_g4} MICRO-TEMA 5: ${g4['ticker']} ({g4['daily_change']:+.2f}%)
                Quarto titolo per variazione positiva. Spiega la notizia reale e il catalizzatore del movimento: {g4['news_snippet']}.
 
             {tag_instruction}
@@ -1550,7 +1670,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
                     # Post-process: ensure only valid portfolio tags are used and limit count
                     recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
                     recap_text = _clean_robotic_phrases(recap_text)
-                    
+                    recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
 
                     # Pre-publication double-check
                     approved, verified_text = _run_post_verification(
@@ -1564,6 +1684,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
                         print(f"⚠️ Market news recap rejected by verifier ({model_name}), trying next model...")
                         continue
                     recap_text = _limit_tags_in_text(verified_text, all_allowed_for_validation, max_tags)
+                    recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
 
                     # Update rotation history with the tags actually selected for the post
                     if selected_tags:

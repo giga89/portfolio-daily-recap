@@ -208,6 +208,11 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
    - Se il post contiene frasi generiche, banali e vuote prive di qualsiasi dato concreto sui titoli citati (es. 'continuiamo a seguire con estrema fiducia', 'la tesi rimane solida', 'sostenuta dalla forte domanda', 'continua ad offrire ottima stabilità', 'rappresenta una copertura strategica importante', 'pronti a gestire la volatilità'), DEVI considerarlo un difetto grave.
    - CORREZIONE: Sostituisci la frase generica con un dato aziendale reale tratto dai METADATI DI PORTAFOGLIO o dalle NOTIZIE LIVE TAVILY (es. cita numeri di bilancio, crescita ricavi, margini operativi, contratti vinti, siti produttivi, nomi di farmaci/dispositivi o piattaforme proprietarie).
 
+7. REGOLE CONTRO INVENZIONI, ALLUCINAZIONI E RIPETIZIONI (TASSATIVE):
+   - NON INVENTARE EVENTI NON PRESENTI NEL TESTO: Se il testo da auditare non parla affatto di tassi d'interesse, della Federal Reserve o di uno specifico indicatore macroeconomico, NON devi assolutamente inventarlo o aggiungerlo di tua iniziativa! Correggi al passato SOLO gli eventi che sono già menzionati nel testo.
+   - NESSUNA FRASE ASSURDA O CONTRADDITTORIA: È severamente vietato inventare concetti finanziari inesistenti (come 'tassa sui tassi', 'tassa sugli interessi').
+   - ZERO RIPETIZIONI: È severamente vietato ripetere la stessa frase o periodo due o più volte nel testo verificato.
+
 =========================================
 OUTPUT RICHIESTO:
 =========================================
@@ -221,6 +226,60 @@ Restituisci ESCLUSIVAMENTE un oggetto JSON valido (senza testo prima o dopo) con
   "explanation": "Breve sintesi dell'audit in italiano"
 }}
 """
+
+
+def sanitize_verified_text(original_text: str, verified_text: str) -> str:
+    """
+    Sanitizes auto-corrections proposed by LLM auditors:
+    1. Removes absurd hallucinations (e.g. 'tassa sui tassi', 'tasse sui tassi', 'tassa sugli interessi').
+    2. Deduplicates repeated sentences or hallucinations generated in loops.
+    3. Rejects hallucinated massive expansions of short non-financial opening sentences.
+    4. Cleans whitespace and trailing punctuation artifacts.
+    """
+    if not verified_text:
+        return original_text
+
+    cleaned = verified_text.strip()
+
+    # 1. Strip absurd/hallucinated financial phrases
+    absurd_patterns = [
+        r'(?i)\bnuova\s+tassa\s+sui\s+tassi(?:\s+di\s+interesse)?\b[.,]?',
+        r'(?i)\btass[ae]\s+sui\s+tassi(?:\s+di\s+interesse)?\b[.,]?',
+        r'(?i)\btass[ae]\s+sugli\s+interessi\b[.,]?',
+    ]
+    for pat in absurd_patterns:
+        cleaned = re.sub(pat, '', cleaned).strip()
+
+    # 2. Deduplicate repeated sentences (e.g. "Sentence A. Sentence A.")
+    raw_sentences = re.split(r'(?<=[.!?])\s+', cleaned)
+    seen_normalized = set()
+    deduped_sentences = []
+    for s in raw_sentences:
+        s_clean = s.strip()
+        if not s_clean:
+            continue
+        # Normalize for repetition comparison
+        norm = re.sub(r'[^a-zA-Z0-9]', '', s_clean.lower())
+        if len(norm) > 15 and norm in seen_normalized:
+            continue
+        seen_normalized.add(norm)
+        deduped_sentences.append(s_clean)
+
+    cleaned = " ".join(deduped_sentences)
+
+    # 3. Reject hallucinated expansion on short greeting/transitional text
+    orig_stripped = original_text.strip()
+    if len(orig_stripped) < 130:
+        orig_has_finance = bool(re.search(r'\$[A-Za-z0-9\.\-]+', orig_stripped) or re.search(r'[+-]?\d+[\.,]?\d*%', orig_stripped))
+        if not orig_has_finance and len(cleaned) > len(orig_stripped) * 1.8:
+            return orig_stripped
+
+    # 4. Clean double spaces and misplaced punctuation
+    cleaned = re.sub(r'\s+([.,!?])', r'\1', cleaned)
+    cleaned = re.sub(r'\s{2,}', ' ', cleaned)
+    cleaned = cleaned.replace("**", "").replace("__", "")
+
+    return cleaned.strip()
 
 
 def audit_with_groq(
@@ -281,6 +340,8 @@ def audit_with_groq(
                 content = data["choices"][0]["message"]["content"]
                 parsed = json.loads(content)
                 if "decision" in parsed and "verified_text" in parsed:
+                    if parsed.get("verified_text"):
+                        parsed["verified_text"] = sanitize_verified_text(text, parsed["verified_text"])
                     parsed["auditor"] = f"groq:{model}"
                     parsed["latency_sec"] = round(elapsed, 2)
                     print(f"   ⚡ Groq Independent Audit ({model}) succeeded in {elapsed:.2f}s — Decision: {parsed.get('decision')}")
@@ -358,6 +419,8 @@ def audit_with_mistral(
                 content = data["choices"][0]["message"]["content"]
                 parsed = json.loads(content)
                 if "decision" in parsed and "verified_text" in parsed:
+                    if parsed.get("verified_text"):
+                        parsed["verified_text"] = sanitize_verified_text(text, parsed["verified_text"])
                     _MISTRAL_AVAILABLE = True
                     parsed["auditor"] = f"mistral:{model}"
                     parsed["latency_sec"] = round(elapsed, 2)
@@ -619,8 +682,20 @@ def split_into_micro_topics(text: str) -> List[Dict[str, Any]]:
             })
             continue
 
-        # Short dynamic greeting
-        if block_idx == 0 and len(block) < 130 and any(w in block.lower() for w in ["buongiorno", "buonasera", "chiusura", "fine sessione", "bentornati"]):
+        # Short dynamic greeting / opening hook
+        is_opening_greeting = False
+        if block_idx == 0 and len(block) < 160:
+            lower_b = block.lower()
+            greeting_cues = [
+                "buongiorno", "buonasera", "buon pomeriggio", "chiusura", "fine sessione",
+                "bentornati", "giornata conclusa", "sessione conclusa", "ci siamo preparati",
+                "apertura", "apre wall street", "un nuovo giorno", "ecco le notizie", "ecco gli spunti"
+            ]
+            has_no_financial_claims = not re.search(r'\$[A-Za-z0-9\.\-]+', block) and not re.search(r'[+-]?\d+[\.,]?\d*%', block)
+            if any(cue in lower_b for cue in greeting_cues) or has_no_financial_claims:
+                is_opening_greeting = True
+
+        if is_opening_greeting:
             micro_topics.append({
                 "id": len(micro_topics),
                 "type": "greeting",
@@ -684,10 +759,11 @@ def split_into_micro_topics(text: str) -> List[Dict[str, Any]]:
     return micro_topics
 
 
-def reassemble_micro_topics(micro_topics: List[Dict[str, Any]]) -> str:
+def reassemble_micro_topics(micro_topics: List[Dict[str, Any]], session_name: Optional[str] = None) -> str:
     """
     Reassembles approved micro-topics into a clean, cohesive post.
     Bullets follow their header with a single newline, paragraphs separated by double newlines.
+    Ensures that every microtopic paragraph starts with its thematic emoji or list symbol.
     """
     chunks = []
     in_bullet_group = False
@@ -714,7 +790,12 @@ def reassemble_micro_topics(micro_topics: List[Dict[str, Any]]) -> str:
             chunks.append(txt)
             in_bullet_group = False
 
-    return "\n\n".join(chunks)
+    raw_assembled = "\n\n".join(chunks)
+    try:
+        from ai_news_generator import ensure_thematic_emojis
+        return ensure_thematic_emojis(raw_assembled, session_name=session_name)
+    except Exception:
+        return raw_assembled
 
 
 def run_micro_topic_consensus_fact_check(
@@ -808,7 +889,7 @@ def run_micro_topic_consensus_fact_check(
         elif dec == "AUTO_CORRECT" and res.get("verified_text"):
             corrected_count += 1
             substantive_retained += 1
-            t["verified_text"] = res["verified_text"]
+            t["verified_text"] = sanitize_verified_text(t["text"], res["verified_text"])
             all_issues.extend(res.get("temporal_issues", []))
             all_halluc.extend(res.get("hallucinations_detected", []))
             print(f"   🛠️ Micro-argomento [{t['id']} - {t['type']}] CORRETTO CHIRURGICAMENTE: {res.get('explanation')[:80]}...")
@@ -835,7 +916,7 @@ def run_micro_topic_consensus_fact_check(
             "explanation": "Tutti i micro-argomenti sostanziali sono stati respinti dal consenso.",
         }
 
-    final_text = reassemble_micro_topics(micro_topics)
+    final_text = reassemble_micro_topics(micro_topics, session_name=session_name)
     overall_decision = "AUTO_CORRECT" if corrected_count > 0 or rejected_count > 0 else "APPROVE"
 
     return {
