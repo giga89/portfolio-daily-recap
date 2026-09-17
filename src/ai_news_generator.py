@@ -79,7 +79,7 @@ def _get_all_portfolio_tags():
     return [t for t in PORTFOLIO_TICKERS.keys() if t not in _EXCLUDED_FROM_TAGS]
 
 
-def _get_ticker_engagement_scores() -> Dict[str, float]:
+def _get_ticker_engagement_scores() -> dict[str, float]:
     """
     Computes community engagement scores (likes + comments) for each portfolio ticker
     based on historical eToro post metrics from data/post_analytics.json.
