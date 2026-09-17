@@ -56,10 +56,10 @@ GROQ_MODELS = [
     "openai/gpt-oss-120b",
 ]
 
-# Tested, verified working models on Mistral API (Free/Dev tier grants 188 RPM on Ministral 8B, 125 RPM on Codestral)
+# Tested, verified working models on Mistral API (Free/Dev tier grants 125 RPM on Codestral, 188 RPM on Ministral 8B)
 MISTRAL_MODELS = [
-    "ministral-8b-latest",
     "codestral-latest",
+    "ministral-8b-latest",
     "ministral-3b-latest",
 ]
 
@@ -338,27 +338,159 @@ def run_independent_fact_check(
     text: str,
     session_name: Optional[str] = None,
     portfolio_metadata_summary: str = "",
+    require_consensus: bool = True,
 ) -> Optional[Dict[str, Any]]:
     """
-    Orchestrates the independent fact-checking pipeline across external models.
-    Tries Groq -> Mistral -> None (allowing caller to fallback to Gemini).
+    Orchestrates the independent fact-checking pipeline across external models
+    using a Dual-Auditor Consensus mechanism (Groq + Mistral).
+
+    Consensus Rules:
+    1. Both Groq and Mistral audit the post independently.
+    2. VETO RULE: If either auditor flags a critical violation or REJECTs,
+       the original text is NEVER published as-is.
+    3. CROSS-VERIFICATION OF CORRECTIONS: If an auditor proposes an AUTO_CORRECT,
+       the proposed text is cross-checked by the OTHER auditor.
+       The corrected text is ONLY published if the other auditor approves it!
+    4. UNANIMOUS APPROVAL: Both auditors must agree on the final published text.
+    5. Fallback: If only one provider is configured/available, it acts as single auditor.
     """
-    # 1. Primary: Groq (fastest, high reasoning)
+    # 1. Query Groq
     groq_audit = audit_with_groq(
         text=text,
         session_name=session_name,
         portfolio_metadata_summary=portfolio_metadata_summary,
     )
-    if groq_audit:
-        return groq_audit
 
-    # 2. Secondary: Mistral
+    # 2. Query Mistral
     mistral_audit = audit_with_mistral(
         text=text,
         session_name=session_name,
         portfolio_metadata_summary=portfolio_metadata_summary,
     )
-    if mistral_audit:
+
+    # If neither is available, return None for fallback
+    if not groq_audit and not mistral_audit:
+        return None
+
+    # Single-auditor fallback if only one is operational
+    if groq_audit and not mistral_audit:
+        print("   ℹ️ Multi-AI consensus note: Mistral non disponibile, audit affidato al solo Groq.")
+        return groq_audit
+
+    if mistral_audit and not groq_audit:
+        print("   ℹ️ Multi-AI consensus note: Groq non disponibile, audit affidato alla sola Mistral.")
         return mistral_audit
 
-    return None
+    # ── DUAL-AI CONSENSUS LOGIC (Both Groq and Mistral active) ──────────────────
+    g_dec = groq_audit.get("decision", "REJECT")
+    m_dec = mistral_audit.get("decision", "REJECT")
+    print(f"   🔍 Consensus Audit: Groq -> {g_dec} | Mistral -> {m_dec}")
+
+    # Case A: Both Unanimously APPROVE
+    if g_dec == "APPROVE" and m_dec == "APPROVE":
+        print("   🤝 Dual-AI Consensus: Both Groq and Mistral APPROVED the post unanimously!")
+        return {
+            "decision": "APPROVE",
+            "score": min(groq_audit.get("score", 90), mistral_audit.get("score", 90)),
+            "verified_text": text,
+            "temporal_issues": [],
+            "hallucinations_detected": [],
+            "auditor": f"consensus:dual ({groq_audit.get('auditor')} + {mistral_audit.get('auditor')})",
+            "explanation": f"Approvato all'unanimità da Groq ({groq_audit.get('auditor')}) e Mistral ({mistral_audit.get('auditor')}).",
+            "consensus_details": {
+                "groq": groq_audit,
+                "mistral": mistral_audit,
+            },
+        }
+
+    # Case B: Cross-Verification of Auto-Corrections
+    def _is_audit_clean(audit_res: Optional[Dict[str, Any]]) -> bool:
+        """Returns True if the audit considers the text clean of hallucinations and temporal paradoxes."""
+        if not audit_res:
+            return False
+        dec = audit_res.get("decision")
+        if dec == "APPROVE":
+            return True
+        if dec == "AUTO_CORRECT":
+            # If no hallucinations or temporal errors remain, the text is factually sound
+            t_issues = audit_res.get("temporal_issues", [])
+            h_issues = audit_res.get("hallucinations_detected", [])
+            return len(t_issues) == 0 and len(h_issues) == 0
+        return False
+
+    # If Groq proposed an auto-correction, verify it with Mistral
+    if g_dec == "AUTO_CORRECT" and groq_audit.get("verified_text"):
+        g_cand = groq_audit["verified_text"]
+        print("   🔄 Cross-verifying Groq auto-correction with Mistral...")
+        cross_m = audit_with_mistral(
+            text=g_cand,
+            session_name=session_name,
+            portfolio_metadata_summary=portfolio_metadata_summary,
+        )
+        if _is_audit_clean(cross_m):
+            print("   🤝 Dual-AI Consensus: Groq auto-correction cross-verified and APPROVED by Mistral!")
+            return {
+                "decision": "AUTO_CORRECT",
+                "score": min(groq_audit.get("score", 85), cross_m.get("score", 85) if cross_m else 85),
+                "verified_text": g_cand,
+                "temporal_issues": groq_audit.get("temporal_issues", []),
+                "hallucinations_detected": groq_audit.get("hallucinations_detected", []),
+                "auditor": f"consensus:cross_verified ({groq_audit.get('auditor')} -> {cross_m.get('auditor') if cross_m else 'mistral'})",
+                "explanation": f"Testo corretto da Groq e confermato valido da Mistral. {groq_audit.get('explanation')}",
+                "consensus_details": {
+                    "proposer": groq_audit,
+                    "verifier": cross_m,
+                },
+            }
+
+    # If Mistral proposed an auto-correction, verify it with Groq
+    if m_dec == "AUTO_CORRECT" and mistral_audit.get("verified_text"):
+        m_cand = mistral_audit["verified_text"]
+        print("   🔄 Cross-verifying Mistral auto-correction with Groq...")
+        cross_g = audit_with_groq(
+            text=m_cand,
+            session_name=session_name,
+            portfolio_metadata_summary=portfolio_metadata_summary,
+        )
+        if _is_audit_clean(cross_g):
+            print("   🤝 Dual-AI Consensus: Mistral auto-correction cross-verified and APPROVED by Groq!")
+            return {
+                "decision": "AUTO_CORRECT",
+                "score": min(mistral_audit.get("score", 85), cross_g.get("score", 85) if cross_g else 85),
+                "verified_text": m_cand,
+                "temporal_issues": mistral_audit.get("temporal_issues", []),
+                "hallucinations_detected": mistral_audit.get("hallucinations_detected", []),
+                "auditor": f"consensus:cross_verified ({mistral_audit.get('auditor')} -> {cross_g.get('auditor') if cross_g else 'groq'})",
+                "explanation": f"Testo corretto da Mistral e confermato valido da Groq. {mistral_audit.get('explanation')}",
+                "consensus_details": {
+                    "proposer": mistral_audit,
+                    "verifier": cross_g,
+                },
+            }
+
+    # Case C: Safety Veto - No consensus reached or either rejected with no cross-approved fix
+    print(f"   🛑 Dual-AI Consensus: VETO applied (Groq: {g_dec}, Mistral: {m_dec}). Post blocked for safety.")
+    all_issues = []
+    all_issues.extend(groq_audit.get("temporal_issues", []))
+    all_issues.extend(mistral_audit.get("temporal_issues", []))
+    all_halluc = []
+    all_halluc.extend(groq_audit.get("hallucinations_detected", []))
+    all_halluc.extend(mistral_audit.get("hallucinations_detected", []))
+
+    return {
+        "decision": "REJECT",
+        "score": min(groq_audit.get("score", 0), mistral_audit.get("score", 0)),
+        "verified_text": None,
+        "temporal_issues": all_issues,
+        "hallucinations_detected": all_halluc,
+        "auditor": f"consensus:veto ({groq_audit.get('auditor')} + {mistral_audit.get('auditor')})",
+        "explanation": (
+            f"Veto di sicurezza per mancato accordo o allucinazioni non risolte: "
+            f"Groq ({g_dec}): {groq_audit.get('explanation', 'N/A')} | "
+            f"Mistral ({m_dec}): {mistral_audit.get('explanation', 'N/A')}"
+        ),
+        "consensus_details": {
+            "groq": groq_audit,
+            "mistral": mistral_audit,
+        },
+    }
