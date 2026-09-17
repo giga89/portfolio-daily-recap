@@ -180,6 +180,11 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
    - Nessun markdown bold (** o __).
    - Massimo 4 cashtag con prefisso $ (es. $NVDA, $SPX500). Non aggiungere cashtag a titoli citati come testo semplice.
 
+5. PRESERVAZIONE DELLA RICCHEZZA DEL CONTENUTO (NON RIASSUMERE):
+   - È SEVERAMENTE VIETATO tagliare o riassumere il post in poche righe generiche!
+   - Devi preservare integralmente tutta la struttura, i dettagli di mercato, le analisi dei singoli titoli, i paragrafi e la ricchezza del post originale.
+   - Intervieni in modo chirurgico SOLO sui passaggi che contengono errori temporali o allucinazioni, riscrivendoli al passato o correggendo l'inesattezza, senza impoverire o accorciare il post.
+
 =========================================
 OUTPUT RICHIESTO:
 =========================================
