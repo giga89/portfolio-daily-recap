@@ -56,8 +56,11 @@ GROQ_MODELS = [
     "openai/gpt-oss-120b",
 ]
 
+# Tested, verified working models on Mistral API (Free/Dev tier grants 188 RPM on Ministral 8B, 125 RPM on Codestral)
 MISTRAL_MODELS = [
-    "mistral-small-latest",
+    "ministral-8b-latest",
+    "codestral-latest",
+    "ministral-3b-latest",
 ]
 
 # Circuit breaker: avoids wasting time with HTTP calls if Mistral account has 0 RPM quota

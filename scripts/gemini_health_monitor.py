@@ -57,7 +57,8 @@ ACTIVE_GROQ_MODELS = [
 ]
 
 ACTIVE_MISTRAL_MODELS = [
-    ("mistral-small-latest", "Mistral Small - Secondary Auditor"),
+    ("ministral-8b-latest", "Ministral 8B - Secondary Auditor (188 RPM Free Tier)"),
+    ("codestral-latest", "Codestral - Reasoning & Logic (125 RPM Free Tier)"),
 ]
 
 

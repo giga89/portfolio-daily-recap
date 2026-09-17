@@ -115,6 +115,28 @@ class TestTemporalAndIndependentFactCheck(unittest.TestCase):
             audit = audit_with_mistral("Test text", session_name="US_CLOSE", api_key="test_key")
             self.assertIsNone(audit, "Mistral 429 should return None for graceful fallback")
 
+    def test_independent_fact_checker_mistral_live_or_mock(self):
+        """Mistral ministral-8b-latest live or mock audit."""
+        mistral_key = os.environ.get("MISTRAL_API_KEY")
+        if mistral_key:
+            audit = audit_with_mistral("Chiusura USA positiva per $NVDA.", session_name="US_CLOSE")
+            if audit:
+                self.assertIn("mistral:", audit.get("auditor", ""))
+                self.assertIn(audit.get("decision"), ["APPROVE", "AUTO_CORRECT", "REJECT"])
+        else:
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "choices": [{
+                    "message": {
+                        "content": '{"decision": "APPROVE", "score": 95, "verified_text": "Chiusura OK", "explanation": "OK"}'
+                    }
+                }]
+            }
+            with patch("requests.post", return_value=mock_response):
+                audit = audit_with_mistral("Chiusura USA", session_name="US_CLOSE", api_key="dummy_key")
+                self.assertEqual(audit["decision"], "APPROVE")
+
     def test_full_pipeline_autocorrects_temporal_error(self):
         """verify_and_clean_post with Groq enabled auto-corrects the user's reported error."""
         hallucinated_post = (
