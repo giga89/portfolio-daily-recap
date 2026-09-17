@@ -578,7 +578,7 @@ def verify_and_clean_post(
     if run_ai_review:
         # Step 2A: Try Independent Multi-AI Fact-Checker (Groq / Mistral)
         try:
-            from independent_fact_checker import run_independent_fact_check
+            from independent_fact_checker import run_independent_fact_check, run_micro_topic_consensus_fact_check
             # Build metadata summary for context
             tickers = extract_cashtags(cleaned_text)
             if primary_ticker and primary_ticker.upper() not in tickers:
@@ -594,11 +594,18 @@ def verify_and_clean_post(
                     )
             meta_str = "\n".join(meta_summary)
 
-            ext_audit = run_independent_fact_check(
-                text=cleaned_text,
-                session_name=session_name,
-                portfolio_metadata_summary=meta_str,
-            )
+            if len(cleaned_text) > 300 and ("\n" in cleaned_text or "•" in cleaned_text):
+                ext_audit = run_micro_topic_consensus_fact_check(
+                    text=cleaned_text,
+                    session_name=session_name,
+                    portfolio_metadata_summary=meta_str,
+                )
+            else:
+                ext_audit = run_independent_fact_check(
+                    text=cleaned_text,
+                    session_name=session_name,
+                    portfolio_metadata_summary=meta_str,
+                )
             if ext_audit and "decision" in ext_audit:
                 audit_data = ext_audit
         except Exception as ext_err:

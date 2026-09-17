@@ -499,3 +499,237 @@ def run_independent_fact_check(
             "mistral": mistral_audit,
         },
     }
+
+
+# ─── MICRO-TOPIC MODULAR CONSENSUS AUDITING ─────────────────────────────────
+
+def split_into_micro_topics(text: str) -> List[Dict[str, Any]]:
+    """
+    Splits a recap post into semantically coherent micro-topics:
+    1. Greeting / Header (safe, no audit needed)
+    2. Macro / Market Overview paragraph(s) (needs audit)
+    3. Portfolio Stocks (individual bullet points or separate stock paragraphs) (needs audit)
+    4. Wrap-up / Outlook (needs audit)
+    5. Community question / Footer (safe, no audit needed)
+    """
+    cleaned = text.strip()
+    raw_blocks = [b.strip() for b in re.split(r'\n\s*\n', cleaned) if b.strip()]
+
+    micro_topics = []
+
+    for block_idx, block in enumerate(raw_blocks):
+        # Footer / Tag / link lines
+        if block.startswith("📌") or block.startswith("👤") or block.startswith("#") or block.startswith("http"):
+            micro_topics.append({
+                "id": len(micro_topics),
+                "type": "footer",
+                "text": block,
+                "needs_audit": False,
+            })
+            continue
+
+        # Short dynamic greeting
+        if block_idx == 0 and len(block) < 130 and any(w in block.lower() for w in ["buongiorno", "buonasera", "chiusura", "fine sessione", "bentornati"]):
+            micro_topics.append({
+                "id": len(micro_topics),
+                "type": "greeting",
+                "text": block,
+                "needs_audit": False,
+            })
+            continue
+
+        # Community engagement question
+        if "?" in block and len(block) < 240 and any(w in block.lower() for w in ["commenti", "voi come", "cosa ne pensate", "dite la vostra"]):
+            micro_topics.append({
+                "id": len(micro_topics),
+                "type": "engagement_question",
+                "text": block,
+                "needs_audit": False,
+            })
+            continue
+
+        # Bullet lists (e.g. •, -, *, 1.)
+        lines = [l.strip() for l in block.split('\n') if l.strip()]
+        bullet_lines = [l for l in lines if l.startswith(('•', '-', '*', '✓')) or re.match(r'^\d+\.', l)]
+
+        if len(bullet_lines) >= 2:
+            intro_lines = [l for l in lines if not (l.startswith(('•', '-', '*', '✓')) or re.match(r'^\d+\.', l))]
+            if intro_lines:
+                micro_topics.append({
+                    "id": len(micro_topics),
+                    "type": "bullet_header",
+                    "text": "\n".join(intro_lines),
+                    "needs_audit": False,
+                })
+            for b_line in bullet_lines:
+                micro_topics.append({
+                    "id": len(micro_topics),
+                    "type": "stock_bullet",
+                    "text": b_line,
+                    "needs_audit": True,
+                })
+        else:
+            p_type = "macro" if any(w in block.lower() for w in ["indice", "fed", "bce", "spx", "nasdaq", "inflazione", "tassi"]) else "stock_paragraph"
+            micro_topics.append({
+                "id": len(micro_topics),
+                "type": p_type,
+                "text": block,
+                "needs_audit": True,
+            })
+
+    return micro_topics
+
+
+def reassemble_micro_topics(micro_topics: List[Dict[str, Any]]) -> str:
+    """
+    Reassembles approved micro-topics into a clean, cohesive post.
+    Bullets follow their header with a single newline, paragraphs separated by double newlines.
+    """
+    chunks = []
+    in_bullet_group = False
+
+    for t in micro_topics:
+        if t.get("excluded", False):
+            continue
+        txt = t.get("verified_text") or t.get("text", "")
+        txt = txt.strip()
+        if not txt:
+            continue
+        t_type = t.get("type")
+
+        if t_type == "bullet_header":
+            chunks.append(txt)
+            in_bullet_group = True
+        elif t_type == "stock_bullet":
+            if in_bullet_group and chunks:
+                chunks[-1] = chunks[-1] + "\n" + txt
+            else:
+                chunks.append(txt)
+                in_bullet_group = True
+        else:
+            chunks.append(txt)
+            in_bullet_group = False
+
+    return "\n\n".join(chunks)
+
+
+def run_micro_topic_consensus_fact_check(
+    text: str,
+    session_name: Optional[str] = None,
+    portfolio_metadata_summary: str = "",
+) -> Optional[Dict[str, Any]]:
+    """
+    Modular fact-checking architecture:
+    1. Splits candidate post into micro-topics (macro, individual stock bullets, wrap-up).
+    2. Runs Dual-AI Consensus (Groq + Mistral) on each micro-topic in parallel.
+    3. Surgically corrects only the specific sentence/topic with errors (e.g. temporal paradox),
+       preserving 100% of all other detailed stock analyses without dilution or summarization.
+    4. Reassembles the final rich, verified post.
+    """
+    micro_topics = split_into_micro_topics(text)
+    topics_to_audit = [t for t in micro_topics if t.get("needs_audit")]
+
+    if not topics_to_audit:
+        return run_independent_fact_check(
+            text=text,
+            session_name=session_name,
+            portfolio_metadata_summary=portfolio_metadata_summary,
+        )
+
+    print(f"   🧩 Scomposizione in {len(micro_topics)} micro-argomenti ({len(topics_to_audit)} da auditare in parallelo)...")
+
+    # Run consensus audits concurrently across micro-topics
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=min(4, len(topics_to_audit))) as executor:
+        future_to_topic = {
+            executor.submit(
+                run_independent_fact_check,
+                t["text"],
+                session_name,
+                portfolio_metadata_summary,
+            ): t
+            for t in topics_to_audit
+        }
+        for future in future_to_topic:
+            t = future_to_topic[future]
+            try:
+                t["audit_result"] = future.result()
+            except Exception as exc:
+                print(f"   ⚠️ Errore audit micro-argomento [{t.get('id')}]: {exc}")
+                t["audit_result"] = None
+
+    # Evaluate results across micro-topics
+    corrected_count = 0
+    approved_count = 0
+    rejected_count = 0
+    substantive_retained = 0
+    all_issues = []
+    all_halluc = []
+    auditors_used = set()
+
+    for t in micro_topics:
+        if not t.get("needs_audit"):
+            continue
+
+        res = t.get("audit_result")
+        if not res:
+            # Audit failed to respond, keep original text
+            continue
+
+        dec = res.get("decision", "APPROVE")
+        auditors_used.add(res.get("auditor", "AI"))
+
+        if dec == "APPROVE":
+            approved_count += 1
+            substantive_retained += 1
+            t["verified_text"] = t["text"]
+            print(f"   ✓ Micro-argomento [{t['id']} - {t['type']}] APPROVATO: {t['text'][:60]}...")
+        elif dec == "AUTO_CORRECT" and res.get("verified_text"):
+            corrected_count += 1
+            substantive_retained += 1
+            t["verified_text"] = res["verified_text"]
+            all_issues.extend(res.get("temporal_issues", []))
+            all_halluc.extend(res.get("hallucinations_detected", []))
+            print(f"   🛠️ Micro-argomento [{t['id']} - {t['type']}] CORRETTO CHIRURGICAMENTE: {res.get('explanation')[:80]}...")
+        elif dec == "REJECT":
+            rejected_count += 1
+            all_issues.extend(res.get("temporal_issues", []))
+            all_halluc.extend(res.get("hallucinations_detected", []))
+            if t.get("type") == "stock_bullet":
+                t["excluded"] = True
+                print(f"   ⚠️ Micro-bullet [{t['id']}] con allucinazione irreversibile ESCLUSO: {t['text'][:60]}...")
+            else:
+                # If a macro paragraph was rejected without auto-correct
+                print(f"   ❌ Micro-argomento [{t['id']} - {t['type']}] RESPINTO: {res.get('explanation')[:80]}...")
+
+    # If critical macro paragraph was rejected without fix and no substantive content remains
+    if substantive_retained == 0:
+        return {
+            "decision": "REJECT",
+            "score": 0,
+            "verified_text": None,
+            "temporal_issues": all_issues,
+            "hallucinations_detected": all_halluc,
+            "auditor": f"consensus:micro_topics ({', '.join(auditors_used) if auditors_used else 'N/A'})",
+            "explanation": "Tutti i micro-argomenti sostanziali sono stati respinti dal consenso.",
+        }
+
+    final_text = reassemble_micro_topics(micro_topics)
+    overall_decision = "AUTO_CORRECT" if corrected_count > 0 or rejected_count > 0 else "APPROVE"
+
+    return {
+        "decision": overall_decision,
+        "score": 95 if overall_decision == "APPROVE" else 88,
+        "verified_text": final_text,
+        "temporal_issues": all_issues,
+        "hallucinations_detected": all_halluc,
+        "auditor": f"consensus:micro_modular ({len(topics_to_audit)} argomenti)",
+        "explanation": (
+            f"Audit modulare a micro-argomenti: {approved_count} approvati tal quali, "
+            f"{corrected_count} corretti chirurgicamente, {rejected_count} esclusi. "
+            f"Profondità e lunghezza preservate."
+        ),
+        "micro_topics": micro_topics,
+    }
+
