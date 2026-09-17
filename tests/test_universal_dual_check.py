@@ -39,11 +39,11 @@ class TestUniversalDualCheck(unittest.TestCase):
 
     def test_model_cascade_priority(self):
         """Verify model cascade priority order."""
-        self.assertEqual(DEFAULT_GEMINI_MODELS[0], 'gemini-3.1-pro-preview')
-        self.assertEqual(DEFAULT_GEMINI_MODELS[1], 'gemini-3.8-flash')
-        self.assertIn('gemini-3.7-flash', DEFAULT_GEMINI_MODELS)
+        self.assertEqual(DEFAULT_GEMINI_MODELS[0], 'gemini-3.8-flash')
+        self.assertEqual(DEFAULT_GEMINI_MODELS[1], 'gemini-3.7-flash')
+        self.assertIn('gemini-3.6-flash', DEFAULT_GEMINI_MODELS)
         self.assertIn('gemini-2.5-flash', DEFAULT_GEMINI_MODELS)
-        self.assertEqual(REVIEWER_GEMINI_MODELS[0], 'gemini-3.1-pro-preview')
+        self.assertEqual(REVIEWER_GEMINI_MODELS[0], 'gemini-3.8-flash')
 
     def test_purged_asset_xeon_blocked(self):
         """Purged asset XEON.DE must be blocked deterministically."""

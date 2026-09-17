@@ -36,9 +36,8 @@ except ImportError:
     except ImportError:
         API_TRACKER_AVAILABLE = False
 
-# Prioritized cascade: Smartest -> Standard fallback
+# Prioritized cascade: Smartest -> Standard fallback (Free tier compatible: 5-10 RPM / 20 RPD each)
 DEFAULT_GEMINI_MODELS: List[str] = [
-    'gemini-3.1-pro-preview',  # Flagship Deep Reasoning (Best quality & analytical depth)
     'gemini-3.8-flash',        # Newest Flash flagship (Fast & state-of-the-art)
     'gemini-3.7-flash',        # High-intelligence 3.x series
     'gemini-3.6-flash',        # Advanced reasoning & agentic workflow
@@ -48,7 +47,6 @@ DEFAULT_GEMINI_MODELS: List[str] = [
 
 # Models for the adversarial reviewer / double-check judge (ensures dual-model diversity)
 REVIEWER_GEMINI_MODELS: List[str] = [
-    'gemini-3.1-pro-preview',
     'gemini-3.8-flash',
     'gemini-3.7-flash',
     'gemini-3.6-flash',

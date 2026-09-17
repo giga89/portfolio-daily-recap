@@ -52,7 +52,6 @@ except ImportError:
         from src.ai_model_cascade import DEFAULT_GEMINI_MODELS
     except ImportError:
         DEFAULT_GEMINI_MODELS = [
-            'gemini-3.1-pro-preview', # Flagship Deep Reasoning model (Best quality)
             'gemini-3.8-flash',       # Newest Flagship Flash model
             'gemini-3.7-flash',       # Most intelligent & capable
             'gemini-3.6-flash',       # High capability 3.x series

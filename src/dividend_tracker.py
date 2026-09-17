@@ -64,7 +64,6 @@ except ImportError:
         from src.ai_model_cascade import DEFAULT_GEMINI_MODELS
     except ImportError:
         DEFAULT_GEMINI_MODELS = [
-            'gemini-3.1-pro-preview',
             'gemini-3.8-flash',
             'gemini-3.7-flash',
             'gemini-3.6-flash',
