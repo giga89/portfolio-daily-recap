@@ -329,14 +329,16 @@ def _get_top_gainers_with_news(stock_data: dict = None, count: int = 4, max_chec
             try:
                 search_term = TICKER_NAME_MAP.get(clean_sym, comp_name)
                 query = f"{search_term} stock news earnings catalyst"
-                results = search_tavily(query=query, topic="news", days=5, max_results=2)
+                results = search_tavily(query=query, topic="news", days=2, max_results=3)
                 if results:
                     best_r = results[0]
                     content = best_r.get("content", "").strip().replace("\n", " ")
                     title = best_r.get("title", "")
+                    pub_date = best_r.get("published_date", "")[:10]  # YYYY-MM-DD
                     if len(content) > 30:
                         has_news = True
-                        news_snippet = f"Notizia reale: {title}. Sintesi: {content[:250]}"
+                        date_tag = f" [Fonte: {pub_date}]" if pub_date else ""
+                        news_snippet = f"Notizia reale{date_tag}: {title}. Sintesi: {content[:250]}"
             except Exception as e:
                 print(f"   ⚠️ Tavily check error for {sym}: {e}")
         
@@ -1562,6 +1564,11 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
 
             🌆 MICRO-TEMA 1: Riepilogo rapido di cose successe che hanno mosso l'indice oggi
                Sintesi a bocce ferme di cosa ha guidato S&P 500 e Nasdaq oggi (reazione ai dati macro, rendimenti, flussi settoriali).
+
+            REGOLA CRITICA SULLA FRESCHEZZA DELLE NOTIZIE:
+            - Per ogni titolo, la notizia citata DEVE essere della giornata odierna o al massimo di ieri. Se la fonte è più vecchia di 2 giorni, NON citarla come catalizzatore di oggi.
+            - Se il news_snippet include una data [Fonte: YYYY-MM-DD], usala per verificare che sia recente. Se non è recente, spiega il movimento con dati di mercato (volumi, settore, flussi) anziché con notizie stale.
+            - MAI presentare una notizia di 3-5 giorni fa come se fosse il catalizzatore della sessione odierna.
 
             {emoji_g1} MICRO-TEMA 2: ${g1['ticker']} ({g1['daily_change']:+.2f}%)
                Titolo del portafoglio con la più grande variazione positiva di oggi. Spiega la notizia reale e il catalizzatore che lo ha portato a muoversi così: {g1['news_snippet']}.
