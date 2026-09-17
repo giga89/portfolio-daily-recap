@@ -128,6 +128,26 @@ GLOBAL_FORBIDDEN_HALLUCINATIONS = [
     (r'\bwindows\s+europe\s+quity\s+income\b', "Windows Europe Quity Income (allucinazione evidente)"),
 ]
 
+# Patterns that indicate severe temporal paradoxes or outdated institutional figures in recap posts
+TEMPORAL_CLOSE_FORBIDDEN_PATTERNS = [
+    (
+        r'\b(?:oggi|stasera|in\s+serata|nella\s+seduta\s+odierna)\b.{0,60}\b(?:prenderà\s+una\s+decisione|deciderà|annuncerà|stabilirà)\b',
+        "Paradosso temporale in chiusura mercati: l'evento di oggi è descritto al futuro ('prenderà/deciderà oggi') a sessione già conclusa"
+    ),
+    (
+        r'\b(?:in\s+attesa\s+della\s+decisione|attende\s+la\s+decisione)\s+(?:di\s+oggi|odierna|di\s+stasera)\b',
+        "Paradosso temporale in chiusura mercati: esprime attesa per una decisione odierna a sessione conclusa"
+    ),
+    (
+        r'\b(?:la\s+fed|la\s+bce)\s+(?:deciderà|taglierà|alzerà)\s+(?:oggi|stasera)\b',
+        "Paradosso temporale: decisione della banca centrale descritta al futuro a sessione conclusa"
+    ),
+    (
+        r'\b(?:powell|jerome\s+powell)\b.{0,50}\b(?:oggi|stasera|prenderà|deciderà|taglierà)\b',
+        "Anacronismo / Allucinazione istituzionale: Jerome Powell citato come attore di decisioni odierne/future"
+    ),
+]
+
 
 def clean_etoro_formatting(text: str) -> str:
     """
@@ -236,9 +256,13 @@ def limit_cashtags(text: str, max_tags: int = 4) -> str:
     return cleaned.strip()
 
 
-def verify_post_deterministic(text: str, primary_ticker: Optional[str] = None) -> Tuple[bool, List[str], str]:
+def verify_post_deterministic(
+    text: str,
+    primary_ticker: Optional[str] = None,
+    session_name: Optional[str] = None,
+) -> Tuple[bool, List[str], str]:
     """
-    Fast, rule-based verification against PORTFOLIO_ASSETS_METADATA.
+    Fast, rule-based verification against PORTFOLIO_ASSETS_METADATA and temporal rules.
     
     Returns:
         tuple: (is_clean, issues_list, cleaned_text)
@@ -272,6 +296,21 @@ def verify_post_deterministic(text: str, primary_ticker: Optional[str] = None) -
     for pattern, reason in GLOBAL_FORBIDDEN_HALLUCINATIONS:
         if re.search(pattern, text, flags=re.IGNORECASE) or re.search(pattern, cleaned_text, flags=re.IGNORECASE):
             issues.append(f"CRITICAL: {reason}.")
+
+    # 0b. Temporal paradox and institutional figures check for close/evening sessions
+    session_upper = (session_name or "").upper()
+    is_close_session = (
+        any(k in session_upper for k in ["CLOSE", "SERALE", "CHIUSURA", "FINE GIORNATA"]) or
+        (not session_name and bool(re.search(r'\b(?:chiusura\s+usa|buonasera|fine\s+sessione)\b', text_lower)))
+    )
+    if is_close_session:
+        for pattern, reason in TEMPORAL_CLOSE_FORBIDDEN_PATTERNS:
+            if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
+                issues.append(f"CRITICAL: {reason}.")
+    else:
+        # For any session, Powell cited as current decider is strictly forbidden
+        if re.search(r'\b(?:powell|jerome\s+powell)\b.{0,50}\b(?:oggi|stasera|prenderà|deciderà|taglierà)\b', cleaned_text, flags=re.IGNORECASE):
+            issues.append("CRITICAL: Anacronismo / Allucinazione istituzionale: Jerome Powell citato come decisore odierno/futuro.")
 
     # Check for purged assets that must never appear in active communications
     for tag in tickers_to_check:
@@ -411,9 +450,24 @@ def audit_post_with_ai_reviewer(
                 reviewer_model = m
                 break
 
+    try:
+        from independent_fact_checker import get_current_temporal_context
+        temporal_ctx = get_current_temporal_context(session_name)
+        temporal_section = f"""
+=========================
+INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
+=========================
+• Data Odierna: {temporal_ctx.get('formatted_date')} (Anno: {temporal_ctx.get('year')})
+• Ora Locale Italiana: {temporal_ctx.get('rome_time')}
+• Ora Wall Street: {temporal_ctx.get('ny_time')}
+• Stato Sessione: {temporal_ctx.get('market_state')}
+"""
+    except Exception:
+        temporal_section = ""
+
     audit_prompt = f"""Sei il Lead Financial Fact-Checker & Compliance Auditor per un portfolio pubblico su eToro.
 Il tuo compito è analizzare con estremo rigore critico il seguente POST generato per i social/eToro e verificare che NON contenga alcuna allucinazione o inesattezza finanziaria rispetto alla SINGLE SOURCE OF TRUTH dei dati ufficiali.
-
+{temporal_section}
 =========================
 METADATI UFFICIALI DEGLI ASSET COINVOLTI (SINGLE SOURCE OF TRUTH):
 =========================
@@ -431,7 +485,8 @@ REGOLE DI VERIFICA TASSATIVE:
 2. VERIFICA IDENTITÀ & SETTORE: Il nome dell'azienda o dell'ETF e il settore devono corrispondere esattamente ai dati ufficiali. (Es: $WDEF.L è WisdomTree Europe Defence UCITS ETF, settore Difesa e Aerospazio europeo ad accumulazione, MAI Equity Income o 'Windows Europe'; $IQQL.DE è iShares Listed Private Equity UCITS ETF, settore Private Equity, NON MSCI World Quality).
 3. FORMATTAZIONE ETORO: Rimuovi qualsiasi markdown bold '**' o '__' perché eToro non lo supporta. I cashtag devono avere lo spazio prima e dopo (es. ' $NVDA ').
 4. REGOLA ASSOLUTA SUI CASHTAG ($TICKER): Nel post finale possono esserci al MASSIMO 4 cashtag in totale. Se un'azienda o ETF è citata nel testo SENZA il simbolo $, NON trasformarla in cashtag (NON aggiungere il prefisso $). NON aggiungere MAI nuovi cashtag che non erano già presenti con il prefisso $ nel testo da revisionare.
-5. DECISIONE:
+5. COERENZA TEMPORALE & ISTITUZIONALE: Se la sessione è serale o di chiusura mercati (US_CLOSE), la seduta odierna è CONCLUSA e tutti gli eventi odierni sono GIÀ AVVENUTI. È tassativamente vietato usare il futuro per eventi di oggi ('oggi deciderà', 'in attesa della decisione di oggi'). Correggi al passato ('ha deciso') oppure, se l'esito reale non è certo, rimuovi l'affermazione per non spacciare speculazioni per fatti. Bonifica eventuali cariche non attuali.
+6. DECISIONE:
    - Se il post è perfetto e veritiero -> decision: "APPROVE", verified_text: il testo originale pulito.
    - Se il post contiene inesattezze o allucinazioni ma è correggibile preservando struttura e stile -> decision: "AUTO_CORRECT", verified_text: il testo integralmente corretto e bonificato.
    - Se il post è totalmente fuorviante, incoerente o dannoso -> decision: "REJECT", verified_text: "".
@@ -495,7 +550,8 @@ def verify_and_clean_post(
 ) -> Tuple[bool, str, Dict[str, Any]]:
     """
     Complete pre-publication verification pipeline.
-    Combines Fast-Gate deterministic validation with Adversarial AI Review.
+    Combines Fast-Gate deterministic validation with Multi-AI Independent Fact-Checking
+    (Groq primary, Mistral secondary, Gemini fallback).
 
     Returns:
         tuple: (is_approved: bool, final_published_text: str, audit_summary: dict)
@@ -503,8 +559,12 @@ def verify_and_clean_post(
     print(f"\n🛡️ PRE-PUBLICATION VERIFICATION GATE:")
     print(f"   Primary Ticker: {primary_ticker or 'N/A'} | Session: {session_name or 'General'}")
 
-    # Stage 1: Deterministic check
-    is_clean, issues, cleaned_text = verify_post_deterministic(text, primary_ticker=primary_ticker)
+    # Stage 1: Deterministic check (structural, asset compliance, temporal rules)
+    is_clean, issues, cleaned_text = verify_post_deterministic(
+        text,
+        primary_ticker=primary_ticker,
+        session_name=session_name
+    )
 
     if issues:
         print(f"   ⚠️ Deterministic Fast-Gate issues detected:")
@@ -513,34 +573,68 @@ def verify_and_clean_post(
     else:
         print(f"   ✓ Deterministic Fast-Gate: PASSED (clean formatting & rules)")
 
-    # If critical issues found or AI review requested, run Stage 2
+    # Stage 2: AI Review Gate
     audit_data = {}
-    if run_ai_review and GENAI_AVAILABLE and os.environ.get("GEMINI_API_KEY"):
-        audit_data = audit_post_with_ai_reviewer(
-            text=cleaned_text,
-            primary_ticker=primary_ticker,
-            session_name=session_name,
-            generator_model=generator_model,
-        )
+    if run_ai_review:
+        # Step 2A: Try Independent Multi-AI Fact-Checker (Groq / Mistral)
+        try:
+            from independent_fact_checker import run_independent_fact_check
+            # Build metadata summary for context
+            tickers = extract_cashtags(cleaned_text)
+            if primary_ticker and primary_ticker.upper() not in tickers:
+                tickers.append(primary_ticker.upper())
+            meta_summary = []
+            for t in tickers:
+                if t in PORTFOLIO_ASSETS_METADATA:
+                    m = PORTFOLIO_ASSETS_METADATA[t]
+                    meta_summary.append(
+                        f"• ${t}: {m.get('name')} | Settore: {m.get('sector')} | "
+                        f"Paga Dividendi: {'SÌ' if m.get('is_dividend_paying') else 'NO (ACCUMULAZIONE)'} | "
+                        f"Politica: {m.get('dividend_policy')}"
+                    )
+            meta_str = "\n".join(meta_summary)
 
-        decision = audit_data.get("decision", "APPROVE")
-        verified_text = audit_data.get("verified_text", cleaned_text)
+            ext_audit = run_independent_fact_check(
+                text=cleaned_text,
+                session_name=session_name,
+                portfolio_metadata_summary=meta_str,
+            )
+            if ext_audit and "decision" in ext_audit:
+                audit_data = ext_audit
+        except Exception as ext_err:
+            print(f"   ℹ️ Independent fact-checker note: {ext_err}")
 
-        if decision == "REJECT":
-            print(f"   ❌ POST REJECTED BY AI REVIEWER: {audit_data.get('explanation')}")
-            return False, "", audit_data
+        # Step 2B: Fallback to Gemini reviewer if independent audit did not run
+        if not audit_data and GENAI_AVAILABLE and os.environ.get("GEMINI_API_KEY"):
+            audit_data = audit_post_with_ai_reviewer(
+                text=cleaned_text,
+                primary_ticker=primary_ticker,
+                session_name=session_name,
+                generator_model=generator_model,
+            )
 
-        if decision == "AUTO_CORRECT":
-            print(f"   🛠️ POST AUTO-CORRECTED BY AI REVIEWER:")
-            print(f"      Explanation: {audit_data.get('explanation')}")
-            for h in audit_data.get("hallucinations_detected", []):
-                print(f"      • Fixed hallucination: {h}")
-            final_text = limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4)
-            return True, final_text, audit_data
+        if audit_data:
+            decision = audit_data.get("decision", "APPROVE")
+            verified_text = audit_data.get("verified_text", cleaned_text)
+            auditor_name = audit_data.get("auditor", "AI Reviewer")
 
-        # APPROVE
-        print(f"   ✅ POST APPROVED BY AI REVIEWER.")
-        return True, limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4), audit_data
+            if decision == "REJECT":
+                print(f"   ❌ POST REJECTED BY AUDITOR ({auditor_name}): {audit_data.get('explanation')}")
+                return False, "", audit_data
+
+            if decision == "AUTO_CORRECT":
+                print(f"   🛠️ POST AUTO-CORRECTED BY AUDITOR ({auditor_name}):")
+                print(f"      Explanation: {audit_data.get('explanation')}")
+                for h in audit_data.get("hallucinations_detected", []):
+                    print(f"      • Fixed hallucination: {h}")
+                for t_err in audit_data.get("temporal_issues", []):
+                    print(f"      • Fixed temporal issue: {t_err}")
+                final_text = limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4)
+                return True, final_text, audit_data
+
+            # APPROVE
+            print(f"   ✅ POST APPROVED BY AUDITOR ({auditor_name}).")
+            return True, limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4), audit_data
 
     # If AI review not available or skipped, use deterministic outcome
     if not is_clean:

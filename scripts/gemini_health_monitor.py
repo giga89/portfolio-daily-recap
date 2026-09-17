@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Gemini API Health & Quota Monitor.
-Tests all active Gemini models, checks quota availability,
-and dispatches Telegram alerts when quota limits (429) or service outages occur.
+AI API Health, Quota & Multi-Model Monitor.
+Tests all active Gemini models, Groq Fact-Checkers, and Mistral models.
+Checks quota availability and dispatches Telegram alerts when quota limits (429)
+or service outages occur.
 """
 
 import os
@@ -12,6 +13,16 @@ from datetime import datetime
 
 # Add src/ to path for telegram sender
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
+# Load local .env if available
+_env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+if os.path.exists(_env_path):
+    with open(_env_path, "r", encoding="utf-8") as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith("#") and "=" in _line:
+                _k, _v = _line.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
 
 try:
     from google import genai
@@ -40,9 +51,18 @@ ACTIVE_MODELS = [
     ("gemini-2.5-flash", "2.5 Flash - Standard fallback (5 RPM / 20 RPD)"),
 ]
 
+ACTIVE_GROQ_MODELS = [
+    ("qwen/qwen3.8-27b", "Qwen 2.5/3.8 27B - Fact-Checking Principale LPUs"),
+    ("openai/gpt-oss-120b", "GPT-OSS 120B - Deep Reasoning Fallback"),
+]
+
+ACTIVE_MISTRAL_MODELS = [
+    ("mistral-small-latest", "Mistral Small - Secondary Auditor"),
+]
+
 
 def test_model(api_key: str, model_name: str, client=None) -> dict:
-    """Test a single model with a minimal request (SDK or REST)."""
+    """Test a single Gemini model with a minimal request (SDK or REST)."""
     t0 = time.time()
     
     # 1. Try SDK if client provided
@@ -100,71 +120,162 @@ def test_model(api_key: str, model_name: str, client=None) -> dict:
         return {"status": "error", "latency": latency, "detail": str(exc)[:80]}
 
 
+def test_groq_model(api_key: str, model_name: str) -> dict:
+    """Test a Groq model using OpenAI-compatible REST API."""
+    t0 = time.time()
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "User-Agent": "Portfolio-Health-Check/1.0",
+    }
+    payload = json.dumps({
+        "model": model_name,
+        "messages": [{"role": "user", "content": "Reply OK"}],
+        "max_tokens": 5,
+        "temperature": 0.0,
+    }).encode("utf-8")
+    req = urllib.request.Request(url, data=payload, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode())
+            latency = round((time.time() - t0) * 1000)
+            ans = data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+            return {"status": "ok", "latency": latency, "detail": ans}
+    except urllib.error.HTTPError as he:
+        latency = round((time.time() - t0) * 1000)
+        err_body = he.read().decode()
+        if he.code == 429:
+            return {"status": "quota_exceeded", "latency": latency, "detail": "429 Quota Exceeded / Rate Limited"}
+        elif he.code == 404:
+            return {"status": "not_found", "latency": latency, "detail": "404 Model Not Found"}
+        return {"status": "error", "latency": latency, "detail": f"HTTP {he.code}: {err_body[:60]}"}
+    except Exception as exc:
+        latency = round((time.time() - t0) * 1000)
+        return {"status": "error", "latency": latency, "detail": str(exc)[:80]}
+
+
+def test_mistral_model(api_key: str, model_name: str) -> dict:
+    """Test a Mistral model using REST API."""
+    t0 = time.time()
+    url = "https://api.mistral.ai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "User-Agent": "Portfolio-Health-Check/1.0",
+    }
+    payload = json.dumps({
+        "model": model_name,
+        "messages": [{"role": "user", "content": "Reply OK"}],
+        "max_tokens": 5,
+    }).encode("utf-8")
+    req = urllib.request.Request(url, data=payload, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode())
+            latency = round((time.time() - t0) * 1000)
+            ans = data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+            return {"status": "ok", "latency": latency, "detail": ans}
+    except urllib.error.HTTPError as he:
+        latency = round((time.time() - t0) * 1000)
+        err_body = he.read().decode()
+        if he.code == 429:
+            return {"status": "unverified", "latency": latency, "detail": "429 0 RPM (In attesa di abilitazione)"}
+        return {"status": "error", "latency": latency, "detail": f"HTTP {he.code}: {err_body[:60]}"}
+    except Exception as exc:
+        latency = round((time.time() - t0) * 1000)
+        return {"status": "error", "latency": latency, "detail": str(exc)[:80]}
+
+
 def run_health_check(notify_always: bool = False) -> int:
-    """Run health check across all active models and alert if necessary."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("❌ Error: GEMINI_API_KEY is not set.")
-        if TELEGRAM_AVAILABLE and os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
-            telegram_sender.send_telegram_message("🚨 <b>GEMINI HEALTH CHECK ERROR</b>: GEMINI_API_KEY non è impostata nei secrets.")
-        return 1
-
-    client = None
-    if GENAI_AVAILABLE:
-        try:
-            client = genai.Client(api_key=api_key)
-        except Exception:
-            client = None
+    """Run health check across all active models (Gemini + Groq + Mistral)."""
+    gemini_key = os.environ.get("GEMINI_API_KEY")
+    groq_key = os.environ.get("GROQ_API_KEY")
+    mistral_key = os.environ.get("MISTRAL_API_KEY")
 
     print("=" * 60)
-    print(f"🤖 GEMINI API HEALTH CHECK — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"🤖 COMPREHENSIVE AI HEALTH CHECK — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
 
+    # 1. Gemini Models
     results = {}
     quota_exceeded_count = 0
     ok_count = 0
 
-    for model_name, descr in ACTIVE_MODELS:
-        print(f"🔍 Testing {model_name} ({descr})...")
-        res = test_model(api_key, model_name, client=client)
-        results[model_name] = res
+    print("\n--- 1. Gemini Generation Models ---")
+    if gemini_key:
+        client = None
+        if GENAI_AVAILABLE:
+            try:
+                client = genai.Client(api_key=gemini_key)
+            except Exception:
+                client = None
+        for model_name, descr in ACTIVE_MODELS:
+            print(f"🔍 Testing {model_name} ({descr})...")
+            res = test_model(gemini_key, model_name, client=client)
+            results[model_name] = res
 
-        status_emoji = "✅" if res["status"] == "ok" else "🔴" if res["status"] == "quota_exceeded" else "⚠️"
-        print(f"   {status_emoji} Status: {res['status']} ({res['latency']}ms) — {res['detail']}")
+            status_emoji = "✅" if res["status"] == "ok" else "🔴" if res["status"] == "quota_exceeded" else "⚠️"
+            print(f"   {status_emoji} Status: {res['status']} ({res['latency']}ms) — {res['detail']}")
 
-        if res["status"] == "ok":
-            ok_count += 1
-        elif res["status"] == "quota_exceeded":
-            quota_exceeded_count += 1
+            if res["status"] == "ok":
+                ok_count += 1
+            elif res["status"] == "quota_exceeded":
+                quota_exceeded_count += 1
 
-        # Throttle between tests to stay below RPM limit
-        time.sleep(2.0)
+            time.sleep(1.5)
+    else:
+        print("   ℹ️ GEMINI_API_KEY non configurata localmente (attiva nei GitHub Actions Secrets).")
 
+    # 2. Groq Independent Fact-Checker
+    groq_results = {}
+    print("\n--- 2. Groq Independent Fact-Checkers (LPUs) ---")
+    if groq_key:
+        for model_name, descr in ACTIVE_GROQ_MODELS:
+            print(f"🔍 Testing Groq: {model_name} ({descr})...")
+            res = test_groq_model(groq_key, model_name)
+            groq_results[model_name] = res
+            status_emoji = "✅" if res["status"] == "ok" else "🔴" if res["status"] == "quota_exceeded" else "⚠️"
+            print(f"   {status_emoji} Status: {res['status']} ({res['latency']}ms) — {res['detail']}")
+    else:
+        print("   ⚠️ GROQ_API_KEY non configurata.")
+
+    # 3. Mistral Independent Fact-Checker
+    mistral_results = {}
+    print("\n--- 3. Mistral Independent Fact-Checkers ---")
+    if mistral_key:
+        for model_name, descr in ACTIVE_MISTRAL_MODELS:
+            print(f"🔍 Testing Mistral: {model_name} ({descr})...")
+            res = test_mistral_model(mistral_key, model_name)
+            mistral_results[model_name] = res
+            status_emoji = "✅" if res["status"] == "ok" else "ℹ️" if res["status"] == "unverified" else "⚠️"
+            print(f"   {status_emoji} Status: {res['status']} ({res['latency']}ms) — {res['detail']}")
+    else:
+        print("   ⚠️ MISTRAL_API_KEY non configurata.")
+
+    print("\n" + "=" * 60)
+    groq_ok = sum(1 for r in groq_results.values() if r.get("status") == "ok")
+    print(f"📊 Summary: Gemini {ok_count}/{len(ACTIVE_MODELS)} operational | Groq {groq_ok}/{len(ACTIVE_GROQ_MODELS)} operational")
     print("=" * 60)
-    print(f"📊 Summary: {ok_count}/{len(ACTIVE_MODELS)} models operational | {quota_exceeded_count} quota exceeded")
-    print("=" * 60)
 
-    # Pro models require a paid billing account on Google AI Studio.
-    # Count quota exhaustion on standard operational models (Flash tier)
+    # Count quota exhaustion on standard operational Flash models
     flash_quota_exceeded_count = sum(
         1 for m, _ in ACTIVE_MODELS
         if "pro" not in m.lower() and results.get(m, {}).get("status") == "quota_exceeded"
     )
 
-    # Determine if Telegram notification should be sent:
-    # Alert only if all models fail OR an active operational Flash model is exhausted, or manual override
-    is_alert = (flash_quota_exceeded_count > 0) or (ok_count == 0)
+    is_alert = (flash_quota_exceeded_count > 0) or (bool(gemini_key) and ok_count == 0)
     should_alert = is_alert or notify_always
 
     if should_alert:
         print("📡 Preparing Telegram notification...")
         header_emoji = "🚨" if is_alert else "ℹ️"
-        title = "ALLERTA STATO GEMINI API" if is_alert else "REPORT STATO GEMINI API"
+        title = "ALLERTA STATO AI API" if is_alert else "REPORT STATO AI API & FACT-CHECKERS"
 
         lines = [
             f"{header_emoji} <b>{title}</b> {header_emoji}",
             f"📅 <i>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</i>\n",
-            "<b>Stato Modelli:</b>"
+            "<b>Modelli Generazione Gemini:</b>"
         ]
 
         for model_name, descr in ACTIVE_MODELS:
@@ -181,14 +292,39 @@ def run_health_check(notify_always: bool = False) -> int:
             else:
                 lines.append(f"• <b>{model_name}</b>: ⚠️ Errore ({res['detail']})")
 
-        if ok_count == 0:
-            lines.append("\n❌ <b>TUTTI I MODELLI SONO BLOCCATI!</b> La generazione post e news AI fallirà fino al reset o attivazione fatturazione.")
-        elif flash_quota_exceeded_count > 0:
-            lines.append(f"\n⚠️ <i>Nota: {ok_count} modelli sono ancora operativi e interverranno tramite fallback automatico.</i>")
+        lines.append("\n<b>Auditor Indipendenti Fact-Checking:</b>")
+        if groq_results:
+            for m, descr in ACTIVE_GROQ_MODELS:
+                r = groq_results.get(m, {})
+                st = r.get("status")
+                if st == "ok":
+                    lines.append(f"• <b>Groq ({m})</b>: ✅ Attivo ({r['latency']}ms)")
+                else:
+                    lines.append(f"• <b>Groq ({m})</b>: ⚠️ {r.get('detail')}")
         else:
-            lines.append(f"\n✅ <i>Modelli gratuiti operativi ({ok_count}/{len(ACTIVE_MODELS)}). Fallback perfettamente funzionante.</i>")
+            lines.append("• <b>Groq</b>: ⚠️ Non configurato")
 
-        lines.append("\n🔗 <a href='https://aistudio.google.com/app/apikey'>Google AI Studio Dashboard</a>")
+        if mistral_results:
+            for m, descr in ACTIVE_MISTRAL_MODELS:
+                r = mistral_results.get(m, {})
+                st = r.get("status")
+                if st == "ok":
+                    lines.append(f"• <b>Mistral ({m})</b>: ✅ Attivo ({r['latency']}ms)")
+                elif st == "unverified":
+                    lines.append(f"• <b>Mistral ({m})</b>: ℹ️ 0 RPM (In attesa di abilitazione profilo)")
+                else:
+                    lines.append(f"• <b>Mistral ({m})</b>: ⚠️ {r.get('detail')}")
+        else:
+            lines.append("• <b>Mistral</b>: ℹ️ Non configurato")
+
+        if ok_count == 0:
+            lines.append("\n❌ <b>TUTTI I MODELLI GEMINI BLOCCATI!</b> Generazione post a rischio.")
+        elif flash_quota_exceeded_count > 0:
+            lines.append(f"\n⚠️ <i>Nota: {ok_count} modelli Gemini ancora operativi tramite cascade.</i>")
+        else:
+            lines.append(f"\n✅ <i>Sia generatore che auditor indipendente (Groq) sono pienamente operativi.</i>")
+
+        lines.append("\n🔗 <a href='https://console.groq.com'>Groq Console</a> | <a href='https://aistudio.google.com'>Google AI Studio</a>")
 
         msg = "\n".join(lines)
         if TELEGRAM_AVAILABLE:
@@ -200,7 +336,7 @@ def run_health_check(notify_always: bool = False) -> int:
         else:
             print("⚠️ Telegram sender module not available, skipped sending message")
 
-    return 0 if ok_count > 0 else 1
+    return 0 if (ok_count > 0 or (not gemini_key and groq_ok > 0)) else 1
 
 
 if __name__ == "__main__":

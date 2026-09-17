@@ -61,39 +61,30 @@ MEME_CATALOG = {
     "BULL_EXTREME": [
         {
             "template": "gatsby_cheers.jpg",
-            "title": "🥂 CHEERS TO THE BULLS!",
             "title": "CHEERS TO THE BULLS!",
             "top_text": "QUANDO $PLTR E I TECH COMPOUNDER",
-            "bottom_text": "GUIDANO IL PORTAFOGLIO A NUOVI MASSIMI 🚀",
             "bottom_text": "GUIDANO IL PORTAFOGLIO A NUOVI MASSIMI",
             "en_top": "WHEN THE AI & TECH COMPOUNDERS",
-            "en_bottom": "CARRY THE ENTIRE PORTFOLIO TO THE MOON 🥂🚀",
             "en_bottom": "CARRY THE ENTIRE PORTFOLIO TO THE MOON",
             "mood_emoji": "🔥",
             "badge_color": "#10B981"
         },
         {
             "template": "stonks.jpg",
-            "title": "📈 STONKS ONLY GO UP",
             "title": "STONKS ONLY GO UP",
             "top_text": "CHI FA TRADING A LEVA: LIQUIDATO",
-            "bottom_text": "NOI CON 100% AZIONI REALI E RISK 3/10: 📈 STONKS",
             "bottom_text": "NOI CON 100% AZIONI REALI E RISK 3/10: STONKS",
             "en_top": "20X LEVERAGE TRADERS: LIQUIDATED",
-            "en_bottom": "US WITH 100% REAL ASSETS & RISK SCORE 3/10: 📈 STONKS",
             "en_bottom": "US WITH 100% REAL ASSETS & RISK SCORE 3/10: STONKS",
             "mood_emoji": "🚀",
             "badge_color": "#10B981"
         },
         {
             "template": "disaster_girl.jpg",
-            "title": "🔥 SHORTS GETTING BURNED",
             "title": "SHORTS GETTING BURNED",
             "top_text": "I BEAR CHE PREVEDEVANO IL CRASH IMMINENTE",
-            "bottom_text": "NOI CHE INCASSIAMO UN ALTRO GREEN DAY 🍀",
             "bottom_text": "NOI CHE INCASSIAMO UN ALTRO GREEN DAY",
             "en_top": "DOOMERS PREDICTING A MARKET CRASH",
-            "en_bottom": "US ENJOYING ANOTHER MASSIVE GREEN DAY 🍀🔥",
             "en_bottom": "US ENJOYING ANOTHER MASSIVE GREEN DAY",
             "mood_emoji": "😈",
             "badge_color": "#10B981"
@@ -102,20 +93,16 @@ MEME_CATALOG = {
     "BULL_STEADY": [
         {
             "template": "honest_work.png",
-            "title": "🌾 HONEST COMPOUNDING",
             "title": "HONEST COMPOUNDING",
             "top_text": "+0.75% OGGI. NIENTE LEVE FOLLI 50X",
-            "bottom_text": "SOLO 100% AZIONI REALI, DIVIDENDI E COMPOUNDING 🌾",
             "bottom_text": "SOLO 100% AZIONI REALI, DIVIDENDI E COMPOUNDING",
             "en_top": "+0.75% TODAY. NO CRAZY 50X LEVERAGE",
-            "en_bottom": "IT AIN'T MUCH, BUT IT'S HONEST COMPOUND WORK 🌾",
             "en_bottom": "IT AIN'T MUCH, BUT IT'S HONEST COMPOUND WORK",
             "mood_emoji": "🌾",
             "badge_color": "#10B981"
         },
         {
             "template": "two_bus_passengers.jpg",
-            "title": "🚌 DUE MODI DI VIVERE LA GIORNATA",
             "title": "DUE MODI DI VIVERE LA GIORNATA",
             "top_text": "CHI GUARDA IL GRAFICO AD 1 MINUTO CON ANSIA",
             "bottom_text": "CHI FA COPY TRADING A BASSO RISCHIO E DORME SERENO",
@@ -126,38 +113,30 @@ MEME_CATALOG = {
         },
         {
             "template": "epic_handshake.jpg",
-            "title": "🤝 THE PERFECT ALLIANCE",
             "title": "THE PERFECT ALLIANCE",
             "top_text": "CRESCITA TECNOLOGICA (AI & CHIPS)",
-            "bottom_text": "DIVIDENDI SOLIDI & ZERO LEVA = COMPOUNDING 🌿",
             "bottom_text": "DIVIDENDI SOLIDI & ZERO LEVA = COMPOUNDING",
             "en_top": "GROWTH MEGATRENDS (AI & TECH)",
-            "en_bottom": "CASH FLOW & 0% LEVERAGE = LONG TERM COMPOUNDING 🤝",
             "en_bottom": "CASH FLOW & 0% LEVERAGE = LONG TERM COMPOUNDING",
             "mood_emoji": "🤝",
             "badge_color": "#06B6D4"
         },
         {
             "template": "expanding_brain.jpg",
-            "title": "🧠 INVESTING EVOLUTION",
             "title": "INVESTING EVOLUTION",
             "top_text": "INSEGUIRE LE MEME COIN CON LEVA 50X",
             "bottom_text": "COPIARE UN PORTAFOGLIO +200% DAL 2020 SENZA STRESS",
             "en_top": "CHASING RANDOM PENNY STOCKS",
-            "en_bottom": "1-CLICK COPYING A +200% TRACK RECORD WITH 3/10 RISK 🧠",
             "en_bottom": "1-CLICK COPYING A +200% TRACK RECORD WITH 3/10 RISK",
             "mood_emoji": "💡",
             "badge_color": "#8B5CF6"
         },
         {
             "template": "change_my_mind.jpg",
-            "title": "☕ CHANGE MY MIND",
             "title": "CHANGE MY MIND",
             "top_text": "IL COPY TRADING SU AZIONI REALI A BASSO RISCHIO",
-            "bottom_text": "BATTE IL 90% DEL TRADING FAI-DA-TE. CHANGE MY MIND. ☕",
             "bottom_text": "BATTE IL 90% DEL TRADING FAI-DA-TE. CHANGE MY MIND.",
             "en_top": "DISCIPLINED LOW-RISK COPY TRADING",
-            "en_bottom": "BEATS 90% OF EMOTIONAL DAY TRADING. CHANGE MY MIND. ☕",
             "en_bottom": "BEATS 90% OF EMOTIONAL DAY TRADING. CHANGE MY MIND.",
             "mood_emoji": "☕",
             "badge_color": "#38BDF8"
@@ -166,50 +145,40 @@ MEME_CATALOG = {
     "SIDEWAYS": [
         {
             "template": "trade_offer.jpg",
-            "title": "🤝 TRADE OFFER",
             "title": "TRADE OFFER",
             "top_text": "IO RICEVO: VOLATILITÀ QUASI ZERO",
             "bottom_text": "TU RICEVI: DIVIDENDI ACCUMULATI E TEMPO LIBERO",
             "en_top": "I RECEIVE: FLAT MARKET ACTION",
-            "en_bottom": "YOU RECEIVE: SOLID DIVIDENDS & FREE TIME ⏳",
             "en_bottom": "YOU RECEIVE: SOLID DIVIDENDS & FREE TIME",
             "mood_emoji": "⚖️",
             "badge_color": "#38BDF8"
         },
         {
             "template": "waiting_skeleton.jpg",
-            "title": "⏳ WAITING FOR THE DIP",
             "title": "WAITING FOR THE DIP",
             "top_text": "IO CHE ASPETTO CHE IL MERCATO CROLLI",
             "bottom_text": "PERCHÉ 'I GURU HANNO DETTO CHE È TROPPO CARO'",
             "en_top": "WAITING FOR THE BIG CRASH",
-            "en_bottom": "BECAUSE 'EXPERTS SAID MARKET IS AT THE TOP' SINCE 2022 ⏳",
             "en_bottom": "BECAUSE 'EXPERTS SAID MARKET IS AT THE TOP' SINCE 2022",
             "mood_emoji": "💀",
             "badge_color": "#64748B"
         },
         {
             "template": "two_buttons.jpg",
-            "title": "🔴 TOUGH CHOICE",
             "title": "TOUGH CHOICE",
             "top_text": "COMPRARE ALTRE AZIONI REAL ESTATE & ENERGIA",
-            "bottom_text": "O RAFFORZARE I COMPOUNDER TECH SULLA PARITÀ? 🤔",
             "bottom_text": "O RAFFORZARE I COMPOUNDER TECH SULLA PARITÀ?",
             "en_top": "ADD MORE DIVIDEND DIVIDENDS",
-            "en_bottom": "OR ACCUMULATE CORE TECH LEADERS ON FLAT DAYS? 🤔",
             "en_bottom": "OR ACCUMULATE CORE TECH LEADERS ON FLAT DAYS?",
             "mood_emoji": "🤔",
             "badge_color": "#F59E0B"
         },
         {
             "template": "distracted_boyfriend.jpg",
-            "title": "👀 DISTRACTED BY COMPOUNDERS",
             "title": "DISTRACTED BY COMPOUNDERS",
             "top_text": "TRADING SPECULATIVO E LEVE PAZZE",
-            "bottom_text": "NOI: PORTAFOGLIO MULTI-ASSET DIVERSIFICATO 👀",
             "bottom_text": "NOI: PORTAFOGLIO MULTI-ASSET DIVERSIFICATO",
             "en_top": "HIGH RISK PENNY STOCKS & 20X LEVERAGE",
-            "en_bottom": "US: QUALITY MULTI-ASSET COMPOUNDERS 👀",
             "en_bottom": "US: QUALITY MULTI-ASSET COMPOUNDERS",
             "mood_emoji": "👀",
             "badge_color": "#EC4899"
@@ -218,52 +187,40 @@ MEME_CATALOG = {
     "BEAR_DIP": [
         {
             "template": "this_is_fine.jpg",
-            "title": "☕ THIS IS FINE",
             "title": "THIS IS FINE",
             "top_text": "IL MERCATO RITRACCIA DEL -0.9%",
-            "bottom_text": "NOI CON ZERO LEVA E CASSA PRONTA PER IL DIP ☕",
             "bottom_text": "NOI CON ZERO LEVA E CASSA PRONTA PER IL DIP",
             "en_top": "MARKET DIPS -0.9% TODAY",
-            "en_bottom": "US CHILLING WITH ZERO LEVERAGE & CASH READY ☕",
             "en_bottom": "US CHILLING WITH ZERO LEVERAGE & CASH READY",
             "mood_emoji": "☕",
             "badge_color": "#EF4444"
         },
         {
             "template": "woman_yelling_cat.jpg",
-            "title": "😼 CALM AS A CAT",
             "title": "CALM AS A CAT",
             "top_text": "I TRADER A LEVA CHE VANNO IN PANICO",
-            "bottom_text": "NOI SERENI CON ZERO LEVA E RISK SCORE 3/10 😼",
             "bottom_text": "NOI SERENI CON ZERO LEVA E RISK SCORE 3/10",
             "en_top": "LEVERAGE TRADERS PANICKING OVER MINOR PULLBACKS",
-            "en_bottom": "US CHILLING WITH ZERO LEVERAGE & 3/10 RISK 😼",
             "en_bottom": "US CHILLING WITH ZERO LEVERAGE & 3/10 RISK",
             "mood_emoji": "😼",
             "badge_color": "#F59E0B"
         },
         {
             "template": "clown_makeup.jpg",
-            "title": "🎪 THE TIMING CYCLE",
             "title": "THE TIMING CYCLE",
             "top_text": "1. Compro il dip · 2. Scende ancora",
-            "bottom_text": "3. Vendo sul panico · 4. Rimbalzo +4% il giorno dopo 🤡",
             "bottom_text": "3. Vendo sul panico · 4. Rimbalzo +4% il giorno dopo",
             "en_top": "1. Buy the dip · 2. It dips more",
-            "en_bottom": "3. Panic sell the bottom · 4. +4% rally the next morning 🤡",
             "en_bottom": "3. Panic sell the bottom · 4. +4% rally the next morning",
             "mood_emoji": "🎪",
             "badge_color": "#F59E0B"
         },
         {
             "template": "uno_draw_25.jpg",
-            "title": "🃏 UNO DRAW 25",
             "title": "UNO DRAW 25",
             "top_text": "VENDERE SUL PANICO PER UN DIP DEL -1%",
-            "bottom_text": "OPPURE PESCARE 25 CARTE E MANTENERE IL RISK 3/10 🃏",
             "bottom_text": "OPPURE PESCARE 25 CARTE E MANTENERE IL RISK 3/10",
             "en_top": "PANIC SELL AT THE FIRST -1% MARKET PULLBACK",
-            "en_bottom": "OR DRAW 25 AND STICK TO DISCIPLINED 3/10 RISK 🃏",
             "en_bottom": "OR DRAW 25 AND STICK TO DISCIPLINED 3/10 RISK",
             "mood_emoji": "🃏",
             "badge_color": "#EF4444"
@@ -272,33 +229,26 @@ MEME_CATALOG = {
     "BEAR_CRASH": [
         {
             "template": "this_is_fine.jpg",
-            "title": "☕ THIS IS FINE (EXTREME)",
             "title": "THIS IS FINE (EXTREME)",
             "top_text": "QUANDO TUTTO IL MERCATO È PROFONDAMENTE ROSSO",
-            "bottom_text": "MA LA TUA TESI D'INVESTIMENTO A 5 ANNI È INVIOLATA ☕",
             "bottom_text": "MA LA TUA TESI D'INVESTIMENTO A 5 ANNI È INVIOLATA",
             "en_top": "WHEN THE ENTIRE MARKET IS BURNING RED",
-            "en_bottom": "BUT YOUR 5-YEAR MULTI-ASSET THESIS REMAINS BULLETPROOF ☕🔥",
             "en_bottom": "BUT YOUR 5-YEAR MULTI-ASSET THESIS REMAINS BULLETPROOF",
             "mood_emoji": "☕",
             "badge_color": "#DC2626"
         },
         {
             "template": "drowning_kid.jpg",
-            "title": "🏊‍♂️ MARKET LIQUIDITY",
             "title": "MARKET LIQUIDITY",
             "top_text": "IL MERCATO CHE SOSTIENE SOLO IL MOMENTUM",
-            "bottom_text": "I SOLIDI COMPOUNDER A SCONTO CHE ASPETTANO IL REBOUND 🏊‍♂️",
             "bottom_text": "I SOLIDI COMPOUNDER A SCONTO CHE ASPETTANO IL REBOUND",
             "en_top": "HYPED MOMENTUM STOCKS CRASHING HARD",
-            "en_bottom": "SOLID CASH-FLOW LEADERS QUIETLY ACCUMULATING 🏊‍♂️",
             "en_bottom": "SOLID CASH-FLOW LEADERS QUIETLY ACCUMULATING",
             "mood_emoji": "🏊‍♂️",
             "badge_color": "#DC2626"
         },
         {
             "template": "pablo_escobar.jpg",
-            "title": "🌧️ WAITING FOR THE REBOUND",
             "title": "WAITING FOR THE REBOUND",
             "top_text": "IO CHE GUARDO IL PORTAFOGLIO OGGI",
             "bottom_text": "SAPENDO CHE DAL 2020 ABBIAMO SUPERATO OGNI TEMPESTA (+200%)",
@@ -311,7 +261,6 @@ MEME_CATALOG = {
     "WEEKEND": [
         {
             "template": "pablo_escobar.jpg",
-            "title": "🛋️ WEEKEND MOOD",
             "title": "WEEKEND MOOD",
             "top_text": "IO IL SABATO E LA DOMENICA",
             "bottom_text": "ASPETTANDO CHE RIAPRA WALL STREET LUNEDÌ ALLE 15:30",
@@ -324,39 +273,30 @@ MEME_CATALOG = {
     "HOLIDAY": [
         {
             "template": "pablo_escobar.jpg",
-            "title": "🛋️ MERCATI IN FESTA",
             "title": "MERCATI IN FESTA",
             "top_text": "IO CHE ASPETTO CHE RIAPRA IL MERCATO",
-            "bottom_text": "MENTRE LA BORSA È IN VACANZA PER {holiday_name} 🏖️",
             "bottom_text": "MENTRE LA BORSA È IN VACANZA PER {holiday_name}",
             "en_top": "ME WAITING FOR MARKETS TO REOPEN",
-            "en_bottom": "WHILE THE EXCHANGE IS CLOSED FOR {holiday_name} 🏖️",
             "en_bottom": "WHILE THE EXCHANGE IS CLOSED FOR {holiday_name}",
             "mood_emoji": "🛋️",
             "badge_color": "#6366F1"
         },
         {
             "template": "waiting_skeleton.jpg",
-            "title": "⏳ ATTENDENDO IL MERCATO",
             "title": "ATTENDENDO IL MERCATO",
             "top_text": "QUANDO LA BORSA È CHIUSA PER FESTIVITÀ",
-            "bottom_text": "E TU NON VEDI L'ORA CHE RIAPRA DOMANI 🌿",
             "bottom_text": "E TU NON VEDI L'ORA CHE RIAPRA DOMANI",
             "en_top": "WHEN MARKETS ARE CLOSED FOR HOLIDAY",
-            "en_bottom": "AND YOU CAN'T WAIT FOR TOMORROW'S OPEN 🌿",
             "en_bottom": "AND YOU CAN'T WAIT FOR TOMORROW'S OPEN",
             "mood_emoji": "☕",
             "badge_color": "#8B5CF6"
         },
         {
             "template": "two_bus_passengers.jpg",
-            "title": "🏖️ GIORNATA DI RELAX SUI MERCATI",
             "title": "GIORNATA DI RELAX SUI MERCATI",
             "top_text": "I DAY TRADER CHE NON SANNO COSA FARE SENZA BORSA",
-            "bottom_text": "I LONG-TERM INVESTOR CHE SI GODONO LA FESTIVITÀ ☕",
             "bottom_text": "I LONG-TERM INVESTOR CHE SI GODONO LA FESTIVITÀ",
             "en_top": "DAY TRADERS STRESSED WITHOUT LIVE CANDLES",
-            "en_bottom": "LONG-TERM INVESTORS ENJOYING THE HOLIDAY RELAX ☕",
             "en_bottom": "LONG-TERM INVESTORS ENJOYING THE HOLIDAY RELAX",
             "mood_emoji": "🌴",
             "badge_color": "#10B981"

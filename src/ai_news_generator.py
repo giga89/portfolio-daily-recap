@@ -984,9 +984,32 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             for entry in history:
                 previous_topics_str += f"- {entry['content'][:300]}...\n"
         
-        # Create prompt based on session
-        current_date = datetime.now().strftime('%Y-%m-%d')
+        # Create prompt based on session with rich temporal context
+        from independent_fact_checker import get_current_temporal_context
+        temporal_ctx = get_current_temporal_context(session_name=market_session)
+        current_date = temporal_ctx.get("iso_date", datetime.now().strftime('%Y-%m-%d'))
         
+        temporal_ground_truth_header = f"""
+=====================================================
+INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
+=====================================================
+- DATA DI OGGI: {temporal_ctx['formatted_date']} (Anno solare: {temporal_ctx['year']})
+- ORA LOCALE ITALIANA: {temporal_ctx['rome_time']}
+- ORA A NEW YORK / WALL STREET: {temporal_ctx['ny_time']}
+- STATO DEI MERCATI: {temporal_ctx['market_state']}
+=====================================================
+"""
+
+        temporal_rules_us_close = f"""
+- REGOLE TEMPORALI TASSATIVE PER CHIUSURA USA (US_CLOSE):
+  * La seduta di Wall Street di oggi è DEFINITIVAMENTE CONCLUSA (mercati chiusi).
+  * Tutti gli eventi, dati macro e decisioni di banche centrali della giornata (es. riunioni o annunci tassi della Federal Reserve delle 14:00 ET / 20:00 CET) sono GIÀ AVVENUTI nel passato.
+  * È SEVERAMENTE VIETATO parlare al futuro di eventi di oggi (è tassativamente vietato scrivere: 'oggi deciderà', 'in attesa della decisione di oggi', 'si attende la riunione di stasera').
+  * Parla di quanto accaduto oggi SOLO ED ESCLUSIVAMENTE AL PASSATO ('la Fed ha tagliato/mantenuto i tassi', 'la seduta ha visto...').
+  * Se non conosci l'esito reale di una decisione di oggi con certezza assoluta, NON inventarlo e NON menzionare la decisione: concentrati sulle performance effettive e verificate dei titoli del nostro portafoglio.
+  * È SEVERAMENTE VIETATO citare figure non attuali (es. Jerome Powell se non è in carica) come decisori odierni o futuri.
+"""
+
         # Build dynamic greeting and closing question for this session
         dynamic_greeting = _get_dynamic_greeting(session_upper)
         closing_question_instruction = _get_closing_question_instruction(session_upper)
@@ -1001,7 +1024,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         
         if "EUROPEAN" in session_upper and "OPEN" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura dei mercati europei.
-            
+            {temporal_ground_truth_header}
             Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e gli eventi di mercato più rilevanti delle ultime 12-24 ore relativi ai mercati europei o ai titoli europei nel nostro portafoglio.
             
             CONTESTO PORTAFOGLIO EUROPEO:
@@ -1026,7 +1049,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
         elif "U.S." in session_upper and "OPEN" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno/buon pomeriggio caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura di Wall Street (U.S. market open).
-            
+            {temporal_ground_truth_header}
             Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e gli eventi di mercato più rilevanti delle ultime 12-24 ore relativi ai mercati americani o ai titoli USA nel nostro portafoglio.
             
             CONTESTO PORTAFOGLIO USA:
@@ -1051,7 +1074,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
         elif "WEEKLY" in session_upper and "SAT" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di fine settimana caldo, onesto e naturale per i tuoi copiatori ed follower (Weekly Recap - Sabato).
-            
+            {temporal_ground_truth_header}
             Usa il tuo strumento di ricerca Google per analizzare l'andamento della settimana appena trascorsa sui mercati globali e l'impatto sul nostro portafoglio.
             
             CONTESTO PORTAFOGLIO:
@@ -1076,7 +1099,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
         elif "WEEKLY" in session_upper and "SUN" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post domenicale strategico, naturale e professionale per i tuoi copiatori ed investitori focalizzato sull'ANTEPRIMA DELLA SETTIMANA IN ARRIVO (Weekly Outlook & Preview).
-            
+            {temporal_ground_truth_header}
             Usa il tuo strumento di ricerca Google per cercare:
             1. I principali appuntamenti macroeconomici previsti per la prossima settimana (es. riunioni banche centrali Fed/BCE, dati inflazione CPI, PIL, mercato del lavoro).
             2. Le trimestrali (earnings) o eventi societari attesi nella settimana per le principali aziende o per i titoli del nostro portafoglio.
@@ -1103,7 +1126,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
         else:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un resoconto serale caldo, professionale e naturale per i tuoi copiatori dopo la chiusura dei mercati USA (U.S. market close / fine giornata).
-            
+            {temporal_ground_truth_header}
+            {temporal_rules_us_close}
             Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e le performance più rilevanti delle ultime 24 ore sui mercati globali e per i titoli del nostro portafoglio.
             
             {previous_topics_str}
@@ -2055,10 +2079,22 @@ def generate_weekly_macro_outlook() -> str:
 
     models_to_try = list(DEFAULT_GEMINI_MODELS)
 
+    from independent_fact_checker import get_current_temporal_context
+    temporal_ctx = get_current_temporal_context(session_name="Weekly macro outlook")
+    temporal_ground_truth_header = f"""
+=====================================================
+INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
+=====================================================
+- DATA DI OGGI: {temporal_ctx['formatted_date']} (Anno solare: {temporal_ctx['year']})
+- ORA LOCALE ITALIANA: {temporal_ctx['rome_time']}
+- STATO DEI MERCATI: {temporal_ctx['market_state']}
+=====================================================
+"""
+
     prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro.
 Scrivi il post del Sabato pomeriggio per i tuoi follower e copier focalizzato su:
 "COSA CI ASPETTA NELLA PROSSIMA SETTIMANA A LIVELLO MACROECONOMICO GLOBALE".
-
+{temporal_ground_truth_header}
 Usa il tuo strumento di ricerca Google per consultare il calendario macroeconomico globale della prossima settimana (dati USA, Europa, Cina, banche centrali FED/BCE).
 
 REGOLE PER IL TESTO (in ITALIANO):
@@ -2086,7 +2122,6 @@ Output ONLY the post text in Italian."""
                     print(f"✅ Global Macro Outlook post generated using {model_name}")
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "macro_outlook_post")
-                    return response.text.strip()
                     raw_text = response.text.strip()
                     approved, verified_text = _run_post_verification(
                         raw_text,

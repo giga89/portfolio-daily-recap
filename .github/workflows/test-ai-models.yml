@@ -26,5 +26,7 @@ jobs:
       - name: Run Comprehensive AI Model Test Suite
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
         run: |
           python scripts/test_all_ai_models.py
