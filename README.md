@@ -19,6 +19,8 @@ Built specifically for **Andrea Ravalli**'s Popular Investor portfolio on **eTor
 * 🪙 **Daily Crypto Pulse & Sentiment**: Live 16:9 card generator featuring the **Crypto Fear & Greed Index**, spot prices, 24h volumes, $TRX portfolio highlight, and a dynamic 4th altcoin selected from **30 pre-cached official crypto logos**.
 * 🔍 **Stock Focus Deep-Dive & Niche Coverage**: 1:1 ultra-premium infographics with bull/bear catalysts, investment theses, live certified weights, and full support for both mega-caps and 10 under-the-radar niche holdings ($ENEL.MI, $GLEN.L, $ULVR.L, $PRY.MI, $1919.HK, $2318.HK, $TRIG.L, $HUM, $AZN.L, $ABT.US).
 * ⚡ **Stock News & Catalyst Follow-up Commenter**: Monitors breaking news & corporate catalysts for tracked portfolio holdings and automatically publishes professional, targeted Italian update comments under their original eToro thread.
+* 🛡️ **Multi-AI Consensus & Real-Time Fact-Checking**: Institutional-grade verification pipeline featuring **Tavily Live Web Search** ground-truth, **Groq LPUs** (`qwen/qwen3.8-27b`, `openai/gpt-oss-120b`), and **Mistral AI** (`codestral-latest`). Decomposes recaps into **micro-topics** to surgically verify catalysts while preserving post depth and full historical length (~3,000–4,200 chars).
+* 📊 **Community-Driven Engagement Priority**: Selects and prioritizes portfolio stocks based on real-time audience engagement metrics (likes & comments tracked in `data/post_analytics.json`).
 * 🤖 **AI Financial Journalism (Google Gemini)**: Natural, engaging financial commentary tailored for European and US markets with automatic multi-model quota fallback (`gemini-3.7-flash` → `gemini-3.6-flash` → `gemini-3.5-flash` → `gemini-2.5-flash`).
 * 🎨 **Visual Graphics Engine**: Automated high-res visual assets:
   * **16:9 Crypto Daily Card** (`crypto_card_generator.py`)
@@ -84,6 +86,9 @@ portfolio-daily-recap/
 │   ├── social_publisher.py           # Multi-platform routing & publishing coordinator
 │   ├── stock_focus_card.py           # 1:1 stock focus square card generator
 │   ├── stock_focus_infographic.py    # 1:1 high-res stock deep-dive infographic generator
+│   ├── independent_fact_checker.py   # Multi-AI modular consensus fact-checking (Groq + Mistral)
+│   ├── post_verifier.py              # Pre-send compliance & deterministic verification gates
+│   ├── tavily_search.py              # Live web ground-truth financial news provider
 │   ├── telegram_sender.py            # Telegram Bot API integration
 │   ├── twitter_sender.py             # Twitter / X API integration
 │   ├── bluesky_sender.py             # Bluesky AT Protocol integration
@@ -93,6 +98,57 @@ portfolio-daily-recap/
 ├── requirements.txt                  # Python dependencies
 └── README.md                         # This documentation
 ```
+
+---
+
+## 🧠 Come Vengono Pensate, Generate e Validate le Notizie
+
+Il processo editoriale e informativo del portafoglio non si affida all'AI in modo acritico, ma implementa un'**architettura quantitativa a più livelli ("LLM-as-a-Judge" con Ground Truth live)**:
+
+```
+┌────────────────────────────────────────────────────────┐
+│ 1. PRIORITIZZAZIONE ASSET SUL GRADIMENTO COMMUNITY      │
+│    (Metriche reali di Like e Commenti da post_analytics)│
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ 2. GROUND-TRUTH IN TEMPO REALE (Tavily Search API)     │
+│    (Notizie certificate, fonti primarie e catalizzatori)│
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ 3. GENERAZIONE NARRATIVA STRUTTURATA (Google Gemini)    │
+│    (Flash models con guardrail temporali e di sessione)│
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ 4. SCOMPOSIZIONE MODULARE A MICRO-ARGOMENTI            │
+│    (Macro, singoli stock bullets, outlook, community)  │
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ 5. AUDIT PARALLELO & CONSENSO A DUE PASSAGGI           │
+│    (Groq LPUs + Mistral AI con cross-verification)     │
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ 6. PUBBLICAZIONE CERTIFICATA (Zero Allucinazioni)       │
+│    (Approvazione unanime e preservazione lunghezza)    │
+└────────────────────────────────────────────────────────┘
+```
+
+1. **Prioritizzazione dei Titoli in base all'Interesse del Pubblico**:
+   - I titoli del portafoglio non ruotano in modo casuale: l'algoritmo calcola un punteggio di gradimento basato sui like e commenti storici registrati su eToro (`data/post_analytics.json`).
+   - I titoli più amati e discussi dai copiatori (es. $NVDA, $PLTR, $MRVL, $TRX) ricevono maggiore copertura, garantendo al contempo un'equa rotazione su tutti i pilastri del portafoglio.
+
+2. **Ground-Truth in Tempo Reale con Tavily Search**:
+   - Prima della stesura, il sistema interroga le API di Tavily per estrarre le notizie reali e le fonti accreditate del giorno (trimestrali, accordi industriali, decisioni macroeconomiche).
+   - Gemini riceve queste notizie certificate direttamente nel prompt, eliminando le allucinazioni e l'obsolescenza informativa.
+
+3. **Audit Indipendente & Consenso Multi-AI (Groq LPUs + Mistral)**:
+   - Il post generato viene scomposto in singoli **micro-argomenti** indipendenti.
+   - Ogni micro-argomento viene verificato in parallelo da **Groq** (modelli open-weight ad altissima velocità su LPUs) e **Mistral AI** (modello indipendente europeo Codestral).
+   - **Correzione Chirurgica e Consenso a Due Passaggi**: se una frase contiene un paradosso temporale o una carica istituzionale anacronistica, viene corretta e validata dal secondo revisore. Il post finale mantiene la ricchezza informativa originaria (3.000–4.200+ caratteri) senza riassunti generici.
 
 ---
 
@@ -112,6 +168,9 @@ portfolio-daily-recap/
 | `TELEGRAM_BOT_TOKEN` | Telegram Bot Token from [@BotFather](https://t.me/botfather) |
 | `TELEGRAM_CHAT_ID` | Telegram Channel or Chat ID |
 | `GEMINI_API_KEY` | Google AI Studio API Key ([Google AI Studio](https://aistudio.google.com/)) |
+| `GROQ_API_KEY` | Groq Cloud API Key for ultrafast independent LPU auditing |
+| `MISTRAL_API_KEY` | Mistral AI API Key for European independent auditor check |
+| `TAVILY_API_KEY` | Tavily Search API Key for real-time live financial news grounding |
 | `GIST_TOKEN` | GitHub Personal Access Token (PAT) for Gist state persistence |
 | `LINKEDIN_ACCESS_TOKEN` | *(Optional)* LinkedIn OAuth2 token for weekly posts |
 | `TWITTER_API_KEY` / `_SECRET` | *(Optional)* Twitter / X API credentials |

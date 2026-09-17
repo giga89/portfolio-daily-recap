@@ -79,9 +79,32 @@ def _get_all_portfolio_tags():
     return [t for t in PORTFOLIO_TICKERS.keys() if t not in _EXCLUDED_FROM_TAGS]
 
 
+def _get_ticker_engagement_scores() -> Dict[str, float]:
+    """
+    Computes community engagement scores (likes + comments) for each portfolio ticker
+    based on historical eToro post metrics from data/post_analytics.json.
+    """
+    scores = {}
+    try:
+        analytics_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "post_analytics.json")
+        if os.path.exists(analytics_file):
+            with open(analytics_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for p in data.get("posts", []):
+                likes = p.get("likes", 0)
+                comments = p.get("comments", 0)
+                weight = likes * 1.5 + comments * 2.0
+                for t in p.get("tickers", []):
+                    clean_t = t.replace(".", "").upper()
+                    scores[clean_t] = scores.get(clean_t, 0.0) + weight
+    except Exception:
+        pass
+    return scores
+
+
 def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, allowed_tickers=None):
     """
-    Select tags for the current post with rotation to ensure variety.
+    Select tags for the current post with rotation and audience interest prioritization.
     
     Args:
         max_tags: Maximum number of tags to select
@@ -92,6 +115,7 @@ def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, al
         list: List of selected tags
     """
     all_tags = _get_all_portfolio_tags()
+    engagement_scores = _get_ticker_engagement_scores()
     
     if allowed_tickers:
         allowed_normalized = [t.replace('.', '').upper() for t in allowed_tickers]
@@ -109,19 +133,32 @@ def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, al
         data = load_data()
         used_tags = data.get('used_tags', [])
 
-        # Prioritize tags that haven't been used recently
+        # Prioritize tags that haven't been used recently, sorted by audience engagement (likes/interest)
         unused_tags = [tag for tag in all_tags if tag not in used_tags]
+        unused_tags.sort(
+            key=lambda tag: engagement_scores.get(tag.replace('.', '').upper(), 0.0),
+            reverse=True
+        )
 
         if len(unused_tags) >= max_tags:
             selected = unused_tags[:max_tags]
         elif unused_tags:
-            # Not enough unused — fill the gap from all_tags (least-recently-used first)
+            # Not enough unused — fill the gap from all_tags (also sorted by engagement)
             already = set(unused_tags)
             filler = [t for t in all_tags if t not in already]
+            filler.sort(
+                key=lambda tag: engagement_scores.get(tag.replace('.', '').upper(), 0.0),
+                reverse=True
+            )
             selected = unused_tags + filler[:max_tags - len(unused_tags)]
         else:
-            # All tags recently used — just take from the full list
-            selected = all_tags[:max_tags]
+            # All tags recently used — sort all by engagement score
+            sorted_all = list(all_tags)
+            sorted_all.sort(
+                key=lambda tag: engagement_scores.get(tag.replace('.', '').upper(), 0.0),
+                reverse=True
+            )
+            selected = sorted_all[:max_tags]
 
         # Guarantee we always return exactly max_tags (safety net: pool was too small)
         if len(selected) < max_tags:
@@ -1427,6 +1464,13 @@ Raddoppio del capitale stimato in ~{time_to_double:.1f} anni
 • Focus sui megatrend del futuro: AI, Sanità ed Energia
 • Mix bilanciato di ETF e azioni individuali ad alto potenziale
 • Gestione attiva, trasparente e senza commissioni nascoste
+
+🛡️ METODO & VERIFICA DELLE NOTIZIE (MULTI-AI CONSENSUS):
+Utilizzo l'Intelligenza Artificiale con approccio critico e quantitativo:
+1. Ground-Truth in tempo reale: notizie e catalizzatori societari cross-verificati sul web live (Tavily Search) contro fonti ufficiali.
+2. Analisi e Sintesi: elaborazione macroeconomica strutturata con Google Gemini.
+3. Doppio Audit Indipendente: ogni notizia viene analizzata in parallelo da due AI indipendenti (Groq LPUs e Mistral).
+4. Regola del Consenso: pubblicazione solo con approvazione unanime a micro-argomenti per garantire zero allucinazioni e massima accuratezza.
 
 📊 DIFFERENZIALE RISPETTO AI BENCHMARK (Dal 2020):
 {benchmark_lines.strip()}
