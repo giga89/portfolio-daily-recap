@@ -9,6 +9,7 @@ import json
 import time
 import re
 from datetime import datetime
+from typing import Optional, List, Dict, Any, Tuple
 try:
     from google import genai
     from google.genai import types
