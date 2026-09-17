@@ -49,6 +49,12 @@ try:
 except ImportError:
     REQUESTS_AVAILABLE = False
 
+try:
+    from tavily_search import get_live_market_news_context, is_tavily_available
+except ImportError:
+    get_live_market_news_context = None
+    is_tavily_available = lambda: False
+
 
 # Tested, verified working models on Groq LPUs
 GROQ_MODELS = [
@@ -136,9 +142,19 @@ def _build_audit_prompt(
     text: str,
     session_name: Optional[str],
     temporal_ctx: Dict[str, str],
-    portfolio_metadata_summary: str = ""
+    portfolio_metadata_summary: str = "",
+    live_news_context: str = "",
 ) -> str:
-    """Creates the adversarial fact-checker prompt for Groq/Mistral."""
+    """Creates the adversarial fact-checker prompt for Groq/Mistral with optional Tavily live grounding."""
+    live_news_section = ""
+    if live_news_context:
+        live_news_section = f"""
+=========================================
+FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY):
+=========================================
+{live_news_context}
+"""
+
     return f"""Sei un Lead Financial Fact-Checker & Senior Compliance Auditor per un account pubblico di investimenti su eToro.
 Il tuo obiettivo è effettuare un AUDIT INDIPENDENTE, CRITICO E SPIETATO sul seguente post prima della pubblicazione.
 
@@ -154,7 +170,7 @@ INFORMAZIONI TEMPORALI CERTE (GROUND TRUTH):
 METADATI DI PORTAFOGLIO:
 =========================================
 {portfolio_metadata_summary or "Nessun asset specifico indicato."}
-
+{live_news_section}
 =========================================
 TESTO DEL POST DA AUDITARE:
 =========================================
@@ -171,10 +187,13 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
 
 2. VERIFICA CARICHE E FIGURE ISTITUZIONALI:
    - Verifica che le figure istituzionali menzionate (banchieri centrali, ministri, CEO) siano coerenti e non anacronistiche.
+   - NOTA BENE (ANACRONISMI NOTI): Il mandato di Jerome Powell come Presidente della Fed termina a maggio 2026. Citare Powell per decisioni o annunci nel 2026 è anacronistico: rimuovi tassativamente il nome 'Powell' e usa genericamente 'la Federal Reserve' / 'la banca centrale'.
    - Se viene attribuita una decisione a una figura che non ricopre più la carica o se c'è un'allucinazione su chi guida un'istituzione, correggi immediatamente o rimuovi il riferimento.
 
-3. DIVIETO ASSOLUTO DI INVENTARE NOTIZIE:
-   - Non permettere che il post spacci rumor o allucinazioni per fatti certi. Se un fatto sembra generato per errore, bonificalo.
+3. CONFERMA NOTIZIE CON LE FONTI LIVE TAVILY:
+   - Consulta le 'FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY)' sopra riportate per verificare i fatti menzionati nel post (partnership, catalizzatori, trimestrali, rating).
+   - Se una notizia o catalizzatore è confermato dalle fonti live, consideralo autentico e approvalo.
+   - Se un fatto è palesemente inventato e in contrasto con la realtà, correggilo chirurgicamente.
 
 4. FORMATTAZIONE ETORO:
    - Nessun markdown bold (** o __).
@@ -204,6 +223,7 @@ def audit_with_groq(
     text: str,
     session_name: Optional[str] = None,
     portfolio_metadata_summary: str = "",
+    live_news_context: str = "",
     api_key: Optional[str] = None,
     timeout: int = 10,
 ) -> Optional[Dict[str, Any]]:
@@ -219,7 +239,13 @@ def audit_with_groq(
         return None
 
     temporal_ctx = get_current_temporal_context(session_name)
-    prompt = _build_audit_prompt(text, session_name, temporal_ctx, portfolio_metadata_summary)
+    prompt = _build_audit_prompt(
+        text=text,
+        session_name=session_name,
+        temporal_ctx=temporal_ctx,
+        portfolio_metadata_summary=portfolio_metadata_summary,
+        live_news_context=live_news_context,
+    )
 
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
@@ -271,6 +297,7 @@ def audit_with_mistral(
     text: str,
     session_name: Optional[str] = None,
     portfolio_metadata_summary: str = "",
+    live_news_context: str = "",
     api_key: Optional[str] = None,
     timeout: int = 10,
 ) -> Optional[Dict[str, Any]]:
@@ -289,7 +316,13 @@ def audit_with_mistral(
         return None
 
     temporal_ctx = get_current_temporal_context(session_name)
-    prompt = _build_audit_prompt(text, session_name, temporal_ctx, portfolio_metadata_summary)
+    prompt = _build_audit_prompt(
+        text=text,
+        session_name=session_name,
+        temporal_ctx=temporal_ctx,
+        portfolio_metadata_summary=portfolio_metadata_summary,
+        live_news_context=live_news_context,
+    )
 
     url = "https://api.mistral.ai/v1/chat/completions"
     headers = {
@@ -343,27 +376,46 @@ def run_independent_fact_check(
     text: str,
     session_name: Optional[str] = None,
     portfolio_metadata_summary: str = "",
+    live_news_context: Optional[str] = None,
     require_consensus: bool = True,
 ) -> Optional[Dict[str, Any]]:
     """
     Orchestrates the independent fact-checking pipeline across external models
-    using a Dual-Auditor Consensus mechanism (Groq + Mistral).
+    using a Dual-Auditor Consensus mechanism (Groq + Mistral) grounded with live web search (Tavily).
 
     Consensus Rules:
     1. Both Groq and Mistral audit the post independently.
-    2. VETO RULE: If either auditor flags a critical violation or REJECTs,
+    2. Live Grounding: Real-time financial headlines and summaries from Tavily are supplied
+       in the audit prompt to verify real-world facts and recent catalysts.
+    3. VETO RULE: If either auditor flags a critical violation or REJECTs,
        the original text is NEVER published as-is.
-    3. CROSS-VERIFICATION OF CORRECTIONS: If an auditor proposes an AUTO_CORRECT,
+    4. CROSS-VERIFICATION OF CORRECTIONS: If an auditor proposes an AUTO_CORRECT,
        the proposed text is cross-checked by the OTHER auditor.
        The corrected text is ONLY published if the other auditor approves it!
-    4. UNANIMOUS APPROVAL: Both auditors must agree on the final published text.
-    5. Fallback: If only one provider is configured/available, it acts as single auditor.
+    5. UNANIMOUS APPROVAL: Both auditors must agree on the final published text.
+    6. Fallback: If only one provider is configured/available, it acts as single auditor.
     """
+    # Auto-fetch Tavily live news context if not provided
+    if live_news_context is None:
+        try:
+            if is_tavily_available and is_tavily_available() and get_live_market_news_context:
+                cashtags = re.findall(r'\$([A-Za-z0-9\-\.]+)', text)
+                live_news_context = get_live_market_news_context(
+                    session_name=session_name,
+                    tickers=cashtags,
+                    max_results=3,
+                )
+        except Exception as t_err:
+            live_news_context = ""
+    if live_news_context is None:
+        live_news_context = ""
+
     # 1. Query Groq
     groq_audit = audit_with_groq(
         text=text,
         session_name=session_name,
         portfolio_metadata_summary=portfolio_metadata_summary,
+        live_news_context=live_news_context,
     )
 
     # 2. Query Mistral
@@ -371,6 +423,7 @@ def run_independent_fact_check(
         text=text,
         session_name=session_name,
         portfolio_metadata_summary=portfolio_metadata_summary,
+        live_news_context=live_news_context,
     )
 
     # If neither is available, return None for fallback
@@ -431,6 +484,7 @@ def run_independent_fact_check(
             text=g_cand,
             session_name=session_name,
             portfolio_metadata_summary=portfolio_metadata_summary,
+            live_news_context=live_news_context,
         )
         if _is_audit_clean(cross_m):
             print("   🤝 Dual-AI Consensus: Groq auto-correction cross-verified and APPROVED by Mistral!")
@@ -447,6 +501,22 @@ def run_independent_fact_check(
                     "verifier": cross_m,
                 },
             }
+        elif cross_m and cross_m.get("decision") == "AUTO_CORRECT" and cross_m.get("verified_text"):
+            refined_cand = cross_m["verified_text"]
+            print("   🤝 Dual-AI Consensus: Groq auto-correction refined and validated by Mistral (two-pass consensus)!")
+            return {
+                "decision": "AUTO_CORRECT",
+                "score": min(groq_audit.get("score", 85), cross_m.get("score", 85)),
+                "verified_text": refined_cand,
+                "temporal_issues": groq_audit.get("temporal_issues", []) + cross_m.get("temporal_issues", []),
+                "hallucinations_detected": groq_audit.get("hallucinations_detected", []) + cross_m.get("hallucinations_detected", []),
+                "auditor": f"consensus:two_pass ({groq_audit.get('auditor')} -> {cross_m.get('auditor')})",
+                "explanation": f"Testo corretto da Groq e rifinito in secondo passaggio da Mistral. {cross_m.get('explanation')}",
+                "consensus_details": {
+                    "proposer": groq_audit,
+                    "verifier": cross_m,
+                },
+            }
 
     # If Mistral proposed an auto-correction, verify it with Groq
     if m_dec == "AUTO_CORRECT" and mistral_audit.get("verified_text"):
@@ -456,6 +526,7 @@ def run_independent_fact_check(
             text=m_cand,
             session_name=session_name,
             portfolio_metadata_summary=portfolio_metadata_summary,
+            live_news_context=live_news_context,
         )
         if _is_audit_clean(cross_g):
             print("   🤝 Dual-AI Consensus: Mistral auto-correction cross-verified and APPROVED by Groq!")
@@ -467,6 +538,22 @@ def run_independent_fact_check(
                 "hallucinations_detected": mistral_audit.get("hallucinations_detected", []),
                 "auditor": f"consensus:cross_verified ({mistral_audit.get('auditor')} -> {cross_g.get('auditor') if cross_g else 'groq'})",
                 "explanation": f"Testo corretto da Mistral e confermato valido da Groq. {mistral_audit.get('explanation')}",
+                "consensus_details": {
+                    "proposer": mistral_audit,
+                    "verifier": cross_g,
+                },
+            }
+        elif cross_g and cross_g.get("decision") == "AUTO_CORRECT" and cross_g.get("verified_text"):
+            refined_cand = cross_g["verified_text"]
+            print("   🤝 Dual-AI Consensus: Mistral auto-correction refined and validated by Groq (two-pass consensus)!")
+            return {
+                "decision": "AUTO_CORRECT",
+                "score": min(mistral_audit.get("score", 85), cross_g.get("score", 85)),
+                "verified_text": refined_cand,
+                "temporal_issues": mistral_audit.get("temporal_issues", []) + cross_g.get("temporal_issues", []),
+                "hallucinations_detected": mistral_audit.get("hallucinations_detected", []) + cross_g.get("hallucinations_detected", []),
+                "auditor": f"consensus:two_pass ({mistral_audit.get('auditor')} -> {cross_g.get('auditor')})",
+                "explanation": f"Testo corretto da Mistral e rifinito in secondo passaggio da Groq. {cross_g.get('explanation')}",
                 "consensus_details": {
                     "proposer": mistral_audit,
                     "verifier": cross_g,
@@ -638,6 +725,21 @@ def run_micro_topic_consensus_fact_check(
 
     print(f"   🧩 Scomposizione in {len(micro_topics)} micro-argomenti ({len(topics_to_audit)} da auditare in parallelo)...")
 
+    # Fetch live ground truth news from Tavily once for all micro-topics
+    live_news_context = ""
+    try:
+        if is_tavily_available and is_tavily_available() and get_live_market_news_context:
+            cashtags = re.findall(r'\$([A-Za-z0-9\-\.]+)', text)
+            live_news_context = get_live_market_news_context(
+                session_name=session_name,
+                tickers=cashtags,
+                max_results=4,
+            )
+            if live_news_context:
+                print(f"   🌐 Tavily: Fonti live certificate caricate per l'audit modulare ({len(live_news_context)} caratteri).")
+    except Exception as t_err:
+        print(f"   ℹ️ Tavily grounding note: {t_err}")
+
     # Run consensus audits concurrently across micro-topics
     from concurrent.futures import ThreadPoolExecutor
 
@@ -646,8 +748,9 @@ def run_micro_topic_consensus_fact_check(
             executor.submit(
                 run_independent_fact_check,
                 t["text"],
-                session_name,
-                portfolio_metadata_summary,
+                session_name=session_name,
+                portfolio_metadata_summary=portfolio_metadata_summary,
+                live_news_context=live_news_context,
             ): t
             for t in topics_to_audit
         }

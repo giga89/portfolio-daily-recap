@@ -989,6 +989,26 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         temporal_ctx = get_current_temporal_context(session_name=market_session)
         current_date = temporal_ctx.get("iso_date", datetime.now().strftime('%Y-%m-%d'))
         
+        # Fetch verified live market news from Tavily if configured
+        tavily_grounding_section = ""
+        try:
+            from tavily_search import get_live_market_news_context, is_tavily_available
+            if is_tavily_available():
+                t_tickers = [t for t in (selected_tags or [])]
+                t_news = get_live_market_news_context(session_name=market_session, tickers=t_tickers, max_results=4)
+                if t_news:
+                    tavily_grounding_section = f"""
+=====================================================
+NOTIZIE FINANZIARIE REALI RECENTI (FONTE LIVE WEB - TAVILY):
+=====================================================
+{t_news}
+=====================================================
+Usa queste notizie reali verificate come spunto principale per la tua analisi dei mercati e dei titoli.
+"""
+                    print(f"   🌐 Tavily Live Grounding: fornite notizie recenti al generatore ({len(t_news)} caratteri).")
+        except Exception as tavily_err:
+            print(f"   ℹ️ Tavily grounding note: {tavily_err}")
+
         temporal_ground_truth_header = f"""
 =====================================================
 INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
@@ -1025,6 +1045,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
         if "EUROPEAN" in session_upper and "OPEN" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura dei mercati europei.
             {temporal_ground_truth_header}
+            {tavily_grounding_section}
             Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e gli eventi di mercato più rilevanti delle ultime 12-24 ore relativi ai mercati europei o ai titoli europei nel nostro portafoglio.
             
             CONTESTO PORTAFOGLIO EUROPEO:
@@ -1050,6 +1071,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
         elif "U.S." in session_upper and "OPEN" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno/buon pomeriggio caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura di Wall Street (U.S. market open).
             {temporal_ground_truth_header}
+            {tavily_grounding_section}
             Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e gli eventi di mercato più rilevanti delle ultime 12-24 ore relativi ai mercati americani o ai titoli USA nel nostro portafoglio.
             
             CONTESTO PORTAFOGLIO USA:
@@ -1075,6 +1097,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
         elif "WEEKLY" in session_upper and "SAT" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di fine settimana caldo, onesto e naturale per i tuoi copiatori ed follower (Weekly Recap - Sabato).
             {temporal_ground_truth_header}
+            {tavily_grounding_section}
             Usa il tuo strumento di ricerca Google per analizzare l'andamento della settimana appena trascorsa sui mercati globali e l'impatto sul nostro portafoglio.
             
             CONTESTO PORTAFOGLIO:
@@ -1100,6 +1123,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
         elif "WEEKLY" in session_upper and "SUN" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post domenicale strategico, naturale e professionale per i tuoi copiatori ed investitori focalizzato sull'ANTEPRIMA DELLA SETTIMANA IN ARRIVO (Weekly Outlook & Preview).
             {temporal_ground_truth_header}
+            {tavily_grounding_section}
             Usa il tuo strumento di ricerca Google per cercare:
             1. I principali appuntamenti macroeconomici previsti per la prossima settimana (es. riunioni banche centrali Fed/BCE, dati inflazione CPI, PIL, mercato del lavoro).
             2. Le trimestrali (earnings) o eventi societari attesi nella settimana per le principali aziende o per i titoli del nostro portafoglio.
@@ -1128,6 +1152,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un resoconto serale caldo, professionale e naturale per i tuoi copiatori dopo la chiusura dei mercati USA (U.S. market close / fine giornata).
             {temporal_ground_truth_header}
             {temporal_rules_us_close}
+            {tavily_grounding_section}
             Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e le performance più rilevanti delle ultime 24 ore sui mercati globali e per i titoli del nostro portafoglio.
             
             {previous_topics_str}

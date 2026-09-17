@@ -84,7 +84,7 @@ class TestMicroTopicConsensus(unittest.TestCase):
 
     @patch("independent_fact_checker.run_independent_fact_check")
     def test_run_micro_topic_consensus_surgical_correction(self, mock_audit):
-        def side_effect(text, session_name=None, portfolio_metadata_summary=""):
+        def side_effect(text, *args, **kwargs):
             if "metabolizzato" in text:
                 return {
                     "decision": "AUTO_CORRECT",

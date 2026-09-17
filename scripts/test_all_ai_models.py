@@ -182,6 +182,54 @@ def run_tests():
     else:
         print(f"\n❌ Cascade FAILED! All models failed after retries.")
 
+    # ── Part 3: External Fact-Checkers & Live Search Grounding ───────────────
+    print("\n--- Part 3: External Fact-Checkers & Live Search Grounding ---")
+    
+    # Groq
+    groq_key = os.environ.get("GROQ_API_KEY")
+    groq_status = "⚠️ Not configured"
+    if groq_key:
+        try:
+            from independent_fact_checker import audit_with_groq
+            g_res = audit_with_groq("Il mercato USA ha chiuso regolarmente oggi.", session_name="US_CLOSE")
+            if g_res and "decision" in g_res:
+                groq_status = f"✅ OK ({g_res.get('auditor', 'groq')}, {g_res.get('latency_sec', 0)}s) — {g_res.get('decision')}"
+            else:
+                groq_status = "⚠️ Response issue"
+        except Exception as e:
+            groq_status = f"❌ Error: {e}"
+    print(f"🔍 Groq LPU Auditor: {groq_status}")
+
+    # Mistral
+    mistral_key = os.environ.get("MISTRAL_API_KEY")
+    mistral_status = "⚠️ Not configured"
+    if mistral_key:
+        try:
+            from independent_fact_checker import audit_with_mistral
+            m_res = audit_with_mistral("Il mercato USA ha chiuso regolarmente oggi.", session_name="US_CLOSE")
+            if m_res and "decision" in m_res:
+                mistral_status = f"✅ OK ({m_res.get('auditor', 'mistral')}, {m_res.get('latency_sec', 0)}s) — {m_res.get('decision')}"
+            else:
+                mistral_status = "ℹ️ 429 0 RPM / Not active"
+        except Exception as e:
+            mistral_status = f"❌ Error: {e}"
+    print(f"🔍 Mistral Auditor: {mistral_status}")
+
+    # Tavily
+    tavily_key = os.environ.get("TAVILY_API_KEY")
+    tavily_status = "⚠️ Not configured"
+    if tavily_key:
+        try:
+            from tavily_search import search_tavily
+            t_res = search_tavily("Wall Street market close today", max_results=2)
+            if t_res:
+                tavily_status = f"✅ OK ({len(t_res)} real-time news articles retrieved)"
+            else:
+                tavily_status = "⚠️ Empty response / Rate limit"
+        except Exception as e:
+            tavily_status = f"❌ Error: {e}"
+    print(f"🌐 Tavily Live Search: {tavily_status}")
+
     # ── Summary Report ──────────────────────────────────────────────────────
     print("=" * 70)
     print("📊 AI MODEL CAPABILITIES SUMMARY TABLE")

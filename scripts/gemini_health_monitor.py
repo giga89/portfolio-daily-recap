@@ -188,11 +188,42 @@ def test_mistral_model(api_key: str, model_name: str) -> dict:
         return {"status": "error", "latency": latency, "detail": str(exc)[:80]}
 
 
+def test_tavily_provider(api_key: str) -> dict:
+    """Test Tavily Live Search API."""
+    t0 = time.time()
+    url = "https://api.tavily.com/search"
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Portfolio-Health-Check/1.0",
+    }
+    payload = json.dumps({
+        "api_key": api_key,
+        "query": "Wall Street stock market today",
+        "topic": "news",
+        "days": 1,
+        "max_results": 1,
+    }).encode("utf-8")
+    req = urllib.request.Request(url, data=payload, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode())
+            latency = round((time.time() - t0) * 1000)
+            cnt = len(data.get("results", []))
+            return {"status": "ok", "latency": latency, "detail": f"{cnt} notizie verificate trovate"}
+    except urllib.error.HTTPError as he:
+        latency = round((time.time() - t0) * 1000)
+        return {"status": "error", "latency": latency, "detail": f"HTTP {he.code}"}
+    except Exception as exc:
+        latency = round((time.time() - t0) * 1000)
+        return {"status": "error", "latency": latency, "detail": str(exc)[:80]}
+
+
 def run_health_check(notify_always: bool = False) -> int:
-    """Run health check across all active models (Gemini + Groq + Mistral)."""
+    """Run health check across all active models (Gemini + Groq + Mistral + Tavily)."""
     gemini_key = os.environ.get("GEMINI_API_KEY")
     groq_key = os.environ.get("GROQ_API_KEY")
     mistral_key = os.environ.get("MISTRAL_API_KEY")
+    tavily_key = os.environ.get("TAVILY_API_KEY")
 
     print("=" * 60)
     print(f"🤖 COMPREHENSIVE AI HEALTH CHECK — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -254,9 +285,21 @@ def run_health_check(notify_always: bool = False) -> int:
     else:
         print("   ⚠️ MISTRAL_API_KEY non configurata.")
 
+    # 4. Tavily Live Search & Ground Truth Provider
+    tavily_result = {}
+    print("\n--- 4. Tavily Live Search & Ground Truth Provider ---")
+    if tavily_key:
+        print(f"🔍 Testing Tavily Live Search...")
+        tavily_result = test_tavily_provider(tavily_key)
+        status_emoji = "✅" if tavily_result["status"] == "ok" else "⚠️"
+        print(f"   {status_emoji} Status: {tavily_result['status']} ({tavily_result['latency']}ms) — {tavily_result['detail']}")
+    else:
+        print("   ⚠️ TAVILY_API_KEY non configurata.")
+
     print("\n" + "=" * 60)
     groq_ok = sum(1 for r in groq_results.values() if r.get("status") == "ok")
-    print(f"📊 Summary: Gemini {ok_count}/{len(ACTIVE_MODELS)} operational | Groq {groq_ok}/{len(ACTIVE_GROQ_MODELS)} operational")
+    tavily_ok = 1 if tavily_result.get("status") == "ok" else 0
+    print(f"📊 Summary: Gemini {ok_count}/{len(ACTIVE_MODELS)} | Groq {groq_ok}/{len(ACTIVE_GROQ_MODELS)} | Tavily {'✅ OK' if tavily_ok else 'N/A'}")
     print("=" * 60)
 
     # Count quota exhaustion on standard operational Flash models
@@ -318,14 +361,23 @@ def run_health_check(notify_always: bool = False) -> int:
         else:
             lines.append("• <b>Mistral</b>: ℹ️ Non configurato")
 
+        lines.append("\n<b>Fonti Live Web & Fact-Checking (Tavily):</b>")
+        if tavily_result:
+            if tavily_result.get("status") == "ok":
+                lines.append(f"• <b>Tavily Live Search</b>: ✅ Attivo ({tavily_result['latency']}ms)")
+            else:
+                lines.append(f"• <b>Tavily Live Search</b>: ⚠️ {tavily_result.get('detail')}")
+        else:
+            lines.append("• <b>Tavily Live Search</b>: ℹ️ Non configurato")
+
         if ok_count == 0:
             lines.append("\n❌ <b>TUTTI I MODELLI GEMINI BLOCCATI!</b> Generazione post a rischio.")
         elif flash_quota_exceeded_count > 0:
             lines.append(f"\n⚠️ <i>Nota: {ok_count} modelli Gemini ancora operativi tramite cascade.</i>")
         else:
-            lines.append(f"\n✅ <i>Sia generatore che auditor indipendente (Groq) sono pienamente operativi.</i>")
+            lines.append(f"\n✅ <i>Generatore (Gemini), Fact-Checkers (Groq+Mistral) e Live Search (Tavily) operativi.</i>")
 
-        lines.append("\n🔗 <a href='https://console.groq.com'>Groq Console</a> | <a href='https://aistudio.google.com'>Google AI Studio</a>")
+        lines.append("\n🔗 <a href='https://tavily.com'>Tavily</a> | <a href='https://console.groq.com'>Groq</a> | <a href='https://aistudio.google.com'>Google AI Studio</a>")
 
         msg = "\n".join(lines)
         if TELEGRAM_AVAILABLE:
