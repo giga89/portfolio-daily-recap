@@ -141,14 +141,16 @@ Il processo editoriale e informativo del portafoglio non si affida all'AI in mod
    - I titoli del portafoglio non ruotano in modo casuale: l'algoritmo calcola un punteggio di gradimento basato sui like e commenti storici registrati su eToro (`data/post_analytics.json`).
    - I titoli più amati e discussi dai copiatori (es. $NVDA, $PLTR, $MRVL, $TRX) ricevono maggiore copertura, garantendo al contempo un'equa rotazione su tutti i pilastri del portafoglio.
 
-2. **Ground-Truth in Tempo Reale con Tavily Search**:
-   - Prima della stesura, il sistema interroga le API di Tavily per estrarre le notizie reali e le fonti accreditate del giorno (trimestrali, accordi industriali, decisioni macroeconomiche).
-   - Gemini riceve queste notizie certificate direttamente nel prompt, eliminando le allucinazioni e l'obsolescenza informativa.
+2. **Ground-Truth in Tempo Reale con Tavily Search (Per-Ticker Mirato)**:
+   - Prima della stesura, il sistema esegue **ricerche parallele ad alta velocità** su Tavily: una per il quadro macro della sessione e query dedicate individuali per ciascun titolo selezionato, risolvendo il nome societario completo (es. *Taiwan Semiconductor TSMC*, *Cameco uranium*, *Eni*, *TRIG*).
+   - Vengono estratti **fatti e numeri concreti del giorno**: accordi industriali (es. cessione quote giacimenti, buyback di azioni), trimestrali, tassi di crescita e contratti vinti, eliminando l'obsolescenza informativa.
+   - **Regola Anti-Banalità Tassativa**: È fatto divieto assoluto all'AI di usare formule generiche o frasi fatte (*"continuiamo a seguire con fiducia"*, *"la tesi rimane solida"*). Ogni titolo menzionato deve obbligatoriamente contenere dati e catalizzatori reali verificati.
 
 3. **Audit Indipendente & Consenso Multi-AI (Groq LPUs + Mistral)**:
-   - Il post generato viene scomposto in singoli **micro-argomenti** indipendenti.
-   - Ogni micro-argomento viene verificato in parallelo da **Groq** (modelli open-weight ad altissima velocità su LPUs) e **Mistral AI** (modello indipendente europeo Codestral).
-   - **Correzione Chirurgica e Consenso a Due Passaggi**: se una frase contiene un paradosso temporale o una carica istituzionale anacronistica, viene corretta e validata dal secondo revisore. Il post finale mantiene la ricchezza informativa originaria (3.000–4.200+ caratteri) senza riassunti generici.
+   - Il post generato viene scomposto in singoli **micro-argomenti** semantici (macro, titoli individuali, spunti di chiusura).
+   - Ogni micro-argomento viene verificato in parallelo da **Groq** (modelli open-weight ultra-rapidi su LPUs) e **Mistral AI** (modello europeo indipendente Codestral).
+   - **Correzione Chirurgica e Consenso a Due Passaggi**: se una frase contiene un paradosso temporale o un anacronismo istituzionale, viene corretta e validata dal secondo revisore. Il post finale mantiene la ricchezza informativa originaria (3.000–4.200+ caratteri) senza tagliare contenuti validi.
+   - **Collocazione Trasparente**: Il manifesto del metodo Multi-AI Consensus viene valorizzato nei post educativi dedicati al **"Perché Copiarmi"** (Copy Trading), lasciando ai post di tutti i giorni il massimo spazio per i numeri e le notizie fresche di mercato.
 
 ---
 
