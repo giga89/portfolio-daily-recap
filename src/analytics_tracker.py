@@ -283,13 +283,16 @@ DIVIDEND_BREAKDOWN = [
 ]
 
 NEXT_DIVIDENDS = [
-    {"ticker": "WMT", "type": "Pay Day", "date": "Sep 08, 2026", "pay": "$0.25"},
     {"ticker": "GLEN.L", "type": "Pay Day", "date": "Sep 18, 2026", "pay": "$0.09"},
     {"ticker": "ENI.MI", "type": "Pay Day", "date": "Sep 23, 2026", "pay": "$0.24"},
     {"ticker": "TRIG.L", "type": "Pay Day", "date": "Sep 30, 2026", "pay": "$0.07"},
     {"ticker": "ABBV", "type": "Ex-Dividend", "date": "Oct 15, 2026", "pay": "$1.55"},
     {"ticker": "ENEL.MI", "type": "Ex-Dividend", "date": "Oct 19, 2026", "pay": "$0.22"},
     {"ticker": "ENEL.MI", "type": "Pay Day", "date": "Oct 21, 2026", "pay": "$0.22"},
+    {"ticker": "1919.HK", "type": "Pay Day", "date": "Nov 18, 2026", "pay": "$0.21"},
+    {"ticker": "MSFT", "type": "Pay Day", "date": "Dec 10, 2026", "pay": "$0.75"},
+    {"ticker": "WMT", "type": "Ex-Dividend", "date": "Dec 04, 2026", "pay": "$0.25"},
+    {"ticker": "WMT", "type": "Pay Day", "date": "Jan 04, 2027", "pay": "$0.25"},
 ]
 
 HISTORICAL_DRAWDOWNS = [
@@ -815,7 +818,16 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     monthly_json = json.dumps(monthly_data, ensure_ascii=False)
     gauge_json = json.dumps(GAUGE_METRICS, ensure_ascii=False)
     div_breakdown_json = json.dumps(DIVIDEND_BREAKDOWN, ensure_ascii=False)
-    next_divs_json = json.dumps(NEXT_DIVIDENDS, ensure_ascii=False)
+    today_date = datetime.now(timezone.utc).date()
+    def _parse_div_date(item):
+        try:
+            return datetime.strptime(item.get("date", ""), "%b %d, %Y").date()
+        except Exception:
+            return datetime.max.date()
+
+    upcoming_divs = [d for d in NEXT_DIVIDENDS if _parse_div_date(d) >= today_date]
+    upcoming_divs.sort(key=_parse_div_date)
+    next_divs_json = json.dumps(upcoming_divs, ensure_ascii=False)
     drawdowns_json = json.dumps(HISTORICAL_DRAWDOWNS, ensure_ascii=False)
     correlation_json = json.dumps(CORRELATION_CLUSTERS, ensure_ascii=False)
     seasonality_data = compute_seasonality(monthly_data)
@@ -2716,28 +2728,38 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         tb.appendChild(tr);
       }});
 
-      // 2. Next Dividends
+      // 2. Next Dividends (dynamically filters out past dates)
       const list = document.getElementById('nextDivsList');
       list.innerHTML = '';
-      nextDivsData.forEach(n => {{
-        const row = document.createElement('div');
-        row.className = 'div-next-row';
-        const isEx = n.type.includes('Ex');
-        row.innerHTML = `
-          <div class="div-next-left">
-            <img src="./assets/logos/${{n.ticker}}.png" alt="${{n.ticker}}" style="width:24px; height:24px; border-radius:50%; object-fit:contain;" onerror="this.style.display='none'">
-            <div>
-              <strong style="color:#FFF;">$${{n.ticker}}</strong>
-              <div style="font-size:0.72rem; color:var(--muted);">${{n.date}}</div>
-            </div>
-          </div>
-          <div style="text-align:right;">
-            <span class="div-next-type ${{isEx ? 'ex' : 'pay'}}">${{n.type}}</span>
-            <div style="font-size:0.8rem; font-weight:800; color:var(--green); margin-top:2px;">${{n.pay}}</div>
-          </div>
-        `;
-        list.appendChild(row);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const activeDivs = nextDivsData.filter(n => {{
+        const d = new Date(n.date);
+        return isNaN(d.getTime()) || d >= today;
       }});
+      if (activeDivs.length === 0) {{
+        list.innerHTML = '<div style="padding:16px; color:var(--muted); font-size:0.8rem; text-align:center;">No upcoming dividends scheduled</div>';
+      }} else {{
+        activeDivs.forEach(n => {{
+          const row = document.createElement('div');
+          row.className = 'div-next-row';
+          const isEx = n.type.includes('Ex');
+          row.innerHTML = `
+            <div class="div-next-left">
+              <img src="./assets/logos/${{n.ticker}}.png" alt="${{n.ticker}}" style="width:24px; height:24px; border-radius:50%; object-fit:contain;" onerror="this.style.display='none'">
+              <div>
+                <strong style="color:#FFF;">$${{n.ticker}}</strong>
+                <div style="font-size:0.72rem; color:var(--muted);">${{n.date}}</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <span class="div-next-type ${{isEx ? 'ex' : 'pay'}}">${{n.type}}</span>
+              <div style="font-size:0.8rem; font-weight:800; color:var(--green); margin-top:2px;">${{n.pay}}</div>
+            </div>
+          `;
+          list.appendChild(row);
+        }});
+      }}
     }}
 
     // ── Drawdowns Table (Post-2020) ─────────────────────────────────────────
