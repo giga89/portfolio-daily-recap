@@ -5,6 +5,7 @@ Generates market news recap using Google Gemini API
 """
 
 import os
+import json
 import time
 import re
 from datetime import datetime
@@ -91,9 +92,13 @@ def _get_ticker_engagement_scores() -> dict[str, float]:
                 data = json.load(f)
             for p in data.get("posts", []):
                 likes = p.get("likes", 0)
-                comments = p.get("comments", 0)
+                comments = p.get("comments", 0) or p.get("comments_count", 0)
                 weight = likes * 1.5 + comments * 2.0
-                for t in p.get("tickers", []):
+                post_tickers = list(p.get("tickers", []))
+                if not post_tickers:
+                    text = (p.get("title", "") or "") + " " + (p.get("content", "") or "")
+                    post_tickers = re.findall(r'\$([A-Z0-9]+(?:\.[A-Z0-9]+)?)', text)
+                for t in post_tickers:
                     clean_t = t.replace(".", "").upper()
                     scores[clean_t] = scores.get(clean_t, 0.0) + weight
     except Exception:
@@ -101,9 +106,36 @@ def _get_ticker_engagement_scores() -> dict[str, float]:
     return scores
 
 
+def _sort_by_recency_and_engagement(pool, used_tags, engagement_scores=None, prefer_engagement=False):
+    """
+    Sorts a candidate pool so that least recently used items come first.
+    For items with equal recency (e.g. both never used), prefer_engagement=True
+    breaks ties using highest engagement score.
+    """
+    engagement_scores = engagement_scores or {}
+    
+    last_seen = {}
+    for idx, tag in enumerate(used_tags):
+        clean = tag.replace('.', '').upper()
+        last_seen[tag] = idx
+        last_seen[clean] = idx
+        
+    def sort_key(tag):
+        clean = tag.replace('.', '').upper()
+        idx = max(last_seen.get(tag, -1), last_seen.get(clean, -1))
+        score = engagement_scores.get(clean, 0.0)
+        if prefer_engagement:
+            return (0 if idx == -1 else 1, idx, -score)
+        else:
+            return (0 if idx == -1 else 1, idx, 0)
+
+    return sorted(pool, key=sort_key)
+
+
 def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, allowed_tickers=None):
     """
-    Select tags for the current post with rotation and audience interest prioritization.
+    Select tags for the current post balancing audience favorites (high-engagement likes/comments)
+    and niche/diversified holdings, ensuring fair rotation across all portfolio assets.
     
     Args:
         max_tags: Maximum number of tags to select
@@ -111,75 +143,83 @@ def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, al
         allowed_tickers: Optional list of tickers to restrict the selection to
     
     Returns:
-        list: List of selected tags
+        List of selected tag strings (without '$')
     """
-    all_tags = _get_all_portfolio_tags()
     engagement_scores = _get_ticker_engagement_scores()
     
     if allowed_tickers:
-        allowed_normalized = [t.replace('.', '').upper() for t in allowed_tickers]
-        all_tags = [t for t in all_tags if t.replace('.', '').upper() in allowed_normalized]
+        all_tags = [t for t in _get_all_portfolio_tags() if t in allowed_tickers or t.replace('.', '') in [a.replace('.', '') for a in allowed_tickers]]
+    else:
+        all_tags = _get_all_portfolio_tags()
     
+    # Exclude tags already used in this post
     if excluded_tags:
-        # Remove excluded tags from candidates
         excluded_normalized = [t.replace('.', '').upper() for t in excluded_tags]
         all_tags = [t for t in all_tags if t.replace('.', '').upper() not in excluded_normalized]
     
-    if max_tags <= 0:
+    if max_tags <= 0 or not all_tags:
         return []
 
     try:
         data = load_data()
         used_tags = data.get('used_tags', [])
 
-        # Prioritize tags that haven't been used recently, sorted by audience engagement (likes/interest)
-        unused_tags = [tag for tag in all_tags if tag not in used_tags]
-        unused_tags.sort(
+        # Partition available tags into High-Engagement (community favorites) and Niche holdings
+        sorted_by_engagement = sorted(
+            all_tags,
             key=lambda tag: engagement_scores.get(tag.replace('.', '').upper(), 0.0),
             reverse=True
         )
 
-        if len(unused_tags) >= max_tags:
-            selected = unused_tags[:max_tags]
-        elif unused_tags:
-            # Not enough unused — fill the gap from all_tags (also sorted by engagement)
-            already = set(unused_tags)
-            filler = [t for t in all_tags if t not in already]
-            filler.sort(
-                key=lambda tag: engagement_scores.get(tag.replace('.', '').upper(), 0.0),
-                reverse=True
-            )
-            selected = unused_tags + filler[:max_tags - len(unused_tags)]
-        else:
-            # All tags recently used — sort all by engagement score
-            sorted_all = list(all_tags)
-            sorted_all.sort(
-                key=lambda tag: engagement_scores.get(tag.replace('.', '').upper(), 0.0),
-                reverse=True
-            )
-            selected = sorted_all[:max_tags]
+        # High-interest pool: top 50% of available tags (at least 2 if available)
+        split_idx = max(2, len(sorted_by_engagement) // 2) if len(sorted_by_engagement) >= 4 else len(sorted_by_engagement)
+        high_pool = sorted_by_engagement[:split_idx]
+        niche_pool = sorted_by_engagement[split_idx:] if len(sorted_by_engagement) > split_idx else []
 
-        # Guarantee we always return exactly max_tags (safety net: pool was too small)
+        # Determine slot allocation:
+        # If max_tags >= 3 and niche_pool exists: allocate (max_tags - 1) high-interest + 1 niche holding
+        # If max_tags == 2 and niche_pool exists: 1 high-interest + 1 niche holding
+        # Otherwise: all from high_pool
+        if niche_pool and max_tags >= 3:
+            high_quota = max_tags - 1
+            niche_quota = 1
+        elif niche_pool and max_tags == 2:
+            high_quota = 1
+            niche_quota = 1
+        else:
+            high_quota = max_tags
+            niche_quota = 0
+
+        # 1. Select high-interest candidates using recency + engagement preference
+        ordered_high = _sort_by_recency_and_engagement(high_pool, used_tags, engagement_scores, prefer_engagement=True)
+        selected_high = ordered_high[:high_quota]
+
+        # 2. Select niche candidates using recency (ensures every niche holding rotates through)
+        selected_niche = []
+        if niche_quota > 0 and niche_pool:
+            candidates_niche = [t for t in niche_pool if t not in selected_high]
+            ordered_niche = _sort_by_recency_and_engagement(candidates_niche, used_tags, engagement_scores, prefer_engagement=False)
+            selected_niche = ordered_niche[:niche_quota]
+
+        selected = selected_high + selected_niche
+
+        # 3. Safety fill if still short of max_tags
         if len(selected) < max_tags:
-            # all_tags already had excluded_tags stripped; ignore excluded to fill
-            full_pool = _get_all_portfolio_tags()
-            if allowed_tickers:
-                allowed_normalized = [t.replace('.', '').upper() for t in allowed_tickers]
-                full_pool = [t for t in full_pool if t.replace('.', '').upper() in allowed_normalized]
-            extra = [t for t in full_pool if t not in selected]
-            selected = selected + extra[:max_tags - len(selected)]
+            pool_filler = [t for t in all_tags if t not in selected]
+            selected.extend(pool_filler[:max_tags - len(selected)])
 
         # Update used-tags rotation history (keep last 2 full rounds)
         new_used = used_tags + selected
-        max_history = len(_get_all_portfolio_tags()) * 2
-        data['used_tags'] = new_used[-max_history:] if len(new_used) > max_history else new_used
-
+        max_history = len(all_tags) * 2
+        if len(new_used) > max_history:
+            new_used = new_used[-max_history:]
+        data['used_tags'] = new_used
         save_data(data)
 
         return selected
 
     except Exception as e:
-        print(f"⚠️ Error in tag rotation: {e}")
+        print(f"Error in tag rotation: {e}")
         return all_tags[:max_tags]
 
 

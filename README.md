@@ -137,9 +137,12 @@ Il processo editoriale e informativo del portafoglio non si affida all'AI in mod
 └────────────────────────────────────────────────────────┘
 ```
 
-1. **Prioritizzazione dei Titoli in base all'Interesse del Pubblico**:
-   - I titoli del portafoglio non ruotano in modo casuale: l'algoritmo calcola un punteggio di gradimento basato sui like e commenti storici registrati su eToro (`data/post_analytics.json`).
-   - I titoli più amati e discussi dai copiatori (es. $NVDA, $PLTR, $MRVL, $TRX) ricevono maggiore copertura, garantendo al contempo un'equa rotazione su tutti i pilastri del portafoglio.
+1. **Bilanciamento Intelligente tra Interesse del Pubblico e Rotazione di Nicchia**:
+   - I titoli del portafoglio non vengono scelti a caso né lasciati a rotazioni puramente statistiche: l'algoritmo calcola dinamicamente un punteggio di gradimento reale basato sui like e commenti storici della community su eToro (`data/post_analytics.json`).
+   - **Ripartizione a Due Fasce (Crowd Favorites vs. Nicchia Strategica)**:
+     - **Titoli Mainstream / High-Engagement** (es. $NVDA, $PLTR, $TSM, $CCJ, $AMZN, $TRX): occupano la quota prioritaria (`max_tags - 1`), massimizzando l'interesse, le interazioni e l'attrattività del post per nuovi potenziali copiatori.
+     - **Slot Garantito per i Titoli di Nicchia** (es. $ENI.MI, $TRIG.L, $PRY.MI, $AZN.L, $GLEN.L, $1919.HK, $ENEL.MI, $IQQL.DE): esattamente 1 slot è rigidamente riservato e fatto ruotare sistematicamente tra tutti gli asset meno coperti ma strategici del portafoglio.
+   - **Memoria Storica di Rotazione (FIFO)**: il sistema traccia i titoli utilizzati negli ultimi 2 cicli completi. In ogni fascia, i titoli usati meno di recente hanno la precedenza assoluta, garantendo che nessuno dei 35+ asset del portafoglio rimanga nell'ombra e che il pubblico scopra anche le tesi d'investimento più difensive o ad alto rendimento da dividendo.
 
 2. **Ground-Truth in Tempo Reale con Tavily Search (Per-Ticker Mirato)**:
    - Prima della stesura, il sistema esegue **ricerche parallele ad alta velocità** su Tavily: una per il quadro macro della sessione e query dedicate individuali per ciascun titolo selezionato, risolvendo il nome societario completo (es. *Taiwan Semiconductor TSMC*, *Cameco uranium*, *Eni*, *TRIG*).
