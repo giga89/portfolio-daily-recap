@@ -1,0 +1,59 @@
+{
+  "name": "TRON",
+  "tagline": "Leader globale nel regolamento USDT",
+  "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+  "subtitle": "Infrastruttura blockchain dominante per volume USDT, con transazioni ultra-rapide, commissioni minime e un modello economico deflazionistico.",
+  "kpis": [
+    {
+      "label": "VOLUME TRANSAZIONI USDT",
+      "val": "$10B+ Giornalieri",
+      "sub": "Leader assoluto nel regolamento di stablecoin"
+    },
+    {
+      "label": "TASSO DI BURN (DEFLAZIONE)",
+      "val": "~2.5% Annuo",
+      "sub": "Riduzione costante dell'offerta circolante di TRX"
+    },
+    {
+      "label": "PESO IN PORTAFOGLIO",
+      "val": "9.85%",
+      "sub": "Allocazione gestita nel portafoglio"
+    },
+    {
+      "label": "FREE CASH FLOW (REVENUE)",
+      "val": "$1.2B+ Annualizzati",
+      "sub": "Generati dalle fee di transazione della rete"
+    }
+  ],
+  "pillars": [
+    [
+      "Fossato Competitivo:",
+      "Effetto di rete insuperabile come standard globale per il trasferimento di USDT a basso costo."
+    ],
+    [
+      "Catalizzatore di Crescita:",
+      "Adozione di massa nei mercati emergenti per rimesse e pagamenti transfrontalieri quotidiani."
+    ],
+    [
+      "Solidità e Finanze:",
+      "Modello altamente profittevole con zero debito e accumulo continuo di valore tramite token burn."
+    ],
+    [
+      "Visione Decennale:",
+      "Infrastruttura finanziaria decentralizzata fondamentale per l'integrazione globale delle valute digitali."
+    ]
+  ],
+  "quote": "TRON ridefinisce il trasferimento di valore globale, rendendo i pagamenti digitali istantanei, economici e accessibili a tutti.",
+  "tags": [
+    "#TRX",
+    "#Stablecoin",
+    "#USDT",
+    "#Deflationary",
+    "#Web3"
+  ],
+  "color": [
+    224,
+    27,
+    36
+  ]
+}
