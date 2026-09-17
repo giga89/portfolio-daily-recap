@@ -22,8 +22,8 @@ TAVILY_API_URL = "https://api.tavily.com/search"
 
 # Company name mapping for precise financial search
 TICKER_NAME_MAP = {
-    'TSM': 'Taiwan Semiconductor TSMC',
-    'CCJ': 'Cameco uranium',
+    'TSM': 'Taiwan Semiconductor TSMC TSM',
+    'CCJ': 'Cameco CCJ uranium',
     'NVDA': 'NVIDIA',
     'MSFT': 'Microsoft',
     'AMZN': 'Amazon',
@@ -31,7 +31,7 @@ TICKER_NAME_MAP = {
     'AVGO': 'Broadcom',
     'LLY': 'Eli Lilly',
     'ABBV': 'AbbVie',
-    'ABT': 'Abbott Laboratories',
+    'ABT': 'Abbott Laboratories ABT',
     'NET': 'Cloudflare',
     'PYPL': 'PayPal',
     'ENEL': 'Enel',
@@ -166,7 +166,7 @@ def get_live_market_news_context(
         if clean_t not in clean_tickers:
             clean_tickers.append(clean_t)
             company_name = TICKER_NAME_MAP.get(clean_t, clean_t)
-            t_query = f"{company_name} {clean_t} stock news catalyst earnings"
+            t_query = f"{company_name} stock news earnings" if clean_t in company_name else f"{company_name} {clean_t} stock news earnings"
             search_tasks.append((clean_t, t_query, 5, 2))
 
     def _execute_search(task):

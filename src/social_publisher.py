@@ -202,12 +202,14 @@ def check_cooldown_and_similarity(session_name: str, min_cooldown_minutes: int =
         print(f"   ⚠️ Error checking local analytics for cooldown: {e}")
 
     CORE_SCHEDULED_KEYWORDS = [
+        "recap",
+        "daily",
         "market open",
         "market close",
-        "weekly recap",
-        "monthly recap",
-        "crypto recap",
+        "stock focus",
+        "crypto",
         "copy trading",
+        "outlook",
     ]
 
     if last_dt:
@@ -222,15 +224,18 @@ def check_cooldown_and_similarity(session_name: str, min_cooldown_minutes: int =
                       f"Aborting to avoid duplicate post.")
             return False, reason
 
-        # 2. Core scheduled market sessions are never blocked by auxiliary event posts (e.g. dividends, polls)
+        # 2. Core scheduled market sessions (EU Open, US Open, US Close, Daily recap, etc.):
+        # Never blocked by auxiliary event posts (e.g. Dividend Announcement, polls, single-stock comments).
+        # Only blocked if another core session ran less than 20 minutes ago to prevent rapid multi-dispatch collisions.
         if is_current_core:
-            if is_last_core and elapsed_mins < 45:
+            if is_last_core and elapsed_mins < 20:
                 reason = (f"COOLDOWN ACTIVE: Previous core session ('{last_session}') was published {elapsed_mins:.1f} minutes ago "
-                          f"(minimum core interval is 45m). Aborting to prevent feed cannibalization.")
+                          f"(minimum interval between distinct core sessions is 20m). Aborting to prevent feed cannibalization.")
                 return False, reason
-            # Core session passes cooldown even if an auxiliary post ran recently
+            # Core scheduled session is authorized
+            return True, "Cooldown check passed (core scheduled session authorized)."
         else:
-            # 3. Auxiliary / event-driven posts respect the full cooldown interval
+            # 3. Auxiliary / event-driven posts (e.g. dividend alerts, community polls) respect the full cooldown interval
             if elapsed_mins < min_cooldown_minutes:
                 reason = (f"COOLDOWN ACTIVE: Last post ('{last_session}') was published only {elapsed_mins:.1f} minutes ago "
                           f"(minimum interval is {min_cooldown_minutes}m). Aborting to prevent feed cannibalization.")

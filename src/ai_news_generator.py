@@ -1034,7 +1034,11 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags]) if selected_tags else "Nessuno"
             tag_instruction = f"""
 - REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE {max_tags} tag con il simbolo $ nel testo. Non uno di meno, non uno di più.
-- TAG OBBLIGATORI DEL PORTAFOGLIO ({portfolio_budget}): DEVI includere TUTTI questi tag nel testo, ognuno accompagnato da almeno una frase che lo riguardi: {selected_tags_str}. Non puoi saltarne nessuno.
+- TAG OBBLIGATORI DEL PORTAFOGLIO ({portfolio_budget}): {selected_tags_str}. DEVI includere TUTTI questi tag nel testo.
+- APPROFONDIMENTO SOSTANZIOSO PER CIASCUN TITOLO ({selected_tags_str}):
+  * Per OGNUNO dei titoli indicati ({selected_tags_str}), DEVI scrivere un paragrafo dedicato di 2-4 frasi ricco di contenuti concreti, dati reali e catalizzatori operativi.
+  * È SEVERAMENTE VIETATO limitarsi a una singola frase di circostanza o a formule generiche (es. NO "continuiamo a seguire con fiducia", NO "la tesi rimane solida", NO "sostenuta dalla forte domanda", NO "continua ad offrire ottima stabilità", NO "copertura strategica importante").
+  * DEVI obbligatoriamente citare FATTI, NUMERI, DATI TRIMESTRALI, ACCORDI o PRODOTTI SPECIFICI ricavati dalle fonti Tavily e dalle schede fondamentali fornite (es. fatturati, marginalità, tassi di crescita, contratti industriali, buyback di azioni, nomi di farmaci/dispositivi o piattaforme proprietarie).
 - TAG TENDENZA OBBLIGATORIO (1): DEVI aggiungere esattamente 1 tag tra i più cercati/discussi del momento, scegliendo tra $NSDQ100 o $SPX500 (preferiti perché attirano copiatori), oppure un titolo di enorme interesse del giorno (es. $TSLA, $NVDA, $AAPL, $BTC). Questo tag DEVE essere spiegato nel testo.
 - TOTALE: {portfolio_budget} tag portafoglio + 1 tag tendenza = {max_tags} tag totali. Conta i $ nel testo prima di concludere e verifica che siano esattamente {max_tags}.
 """
@@ -1086,6 +1090,32 @@ Estrai e cita i fatti concreti, le cifre, le percentuali, i dati trimestrali e i
         except Exception as tavily_err:
             print(f"   ℹ️ Tavily grounding note: {tavily_err}")
 
+        # Build fundamental profile context for selected portfolio tags
+        holdings_fundamental_section = ""
+        try:
+            from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+            fundamental_lines = []
+            for tag in (selected_tags or []):
+                clean_tag = tag.replace("$", "").strip()
+                meta = PORTFOLIO_ASSETS_METADATA.get(clean_tag) or PORTFOLIO_ASSETS_METADATA.get(clean_tag.split('.')[0])
+                if meta:
+                    cat_str = "; ".join(meta.get("upside_catalysts", [])[:2])
+                    fundamental_lines.append(
+                        f"📊 DATI FONDAMENTALI E PROFILO PER ${tag} ({meta.get('name', tag)} - {meta.get('sector', '')}):\n"
+                        f"  • Modello di Business & Moat: {meta.get('thesis', '')}\n"
+                        f"  • Catalizzatori Operativi Chiave: {cat_str}"
+                    )
+            if fundamental_lines:
+                holdings_fundamental_section = (
+                    "=====================================================\n"
+                    "SCHEDE FONDAMENTALI DEI NOSTRI TITOLI IN EVIDENZA:\n"
+                    "=====================================================\n" +
+                    "\n".join(fundamental_lines) + "\n"
+                    "=====================================================\n"
+                )
+        except Exception as meta_err:
+            print(f"   ℹ️ Portfolio metadata grounding note: {meta_err}")
+
         temporal_ground_truth_header = f"""
 =====================================================
 INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
@@ -1120,18 +1150,20 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
         )
 
         anti_platitude_rules = (
-            "- REGOLA ANTI-BANALITÀ E NOTIZIE VERE (TASSATIVA):\n"
-            "  * È SEVERAMENTE VIETATO scrivere frasi fatte, banali, ovvie o vuote come: "
+            "- REGOLA ANTI-BANALITÀ E NOTIZIE VERE (TASSATIVA E RIGIDA):\n"
+            "  * È SEVERAMENTE VIETATO scrivere frasi fatte, banali, ovvie o prive di dati come: "
             "'continuiamo a seguire con estrema fiducia', 'la tesi rimane solida', 'sostenuta dalla forte domanda', "
-            "'rappresenta una copertura strategica importante', 'attendiamo sviluppi futuri', 'prospettive incoraggianti'.\n"
-            "  * Ogni volta che citi un titolo del portafoglio (es. $TSM, $CCJ, $NVDA, $PLTR, ecc.), DEVI riportare una NOTIZIA VERA, RECENTE e CONCRETA tratta dalle fonti reali Tavily fornite sopra (un catalizzatore reale, risultati trimestrali con cifre, guidance, ordini vinti, partnership, upgrade/downgrade di analisti, target price o metriche operative effettive).\n"
-            "  * Se non hai notizie concrete su un titolo, parla di un altro titolo del nostro portafoglio presente nelle notizie fornite sopra, oppure descrivi un dato aziendale preciso. NON riempire mai lo spazio con ovvietà o frasi generiche!"
+            "'rappresenta una copertura strategica importante', 'continua ad offrire ottima stabilità', "
+            "'pronti a gestire la volatilità', 'attendiamo sviluppi futuri', 'prospettive incoraggianti'.\n"
+            "  * Ogni volta che citi un titolo del portafoglio (es. $TSM, $CCJ, $NVDA, $PLTR, $ABT.US, ecc.), DEVI riportare NOTIZIE VERE, RECENTI e CONCRETE: numeri di bilancio, crescita percentuale, guidance, accordi vinti, buyback azionari, investimenti industriali o prodotti/farmaci specifici.\n"
+            "  * Se scrivi anche solo una frase generica o ovvia senza dati o fatti, il post risulterà inaccettabile e verrà bloccato dai filtri di conformità."
         )
         
         if "EUROPEAN" in session_upper and "OPEN" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura dei mercati europei.
             {temporal_ground_truth_header}
             {tavily_grounding_section}
+            {holdings_fundamental_section}
             Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e gli eventi di mercato più rilevanti delle ultime 12-24 ore relativi ai mercati europei o ai titoli europei nel nostro portafoglio.
             
             CONTESTO PORTAFOGLIO EUROPEO:
@@ -1145,7 +1177,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             {asset_identity_rules}
             {anti_platitude_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
-            - Presenta MAX 3 brevi spunti o notizie principali per l'apertura europea, focalizzandoti sulle novità dei nostri titoli in portafoglio o sull'indice Euro Stoxx.
+            - Sviluppa approfondimenti concreti e specifici per i nostri titoli in portafoglio citando dati reali, prodotti e notizie aziendali.
             - {tag_instruction}
             - Usa le emoji in modo spontaneo e naturale (non metterne troppe, massimo 3 o 4 in tutto il post).
             - {closing_question_instruction}
@@ -1159,6 +1191,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno/buon pomeriggio caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura di Wall Street (U.S. market open).
             {temporal_ground_truth_header}
             {tavily_grounding_section}
+            {holdings_fundamental_section}
             Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e gli eventi di mercato più rilevanti delle ultime 12-24 ore relativi ai mercati americani o ai titoli USA nel nostro portafoglio.
             
             CONTESTO PORTAFOGLIO USA:
@@ -1172,7 +1205,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             {asset_identity_rules}
             {anti_platitude_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
-            - Presenta MAX 3 brevi spunti o notizie principali per l'apertura USA, focalizzandoti sulle novità dei nostri titoli in portafoglio o sugli indici americani (S&P 500, Nasdaq).
+            - Sviluppa approfondimenti concreti e specifici per i nostri titoli in portafoglio citando dati reali, prodotti e notizie aziendali.
             - {tag_instruction}
             - Usa le emoji in modo spontaneo e naturale (non metterne troppe, massimo 3 o 4 in tutto il post).
             - {closing_question_instruction}
@@ -1186,6 +1219,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di fine settimana caldo, onesto e naturale per i tuoi copiatori ed follower (Weekly Recap - Sabato).
             {temporal_ground_truth_header}
             {tavily_grounding_section}
+            {holdings_fundamental_section}
             Usa il tuo strumento di ricerca Google per analizzare l'andamento della settimana appena trascorsa sui mercati globali e l'impatto sul nostro portafoglio.
             
             CONTESTO PORTAFOGLIO:
@@ -1198,7 +1232,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             {asset_identity_rules}
             {anti_platitude_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
-            - Fai un bilancio sincero di cosa ha guidato il portafoglio in questa settimana, menzionando i movimenti principali dei nostri titoli chiave.
+            - Fai un bilancio sincero di cosa ha guidato il portafoglio in questa settimana, menzionando i movimenti principali dei nostri titoli chiave con fatti e numeri precisi.
             - Spiega brevemente cosa terremo d'occhio per la prossima settimana.
             - {tag_instruction}
             - Usa le emoji in modo spontaneo e naturale (massimo 3 o 4 in tutto il post).
@@ -1213,6 +1247,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post domenicale strategico, naturale e professionale per i tuoi copiatori ed investitori focalizzato sull'ANTEPRIMA DELLA SETTIMANA IN ARRIVO (Weekly Outlook & Preview).
             {temporal_ground_truth_header}
             {tavily_grounding_section}
+            {holdings_fundamental_section}
             Usa il tuo strumento di ricerca Google per cercare:
             1. I principali appuntamenti macroeconomici previsti per la prossima settimana (es. riunioni banche centrali Fed/BCE, dati inflazione CPI, PIL, mercato del lavoro).
             2. Le trimestrali (earnings) o eventi societari attesi nella settimana per le principali aziende o per i titoli del nostro portafoglio.
@@ -1227,7 +1262,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             {asset_identity_rules}
             {anti_platitude_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
-            - Metti in evidenza i 2-3 catalizzatori principali della settimana entrante e come la nostra diversificazione e gestione del rischio ci posizionano per affrontarli.
+            - Metti in evidenza i 2-3 catalizzatori principali della settimana entrante e come la nostra diversificazione e gestione del rischio ci posizionano per affrontarli con dati precisi.
             - Spiega cosa terremo d'occhio in particolare e trasmetti serenità e fiducia strategica.
             - {tag_instruction}
             - Usa le emoji in modo spontaneo e naturale (massimo 3 o 4 in tutto il post).
@@ -1243,6 +1278,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             {temporal_ground_truth_header}
             {temporal_rules_us_close}
             {tavily_grounding_section}
+            {holdings_fundamental_section}
             Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e le performance più rilevanti delle ultime 24 ore sui mercati globali e per i titoli del nostro portafoglio.
             
             {previous_topics_str}
@@ -1257,6 +1293,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             - È TASSATIVAMENTE VIETATO inserire menzioni o tag come @AndreaRavalli o @andrearavalli.
             {asset_identity_rules}
             {anti_platitude_rules}
+            - Sviluppa approfondimenti concreti e specifici per i nostri titoli in portafoglio citando dati reali, prodotti e notizie aziendali.
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta un breve quadro della giornata di borsa (S&P 500, Nasdaq, mercati europei) e spiega l'impatto diretto sui titoli del nostro portafoglio.
             - {tag_instruction}

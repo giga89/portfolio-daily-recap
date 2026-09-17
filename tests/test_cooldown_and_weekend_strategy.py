@@ -54,6 +54,25 @@ class TestCooldownAndWeekendStrategy(unittest.TestCase):
                     can_post, reason = social_publisher.check_cooldown_and_similarity("Stock focus", min_cooldown_minutes=75)
                     self.assertTrue(can_post)
 
+    def test_core_session_not_blocked_by_auxiliary_dividend_post(self):
+        """Ensure core scheduled sessions (e.g. US market open or Daily recap) are never blocked by auxiliary posts (e.g. Dividend 45m ago)."""
+        recent_time = (datetime.now(timezone.utc) - timedelta(minutes=45)).isoformat()
+        mock_post = {
+            "created_at": recent_time,
+            "session_name": "Dividend Announcement: $ENI.MI",
+        }
+
+        with patch.dict(os.environ, {"FORCE_RUN": "false"}):
+            with patch("gist_storage.get_last_etoro_post", return_value=mock_post):
+                with patch("os.path.exists", return_value=False):
+                    can_post_us, reason_us = social_publisher.check_cooldown_and_similarity("U.S. market open", min_cooldown_minutes=75)
+                    self.assertTrue(can_post_us)
+                    self.assertIn("authorized", reason_us)
+
+                    can_post_daily, reason_daily = social_publisher.check_cooldown_and_similarity("Daily recap", min_cooldown_minutes=75)
+                    self.assertTrue(can_post_daily)
+                    self.assertIn("authorized", reason_daily)
+
     def test_duplicate_session_guard(self):
         """Ensure identical session is blocked if it ran 2 hours ago (< 360 min)."""
         past_time = (datetime.now(timezone.utc) - timedelta(minutes=120)).isoformat()

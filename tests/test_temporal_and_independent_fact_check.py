@@ -155,5 +155,18 @@ class TestTemporalAndIndependentFactCheck(unittest.TestCase):
         self.assertIn("$NVDA", final_text)
 
 
+    def test_deterministic_gate_catches_banal_platitudes(self):
+        """Ensure post_verifier deterministically detects empty banal platitudes."""
+        banal_post = (
+            "Nel nostro portafoglio continuiamo a seguire con estrema fiducia $TSM , sostenuta dalla domanda sempre fortissima. "
+            "La tesi sull uranio rimane solida e rappresenta una copertura strategica importante per bilanciare il nostro portafoglio. "
+            "Infine per $ABT.US continua ad offrire ottima stabilità e siamo pronti a gestire la volatilità."
+        )
+        is_clean, issues, cleaned = verify_post_deterministic(banal_post, session_name="US_OPEN")
+        self.assertFalse(is_clean)
+        self.assertTrue(len(issues) >= 3, f"Expected multiple platitude issues, got: {issues}")
+        self.assertTrue(any("BANALITÀ VIETATA" in issue for issue in issues))
+
+
 if __name__ == "__main__":
     unittest.main()

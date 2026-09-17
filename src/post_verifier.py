@@ -147,6 +147,34 @@ TEMPORAL_CLOSE_FORBIDDEN_PATTERNS = [
     ),
 ]
 
+# Patterns that represent empty banality or generic platitudes without news/catalysts
+PLATITUDE_FORBIDDEN_PATTERNS = [
+    (
+        r'\bcontinuiamo\s+a\s+seguire\s+con\s+estrema\s+fiducia\b',
+        "Frase vuota/banale vietata: 'continuiamo a seguire con estrema fiducia'. Sostituire con dati aziendali, catalizzatori o numeri reali"
+    ),
+    (
+        r'\bla\s+tesi\s+(?:sull\S+|\S+)?\s*rimane\s+solida\b',
+        "Frase vuota/banale vietata: 'la tesi rimane solida'. Riportare fatti concreti, ordini industriali o trimestrali"
+    ),
+    (
+        r'\bsostenuta\s+dalla\s+domanda\s+sempre\s+fortissima\b',
+        "Frase vuota/banale vietata: 'sostenuta dalla domanda sempre fortissima'. Citare numeri di crescita ricavi, margini o guidance"
+    ),
+    (
+        r'\brappresenta\s+una\s+copertura\s+strategica\s+importante\b',
+        "Frase vuota/banale vietata: 'rappresenta una copertura strategica importante'. Specificare metriche o fattori operativi effettivi"
+    ),
+    (
+        r'\bcontinua\s+ad\s+offrire\s+ottima\s+stabilità\b',
+        "Frase vuota/banale vietata: 'continua ad offrire ottima stabilità'. Riportare prodotti specifici, utili per azione o sviluppi clinici"
+    ),
+    (
+        r'\bpronti\s+a\s+gestire\s+la\s+volatilità\b',
+        "Frase vuota/banale vietata: 'pronti a gestire la volatilità'. Sostituire con considerazioni analitiche concrete"
+    ),
+]
+
 
 def clean_etoro_formatting(text: str) -> str:
     """
@@ -310,6 +338,11 @@ def verify_post_deterministic(
         # For any session, Powell cited as current decider is strictly forbidden
         if re.search(r'\b(?:powell|jerome\s+powell)\b.{0,50}\b(?:oggi|stasera|prenderà|deciderà|taglierà)\b', cleaned_text, flags=re.IGNORECASE):
             issues.append("CRITICAL: Anacronismo / Allucinazione istituzionale: Jerome Powell citato come decisore odierno/futuro.")
+
+    # 0c. Check for empty platitudes and generic banned filler phrases
+    for pattern, reason in PLATITUDE_FORBIDDEN_PATTERNS:
+        if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
+            issues.append(f"CRITICAL: BANALITÀ VIETATA: {reason}.")
 
     # Check for purged assets that must never appear in active communications
     for tag in tickers_to_check:

@@ -204,6 +204,10 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
    - Devi preservare integralmente tutta la struttura, i dettagli di mercato, le analisi dei singoli titoli, i paragrafi e la ricchezza del post originale.
    - Intervieni in modo chirurgico SOLO sui passaggi che contengono errori temporali o allucinazioni, riscrivendoli al passato o correggendo l'inesattezza, senza impoverire o accorciare il post.
 
+6. RIGETTO DI BANALITÀ E FRASI FATTE (QUALITÀ DELLE NOTIZIE):
+   - Se il post contiene frasi generiche, banali e vuote prive di qualsiasi dato concreto sui titoli citati (es. 'continuiamo a seguire con estrema fiducia', 'la tesi rimane solida', 'sostenuta dalla forte domanda', 'continua ad offrire ottima stabilità', 'rappresenta una copertura strategica importante', 'pronti a gestire la volatilità'), DEVI considerarlo un difetto grave.
+   - CORREZIONE: Sostituisci la frase generica con un dato aziendale reale tratto dai METADATI DI PORTAFOGLIO o dalle NOTIZIE LIVE TAVILY (es. cita numeri di bilancio, crescita ricavi, margini operativi, contratti vinti, siti produttivi, nomi di farmaci/dispositivi o piattaforme proprietarie).
+
 =========================================
 OUTPUT RICHIESTO:
 =========================================
