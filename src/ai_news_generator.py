@@ -1031,15 +1031,16 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             from tavily_search import get_live_market_news_context, is_tavily_available
             if is_tavily_available():
                 t_tickers = [t for t in (selected_tags or [])]
-                t_news = get_live_market_news_context(session_name=market_session, tickers=t_tickers, max_results=4)
+                t_news = get_live_market_news_context(session_name=market_session, tickers=t_tickers, max_results=2)
                 if t_news:
                     tavily_grounding_section = f"""
 =====================================================
-NOTIZIE FINANZIARIE REALI RECENTI (FONTE LIVE WEB - TAVILY):
+NOTIZIE FINANZIARIE REALI & CATALIZZATORI SOCIETARI (GROUND TRUTH WEB LIVE - TAVILY):
 =====================================================
 {t_news}
 =====================================================
-Usa queste notizie reali verificate come spunto principale per la tua analisi dei mercati e dei titoli.
+REGOLA D'USO TASSATIVA: Usa queste notizie reali e verificate come base OBBLIGATORIA per la tua analisi.
+Estrai e cita i fatti concreti, le cifre, le percentuali, i dati trimestrali e i catalizzatori societari reali menzionati sopra.
 """
                     print(f"   🌐 Tavily Live Grounding: fornite notizie recenti al generatore ({len(t_news)} caratteri).")
         except Exception as tavily_err:
@@ -1077,6 +1078,15 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             "$IQQL.DE è iShares Listed Private Equity UCITS ETF (Private Equity, es. KKR, Blackstone), NON World Quality. "
             "Nessuna menzione di XEON (dismesso dal portafoglio)."
         )
+
+        anti_platitude_rules = (
+            "- REGOLA ANTI-BANALITÀ E NOTIZIE VERE (TASSATIVA):\n"
+            "  * È SEVERAMENTE VIETATO scrivere frasi fatte, banali, ovvie o vuote come: "
+            "'continuiamo a seguire con estrema fiducia', 'la tesi rimane solida', 'sostenuta dalla forte domanda', "
+            "'rappresenta una copertura strategica importante', 'attendiamo sviluppi futuri', 'prospettive incoraggianti'.\n"
+            "  * Ogni volta che citi un titolo del portafoglio (es. $TSM, $CCJ, $NVDA, $PLTR, ecc.), DEVI riportare una NOTIZIA VERA, RECENTE e CONCRETA tratta dalle fonti reali Tavily fornite sopra (un catalizzatore reale, risultati trimestrali con cifre, guidance, ordini vinti, partnership, upgrade/downgrade di analisti, target price o metriche operative effettive).\n"
+            "  * Se non hai notizie concrete su un titolo, parla di un altro titolo del nostro portafoglio presente nelle notizie fornite sopra, oppure descrivi un dato aziendale preciso. NON riempire mai lo spazio con ovvietà o frasi generiche!"
+        )
         
         if "EUROPEAN" in session_upper and "OPEN" in session_upper:
             prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura dei mercati europei.
@@ -1093,6 +1103,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona ("Nel nostro portafoglio...", "Monitoriamo...", "La mia strategia..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
             {asset_identity_rules}
+            {anti_platitude_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta MAX 3 brevi spunti o notizie principali per l'apertura europea, focalizzandoti sulle novità dei nostri titoli in portafoglio o sull'indice Euro Stoxx.
             - {tag_instruction}
@@ -1119,6 +1130,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona ("Nel nostro portafoglio...", "Oggi all'apertura guardiamo...", "La mia strategia..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
             {asset_identity_rules}
+            {anti_platitude_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta MAX 3 brevi spunti o notizie principali per l'apertura USA, focalizzandoti sulle novità dei nostri titoli in portafoglio o sugli indici americani (S&P 500, Nasdaq).
             - {tag_instruction}
@@ -1144,6 +1156,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona. È TASSATIVAMENTE VIETATO iniziare con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai col tuo nome nel testo!
             {asset_identity_rules}
+            {anti_platitude_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Fai un bilancio sincero di cosa ha guidato il portafoglio in questa settimana, menzionando i movimenti principali dei nostri titoli chiave.
             - Spiega brevemente cosa terremo d'occhio per la prossima settimana.
@@ -1172,6 +1185,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
             - IMPORTANTE: Parla direttamente in prima persona ("Ci prepariamo alla nuova settimana...", "Nel nostro portafoglio monitoriamo...", "La nostra strategia..."). È TASSATIVAMENTE VIETATO usare formule come "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai col tuo nome nel testo!
             {asset_identity_rules}
+            {anti_platitude_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Metti in evidenza i 2-3 catalizzatori principali della settimana entrante e come la nostra diversificazione e gestione del rischio ci posizionano per affrontarli.
             - Spiega cosa terremo d'occhio in particolare e trasmetti serenità e fiducia strategica.
@@ -1202,6 +1216,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             - IMPORTANTE: Parla direttamente in prima persona ("Chiudiamo la sessione...", "Nel nostro portafoglio...", "Oggi abbiamo osservato..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
             - È TASSATIVAMENTE VIETATO inserire menzioni o tag come @AndreaRavalli o @andrearavalli.
             {asset_identity_rules}
+            {anti_platitude_rules}
             - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
             - Presenta un breve quadro della giornata di borsa (S&P 500, Nasdaq, mercati europei) e spiega l'impatto diretto sui titoli del nostro portafoglio.
             - {tag_instruction}
@@ -1463,13 +1478,6 @@ Raddoppio del capitale stimato in ~{time_to_double:.1f} anni
 • Focus sui megatrend del futuro: AI, Sanità ed Energia
 • Mix bilanciato di ETF e azioni individuali ad alto potenziale
 • Gestione attiva, trasparente e senza commissioni nascoste
-
-🛡️ METODO & VERIFICA DELLE NOTIZIE (MULTI-AI CONSENSUS):
-Utilizzo l'Intelligenza Artificiale con approccio critico e quantitativo:
-1. Ground-Truth in tempo reale: notizie e catalizzatori societari cross-verificati sul web live (Tavily Search) contro fonti ufficiali.
-2. Analisi e Sintesi: elaborazione macroeconomica strutturata con Google Gemini.
-3. Doppio Audit Indipendente: ogni notizia viene analizzata in parallelo da due AI indipendenti (Groq LPUs e Mistral).
-4. Regola del Consenso: pubblicazione solo con approvazione unanime a micro-argomenti per garantire zero allucinazioni e massima accuratezza.
 
 📊 DIFFERENZIALE RISPETTO AI BENCHMARK (Dal 2020):
 {benchmark_lines.strip()}
@@ -1756,10 +1764,11 @@ def generate_copy_trading_post(
     from datetime import datetime as _dt
     weekday = _dt.utcnow().weekday()  # 0=Mon … 6=Sun
     angles = [
-        "Come funziona il Copy Trading step-by-step + perché è diverso da un fondo",
+        "Metodo & Trasparenza: come il Multi-AI Consensus e la verifica live azzerano le allucinazioni e proteggono i copiatori",
+        "Come funziona il Copy Trading step-by-step + perché è diverso da un fondo comune",
         "I miei numeri reali su eToro: performance storica, win rate e trasparenza totale",
         "Domande frequenti sul Copy Trading: rischi, costi, gestione della liquidità e come iniziare",
-        "Il mio approccio di investimento prudente: zero leva e diversificazione globale",
+        "Il mio approccio di investimento prudente: zero leva e diversificazione globale su megatrend",
         "Copy Trading vs ETF: i vantaggi di una gestione attiva trasparente",
         "Cosa succede al tuo capitale quando mi copi: controllo e libertà totale in ogni momento",
         "I miei principi d'investimento: lungo periodo, gestione del rischio e disciplina",
@@ -1767,7 +1776,7 @@ def generate_copy_trading_post(
     angle = angles[weekday % len(angles)]
 
     prompt = f"""Sei Andrea Ravalli, Popular Investor Elite italiano su eToro con un portfolio reale, trasparente e prudente.
-Il tuo obiettivo oggi è scrivere un post educativo e persuasivo sul Copy Trading di eToro per la tua community.
+Il tuo obiettivo oggi è scrivere un post educativo e persuasivo sul Copy Trading di eToro per la tua community ("Perché copiarmi").
 
 ANGOLO DEL POST DI OGGI: "{angle}"
 
@@ -1780,9 +1789,18 @@ DATI REALI DEL PORTAFOGLIO & COPIATORI (usali con naturalezza per dare massima c
 
 {gain_context}
 
+APPROCCIO SCIENTIFICO & METODO DI VERIFICA (ELEMENTO DIFFERENZIANTE CHIAVE):
+Spiega (quando pertinente all'angolo del post o come segno distintivo del tuo profilo) come gestisci le notizie, i dati societari e la strategia:
+🛡️ METODO & VERIFICA DELLE NOTIZIE (MULTI-AI CONSENSUS):
+Utilizzo l'Intelligenza Artificiale con approccio critico e quantitativo:
+1. Ground-Truth in tempo reale: notizie e catalizzatori societari cross-verificati sul web live (Tavily Search) contro fonti ufficiali.
+2. Analisi e Sintesi: elaborazione macroeconomica strutturata con Google Gemini.
+3. Doppio Audit Indipendente: ogni notizia viene analizzata in parallelo da due AI indipendenti (Groq LPUs e Mistral).
+4. Regola del Consenso: pubblicazione solo con approvazione unanime a micro-argomenti per garantire zero allucinazioni e massima accuratezza.
+
 OBIETTIVO DEL POST:
 1. Spiegare in modo limpido come funziona il Copy Trading su eToro
-2. Mostrare perché ha senso copiare la tua strategia (lungo termine, basso rischio score 3, 100% no leva, win rate solido, oltre 8 anni di storico)
+2. Mostrare perché ha senso copiare la tua strategia (approccio quantitativo e scientifico Multi-AI, lungo termine, basso rischio score 3, 100% no leva, win rate solido, oltre 8 anni di storico)
 3. Essere totalmente onesto e trasparente: il Copy Trading non garantisce profitti, i mercati oscillano
 4. Concludere con una domanda aperta stimolante per invitare i lettori a commentare
 
@@ -1840,7 +1858,7 @@ def _copy_trading_fallback(
     portfolio_perf: float = None,
     rankings_data: dict = None,
 ) -> str:
-    """Fallback copy trading post when Gemini is unavailable — uses real stats data."""
+    """Fallback copy trading post when Gemini is unavailable — uses real stats data and Multi-AI Consensus method."""
     perf_line = ""
     if portfolio_perf is not None:
         sign = "+" if portfolio_perf >= 0 else ""
@@ -1863,13 +1881,19 @@ def _copy_trading_fallback(
                 break
 
     return (
-        "💡 Sai come funziona il Copy Trading su eToro?\n\n"
-        "Con il Copy Trading puoi replicare in tempo reale e in proporzione tutte le mie operazioni di portafoglio, "
-        "con il capitale che scegli tu — mantenendo sempre il pieno controllo e potendo fermare la copia in qualsiasi istante.\n\n"
+        "💡 PERCHÉ COPIARE IL MIO PORTAFOGLIO SU eToro?\n\n"
+        "Con il Copy Trading puoi replicare in tempo reale e in proporzione tutte le mie operazioni, "
+        "con il capitale che scegli tu — mantenendo sempre il pieno controllo e potendo fermare la copia in qualsiasi momento.\n\n"
         f"La mia strategia punta su fondamentali solidi, diversificazione globale e zero leva speculativa.{perf_line}{copier_line}{win_line}\n\n"
-        "Investire con metodo e disciplina nel lungo periodo fa la differenza.\n\n"
+        "🛡️ METODO & VERIFICA DELLE NOTIZIE (MULTI-AI CONSENSUS):\n"
+        "Utilizzo l'Intelligenza Artificiale con approccio critico e quantitativo:\n"
+        "1. Ground-Truth in tempo reale: notizie e catalizzatori societari cross-verificati sul web live (Tavily Search) contro fonti ufficiali.\n"
+        "2. Analisi e Sintesi: elaborazione macroeconomica strutturata con Google Gemini.\n"
+        "3. Doppio Audit Indipendente: ogni notizia viene analizzata in parallelo da due AI indipendenti (Groq LPUs e Mistral).\n"
+        "4. Regola del Consenso: pubblicazione solo con approvazione unanime a micro-argomenti per garantire zero allucinazioni e massima accuratezza.\n\n"
+        "Investire con metodo, disciplina e trasparenza nel lungo periodo fa la differenza.\n\n"
         "⚠️ Ricorda: i rendimenti passati non sono garanzia di risultati futuri. Investire comporta rischi.\n\n"
-        "Hai curiosità o dubbi sul funzionamento della copia? Scrivimelo nei commenti qui sotto 👇"
+        "Hai curiosità o dubbi sul funzionamento della copia o sulla strategia? Scrivimelo nei commenti qui sotto 👇"
     )
 
 

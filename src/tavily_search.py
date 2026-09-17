@@ -16,7 +16,43 @@ except ImportError:
     REQUESTS_AVAILABLE = False
 
 
+from concurrent.futures import ThreadPoolExecutor
+
 TAVILY_API_URL = "https://api.tavily.com/search"
+
+# Company name mapping for precise financial search
+TICKER_NAME_MAP = {
+    'TSM': 'Taiwan Semiconductor TSMC',
+    'CCJ': 'Cameco uranium',
+    'NVDA': 'NVIDIA',
+    'MSFT': 'Microsoft',
+    'AMZN': 'Amazon',
+    'PLTR': 'Palantir',
+    'AVGO': 'Broadcom',
+    'LLY': 'Eli Lilly',
+    'ABBV': 'AbbVie',
+    'ABT': 'Abbott Laboratories',
+    'NET': 'Cloudflare',
+    'PYPL': 'PayPal',
+    'ENEL': 'Enel',
+    'ENI': 'Eni',
+    'PRY': 'Prysmian',
+    'RACE': 'Ferrari',
+    'VOW3': 'Volkswagen',
+    'GLEN': 'Glencore',
+    'AZN': 'AstraZeneca',
+    'NOVO-B': 'Novo Nordisk',
+    'WDEF': 'WisdomTree Europe Defence ETF',
+    'SX7PEX': 'European Banks ETF STOXX 600',
+    'IQQL': 'iShares Listed Private Equity ETF',
+    'PPFB': 'Physical Gold ETC',
+    'IB01': 'Treasury Bond 0-1yr ETF',
+    'ETOR': 'eToro Group',
+    'MELI': 'MercadoLibre',
+    'MRVL': 'Marvell Technology',
+    'HUM': 'Humana',
+    'WMT': 'Walmart',
+}
 
 
 def is_tavily_available() -> bool:
@@ -28,10 +64,10 @@ def search_tavily(
     query: str,
     search_depth: str = "basic",
     topic: str = "news",
-    days: int = 2,
-    max_results: int = 3,
+    days: int = 3,
+    max_results: int = 2,
     api_key: Optional[str] = None,
-    timeout: int = 10,
+    timeout: int = 8,
 ) -> Optional[List[Dict[str, Any]]]:
     """
     Executes a real-time web search via Tavily Search API.
@@ -40,7 +76,7 @@ def search_tavily(
         query: Search query (e.g. "Wall Street close today", "NVDA stock news")
         search_depth: "basic" or "advanced"
         topic: "news" or "general"
-        days: Limit results to the last N days (default 2 for recent financial news)
+        days: Limit results to the last N days (default 3 for recent financial news)
         max_results: Max number of search results to return
         api_key: Optional API key override (defaults to TAVILY_API_KEY env var)
         timeout: Request timeout in seconds
@@ -88,12 +124,17 @@ def search_tavily(
 def get_live_market_news_context(
     session_name: Optional[str] = None,
     tickers: Optional[List[str]] = None,
-    max_results: int = 4,
-    days: int = 2,
+    max_results: int = 2,
+    days: int = 3,
 ) -> str:
     """
     Fetches real-time financial ground truth context from Tavily for injection
     into AI news prompts and fact-checker audits.
+    
+    Executes parallel queries:
+    1. One macro session query (e.g. Wall Street open/close, European open)
+    2. Targeted individual queries for up to 3 specific portfolio tickers to fetch
+       genuine catalysts, quarterly earnings, orders, analyst upgrades, or operational figures.
     
     Returns:
         Clean formatted string with recent verified articles and snippets.
@@ -102,40 +143,76 @@ def get_live_market_news_context(
         return ""
 
     session_str = (session_name or "Wall Street market close").lower()
-    ticker_focus = " ".join(tickers[:3]) if tickers else "S&P 500 Nasdaq"
 
-    # Build targeted financial query
-    if "open" in session_str:
-        query = f"stock market opening futures news {ticker_focus}"
+    # 1. Determine macro query
+    if "open" in session_str and "eu" in session_str:
+        macro_query = "European stock market open Stoxx 600 DAX today"
+    elif "open" in session_str:
+        macro_query = "Wall Street stock market opening futures today S&P 500"
     elif "close" in session_str:
-        query = f"Wall Street stock market close today {ticker_focus}"
+        macro_query = "Wall Street stock market close today S&P 500 Nasdaq"
     elif "weekly" in session_str:
-        query = f"weekly stock market recap {ticker_focus}"
+        macro_query = "weekly stock market recap Wall Street S&P 500"
     else:
-        query = f"financial market news today {ticker_focus}"
+        macro_query = "financial stock market news today Wall Street"
 
-    results = search_tavily(
-        query=query,
-        topic="news",
-        days=days,
-        max_results=max_results,
-    )
+    # 2. Build list of queries to run in parallel
+    search_tasks = [("macro", macro_query, days, 2)]
 
-    if not results:
+    clean_tickers = []
+    for t in (tickers or [])[:3]:
+        raw_t = t.replace("$", "").strip()
+        clean_t = raw_t.split(".")[0].upper()
+        if clean_t not in clean_tickers:
+            clean_tickers.append(clean_t)
+            company_name = TICKER_NAME_MAP.get(clean_t, clean_t)
+            t_query = f"{company_name} {clean_t} stock news catalyst earnings"
+            search_tasks.append((clean_t, t_query, 5, 2))
+
+    def _execute_search(task):
+        tag, query, d, m = task
+        res = search_tavily(query=query, topic="news", days=d, max_results=m)
+        return tag, res
+
+    try:
+        with ThreadPoolExecutor(max_workers=min(4, len(search_tasks))) as executor:
+            task_results = list(executor.map(_execute_search, search_tasks))
+    except Exception as e:
+        print(f"   ⚠️ Parallel Tavily search failed: {e}")
         return ""
 
-    formatted_items = []
-    for r in results:
-        title = r.get("title", "News")
-        content = r.get("content", "").strip().replace("\n", " ")
-        pub = r.get("published_date") or "Oggi"
-        url = r.get("url", "")
-        source_str = f" ({url})" if url else ""
-        if content:
-            snippet = content[:250] + "..." if len(content) > 250 else content
-            formatted_items.append(f"• [{pub}] {title}{source_str}\n  Sintesi: {snippet}")
+    macro_items = []
+    ticker_items = []
 
-    if not formatted_items:
-        return ""
+    for tag, results in task_results:
+        if not results:
+            continue
+        if tag == "macro":
+            for r in results:
+                title = r.get("title", "News")
+                content = r.get("content", "").strip().replace("\n", " ")
+                pub = r.get("published_date") or "Oggi"
+                url = r.get("url", "")
+                source_str = f" ({url})" if url else ""
+                snippet = content[:250] + "..." if len(content) > 250 else content
+                macro_items.append(f"• [{pub}] {title}{source_str}\n  Sintesi: {snippet}")
+        else:
+            company_name = TICKER_NAME_MAP.get(tag, tag)
+            sub_items = [f"\n📊 NOTIZIE E DATI REALI PER ${tag} ({company_name}):"]
+            for r in results:
+                title = r.get("title", "News")
+                content = r.get("content", "").strip().replace("\n", " ")
+                pub = r.get("published_date") or "Recente"
+                url = r.get("url", "")
+                source_str = f" ({url})" if url else ""
+                snippet = content[:280] + "..." if len(content) > 280 else content
+                sub_items.append(f"• [{pub}] {title}{source_str}\n  Fatto/Dato concreto: {snippet}")
+            ticker_items.append("\n".join(sub_items))
 
-    return "\n".join(formatted_items)
+    output_sections = []
+    if macro_items:
+        output_sections.append("🌍 CONTESTO MACRO E APERTURA/CHIUSURA MERCATI:\n" + "\n".join(macro_items))
+    if ticker_items:
+        output_sections.append("🏢 CATALIZZATORI E NOTIZIE SOCIETARIE SUI NOSTRI TITOLI:\n" + "\n".join(ticker_items))
+
+    return "\n\n".join(output_sections)
