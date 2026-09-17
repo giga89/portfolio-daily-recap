@@ -6,7 +6,7 @@ on:
       session_name:
         description: 'Market session to simulate (e.g. US_CLOSE, EU_OPEN)'
         required: false
-        default: 'US_CLOSE'
+        default: 'ALL'
 
 jobs:
   test-telegram:

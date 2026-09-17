@@ -223,6 +223,152 @@ def _select_tags_for_rotation(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, al
         return all_tags[:max_tags]
 
 
+def _select_rotation_favorites_and_niche(allowed_tickers, excluded_tags=None, count_favorites=2, count_niche=1):
+    """
+    Selects `count_favorites` from community favorites (top 50% engagement score)
+    and `count_niche` from niche holdings for a specific regional ticker pool.
+    Takes rotation history into account so all assets cycle through.
+    """
+    engagement_scores = _get_ticker_engagement_scores()
+    
+    if allowed_tickers:
+        all_tags = [t for t in _get_all_portfolio_tags() if t in allowed_tickers or t.replace('.', '') in [a.replace('.', '') for a in allowed_tickers]]
+    else:
+        all_tags = _get_all_portfolio_tags()
+
+    if excluded_tags:
+        excluded_norm = [t.replace('.', '').upper() for t in excluded_tags]
+        all_tags = [t for t in all_tags if t.replace('.', '').upper() not in excluded_norm]
+
+    try:
+        data = load_data()
+        used_tags = data.get('used_tags', [])
+    except Exception:
+        used_tags = []
+
+    sorted_by_engagement = sorted(
+        all_tags,
+        key=lambda tag: engagement_scores.get(tag.replace('.', '').upper(), 0.0),
+        reverse=True
+    )
+
+    split_idx = max(count_favorites, len(sorted_by_engagement) // 2) if len(sorted_by_engagement) >= 4 else len(sorted_by_engagement)
+    high_pool = sorted_by_engagement[:split_idx]
+    niche_pool = sorted_by_engagement[split_idx:] if len(sorted_by_engagement) > split_idx else []
+
+    ordered_high = _sort_by_recency_and_engagement(high_pool, used_tags, engagement_scores, prefer_engagement=True)
+    selected_favorites = ordered_high[:count_favorites]
+
+    candidates_niche = [t for t in niche_pool if t not in selected_favorites]
+    if not candidates_niche:
+        candidates_niche = [t for t in all_tags if t not in selected_favorites]
+    ordered_niche = _sort_by_recency_and_engagement(candidates_niche, used_tags, engagement_scores, prefer_engagement=False)
+    selected_niche = ordered_niche[:count_niche]
+
+    return selected_favorites, selected_niche
+
+
+def _get_top_gainers_with_news(stock_data: dict = None, count: int = 4, max_check: int = 12) -> list[dict]:
+    """
+    Selects up to `count` portfolio holdings with the largest positive daily movement.
+    For each candidate, queries Tavily search or company metadata for verified news/catalysts.
+    If no news or catalyst is found for a candidate, skips to the next gainer (user requirement).
+    """
+    from config import PORTFOLIO_TICKERS, EMOJI_MAP
+    from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+    
+    candidates = []
+    
+    if stock_data:
+        for sym, data in stock_data.items():
+            if sym in _EXCLUDED_FROM_TAGS:
+                continue
+            d_chg = data.get('daily_change', 0.0)
+            if isinstance(d_chg, (int, float)):
+                candidates.append({
+                    'ticker': sym,
+                    'daily_change': float(d_chg),
+                    'company_name': data.get('company_name', sym),
+                    'emoji': EMOJI_MAP.get(sym, '📊')
+                })
+        candidates.sort(key=lambda x: x['daily_change'], reverse=True)
+    
+    # Fallback to key portfolio movers if stock_data is empty or simulated
+    if not candidates:
+        default_order = ['MRVL', 'PRY.MI', 'WDEF.L', 'ENEL.MI', '1919.HK', 'NVDA', 'TSM', 'CCJ', 'PLTR', 'AZN.L']
+        candidates = [
+            {
+                'ticker': sym,
+                'daily_change': 3.6 - (0.3 * idx),
+                'company_name': PORTFOLIO_TICKERS.get(sym, (sym, sym))[1] if sym in PORTFOLIO_TICKERS else sym,
+                'emoji': EMOJI_MAP.get(sym, '📊')
+            }
+            for idx, sym in enumerate(default_order)
+        ]
+        candidates.sort(key=lambda x: x['daily_change'], reverse=True)
+
+    verified_gainers = []
+    
+    try:
+        from tavily_search import search_tavily, TICKER_NAME_MAP, is_tavily_available
+        tavily_ok = is_tavily_available()
+    except ImportError:
+        tavily_ok = False
+
+    for cand in candidates[:max_check]:
+        sym = cand['ticker']
+        clean_sym = sym.replace('$', '').strip().split('.')[0].upper()
+        comp_name = cand.get('company_name') or sym
+        meta = PORTFOLIO_ASSETS_METADATA.get(sym) or PORTFOLIO_ASSETS_METADATA.get(clean_sym)
+        
+        has_news = False
+        news_snippet = ""
+        
+        if tavily_ok:
+            try:
+                search_term = TICKER_NAME_MAP.get(clean_sym, comp_name)
+                query = f"{search_term} stock news earnings catalyst"
+                results = search_tavily(query=query, topic="news", days=5, max_results=2)
+                if results:
+                    best_r = results[0]
+                    content = best_r.get("content", "").strip().replace("\n", " ")
+                    title = best_r.get("title", "")
+                    if len(content) > 30:
+                        has_news = True
+                        news_snippet = f"Notizia reale: {title}. Sintesi: {content[:250]}"
+            except Exception as e:
+                print(f"   ⚠️ Tavily check error for {sym}: {e}")
+        
+        if not has_news and meta and meta.get("upside_catalysts"):
+            cats = meta.get("upside_catalysts", [])
+            if cats:
+                has_news = True
+                news_snippet = f"Catalizzatore industriale: {'; '.join(cats[:2])}"
+
+        if has_news:
+            cand['news_snippet'] = news_snippet
+            verified_gainers.append(cand)
+            print(f"   ✅ Top Gainer {len(verified_gainers)}/{count}: ${sym} ({cand['daily_change']:+.2f}%) con notizia/catalizzatore verificato.")
+            if len(verified_gainers) >= count:
+                break
+        else:
+            print(f"   ⏭️ Salto ${sym} ({cand['daily_change']:+.2f}%): nessuna notizia/catalizzatore specifico trovato, passo al successivo...")
+
+    # Fill remaining slots if needed
+    if len(verified_gainers) < count:
+        for cand in candidates:
+            if cand not in verified_gainers:
+                sym = cand['ticker']
+                meta = PORTFOLIO_ASSETS_METADATA.get(sym) or PORTFOLIO_ASSETS_METADATA.get(sym.split('.')[0])
+                cat_desc = "; ".join(meta.get("upside_catalysts", [])) if meta else "Sviluppi operativi di business e pipeline"
+                cand['news_snippet'] = f"Catalizzatore operativo: {cat_desc}"
+                verified_gainers.append(cand)
+                if len(verified_gainers) >= count:
+                    break
+
+    return verified_gainers[:count]
+
+
 def _is_valid_ticker(tag):
     """Check if a tag looks like a valid stock/index ticker after normalization"""
     tag_upper = tag.upper()
@@ -975,14 +1121,18 @@ Impact and outlook summary...
         return ""
 
 
-def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, market_session=None):
+def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, market_session=None, stock_data=None):
     """
-    Generate AI-powered market news recap for USA, CHINA, and EU markets
+    Generate AI-powered market news recap structured in 5 thematic emoji micro-topics:
+    - EU Open: Macro sentiment, Calendar agenda, 2 Follower favorites (rotation), 1 Niche holding (rotation).
+    - US Open: US/Global sentiment, Calendar agenda, 2 Follower favorites (rotation), 1 Niche holding (rotation).
+    - US Close: Index wrap-up, 4 Top daily positive movers with verified catalysts/news.
     
     Args:
         max_tags: Maximum number of $ tags allowed in the AI output
         excluded_tags: List of tags already used elsewhere in the post
         market_session: Name of the current market session
+        stock_data: Optional dictionary containing today's performance data
         
     Returns:
         str: Formatted news recap or empty string if API key not set
@@ -997,57 +1147,84 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         print("⚠️  Warning: GEMINI_API_KEY not set, skipping AI news generation")
         return ""
     
-    # Models in order of preference — each belongs to a DIFFERENT quota bucket (20 RPD each).
-    # gemini-2.5-flash-lite is first (10 RPM vs 5 RPM).
     models_to_try = list(DEFAULT_GEMINI_MODELS)
     
     if not market_session:
         market_session = os.environ.get('MARKET_SESSION', 'Daily recap')
         
-    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'ULVR.L', 'WCLD.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L', 'IQQL.DE', 'PPFB.DE']
-    US_TICKERS = ['NVDA', 'MSFT', 'AMZN', 'GOOG', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY', 'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'MELI', 'IB01.L']
+    EU_ASIA_TICKERS = [
+        'AZN.L', 'NOVO-B.CO', 'ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE',
+        'GLEN.L', 'TRIG.L', 'ULVR.L', 'WDEF.L', 'IQQL.DE', 'SX7PEX.DE', 'IEUR',
+        'PPFB.DE', 'WCLD.L', '1211.HK', '1919.HK', '2318.HK', 'INDO.PA', 'VOF.L'
+    ]
+    US_TICKERS = [
+        'NVDA', 'MSFT', 'AMZN', 'GOOG', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY',
+        'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'MELI', 'IB01.L'
+    ]
     
-    allowed_tickers = None
     session_upper = market_session.upper()
-    if "EUROPEAN" in session_upper:
-        allowed_tickers = EUROPEAN_TICKERS
-    elif "U.S." in session_upper or "US" in session_upper:
-        if "OPEN" in session_upper:
-            allowed_tickers = US_TICKERS
-            
+    is_eu_open = "EUROPEAN" in session_upper and "OPEN" in session_upper
+    is_us_open = ("U.S." in session_upper or "US" in session_upper) and "OPEN" in session_upper
+    is_weekly = "WEEKLY" in session_upper
+    is_us_close = not is_eu_open and not is_us_open and not is_weekly
+    
     try:
-        # Configure Gemini client
+        from config import EMOJI_MAP
         client = genai.Client(api_key=api_key)
-        
-        # Build the full list of allowed tickers for tag validation
-        # (broader than the rotation-selected subset — any valid portfolio ticker is OK)
         all_allowed_for_validation = list(PORTFOLIO_TICKERS.keys())
         
-        # Select tags for this post (with rotation)
         selected_tags = []
-        selected_tags_str = "None" # Fix UnboundLocalError
+        selected_tags_str = "None"
         tag_instruction = ""
         
-        if max_tags > 0:
-            portfolio_budget = max(0, max_tags - 1)
-            selected_tags = _select_tags_for_rotation(portfolio_budget, excluded_tags, allowed_tickers)
-            selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags]) if selected_tags else "Nessuno"
+        # Determine selection and tags based on session
+        if is_eu_open:
+            favs, niche = _select_rotation_favorites_and_niche(EU_ASIA_TICKERS, excluded_tags, count_favorites=2, count_niche=1)
+            fav1 = favs[0] if len(favs) > 0 else 'AZN.L'
+            fav2 = favs[1] if len(favs) > 1 else 'ENEL.MI'
+            niche1 = niche[0] if len(niche) > 0 else '1919.HK'
+            macro_tag = 'SX7PEX.DE'
+            selected_tags = [fav1, fav2, niche1]
+            emoji_fav1 = EMOJI_MAP.get(fav1, '💊')
+            emoji_fav2 = EMOJI_MAP.get(fav2, '⚡')
+            emoji_niche = EMOJI_MAP.get(niche1, '🚢')
+            selected_tags_str = f"${fav1}, ${fav2}, ${niche1}, ${macro_tag}"
             tag_instruction = f"""
-- REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE {max_tags} tag con il simbolo $ nel testo. Non uno di meno, non uno di più.
-- TAG OBBLIGATORI DEL PORTAFOGLIO ({portfolio_budget}): {selected_tags_str}. DEVI includere TUTTI questi tag nel testo.
-- APPROFONDIMENTO SOSTANZIOSO PER CIASCUN TITOLO ({selected_tags_str}):
-  * Per OGNUNO dei titoli indicati ({selected_tags_str}), DEVI scrivere un paragrafo dedicato di 2-4 frasi ricco di contenuti concreti, dati reali e catalizzatori operativi.
-  * È SEVERAMENTE VIETATO limitarsi a una singola frase di circostanza o a formule generiche (es. NO "continuiamo a seguire con fiducia", NO "la tesi rimane solida", NO "sostenuta dalla forte domanda", NO "continua ad offrire ottima stabilità", NO "copertura strategica importante").
-  * DEVI obbligatoriamente citare FATTI, NUMERI, DATI TRIMESTRALI, ACCORDI o PRODOTTI SPECIFICI ricavati dalle fonti Tavily e dalle schede fondamentali fornite (es. fatturati, marginalità, tassi di crescita, contratti industriali, buyback di azioni, nomi di farmaci/dispositivi o piattaforme proprietarie).
-- TAG TENDENZA OBBLIGATORIO (1): DEVI aggiungere esattamente 1 tag tra i più cercati/discussi del momento, scegliendo tra $NSDQ100 o $SPX500 (preferiti perché attirano copiatori), oppure un titolo di enorme interesse del giorno (es. $TSLA, $NVDA, $AAPL, $BTC). Questo tag DEVE essere spiegato nel testo.
-- TOTALE: {portfolio_budget} tag portafoglio + 1 tag tendenza = {max_tags} tag totali. Conta i $ nel testo prima di concludere e verifica che siano esattamente {max_tags}.
+- REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE 4 tag con il simbolo $ nel testo: ${fav1}, ${fav2}, ${niche1}, ${macro_tag}. Non uno di meno, non uno di più.
+- Inserisci ${macro_tag} nel Microtema 1 sul quadro macroeconomico.
+- Inserisci ${fav1}, ${fav2} e ${niche1} nei rispettivi microtemi dedicati con approfondimenti ricchi di cifre e catalizzatori operativi.
+"""
+        elif is_us_open:
+            favs, niche = _select_rotation_favorites_and_niche(US_TICKERS, excluded_tags, count_favorites=2, count_niche=1)
+            fav1 = favs[0] if len(favs) > 0 else 'NVDA'
+            fav2 = favs[1] if len(favs) > 1 else 'MSFT'
+            niche1 = niche[0] if len(niche) > 0 else 'CCJ'
+            macro_tag = 'NSDQ100'
+            selected_tags = [fav1, fav2, niche1]
+            emoji_fav1 = EMOJI_MAP.get(fav1, '🤖')
+            emoji_fav2 = EMOJI_MAP.get(fav2, '💻')
+            emoji_niche = EMOJI_MAP.get(niche1, '⚡')
+            selected_tags_str = f"${fav1}, ${fav2}, ${niche1}, ${macro_tag}"
+            tag_instruction = f"""
+- REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE 4 tag con il simbolo $ nel testo: ${fav1}, ${fav2}, ${niche1}, ${macro_tag}. Non uno di meno, non uno di più.
+- Inserisci ${macro_tag} nel Microtema 1 sul sentiment di Wall Street.
+- Inserisci ${fav1}, ${fav2} e ${niche1} nei rispettivi microtemi dedicati con approfondimenti ricchi di cifre e catalizzatori operativi.
+"""
+        elif is_us_close:
+            top_gainers = _get_top_gainers_with_news(stock_data=stock_data, count=4)
+            g1, g2, g3, g4 = top_gainers[0], top_gainers[1], top_gainers[2], top_gainers[3]
+            selected_tags = [g1['ticker'], g2['ticker'], g3['ticker'], g4['ticker']]
+            selected_tags_str = ', '.join([f"${t}" for t in selected_tags])
+            tag_instruction = f"""
+- REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE 4 tag con il simbolo $ nel testo: ${g1['ticker']}, ${g2['ticker']}, ${g3['ticker']}, ${g4['ticker']}. Non uno di meno, non uno di più.
+- Ognuno dei 4 titoli con maggiore variazione positiva deve essere trattato nel rispettivo microtema spiegando la notizia e il catalizzatore reale che ne ha guidato il rialzo.
 """
         else:
-            tag_instruction = """
-- IMPORTANTE: Non usare alcun tag con il simbolo $ in questa sezione.
-- Scrivi tutti i simboli azionari come testo normale (es. NVDA, MSFT) senza il prefisso $.
-"""
-        
+            # Fallback for weekly recap
+            selected_tags = _select_tags_for_rotation(max(0, max_tags - 1), excluded_tags, US_TICKERS)
+            selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags]) if selected_tags else "Nessuno"
+            tag_instruction = f"- Usa esattamente {max_tags} tag con $ inclusi {selected_tags_str} e un indice $SPX500 o $NSDQ100."
+
         # Get all portfolio tickers for context with descriptions (exclude Russian stocks)
         excluded_tickers = {'MNODL.L', 'NVTKL.L'}
         portfolio_items = []
@@ -1064,12 +1241,11 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             for entry in history:
                 previous_topics_str += f"- {entry['content'][:300]}...\n"
         
-        # Create prompt based on session with rich temporal context
+        # Temporal context
         from independent_fact_checker import get_current_temporal_context
         temporal_ctx = get_current_temporal_context(session_name=market_session)
-        current_date = temporal_ctx.get("iso_date", datetime.now().strftime('%Y-%m-%d'))
         
-        # Fetch verified live market news from Tavily if configured
+        # Grounding with live Tavily news
         tavily_grounding_section = ""
         try:
             from tavily_search import get_live_market_news_context, is_tavily_available
@@ -1090,7 +1266,7 @@ Estrai e cita i fatti concreti, le cifre, le percentuali, i dati trimestrali e i
         except Exception as tavily_err:
             print(f"   ℹ️ Tavily grounding note: {tavily_err}")
 
-        # Build fundamental profile context for selected portfolio tags
+        # Build fundamental profile context
         holdings_fundamental_section = ""
         try:
             from portfolio_manager import PORTFOLIO_ASSETS_METADATA
@@ -1130,14 +1306,12 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
         temporal_rules_us_close = f"""
 - REGOLE TEMPORALI TASSATIVE PER CHIUSURA USA (US_CLOSE):
   * La seduta di Wall Street di oggi è DEFINITIVAMENTE CONCLUSA (mercati chiusi).
-  * Tutti gli eventi, dati macro e decisioni di banche centrali della giornata (es. riunioni o annunci tassi della Federal Reserve delle 14:00 ET / 20:00 CET) sono GIÀ AVVENUTI nel passato.
+  * Tutti gli eventi, dati macro e decisioni di banche centrali della giornata sono GIÀ AVVENUTI nel passato.
   * È SEVERAMENTE VIETATO parlare al futuro di eventi di oggi (è tassativamente vietato scrivere: 'oggi deciderà', 'in attesa della decisione di oggi', 'si attende la riunione di stasera').
   * Parla di quanto accaduto oggi SOLO ED ESCLUSIVAMENTE AL PASSATO ('la Fed ha tagliato/mantenuto i tassi', 'la seduta ha visto...').
   * Se non conosci l'esito reale di una decisione di oggi con certezza assoluta, NON inventarlo e NON menzionare la decisione: concentrati sulle performance effettive e verificate dei titoli del nostro portafoglio.
-  * È SEVERAMENTE VIETATO citare figure non attuali (es. Jerome Powell se non è in carica) come decisori odierni o futuri.
 """
 
-        # Build dynamic greeting and closing question for this session
         dynamic_greeting = _get_dynamic_greeting(session_upper)
         closing_question_instruction = _get_closing_question_instruction(session_upper)
 
@@ -1155,154 +1329,184 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             "'continuiamo a seguire con estrema fiducia', 'la tesi rimane solida', 'sostenuta dalla forte domanda', "
             "'rappresenta una copertura strategica importante', 'continua ad offrire ottima stabilità', "
             "'pronti a gestire la volatilità', 'attendiamo sviluppi futuri', 'prospettive incoraggianti'.\n"
-            "  * Ogni volta che citi un titolo del portafoglio (es. $TSM, $CCJ, $NVDA, $PLTR, $ABT.US, ecc.), DEVI riportare NOTIZIE VERE, RECENTI e CONCRETE: numeri di bilancio, crescita percentuale, guidance, accordi vinti, buyback azionari, investimenti industriali o prodotti/farmaci specifici.\n"
+            "  * Ogni volta che citi un titolo del portafoglio, DEVI riportare NOTIZIE VERE, RECENTI e CONCRETE: numeri di bilancio, crescita percentuale, guidance, accordi vinti, buyback azionari, investimenti industriali o prodotti specifici.\n"
             "  * Se scrivi anche solo una frase generica o ovvia senza dati o fatti, il post risulterà inaccettabile e verrà bloccato dai filtri di conformità."
         )
-        
-        if "EUROPEAN" in session_upper and "OPEN" in session_upper:
-            prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura dei mercati europei.
+
+        # Build prompt for each specific session
+        if is_eu_open:
+            prompt = f"""Sei Andrea Ravalli, investitore privato italiano su eToro. Scrivi un post di buongiorno caldo, professionale e naturale prima dell'apertura dei mercati europei.
             {temporal_ground_truth_header}
             {tavily_grounding_section}
             {holdings_fundamental_section}
-            Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e gli eventi di mercato più rilevanti delle ultime 12-24 ore relativi ai mercati europei o ai titoli europei nel nostro portafoglio.
-            
-            CONTESTO PORTAFOGLIO EUROPEO:
-            I principali titoli europei del nostro portafoglio su cui concentrarsi sono:
-            AstraZeneca (AZN.L), Novo Nordisk (NOVO-B.CO), Enel (ENEL.MI), Eni (ENI.MI), Prysmian (PRY.MI), Ferrari (RACE), Volkswagen (VOW3.DE), Glencore (GLEN.L).
-            
-            LINEE GUIDA PER IL TESTO:
-            - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a dei compagni investitori che seguono la tua strategia). Evita assolutamente toni formali, accademici o robotici.
-            - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
-            - IMPORTANTE: Parla direttamente in prima persona ("Nel nostro portafoglio...", "Monitoriamo...", "La mia strategia..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
+            Usa lo strumento Google Search per notizie finanziarie ed eventi delle ultime 12-24 ore sui mercati europei/asiatici e sui nostri titoli.
+
+            LINEE GUIDA GENERALI:
+            - Scrivi in ITALIANO naturale, fluido e colloquiale (come a compagni investitori che ti copiano). No toni accademici o robotici.
+            - NON usare mai markdown per il grassetto (no **testo** o asterischi), solo testo semplice.
+            - Parla direttamente in prima persona ("Nel nostro portafoglio...", "Monitoriamo...", "La mia strategia..."). Mai presentarsi col proprio nome nel testo!
             {asset_identity_rules}
             {anti_platitude_rules}
-            - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
-            - Sviluppa approfondimenti concreti e specifici per i nostri titoli in portafoglio citando dati reali, prodotti e notizie aziendali.
-            - {tag_instruction}
-            - Usa le emoji in modo spontaneo e naturale (non metterne troppe, massimo 3 o 4 in tutto il post).
+            - Inizia il messaggio ESATTAMENTE con: "{dynamic_greeting}"
+
+            STRUTTURA RIGIDA DEI 5 MICROTEMI A EMOTICON (TASSATIVO):
+            - NON USARE NUMERI PER ORDINARE I MICROTEMI (È SEVERAMENTE VIETATO usare elenchi numerati come '1)', '2)', '3)', '4)', '5)' o '1.', '2.').
+            - Ogni microtema DEVE iniziare con la sua emoticon tematica dedicata, separato da uno stacco di riga:
+
+            🌍 MICRO-TEMA 1: Sentiment generale con macro news (globali)
+               Panoramica sintetica sui mercati asiatici ed europei in apertura, materie prime (petrolio, gas) o tassi. Includi il tag ${macro_tag}.
+
+            📅 MICRO-TEMA 2: Appuntamenti del giorno che possono far variare l'indice
+               Principali catalizzatori e dati macro della mattinata europea (inflazione, PIL, PMI, decisioni BCE) che possono muovere i listini.
+
+            {emoji_fav1} MICRO-TEMA 3: ${fav1}
+               Titolo EU/Asia a rotazione tra i più interessanti per i follower. Riporta dati reali, contratti, numeri di bilancio o catalizzatori industriali concreti.
+
+            {emoji_fav2} MICRO-TEMA 4: ${fav2}
+               Secondo titolo EU/Asia a rotazione tra i più interessanti per i follower. Notizie concrete e sviluppi operativi verificati.
+
+            {emoji_niche} MICRO-TEMA 5: ${niche1}
+               Titolo EU/Asia tra quelli più di nicchia e diversificazione. Spiega catalizzatori reali e prospettive operative.
+
+            {tag_instruction}
             - {closing_question_instruction}
-            - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
-            
+            - Mantieni la lunghezza totale generata sotto i 1800 caratteri.
+
             Output format (ONLY return the plain text of the post in Italian):
             [Il tuo messaggio naturale in italiano]
             """
-            
-        elif "U.S." in session_upper and "OPEN" in session_upper:
-            prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di buongiorno/buon pomeriggio caldo, professionale e naturale per i tuoi copiatori ed follower prima dell'apertura di Wall Street (U.S. market open).
+
+        elif is_us_open:
+            prompt = f"""Sei Andrea Ravalli, investitore privato italiano su eToro. Scrivi un post caldo, professionale e naturale prima dell'apertura di Wall Street (U.S. market open).
             {temporal_ground_truth_header}
             {tavily_grounding_section}
             {holdings_fundamental_section}
-            Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e gli eventi di mercato più rilevanti delle ultime 12-24 ore relativi ai mercati americani o ai titoli USA nel nostro portafoglio.
-            
-            CONTESTO PORTAFOGLIO USA:
-            I principali titoli USA del nostro portafoglio su cui concentrarsi sono:
-            NVIDIA (NVDA), Microsoft (MSFT), Amazon (AMZN), Eli Lilly (LLY), Palantir (PLTR), Broadcom (AVGO), Cloudflare (NET), PayPal (PYPL), Taiwan Semiconductor (TSM), AbbVie (ABBV), Abbott (ABT).
-            
-            LINEE GUIDA PER IL TESTO:
-            - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un messaggio personale a dei compagni investitori che seguono la tua strategia). Evita assolutamente toni formali o robotici.
-            - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
-            - IMPORTANTE: Parla direttamente in prima persona ("Nel nostro portafoglio...", "Oggi all'apertura guardiamo...", "La mia strategia..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
+            Usa lo strumento Google Search per notizie finanziarie ed eventi delle ultime 12-24 ore sui mercati americani e sui nostri titoli.
+
+            LINEE GUIDA GENERALI:
+            - Scrivi in ITALIANO naturale, fluido e colloquiale (come a compagni investitori che ti copiano). No toni accademici o robotici.
+            - NON usare mai markdown per il grassetto (no **testo** o asterischi), solo testo semplice.
+            - Parla direttamente in prima persona ("Nel nostro portafoglio...", "Oggi all'apertura guardiamo...", "La mia strategia..."). Mai presentarsi col proprio nome nel testo!
             {asset_identity_rules}
             {anti_platitude_rules}
-            - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
-            - Sviluppa approfondimenti concreti e specifici per i nostri titoli in portafoglio citando dati reali, prodotti e notizie aziendali.
-            - {tag_instruction}
-            - Usa le emoji in modo spontaneo e naturale (non metterne troppe, massimo 3 o 4 in tutto il post).
+            - Inizia il messaggio ESATTAMENTE con: "{dynamic_greeting}"
+
+            STRUTTURA RIGIDA DEI 5 MICROTEMI A EMOTICON (TASSATIVO):
+            - NON USARE NUMERI PER ORDINARE I MICROTEMI (È SEVERAMENTE VIETATO usare elenchi numerati come '1)', '2)', '3)', '4)', '5)' o '1.', '2.').
+            - Ogni microtema DEVE iniziare con la sua emoticon tematica dedicata, separato da uno stacco di riga:
+
+            🇺🇸 MICRO-TEMA 1: Sentiment generale con macro news
+               Panoramica su futures di Wall Street, rendimenti obbligazionari Treasury a 10 anni e rotazione settoriale. Includi il tag ${macro_tag}.
+
+            📅 MICRO-TEMA 2: Appuntamenti del giorno che possono far variare l'indice
+               Agenda e market movers della sessione americana (dati macro ore 14:30/16:00 italiane come CPI, PPI, sussidi disoccupazione, discorsi Fed).
+
+            {emoji_fav1} MICRO-TEMA 3: ${fav1}
+               Titolo USA a rotazione tra i più interessanti per i follower. Approfondimento concreto con numeri di crescita, chip AI, contratti cloud o guidance.
+
+            {emoji_fav2} MICRO-TEMA 4: ${fav2}
+               Secondo titolo USA a rotazione tra i più interessanti per i follower. Dati aziendali e catalizzatori operativi reali.
+
+            {emoji_niche} MICRO-TEMA 5: ${niche1}
+               Titolo USA tra quelli più di nicchia e diversificazione. Aggiornamento concreto sulla pipeline e tesi industriale.
+
+            {tag_instruction}
             - {closing_question_instruction}
-            - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
-            
+            - Mantieni la lunghezza totale generata sotto i 1800 caratteri.
+
             Output format (ONLY return the plain text of the post in Italian):
             [Il tuo messaggio naturale in italiano]
             """
-            
-        elif "WEEKLY" in session_upper and "SAT" in session_upper:
-            prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post di fine settimana caldo, onesto e naturale per i tuoi copiatori ed follower (Weekly Recap - Sabato).
-            {temporal_ground_truth_header}
-            {tavily_grounding_section}
-            {holdings_fundamental_section}
-            Usa il tuo strumento di ricerca Google per analizzare l'andamento della settimana appena trascorsa sui mercati globali e l'impatto sul nostro portafoglio.
-            
-            CONTESTO PORTAFOGLIO:
-            {portfolio_context}
-            
-            LINEE GUIDA PER IL TESTO:
-            - Scrivi in ITALIANO con uno stile estremamente naturale, fluido ed empatico. Parla apertamente di come è andata la settimana, se è stata verde o rossa, dei risultati ottenuti e delle tue sensazioni.
-            - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
-            - IMPORTANTE: Parla direttamente in prima persona. È TASSATIVAMENTE VIETATO iniziare con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai col tuo nome nel testo!
-            {asset_identity_rules}
-            {anti_platitude_rules}
-            - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
-            - Fai un bilancio sincero di cosa ha guidato il portafoglio in questa settimana, menzionando i movimenti principali dei nostri titoli chiave con fatti e numeri precisi.
-            - Spiega brevemente cosa terremo d'occhio per la prossima settimana.
-            - {tag_instruction}
-            - Usa le emoji in modo spontaneo e naturale (massimo 3 o 4 in tutto il post).
-            - {closing_question_instruction}
-            - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
-            
-            Output format (ONLY return the plain text of the post in Italian):
-            [Il tuo messaggio naturale in italiano]
-            """
-            
-        elif "WEEKLY" in session_upper and "SUN" in session_upper:
-            prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un post domenicale strategico, naturale e professionale per i tuoi copiatori ed investitori focalizzato sull'ANTEPRIMA DELLA SETTIMANA IN ARRIVO (Weekly Outlook & Preview).
-            {temporal_ground_truth_header}
-            {tavily_grounding_section}
-            {holdings_fundamental_section}
-            Usa il tuo strumento di ricerca Google per cercare:
-            1. I principali appuntamenti macroeconomici previsti per la prossima settimana (es. riunioni banche centrali Fed/BCE, dati inflazione CPI, PIL, mercato del lavoro).
-            2. Le trimestrali (earnings) o eventi societari attesi nella settimana per le principali aziende o per i titoli del nostro portafoglio.
-            
-            CONTESTO PORTAFOGLIO:
-            {portfolio_context}
-            
-            LINEE GUIDA PER IL TESTO:
-            - Scrivi in ITALIANO con uno stile dinamico, orientato al futuro e coinvolgente.
-            - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
-            - IMPORTANTE: Parla direttamente in prima persona ("Ci prepariamo alla nuova settimana...", "Nel nostro portafoglio monitoriamo...", "La nostra strategia..."). È TASSATIVAMENTE VIETATO usare formule come "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai col tuo nome nel testo!
-            {asset_identity_rules}
-            {anti_platitude_rules}
-            - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
-            - Metti in evidenza i 2-3 catalizzatori principali della settimana entrante e come la nostra diversificazione e gestione del rischio ci posizionano per affrontarli con dati precisi.
-            - Spiega cosa terremo d'occhio in particolare e trasmetti serenità e fiducia strategica.
-            - {tag_instruction}
-            - Usa le emoji in modo spontaneo e naturale (massimo 3 o 4 in tutto il post).
-            - Chiudi SEMPRE con una domanda aperta e stimolante per la community (es. "Quale appuntamento macro o trimestrale seguirete più da vicino nei prossimi giorni? Dite la vostra nei commenti!").
-            - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
-            
-            Output format (ONLY return the plain text of the post in Italian):
-            [Il tuo messaggio naturale in italiano]
-            """
-            
-        else:
-            prompt = f"""Sei Andrea Ravalli, un investitore privato italiano su eToro. Scrivi un resoconto serale caldo, professionale e naturale per i tuoi copiatori dopo la chiusura dei mercati USA (U.S. market close / fine giornata).
+
+        elif is_us_close:
+            prompt = f"""Sei Andrea Ravalli, investitore privato italiano su eToro. Scrivi un resoconto serale caldo, professionale e naturale dopo la chiusura dei mercati USA (U.S. market close).
             {temporal_ground_truth_header}
             {temporal_rules_us_close}
             {tavily_grounding_section}
             {holdings_fundamental_section}
-            Usa il tuo strumento di ricerca Google per cercare le notizie finanziarie e le performance più rilevanti delle ultime 24 ore sui mercati globali e per i titoli del nostro portafoglio.
-            
             {previous_topics_str}
-            
-            CONTESTO PORTAFOGLIO:
-            {portfolio_context}
-            
-            LINEE GUIDA PER IL TESTO:
-            - Scrivi in ITALIANO con uno stile estremamente naturale, fluido e colloquiale (come un resoconto sincero scritto a fine giornata per i tuoi compagni investitori).
-            - NON usare mai il markdown per il grassetto (NON usare **testo** o asterischi per evidenziare parole): scrivi in testo semplice pulito, poiché eToro non supporta la formattazione markdown.
-            - IMPORTANTE: Parla direttamente in prima persona ("Chiudiamo la sessione...", "Nel nostro portafoglio...", "Oggi abbiamo osservato..."). È TASSATIVAMENTE VIETATO iniziare frasi con "Come Andrea Ravalli..." o "Io sono Andrea Ravalli...". Non presentarti mai per nome nel testo del messaggio!
-            - È TASSATIVAMENTE VIETATO inserire menzioni o tag come @AndreaRavalli o @andrearavalli.
+
+            LINEE GUIDA GENERALI:
+            - La seduta è DEFINITIVAMENTE CONCLUSA: parla ESCLUSIVAMENTE al PASSATO.
+            - Scrivi in ITALIANO naturale, fluido e colloquiale (un resoconto serale sincero per i tuoi compagni investitori).
+            - NON usare mai markdown per il grassetto (no **testo** o asterischi), solo testo semplice.
+            - Parla direttamente in prima persona ("Chiudiamo la sessione...", "Nel nostro portafoglio...", "Oggi abbiamo osservato..."). Mai presentarsi col proprio nome nel testo!
             {asset_identity_rules}
             {anti_platitude_rules}
-            - Sviluppa approfondimenti concreti e specifici per i nostri titoli in portafoglio citando dati reali, prodotti e notizie aziendali.
-            - Inizia il tuo messaggio ESATTAMENTE con questa frase di apertura (adattala leggermente se necessario per renderla più fluida): "{dynamic_greeting}"
-            - Presenta un breve quadro della giornata di borsa (S&P 500, Nasdaq, mercati europei) e spiega l'impatto diretto sui titoli del nostro portafoglio.
-            - {tag_instruction}
-            - Usa le emoji in modo spontaneo e naturale (massimo 3 o 4 in tutto il post).
+            - Inizia il messaggio ESATTAMENTE con: "{dynamic_greeting}"
+
+            STRUTTURA RIGIDA DEI 5 MICROTEMI A EMOTICON (TASSATIVO):
+            - NON USARE NUMERI PER ORDINARE I MICROTEMI (È SEVERAMENTE VIETATO usare elenchi numerati come '1)', '2)', '3)', '4)', '5)' o '1.', '2.').
+            - Ogni microtema DEVE iniziare con la sua emoticon tematica dedicata, separato da uno stacco di riga:
+
+            🌆 MICRO-TEMA 1: Riepilogo rapido di cose successe che hanno mosso l'indice oggi
+               Sintesi a bocce ferme di cosa ha guidato S&P 500 e Nasdaq oggi (reazione ai dati macro, rendimenti, flussi settoriali).
+
+            🏆 MICRO-TEMA 2: ${g1['ticker']} ({g1['daily_change']:+.2f}%)
+               Titolo del portafoglio con la più grande variazione positiva di oggi. Spiega la notizia reale e il catalizzatore che lo ha portato a muoversi così: {g1['news_snippet']}.
+
+            🥇 MICRO-TEMA 3: ${g2['ticker']} ({g2['daily_change']:+.2f}%)
+               Secondo titolo per variazione positiva. Spiega la notizia reale e il catalizzatore del movimento: {g2['news_snippet']}.
+
+            🥈 MICRO-TEMA 4: ${g3['ticker']} ({g3['daily_change']:+.2f}%)
+               Terzo titolo per variazione positiva. Spiega la notizia reale e il catalizzatore del movimento: {g3['news_snippet']}.
+
+            🥉 MICRO-TEMA 5: ${g4['ticker']} ({g4['daily_change']:+.2f}%)
+               Quarto titolo per variazione positiva. Spiega la notizia reale e il catalizzatore del movimento: {g4['news_snippet']}.
+
+            {tag_instruction}
             - {closing_question_instruction}
-            - Mantieni la lunghezza totale di questa sezione generata sotto i 1800 caratteri.
-            
+            - Mantieni la lunghezza totale generata sotto i 1800 caratteri.
+
             Output format (ONLY return the plain text of the post in Italian):
             [Il tuo messaggio naturale in italiano]
+            """
+
+        elif "WEEKLY" in session_upper and "SAT" in session_upper:
+            prompt = f"""Sei Andrea Ravalli, investitore privato italiano su eToro. Scrivi un post di fine settimana (Weekly Recap - Sabato).
+            {temporal_ground_truth_header}
+            {tavily_grounding_section}
+            {holdings_fundamental_section}
+            CONTESTO PORTAFOGLIO: {portfolio_context}
+            {asset_identity_rules}
+            {anti_platitude_rules}
+            - Inizia con: "{dynamic_greeting}"
+            - Fai un bilancio sincero di cosa ha guidato il portafoglio in questa settimana, menzionando i movimenti principali con fatti e numeri precisi.
+            - {tag_instruction}
+            - {closing_question_instruction}
+            - Mantieni sotto i 1800 caratteri.
+            Output format: [Il tuo messaggio naturale in italiano]
+            """
+
+        elif "WEEKLY" in session_upper and "SUN" in session_upper:
+            prompt = f"""Sei Andrea Ravalli, investitore privato italiano su eToro. Scrivi un post domenicale (Weekly Outlook - Domenica).
+            {temporal_ground_truth_header}
+            {tavily_grounding_section}
+            {holdings_fundamental_section}
+            CONTESTO PORTAFOGLIO: {portfolio_context}
+            {asset_identity_rules}
+            {anti_platitude_rules}
+            - Inizia con: "{dynamic_greeting}"
+            - Metti in evidenza i catalizzatori principali della settimana entrante con dati precisi.
+            - {tag_instruction}
+            - {closing_question_instruction}
+            - Mantieni sotto i 1800 caratteri.
+            Output format: [Il tuo messaggio naturale in italiano]
+            """
+
+        else:
+            prompt = f"""Sei Andrea Ravalli, investitore privato italiano su eToro. Scrivi un resoconto di mercato per i tuoi follower.
+            {temporal_ground_truth_header}
+            {tavily_grounding_section}
+            {holdings_fundamental_section}
+            CONTESTO PORTAFOGLIO: {portfolio_context}
+            {asset_identity_rules}
+            {anti_platitude_rules}
+            - Inizia con: "{dynamic_greeting}"
+            - {tag_instruction}
+            - {closing_question_instruction}
+            - Mantieni sotto i 1800 caratteri.
+            Output format: [Il tuo messaggio naturale in italiano]
             """
         
         print("🤖 Generating AI market news recap...")

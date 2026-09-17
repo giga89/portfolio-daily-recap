@@ -639,12 +639,25 @@ def split_into_micro_topics(text: str) -> List[Dict[str, Any]]:
             })
             continue
 
-        # Bullet lists (e.g. •, -, *, 1.)
+        # Bullet lists and thematic emoji items (e.g. •, -, *, 1., 🌍, 📅, 🏆, 🥇, 🥈, 🥉, ⚡, 💊)
+        def _is_bullet_or_emoji_topic(line_str: str) -> bool:
+            if not line_str:
+                return False
+            if line_str.startswith(('•', '-', '*', '✓', '▪', '▫', '►')):
+                return True
+            if re.match(r'^\d+[\.\)]', line_str):
+                return True
+            first_c = line_str[0]
+            # Recognizes emojis and symbol bullets while ignoring words, quotes, $, etc.
+            if not (first_c.isalnum() or first_c in ('$', '"', "'", '(', '[', '¿', '¡', '#')):
+                return True
+            return False
+
         lines = [l.strip() for l in block.split('\n') if l.strip()]
-        bullet_lines = [l for l in lines if l.startswith(('•', '-', '*', '✓')) or re.match(r'^\d+\.', l)]
+        bullet_lines = [l for l in lines if _is_bullet_or_emoji_topic(l)]
 
         if len(bullet_lines) >= 2:
-            intro_lines = [l for l in lines if not (l.startswith(('•', '-', '*', '✓')) or re.match(r'^\d+\.', l))]
+            intro_lines = [l for l in lines if not _is_bullet_or_emoji_topic(l)]
             if intro_lines:
                 micro_topics.append({
                     "id": len(micro_topics),

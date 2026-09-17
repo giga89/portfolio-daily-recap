@@ -210,15 +210,9 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         show_perf_lists = False
 
     # 4. Select tags for this run
-    tags_selected_map = set() # Set of symbols to be tagged
-    
-    # Only select tags for the tables if we are showing the performance lists
-    if show_perf_lists:
-        # If we have available candidates that haven't been used recently, pick from them
-        if available_candidates:
-            random.shuffle(available_candidates)
-            selected = available_candidates[:3]
-            tags_selected_map.update(selected)
+    # For all core sessions, we reserve the full 4-tag budget for the rich AI news micro-topics
+    # (top 4 gainers in US Close, or 3 portfolio holdings + 1 macro index in EU/US Open).
+    tags_selected_map = set() # Performance tables format tickers cleanly without consuming $ tags
     
     # --- FORMATTING WITH TAGS ---
 
@@ -227,7 +221,7 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         if not is_monthly and daily_sorted:
             recap += f"MIGLIORI 5 {'SETTIMANALI' if is_weekly else 'DI OGGI'} DEL PORTAFOGLIO 📈\n"
             for etoro_symbol, data in daily_sorted:
-                should_tag = etoro_symbol in tags_selected_map
+                should_tag = False
                 performance = data['weekly_change'] if is_weekly else data['daily_change']
                 recap += format_ticker(etoro_symbol, data['company_name'], performance, use_tag=should_tag) + "\n"
             recap += "\n"
@@ -236,7 +230,7 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         if monthly_sorted:
             recap += f"MIGLIORI {len(monthly_sorted)} PERFORMANCE MENSILI 📈\n"
             for etoro_symbol, data in monthly_sorted:
-                should_tag = etoro_symbol in tags_selected_map
+                should_tag = False
                 recap += format_ticker(etoro_symbol, data['company_name'], data['monthly_change'], use_tag=should_tag) + "\n"
             recap += "\n"
         
@@ -245,7 +239,7 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
             yearly_label = "YTD" if (is_monthly and is_january) else ("DELL'ANNO" if is_monthly else "DI SEMPRE (YTD)")
             recap += f"MIGLIORI {len(yearly_sorted)} {yearly_label} DEL PORTAFOGLIO 📈\n"
             for etoro_symbol, data in yearly_sorted:
-                should_tag = etoro_symbol in tags_selected_map
+                should_tag = False
                 recap += format_ticker(etoro_symbol, data['company_name'], data['yearly_change'], use_tag=should_tag) + "\n"
             recap += "\n"
     
@@ -270,7 +264,8 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         ai_news = ai_news_generator.generate_market_news_recap(
             max_tags=tag_budget_remaining, 
             excluded_tags=current_exclusions,
-            market_session=market_session
+            market_session=market_session,
+            stock_data=stock_data
         )
     
     if ai_news:

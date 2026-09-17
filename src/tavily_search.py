@@ -52,6 +52,13 @@ TICKER_NAME_MAP = {
     'MRVL': 'Marvell Technology',
     'HUM': 'Humana',
     'WMT': 'Walmart',
+    '1211': 'BYD electric vehicles',
+    '1919': 'COSCO Shipping Holdings',
+    '2318': 'Ping An Insurance',
+    'TRIG': 'Greencoat UK Wind',
+    'ULVR': 'Unilever',
+    'VOF': 'VinaCapital Vietnam',
+    'INDO': 'Lyxor MSCI Indonesia',
 }
 
 
@@ -160,7 +167,7 @@ def get_live_market_news_context(
     search_tasks = [("macro", macro_query, days, 2)]
 
     clean_tickers = []
-    for t in (tickers or [])[:3]:
+    for t in (tickers or [])[:4]:
         raw_t = t.replace("$", "").strip()
         clean_t = raw_t.split(".")[0].upper()
         if clean_t not in clean_tickers:
@@ -175,7 +182,7 @@ def get_live_market_news_context(
         return tag, res
 
     try:
-        with ThreadPoolExecutor(max_workers=min(4, len(search_tasks))) as executor:
+        with ThreadPoolExecutor(max_workers=min(5, len(search_tasks))) as executor:
             task_results = list(executor.map(_execute_search, search_tasks))
     except Exception as e:
         print(f"   ⚠️ Parallel Tavily search failed: {e}")
