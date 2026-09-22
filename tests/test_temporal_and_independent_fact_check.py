@@ -162,6 +162,7 @@ class TestTemporalAndIndependentFactCheck(unittest.TestCase):
 
 
 
+
     def test_deterministic_gate_catches_banal_platitudes(self):
         """Ensure post_verifier deterministically detects empty banal platitudes."""
         banal_post = (

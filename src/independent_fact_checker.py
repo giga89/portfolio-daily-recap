@@ -801,6 +801,7 @@ def reassemble_micro_topics(micro_topics: List[Dict[str, Any]], session_name: Op
 
 
 
+
 def run_micro_topic_consensus_fact_check(
     text: str,
     session_name: Optional[str] = None,

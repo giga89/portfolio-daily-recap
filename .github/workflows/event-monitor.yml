@@ -120,3 +120,4 @@ jobs:
             git commit -m "chore(analytics): update social analytics dashboard after event publication [skip ci]"
             git push origin main || echo "Git push failed or branch protected"
           fi
+

@@ -74,11 +74,15 @@ def check_and_publish_dividends(dry_run: bool = False, lookback_days: int = 4) -
     Scan NEXT_DIVIDENDS and yfinance for holdings having a Pay Day today or recently unposted.
     If not yet published, generate card and post.
     """
+
     print("\n" + "=" * 65)
     print("💰 CHECKING FOR DIVIDEND PAY DAYS")
     print("=" * 65)
 
     today = datetime.now(timezone.utc).date()
+    today_str1 = today.strftime("%b %d, %Y")  # e.g. "Sep 08, 2026"
+    today_str2 = today.strftime("%b %e, %Y").replace("  ", " ")
+
     results = []
 
     # 1. Check curated NEXT_DIVIDENDS from analytics_tracker
@@ -110,6 +114,7 @@ def check_and_publish_dividends(dry_run: bool = False, lookback_days: int = 4) -
 
         print(f"🎯 Found Pay Day for ${ticker}: {item_date_str} (DPS: {pay_amount}, {days_diff} days ago)")
 
+
         if gist_storage.is_dividend_posted(ticker, item_date_str):
             print(f"   ℹ️ Dividend post for ${ticker} on {item_date_str} already published. Skipping.")
             continue
@@ -123,6 +128,7 @@ def check_and_publish_dividends(dry_run: bool = False, lookback_days: int = 4) -
         results.append(res)
 
     if not results:
+        print("ℹ️ No new dividend Pay Days detected for today.")
         print("ℹ️ No new dividend Pay Days detected.")
 
     return results
@@ -201,7 +207,8 @@ def publish_dividend_for_ticker(
     )
 
     print(f"\n📝 Generated Dividend Post for ${clean_sym}:\n" + "-" * 50)
-    print(post_text[:350] + "...\n" + "-" * 50)
+    print(post_text + "\n" + "-" * 50)
+
 
     if dry_run:
         print(f"🧪 [DRY RUN] Dividend post for ${clean_sym} generated successfully. Skipping publish.")
@@ -317,6 +324,7 @@ def check_and_publish_earnings(dry_run: bool = False, lookback_days: int = 3) ->
 
 
 
+
 def publish_earnings_for_ticker(
     ticker: str,
     quarter: str = "Q3 2026",
@@ -395,7 +403,8 @@ def publish_earnings_for_ticker(
     )
 
     print(f"\n📝 Generated Earnings Post for ${clean_sym}:\n" + "-" * 50)
-    print(post_text[:350] + "...\n" + "-" * 50)
+    print(post_text + "\n" + "-" * 50)
+
 
     if dry_run:
         print(f"🧪 [DRY RUN] Earnings post for ${clean_sym} generated successfully. Skipping publish.")
@@ -483,14 +492,19 @@ if __name__ == "__main__":
         publish_earnings_for_ticker(ticker=ticker, dry_run=dry_run)
     elif "--trigger-dividend" in sys.argv:
         idx = sys.argv.index("--trigger-dividend")
+        ticker = sys.argv[idx + 1].upper() if idx + 1 < len(sys.argv) else "WMT"
         ticker = sys.argv[idx + 1].upper() if idx + 1 < len(sys.argv) else "GLEN.L"
         publish_dividend_for_ticker(ticker=ticker, dry_run=dry_run)
     elif "--check-dividends" in sys.argv:
+        check_and_publish_dividends(dry_run=dry_run)
         check_and_publish_dividends(dry_run=dry_run, lookback_days=lookback)
     elif "--check-earnings" in sys.argv:
+        check_and_publish_earnings(dry_run=dry_run)
         check_and_publish_earnings(dry_run=dry_run, lookback_days=lookback)
     else:
         # Default: check both automatically
+        check_and_publish_dividends(dry_run=dry_run)
+        check_and_publish_earnings(dry_run=dry_run)
         check_and_publish_dividends(dry_run=dry_run, lookback_days=lookback)
         check_and_publish_earnings(dry_run=dry_run, lookback_days=lookback)
 
