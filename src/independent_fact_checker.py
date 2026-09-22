@@ -791,11 +791,14 @@ def reassemble_micro_topics(micro_topics: List[Dict[str, Any]], session_name: Op
             in_bullet_group = False
 
     raw_assembled = "\n\n".join(chunks)
-    try:
-        from ai_news_generator import ensure_thematic_emojis
-        return ensure_thematic_emojis(raw_assembled, session_name=session_name)
-    except Exception:
-        return raw_assembled
+    if session_name:
+        try:
+            from ai_news_generator import ensure_thematic_emojis
+            return ensure_thematic_emojis(raw_assembled, session_name=session_name)
+        except Exception:
+            return raw_assembled
+    return raw_assembled
+
 
 
 def run_micro_topic_consensus_fact_check(

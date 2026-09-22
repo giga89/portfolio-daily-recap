@@ -2792,3 +2792,247 @@ Output ONLY the post text in Italian."""
         return "Daily crypto recap", fallback_text
 
 
+# ══════════════════════════════════════════════════════════════════════════
+# DIVIDEND PAY DAY & CORPORATE EARNINGS EVENT GENERATORS
+# ══════════════════════════════════════════════════════════════════════════
+
+def _dividend_post_fallback(
+    ticker: str,
+    company_name: str,
+    pay_date: str,
+    dps_amount: Optional[str] = None,
+    div_yield: Optional[str] = None,
+    weight_pct: Optional[float] = None,
+) -> str:
+    clean_ticker = ticker.replace("$", "").strip().upper()
+    cashtag = f"${clean_ticker}"
+    weight_str = f"{weight_pct:.2f}%" if weight_pct else "strategico"
+    dps_str = f" ({dps_amount})" if dps_amount else ""
+    yield_str = f" Il rendimento cedolare stimato si attesta al {div_yield}." if div_yield and div_yield != "Sostenibile" else ""
+
+    text = (
+        f"💰 ACCREDITO DIVIDENDO: CASH FLOW REALE IN PORTAFOGLIO\n\n"
+        f"Oggi registriamo l'accredito effettivo del dividendo di {company_name} ({cashtag}){dps_str} con valuta {pay_date}!\n\n"
+        f"Perché questo passaggio è fondamentale per la nostra strategia?\n"
+        f"1. Liquidità Immediata: i dividendi generano cassa liquida spendibile o reinvestibile direttamente sul conto, senza dover vendere alcuna azione.\n"
+        f"2. Interesse Composto: per chi copia il portafoglio su eToro, questo flusso incrementa costantemente il saldo di cassa disponibile per cogliere nuove opportunità a sconto.\n"
+        f"3. Profilo Difensivo & Zero Leva: con un peso del {weight_str} e Risk Score 3/10, puntiamo su aziende solide con flussi di cassa operativi reali.{yield_str}\n\n"
+        f"Il vero motore dell'investimento a lungo termine non è rincorrere la speculazione, ma incassare flussi di cassa costanti e far lavorare l'interesse composto a nostro favore.\n\n"
+        f"Voi preferite reinvestire subito i dividendi o accumulare liquidità tattica?\n\n"
+        f"📌 {cashtag}\n\n"
+        f"👤 Segui e copia la strategia: https://www.etoro.com/people/andrearavalli"
+    )
+    return sanitize_etoro_cashtags(text)
+
+
+def generate_dividend_post(
+    ticker: str,
+    company_name: str,
+    pay_date: str,
+    dps_amount: Optional[str] = None,
+    div_yield: Optional[str] = None,
+    weight_pct: Optional[float] = None,
+) -> str:
+    """
+    Generate an educational & transparent Italian post for eToro celebrating a Dividend Pay Day.
+    Highlights actual cash flow credited, compounding effect, risk score 3/10, and zero leverage.
+    """
+    clean_ticker = ticker.replace("$", "").strip().upper()
+    cashtag = f"${clean_ticker}"
+    fallback = _dividend_post_fallback(ticker, company_name, pay_date, dps_amount, div_yield, weight_pct)
+
+    if not GENAI_AVAILABLE:
+        return fallback
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return fallback
+
+    weight_str = f"{weight_pct:.2f}%" if weight_pct else "rilevante"
+    dps_info = f"Tranche/DPS: {dps_amount}" if dps_amount else "Dividendo confermato"
+    yield_info = f"Rendimento: {div_yield}" if div_yield else ""
+
+    prompt = f"""Sei Andrea Ravalli, Popular Investor Elite italiano su eToro con portfolio trasparente, prudente (Risk Score 3/10) e 100% senza leva finanziaria.
+Oggi è il GIORNO DI ACCREDITO (Pay Day) del dividendo per una delle aziende del nostro portafoglio:
+- Titolo: {company_name} ({cashtag})
+- Data accredito / valuta: {pay_date}
+- Dettaglio cedola: {dps_info}
+- {yield_info}
+- Peso in portafoglio: {weight_str}
+
+OBIETTIVO DEL POST:
+Scrivi un post trasparente ed educativo per i tuoi copiatori e per la community di eToro, spiegando perché l'accredito dei dividendi è la linfa vitale della strategia:
+1. Accreditamento reale: la cassa liquida arriva direttamente sul conto senza vendere azioni (cash flow passivo).
+2. Per chi copia il portafoglio: la liquidità disponibile sul conto eToro aumenta in proporzione, pronta per reinvestimenti con interesse composto (compounding) o per fungere da cuscinetto di sicurezza.
+3. Filosofia a basso rischio: zero leva, Risk Score 3/10, pazienza e qualità dei flussi di cassa invece di trading frenetico.
+4. Chiusura con una domanda aperta e stimolante per la community.
+
+REGOLE TASSATIVE:
+- Lingua: ITALIANO, tono caloroso, professionale, trasparente, autorevole ma mai arrogante.
+- Massimo 1400 caratteri (limite feed eToro).
+- ZERO hashtag '#' (eToro non li usa nel feed social). Usa solo cashtag col dollaro (es. {cashtag}).
+- Includi sempre alla fine:
+📌 {cashtag}
+
+👤 Segui e copia la strategia: https://www.etoro.com/people/andrearavalli
+
+Output ONLY the final Italian post text, with no introductory meta-comments."""
+
+    try:
+        client = genai.Client(api_key=api_key)
+        config = types.GenerateContentConfig(temperature=0.75)
+        for model_name in DEFAULT_GEMINI_MODELS:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config,
+                )
+                if response and response.text:
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "dividend_post")
+                    text = _clean_robotic_phrases(response.text.strip())
+                    text = sanitize_etoro_cashtags(text)
+                    if len(text) > 100:
+                        print(f"✅ Dividend Pay Day post generated with {model_name}")
+                        return text
+            except Exception as e:
+                err_str = str(e).lower()
+                if '429' in err_str or 'quota' in err_str or 'resource_exhausted' in err_str:
+                    time.sleep(2.0)
+                continue
+    except Exception as exc:
+        print(f"⚠️ Error querying Gemini for dividend post: {exc}")
+
+    return fallback
+
+
+def _earnings_post_fallback(
+    ticker: str,
+    company_name: str,
+    quarter: str,
+    eps_actual: Optional[str] = None,
+    eps_est: Optional[str] = None,
+    eps_beat: bool = True,
+    rev_actual: Optional[str] = None,
+    rev_growth_yoy: Optional[str] = None,
+    guidance_text: Optional[str] = None,
+    thesis_impact: Optional[str] = None,
+    weight_pct: Optional[float] = None,
+) -> str:
+    clean_ticker = ticker.replace("$", "").strip().upper()
+    cashtag = f"${clean_ticker}"
+    weight_str = f"{weight_pct:.2f}%" if weight_pct else "strategico"
+    beat_str = "superando le stime degli analisti" if eps_beat else "in linea con la traiettoria operativa"
+    eps_line = f"• Utile per Azione (EPS): {eps_actual} (vs stime {eps_est})" if eps_actual and eps_est else (f"• EPS: {eps_actual}" if eps_actual else "")
+    rev_line = f"• Ricavi trimestrali: {rev_actual} ({rev_growth_yoy})" if rev_actual and rev_growth_yoy else (f"• Ricavi: {rev_actual}" if rev_actual else "")
+    guidance_line = f"• Outlook / Guidance: {guidance_text}\n" if guidance_text else ""
+    thesis_line = f"\nTesi di portafoglio: {thesis_impact}\n" if thesis_impact else ""
+
+    text = (
+        f"📊 EARNINGS FLASH: RISULTATI TRIMESTRALI {quarter.upper()}\n\n"
+        f"{company_name} ({cashtag}) ha appena alzato il velo sui conti del {quarter}, {beat_str}.\n\n"
+        f"I punti chiave della trimestrale:\n"
+        f"{eps_line}\n"
+        f"{rev_line}\n"
+        f"{guidance_line}"
+        f"{thesis_line}\n"
+        f"Con un peso del {weight_str} nel nostro portafoglio su eToro, confermiamo l'importanza di posizionarsi su business con bilanci solidi, forte generazione di cassa libera e barriere all'entrata difendibili.\n\n"
+        f"Come valutate la reazione del mercato sui conti di {cashtag}?\n\n"
+        f"📌 {cashtag}\n\n"
+        f"👤 Segui e copia la strategia: https://www.etoro.com/people/andrearavalli"
+    )
+    return sanitize_etoro_cashtags(text)
+
+
+def generate_earnings_post(
+    ticker: str,
+    company_name: str,
+    quarter: str = "Q3 2026",
+    eps_actual: Optional[str] = None,
+    eps_est: Optional[str] = None,
+    eps_beat: bool = True,
+    rev_actual: Optional[str] = None,
+    rev_growth_yoy: Optional[str] = None,
+    guidance_text: Optional[str] = None,
+    thesis_impact: Optional[str] = None,
+    weight_pct: Optional[float] = None,
+) -> str:
+    """
+    Generate an Italian post for eToro commenting on corporate earnings release.
+    Analyzes EPS, revenue growth, guidance, and portfolio thesis impact.
+    """
+    clean_ticker = ticker.replace("$", "").strip().upper()
+    cashtag = f"${clean_ticker}"
+    fallback = _earnings_post_fallback(
+        ticker, company_name, quarter, eps_actual, eps_est, eps_beat,
+        rev_actual, rev_growth_yoy, guidance_text, thesis_impact, weight_pct
+    )
+
+    if not GENAI_AVAILABLE:
+        return fallback
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return fallback
+
+    weight_str = f"{weight_pct:.2f}%" if weight_pct else "strategico"
+    beat_sentiment = "BATTUTE LE STIME (BEAT)" if eps_beat else "IN LINEA / SFIDE TEMPORANEE"
+
+    prompt = f"""Sei Andrea Ravalli, Popular Investor Elite italiano su eToro.
+Scrivi un post tempestivo, chiaro e penetrante per commentare i risultati trimestrali appena pubblicati per uno dei titoli del nostro portafoglio:
+- Società: {company_name} ({cashtag})
+- Trimestre: {quarter}
+- Risultato EPS: {eps_actual or 'N/D'} vs Stime analisti: {eps_est or 'N/D'} ({beat_sentiment})
+- Fatturato/Ricavi: {rev_actual or 'N/D'} (Crescita YoY: {rev_growth_yoy or 'N/D'})
+- Guidance/Outlook: {guidance_text or 'Outlook confermato dal management.'}
+- Tesi d'investimento nel portafoglio: {thesis_impact or 'Esposizione su megatrend strutturale di lungo termine.'}
+- Peso in portafoglio: {weight_str}
+
+OBIETTIVO DEL POST:
+1. Riassumere con chiarezza i numeri della trimestrale (EPS, Ricavi, Margini).
+2. Spiegare cosa significano questi risultati per la nostra tesi di investimento a lungo termine.
+3. Mantenere l'orientamento di valore: focus sui fondamentali industriali e generazione di cassa, non sul rumore a breve termine.
+4. Concludere con una domanda aperta per stimolare la discussione tra copier e investitori.
+
+REGOLE TASSATIVE:
+- Lingua: ITALIANO, professionale, concreto e analitico.
+- Massimo 1400 caratteri.
+- ZERO hashtag '#' (usa solo cashtag ${clean_ticker}).
+- Includi sempre alla fine:
+📌 {cashtag}
+
+👤 Segui e copia la strategia: https://www.etoro.com/people/andrearavalli
+
+Output ONLY the final Italian post text, with no introductory meta-comments."""
+
+    try:
+        client = genai.Client(api_key=api_key)
+        config = types.GenerateContentConfig(temperature=0.75)
+        for model_name in DEFAULT_GEMINI_MODELS:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config,
+                )
+                if response and response.text:
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "earnings_post")
+                    text = _clean_robotic_phrases(response.text.strip())
+                    text = sanitize_etoro_cashtags(text)
+                    if len(text) > 100:
+                        print(f"✅ Earnings post generated with {model_name}")
+                        return text
+            except Exception as e:
+                err_str = str(e).lower()
+                if '429' in err_str or 'quota' in err_str or 'resource_exhausted' in err_str:
+                    time.sleep(2.0)
+                continue
+    except Exception as exc:
+        print(f"⚠️ Error querying Gemini for earnings post: {exc}")
+
+    return fallback
+
+
+

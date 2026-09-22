@@ -46,7 +46,9 @@ case "$SESSION" in
     copy_trading)          SESSION_NAME="Copy trading post" ;;
     dividend_post)         SESSION_NAME="Dividend Announcement" ;;
     dashboard_sync)        SESSION_NAME="Daily Dashboard Sync" ;;
+    event_monitor)         SESSION_NAME="Event Monitor (Earnings & Dividends)" ;;
     *)
+
         echo "ERROR: Unknown session '$SESSION'" >&2
         exit 1
         ;;

@@ -91,3 +91,9 @@
 # 09:45 local (CET/CEST) → 07:45 UTC (summer) / 08:45 UTC (winter)
 45 7 * * 1,4   /opt/portfolio-dispatch/dispatch.sh dividend_post >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 45 8 * * 1,4   /opt/portfolio-dispatch/dispatch.sh dividend_post >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
+# ── Event Monitor (Earnings & Dividend Pay Days - Mon-Fri mornings) ───────────
+# 10:00 local (CET/CEST) → 08:00 UTC (summer) / 09:00 UTC (winter)
+0 8 * * 1-5   /opt/portfolio-dispatch/dispatch.sh event_monitor >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+0 9 * * 1-5   /opt/portfolio-dispatch/dispatch.sh event_monitor >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+

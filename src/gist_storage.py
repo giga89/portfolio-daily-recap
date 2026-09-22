@@ -652,3 +652,78 @@ def mark_dividend_announced(
     data['announced_dividends'] = announced
     _invalidate_cache()
     return save_data(data)
+
+
+# ---------------------------------------------------------------------------
+# Dividend Pay Day Deduplication
+# ---------------------------------------------------------------------------
+
+def is_dividend_posted(ticker: str, pay_date: str) -> bool:
+    """Check if a dividend pay day post for ticker and pay_date was already published."""
+    ticker = ticker.replace('$', '').upper().strip()
+    data = load_data()
+    posted = data.get('posted_dividends', {})
+    key = f"{ticker}_{pay_date.strip().replace(' ', '_')}"
+    return key in posted
+
+
+def mark_dividend_posted(
+    ticker: str,
+    pay_date: str,
+    post_id: str = None,
+) -> bool:
+    """Record that a dividend pay day post was published for a specific ticker and pay_date."""
+    from datetime import datetime, timezone
+    ticker = ticker.replace('$', '').upper().strip()
+    data = load_data()
+    posted = data.get('posted_dividends', {})
+    key = f"{ticker}_{pay_date.strip().replace(' ', '_')}"
+    posted[key] = {
+        'ticker': ticker,
+        'pay_date': pay_date,
+        'post_id': str(post_id or ''),
+        'posted_at': datetime.now(timezone.utc).isoformat(),
+    }
+    data['posted_dividends'] = posted
+    _invalidate_cache()
+    return save_data(data)
+
+
+# ---------------------------------------------------------------------------
+# Corporate Earnings Deduplication
+# ---------------------------------------------------------------------------
+
+def is_earnings_posted(ticker: str, quarter: str, year: int) -> bool:
+    """Check if an earnings report post for ticker, quarter and year was already published."""
+    ticker = ticker.replace('$', '').upper().strip()
+    data = load_data()
+    posted = data.get('posted_earnings', {})
+    clean_q = quarter.strip().replace(' ', '_')
+    key = f"{ticker}_{clean_q}_{year}"
+    return key in posted
+
+
+def mark_earnings_posted(
+    ticker: str,
+    quarter: str,
+    year: int,
+    post_id: str = None,
+) -> bool:
+    """Record that an earnings report post was published for a specific ticker, quarter and year."""
+    from datetime import datetime, timezone
+    ticker = ticker.replace('$', '').upper().strip()
+    data = load_data()
+    posted = data.get('posted_earnings', {})
+    clean_q = quarter.strip().replace(' ', '_')
+    key = f"{ticker}_{clean_q}_{year}"
+    posted[key] = {
+        'ticker': ticker,
+        'quarter': quarter,
+        'year': year,
+        'post_id': str(post_id or ''),
+        'posted_at': datetime.now(timezone.utc).isoformat(),
+    }
+    data['posted_earnings'] = posted
+    _invalidate_cache()
+    return save_data(data)
+

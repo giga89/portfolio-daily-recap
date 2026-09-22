@@ -30,6 +30,8 @@ class TestMicroTopicConsensus(unittest.TestCase):
             "👤 Segui e copia la strategia: https://www.etoro.com/people/andrearavalli"
         )
 
+
+
     def test_split_into_micro_topics(self):
         topics = split_into_micro_topics(self.sample_recap)
         self.assertGreaterEqual(len(topics), 7)

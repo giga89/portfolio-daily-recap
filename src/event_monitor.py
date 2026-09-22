@@ -69,9 +69,9 @@ def _get_current_weight(ticker: str) -> Optional[float]:
 # 1. DIVIDEND PAY DAY AUTOMATION
 # ══════════════════════════════════════════════════════════════════════════
 
-def check_and_publish_dividends(dry_run: bool = False) -> List[Dict[str, Any]]:
+def check_and_publish_dividends(dry_run: bool = False, lookback_days: int = 4) -> List[Dict[str, Any]]:
     """
-    Scan NEXT_DIVIDENDS and yfinance for holdings having a Pay Day today.
+    Scan NEXT_DIVIDENDS and yfinance for holdings having a Pay Day today or recently unposted.
     If not yet published, generate card and post.
     """
     print("\n" + "=" * 65)
@@ -79,9 +79,6 @@ def check_and_publish_dividends(dry_run: bool = False) -> List[Dict[str, Any]]:
     print("=" * 65)
 
     today = datetime.now(timezone.utc).date()
-    today_str1 = today.strftime("%b %d, %Y")  # e.g. "Sep 08, 2026"
-    today_str2 = today.strftime("%b %e, %Y").replace("  ", " ")
-
     results = []
 
     # 1. Check curated NEXT_DIVIDENDS from analytics_tracker
@@ -97,7 +94,7 @@ def check_and_publish_dividends(dry_run: bool = False) -> List[Dict[str, Any]]:
         ticker = item.get("ticker", "").strip().upper()
         pay_amount = item.get("pay", "")
 
-        # Check if date matches today (or if dry-run with specific date)
+        # Parse date
         try:
             item_date = datetime.strptime(item_date_str, "%b %d, %Y").date()
         except Exception:
@@ -106,11 +103,12 @@ def check_and_publish_dividends(dry_run: bool = False) -> List[Dict[str, Any]]:
             except Exception:
                 continue
 
-        # Match today (or within ±1 day if weekend)
-        if item_date != today:
+        # Match today or recent unposted pay days within lookback window (e.g. weekend or Friday runs)
+        days_diff = (today - item_date).days
+        if not (0 <= days_diff <= lookback_days):
             continue
 
-        print(f"🎯 Found Pay Day today for ${ticker}: {item_date_str} (DPS: {pay_amount})")
+        print(f"🎯 Found Pay Day for ${ticker}: {item_date_str} (DPS: {pay_amount}, {days_diff} days ago)")
 
         if gist_storage.is_dividend_posted(ticker, item_date_str):
             print(f"   ℹ️ Dividend post for ${ticker} on {item_date_str} already published. Skipping.")
@@ -125,9 +123,10 @@ def check_and_publish_dividends(dry_run: bool = False) -> List[Dict[str, Any]]:
         results.append(res)
 
     if not results:
-        print("ℹ️ No new dividend Pay Days detected for today.")
+        print("ℹ️ No new dividend Pay Days detected.")
 
     return results
+
 
 
 def publish_dividend_for_ticker(
@@ -248,9 +247,9 @@ def publish_dividend_for_ticker(
 # 2. EARNINGS ANNOUNCEMENT AUTOMATION
 # ══════════════════════════════════════════════════════════════════════════
 
-def check_and_publish_earnings(dry_run: bool = False) -> List[Dict[str, Any]]:
+def check_and_publish_earnings(dry_run: bool = False, lookback_days: int = 3) -> List[Dict[str, Any]]:
     """
-    Scan all portfolio holdings for corporate earnings released in the last 24-48 hours.
+    Scan all portfolio holdings for corporate earnings released in the last few days (within lookback_days).
     If not yet published, generate card and post.
     """
     print("\n" + "=" * 65)
@@ -262,18 +261,24 @@ def check_and_publish_earnings(dry_run: bool = False) -> List[Dict[str, Any]]:
         return []
 
     today = datetime.now(timezone.utc).date()
-    yesterday = today - timedelta(days=1)
     results = []
+
+    # Non-equity holdings or ETFs without quarterly EPS/Revenue reports
+    EXCLUDED_EARNINGS_TICKERS = {
+        "PPFB.DE", "IB01.L", "SX7PEX.DE", "IEUR", "IQQL.DE", "TRX", "SPCX.RTH",
+        "WCLD.L", "INDO.PA", "WDEF.L", "XEON.DE"
+    }
 
     for ticker in list(TICKER_THEMES.keys()):
         # Exclude ETFs / Commodities without earnings
         if any(ticker.endswith(sfx) for sfx in [".DE", ".PA", ".L"]) and "ETF" in TICKER_THEMES[ticker].get("sector", ""):
             continue
-        if ticker in ["PPFB.DE", "IB01.L", "SX7PEX.DE", "IEUR", "IQQL.DE", "TRX", "SPCX.RTH"]:
+        if ticker in EXCLUDED_EARNINGS_TICKERS:
             continue
 
+        yf_sym = ticker.replace(".US", "")
         try:
-            t = yf.Ticker(ticker)
+            t = yf.Ticker(yf_sym)
             cal = t.calendar
             if not cal or "Earnings Date" not in cal:
                 continue
@@ -286,10 +291,11 @@ def check_and_publish_earnings(dry_run: bool = False) -> List[Dict[str, Any]]:
             if isinstance(target_date, datetime):
                 target_date = target_date.date()
 
-            # Check if earnings occurred yesterday or today
-            if target_date in (today, yesterday):
+            # Check if earnings occurred within lookback window
+            days_ago = (today - target_date).days
+            if 0 <= days_ago <= lookback_days:
                 quarter_str = f"Q{((target_date.month - 1) // 3) + 1} {target_date.year}"
-                print(f"🎯 Detected Earnings for ${ticker} on {target_date} ({quarter_str})")
+                print(f"🎯 Detected Earnings for ${ticker} on {target_date} ({quarter_str}, {days_ago} days ago)")
 
                 if gist_storage.is_earnings_posted(ticker, quarter_str, target_date.year):
                     print(f"   ℹ️ Earnings post for ${ticker} ({quarter_str}) already published. Skipping.")
@@ -301,13 +307,14 @@ def check_and_publish_earnings(dry_run: bool = False) -> List[Dict[str, Any]]:
                     dry_run=dry_run,
                 )
                 results.append(res)
-        except Exception as e:
+        except Exception:
             continue
 
     if not results:
-        print("ℹ️ No un-posted earnings reports found in the last 24-48 hours.")
+        print(f"ℹ️ No un-posted earnings reports found in the last {lookback_days} days.")
 
     return results
+
 
 
 def publish_earnings_for_ticker(
@@ -463,6 +470,12 @@ def _send_event_alert_telegram(
 
 if __name__ == "__main__":
     dry_run = "--dry-run" in sys.argv
+    lookback = 4
+    if "--lookback" in sys.argv:
+        try:
+            lookback = int(sys.argv[sys.argv.index("--lookback") + 1])
+        except Exception:
+            lookback = 4
 
     if "--trigger-earnings" in sys.argv:
         idx = sys.argv.index("--trigger-earnings")
@@ -470,13 +483,14 @@ if __name__ == "__main__":
         publish_earnings_for_ticker(ticker=ticker, dry_run=dry_run)
     elif "--trigger-dividend" in sys.argv:
         idx = sys.argv.index("--trigger-dividend")
-        ticker = sys.argv[idx + 1].upper() if idx + 1 < len(sys.argv) else "WMT"
+        ticker = sys.argv[idx + 1].upper() if idx + 1 < len(sys.argv) else "GLEN.L"
         publish_dividend_for_ticker(ticker=ticker, dry_run=dry_run)
     elif "--check-dividends" in sys.argv:
-        check_and_publish_dividends(dry_run=dry_run)
+        check_and_publish_dividends(dry_run=dry_run, lookback_days=lookback)
     elif "--check-earnings" in sys.argv:
-        check_and_publish_earnings(dry_run=dry_run)
+        check_and_publish_earnings(dry_run=dry_run, lookback_days=lookback)
     else:
         # Default: check both automatically
-        check_and_publish_dividends(dry_run=dry_run)
-        check_and_publish_earnings(dry_run=dry_run)
+        check_and_publish_dividends(dry_run=dry_run, lookback_days=lookback)
+        check_and_publish_earnings(dry_run=dry_run, lookback_days=lookback)
+
