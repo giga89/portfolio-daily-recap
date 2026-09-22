@@ -422,10 +422,15 @@ def create_post(
         return {"success": False, "error": str(e)}
 
 
-def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict[str, Any]]:
+def get_post_metrics(
+    post_id: str,
+    exclude_author: bool = True,
+    fetch_comments: bool = False,
+) -> Optional[Dict[str, Any]]:
     """
     Fetch engagement metrics (likes, comments, content) for a specific eToro post.
     Filters out author self-likes if exclude_author is True.
+    If fetch_comments is True, retrieves live comments from GET /api/v1/posts/{postId}/comments.
     Includes retry with exponential backoff on HTTP 429 rate limits.
     GET /api/v1/posts/{postId}
     """
@@ -472,19 +477,40 @@ def get_post_metrics(post_id: str, exclude_author: bool = True) -> Optional[Dict
                 else:
                     likes = total_likes
 
-                # Total comments from summary
-                comments = (
-                    summary.get("commentCount")
-                    or summary.get("commentsCount")
-                    or data.get("commentsCount", 0)
-                )
+                # Total comments calculation
+                comments: Optional[int] = None
+                if summary.get("commentCount") is not None or summary.get("commentsCount") is not None:
+                    comments = int(summary.get("commentCount") or summary.get("commentsCount") or 0)
+                elif fetch_comments:
+                    try:
+                        c_url = f"{BASE_URL}/api/v1/posts/{post_id}/comments"
+                        c_resp = requests.get(c_url, headers=headers, params={"pageSize": 50, "take": 50}, timeout=15)
+                        if c_resp.status_code == 200:
+                            c_data = c_resp.json()
+                            c_list = c_data.get("comments", []) if isinstance(c_data, dict) else (c_data if isinstance(c_data, list) else [])
+                            total_comments = c_data.get("paging", {}).get("totalCount", len(c_list)) if isinstance(c_data, dict) else len(c_list)
+                            if exclude_author and c_list:
+                                author_comments = sum(
+                                    1 for c in c_list
+                                    if (c.get("entity", {}).get("owner", {}).get("username") or "").lower() == my_username
+                                    or str(c.get("entity", {}).get("owner", {}).get("id")) == my_user_id
+                                    or c.get("requesterContext", {}).get("isOwner", False)
+                                )
+                                comments = max(0, total_comments - author_comments)
+                            else:
+                                comments = total_comments
+                        elif c_resp.status_code == 429:
+                            print(f"⏳ Rate limited on comments for {post_id}.")
+                    except Exception as ce:
+                        print(f"⚠️ Error fetching comments for post {post_id}: {ce}")
+
                 shares = summary.get("sharedCount") or summary.get("sharesCount") or 0
 
                 return {
                     "id": data.get("id") or post_id,
                     "created": data.get("created"),
                     "likes": int(likes),
-                    "comments": int(comments),
+                    "comments": comments,
                     "shares": int(shares),
                     "word_count": data.get("wordCount", 0),
                     "reading_time": data.get("readingTimeMinutes", 0),

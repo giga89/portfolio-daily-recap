@@ -27,6 +27,7 @@ and generates a state-of-the-art dual-hub portal for GitHub Pages (in full Engli
 
 import os
 import json
+import time
 import shutil
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
@@ -35,6 +36,7 @@ import gist_storage
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ANALYTICS_FILE = os.path.join(ROOT_DIR, "data", "post_analytics.json")
+ANSWERED_COMMENTS_FILE = os.path.join(ROOT_DIR, "data", "answered_comments.json")
 DOCS_DIR = os.path.join(ROOT_DIR, "docs")
 DOCS_INDEX_HTML = os.path.join(DOCS_DIR, "index.html")
 ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
@@ -646,24 +648,67 @@ def record_post(
     print(f"📊 Analytics: Recorded {platform} post {post_id} ({session_name})")
 
 
-def sync_etoro_metrics() -> Dict[str, Any]:
+def sync_etoro_metrics(max_comment_sync_days: int = 14) -> Dict[str, Any]:
     """
     Poll live engagement metrics from eToro API for all tracked posts.
+    - Accurately tracks likes, comments, and shares.
+    - Employs smart comment sync: queries /comments for recent posts (<= 14 days or top 20)
+      with backoff delay, avoiding HTTP 429 rate limits.
+    - Preserves existing comments on older posts so they are never wiped to 0.
+    - Incorporates known answered comments from answered_comments.json as a floor.
     """
     data = load_local_analytics()
     posts = data.get("posts", [])
     updated_count = 0
 
-    for p in posts:
+    # 1. Load answered comments baseline
+    answered_counts: Dict[str, int] = {}
+    if os.path.exists(ANSWERED_COMMENTS_FILE):
+        try:
+            with open(ANSWERED_COMMENTS_FILE, "r", encoding="utf-8") as f:
+                answered_raw = json.load(f)
+                if isinstance(answered_raw, dict):
+                    for cid, info in answered_raw.items():
+                        if isinstance(info, dict):
+                            pid = info.get("post_id")
+                            if pid:
+                                answered_counts[pid] = answered_counts.get(pid, 0) + 1
+        except Exception as e:
+            print(f"⚠️ Warning reading answered comments baseline: {e}")
+
+    now_utc = datetime.now(timezone.utc)
+
+    for idx, p in enumerate(posts):
         if p.get("platform") == "etoro" and p.get("id"):
             post_id = p["id"]
-            metrics = etoro_client.get_post_metrics(post_id)
+
+            # Selectively fetch comments for recent posts (first 20 or published <= 14 days ago)
+            is_recent = (idx < 20)
+            if not is_recent and p.get("published_at"):
+                try:
+                    pub_dt = datetime.fromisoformat(p["published_at"].replace("Z", "+00:00"))
+                    if (now_utc - pub_dt).days <= max_comment_sync_days:
+                        is_recent = True
+                except Exception:
+                    pass
+
+            metrics = etoro_client.get_post_metrics(post_id, fetch_comments=is_recent)
             if metrics:
-                p["likes"] = metrics.get("likes", 0)
-                p["comments"] = metrics.get("comments", 0)
-                p["shares"] = metrics.get("shares", 0)
+                p["likes"] = metrics.get("likes", p.get("likes", 0))
+                p["shares"] = metrics.get("shares", p.get("shares", 0))
+                if metrics.get("comments") is not None:
+                    p["comments"] = metrics["comments"]
                 p["last_synced"] = datetime.now(timezone.utc).isoformat()
                 updated_count += 1
+
+            # Ensure comments count never drops below verified answered comments
+            if post_id in answered_counts:
+                p["comments"] = max(p.get("comments", 0), answered_counts[post_id])
+
+            if is_recent:
+                time.sleep(0.25)
+            else:
+                time.sleep(0.05)
 
     data["posts"] = [p for p in posts if p.get("id") not in ["41f4c7dc-402a-4ce6-a7fe-49b819f074d2", "fb2dfe40-9d61-11f1-8080-800019b76646"]]
     save_local_analytics(data)
