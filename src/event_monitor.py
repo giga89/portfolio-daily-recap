@@ -467,7 +467,7 @@ def _send_event_alert_telegram(
             f"🔗 <b>Post eToro</b>: <a href=\"{post_url}\">{post_url}</a>\n\n"
             f"🤖 <i>Automated Event Monitor Bot</i>"
         )
-        return telegram_sender.send_telegram_notification(msg)
+        return telegram_sender.send_telegram_message(msg)
     except Exception as e:
         print(f"⚠️ Failed to send Telegram alert: {e}")
         return False
