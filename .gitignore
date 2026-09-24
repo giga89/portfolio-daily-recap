@@ -19,3 +19,4 @@ output/recap.txt
 
 # Private eToro engagement bot (runs on OrangePi, never public)
 etoro-engagement-bot/
+tests/test_engagement_bot_topic_comments.py

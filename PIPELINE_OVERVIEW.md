@@ -15,6 +15,7 @@ Last reviewed: May 2026.
 | Daily 16:00 UTC (18:00 ITA) | `Daily crypto recap` | 16:9 Crypto Card, Fear & Greed Index, $BTC, $ETH, $TRX, and dynamic altcoin | Telegram, eToro Feed |
 | Mon–Fri 20:02 / 21:02 UTC (22:02 / 23:02 ITA) | `U.S. market close` | Full daily wrap-up, benchmark charts, pie chart, Top & Flop card + 3 comments | Telegram, eToro, Twitter, Bluesky, Threads, FB, IG |
 | Saturday 08:00 / 09:00 UTC (10:00 ITA) | `Weekly recap (Sat)` | Weekly portfolio & macro recap with Top & Flop card | Telegram, eToro Feed, LinkedIn |
+| Saturday 10:00 / 11:00 UTC (12:00 ITA) | `Copy trading post` | Educational & conviction post "Perché Copiarmi" + Dedicated Copy Trading Card | Telegram, eToro Feed, Twitter, Bluesky |
 | Sunday 20:00 / 21:00 UTC (22:00 ITA) | `Weekly recap (Sun)` | Upcoming catalysts, earnings & central banks schedule | Telegram, eToro Feed, LinkedIn |
 
 **Important:** Triggered primarily by the Orange Pi 5 local scheduler (`dispatch.sh`) with hour-bucket deduplication to guarantee on-the-minute execution regardless of daylight saving time (DST).

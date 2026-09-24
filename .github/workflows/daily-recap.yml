@@ -15,7 +15,6 @@ on:
     - cron: '30 21 * * 0'     # Weekly recap (Sun):  21:30 UTC
     - cron: '0 10 * * 6'      # Saturday Copy Trading: 10:00 UTC (12:00 ITA)
     - cron: '0 16 * * 0'      # Weekly recap / Sunday Outlook: 16:00 UTC (18:00 ITA)
-    - cron: '30 11 * * 1-5'   # Copy trading post:   11:30 UTC (13:30 ITA)
   workflow_dispatch:  # Allows manual trigger
     inputs:
       force_session:
@@ -122,8 +121,6 @@ jobs:
                 SESSION_NAME="Copy trading post" ;;
               "0 16 * * 0")
                 SESSION_NAME="Weekly recap (Sun)" ;;
-              "30 11 * * 1-5")
-                SESSION_NAME="Copy trading post" ;;
             esac
             echo "Triggered by GitHub cron (fallback): $SCHEDULE"
           else

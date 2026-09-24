@@ -348,7 +348,7 @@ def publish_all(
 
     if is_copy_trading:
         print("\n" + "=" * 60)
-        print(f"🔁 DAILY SESSION — Copy Trading Education Post")
+        print(f"🔁 WEEKLY SESSION — Copy Trading Education Post (Saturday)")
         print("=" * 60)
         results.update(_publish_copy_trading_post(
             portfolio_perf=data.get("portfolio_perf", None),
@@ -1066,9 +1066,9 @@ def _publish_crypto_recap_post() -> dict:
 
 def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
     """
-    Generate and publish a daily Copy Trading education + persuasion post.
+    Generate and publish a weekly Copy Trading education + persuasion post (Saturday).
     Fetches real eToro history (P&L, win rate, monthly gains) and sends to
-    both eToro Social Feed and Telegram.
+    eToro Social Feed, Telegram, Bluesky, and Twitter/X.
 
     Returns:
         dict: {platform: True/False}

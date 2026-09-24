@@ -2105,7 +2105,7 @@ def generate_copy_trading_post(
     rankings_data: dict = None,
 ) -> str:
     """
-    Generate a daily Copy Trading education + persuasion post for eToro.
+    Generate a weekly Copy Trading education + persuasion post for eToro (Saturday).
 
     Explains how Copy Trading works, why copying AndreaRavalli makes sense,
     and uses REAL historical performance data (P&L, win rate, copiers count,
