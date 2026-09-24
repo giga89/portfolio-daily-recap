@@ -16,3 +16,6 @@ output/performance_chart.png
 output/recap.txt
 .github/copilot-instructions.md
 *.xlsx
+
+# Private eToro engagement bot (runs on OrangePi, never public)
+etoro-engagement-bot/
