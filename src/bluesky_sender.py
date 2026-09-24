@@ -226,23 +226,58 @@ def build_bluesky_thread(
 
 
 def build_bluesky_copy_trading_thread(
-    gain_pct: str = "+200%",
+    gain_pct: str = None,
+    cagr_pct: str = None,
+    risk_score: int = None,
+    portfolio_perf: float = None,
+    rankings_data: dict = None,
+    gain_history: list = None,
+    theme_index: int = None,
+    theme_id: str = None,
 ) -> list[str]:
     """
     Build a dedicated 2-post Bluesky promotional thread in English explaining
     Andrea Ravalli's Popular Investor strategy and Copy Trading.
+    Dynamically resolves performance metrics and rotates thematic focus.
     """
+    from twitter_sender import compute_copy_strategy_metrics, COPY_TRADING_THEMES
+
+    if gain_pct is None or cagr_pct is None or risk_score is None:
+        computed_gain, computed_cagr, computed_risk = compute_copy_strategy_metrics(
+            portfolio_perf=portfolio_perf,
+            rankings_data=rankings_data,
+            gain_history=gain_history,
+        )
+        gain_pct = gain_pct or computed_gain
+        cagr_pct = cagr_pct or computed_cagr
+        risk_score = risk_score if risk_score is not None else computed_risk
+
+    selected_theme = None
+    if theme_id:
+        for t in COPY_TRADING_THEMES:
+            if t["id"] == theme_id:
+                selected_theme = t
+                break
+
+    if selected_theme is None:
+        if theme_index is not None:
+            selected_theme = COPY_TRADING_THEMES[theme_index % len(COPY_TRADING_THEMES)]
+        else:
+            day_of_year = datetime.utcnow().timetuple().tm_yday
+            selected_theme = COPY_TRADING_THEMES[day_of_year % len(COPY_TRADING_THEMES)]
+
     post1 = (
         "👋 Andrea Ravalli · eToro Popular Investor\n\n"
         "📊 Long-Term Multi-Asset Strategy:\n"
-        f"• {gain_pct} cumulative return since 2020 (~18% CAGR)\n"
-        "• 3/10 Risk Score · 0% Leverage (1x real assets)\n"
-        "• Core: AI, Semiconductors, Healthcare & Nuclear Energy\n\n"
-        "#FinSky #Investing #Stocks #Portfolio"
+        f"• {gain_pct} cumulative return since 2020 ({cagr_pct})\n"
+        f"• {risk_score}/10 Risk Score · 0% Leverage (1x real assets)\n"
+        f"• Core: {selected_theme['pillars']}\n\n"
+        f"#FinSky #Investing {selected_theme['tickers_line']} {selected_theme['hashtags']}"
     )
 
-    hub_url = get_bluesky_hub_url(campaign="copy")
-    partner_url = get_bluesky_etoro_url(campaign="copy")
+    campaign_name = f"copy_{selected_theme['id']}"
+    hub_url = get_bluesky_hub_url(campaign=campaign_name)
+    partner_url = get_bluesky_etoro_url(campaign=campaign_name)
 
     post2 = (
         f"📈 1-Click Copy Trading:\n{ETORO_PROFILE}\n\n"

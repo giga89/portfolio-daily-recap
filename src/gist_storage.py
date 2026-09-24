@@ -434,6 +434,48 @@ def get_current_copy_card_style() -> str:
 
 
 # ---------------------------------------------------------------------------
+# Twitter / Bluesky Copy Trading Theme Rotation Tracking
+# ---------------------------------------------------------------------------
+
+def get_next_twitter_copy_theme_index(num_themes: int = 9) -> int:
+    """
+    Return the next Twitter / X copy trading promotional theme index (round-robin).
+    Advances the internal counter and saves it back to Gist.
+    """
+    data = load_data()
+    idx = data.get('twitter_copy_theme_index', 0)
+    data['twitter_copy_theme_index'] = (idx + 1) % max(1, num_themes)
+    save_data(data)
+    return idx % max(1, num_themes)
+
+
+def get_current_twitter_copy_theme_index(num_themes: int = 9) -> int:
+    """Return the current Twitter copy trading theme index without advancing the counter."""
+    data = load_data()
+    idx = data.get('twitter_copy_theme_index', 0)
+    return idx % max(1, num_themes)
+
+
+def get_next_twitter_close_hashtag_index(num_sets: int = 8) -> int:
+    """
+    Return the next Twitter / X market close hashtag index (round-robin).
+    Advances the internal counter and saves it back to Gist.
+    """
+    data = load_data()
+    idx = data.get('twitter_close_hashtag_index', 0)
+    data['twitter_close_hashtag_index'] = (idx + 1) % max(1, num_sets)
+    save_data(data)
+    return idx % max(1, num_sets)
+
+
+def get_current_twitter_close_hashtag_index(num_sets: int = 8) -> int:
+    """Return the current Twitter market close hashtag index without advancing the counter."""
+    data = load_data()
+    idx = data.get('twitter_close_hashtag_index', 0)
+    return idx % max(1, num_sets)
+
+
+# ---------------------------------------------------------------------------
 # eToro Post & Delayed Engagement Tracking
 # ---------------------------------------------------------------------------
 

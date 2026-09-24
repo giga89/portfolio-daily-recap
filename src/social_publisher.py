@@ -1199,7 +1199,11 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
     # 3. Bluesky (Copy Trading Educational Thread in English)
     if os.environ.get("BLUESKY_HANDLE") and os.environ.get("BLUESKY_APP_PASS"):
         try:
-            bsky_posts = bluesky_sender.build_bluesky_copy_trading_thread()
+            bsky_posts = bluesky_sender.build_bluesky_copy_trading_thread(
+                portfolio_perf=portfolio_perf,
+                rankings_data=rankings_data,
+                gain_history=gain_history,
+            )
             if visual_path and os.path.exists(visual_path):
                 ok_bsky = bluesky_sender.send_bluesky_thread_with_image(
                     bsky_posts,
@@ -1217,7 +1221,11 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
     # 4. Twitter / X (Copy Trading Educational Thread)
     if os.environ.get("TWITTER_API_KEY") and os.environ.get("TWITTER_ACCESS_TOKEN"):
         try:
-            tweets = twitter_sender.build_twitter_copy_trading_thread()
+            tweets = twitter_sender.build_twitter_copy_trading_thread(
+                portfolio_perf=portfolio_perf,
+                rankings_data=rankings_data,
+                gain_history=gain_history,
+            )
             ok_tw = twitter_sender.send_twitter_thread(tweets)
             results["twitter_copy_trading"] = ok_tw
             print(f"   {'✅' if ok_tw else '❌'} Copy trading thread sent to Twitter/X")
