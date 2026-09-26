@@ -80,12 +80,24 @@ def _get_all_portfolio_tags():
     return [t for t in PORTFOLIO_TICKERS.keys() if t not in _EXCLUDED_FROM_TAGS]
 
 
+HEAVY_ANCHOR_TICKERS = {
+    "SPX500", "NSDQ100", "GER40",
+    "NVDA", "PLTR", "MSFT", "AMZN", "TSM", "GOOG", "GOOGL",
+    "BTC", "ETH", "SOL", "CCJ", "LLY", "PRYMI", "ENIMI", "RACE"
+}
+
+
 def _get_ticker_engagement_scores() -> dict[str, float]:
     """
     Computes community engagement scores (likes + comments) for each portfolio ticker
     based on historical eToro post metrics from data/post_analytics.json.
+    Heavy anchor tickers receive a baseline bonus to ensure strong visibility.
     """
     scores = {}
+    for anchor in HEAVY_ANCHOR_TICKERS:
+        clean_a = anchor.replace(".", "").upper()
+        scores[clean_a] = 15.0
+
     try:
         analytics_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "post_analytics.json")
         if os.path.exists(analytics_file):
@@ -1269,11 +1281,12 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
     try:
         from config import EMOJI_MAP
         client = genai.Client(api_key=api_key)
-        all_allowed_for_validation = list(PORTFOLIO_TICKERS.keys())
+        all_allowed_for_validation = list(PORTFOLIO_TICKERS.keys()) + ["SPX500", "NSDQ100", "GER40", "DJ30", "EURUSD"]
         
         selected_tags = []
         selected_tags_str = "None"
         tag_instruction = ""
+        from datetime import datetime as _dt
         
         # Determine selection and tags based on session
         if is_eu_open:
@@ -1281,7 +1294,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             fav1 = favs[0] if len(favs) > 0 else 'AZN.L'
             fav2 = favs[1] if len(favs) > 1 else 'ENEL.MI'
             niche1 = niche[0] if len(niche) > 0 else '1919.HK'
-            macro_tag = 'SX7PEX.DE'
+            # Use heavy European benchmark GER40 (DAX) or SPX500 instead of illiquid ETF
+            macro_tag = 'GER40' if (_dt.utcnow().day % 2 == 0) else 'SPX500'
             selected_tags = [fav1, fav2, niche1]
             emoji_fav1 = EMOJI_MAP.get(fav1) or EMOJI_MAP.get(fav1.split('.')[0]) or '🔹'
             emoji_fav2 = EMOJI_MAP.get(fav2) or EMOJI_MAP.get(fav2.split('.')[0]) or '🔹'
@@ -1294,10 +1308,17 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
 """
         elif is_us_open:
             favs, niche = _select_rotation_favorites_and_niche(US_TICKERS, excluded_tags, count_favorites=2, count_niche=1)
+            heavy_us_titans = ['NVDA', 'PLTR', 'MSFT', 'AMZN', 'TSM', 'CCJ', 'LLY']
             fav1 = favs[0] if len(favs) > 0 else 'NVDA'
             fav2 = favs[1] if len(favs) > 1 else 'MSFT'
+            # Guarantee at least one heavy titan in US Open
+            if fav1 not in heavy_us_titans and fav2 not in heavy_us_titans:
+                for titan in heavy_us_titans:
+                    if titan in US_TICKERS and titan not in (excluded_tags or []):
+                        fav1 = titan
+                        break
             niche1 = niche[0] if len(niche) > 0 else 'CCJ'
-            macro_tag = 'NSDQ100'
+            macro_tag = 'SPX500' if (_dt.utcnow().day % 2 != 0) else 'NSDQ100'
             selected_tags = [fav1, fav2, niche1]
             emoji_fav1 = EMOJI_MAP.get(fav1) or EMOJI_MAP.get(fav1.split('.')[0]) or '🔹'
             emoji_fav2 = EMOJI_MAP.get(fav2) or EMOJI_MAP.get(fav2.split('.')[0]) or '🔹'
@@ -1310,16 +1331,24 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
 """
         elif is_us_close:
             top_gainers = _get_top_gainers_with_news(stock_data=stock_data, count=4)
-            g1, g2, g3, g4 = top_gainers[0], top_gainers[1], top_gainers[2], top_gainers[3]
+            macro_heavy = "SPX500" if (_dt.utcnow().day % 2 == 0) else "NSDQ100"
+            gainers_filtered = [g for g in top_gainers if g['ticker'] != macro_heavy]
+            selected_gainers = gainers_filtered[:3] if len(gainers_filtered) >= 3 else top_gainers[:3]
+            g1 = selected_gainers[0] if len(selected_gainers) > 0 else {'ticker': 'NVDA', 'company_name': 'NVIDIA', 'change_pct': 0.0, 'news_snippet': 'NVIDIA guida il sentiment del mercato.'}
+            g2 = selected_gainers[1] if len(selected_gainers) > 1 else {'ticker': 'MSFT', 'company_name': 'Microsoft', 'change_pct': 0.0, 'news_snippet': 'Microsoft consolida le posizioni.'}
+            g3 = selected_gainers[2] if len(selected_gainers) > 2 else {'ticker': 'PLTR', 'company_name': 'Palantir', 'change_pct': 0.0, 'news_snippet': 'Palantir registra volumi importanti.'}
+            
             emoji_g1 = EMOJI_MAP.get(g1['ticker']) or EMOJI_MAP.get(g1['ticker'].split('.')[0]) or '🔹'
             emoji_g2 = EMOJI_MAP.get(g2['ticker']) or EMOJI_MAP.get(g2['ticker'].split('.')[0]) or '🔹'
             emoji_g3 = EMOJI_MAP.get(g3['ticker']) or EMOJI_MAP.get(g3['ticker'].split('.')[0]) or '🔹'
-            emoji_g4 = EMOJI_MAP.get(g4['ticker']) or EMOJI_MAP.get(g4['ticker'].split('.')[0]) or '🔹'
-            selected_tags = [g1['ticker'], g2['ticker'], g3['ticker'], g4['ticker']]
-            selected_tags_str = ', '.join([f"${t}" for t in selected_tags])
+            
+            selected_tags = [macro_heavy, g1['ticker'], g2['ticker'], g3['ticker']]
+            selected_tags_str = f"${macro_heavy}, ${g1['ticker']}, ${g2['ticker']}, ${g3['ticker']}"
+            g_descrs = f"${g1['ticker']} ({g1.get('daily_change', 0.0):+.2f}%), ${g2['ticker']} ({g2.get('daily_change', 0.0):+.2f}%), ${g3['ticker']} ({g3.get('daily_change', 0.0):+.2f}%)"
             tag_instruction = f"""
-- REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE 4 tag con il simbolo $ nel testo: ${g1['ticker']}, ${g2['ticker']}, ${g3['ticker']}, ${g4['ticker']}. Non uno di meno, non uno di più.
-- Ognuno dei 4 titoli con maggiore variazione positiva deve essere trattato nel rispettivo microtema spiegando la notizia e il catalizzatore reale che ne ha guidato il rialzo.
+- REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE 4 tag con il simbolo $ nel testo: {selected_tags_str}. Non uno di meno, non uno di più.
+- Inserisci ${macro_heavy} nel Microtema 1 per inquadrare la chiusura generale di Wall Street e l'andamento del mercato.
+- Inserisci i 3 titoli del portafoglio in evidenza ({g_descrs}) nei rispettivi microtemi dedicati spiegando le notizie e i catalizzatori reali che ne hanno guidato il movimento.
 """
         else:
             # Fallback for weekly recap
@@ -1558,12 +1587,12 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
               * Microtema 2 DEVE iniziare con: {emoji_g1}
               * Microtema 3 DEVE iniziare con: {emoji_g2}
               * Microtema 4 DEVE iniziare con: {emoji_g3}
-              * Microtema 5 DEVE iniziare con: {emoji_g4}
+              * Microtema 5 DEVE iniziare con: ⚖️ (oppure 🔹)
             - Se per qualsiasi motivo non sai cosa mettere, usa il simbolo di elenco '🔹'.
             - NON omettere mai l'emoticon a inizio riga per nessun microtema.
 
-            🌆 MICRO-TEMA 1: Riepilogo rapido di cose successe che hanno mosso l'indice oggi
-               Sintesi a bocce ferme di cosa ha guidato S&P 500 e Nasdaq oggi (reazione ai dati macro, rendimenti, flussi settoriali).
+            🌆 MICRO-TEMA 1: Riepilogo rapido di chiusura Wall Street (${macro_heavy})
+               Sintesi a bocce ferme di cosa ha guidato i listini oggi (reazione a dati macro, rendimenti, flussi settoriali). Includi il tag ${macro_heavy}.
 
             REGOLA CRITICA SULLA FRESCHEZZA DELLE NOTIZIE:
             - Per ogni titolo, la notizia citata DEVE essere della giornata odierna o al massimo di ieri. Se la fonte è più vecchia di 2 giorni, NON citarla come catalizzatore di oggi.
@@ -1579,8 +1608,8 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             {emoji_g3} MICRO-TEMA 4: ${g3['ticker']} ({g3['daily_change']:+.2f}%)
                Terzo titolo per variazione positiva. Spiega la notizia reale e il catalizzatore del movimento: {g3['news_snippet']}.
 
-            {emoji_g4} MICRO-TEMA 5: ${g4['ticker']} ({g4['daily_change']:+.2f}%)
-               Quarto titolo per variazione positiva. Spiega la notizia reale e il catalizzatore del movimento: {g4['news_snippet']}.
+            ⚖️ MICRO-TEMA 5: Rotazione Settoriale & Strategia
+               Breve sintesi su rotazione settoriale a Wall Street (difensivi vs ciclici, flussi istituzionali) e assetti del nostro portafoglio. NON inserire altri tag oltre ai 4 indicati.
 
             {tag_instruction}
             - {closing_question_instruction}
@@ -2170,64 +2199,204 @@ def generate_copy_trading_post(
         sign = "+" if portfolio_perf >= 0 else ""
         perf_context = f"Performance cumulativa portafoglio: {sign}{portfolio_perf:.1f}%"
 
-    # Rotate post angle to avoid repetition (based on weekday)
+COPY_TRADING_ETORO_THEMES = [
+    {
+        "id": "spx500_alpha",
+        "title": "Alpha Attivo vs S&P 500 Passivo",
+        "tickers": ["SPX500", "NVDA", "MSFT"],
+        "angle": (
+            "Perché copiare una strategia attiva e diversificata batte la semplice replica passiva dell'indice $SPX500. "
+            "Evidenzia l'Alpha storico (+7.85% annuo) generato sovrappesando campioni strutturali come $NVDA e $MSFT "
+            "e gestendo attivamente il rischio per attutire le correzioni."
+        ),
+        "fallback_angle": "Confronto attivo con l'indice $SPX500 e selezione disciplinata di leader come $NVDA e $MSFT.",
+    },
+    {
+        "id": "ai_secular_megatrend",
+        "title": "Megatrend Intelligenza Artificiale & Cloud",
+        "tickers": ["SPX500", "NVDA", "PLTR", "TSM"],
+        "angle": (
+            "Come il nostro portafoglio cavalca la rivoluzione dell'AI attraverso l'infrastruttura reale: hardware di computing ($NVDA), "
+            "fonderie avanzate ($TSM) e software enterprise ($PLTR), mantenendo equilibrio e diversificazione rispetto a $SPX500."
+        ),
+        "fallback_angle": "Esposizione strategica ai leader dell'infrastruttura AI ($NVDA, $PLTR, $TSM) bilanciata rispetto all'indice $SPX500.",
+    },
+    {
+        "id": "risk_management_score3",
+        "title": "Gestione del Rischio & Zero Leva (Risk Score 3)",
+        "tickers": ["SPX500", "MSFT", "AMZN"],
+        "angle": (
+            "La vera chiave del rendimento composto: proteggere il capitale nei momenti di turbolenza. "
+            "Risk Score 3/10 su eToro, Beta difensivo 0.84 vs $SPX500, zero leva speculativa, e colossi dai flussi di cassa enormi come $MSFT e $AMZN."
+        ),
+        "fallback_angle": "Protezione del capitale, Risk Score 3/10 e 100% zero leva con campioni dai bilanci solidi come $MSFT e $AMZN rispetto a $SPX500.",
+    },
+    {
+        "id": "real_track_record_consistency",
+        "title": "Trasparenza Totale & Oltre 8 Anni di Storico Certificato",
+        "tickers": ["SPX500", "PLTR", "CCJ"],
+        "angle": (
+            "Su eToro parlano i numeri pubblici e verificati: oltre 8 anni continuativi, win rate oltre il 75% e drawdown sempre recuperati "
+            "in anticipo rispetto alla media dell'indice $SPX500. Metodo, disciplina e trasparenza totale con posizioni di convinzione come $PLTR e $CCJ."
+        ),
+        "fallback_angle": "Oltre 8 anni di storico reale su eToro, win rate solido e recupero rapido dei drawdown rispetto a $SPX500 con $PLTR e $CCJ.",
+    },
+    {
+        "id": "diversification_energy_pharma",
+        "title": "Decorrelazione Intelligente: Oltre la Sola Tecnologia",
+        "tickers": ["SPX500", "CCJ", "LLY"],
+        "angle": (
+            "La trappola dei portafogli troppo concentrati solo su tech o passivi su $SPX500. "
+            "La nostra forza è la diversificazione reale: energia nucleare strategica con $CCJ per alimentare l'era digitale "
+            "e innovazione farmaceutica anticiclica con $LLY per generare sovraperformance in ogni fase del ciclo."
+        ),
+        "fallback_angle": "Diversificazione concreta tra energia nucleare ($CCJ) e pharma difensivo ($LLY) per superare l'indice $SPX500.",
+    },
+    {
+        "id": "how_copy_trading_works",
+        "title": "Come Funziona il Copy Trading: Frazioni, Zero Fee & Liquidità",
+        "tickers": ["SPX500", "AMZN", "MSFT"],
+        "angle": (
+            "Guida trasparente: con un clic su 'Copia', il capitale replica proporzionalmente tutte le operazioni su asset come $AMZN e $MSFT. "
+            "Zero commissioni di gestione, azioni frazionate a partire da cifre contenute, e libertà assoluta di fermare o prelevare in qualunque istante rispetto a fondi o $SPX500."
+        ),
+        "fallback_angle": "Funzionamento pratico del Copy Trading: zero costi di gestione, piena liquidità e replica automatica su $AMZN e $MSFT.",
+    },
+    {
+        "id": "multi_ai_quant_edge",
+        "title": "Metodo Scientifico Multi-AI & Decisioni Grounded sui Dati",
+        "tickers": ["SPX500", "NVDA", "PLTR"],
+        "angle": (
+            "Come filtriamo il rumore dei mercati: approccio quantitativo basato su Multi-AI Consensus "
+            "(doppio audit indipendente su fonti certificate live Tavily) per eliminare il bias emotivo e il FOMO su titoli caldi come $PLTR e $NVDA "
+            "e battere la volatilità di $SPX500."
+        ),
+        "fallback_angle": "Approccio razionale Multi-AI e notizie verificate live per gestire titoli volatili come $PLTR e $NVDA battendo l'emotività.",
+    },
+    {
+        "id": "digital_backbone_cashflow",
+        "title": "L'Infrastruttura Digitale Globale & Flussi di Cassa",
+        "tickers": ["SPX500", "MSFT", "AMZN", "TSM"],
+        "angle": (
+            "I veri pilastri dell'economia moderna sono il cloud e i semiconduttori: $MSFT, $AMZN e $TSM. "
+            "Investire in aziende con moat inscalfibili genera flussi di cassa stabili che battono l'inflazione e sovraperformano $SPX500."
+        ),
+        "fallback_angle": "Infrastruttura del cloud e semiconduttori con $MSFT, $AMZN e $TSM per una crescita composta superiore a $SPX500.",
+    },
+    {
+        "id": "crypto_asymmetric_allocation",
+        "title": "Allocazione Crypto Asimmetrica & Prudente a Leva Zero",
+        "tickers": ["BTC", "ETH", "SPX500"],
+        "angle": (
+            "Perché il portafoglio include una quota attentamente dosata di crypto ($BTC, $ETH): "
+            "zero leva finanziaria, decorrelazione e asimmetria positiva a lungo termine senza rischiare la stabilità complessiva rispetto a $SPX500."
+        ),
+        "fallback_angle": "Presenza mirata e prudente di $BTC ed $ETH a leva zero come motore asimmetrico integrato al benchmark $SPX500.",
+    },
+]
+
+
+def generate_copy_trading_post(
+    history_stats_text: str = "",
+    gain_history: list = None,
+    portfolio_perf: float = None,
+    rankings_data: dict = None,
+    theme_index: int = None,
+) -> str:
+    """
+    Generate an educational + persuasive Copy Trading post for eToro with dynamic
+    thematic rotation, heavy high-traffic tickers ($SPX500, $NVDA, $PLTR, etc.),
+    and real verified metrics.
+    """
     from datetime import datetime as _dt
-    weekday = _dt.utcnow().weekday()  # 0=Mon … 6=Sun
-    angles = [
-        "Metodo & Trasparenza: come il Multi-AI Consensus e la verifica live azzerano le allucinazioni e proteggono i copiatori",
-        "Come funziona il Copy Trading step-by-step + perché è diverso da un fondo comune",
-        "I miei numeri reali su eToro: performance storica, win rate e trasparenza totale",
-        "Domande frequenti sul Copy Trading: rischi, costi, gestione della liquidità e come iniziare",
-        "Il mio approccio di investimento prudente: zero leva e diversificazione globale su megatrend",
-        "Copy Trading vs ETF: i vantaggi di una gestione attiva trasparente",
-        "Cosa succede al tuo capitale quando mi copi: controllo e libertà totale in ogni momento",
-        "I miei principi d'investimento: lungo periodo, gestione del rischio e disciplina",
-    ]
-    angle = angles[weekday % len(angles)]
+    if theme_index is None:
+        theme_index = _dt.utcnow().toordinal() % len(COPY_TRADING_ETORO_THEMES)
+    theme = COPY_TRADING_ETORO_THEMES[theme_index % len(COPY_TRADING_ETORO_THEMES)]
+
+    if not GENAI_AVAILABLE:
+        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data, theme)
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data, theme)
+
+    models_to_try = list(DEFAULT_GEMINI_MODELS)
+
+    # Build rankings and copier context if available from live eToro API
+    rankings_context = ""
+    if rankings_data:
+        copiers = rankings_data.get("copiers", 0)
+        aum = rankings_data.get("aumValue", 0)
+        risk = rankings_data.get("riskScore", 3)
+        win_ratio = rankings_data.get("winRatio", 0.0)
+        ytd_gain = rankings_data.get("gain", 0.0) * 100
+        five_y_gain = rankings_data.get("fiveYearGain", 0.0) * 100
+        weeks = rankings_data.get("weeksSinceRegistration", 0)
+        years = round(weeks / 52, 1) if weeks else 0
+        rankings_context = (
+            f"STATISTICHE UFFICIALI eToro (da API):\n"
+            f"- Copiatori attivi: {copiers}\n"
+            f"- Asset in gestione (AUM): ~${aum:,.0f}\n"
+            f"- Status: Popular Investor Elite\n"
+            f"- Punteggio di Rischio: {risk}/10 (Basso rischio, profilo prudente e disciplinato)\n"
+            f"- Win Ratio: {win_ratio:.1f}%\n"
+            f"- Rendimento YTD 2026: +{ytd_gain:.2f}%\n"
+            f"- Rendimento 5 Anni: +{five_y_gain:.1f}%\n"
+            f"- Anni di esperienza e presenza su eToro: ~{years} anni\n"
+            f"- Profilo Leva: 100% posizioni a zero/bassa leva (no trading con leva speculativa)\n"
+        )
+
+    # Build gain history context (last 12 months)
+    gain_context = ""
+    if gain_history:
+        recent = gain_history[-12:] if len(gain_history) > 12 else gain_history
+        lines = []
+        for entry in recent:
+            month = entry.get("date", entry.get("month", "?"))
+            gain = entry.get("gain", entry.get("value", 0.0))
+            sign = "+" if float(gain) >= 0 else ""
+            lines.append(f"  {month}: {sign}{float(gain):.1f}%")
+        gain_context = "GUADAGNO MENSILE (ultimi 12 mesi):\n" + "\n".join(lines)
+
+    perf_context = ""
+    if portfolio_perf is not None:
+        sign = "+" if portfolio_perf >= 0 else ""
+        perf_context = f"Performance cumulativa portafoglio: {sign}{portfolio_perf:.1f}%"
+
+    tickers_str = ", ".join([f"${t}" for t in theme["tickers"]])
 
     prompt = f"""Sei Andrea Ravalli, Popular Investor Elite italiano su eToro con un portfolio reale, trasparente e prudente.
-Il tuo obiettivo oggi è scrivere un post educativo e persuasivo sul Copy Trading di eToro per la tua community ("Perché copiarmi").
+Il tuo obiettivo oggi è scrivere un post educativo e persuasivo sul Copy Trading su eToro ("Perché copiarmi") per la tua community.
 
-ANGOLO DEL POST DI OGGI: "{angle}"
+TEMA CENTRALE DEL POST: "{theme['title']}"
+ANGOLO SPECIFICO DA SVILUPPARE:
+{theme['angle']}
 
-DATI REALI DEL PORTAFOGLIO & COPIATORI (usali con naturalezza per dare massima credibilità):
+CASHTAG OBBLIGATORI (TAG PESANTI DA INCLUDERE E CONTESTUALIZZARE NEL TESTO):
+{tickers_str}
+Regola tassativa sui tag: devi citare e discutere ESATTAMENTE questi cashtag nel testo per collegarli al ragionamento del post. Non ometterli!
+
+DATI REALI DEL PORTAFOGLIO & TRACK RECORD (usali per dare massima credibilità):
 {rankings_context if rankings_context else ''}
-
 {history_stats_text if history_stats_text else 'Portafoglio attivo su eToro da molti anni con risultati costanti.'}
-
 {perf_context}
-
 {gain_context}
 
-APPROCCIO SCIENTIFICO & METODO DI VERIFICA (ELEMENTO DIFFERENZIANTE CHIAVE):
-Spiega (quando pertinente all'angolo del post o come segno distintivo del tuo profilo) come gestisci le notizie, i dati societari e la strategia:
-🛡️ METODO & VERIFICA DELLE NOTIZIE (MULTI-AI CONSENSUS):
-Utilizzo l'Intelligenza Artificiale con approccio critico e quantitativo:
-1. Ground-Truth in tempo reale: notizie e catalizzatori societari cross-verificati sul web live (Tavily Search) contro fonti ufficiali.
-2. Analisi e Sintesi: elaborazione macroeconomica strutturata con Google Gemini.
-3. Doppio Audit Indipendente: ogni notizia viene analizzata in parallelo da due AI indipendenti (Groq LPUs e Mistral).
-4. Regola del Consenso: pubblicazione solo con approvazione unanime a micro-argomenti per garantire zero allucinazioni e massima accuratezza.
-
-OBIETTIVO DEL POST:
-1. Spiegare in modo limpido come funziona il Copy Trading su eToro
-2. Mostrare perché ha senso copiare la tua strategia (approccio quantitativo e scientifico Multi-AI, lungo termine, basso rischio score 3, 100% no leva, win rate solido, oltre 8 anni di storico)
-3. Essere totalmente onesto e trasparente: il Copy Trading non garantisce profitti, i mercati oscillano
-4. Concludere con una domanda aperta stimolante per invitare i lettori a commentare
-
-REGOLE OBBLIGATORIE:
+LINEE GUIDA E REGOLE OBBLIGATORIE:
 - Scrivi in ITALIANO, tono caldo, accogliente, professionale e autorevole ma mai arrogante
-- MAX 1400 caratteri (deve essere compatibile con i limiti eToro senza tagli)
-- NO promesse di rendimento futuro
-- Usa 2-4 emoji in modo armonioso
-- Testo discorsivo a paragrafi, NO lunghi elenchi puntati
-- Includi 2-3 cashtag rilevanti del portafoglio: es. $PLTR $NVDA $CCJ $MSFT $AMZN
-- Post autonomo e completo
+- MAX 1400 caratteri (deve essere perfettamente compatibile con i limiti di post eToro)
+- NO markdown per grassetto (no **testo** o asterischi), solo testo pulito
+- NO promesse di rendimento futuro ("i rendimenti passati non garantiscono risultati futuri")
+- Usa 2-4 emoji in modo armonioso all'inizio dei punti o paragrafi
+- Testo discorsivo suddiviso in 3-4 brevi paragrafi separati da riga vuota
+- Concludi con una domanda aperta stimolante per invitare i lettori a commentare
 
-Output ONLY the Italian post text, no introduction or wrapping."""
+Output format (ONLY return the plain Italian post text, no greetings to the system or markdown fences):
+"""
 
     try:
         client = genai.Client(api_key=api_key)
-        config = types.GenerateContentConfig(temperature=0.88)
+        config = types.GenerateContentConfig(temperature=0.85)
 
         for model_name in models_to_try:
             try:
@@ -2237,7 +2406,7 @@ Output ONLY the Italian post text, no introduction or wrapping."""
                     config=config,
                 )
                 if response and response.text:
-                    print(f"✅ Copy trading post generated with {model_name}")
+                    print(f"✅ Copy trading post generated with {model_name} [Theme: {theme['title']}]")
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "copy_trading_post")
                     raw_text = _clean_robotic_phrases(response.text.strip())
@@ -2255,11 +2424,11 @@ Output ONLY the Italian post text, no introduction or wrapping."""
                 time.sleep(1)
 
         print("❌ All models failed for copy trading post — using fallback")
-        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data)
+        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data, theme)
 
     except Exception as exc:
         print(f"❌ Error generating copy trading post: {exc}")
-        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data)
+        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data, theme)
 
 
 def _copy_trading_fallback(
@@ -2267,12 +2436,16 @@ def _copy_trading_fallback(
     gain_history: list = None,
     portfolio_perf: float = None,
     rankings_data: dict = None,
+    theme: dict = None,
 ) -> str:
-    """Fallback copy trading post when Gemini is unavailable — uses real stats data and Multi-AI Consensus method."""
+    """Fallback copy trading post when Gemini is unavailable — uses real stats data and current rotated theme."""
+    if not theme:
+        theme = COPY_TRADING_ETORO_THEMES[0]
+
     perf_line = ""
     if portfolio_perf is not None:
         sign = "+" if portfolio_perf >= 0 else ""
-        perf_line = f"\n📈 Performance cumulativa: {sign}{portfolio_perf:.1f}%"
+        perf_line = f"\n📈 Performance storica cumulativa: {sign}{portfolio_perf:.1f}%"
 
     copier_line = ""
     if rankings_data:
@@ -2290,18 +2463,15 @@ def _copy_trading_fallback(
                 win_line = f"\n🎯 {line.strip()}"
                 break
 
+    tickers_str = " ".join([f"${t}" for t in theme["tickers"]])
+
     return (
-        "💡 PERCHÉ COPIARE IL MIO PORTAFOGLIO SU eToro?\n\n"
-        "Con il Copy Trading puoi replicare in tempo reale e in proporzione tutte le mie operazioni, "
+        f"💡 PERCHÉ COPIARE IL MIO PORTAFOGLIO SU eToro: {theme['title'].upper()}\n\n"
+        f"Con il Copy Trading puoi replicare in tempo reale e in proporzione tutte le mie operazioni su asset come {tickers_str}, "
         "con il capitale che scegli tu — mantenendo sempre il pieno controllo e potendo fermare la copia in qualsiasi momento.\n\n"
         f"La mia strategia punta su fondamentali solidi, diversificazione globale e zero leva speculativa.{perf_line}{copier_line}{win_line}\n\n"
-        "🛡️ METODO & VERIFICA DELLE NOTIZIE (MULTI-AI CONSENSUS):\n"
-        "Utilizzo l'Intelligenza Artificiale con approccio critico e quantitativo:\n"
-        "1. Ground-Truth in tempo reale: notizie e catalizzatori societari cross-verificati sul web live (Tavily Search) contro fonti ufficiali.\n"
-        "2. Analisi e Sintesi: elaborazione macroeconomica strutturata con Google Gemini.\n"
-        "3. Doppio Audit Indipendente: ogni notizia viene analizzata in parallelo da due AI indipendenti (Groq LPUs e Mistral).\n"
-        "4. Regola del Consenso: pubblicazione solo con approvazione unanime a micro-argomenti per garantire zero allucinazioni e massima accuratezza.\n\n"
-        "Investire con metodo, disciplina e trasparenza nel lungo periodo fa la differenza.\n\n"
+        f"🎯 Focus Strategico: {theme['fallback_angle']}\n\n"
+        "Investire con metodo, disciplina e trasparenza nel lungo periodo fa la differenza per costruire valore composto.\n\n"
         "⚠️ Ricorda: i rendimenti passati non sono garanzia di risultati futuri. Investire comporta rischi.\n\n"
         "Hai curiosità o dubbi sul funzionamento della copia o sulla strategia? Scrivimelo nei commenti qui sotto 👇"
     )

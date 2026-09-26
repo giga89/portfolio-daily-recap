@@ -13,8 +13,9 @@ on:
     - cron: '45 20 * * 1-5'   # US close fallback:   20:45 UTC (22:45 ITA)
     - cron: '30 9 * * 6'      # Weekly recap (Sat):  09:30 UTC
     - cron: '30 21 * * 0'     # Weekly recap (Sun):  21:30 UTC
-    - cron: '0 10 * * 6'      # Saturday Copy Trading: 10:00 UTC (12:00 ITA)
+    - cron: '15 10 * * 6'     # Saturday Copy Trading: 10:15 UTC (12:15 ITA)
     - cron: '0 16 * * 0'      # Weekly recap / Sunday Outlook: 16:00 UTC (18:00 ITA)
+    - cron: '30 11 * * 1-5'   # Copy trading post (Mon-Fri): 11:30 UTC (13:30 ITA)
   workflow_dispatch:  # Allows manual trigger
     inputs:
       force_session:
@@ -117,7 +118,9 @@ jobs:
                 SESSION_NAME="Weekly recap (Sat)" ;;
               "30 21 * * 0")
                 SESSION_NAME="Weekly recap (Sun)" ;;
-              "0 10 * * 6")
+              "15 10 * * 6"|"0 10 * * 6")
+                SESSION_NAME="Copy trading post" ;;
+              "30 11 * * 1-5")
                 SESSION_NAME="Copy trading post" ;;
               "0 16 * * 0")
                 SESSION_NAME="Weekly recap (Sun)" ;;

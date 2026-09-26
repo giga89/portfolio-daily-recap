@@ -69,6 +69,11 @@
 # 10:00 CET = 09:00 UTC (summer: 08:00 UTC)
 0 8 * * 6     /opt/portfolio-dispatch/dispatch.sh weekly_sat >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 0 9 * * 6     /opt/portfolio-dispatch/dispatch.sh weekly_sat >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── Copy Trading Education & Megatrend Deep-Dive (Mon-Fri) ────────────────────
+# 13:30 local (CET/CEST) → 11:30 UTC (summer) / 12:30 UTC (winter)
+30 11 * * 1-5  /opt/portfolio-dispatch/dispatch.sh copy_trading >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+30 12 * * 1-5  /opt/portfolio-dispatch/dispatch.sh copy_trading >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
 # ── Saturday: Copy Trading Education & Megatrend Deep-Dive ───────────────────
 # 12:00 local (CET/CEST) → 10:00 UTC (summer) / 11:00 UTC (winter)
 0 10 * * 6    /opt/portfolio-dispatch/dispatch.sh copy_trading >> /opt/portfolio-dispatch/logs/cron.log 2>&1

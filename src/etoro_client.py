@@ -29,6 +29,7 @@ MARKET_IDS = {
     "MSFT": 1004,
     "AMZN": 1005,
     "GOOG": 1002,
+    "GOOGL": 1002,
     "TSM": 4481,
     "AVGO": 4236,
     "MRVL": 4358,

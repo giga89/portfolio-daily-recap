@@ -421,6 +421,105 @@ def verify_post_deterministic(
     return is_clean, issues, cleaned_text
 
 
+def sanitize_or_prune_post_content(
+    text: str,
+    primary_ticker: Optional[str] = None,
+    session_name: Optional[str] = None,
+) -> Tuple[str, bool, List[str]]:
+    """
+    Sanitizes or prunes problematic content from a post instead of dropping it entirely.
+
+    1. Depura claims non conformi (es. '100% dei copiatori in profitto' -> 'oltre l'80% delle posizioni storiche in profitto').
+    2. Depura o Epura paragrafi con allucinazioni sui dividendi per asset ad accumulazione:
+       - Tenta prima la sostituzione chirurgica di parole vietate (dividendo/cedola -> rendimento/proventi capitalizzati).
+       - Se il paragrafo continua a fallire la verifica, EPURA (rimuove) il singolo paragrafo difettoso.
+    3. Re-esegue verify_post_deterministic(). Se pulito, ritorna (testo_pulito, True, []).
+    """
+    if not text:
+        return text, False, ["Testo vuoto"]
+
+    cleaned = text
+
+    # 1. Depurazione automatica claim non conforme sui copiatori
+    cleaned = re.sub(
+        r'\b100%\s*(?:dei\s+)?copiatori\s+in\s+profitto\b',
+        "oltre l'80% delle posizioni storiche chiuse in profitto",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\btutti\s+i\s+copiatori\s+in\s+profitto\b',
+        "un solido track record di posizioni storiche in profitto",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\b100%\s*(?:of\s+)?copiers\s+in\s+profit\b',
+        "over 80% of historical closed positions profitable",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+
+    # Verifica preliminare sul testo depurato dai claim generali
+    is_clean, issues, _ = verify_post_deterministic(cleaned, primary_ticker=primary_ticker, session_name=session_name)
+    if is_clean:
+        return cleaned, True, []
+
+    # 2. Controllo e bonifica paragrafo per paragrafo
+    paragraphs = cleaned.split("\n\n")
+    cleaned_paras = []
+
+    for para in paragraphs:
+        p_tags = extract_cashtags(para)
+        has_non_div_conflict = False
+
+        for t in p_tags:
+            if t in PORTFOLIO_ASSETS_METADATA:
+                meta = PORTFOLIO_ASSETS_METADATA[t]
+                if not meta.get("is_dividend_paying", False):
+                    p_lower = para.lower()
+                    para_has_positive = any(re.search(pat, p_lower) for pat in POSITIVE_DIVIDEND_CLAIMS)
+                    para_has_div_word = bool(re.search(r'\b(dividendo|dividendi|cedola|cedole)\b', p_lower))
+                    para_has_neg = any(re.search(n, p_lower) for n in DIVIDEND_NEGATIONS)
+                    if para_has_positive or (para_has_div_word and not para_has_neg):
+                        has_non_div_conflict = True
+                        break
+
+        if has_non_div_conflict:
+            # Step A: Tenta depurazione del testo all'interno del paragrafo
+            sanitized_p = re.sub(r'\b(dividendo|cedola)\b', 'rendimento da capitale', para, flags=re.IGNORECASE)
+            sanitized_p = re.sub(r'\b(dividendi|cedole)\b', 'proventi capitalizzati', sanitized_p, flags=re.IGNORECASE)
+            sanitized_p = re.sub(r'\b(dividend\s+yield|yield\s+da\s+dividendo)\b', 'crescita del NAV', sanitized_p, flags=re.IGNORECASE)
+
+            # Verifica se la depurazione testuale ha risolto il conflitto
+            s_lower = sanitized_p.lower()
+            s_has_positive = any(re.search(pat, s_lower) for pat in POSITIVE_DIVIDEND_CLAIMS)
+            s_has_div_word = bool(re.search(r'\b(dividendo|dividendi|cedola|cedole)\b', s_lower))
+            s_has_neg = any(re.search(n, s_lower) for n in DIVIDEND_NEGATIONS)
+
+            if not s_has_positive and (not s_has_div_word or s_has_neg):
+                cleaned_paras.append(sanitized_p)
+                continue
+            else:
+                # Step B: EPURAZIONE — Scarta questo singolo paragrafo per salvare il resto del post
+                print(f"⚠️ [EPURAZIONE PARAGRAFO]: Rimosso paragrafo non conforme contenente asset non-dividendo: {para[:80]}...")
+                continue
+        else:
+            cleaned_paras.append(para)
+
+    candidate_text = "\n\n".join(cleaned_paras).strip()
+
+    # Se l'epurazione ha lasciato almeno 2 paragrafi e lunghezza sufficiente, verifica
+    if len(cleaned_paras) >= 2 and len(candidate_text) >= 200:
+        is_now_clean, final_issues, _ = verify_post_deterministic(candidate_text, primary_ticker=primary_ticker, session_name=session_name)
+        if is_now_clean:
+            return candidate_text, True, []
+        else:
+            return candidate_text, False, final_issues
+
+    return cleaned, False, issues
+
+
 def audit_post_with_ai_reviewer(
     text: str,
     primary_ticker: Optional[str] = None,

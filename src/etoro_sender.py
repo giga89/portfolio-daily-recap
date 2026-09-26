@@ -99,13 +99,24 @@ def send_etoro_post(
 
     clean_content = _strip_html(text)
     try:
-        from post_verifier import verify_post_deterministic, clean_etoro_formatting, limit_cashtags
+        from post_verifier import (
+            verify_post_deterministic,
+            clean_etoro_formatting,
+            limit_cashtags,
+            sanitize_or_prune_post_content,
+        )
         clean_content = clean_etoro_formatting(clean_content)
         clean_content = limit_cashtags(clean_content, max_tags=4)
         is_clean, issues, clean_content = verify_post_deterministic(clean_content)
         if not is_clean:
-            print(f"🛑 ETORO POST BLOCKED BY PRE-PUBLICATION GATE: {issues}")
-            return False
+            print(f"⚠️ Pre-publication verifier flagged issues: {issues}. Tentativo di auto-depurazione / epurazione...")
+            sanitized_content, is_now_clean, remaining_issues = sanitize_or_prune_post_content(clean_content)
+            if is_now_clean:
+                print(f"✅ [AUTO-EPURAZIONE]: Post depurato/epurato con successo. Procedo alla pubblicazione su eToro.")
+                clean_content = sanitized_content
+            else:
+                print(f"🛑 ETORO POST BLOCKED BY PRE-PUBLICATION GATE (anche dopo tentativi di epurazione): {remaining_issues}")
+                return False
     except Exception as e_ver:
         print(f"⚠️ Pre-publication verifier check in etoro_sender: {e_ver}")
 

@@ -44,7 +44,7 @@ Built specifically for **Andrea Ravalli**'s Popular Investor portfolio on **eTor
 | **`Daily crypto recap`** | 🕕 **18:00** (Every Day) | **16:9 Crypto Card**, Fear & Greed Index, $BTC, $ETH, $TRX (in portfolio) + dynamic altcoin | Telegram, eToro Feed |
 | **`U.S. market close`** | 🕙 **22:02 / 23:02** (Mon–Fri) | Full daily wrap-up, benchmark comparisons, performance chart, pie chart, top/flop card + 3 comments | Telegram, eToro Feed, Twitter, Bluesky, Threads, FB, IG |
 | **`Weekly recap (Sat)`** | 🕙 **10:00** (Saturday) | Weekly portfolio outlook, macro recap, sector performance, **Winners & Losers Card** | Telegram, eToro Feed, LinkedIn |
-| **`Copy trading post`** | 🕛 **12:00** (Saturday) | Formazione & "Perché Copiarmi": track record reale, metriche di rischio e trasparenza + **Copy Trading Card** | Telegram, eToro Feed, Twitter/X, Bluesky |
+| **`Copy trading post`** | 🕧 **13:30** (Mon–Fri) & 🕛 **12:00** (Sat) | Formazione & "Perché Copiarmi": track record reale, metriche di rischio e trasparenza + **Copy Trading Card** | Telegram, eToro Feed, Twitter/X, Bluesky |
 | **`Weekly recap (Sun)`** | 🕙 **22:00** (Sunday) | Upcoming catalysts, earnings preview, central bank schedule for the week ahead | Telegram, eToro Feed, LinkedIn |
 | **`Stock news monitor`** | 🔄 **Scheduled / Event** | News catalyst follow-up commenter under historical single-stock eToro threads | eToro Post Comments |
 
