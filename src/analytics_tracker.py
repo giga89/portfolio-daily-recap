@@ -881,6 +881,36 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     now_utc = datetime.now(timezone.utc)
     sync_human = now_utc.strftime("%d %b %Y, %H:%M UTC")
 
+    # ── Live Strategy Compounding Metrics (Since 2020) ────────────────────────
+    compound = 1.0
+    months_count = 0
+    months_keys = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    for y_str, row in monthly_data.items():
+        try:
+            if int(y_str) >= 2020:
+                for mon in months_keys:
+                    val = row.get(mon)
+                    if val is not None:
+                        compound *= (1.0 + float(val) / 100.0)
+                        months_count += 1
+        except (ValueError, TypeError):
+            pass
+
+    if months_count > 0:
+        hero_total_ret_val = (compound - 1.0) * 100.0
+        hero_years = max(1.0, months_count / 12.0)
+        hero_cagr_val = ((compound) ** (1.0 / hero_years) - 1.0) * 100.0
+    else:
+        hero_total_ret_val = 191.8
+        hero_cagr_val = 17.2
+
+    hero_doubling_val = (72.0 / hero_cagr_val) if hero_cagr_val > 0 else 4.2
+
+    hero_total_return_str = f"+{hero_total_ret_val:.1f}%" if hero_total_ret_val >= 0 else f"{hero_total_ret_val:.1f}%"
+    hero_cagr_str = f"~{hero_cagr_val:.1f}%"
+    hero_doubling_str = f"~{hero_doubling_val:.1f} Years"
+    hero_holdings_count_str = f"{holdings_count} Selected Holdings"
+
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -890,7 +920,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Andrea Ravalli · Portfolio Hub & Popular Investor Analytics</title>
-  <meta name="description" content="Official portfolio hub of Andrea Ravalli (eToro Popular Investor): track record (+200% since 2020), monthly returns heatmap, quantitative risk metrics, dividends breakdown, drawdown analysis, and copier guide.">
+  <meta name="description" content="Official portfolio hub of Andrea Ravalli (eToro Popular Investor): track record ({hero_total_return_str} since 2020), monthly returns heatmap, quantitative risk metrics, dividends breakdown, drawdown analysis, and copier guide.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -1735,23 +1765,23 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         <div class="hero-kpis">
           <div class="kpi-card">
             <div class="kpi-label">Total Return (Since 2020)</div>
-            <div class="kpi-val green">+200%</div>
+            <div class="kpi-val green" id="heroTotalReturn">{hero_total_return_str}</div>
             <div class="kpi-sub">Since strategy inception</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Compound Annual Growth (CAGR)</div>
-            <div class="kpi-val gold">~18.0%</div>
+            <div class="kpi-val gold" id="heroCagr">{hero_cagr_str}</div>
             <div class="kpi-sub">Annual compounded rate</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Capital Doubling Time</div>
-            <div class="kpi-val cyan">~4.0 Years</div>
+            <div class="kpi-val cyan" id="heroDoubling">{hero_doubling_str}</div>
             <div class="kpi-sub">Estimated (Rule of 72)</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Global Diversification</div>
             <div class="kpi-val">3 Continents</div>
-            <div class="kpi-sub">40+ Selected Holdings</div>
+            <div class="kpi-sub" id="heroHoldingsCount">{hero_holdings_count_str}</div>
           </div>
         </div>
       </section>
@@ -1942,8 +1972,8 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
               <input type="range" id="simYears" class="sim-range" min="1" max="20" step="1" value="5" oninput="updateSimulator()">
             </div>
             <div class="sim-field">
-              <label>Estimated Annual Return: <span class="val" id="lblSimRate">18.0% (Andrea Ravalli)</span></label>
-              <input type="range" id="simRate" class="sim-range" min="3" max="25" step="0.5" value="18" oninput="updateSimulator()">
+              <label>Estimated Annual Return: <span class="val" id="lblSimRate">{hero_cagr_val:.1f}% (Andrea Ravalli)</span></label>
+              <input type="range" id="simRate" class="sim-range" min="3" max="25" step="0.1" value="{hero_cagr_val:.1f}" oninput="updateSimulator()">
             </div>
 
             <div class="sim-kpis">
@@ -3017,7 +3047,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             labels: perfYears,
             datasets: [
               {{
-                label: 'Andrea Ravalli (+200%)',
+                label: 'Andrea Ravalli ({hero_total_return_str})',
                 data: getArAnnual(),
                 backgroundColor: 'rgba(19, 198, 54, 0.85)',
                 borderColor: '#13C636',

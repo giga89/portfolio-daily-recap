@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Andrea Ravalli · Portfolio Hub & Popular Investor Analytics</title>
-  <meta name="description" content="Official portfolio hub of Andrea Ravalli (eToro Popular Investor): track record (+200% since 2020), monthly returns heatmap, quantitative risk metrics, dividends breakdown, drawdown analysis, and copier guide.">
+  <meta name="description" content="Official portfolio hub of Andrea Ravalli (eToro Popular Investor): track record (+191.8% since 2020), monthly returns heatmap, quantitative risk metrics, dividends breakdown, drawdown analysis, and copier guide.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -809,7 +809,7 @@
 
         <div class="live-status-pill" title="Auto-synced with eToro Public API">
           <span class="pulse-indicator"></span>
-          <span>eToro Verified · <strong id="liveSyncTime">26 Sep 2026, 12:46 UTC</strong></span>
+          <span>eToro Verified · <strong id="liveSyncTime">26 Sep 2026, 12:53 UTC</strong></span>
         </div>
 
         <div class="tabs-nav">
@@ -845,30 +845,30 @@
           </p>
           <div class="hero-live-badge">
             <span class="pulse-indicator"></span>
-            <span>Real-time Verified Performance · Last synced: <strong>26 Sep 2026, 12:46 UTC</strong></span>
+            <span>Real-time Verified Performance · Last synced: <strong>26 Sep 2026, 12:53 UTC</strong></span>
           </div>
         </div>
 
         <div class="hero-kpis">
           <div class="kpi-card">
             <div class="kpi-label">Total Return (Since 2020)</div>
-            <div class="kpi-val green">+200%</div>
+            <div class="kpi-val green" id="heroTotalReturn">+191.8%</div>
             <div class="kpi-sub">Since strategy inception</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Compound Annual Growth (CAGR)</div>
-            <div class="kpi-val gold">~18.0%</div>
+            <div class="kpi-val gold" id="heroCagr">~17.2%</div>
             <div class="kpi-sub">Annual compounded rate</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Capital Doubling Time</div>
-            <div class="kpi-val cyan">~4.0 Years</div>
+            <div class="kpi-val cyan" id="heroDoubling">~4.2 Years</div>
             <div class="kpi-sub">Estimated (Rule of 72)</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Global Diversification</div>
             <div class="kpi-val">3 Continents</div>
-            <div class="kpi-sub">40+ Selected Holdings</div>
+            <div class="kpi-sub" id="heroHoldingsCount">40 Selected Holdings</div>
           </div>
         </div>
       </section>
@@ -1059,8 +1059,8 @@
               <input type="range" id="simYears" class="sim-range" min="1" max="20" step="1" value="5" oninput="updateSimulator()">
             </div>
             <div class="sim-field">
-              <label>Estimated Annual Return: <span class="val" id="lblSimRate">18.0% (Andrea Ravalli)</span></label>
-              <input type="range" id="simRate" class="sim-range" min="3" max="25" step="0.5" value="18" oninput="updateSimulator()">
+              <label>Estimated Annual Return: <span class="val" id="lblSimRate">17.2% (Andrea Ravalli)</span></label>
+              <input type="range" id="simRate" class="sim-range" min="3" max="25" step="0.1" value="17.2" oninput="updateSimulator()">
             </div>
 
             <div class="sim-kpis">
@@ -1690,7 +1690,7 @@
     const nextDivsData = [{"ticker": "TRIG.L", "type": "Pay Day", "date": "Sep 30, 2026", "pay": "$0.07"}, {"ticker": "ABBV", "type": "Ex-Dividend", "date": "Oct 15, 2026", "pay": "$1.55"}, {"ticker": "ENEL.MI", "type": "Ex-Dividend", "date": "Oct 19, 2026", "pay": "$0.22"}, {"ticker": "ENEL.MI", "type": "Pay Day", "date": "Oct 21, 2026", "pay": "$0.22"}, {"ticker": "1919.HK", "type": "Pay Day", "date": "Nov 18, 2026", "pay": "$0.21"}, {"ticker": "WMT", "type": "Ex-Dividend", "date": "Dec 04, 2026", "pay": "$0.25"}, {"ticker": "MSFT", "type": "Pay Day", "date": "Dec 10, 2026", "pay": "$0.75"}, {"ticker": "WMT", "type": "Pay Day", "date": "Jan 04, 2027", "pay": "$0.25"}];
     const drawdownsData = [{"depth": "-18.72%", "start": "Jan 2022", "end": "Dec 2022", "months": "12", "context": "Global Rate Hike & Inflation Bear Market (Contained vs Nasdaq -33.1%)"}, {"depth": "-18.05%", "start": "Feb 2020", "end": "Mar 2020", "months": "2", "context": "Covid-19 Global Panic Crash (Swiftly recovered by May 2020)"}, {"depth": "-9.45%", "start": "May 2021", "end": "Jun 2021", "months": "1", "context": "Post-Pandemic Growth to Value Rotation"}, {"depth": "-4.04%", "start": "Jun 2026", "end": "Jul 2026", "months": "1", "context": "Summer FX & Multiples Consolidation"}, {"depth": "-3.52%", "start": "Mar 2026", "end": "Apr 2026", "months": "1", "context": "Mid-Cycle Technology Sector Pullback"}];
     const correlationData = [{"cluster": "AI & Tech", "tech": 1.0, "pharma": 0.28, "energy": 0.14, "consumer": 0.42, "safe_haven": -0.15}, {"cluster": "Pharma & GLP-1", "tech": 0.28, "pharma": 1.0, "energy": 0.18, "consumer": 0.35, "safe_haven": 0.05}, {"cluster": "Energy & Nuclear", "tech": 0.14, "pharma": 0.18, "energy": 1.0, "consumer": 0.22, "safe_haven": 0.24}, {"cluster": "Consumer & Luxury", "tech": 0.42, "pharma": 0.35, "energy": 0.22, "consumer": 1.0, "safe_haven": -0.08}, {"cluster": "Safe Haven & Cash", "tech": -0.15, "pharma": 0.05, "energy": 0.24, "consumer": -0.08, "safe_haven": 1.0}];
-    const seasonalityData = {"Jan": 3.62, "Feb": -1.79, "Mar": -1.07, "Apr": 3.96, "May": 1.7, "Jun": 0.29, "Jul": 3.01, "Aug": 3.54, "Sep": -2.39, "Oct": 0.68, "Nov": 6.41, "Dec": 0.88};
+    const seasonalityData = {"Jan": 3.62, "Feb": -1.79, "Mar": -1.07, "Apr": 3.96, "May": 1.7, "Jun": 0.29, "Jul": 3.01, "Aug": 3.54, "Sep": -2.39, "Oct": 0.69, "Nov": 6.41, "Dec": 0.88};
 
     // ── Nomadz Modal Handlers ───────────────────────────────────────────────
     function openNomadzModal() {
@@ -2134,7 +2134,7 @@
             labels: perfYears,
             datasets: [
               {
-                label: 'Andrea Ravalli (+200%)',
+                label: 'Andrea Ravalli (+191.8%)',
                 data: getArAnnual(),
                 backgroundColor: 'rgba(19, 198, 54, 0.85)',
                 borderColor: '#13C636',
