@@ -8,7 +8,6 @@
         "AMZN": "📦",
         "AVGO": "🔌",
         "AZN.L": "🧬",
-        "BESI.NV": "🔬",
         "CCJ": "⚡",
         "ENEL.MI": "🔋",
         "ENI.MI": "⛽",
@@ -30,7 +29,6 @@
         "PPFB.DE": "🥇",
         "PRY.MI": "🔌",
         "RACE": "🏎️",
-        "SPCX.RTH": "🚀",
         "SX7PEX.DE": "🏛️",
         "TRIG.L": "🌬️",
         "TRX": "🪙",
@@ -74,10 +72,6 @@
         "AZN.L": [
             "AZN.L",
             "AstraZeneca PLC"
-        ],
-        "BESI.NV": [
-            "BESI.AS",
-            "BE Semiconductor Industries N.V."
         ],
         "CCJ": [
             "CCJ",
@@ -162,10 +156,6 @@
         "RACE": [
             "RACE",
             "Ferrari N.V."
-        ],
-        "SPCX.RTH": [
-            "SPCX.RTH",
-            "Space Exploration Technologies Corp."
         ],
         "SX7PEX.DE": [
             "EXV1.DE",

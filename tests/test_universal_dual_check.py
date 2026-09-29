@@ -55,15 +55,20 @@ class TestUniversalDualCheck(unittest.TestCase):
         ok_c, _, audit = verify_and_clean_comment(bad_comment, run_ai_review=False)
         self.assertFalse(ok_c, "Comment containing XEON.DE must be rejected")
 
-    def test_purged_asset_mau_blocked(self):
-        """Purged asset MAU.PA must be blocked deterministically."""
-        bad_comment = "Abbiamo ancora $MAU.PA per l'esposizione al settore petrolifero."
-        is_ok, issues, _ = verify_post_deterministic(bad_comment)
-        self.assertFalse(is_ok, "MAU.PA should be flagged as critical error")
-        self.assertTrue(any("dismesso" in i or "MAU.PA" in i for i in issues))
+    def test_purged_asset_spcx_and_mau_blocked(self):
+        """Purged assets SPCX and MAU.PA must be blocked deterministically."""
+        bad_comment_spcx = "Abbiamo investito in $SPCX per l'esplorazione spaziale."
+        is_ok, issues, _ = verify_post_deterministic(bad_comment_spcx)
+        self.assertFalse(is_ok, "SPCX should be flagged as critical error")
+        self.assertTrue(any("dismesso" in i or "SPCX" in i for i in issues))
 
-        ok_c, _, audit = verify_and_clean_comment(bad_comment, run_ai_review=False)
-        self.assertFalse(ok_c, "Comment containing MAU.PA must be rejected")
+        bad_comment_mau = "Analisi della trimestrale di $MAU.PA."
+        is_ok_m, issues_m, _ = verify_post_deterministic(bad_comment_mau)
+        self.assertFalse(is_ok_m, "MAU.PA should be flagged as critical error")
+        self.assertTrue(any("dismesso" in i or "MAU.PA" in i for i in issues_m))
+
+        ok_c, _, _ = verify_and_clean_comment(bad_comment_spcx, run_ai_review=False)
+        self.assertFalse(ok_c, "Comment containing SPCX must be rejected")
 
     def test_accumulating_etf_comment_blocked(self):
         """Dividend claims on accumulating ETF WDEF.L must fail deterministic check."""

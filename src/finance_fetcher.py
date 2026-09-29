@@ -282,7 +282,12 @@ def fetch_portfolio_weights_from_bullaware():
                             if len(numeric_part) == 5 and numeric_part[0] == '0':
                                 sym = numeric_part[1:] + '.HK'
                         normalized_weights[sym] = w
-                    weights = normalized_weights
+                    # Exclude purged positions that BullAware may lag in updating
+                    PURGED_ASSETS = {
+                        "XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX",
+                        "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD"
+                    }
+                    weights = {k: v for k, v in normalized_weights.items() if k not in PURGED_ASSETS}
 
                     print(f"✓ Successfully extracted {len(weights)} portfolio weights")
                     

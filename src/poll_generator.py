@@ -278,20 +278,21 @@ POLL_TEMPLATES = [
         "message": "🗳️ SONDAGGIO MOBILITÀ: LA SCALA INDUSTRIALE DI BYD ($1211.HK)\n\nCon la tecnologia Blade Battery, produzione proprietaria di semiconduttori e prezzi ultra-competitivi, BYD sta espandendo la propria quota di mercato a livello globale.\n\nCome valutate il posizionamento di BYD rispetto all'automotive tradizionale ($VOW3.DE)?\n\nVotate il sondaggio! 👇"
     },
     {
-        "id": "private_equity_space_frontier",
-        "title": "Asset Alternativi & Spazio: Quale frontiera è più promettente? 🚀",
+        "id": "alternative_assets_frontier",
+        "title": "Asset Alternativi: Quale asset class per diversificare? 🏛️",
         "options": [
-            "Spazio & Starlink ($SPCX)",
             "Private Equity ($IQQL)",
+            "Difesa Europea ($WDEF)",
             "Mercati frontiera ($VOF)",
-            "Solo azioni ordinarie"
+            "Oro fisico ($PPFB)"
         ],
         "tickers": [
-            "SPCX.RTH",
             "IQQL.DE",
-            "VOF.L"
+            "WDEF.L",
+            "VOF.L",
+            "PPFB.DE"
         ],
-        "message": "🗳️ SONDAGGIO ASSET ALTERNATIVI: CRESCITA FUORI DAI LISTINI TRADIZIONALI\n\nDalla rivoluzione aerospaziale e Starlink ($SPCX.RTH SpaceX) ai giganti del private equity (Blackstone, KKR via $IQQL.DE), ricerchiamo fonti di rendimento non correlate.\n\nQuale classe di asset alternativi ritenete più interessante per diversificare?\n\nEsprimete la vostra preferenza! 👇"
+        "message": "🗳️ SONDAGGIO ASSET ALTERNATIVI: DIVERSIFICAZIONE FUORI DAI LISTINI TRADIZIONALI\n\nDai giganti del private equity (Blackstone, KKR via $IQQL.DE) al riarmo strategico europeo ($WDEF.L) e mercati di frontiera ($VOF.L), ricerchiamo fonti di rendimento decorrelate.\n\nQuale classe di asset alternativi ritenete più interessante per diversificare?\n\nEsprimete la vostra preferenza! 👇"
     },
     {
         "id": "european_banking_profitability",
@@ -444,7 +445,7 @@ def generate_friday_performers_poll() -> Dict[str, Any]:
         stock_data = finance_fetcher.fetch_stock_data()
         
         # Filter for active portfolio holdings with valid weekly_change
-        excluded = {"MNODL.L", "NVTKL.L", "XEON.DE", "MAU.PA", "IB01.L", "PPFB.DE"}
+        excluded = {"MNODL.L", "NVTKL.L", "XEON.DE", "IB01.L"}
         candidates = []
         for ticker, data in stock_data.items():
             if ticker in excluded:

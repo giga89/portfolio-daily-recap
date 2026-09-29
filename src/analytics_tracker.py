@@ -391,7 +391,6 @@ HOLDINGS_DATA = [
     {"ticker": "WCLD.L", "name": "WisdomTree Cloud Computing ETF", "emoji": "☁️", "asset_class": "ETF", "curr": "USD", "sector": "Cloud Computing & Enterprise SaaS", "geo": "USA / Global", "tier": "Next-Gen Cloud ETF", "desc": "UCITS ETF tracking BVP Nasdaq Emerging Cloud Index capturing pure-play enterprise cloud software (SaaS) leaders benefiting from AI monetization."},
 
     # ── Private / Space & Crypto Assets ───────────────────────────────────────
-    {"ticker": "SPCX.RTH", "name": "Space Exploration Tech (SpaceX)", "emoji": "🚀", "asset_class": "Private Equity", "curr": "USD", "sector": "Space, Satellites & Starlink", "geo": "USA", "tier": "Pre-IPO Moat", "desc": "Dominant global orbital rocket launch provider and operator of the Starlink broadband satellite constellation."},
     {"ticker": "ETOR", "name": "eToro Group Ltd", "emoji": "🏛️", "asset_class": "Stock", "curr": "USD", "sector": "Social Investing Platform", "geo": "Global", "tier": "Fintech Ecosystem", "desc": "Pioneering global social investing and multi-asset trading platform with millions of active global users."},
     {"ticker": "TRX", "name": "TRON Network", "emoji": "🪙", "asset_class": "Crypto", "curr": "USD", "sector": "Stablecoin Settlement Rails", "geo": "Global", "tier": "Digital Assets", "desc": "World's leading high-throughput blockchain network processing the highest volume of USDT stablecoin transfers."},
 ]
@@ -443,8 +442,7 @@ BASELINE_WEIGHTS: Dict[str, float] = {
     "MELI": 1.5,
     "ULVR.L": 1.5,
     "VOW3.DE": 1.0,
-    # Alternative / Space & Crypto (4.0%)
-    "SPCX.RTH": 1.5,
+    # Alternative & Crypto (2.5%)
     "TRX": 1.5,
     "ETOR": 1.0,
 }
@@ -476,6 +474,9 @@ def load_portfolio_weights() -> Dict[str, float]:
                 weights = json.load(f)
         except Exception as e:
             print(f"⚠️ Error reading {PORTFOLIO_WEIGHTS_FILE}: {e}")
+
+    PURGED_ASSETS = {"XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD"}
+    weights = {k: v for k, v in weights.items() if k not in PURGED_ASSETS}
 
     if weights:
         try:

@@ -60,7 +60,6 @@ DEFAULT_TICKERS = {
     '2318.HK': ('2318.HK', 'Ping An Insurance Group'),
     'WMT': ('WMT', 'Walmart Inc.'),
     'TRX': ('TRX-USD', 'TRON'),
-    'SPCX.RTH': ('SPCX.RTH', 'Space Exploration Technologies Corp.'),
 }
 
 DEFAULT_EMOJIS = {
@@ -118,7 +117,6 @@ DEFAULT_EMOJIS = {
     'WMT': '🛒',
     'ETOR': '🏛️',
     '2318.HK': '🏦',
-    'SPCX.RTH': '🚀',
     'TRX': '🪙',
     'DB1.DE': '📊',
     'PYPL': '💳',
@@ -197,8 +195,8 @@ def load_config():
             # Add new positions: IB01.L
             if "IB01.L" not in config["tickers"]:
                 config["tickers"]["IB01.L"] = ["IB01.L", "iShares Treasury Bond 0-1yr UCITS ETF"]
-            # Ensure purged positions are removed: XEON.DE, MAU.PA and legacy unheld assets
-            for purged in ["XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD"]:
+            # Ensure purged positions are removed: XEON.DE, MAU.PA, SPCX.RTH, SPCX and legacy unheld assets
+            for purged in ["XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "SPCX.RTH", "SPCX"]:
                 if purged in config.get("tickers", {}):
                     del config["tickers"][purged]
                     needs_save = True
@@ -392,7 +390,10 @@ def sync_portfolio(bullaware_weights):
     """
     if not bullaware_weights:
         return {}
-        
+
+    PURGED_ASSETS = {"XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "SPCX.RTH", "SPCX"}
+    bullaware_weights = {k: v for k, v in bullaware_weights.items() if k not in PURGED_ASSETS}
+
     current_config = load_config()
     current_tickers = current_config.get('tickers', {})
     current_emojis = current_config.get('emojis', {})

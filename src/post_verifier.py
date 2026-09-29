@@ -247,7 +247,9 @@ def extract_cashtags(text: str) -> List[str]:
         # Ignore pure numerical / currency values (e.g. 10.000, 500, 10,000)
         if re.match(r'^\d+(?:[.,]\d+)*$', t):
             continue
-        t_clean = t.upper()
+        t_clean = t.rstrip('.,:;!?').upper()
+        if not t_clean:
+            continue
         if t_clean not in seen:
             seen.add(t_clean)
             unique_tags.append(t_clean)
@@ -352,10 +354,14 @@ def verify_post_deterministic(
 
     # Check for purged assets that must never appear in active communications
     for tag in tickers_to_check:
-        if tag in ("XEON.DE", "XEON", "MAU.PA", "MAU"):
+        if tag in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX"):
             issues.append(
                 f"CRITICAL: L'asset ${tag} è stato definitivamente dismesso dal portafoglio e non deve comparire in alcun post o commento."
             )
+    if primary_clean and primary_clean in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX"):
+        issues.append(
+            f"CRITICAL: L'asset ${primary_clean} è stato definitivamente dismesso dal portafoglio e non deve comparire in alcun post o commento."
+        )
 
     # Check for forbidden identity and strategy misconceptions per asset
     all_check_tags = list(tickers_to_check)
@@ -871,7 +877,7 @@ TESTO DA REVISIONARE:
 
 REGOLE DI AUDIT:
 1. DIVIETO ASSOLUTO DI CEDOLE SU ASSET AD ACCUMULAZIONE: Se un asset è ad accumulazione ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), non deve mai essere citato come fonte di dividendi o reddito.
-2. DIVIETO ASSET DISMESSI: Nessuna menzione di XEON ($XEON.DE) o MAU.PA ($MAU.PA) (completamente dismessi dal portafoglio).
+2. DIVIETO ASSET DISMESSI: Nessuna menzione di XEON, MAU o SPCX / SPCX.RTH (completamente dismessi dal portafoglio).
 3. TONO & COMPLIANCE: Rispettoso, pacato, nessun consiglio finanziario sollecitatore ("non è un consiglio finanziario", focus sulla strategia a lungo termine e gestione del rischio 3/10).
 4. COMPLETEZZA: Nessuna frase troncata, nessuna interruzione a metà parola o senza punteggiatura/emoji finale. NO markdown con asterischi (**).
 5. VERDETTO:
