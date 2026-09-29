@@ -33,6 +33,8 @@ MARKET_IDS = {
     "TSM": 4481,
     "AVGO": 4236,
     "MRVL": 4358,
+    "BESI.NV": 4513,
+    "BESI": 4513,
 
     # Healthcare & Pharma
     "LLY": 1567,

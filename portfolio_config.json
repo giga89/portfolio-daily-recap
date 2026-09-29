@@ -8,6 +8,7 @@
         "AMZN": "📦",
         "AVGO": "🔌",
         "AZN.L": "🧬",
+        "BESI.NV": "🔬",
         "CCJ": "⚡",
         "ENEL.MI": "🔋",
         "ENI.MI": "⛽",
@@ -73,6 +74,10 @@
         "AZN.L": [
             "AZN.L",
             "AstraZeneca PLC"
+        ],
+        "BESI.NV": [
+            "BESI.AS",
+            "BE Semiconductor Industries N.V."
         ],
         "CCJ": [
             "CCJ",

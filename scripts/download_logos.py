@@ -64,6 +64,8 @@ DOMAIN_MAP = {
     "WMT":        "walmart.com",
     "MRVL":       "marvell.com",
     # ── European stocks ──────────────────────────────────────────────────────
+    "BESI.NV":    "besi.com",
+    "BESI":       "besi.com",
     "AZN.L":      "astrazeneca.com",
     "NOVO-B.CO":  "novonordisk.com",
     "ENEL.MI":    "enel.com",
@@ -161,13 +163,15 @@ def download_logo(ticker: str, force: bool = False) -> bool:
 
     domain = _fetch_domain(ticker)
 
-    # Build candidate URLs
+    # Build candidate URLs (prioritize high-res transparent PNGs)
     candidate_urls = []
     if domain:
         candidate_urls.append(f"{CDN_BASE}/{domain}")
-        candidate_urls.append(f"https://icon.horse/icon/{domain}")
     candidate_urls.append(f"https://assets.parqet.com/logos/symbol/{ticker}")
+    if ticker.endswith(".NV"):
+        candidate_urls.append(f"https://assets.parqet.com/logos/symbol/{ticker[:-3]}.AS")
     if domain:
+        candidate_urls.append(f"https://icon.horse/icon/{domain}")
         candidate_urls.append(f"https://www.google.com/s2/favicons?domain={domain}&sz=128")
 
     headers = {'User-Agent': 'Mozilla/5.0'}

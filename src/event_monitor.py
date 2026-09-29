@@ -273,7 +273,7 @@ def check_and_publish_earnings(dry_run: bool = False, lookback_days: int = 3) ->
     # Non-equity holdings or ETFs without quarterly EPS/Revenue reports
     EXCLUDED_EARNINGS_TICKERS = {
         "PPFB.DE", "IB01.L", "SX7PEX.DE", "IEUR", "IQQL.DE", "TRX", "SPCX.RTH",
-        "WCLD.L", "INDO.PA", "WDEF.L", "XEON.DE"
+        "WCLD.L", "INDO.PA", "WDEF.L", "XEON.DE", "MAU.PA"
     }
 
     for ticker in list(TICKER_THEMES.keys()):
@@ -283,7 +283,9 @@ def check_and_publish_earnings(dry_run: bool = False, lookback_days: int = 3) ->
         if ticker in EXCLUDED_EARNINGS_TICKERS:
             continue
 
-        yf_sym = ticker.replace(".US", "")
+        from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+        meta = PORTFOLIO_ASSETS_METADATA.get(ticker, {})
+        yf_sym = meta.get("yahoo_ticker", ticker.replace(".US", ""))
         try:
             t = yf.Ticker(yf_sym)
             cal = t.calendar

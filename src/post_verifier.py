@@ -118,6 +118,12 @@ ASSET_IDENTITY_FORBIDDEN_TERMS = {
         (r'\bquality\s+msci\b', "Quality MSCI (IQQL.DE è Listed Private Equity, non MSCI Quality)"),
         (r'\bmsci\s+world\b', "MSCI World (IQQL.DE replica l'indice S&P Listed Private Equity)"),
     ],
+    "BESI.NV": [
+        (r'\b(?:produttore\s+di\s+memori[ae]|dram\s+producer|memory\s+maker)\b', "BESI non produce memorie fisiche commodity (DRAM/NAND), ma macchinari di advanced packaging e hybrid bonding"),
+    ],
+    "BESI": [
+        (r'\b(?:produttore\s+di\s+memori[ae]|dram\s+producer|memory\s+maker)\b', "BESI non produce memorie fisiche commodity (DRAM/NAND), ma macchinari di advanced packaging e hybrid bonding"),
+    ],
 }
 
 GLOBAL_FORBIDDEN_HALLUCINATIONS = [
@@ -346,7 +352,7 @@ def verify_post_deterministic(
 
     # Check for purged assets that must never appear in active communications
     for tag in tickers_to_check:
-        if tag in ("XEON.DE", "XEON"):
+        if tag in ("XEON.DE", "XEON", "MAU.PA", "MAU"):
             issues.append(
                 f"CRITICAL: L'asset ${tag} è stato definitivamente dismesso dal portafoglio e non deve comparire in alcun post o commento."
             )
@@ -865,7 +871,7 @@ TESTO DA REVISIONARE:
 
 REGOLE DI AUDIT:
 1. DIVIETO ASSOLUTO DI CEDOLE SU ASSET AD ACCUMULAZIONE: Se un asset è ad accumulazione ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), non deve mai essere citato come fonte di dividendi o reddito.
-2. DIVIETO ASSET DISMESSI: Nessuna menzione di XEON o $XEON.DE (completamente dismesso dal portafoglio).
+2. DIVIETO ASSET DISMESSI: Nessuna menzione di XEON ($XEON.DE) o MAU.PA ($MAU.PA) (completamente dismessi dal portafoglio).
 3. TONO & COMPLIANCE: Rispettoso, pacato, nessun consiglio finanziario sollecitatore ("non è un consiglio finanziario", focus sulla strategia a lungo termine e gestione del rischio 3/10).
 4. COMPLETEZZA: Nessuna frase troncata, nessuna interruzione a metà parola o senza punteggiatura/emoji finale. NO markdown con asterischi (**).
 5. VERDETTO:

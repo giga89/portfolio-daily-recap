@@ -38,6 +38,7 @@ DEFAULT_TICKERS = {
     'NVDA': ('NVDA', 'NVIDIA Corporation'),
     'AVGO': ('AVGO', 'Broadcom Inc'),
     'PLTR': ('PLTR', 'Palantir Technologies Inc'),
+    'BESI.NV': ('BESI.AS', 'BE Semiconductor Industries N.V.'),
     
     # Energy, Nuclear, Utilities & Commodities
     'ENI.MI': ('ENI.MI', 'Eni S.p.A.'),
@@ -94,6 +95,8 @@ DEFAULT_EMOJIS = {
     'PLTR': '🛡️',
     'NET': '☁️',
     'MRVL': '📊',
+    'BESI.NV': '🔬',
+    'BESI': '🔬',
     
     # Energy, Utilities & Commodities
     'CCJ': '⚡',
@@ -356,6 +359,12 @@ def lookup_ticker_info(symbol):
         numeric_part = symbol[:-3]
         if len(numeric_part) == 5 and numeric_part[0] == '0':
             candidates.insert(1, numeric_part[1:] + '.HK')
+
+    # For Euronext Amsterdam (.NV on eToro -> .AS on Yahoo Finance)
+    if symbol.endswith('.NV'):
+        candidates.insert(1, symbol[:-3] + '.AS')
+    if symbol.endswith('.US'):
+        candidates.insert(1, symbol[:-3])
     
     print(f"🔎 Attempting to resolve details for new asset: {symbol}")
     
@@ -453,6 +462,8 @@ MULTI_TAG_MAP = {
     'ENEL.MI': ['$ENEL.MI'],
     'WMT': ['$WMT'],
     'MRVL': ['$MRVL'],
+    'BESI.NV': ['$BESI.NV', '$BESI', '$BESI.AS'],
+    'BESI': ['$BESI.NV', '$BESI', '$BESI.AS'],
 }
 
 RELATED_TICKERS_MAP = {
@@ -465,8 +476,10 @@ RELATED_TICKERS_MAP = {
     'NOVO-B.CO': ['$LLY', '$NVO', '$PFE'],
     'PLTR': ['$SNOW', '$AI', '$MSFT'],
     'AVGO': ['$NVDA', '$QCOM', '$TXN'],
-    'TSM': ['$NVDA', '$AVGO', '$INTC'],
+    'TSM': ['$NVDA', '$AVGO', '$INTC', '$BESI.NV'],
     'MRVL': ['$NVDA', '$AVGO', '$AMD'],
+    'BESI.NV': ['$ASML.AS', '$AMAT', '$LRCX', '$TSM', '$NVDA'],
+    'BESI': ['$ASML.AS', '$AMAT', '$LRCX', '$TSM', '$NVDA'],
     'ABBV': ['$LLY', '$AZN.L', '$JNJ'],
     'ABT.US': ['$MDT', '$BSX', '$SYK'],
     'HUM': ['$UNH', '$CVS', '$CI'],
@@ -654,6 +667,25 @@ PORTFOLIO_ASSETS_METADATA = {
             "Tempi di qualificazione e collaudo per nuove generazioni di DSP ottici"
         ],
         "related_tickers": ["$NVDA", "$AVGO", "$AMD"], "primary_tags": ["$MRVL"]
+    },
+    "BESI.NV": {
+        "ticker": "BESI.NV", "yahoo_ticker": "BESI.AS", "name": "BE Semiconductor Industries N.V.", "emoji": "🔬",
+        "asset_class": "Stock", "sector": "Packaging Avanzato Semiconduttori & Hybrid Bonding", "geo": "Europe", "tier": "AI Hardware Leader",
+        "is_dividend_paying": True, "dividend_policy": "Distribuzione annuale di dividendi (maggio) con payout target elevato (60-100% dell'utile netto)", "annual_yield_pct": 0.9, "frequency": "Annuale (Maggio)",
+        "domain": "besi.com", "color": (0, 114, 206),
+        "desc": "Leading Dutch semiconductor assembly equipment manufacturer, dominating sub-micron hybrid bonding critical for next-gen HBM4 and advanced AI chip packaging.",
+        "thesis": "Leader tecnologico indiscusso e pioniere globale nelle macchine per hybrid bonding (saldatura diretta rame-rame senza microbump), tecnologia abilitante insostituibile per superare il 'memory wall' nell'AI con le memorie HBM4 e il packaging 3D dei chip avanzati.",
+        "upside_catalysts": [
+            "Adozione massiccia dell'hybrid bonding da parte di TSMC, Intel e dei produttori di memorie HBM4 (SK hynix, Micron, Samsung)",
+            "Crescita esponenziale del contenuto di memoria HBM per GPU e acceleratori di inferenza AI",
+            "Ordini pluriennali e commitment di capacità da parte dei leader globali della filiera dei semiconduttori"
+        ],
+        "downside_risks": [
+            "Ciclicità della spesa in beni strumentali (capex) dei produttori di semiconduttori",
+            "Possibili ritardi nell'adozione commerciale di massa dell'hybrid bonding rispetto ai tradizionali microbump",
+            "Multipli di valutazione storicamente volatili legati ai cicli di consegna dei macchinari"
+        ],
+        "related_tickers": ["$ASML.AS", "$AMAT", "$LRCX", "$TSM", "$NVDA"], "primary_tags": ["$BESI.NV"]
     },
 
     # ── Healthcare & GLP-1 Megatrend ──────────────────────────────────────────

@@ -1451,7 +1451,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             "(difesa e aerospazio UE, ad accumulazione, ZERO dividendi/cedole). È SEVERAMENTE VIETATO chiamarlo "
             "'WisdomTree Europe Equity Income', 'Windows Europe' o attribuirgli dividendi! "
             "$IQQL.DE è iShares Listed Private Equity UCITS ETF (Private Equity, es. KKR, Blackstone), NON World Quality. "
-            "Nessuna menzione di XEON (dismesso dal portafoglio)."
+            "Nessuna menzione di XEON o MAU.PA (dismessi dal portafoglio)."
         )
 
         anti_platitude_rules = (
@@ -2505,9 +2505,8 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
     # Case-insensitive ticker lookup dictionary for robustness
     ticker_map = {t.upper(): t for t in tickers.keys()}
 
-    # Exclude money market ETFs, physical metal ETFs, and frozen Russian assets from stock focus candidates
-    stock_candidates = sorted([t for t in tickers.keys() if t not in ['IB01.L', 'PPFB.DE', 'MNODL.L', 'NVTKL.L']])
-    stock_candidates = sorted([t for t in tickers.keys() if t not in ['IB01.L', 'XEON.DE', 'PPFB.DE', 'MNODL.L', 'NVTKL.L']])
+    # Exclude money market ETFs, physical metal ETFs, purged assets, and frozen Russian assets from stock focus candidates
+    stock_candidates = sorted([t for t in tickers.keys() if t not in ['IB01.L', 'XEON.DE', 'MAU.PA', 'PPFB.DE', 'MNODL.L', 'NVTKL.L']])
     if not stock_candidates:
         stock_candidates = sorted(list(tickers.keys()))
 

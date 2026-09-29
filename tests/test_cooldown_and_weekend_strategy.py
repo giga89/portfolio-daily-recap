@@ -130,11 +130,13 @@ class TestCooldownAndWeekendStrategy(unittest.TestCase):
         end_holdings = content.find(";", idx_holdings)
         holdings_sub = content[idx_holdings:end_holdings]
         self.assertNotIn("XEON", holdings_sub, "XEON.DE must not be present in active holdingsData.")
+        self.assertNotIn("MAU.PA", holdings_sub, "MAU.PA must not be present in active holdingsData.")
+        self.assertIn("BESI.NV", holdings_sub, "BESI.NV must be present in active holdingsData.")
 
     def test_dynamic_portfolio_weights_and_allocations(self):
         """Verify that weights normalize to 100% and dynamic allocation distributions sum to 100%."""
         weights = analytics_tracker.load_portfolio_weights()
-        self.assertTrue(len(weights) >= 40)
+        self.assertTrue(len(weights) >= 41)
         total_w = sum(weights.values())
         self.assertAlmostEqual(total_w, 100.0, delta=0.1, msg="Portfolio weights must sum to 100%")
 

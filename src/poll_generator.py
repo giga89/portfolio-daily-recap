@@ -444,7 +444,7 @@ def generate_friday_performers_poll() -> Dict[str, Any]:
         stock_data = finance_fetcher.fetch_stock_data()
         
         # Filter for active portfolio holdings with valid weekly_change
-        excluded = {"MNODL.L", "NVTKL.L", "XEON.DE", "IB01.L"}
+        excluded = {"MNODL.L", "NVTKL.L", "XEON.DE", "MAU.PA", "IB01.L", "PPFB.DE"}
         candidates = []
         for ticker, data in stock_data.items():
             if ticker in excluded:

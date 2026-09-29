@@ -55,6 +55,16 @@ class TestUniversalDualCheck(unittest.TestCase):
         ok_c, _, audit = verify_and_clean_comment(bad_comment, run_ai_review=False)
         self.assertFalse(ok_c, "Comment containing XEON.DE must be rejected")
 
+    def test_purged_asset_mau_blocked(self):
+        """Purged asset MAU.PA must be blocked deterministically."""
+        bad_comment = "Abbiamo ancora $MAU.PA per l'esposizione al settore petrolifero."
+        is_ok, issues, _ = verify_post_deterministic(bad_comment)
+        self.assertFalse(is_ok, "MAU.PA should be flagged as critical error")
+        self.assertTrue(any("dismesso" in i or "MAU.PA" in i for i in issues))
+
+        ok_c, _, audit = verify_and_clean_comment(bad_comment, run_ai_review=False)
+        self.assertFalse(ok_c, "Comment containing MAU.PA must be rejected")
+
     def test_accumulating_etf_comment_blocked(self):
         """Dividend claims on accumulating ETF WDEF.L must fail deterministic check."""
         hallucinated_reply = "@copier $WDEF.L è un ottimo ETF che stacca un generoso dividendo trimestrale per i nostri flussi di cassa."

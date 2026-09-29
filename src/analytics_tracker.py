@@ -349,6 +349,7 @@ HOLDINGS_DATA = [
     {"ticker": "AVGO", "name": "Broadcom Inc", "emoji": "🔌", "asset_class": "Stock", "curr": "USD", "sector": "Semiconductors & Networking", "geo": "USA", "tier": "Core Growth", "desc": "Custom ASIC AI accelerator chips, high-speed data center networking silicon, and VMware enterprise software."},
     {"ticker": "TSM", "name": "Taiwan Semiconductor", "emoji": "🏭", "asset_class": "Stock", "curr": "USD", "sector": "Global Chip Foundry", "geo": "Asia", "tier": "Core Holding", "desc": "The world's most advanced semiconductor foundry, sole manufacturing partner for Apple, NVIDIA, and AMD."},
     {"ticker": "MRVL", "name": "Marvell Technology", "emoji": "📊", "asset_class": "Stock", "curr": "USD", "sector": "Custom Silicon & Optical", "geo": "USA", "tier": "Growth", "desc": "Custom AI processors for cloud hyperscalers and electro-optics interconnects enabling high-bandwidth clusters."},
+    {"ticker": "BESI.NV", "name": "BE Semiconductor Industries", "emoji": "🔬", "asset_class": "Stock", "curr": "EUR", "sector": "Advanced Packaging & Hybrid Bonding", "geo": "Europe", "tier": "AI Hardware Leader", "desc": "Leading Dutch semiconductor assembly equipment manufacturer, dominating sub-micron hybrid bonding critical for next-gen HBM4 and advanced AI chip packaging."},
 
     # ── Healthcare & GLP-1 Megatrend ──────────────────────────────────────────
     {"ticker": "LLY", "name": "Eli Lilly and Co", "emoji": "💊", "asset_class": "Stock", "curr": "USD", "sector": "Pharma & GLP-1 Therapeutics", "geo": "USA", "tier": "Core Growth", "desc": "Global pioneer in revolutionary GLP-1/GIP treatments (Mounjaro, Zepbound) for diabetes, obesity, and oncology."},
@@ -407,6 +408,7 @@ BASELINE_WEIGHTS: Dict[str, float] = {
     "AVGO": 3.5,
     "TSM": 3.0,
     "MRVL": 2.0,
+    "BESI.NV": 0.5,
     # Healthcare & GLP-1 (17.5%)
     "LLY": 4.5,
     "NOVO-B.CO": 4.0,

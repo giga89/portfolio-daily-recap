@@ -286,11 +286,23 @@ DIVIDEND_PROFILES = {
         "approx_dps": "Distribuzione semestrale USD/GBP",
         "thesis": "Fondo chiuso sulla crescita manifatturiera del Vietnam con dividendo semestrale.",
     },
+    "BESI.NV": {
+        "name": "BE Semiconductor Industries N.V.",
+        "cashtag": "$BESI.NV",
+        "emoji": "🔬",
+        "sector": "Packaging Avanzato Semiconduttori & Hybrid Bonding",
+        "annual_yield_pct": 0.9,
+        "frequency": "Annuale (Maggio)",
+        "tranche_pct": 0.9,
+        "approx_dps": "€1,58 per azione",
+        "thesis": "Generazione di cassa ad alta marginalità derivante dalla leadership nell'hybrid bonding e packaging avanzato per chip AI, con dividendo annuale solido sostenuto da un payout del 60-100% dell'utile netto.",
+    },
 }
 
 # Calendar mapping for dividend distribution ex-dates (month, approx_day, tranche_label)
 # NOTE: Accumulating ETFs (e.g. WDEF.L, INDO.PA, IB01.L) and Commodities (PPFB.DE) are EXCLUDED.
 DIVIDEND_CALENDAR = {
+    "BESI.NV": [(4, 28, "Dividendo Annuale")],
     "ENI.MI": [(3, 23, "Tranche 3"), (5, 20, "Saldo"), (9, 21, "Tranche 1"), (11, 20, "Tranche 2")],
     "ENEL.MI": [(1, 22, "Acconto"), (7, 22, "Saldo")],
     "SX7PEX.DE": [(6, 15, "Semestrale H1"), (12, 15, "Semestrale H2")],
