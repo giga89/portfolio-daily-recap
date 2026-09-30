@@ -552,7 +552,7 @@ def publish_all(
                     print(f"⚠️ Failed to save last eToro post to Gist: {g_err}")
 
             # Execute 3-comment cross-linking sequence in immediate succession (5s interval) to save runner minutes
-            if etoro_sender.LAST_PUBLISHED_POST_ID and market_session in ["U.S. market open", "European market open", "U.S. market close"]:
+            if etoro_sender.LAST_PUBLISHED_POST_ID and market_session in ["U.S. market open", "European market open", "U.S. market close", "Monthly recap"]:
                 try:
                     import cross_link_scheduler
                     target_pid = etoro_sender.LAST_PUBLISHED_POST_ID

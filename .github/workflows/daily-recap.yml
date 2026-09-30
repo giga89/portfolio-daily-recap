@@ -3,7 +3,7 @@ name: Daily Portfolio Recap
 on:
   # ── Primary trigger: Orange Pi 5 local scheduler (precise timing) ──────────
   repository_dispatch:
-    types: [eu_open, stock_focus, crypto_recap, us_open, us_close, weekly_sat, weekly_sun, copy_trading]
+    types: [eu_open, stock_focus, crypto_recap, us_open, us_close, weekly_sat, weekly_sun, copy_trading, monthly]
   # ── Fallback: GitHub Actions cron (1 per session, Orange Pi is primary) ─────
   schedule:
     - cron: '45 7 * * 1-5'    # EU open fallback:    07:45 UTC (09:45 ITA)
@@ -11,6 +11,7 @@ on:
     - cron: '15 14 * * 1-5'   # US open fallback:    14:15 UTC (16:15 ITA)
     - cron: '20 16 * * *'     # Daily crypto recap:  16:20 UTC (18:20 ITA)
     - cron: '45 20 * * 1-5'   # US close fallback:   20:45 UTC (22:45 ITA)
+    - cron: '0 20 28-31 * *'  # Monthly recap:       20:00 UTC (last day of month)
     - cron: '30 9 * * 6'      # Weekly recap (Sat):  09:30 UTC
     - cron: '30 21 * * 0'     # Weekly recap (Sun):  21:30 UTC
     - cron: '15 10 * * 6'     # Saturday Copy Trading: 10:15 UTC (12:15 ITA)
@@ -97,6 +98,7 @@ jobs:
                 us_close)     SESSION_NAME="U.S. market close" ;;
                 weekly_sat)   SESSION_NAME="Weekly recap (Sat)" ;;
                 weekly_sun)   SESSION_NAME="Weekly recap (Sun)" ;;
+                monthly)      SESSION_NAME="Monthly recap" ;;
                 copy_trading) SESSION_NAME="Copy trading post" ;;
               esac
             fi
@@ -112,8 +114,23 @@ jobs:
                 SESSION_NAME="U.S. market open" ;;
               "20 16 * * *")
                 SESSION_NAME="Daily crypto recap" ;;
+              "0 20 28-31 * *")
+                TOMORROW=$(date -u -d "+1 day" +%d)
+                if [ "$TOMORROW" == "01" ]; then
+                  SESSION_NAME="Monthly recap"
+                else
+                  echo "Not the last day of the month, skipping monthly recap cron."
+                  exit 0
+                fi
+                ;;
               "45 20 * * 1-5")
-                SESSION_NAME="U.S. market close" ;;
+                TOMORROW=$(date -u -d "+1 day" +%d)
+                if [ "$TOMORROW" == "01" ]; then
+                  SESSION_NAME="Monthly recap"
+                else
+                  SESSION_NAME="U.S. market close"
+                fi
+                ;;
               "30 9 * * 6")
                 SESSION_NAME="Weekly recap (Sat)" ;;
               "30 21 * * 0")
@@ -136,7 +153,7 @@ jobs:
             MINUTE=${MINUTE:-0}
             if [ "$HOUR" -eq 20 ]; then
               TOMORROW=$(date -u -d "+1 day" +%d)
-              if [ "$TOMORROW" == "01" ] && [ "$MINUTE" -lt 30 ]; then
+              if [ "$TOMORROW" == "01" ]; then
                 SESSION_NAME="Monthly recap"
               elif [ "$DAY" -ge 1 ] && [ "$DAY" -le 5 ]; then
                 SESSION_NAME="U.S. market close"

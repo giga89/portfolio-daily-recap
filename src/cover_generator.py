@@ -42,6 +42,7 @@ SESSION_PALETTE = {
     "U.S. market close":    ((35, 15, 10), (80, 35, 15)),    # warm dark orange
     "Weekly recap (Sat)":   ((10, 30, 35), (20, 55, 65)),    # teal
     "Weekly recap (Sun)":   ((10, 12, 30), (25, 30, 65)),    # navy
+    "Monthly recap":        ((25, 15, 45), (55, 30, 90)),    # deep royal purple
     "Daily recap":          ((20, 20, 40), (35, 35, 70)),    # neutral purple
 }
 
@@ -51,6 +52,7 @@ SESSION_LABELS = {
     "U.S. market close":    "CHIUSURA MERCATI",
     "Weekly recap (Sat)":   "RECAP SETTIMANALE",
     "Weekly recap (Sun)":   "CLASSIFICA SETTIMANALE",
+    "Monthly recap":        "RESOCONTO MENSILE",
     "Daily recap":          "PORTFOLIO UPDATE",
 }
 
@@ -89,12 +91,19 @@ _CARD_QUESTIONS = {
         "Ottimismo o cautela\nper la settimana\nche inizia domani?",
         "Quale titolo pensate\npotrà sorprendere\nla prossima settimana?",
     ],
+    "MONTHLY": [
+        "Come valutate il mese\nappena trascorso\nper i vostri investimenti?",
+        "Qual è stato il vostro\nmiglior titolo\ndel mese?",
+        "Quali megatrend monitorerete\ndi più nel mese\nche inizia domani?",
+    ],
 }
 
 
 def _session_to_card_key(session_name: str) -> str:
     """Map a session name to the question pool key."""
     s = session_name.upper()
+    if "MONTHLY" in s:
+        return "MONTHLY"
     if "EUROPEAN" in s and "OPEN" in s:
         return "EU_OPEN"
     if "U.S." in s and "OPEN" in s:
@@ -261,7 +270,12 @@ def generate_cover(
     # ── Colours ─────────────────────────────────────────────────────────────
     perf_color = (60, 210, 80, 255) if portfolio_daily >= 0 else (230, 55, 55, 255)
     perf_text  = f"{portfolio_daily:+.2f}%"
-    sub_label  = "Performance di oggi"
+    if "MONTHLY" in session_name.upper():
+        sub_label = "Performance del mese"
+    elif "WEEKLY" in session_name.upper():
+        sub_label = "Performance della settimana"
+    else:
+        sub_label = "Performance di oggi"
 
     # ── Centre: big % number ────────────────────────────────────────────────
     bbox = draw.textbbox((0, 0), perf_text, font=font_perf_big)

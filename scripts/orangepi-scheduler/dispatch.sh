@@ -28,7 +28,7 @@ source "$ENV_FILE"
 # Session name from argument
 SESSION="${1:-}"
 if [ -z "$SESSION" ]; then
-    echo "Usage: $0 <eu_open|community_poll|stock_focus|us_open|stock_news|crypto_recap|us_close|weekly_sat|weekly_sun>" >&2
+    echo "Usage: $0 <eu_open|community_poll|stock_focus|us_open|stock_news|crypto_recap|us_close|weekly_sat|weekly_sun|monthly>" >&2
     exit 1
 fi
 
@@ -43,6 +43,7 @@ case "$SESSION" in
     us_close)              SESSION_NAME="U.S. market close" ;;
     weekly_sat)            SESSION_NAME="Weekly recap (Sat)" ;;
     weekly_sun)            SESSION_NAME="Weekly recap (Sun)" ;;
+    monthly)               SESSION_NAME="Monthly recap" ;;
     copy_trading)          SESSION_NAME="Copy trading post" ;;
     dividend_post)         SESSION_NAME="Dividend Announcement" ;;
     dashboard_sync)        SESSION_NAME="Daily Dashboard Sync" ;;
@@ -59,6 +60,15 @@ DOW=$(date -u +%u)  # 1=Mon, 7=Sun
 if [[ "$SESSION" =~ ^(eu_open|community_poll|stock_focus|us_open|stock_news|us_close)$ ]] && [ "$DOW" -gt 5 ]; then
     echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP $SESSION — weekend (day $DOW)" >> "$LOG_DIR/dispatch.log"
     exit 0
+fi
+
+# On the last day of the month, us_close is skipped because monthly recap handles the close
+if [ "$SESSION" = "us_close" ]; then
+    TOMORROW=$(date -u -d "+1 day" +%d)
+    if [ "$TOMORROW" = "01" ]; then
+        echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP us_close — last day of the month (handled by monthly recap)" >> "$LOG_DIR/dispatch.log"
+        exit 0
+    fi
 fi
 
 # ---------------------------------------------------------------------------

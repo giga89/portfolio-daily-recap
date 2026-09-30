@@ -52,6 +52,12 @@
 2 20 * * 1-5   /opt/portfolio-dispatch/dispatch.sh us_close >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 2 21 * * 1-5   /opt/portfolio-dispatch/dispatch.sh us_close >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
+# ── Monthly Market & Portfolio Recap (Last calendar day of each month) ───────
+# Runs on the final day of each month at 20:00 local (20:02 UTC summer / 21:02 UTC winter)
+# Automatically replaces normal US close with comprehensive monthly performance & review
+2 20 28-31 * * [ "$(date -u -d '+1 day' +%d)" = "01" ] && /opt/portfolio-dispatch/dispatch.sh monthly >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+2 21 28-31 * * [ "$(date -u -d '+1 day' +%d)" = "01" ] && /opt/portfolio-dispatch/dispatch.sh monthly >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
 # ── Stock News & Catalyst Follow-up Commenter (3x daily, Mon-Sun) ───────────
 # Morning:    11:30 local → 09:30 UTC (summer) / 10:30 UTC (winter)
 30 9 * * *    /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1

@@ -138,14 +138,16 @@ def print_session_preview(session_name, mock_ai_commentary=None):
     
     ath_distance = -1.23
     
-    # Temporarily override generate_market_news_recap to return our custom mock text if API key is not present
+    # Temporarily override generate_market_news_recap / generate_monthly_ai_recap to return custom mock text
     original_func = ai_news_generator.generate_market_news_recap
+    original_monthly_func = ai_news_generator.generate_monthly_ai_recap
     
     if not os.environ.get('GEMINI_API_KEY') and mock_ai_commentary:
         # Define a mock lambda wrapper
         def mock_generate(*args, **kwargs):
             return "\n" + mock_ai_commentary + "\n"
         ai_news_generator.generate_market_news_recap = mock_generate
+        ai_news_generator.generate_monthly_ai_recap = mock_generate
         
     try:
         # Call the formatter
@@ -171,8 +173,9 @@ def print_session_preview(session_name, mock_ai_commentary=None):
         print(f"🏷️ Unique stock tags used ({len(unique_tags)}): {', '.join(unique_tags)}")
         
     finally:
-        # Restore original function
+        # Restore original functions
         ai_news_generator.generate_market_news_recap = original_func
+        ai_news_generator.generate_monthly_ai_recap = original_monthly_func
 
 def main():
     print("🔮 GENERATING 5 MESSAGE PREVIEWS IN NATURAL ITALIAN 🔮")
@@ -267,6 +270,19 @@ def main():
         "Un quadro fondamentale per capire la traiettoria dei tassi nella seconda metà dell'anno."
     )
     print_session_preview("Weekly macro outlook", macro_outlook_mock)
+
+    # 9. Monthly Market & Portfolio Recap
+    monthly_mock = (
+        "🌍 MONTHLY MARKET OVERVIEW\n\n"
+        "🏛️💵🔔 Decisioni Banche Centrali\n"
+        "Il mese si conclude con un quadro favorevole per l'azionario globale ($SPX500, $NSDQ100), sostenuto dal ciclo di allentamento monetario e dal raffreddamento dell'inflazione.\n\n"
+        "💼 PORTFOLIO IMPACT & OUTLOOK\n\n"
+        "🤖💡🚀 $NVDA\n"
+        "NVIDIA guida il settore semiconduttori con una crescita solida e una domanda sostenuta su tutte le linee di business legate all'infrastruttura AI.\n\n"
+        "🛡️💻📈 $PLTR\n"
+        "Palantir registra performance eccezionali nel mese, sostenuta da nuovi contratti strategici nel settore corporate e governativo."
+    )
+    print_session_preview("Monthly recap", monthly_mock)
 
 if __name__ == '__main__':
     main()

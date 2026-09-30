@@ -227,9 +227,10 @@ def main():
     # Generate cover image for the session
     ai_cover_path = None
     try:
+        portfolio_perf_for_cover = portfolio_monthly if is_monthly else (portfolio_weekly if is_weekly and portfolio_weekly is not None else portfolio_daily)
         ai_cover_path = cover_generator.generate_cover(
             session_name=market_session,
-            portfolio_daily=portfolio_daily,
+            portfolio_daily=portfolio_perf_for_cover,
             output_path='output/ai_cover.png',
         )
     except Exception as exc:
@@ -243,9 +244,10 @@ def main():
         from config import EMOJI_MAP
 
         # Contextual meme rotation:
+        # - For monthly recap, always show the Winners & Losers card with monthly change
         # - Movimenti più marcati (|daily| >= 0.5%): 66% chance for sentiment meme
         # - Movimento contenuto (-0.5% < daily < 0.5%): 33% chance la sera (e 33% altre sessioni)
-        use_meme = meme_generator.should_use_meme(
+        use_meme = False if is_monthly else meme_generator.should_use_meme(
             portfolio_daily=portfolio_daily,
             market_session=market_session,
             is_weekly=is_weekly,
