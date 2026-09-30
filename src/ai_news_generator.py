@@ -949,7 +949,65 @@ def update_rotation_history(new_tags):
         print(f"⚠️ Error updating tag rotation: {e}")
 
 
+def _translate_monthly_recap_to_italian(english_text: str, client) -> str:
+    """
+    Translate a monthly recap from English to Italian using Gemini.
+    Preserves emojis, $TICKER cashtags, section headers, and formatting exactly.
+    Falls back to original English text if translation fails.
+
+    Args:
+        english_text: The English monthly recap text.
+        client: An initialized genai.Client instance.
+
+    Returns:
+        str: Italian-translated text, or original English text on failure.
+    """
+    if not english_text or not english_text.strip():
+        return english_text
+
+    translate_prompt = f"""Translate the following financial market recap from English to Italian.
+
+STRICT RULES:
+1. Preserve ALL emojis exactly as-is, in the same positions.
+2. Preserve ALL $TICKER cashtags exactly (e.g. $NVDA, $WDEF.L, $SPX500) — do NOT translate or modify them.
+3. Preserve section headers (🌍 MONTHLY MARKET OVERVIEW → 🌍 PANORAMICA MENSILE DEL MERCATO; 💼 PORTFOLIO IMPACT & OUTLOOK → 💼 IMPATTO SUL PORTAFOGLIO & PROSPETTIVE).
+4. Use natural, fluent financial Italian — not word-for-word literal translation.
+5. Keep proper nouns in their standard form: "Federal Reserve" stays "Federal Reserve", "Nasdaq" stays "Nasdaq", etc.
+6. Output ONLY the translated text — no preamble, no explanation, no markdown code blocks.
+7. Keep the same paragraph structure and line breaks.
+
+TEXT TO TRANSLATE:
+{english_text}"""
+
+    for model_name in DEFAULT_GEMINI_MODELS:
+        try:
+            _throttle_request(1.5)
+            response = client.models.generate_content(
+                model=model_name,
+                contents=translate_prompt,
+                config=types.GenerateContentConfig(temperature=0.3),
+            )
+            if response and response.text:
+                translated = response.text.strip()
+                if len(translated) > 50:
+                    print(f"🇮🇹 Monthly recap translated to Italian using {model_name}")
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, True, "monthly_recap_translate")
+                    return translated
+        except Exception as e:
+            err = str(e).lower()
+            if API_TRACKER_AVAILABLE:
+                log_api_request(model_name, False, "monthly_recap_translate")
+            if '429' in err or 'quota' in err or 'resource_exhausted' in err:
+                time.sleep(3.0)
+            continue
+
+    print("⚠️ Translation to Italian failed, keeping English version as fallback.")
+    return english_text
+
+
 def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
+
     """
     Generate AI-powered monthly market recap summarizing major events over the past month
     
@@ -1008,7 +1066,18 @@ def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
                 portfolio_items.append(f"{t} ({descr})")
         portfolio_context = ", ".join(portfolio_items)
         
+        # CRITICAL ticker annotations - prevent AI hallucinations on specific ETFs
+        ticker_notes = """
+CRITICAL TICKER NOTES — READ CAREFULLY BEFORE WRITING:
+- WDEF.L = "WisdomTree Europe Defence UCITS ETF" — this is a DEFENCE/WEAPONS sector ETF (European aerospace & defence companies). It is ACC (accumulation, no dividends paid out). NEVER describe it as dividend-focused, high-yield, or income-generating.
+- IB01.L = iShares $ Treasury Bond 0-1yr UCITS ETF — short-duration US Treasuries, used as cash equivalent / safe-haven.
+- TRIG.L = The Renewables Infrastructure Group — renewable energy infrastructure fund.
+- IQQL.DE = iShares MSCI China ETF — broad China equity exposure.
+- PPFB.DE = Amundi Prime Euro Bonds — European investment-grade bonds ETF.
+"""
+
         prompt = f"""You are a senior financial analyst. Generate a comprehensive MONTHLY MARKET RECAP for {current_month}.
+Write ENTIRELY in ENGLISH — a separate translation step will convert the output to Italian.
 
 Use your search tool to find the MAJOR EVENTS and TRENDS that defined this month across:
 1. USA Markets (S&P500, Nasdaq, Dow Jones)
@@ -1017,6 +1086,8 @@ Use your search tool to find the MAJOR EVENTS and TRENDS that defined this month
 4. Key Economic Data (inflation, employment, GDP, central bank decisions)
 5. Major Corporate News (earnings, M&A, product launches)
 6. Geopolitical Events (if market-relevant)
+
+{ticker_notes}
 
 PORTFOLIO CONTEXT:
 These are the tickers in the portfolio you should focus on for the PORTFOLIO IMPACT section:
@@ -1115,18 +1186,10 @@ Impact and outlook summary...
                     # Limit tags
                     recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
                     
+                    # Translate English → Italian (higher quality than direct Italian generation)
+                    recap_text = _translate_monthly_recap_to_italian(recap_text, client)
+                    
                     return "\n" + recap_text + "\n"
-                    # Pre-publication double-check
-                    approved, verified_text = _run_post_verification(
-                        recap_text,
-                        session_name="Monthly recap",
-                        generator_model=model_name,
-                    )
-                    if not approved or not verified_text:
-                        print(f"⚠️ Monthly recap rejected by verifier ({model_name}), trying next model...")
-                        continue
-
-                    return "\n" + verified_text + "\n"
                 else:
                     print(f"⚠️  Empty response from {model_name}")
                     continue
@@ -1158,6 +1221,7 @@ Impact and outlook summary...
                                 recap_text = _remove_intro_text(recap_text)
                                 recap_text = _remove_market_section_tags(recap_text)
                                 recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                                recap_text = _translate_monthly_recap_to_italian(recap_text, client)
                                 return "\n" + recap_text + "\n"
                         except Exception as e_notools:
                             print(f"   Direct attempt without tools also failed: {e_notools}")
@@ -1188,6 +1252,7 @@ Impact and outlook summary...
                                 recap_text = _remove_intro_text(recap_text)
                                 recap_text = _remove_market_section_tags(recap_text)
                                 recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                                recap_text = _translate_monthly_recap_to_italian(recap_text, client)
                                 succeeded = True
                                 return "\n" + recap_text + "\n"
                         except Exception as e2:
@@ -1217,6 +1282,7 @@ Impact and outlook summary...
                             recap_text = _remove_intro_text(recap_text)
                             recap_text = _remove_market_section_tags(recap_text)
                             recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+                            recap_text = _translate_monthly_recap_to_italian(recap_text, client)
                             return "\n" + recap_text + "\n"
                     except Exception as e2:
                         print(f"   Retry failed: {e2}")

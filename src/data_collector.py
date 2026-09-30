@@ -21,7 +21,39 @@ import cover_generator
 import winners_losers_card
 import etoro_history
 
+def _fetch_etoro_current_month_gain():
+    """
+    Fetch the real monthly gain for the current month directly from eToro
+    via etoro_client.fetch_gain_history(granularity='monthly').
+
+    Returns:
+        float: monthly gain % (e.g. -2.35 means -2.35%), or None if unavailable.
+    """
+    try:
+        import etoro_client
+        if not etoro_client.is_configured():
+            return None
+        gain_history = etoro_client.fetch_gain_history(granularity="monthly")
+        if not gain_history:
+            return None
+        from datetime import datetime
+        now = datetime.now()
+        current_year = now.year
+        current_month = now.month
+        target_prefix = f"{current_year}-{current_month:02d}"
+        for entry in gain_history:
+            date_str = str(entry.get('date', ''))
+            if date_str.startswith(target_prefix):
+                gain = float(entry.get('gain', 0.0))
+                return gain
+        return None
+    except Exception as e:
+        print(f"⚠️  _fetch_etoro_current_month_gain error: {e}")
+        return None
+
+
 def main():
+
     """
     Main function to orchestrate data collection and recap generation
     """
@@ -121,8 +153,13 @@ def main():
         print("=" * 50)
     
     if is_monthly:
-        print("📊 Calculating MONTHLY portfolio performance...")
-        portfolio_monthly = finance_fetcher.calculate_portfolio_weighted_change(stock_data, portfolio_weights, metric='monthly_change')
+        print("📊 Fetching MONTHLY portfolio performance from eToro (real gain)...")
+        portfolio_monthly = _fetch_etoro_current_month_gain()
+        if portfolio_monthly is not None:
+            print(f"✓ eToro real monthly gain: {portfolio_monthly:+.2f}%")
+        else:
+            print("⚠️ eToro monthly gain unavailable, falling back to yfinance weighted average...")
+            portfolio_monthly = finance_fetcher.calculate_portfolio_weighted_change(stock_data, portfolio_weights, metric='monthly_change')
         print("=" * 50)
     
     
