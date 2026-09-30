@@ -1072,8 +1072,8 @@ CRITICAL TICKER NOTES — READ CAREFULLY BEFORE WRITING:
 - WDEF.L = "WisdomTree Europe Defence UCITS ETF" — this is a DEFENCE/WEAPONS sector ETF (European aerospace & defence companies). It is ACC (accumulation, no dividends paid out). NEVER describe it as dividend-focused, high-yield, or income-generating.
 - IB01.L = iShares $ Treasury Bond 0-1yr UCITS ETF — short-duration US Treasuries, used as cash equivalent / safe-haven.
 - TRIG.L = The Renewables Infrastructure Group — renewable energy infrastructure fund.
-- IQQL.DE = iShares MSCI China ETF — broad China equity exposure.
-- PPFB.DE = Amundi Prime Euro Bonds — European investment-grade bonds ETF.
+- IQQL.DE = iShares Listed Private Equity UCITS ETF (BlackRock) — tracks the S&P Listed Private Equity Index, exposure to listed private equity companies across financials, industrials and consumer discretionary. NOT a China ETF.
+- PPFB.DE = iShares Physical Gold ETC (BlackRock) — direct exposure to the spot price of gold (LBMA Good Delivery gold). A hedge against inflation and currency fluctuations. NOT a bond ETF.
 """
 
         prompt = f"""You are a senior financial analyst. Generate a comprehensive MONTHLY MARKET RECAP for {current_month}.
