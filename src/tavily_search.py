@@ -152,7 +152,12 @@ def get_live_market_news_context(
     session_str = (session_name or "Wall Street market close").lower()
 
     # 1. Determine macro query
-    if "open" in session_str and "eu" in session_str:
+    if "monthly" in session_str:
+        from datetime import datetime as _dt
+        current_month = _dt.now().strftime('%B %Y')
+        macro_query = f"{current_month} stock market monthly recap Federal Reserve inflation ECB interest rates Wall Street"
+        days = 30
+    elif "open" in session_str and "eu" in session_str:
         macro_query = "European stock market open Stoxx 600 DAX today"
     elif "open" in session_str:
         macro_query = "Wall Street stock market opening futures today S&P 500"

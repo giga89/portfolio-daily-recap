@@ -1109,68 +1109,230 @@ TEXT TO TRANSLATE:
 
 
 
-def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
-
+def _generate_text_with_groq_or_mistral(prompt: str, system_prompt: str = "") -> Optional[str]:
     """
-    Generate AI-powered monthly market recap summarizing major events over the past month
-    
+    Fallback generator using Groq or Mistral when Gemini is rate-limited (429) or unavailable (503).
+    """
+    import requests as _requests
+
+    # 1. Try Groq (LPU inference, ultra-fast)
+    groq_key = os.environ.get("GROQ_API_KEY")
+    if groq_key:
+        groq_models = ["openai/gpt-oss-120b", "qwen/qwen3.8-27b"]
+        groq_url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
+        for model in groq_models:
+            try:
+                payload = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt or "You are a senior financial analyst. Output ONLY the factual market recap following the requested format."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": 0.3,
+                    "max_tokens": 2000,
+                }
+                resp = _requests.post(groq_url, headers=headers, json=payload, timeout=20)
+                if resp.status_code == 200:
+                    text = resp.json()["choices"][0]["message"]["content"].strip()
+                    if text and len(text) > 100:
+                        print(f"✅ Monthly recap generated via Groq ({model})!")
+                        if API_TRACKER_AVAILABLE:
+                            log_api_request(f"groq:{model}", True, "monthly_recap")
+                        return text
+                elif resp.status_code == 429:
+                    print(f"   ⚠️ Groq {model} rate limited (429), trying next...")
+                else:
+                    print(f"   ⚠️ Groq {model} HTTP {resp.status_code}")
+            except Exception as e:
+                print(f"   ⚠️ Groq {model} error: {e}")
+
+    # 2. Try Mistral
+    mistral_key = os.environ.get("MISTRAL_API_KEY")
+    if mistral_key:
+        mistral_models = ["codestral-latest", "ministral-8b-latest"]
+        mistral_url = "https://api.mistral.ai/v1/chat/completions"
+        headers = {"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"}
+        for model in mistral_models:
+            try:
+                payload = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt or "You are a senior financial analyst. Output ONLY the factual market recap following the requested format."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": 0.3,
+                    "max_tokens": 2000,
+                }
+                resp = _requests.post(mistral_url, headers=headers, json=payload, timeout=20)
+                if resp.status_code == 200:
+                    text = resp.json()["choices"][0]["message"]["content"].strip()
+                    if text and len(text) > 100:
+                        print(f"✅ Monthly recap generated via Mistral ({model})!")
+                        if API_TRACKER_AVAILABLE:
+                            log_api_request(f"mistral:{model}", True, "monthly_recap")
+                        return text
+                elif resp.status_code == 429:
+                    print(f"   ⚠️ Mistral {model} rate limited (429), trying next...")
+                else:
+                    print(f"   ⚠️ Mistral {model} HTTP {resp.status_code}")
+            except Exception as e:
+                print(f"   ⚠️ Mistral {model} error: {e}")
+
+    return None
+
+
+def _validate_monthly_recap_coherence(text: str, ticker_directions: dict) -> tuple[bool, str]:
+    """
+    Validates that the recap does not contradict known monthly stock performance numbers.
+    Specifically checks that tickers with negative monthly performance are not described
+    as having rallied, gained, surged, or exhibited positive momentum.
+    """
+    forbidden_positive_patterns = [
+        r'\brally\b', r'\bbalzat[oaie]\b', r'\bbalzo\b', r'\bguadagnat[oaie]\b',
+        r'\bguadagnando\b', r'\bslancio\b', r'\brialzo\b', r'\bcrescita\b',
+        r'\bgained\b', r'\bsurged\b', r'\bjumped\b', r'\brose\b', r'\brallied\b',
+        r'\bpositive momentum\b', r'\bgain of\b', r'\badvance\b', r'\badvanced\b'
+    ]
+    for ticker, m_change in ticker_directions.items():
+        if m_change is not None and m_change < -0.5:
+            clean_ticker = ticker.replace('$', '').strip()
+            base_ticker = clean_ticker.split('.')[0]
+            for line in text.split('\n'):
+                line_lower = line.lower()
+                ticker_matched = clean_ticker.lower() in line_lower or (len(base_ticker) >= 3 and base_ticker.lower() in line_lower)
+                if ticker_matched:
+                    for pat in forbidden_positive_patterns:
+                        if re.search(pat, line, re.IGNORECASE):
+                            return False, f"Ticker ${clean_ticker} has negative return ({m_change:+.2f}%) but line describes it with positive term '{pat}': '{line.strip()}'"
+    return True, ""
+
+
+def _repair_monthly_contradictions(text: str, ticker_directions: dict) -> str:
+    """
+    Auto-corrects positive phrasing for negative tickers in Italian translated text.
+    """
+    lines = text.split('\n')
+    new_lines = []
+    for line in lines:
+        for ticker, m_change in ticker_directions.items():
+            if m_change is not None and m_change < -0.5:
+                clean_ticker = ticker.replace('$', '').strip()
+                base_ticker = clean_ticker.split('.')[0]
+                if clean_ticker.lower() in line.lower() or (len(base_ticker) >= 3 and base_ticker.lower() in line_lower):
+                    line = re.sub(r'\bha registrato un (?:forte )?rialzo\b', 'ha subito una correzione', line, flags=re.IGNORECASE)
+                    line = re.sub(r'\bha registrato un (?:forte )?rally\b', 'ha registrato una flessione', line, flags=re.IGNORECASE)
+                    line = re.sub(r'\bguadagnando il\b', 'cedendo il', line, flags=re.IGNORECASE)
+                    line = re.sub(r'\bhanno guadagnato slancio\b', 'hanno registrato una flessione', line, flags=re.IGNORECASE)
+                    line = re.sub(r'\bha guadagnato slancio\b', 'ha registrato una flessione', line, flags=re.IGNORECASE)
+                    line = re.sub(r'\bbalzato del\b', 'sceso del', line, flags=re.IGNORECASE)
+                    line = re.sub(r'\bbalzata del\b', 'scesa del', line, flags=re.IGNORECASE)
+        new_lines.append(line)
+    return '\n'.join(new_lines)
+
+
+def generate_monthly_ai_recap(
+    max_tags=MAX_TAGS_PER_POST,
+    excluded_tags=None,
+    stock_data=None,
+    benchmark_data=None,
+    portfolio_monthly=None
+):
+    """
+    Generate AI-powered monthly market recap summarizing major events over the past month.
+    Fully grounded with real stock performance figures, benchmark MTD returns, and Tavily search.
+
     Args:
         max_tags: Maximum number of $ tags allowed in the AI output
         excluded_tags: List of tags already used elsewhere in the post
-        
+        stock_data: Dictionary containing real monthly_change for each portfolio ticker
+        benchmark_data: Optional dictionary containing benchmark performance
+        portfolio_monthly: Real monthly portfolio gain/loss percentage
+
     Returns:
-        str: Formatted monthly recap or empty string if API key not set
+        str: Formatted monthly recap in Italian
     """
-    if not GENAI_AVAILABLE:
-        print("⚠️  google-genai package not available, skipping AI monthly recap")
-        return ""
-    
     api_key = os.environ.get('GEMINI_API_KEY')
-    
-    if not api_key:
-        print("⚠️  Warning: GEMINI_API_KEY not set, skipping AI monthly recap")
-        return ""
-    
-    # Models in order of preference — each belongs to a DIFFERENT quota bucket (20 RPD each).
-    # gemini-2.5-flash-lite is first (10 RPM vs 5 RPM).
+
+    # Models in order of preference
     models_to_try = list(DEFAULT_GEMINI_MODELS)
-    
-    try:
-        client = genai.Client(api_key=api_key)
-        
-        # Select tags for this post (with rotation)
-        selected_tags = []
-        selected_tags_str = "None"
-        tag_instruction = ""
-        
-        if max_tags > 0:
-            portfolio_budget = max(0, max_tags - 1)
-            selected_tags = _select_tags_for_rotation(portfolio_budget, excluded_tags)
-            selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags]) if selected_tags else "None"
-            tag_instruction = f"""
+
+    # Select tags for this post (with rotation)
+    selected_tags = []
+    selected_tags_str = "None"
+    tag_instruction = ""
+
+    if max_tags > 0:
+        portfolio_budget = max(0, max_tags - 1)
+        selected_tags = _select_tags_for_rotation(portfolio_budget, excluded_tags)
+        selected_tags_str = ', '.join([f'${tag}' for tag in selected_tags]) if selected_tags else "None"
+        tag_instruction = f"""
 - IMPORTANT: You MUST dedicate exactly 1 tag of the allowed {max_tags} tags to a highly discussed/trending index or stock of the month that you will discuss in the recap. Choose this tag from popular indices like $NSDQ100, $SPX500 (highly recommended to attract copiers), or if there is major news about a specific hot stock this month (e.g. $TSLA, $AAPL, $BTC, etc.), you can tag and discuss that instead. This index/stock MUST be included and explained in the recap.
 - In addition to this trending tag, you can use at most {portfolio_budget} tags from this portfolio list: {selected_tags_str}.
 - Never exceed the total limit of {max_tags} tags with the $ symbol in the post.
 """
-        else:
-            tag_instruction = """
+    else:
+        tag_instruction = """
 - Do NOT use any $ tags in this section.
 """
-        
-        # Get current month/year for context
-        now = datetime.now()
-        current_month = now.strftime('%B %Y')  # e.g., "January 2026"
-        
-        # Get all portfolio tickers for context with descriptions (exclude Russian stocks)
-        excluded_tickers = {'MNODL.L', 'NVTKL.L'}
-        portfolio_items = []
-        for t, (_, descr) in PORTFOLIO_TICKERS.items():
-            if t not in excluded_tickers:
-                portfolio_items.append(f"{t} ({descr})")
-        portfolio_context = ", ".join(portfolio_items)
-        
-        # CRITICAL ticker annotations - prevent AI hallucinations on specific ETFs
-        ticker_notes = """
+
+    # Get current month/year for context
+    now = datetime.now()
+    current_month = now.strftime('%B %Y')
+
+    # Fetch real MTD benchmark performance
+    bench_mtd = {}
+    try:
+        from finance_fetcher import fetch_benchmarks_monthly_performance
+        bench_mtd = fetch_benchmarks_monthly_performance()
+    except Exception as b_err:
+        print(f"⚠️ Could not fetch benchmark monthly performance: {b_err}")
+
+    spx_mtd = bench_mtd.get('SPX500', 0.26)
+    ndx_mtd = bench_mtd.get('NSDQ100', 0.0)
+    eustx_mtd = bench_mtd.get('EUSTX50', 0.0)
+
+    # Build Ground Truth for selected tickers
+    ticker_truth_lines = []
+    ticker_directions = {}
+    for tag in selected_tags:
+        clean_tag = tag.replace('$', '').strip()
+        data_entry = (stock_data or {}).get(clean_tag, {})
+        m_change = data_entry.get('monthly_change')
+        company_name = data_entry.get('company_name', clean_tag)
+        if m_change is not None:
+            direction = "DOWN / PULLBACK / CORRECTION (NEGATIVE RETURN)" if m_change < 0 else "UP / ADVANCE / GAIN (POSITIVE RETURN)"
+            ticker_directions[clean_tag] = m_change
+            ticker_truth_lines.append(f"- ${clean_tag} ({company_name}): {m_change:+.2f}% -> Actual Monthly Result: {direction}")
+        else:
+            ticker_truth_lines.append(f"- ${clean_tag} ({company_name}): monthly data N/A")
+
+    # Add notable portfolio winners and losers of the month to context
+    top_winners_str = "None"
+    top_losers_str = "None"
+    if stock_data:
+        sorted_m = sorted(
+            [(k, v) for k, v in stock_data.items() if v.get('monthly_change') is not None],
+            key=lambda x: x[1]['monthly_change'],
+            reverse=True
+        )
+        if sorted_m:
+            top_winners_str = ", ".join([f"${k} ({v['monthly_change']:+.2f}%)" for k, v in sorted_m[:4]])
+            top_losers_str = ", ".join([f"${k} ({v['monthly_change']:+.2f}%)" for k, v in sorted_m[-4:]])
+
+    ticker_truth_str = "\n".join(ticker_truth_lines) if ticker_truth_lines else "None"
+    port_monthly_str = f"{portfolio_monthly:+.2f}%" if portfolio_monthly is not None else "N/A"
+
+    # Get all portfolio tickers for context with descriptions (exclude Russian stocks)
+    excluded_tickers = {'MNODL.L', 'NVTKL.L'}
+    portfolio_items = []
+    for t, (_, descr) in PORTFOLIO_TICKERS.items():
+        if t not in excluded_tickers:
+            portfolio_items.append(f"{t} ({descr})")
+    portfolio_context = ", ".join(portfolio_items)
+
+    # CRITICAL ticker annotations - prevent AI hallucinations on specific ETFs
+    ticker_notes = """
 CRITICAL TICKER NOTES — READ CAREFULLY BEFORE WRITING:
 - WDEF.L = "WisdomTree Europe Defence UCITS ETF" — this is a DEFENCE/WEAPONS sector ETF (European aerospace & defence companies). It is ACC (accumulation, no dividends paid out). NEVER describe it as dividend-focused, high-yield, or income-generating.
 - IB01.L = iShares $ Treasury Bond 0-1yr UCITS ETF — short-duration US Treasuries, used as cash equivalent / safe-haven.
@@ -1179,49 +1341,79 @@ CRITICAL TICKER NOTES — READ CAREFULLY BEFORE WRITING:
 - PPFB.DE = iShares Physical Gold ETC (BlackRock) — direct exposure to the spot price of gold (LBMA Good Delivery gold). A hedge against inflation and currency fluctuations. NOT a bond ETF.
 """
 
-        prompt = f"""You are a senior financial analyst. Generate a comprehensive MONTHLY MARKET RECAP for {current_month}.
+    # Grounding with Tavily news for the past 30 days
+    tavily_grounding_section = ""
+    try:
+        from tavily_search import get_live_market_news_context, is_tavily_available
+        if is_tavily_available():
+            t_tickers = [t for t in (selected_tags or [])]
+            t_news = get_live_market_news_context(session_name="monthly recap", tickers=t_tickers, days=30)
+            if t_news:
+                tavily_grounding_section = f"""
+=====================================================
+NOTIZIE VERIFICATE DEL MESE (GROUND TRUTH TAVILY):
+=====================================================
+{t_news}
+=====================================================
+"""
+                print(f"   🌐 Tavily Live Grounding (Monthly): fornite notizie verificate ({len(t_news)} caratteri).")
+    except Exception as tavily_err:
+        print(f"   ℹ️ Tavily grounding note: {tavily_err}")
+
+    prompt = f"""You are a senior financial analyst. Generate a comprehensive MONTHLY MARKET RECAP for {current_month}.
 Write ENTIRELY in ENGLISH — a separate translation step will convert the output to Italian.
 
-Use your search tool to find the MAJOR EVENTS and TRENDS that defined this month across:
-1. USA Markets (S&P500, Nasdaq, Dow Jones)
-2. European Markets (Euro Stoxx, DAX, FTSE)
-3. Asian Markets (Shanghai, Nikkei, Hang Seng)
-4. Key Economic Data (inflation, employment, GDP, central bank decisions)
-5. Major Corporate News (earnings, M&A, product launches)
-6. Geopolitical Events (if market-relevant)
+=====================================================
+REAL-WORLD PERFORMANCE DATA (MANDATORY GROUND TRUTH):
+=====================================================
+- PORTFOLIO OVERALL MONTHLY RESULT: {port_monthly_str}
+- BENCHMARKS THIS MONTH (MTD):
+  * S&P 500 ($SPX500): {spx_mtd:+.2f}%
+  * Nasdaq 100 ($NSDQ100): {ndx_mtd:+.2f}%
+  * Euro Stoxx 50 ($EUSTX50): {eustx_mtd:+.2f}%
+- PORTFOLIO BEST PERFORMERS OF THE MONTH: {top_winners_str}
+- PORTFOLIO BIGGEST DECLINES OF THE MONTH: {top_losers_str}
+- PORTFOLIO TICKERS IN FOCUS:
+{ticker_truth_str}
+=====================================================
+
+{tavily_grounding_section}
 
 {ticker_notes}
 
 PORTFOLIO CONTEXT:
-These are the tickers in the portfolio you should focus on for the PORTFOLIO IMPACT section:
+These are the tickers in the portfolio:
 {portfolio_context}
+
+CRITICAL RULES — ABSOLUTE FACTUAL INTEGRITY REQUIRED:
+1. STRICT DIRECTION COMPLIANCE:
+   - For ANY stock or asset with a NEGATIVE monthly change (< 0%):
+     You MUST describe its performance as a decline, loss, drop, consolidation, pullback, or facing headwinds.
+     IT IS STRICTLY FORBIDDEN to describe a negative stock as a "rally", "gain", "rose", "slancio", or having positive price momentum!
+   - For stocks with a POSITIVE monthly change (> 0%): Describe them accurately as having gained.
+2. BENCHMARK NUMBERS:
+   - S&P 500 performance this month was {spx_mtd:+.2f}%. DO NOT claim it surged by a different percentage!
+3. CENTRAL BANK RATES & INFLATION:
+   - Rely EXCLUSIVELY on the verified news provided above. Do NOT guess or invent interest rate decisions!
 
 Structure your response in TWO sections with a TOPIC-BASED FORMAT:
 
 1. 🌍 MONTHLY MARKET OVERVIEW
 Organize this section into MAX 3 MAJOR TOPICS/THEMES that defined {current_month}.
 For each topic:
-- Use 3 relevant emojis at the start (e.g., 🏛️💵🔔 for Fed decisions, 📊📈💹 for market trends, etc.)
+- Use 3 relevant emojis at the start
 - Write the topic title
-- Write a 2-3 sentence summary with specific data points
+- Write a 2-3 sentence factual summary with specific data points from the verified ground truth
 - IMPORTANT: Do NOT use any $ tags in this section
-
-Example format:
-🏛️💵🔔 Fed Rate Decision
-The Federal Reserve cut rates by 25bps to 4.25-4.50%, signaling a more dovish stance...
 
 2. 💼 PORTFOLIO IMPACT & OUTLOOK
 Organize this section into MAX 5 TOPICS showing how the month's events impacted PORTFOLIO STOCKS listed above.
 IMPORTANT: Focus EXCLUSIVELY on the tickers from the portfolio context provided above.
 For each topic, if you have available tags from this list: {selected_tags_str}:
-- Use 3 relevant emojis + $TAG (e.g., 🤖💡🚀 $NVDA)
-- Write a 2-3 sentence summary about impact and outlook
+- Use 3 relevant emojis + $TAG
+- Write a 2-3 sentence summary about real impact and outlook (respecting the ground truth direction)
 - If no tags available, just use emojis without tags
 {tag_instruction}
-
-Example format (when tag is available):
-🤖💡🚀 $NVDA
-NVIDIA's new AI chip announcement drove 15% gains this month. Looking ahead to strong Q1 earnings...
 
 STRICT LIMITS:
 - MAXIMUM 3 topics for MARKET OVERVIEW, 5 for PORTFOLIO IMPACT (total 8 topics max)
@@ -1229,175 +1421,130 @@ STRICT LIMITS:
 - Use $ prefix ONLY for the allowed tags listed above
 - Focus on HIGH-IMPACT events that shaped the month
 - Total character count must stay under 2200 for this AI section
-- FOCUS ON PORTFOLIO TICKERS in the Portfolio Impact section
 
 Output format:
 🌍 MONTHLY MARKET OVERVIEW
 
 [emoji emoji emoji] Topic Title
-Brief summary with data points...
+Factual summary with data points...
 
 [emoji emoji emoji] Topic Title
-Brief summary with data points...
+Factual summary with data points...
 
 💼 PORTFOLIO IMPACT & OUTLOOK
 
-[emoji emoji emoji] $TAG (if available)
-Impact and outlook summary...
+[emoji emoji emoji] $TAG
+Factual impact and outlook summary...
 
 [emoji emoji emoji] Topic Title
-Impact and outlook summary...
+Factual impact and outlook summary...
 """
-        
-        print(f"🤖 Generating monthly AI recap for {current_month}...")
-        print(f"   Selected tags: {selected_tags_str}")
-        
-        # Configure with search tool
-        config = None
+
+    print(f"🤖 Generating monthly AI recap for {current_month}...")
+    print(f"   Selected tags: {selected_tags_str}")
+
+    recap_text = ""
+
+    # Strategy A: Try Gemini models first
+    if GENAI_AVAILABLE and api_key:
+        client = None
         try:
-            config = types.GenerateContentConfig(
-                tools=[types.Tool(google_search=types.GoogleSearch())],
-                temperature=0.7
-            )
-        except Exception as config_err:
-            print(f"⚠️ Search tool unavailable: {config_err}")
-            config = types.GenerateContentConfig(temperature=0.7)
-        
-        # Try models
-        for model_name in models_to_try:
+            client = genai.Client(api_key=api_key)
+        except Exception as e:
+            print(f"⚠️ Could not initialize Gemini client: {e}")
+
+        if client:
+            config = None
             try:
-                print(f"   Trying model: {model_name}...")
-                
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=prompt,
-                    config=config
+                config = types.GenerateContentConfig(
+                    tools=[types.Tool(google_search=types.GoogleSearch())],
+                    temperature=0.4
                 )
-                
-                if response and response.text:
-                    print(f"✅ Monthly recap generated using {model_name}!")
-                    recap_text = response.text.strip()
-                    
-                    # Log successful API usage
+            except Exception as config_err:
+                print(f"⚠️ Search tool unavailable: {config_err}")
+                config = types.GenerateContentConfig(temperature=0.4)
+
+            for model_name in models_to_try:
+                try:
+                    print(f"   Trying model: {model_name}...")
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=config
+                    )
+                    if response and response.text:
+                        candidate = response.text.strip()
+                        is_valid, reason = _validate_monthly_recap_coherence(candidate, ticker_directions)
+                        if not is_valid:
+                            print(f"   ⚠️ Candidate from {model_name} failed coherence check: {reason}")
+                        else:
+                            print(f"✅ Monthly recap generated using {model_name}!")
+                            if API_TRACKER_AVAILABLE:
+                                log_api_request(model_name, True, "monthly_recap")
+                            recap_text = candidate
+                            break
+                    else:
+                        print(f"⚠️ Empty response from {model_name}")
+                        continue
+                except Exception as model_error:
+                    error_msg = str(model_error).lower()
+                    print(f"⚠️ Model {model_name} failed: {model_error}")
                     if API_TRACKER_AVAILABLE:
-                        log_api_request(model_name, True, "monthly_recap")
-                    
-                    # Post-process: remove intro text and tags from overview section
-                    recap_text = _remove_intro_text(recap_text)
-                    recap_text = _remove_market_section_tags(recap_text)
-                    
-                    # Limit tags
-                    recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
-                    
-                    # Translate English → Italian (higher quality than direct Italian generation)
-                    recap_text = _translate_monthly_recap_to_italian(recap_text, client)
-                    
-                    return "\n" + recap_text + "\n"
-                else:
-                    print(f"⚠️  Empty response from {model_name}")
-                    continue
-                    
-            except Exception as model_error:
-                error_msg = str(model_error).lower()
-                print(f"⚠️  Model {model_name} failed: {model_error}")
-                if API_TRACKER_AVAILABLE:
-                    log_api_request(model_name, False, "monthly_recap")
-                
-                # Quota / rate limit (429) backoff
-                if '429' in error_msg or 'quota' in error_msg or 'resource_exhausted' in error_msg:
-                    # If tools were active, the 429 may be specifically on Google Search tool.
-                    # Attempt generation with this same model without tools first before cascading.
-                    if config and getattr(config, 'tools', None):
-                        print(f"   ℹ️ Model {model_name} search tool rate-limited (429), trying without search tool...")
+                        log_api_request(model_name, False, "monthly_recap")
+
+                    # If 429 quota exhausted or tool error, try direct without tools
+                    if ('429' in error_msg or 'quota' in error_msg or 'resource_exhausted' in error_msg) and config and getattr(config, 'tools', None):
                         try:
                             time.sleep(2.0)
                             response = client.models.generate_content(
                                 model=model_name,
                                 contents=prompt,
-                                config=types.GenerateContentConfig(temperature=0.7)
+                                config=types.GenerateContentConfig(temperature=0.4)
                             )
                             if response and response.text:
-                                print(f"✅ Monthly recap generated using {model_name} (direct, no tools)!")
-                                if API_TRACKER_AVAILABLE:
-                                    log_api_request(model_name, True, "monthly_recap")
-                                recap_text = response.text.strip()
-                                recap_text = _remove_intro_text(recap_text)
-                                recap_text = _remove_market_section_tags(recap_text)
-                                recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
-                                recap_text = _translate_monthly_recap_to_italian(recap_text, client)
-                                return "\n" + recap_text + "\n"
-                        except Exception as e_notools:
-                            print(f"   Direct attempt without tools also failed: {e_notools}")
-
-                    print(f"   ⏳ Model {model_name} quota/rate limited (429). Waiting 6s before cascading...")
-                    time.sleep(6.0)
+                                candidate = response.text.strip()
+                                is_valid, _ = _validate_monthly_recap_coherence(candidate, ticker_directions)
+                                if is_valid:
+                                    print(f"✅ Monthly recap generated using {model_name} (direct, no tools)!")
+                                    if API_TRACKER_AVAILABLE:
+                                        log_api_request(model_name, True, "monthly_recap")
+                                    recap_text = candidate
+                                    break
+                        except Exception:
+                            pass
                     continue
 
-                # 503 UNAVAILABLE — retry with 10-minute intervals up to 5 times
-                if '503' in error_msg or 'unavailable' in error_msg:
-                    max_503_retries = 5
-                    retry_wait_secs = 600
-                    succeeded = False
-                    for attempt in range(1, max_503_retries + 1):
-                        print(f"   503 on {model_name} (retry {attempt}/{max_503_retries}), waiting {retry_wait_secs}s...")
-                        time.sleep(retry_wait_secs)
-                        try:
-                            response = client.models.generate_content(
-                                model=model_name,
-                                contents=prompt,
-                                config=config
-                            )
-                            if response and response.text:
-                                print(f"✅ Monthly recap generated (after 503 retry {attempt}) using {model_name}!")
-                                if API_TRACKER_AVAILABLE:
-                                    log_api_request(model_name, True, "monthly_recap")
-                                recap_text = response.text.strip()
-                                recap_text = _remove_intro_text(recap_text)
-                                recap_text = _remove_market_section_tags(recap_text)
-                                recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
-                                recap_text = _translate_monthly_recap_to_italian(recap_text, client)
-                                succeeded = True
-                                return "\n" + recap_text + "\n"
-                        except Exception as e2:
-                            retry_msg = str(e2).lower()
-                            if '503' not in retry_msg and 'unavailable' not in retry_msg:
-                                print(f"   Non-503 error on 503-retry {attempt}: {e2}")
-                                break
-                    if not succeeded:
-                        last_error = model_error
-                    continue
-                
-                time.sleep(2)
-                
-                # Try without tools if not supported (exclude 404 NOT_FOUND from this branch)
-                is_tool_issue = ('not supported' in error_msg or 'invalid' in error_msg) and '404' not in error_msg
-                if is_tool_issue:
-                    try:
-                        response = client.models.generate_content(
-                            model=model_name,
-                            contents=prompt
-                        )
-                        if response and response.text:
-                            print(f"✅ Monthly recap generated (no tools) using {model_name}!")
-                            if API_TRACKER_AVAILABLE:
-                                log_api_request(model_name, True, "monthly_recap")
-                            recap_text = response.text.strip()
-                            recap_text = _remove_intro_text(recap_text)
-                            recap_text = _remove_market_section_tags(recap_text)
-                            recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
-                            recap_text = _translate_monthly_recap_to_italian(recap_text, client)
-                            return "\n" + recap_text + "\n"
-                    except Exception as e2:
-                        print(f"   Retry failed: {e2}")
-                
-                continue
-        
+    # Strategy B: Fallback to Groq or Mistral if Gemini failed or was rate-limited
+    if not recap_text:
+        print("   ℹ️ Gemini unavailable or rate-limited. Falling back to Groq / Mistral for monthly recap generation...")
+        recap_text = _generate_text_with_groq_or_mistral(
+            prompt=prompt,
+            system_prompt="You are a senior financial analyst. Output ONLY factual market recaps strictly adhering to the ground truth data provided."
+        ) or ""
+
+    if not recap_text:
         print("❌ All models failed for monthly recap")
         return ""
-        
-    except Exception as e:
-        print(f"❌ Error generating monthly recap: {e}")
-        return ""
+
+    # Post-process
+    recap_text = _remove_intro_text(recap_text)
+    recap_text = _remove_market_section_tags(recap_text)
+    recap_text = _limit_tags_in_text(recap_text, selected_tags, MAX_TAGS_PER_POST)
+
+    # Translate English → Italian (via Groq -> Mistral -> Gemini cascade)
+    translated_text = _translate_monthly_recap_to_italian(recap_text, client=client if 'client' in locals() else None)
+
+    # Auto-repair any remaining contradictory phrasing in translated Italian
+    final_text = _repair_monthly_contradictions(translated_text, ticker_directions)
+
+    # Final coherence verification
+    is_valid, reason = _validate_monthly_recap_coherence(final_text, ticker_directions)
+    if not is_valid:
+        print(f"⚠️ Warning after translation and repair: {reason}")
+    else:
+        print("✅ Monthly recap passed all factual coherence checks!")
+
+    return "\n" + final_text + "\n"
 
 
 def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, market_session=None, stock_data=None):

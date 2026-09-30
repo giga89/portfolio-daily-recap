@@ -258,7 +258,13 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     # Use monthly AI recap for monthly sessions, daily for others
     if is_monthly:
         print(f"Generating monthly AI recap (Budget for tags: {tag_budget_remaining})...")
-        ai_news = ai_news_generator.generate_monthly_ai_recap(max_tags=tag_budget_remaining, excluded_tags=current_exclusions)
+        ai_news = ai_news_generator.generate_monthly_ai_recap(
+            max_tags=tag_budget_remaining, 
+            excluded_tags=current_exclusions,
+            stock_data=stock_data,
+            benchmark_data=benchmark_data,
+            portfolio_monthly=portfolio_monthly
+        )
     else:
         print(f"Generating AI market news (Budget for tags: {tag_budget_remaining}, Session: {market_session})...")
         ai_news = ai_news_generator.generate_market_news_recap(

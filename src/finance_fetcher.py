@@ -749,3 +749,35 @@ def fetch_benchmarks_performance(start_date='2020-01-01'):
                 print(f"   ⚠️ No valid data for {col}")
             
     return bench_data
+
+
+def fetch_benchmarks_monthly_performance():
+    """
+    Fetch real Month-To-Date (MTD) performance for all configured benchmarks.
+    Returns a dictionary of monthly percentage returns for each benchmark, e.g.:
+    {'SPX500': 0.26, 'NSDQ100': 1.15, ...}
+    """
+    now = datetime.now()
+    month_start = f"{now.year}-{now.month:02d}-01"
+    print(f"📈 Fetching benchmark monthly performance since {month_start}...")
+    bench_data = {}
+    
+    for etoro_ticker, yahoo_ticker in BENCHMARKS.items():
+        try:
+            stock = yf.Ticker(yahoo_ticker)
+            hist = stock.history(start=month_start)
+            if not hist.empty and len(hist) >= 2:
+                start_p = hist['Close'].iloc[0]
+                end_p = hist['Close'].iloc[-1]
+                mtd_return = ((end_p - start_p) / start_p) * 100
+                bench_data[etoro_ticker] = round(float(mtd_return), 2)
+                print(f"   {etoro_ticker} MTD: {bench_data[etoro_ticker]:+.2f}%")
+            elif not hist.empty and len(hist) == 1:
+                bench_data[etoro_ticker] = 0.0
+            else:
+                bench_data[etoro_ticker] = 0.0
+        except Exception as e:
+            print(f"   ❌ Error fetching monthly benchmark for {etoro_ticker}: {e}")
+            bench_data[etoro_ticker] = 0.0
+            
+    return bench_data
