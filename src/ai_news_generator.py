@@ -1215,11 +1215,12 @@ def _repair_monthly_contradictions(text: str, ticker_directions: dict) -> str:
     lines = text.split('\n')
     new_lines = []
     for line in lines:
+        line_lower = line.lower()
         for ticker, m_change in ticker_directions.items():
             if m_change is not None and m_change < -0.5:
                 clean_ticker = ticker.replace('$', '').strip()
                 base_ticker = clean_ticker.split('.')[0]
-                if clean_ticker.lower() in line.lower() or (len(base_ticker) >= 3 and base_ticker.lower() in line_lower):
+                if clean_ticker.lower() in line_lower or (len(base_ticker) >= 3 and base_ticker.lower() in line_lower):
                     line = re.sub(r'\bha registrato un (?:forte )?rialzo\b', 'ha subito una correzione', line, flags=re.IGNORECASE)
                     line = re.sub(r'\bha registrato un (?:forte )?rally\b', 'ha registrato una flessione', line, flags=re.IGNORECASE)
                     line = re.sub(r'\bguadagnando il\b', 'cedendo il', line, flags=re.IGNORECASE)
