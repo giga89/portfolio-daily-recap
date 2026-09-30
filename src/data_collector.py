@@ -32,24 +32,45 @@ def _fetch_etoro_current_month_gain():
     try:
         import etoro_client
         if not etoro_client.is_configured():
+            print("⚠️  _fetch_etoro_current_month_gain: etoro_client not configured")
             return None
-        gain_history = etoro_client.fetch_gain_history(granularity="monthly")
-        if not gain_history:
-            return None
+
         from datetime import datetime
         now = datetime.now()
         current_year = now.year
         current_month = now.month
         target_prefix = f"{current_year}-{current_month:02d}"
-        for entry in gain_history:
-            date_str = str(entry.get('date', ''))
-            if date_str.startswith(target_prefix):
-                gain = float(entry.get('gain', 0.0))
-                return gain
+
+        # Strategy 1: fetch_gain_history monthly array
+        gain_history = etoro_client.fetch_gain_history(granularity="monthly")
+        if gain_history:
+            print(f"   📋 gain_history entries: {len(gain_history)}")
+            # Log the last 3 entries to see date format
+            for entry in gain_history[-3:]:
+                print(f"      sample entry: date={entry.get('date','?')} gain={entry.get('gain','?')}")
+            for entry in gain_history:
+                date_str = str(entry.get('date', ''))
+                if date_str.startswith(target_prefix):
+                    gain = float(entry.get('gain', 0.0))
+                    print(f"✓ eToro real monthly gain (gain_history): {gain:+.2f}% (date: {date_str})")
+                    return gain
+            print(f"⚠️  No entry found for prefix '{target_prefix}' in gain_history")
+
+        # Strategy 2: fetch_trader_rankings with period=CurrMonth
+        print("   Trying fetch_trader_rankings(period='CurrMonth')...")
+        rankings = etoro_client.fetch_trader_rankings(period="CurrMonth")
+        if rankings and "gain" in rankings:
+            gain_val = float(rankings["gain"]) * 100.0
+            print(f"✓ eToro real monthly gain (rankings CurrMonth): {gain_val:+.2f}%")
+            return gain_val
+
         return None
     except Exception as e:
         print(f"⚠️  _fetch_etoro_current_month_gain error: {e}")
+        import traceback
+        traceback.print_exc()
         return None
+
 
 
 def main():
