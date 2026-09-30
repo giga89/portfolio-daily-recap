@@ -949,15 +949,16 @@ def update_rotation_history(new_tags):
         print(f"⚠️ Error updating tag rotation: {e}")
 
 
-def _translate_monthly_recap_to_italian(english_text: str, client) -> str:
+def _translate_monthly_recap_to_italian(english_text: str, client=None) -> str:
     """
-    Translate a monthly recap from English to Italian using Gemini.
-    Preserves emojis, $TICKER cashtags, section headers, and formatting exactly.
-    Falls back to original English text if translation fails.
+    Translate a monthly recap from English to Italian.
+    Provider cascade: Groq (primary, free tier) → Mistral → Gemini (tertiary).
+    Validates translation quality before accepting (tag preservation, length, language).
+    Falls back to original English text if all providers fail.
 
     Args:
         english_text: The English monthly recap text.
-        client: An initialized genai.Client instance.
+        client: An initialized genai.Client instance (used as tertiary fallback).
 
     Returns:
         str: Italian-translated text, or original English text on failure.
@@ -965,45 +966,147 @@ def _translate_monthly_recap_to_italian(english_text: str, client) -> str:
     if not english_text or not english_text.strip():
         return english_text
 
+    # Extract $TICKER tags from original to validate they're preserved
+    import re as _re
+    original_tags = set(_re.findall(r'\$[A-Z0-9]+(?:\.[A-Z]+)?', english_text))
+
     translate_prompt = f"""Translate the following financial market recap from English to Italian.
 
 STRICT RULES:
 1. Preserve ALL emojis exactly as-is, in the same positions.
 2. Preserve ALL $TICKER cashtags exactly (e.g. $NVDA, $WDEF.L, $SPX500) — do NOT translate or modify them.
-3. Preserve section headers (🌍 MONTHLY MARKET OVERVIEW → 🌍 PANORAMICA MENSILE DEL MERCATO; 💼 PORTFOLIO IMPACT & OUTLOOK → 💼 IMPATTO SUL PORTAFOGLIO & PROSPETTIVE).
+3. Translate section headers: "🌍 MONTHLY MARKET OVERVIEW" → "🌍 PANORAMICA MENSILE DEL MERCATO"; "💼 PORTFOLIO IMPACT & OUTLOOK" → "💼 IMPATTO SUL PORTAFOGLIO & PROSPETTIVE".
 4. Use natural, fluent financial Italian — not word-for-word literal translation.
-5. Keep proper nouns in their standard form: "Federal Reserve" stays "Federal Reserve", "Nasdaq" stays "Nasdaq", etc.
+5. Keep proper nouns as-is: "Federal Reserve", "Nasdaq", "S&P 500", "Nikkei", etc.
 6. Output ONLY the translated text — no preamble, no explanation, no markdown code blocks.
 7. Keep the same paragraph structure and line breaks.
 
 TEXT TO TRANSLATE:
 {english_text}"""
 
-    for model_name in DEFAULT_GEMINI_MODELS:
-        try:
-            _throttle_request(1.5)
-            response = client.models.generate_content(
-                model=model_name,
-                contents=translate_prompt,
-                config=types.GenerateContentConfig(temperature=0.3),
-            )
-            if response and response.text:
-                translated = response.text.strip()
-                if len(translated) > 50:
-                    print(f"🇮🇹 Monthly recap translated to Italian using {model_name}")
-                    if API_TRACKER_AVAILABLE:
-                        log_api_request(model_name, True, "monthly_recap_translate")
-                    return translated
-        except Exception as e:
-            err = str(e).lower()
-            if API_TRACKER_AVAILABLE:
-                log_api_request(model_name, False, "monthly_recap_translate")
-            if '429' in err or 'quota' in err or 'resource_exhausted' in err:
-                time.sleep(3.0)
-            continue
+    def _validate_translation(translated: str) -> bool:
+        """Check translation quality: length ratio, tag preservation, not still English."""
+        if len(translated) < 80:
+            return False
+        # Length must be at least 60% of original (not truncated)
+        ratio = len(translated) / max(len(english_text), 1)
+        if ratio < 0.6 or ratio > 2.5:
+            print(f"   ⚠️ Translation length ratio {ratio:.2f} out of range (0.6–2.5), rejecting.")
+            return False
+        # All original $TICKER tags must still be present
+        missing = [t for t in original_tags if t not in translated]
+        if missing:
+            print(f"   ⚠️ Missing $TICKER tags in translation: {missing}, rejecting.")
+            return False
+        # Sanity: at least some Italian words present (crude but effective)
+        italian_markers = ['il ', 'la ', 'del ', 'dei ', 'nel ', 'per ', 'che ', 'con ', 'ha ', 'sono ', 'di ', 'le ']
+        found = sum(1 for m in italian_markers if m in translated.lower())
+        if found < 3:
+            print(f"   ⚠️ Translation doesn't look Italian (only {found}/12 IT markers), rejecting.")
+            return False
+        return True
 
-    print("⚠️ Translation to Italian failed, keeping English version as fallback.")
+    import requests as _requests
+
+    # ── Provider 1: Groq (free tier, ultra-fast LPUs) ────────────────────────
+    groq_key = os.environ.get("GROQ_API_KEY")
+    if groq_key:
+        groq_models = ["qwen/qwen3.8-27b", "openai/gpt-oss-120b"]
+        groq_url = "https://api.groq.com/openai/v1/chat/completions"
+        groq_headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
+        for model in groq_models:
+            try:
+                payload = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": "You are a professional financial Italian translator. Output ONLY the translated text, nothing else."},
+                        {"role": "user", "content": translate_prompt},
+                    ],
+                    "temperature": 0.2,
+                    "max_tokens": 2000,
+                }
+                resp = _requests.post(groq_url, headers=groq_headers, json=payload, timeout=15)
+                if resp.status_code == 200:
+                    translated = resp.json()["choices"][0]["message"]["content"].strip()
+                    if _validate_translation(translated):
+                        print(f"🇮🇹 Monthly recap translated to Italian via Groq ({model})")
+                        if API_TRACKER_AVAILABLE:
+                            log_api_request(f"groq:{model}", True, "monthly_recap_translate")
+                        return translated
+                elif resp.status_code == 429:
+                    print(f"   ⚠️ Groq {model} rate limited (429), trying next...")
+                    continue
+                else:
+                    print(f"   ⚠️ Groq {model} HTTP {resp.status_code}")
+            except Exception as e:
+                print(f"   ⚠️ Groq {model} exception: {e}")
+                continue
+    else:
+        print("   ℹ️ GROQ_API_KEY not set, skipping Groq translation.")
+
+    # ── Provider 2: Mistral ───────────────────────────────────────────────────
+    mistral_key = os.environ.get("MISTRAL_API_KEY")
+    if mistral_key:
+        mistral_models = ["codestral-latest", "ministral-8b-latest"]
+        mistral_url = "https://api.mistral.ai/v1/chat/completions"
+        mistral_headers = {"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"}
+        for model in mistral_models:
+            try:
+                payload = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": "You are a professional financial Italian translator. Output ONLY the translated text, nothing else."},
+                        {"role": "user", "content": translate_prompt},
+                    ],
+                    "temperature": 0.2,
+                }
+                resp = _requests.post(mistral_url, headers=mistral_headers, json=payload, timeout=15)
+                if resp.status_code == 200:
+                    translated = resp.json()["choices"][0]["message"]["content"].strip()
+                    if _validate_translation(translated):
+                        print(f"🇮🇹 Monthly recap translated to Italian via Mistral ({model})")
+                        if API_TRACKER_AVAILABLE:
+                            log_api_request(f"mistral:{model}", True, "monthly_recap_translate")
+                        return translated
+                elif resp.status_code == 429:
+                    print(f"   ⚠️ Mistral {model} rate limited (429), skipping Mistral.")
+                    break
+                else:
+                    print(f"   ⚠️ Mistral {model} HTTP {resp.status_code}")
+            except Exception as e:
+                print(f"   ⚠️ Mistral {model} exception: {e}")
+                continue
+    else:
+        print("   ℹ️ MISTRAL_API_KEY not set, skipping Mistral translation.")
+
+    # ── Provider 3: Gemini (tertiary) ─────────────────────────────────────────
+    if client is not None and GENAI_AVAILABLE:
+        for model_name in DEFAULT_GEMINI_MODELS:
+            try:
+                _throttle_request(1.5)
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=translate_prompt,
+                    config=types.GenerateContentConfig(temperature=0.3),
+                )
+                if response and response.text:
+                    translated = response.text.strip()
+                    if _validate_translation(translated):
+                        print(f"🇮🇹 Monthly recap translated to Italian via Gemini ({model_name})")
+                        if API_TRACKER_AVAILABLE:
+                            log_api_request(model_name, True, "monthly_recap_translate")
+                        return translated
+            except Exception as e:
+                err = str(e).lower()
+                if API_TRACKER_AVAILABLE:
+                    log_api_request(model_name, False, "monthly_recap_translate")
+                if '429' in err or 'quota' in err or 'resource_exhausted' in err:
+                    time.sleep(3.0)
+                continue
+
+    print("⚠️ All translation providers failed — keeping English version as fallback.")
     return english_text
+
 
 
 def generate_monthly_ai_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None):
