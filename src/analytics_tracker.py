@@ -468,33 +468,21 @@ def load_portfolio_weights() -> Dict[str, float]:
         except Exception:
             pass
 
-    from_cache = False
     if not weights and os.path.exists(PORTFOLIO_WEIGHTS_FILE):
         try:
             with open(PORTFOLIO_WEIGHTS_FILE, "r", encoding="utf-8") as f:
                 weights = json.load(f)
-                from_cache = True
         except Exception as e:
             print(f"⚠️ Error reading {PORTFOLIO_WEIGHTS_FILE}: {e}")
 
     PURGED_ASSETS = {"XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD"}
     weights = {k: v for k, v in weights.items() if k not in PURGED_ASSETS}
 
-    if weights and not from_cache:
+    if weights:
         try:
-            clean_weights = {k: round(float(v), 2) for k, v in sorted(weights.items())}
-            should_write = True
-            if os.path.exists(PORTFOLIO_WEIGHTS_FILE):
-                try:
-                    with open(PORTFOLIO_WEIGHTS_FILE, "r", encoding="utf-8") as f:
-                        if json.load(f) == clean_weights:
-                            should_write = False
-                except Exception:
-                    pass
-            if should_write:
-                os.makedirs(os.path.dirname(PORTFOLIO_WEIGHTS_FILE), exist_ok=True)
-                with open(PORTFOLIO_WEIGHTS_FILE, "w", encoding="utf-8") as f:
-                    json.dump(clean_weights, f, indent=2, sort_keys=True)
+            os.makedirs(os.path.dirname(PORTFOLIO_WEIGHTS_FILE), exist_ok=True)
+            with open(PORTFOLIO_WEIGHTS_FILE, "w", encoding="utf-8") as f:
+                json.dump(weights, f, indent=2)
         except Exception:
             pass
 
