@@ -21,3 +21,6 @@ output/recap.txt
 etoro-engagement-bot/
 tests/test_engagement_bot_topic_comments.py
 NoteGPT_Riepilogo_Memorie_filiera_AI.md
+
+# Local cache files
+data/portfolio_weights.json

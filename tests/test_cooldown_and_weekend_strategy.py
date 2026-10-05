@@ -136,7 +136,9 @@ class TestCooldownAndWeekendStrategy(unittest.TestCase):
 
     def test_dynamic_portfolio_weights_and_allocations(self):
         """Verify that weights normalize to 100% and dynamic allocation distributions sum to 100%."""
-        weights = analytics_tracker.load_portfolio_weights()
+        with patch("finance_fetcher.fetch_portfolio_weights_from_bullaware", return_value=None), \
+             patch("etoro_client.fetch_portfolio_weights", return_value=None):
+            weights = analytics_tracker.load_portfolio_weights()
         self.assertTrue(len(weights) >= 40)
         total_w = sum(weights.values())
         self.assertAlmostEqual(total_w, 100.0, delta=0.1, msg="Portfolio weights must sum to 100%")
