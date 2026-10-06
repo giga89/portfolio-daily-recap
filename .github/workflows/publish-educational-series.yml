@@ -1,0 +1,80 @@
+name: Publish Educational Series to eToro
+
+on:
+  # ── Weekly automated schedule: Wednesday 12:30 UTC (= 14:30 CET / Italian Time) ──
+  schedule:
+    - cron: '30 12 * * 3'
+  workflow_dispatch:
+    inputs:
+      episode:
+        description: 'Episode number to publish (auto = next in rotation, or 1 to 20)'
+        required: false
+        default: 'auto'
+      dry_run:
+        description: 'Dry run mode (verify image & copy without publishing to eToro)'
+        required: false
+        type: boolean
+        default: false
+      force_run:
+        description: 'Bypass same-day run check and force publish'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  publish-educational:
+    runs-on: ubuntu-latest
+    environment: Etoro
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Educational Series Publisher
+        env:
+          ETORO_USER_KEY: ${{ secrets.ETORO_USER_KEY }}
+          ETORO_API_KEY: ${{ secrets.ETORO_API_KEY }}
+          ETORO_USERNAME: ${{ secrets.ETORO_USERNAME }}
+          GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          INPUT_EPISODE: ${{ inputs.episode || 'auto' }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          INPUT_FORCE_RUN: ${{ inputs.force_run }}
+        run: |
+          CMD="python src/educational_series_publisher.py --publish"
+          if [ "$INPUT_EPISODE" != "auto" ] && [ -n "$INPUT_EPISODE" ]; then
+            CMD="$CMD --episode $INPUT_EPISODE"
+          fi
+          if [ "$INPUT_DRY_RUN" = "true" ]; then
+            CMD="$CMD --dry-run"
+          fi
+          if [ "$INPUT_FORCE_RUN" = "true" ]; then
+            CMD="$CMD --force"
+          fi
+          echo "Executing: $CMD"
+          eval $CMD
+
+      - name: Persist local state if changed
+        if: inputs.dry_run != true
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/educational_series_state.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No local state changes to commit."
+          else
+            git commit -m "chore(series): record educational series episode publication [skip ci]"
+            git push origin main || echo "Git push skipped or branch protected"
+          fi

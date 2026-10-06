@@ -1,0 +1,502 @@
+[
+  {
+    "episode": 1,
+    "title": "L'EROSIONE SILENZIOSA DELLA LIQUIDITÀ",
+    "subtitle": "10.000€ sul conto corrente nel 2014 oggi hanno perso oltre il 22% del loro potere d'acquisto reale.",
+    "palette": "cyan",
+    "tickers": ["IB01", "AMZN", "RACE"],
+    "pillars": [
+      {
+        "label": "IL FATTO STORICO",
+        "highlight": "-22% POTERE REALE",
+        "text": "L'inflazione è una tassa invisibile che non fa rumore. Lasciare il capitale fermo in banca garantisce matematicamente una perdita di valore anno dopo anno."
+      },
+      {
+        "label": "LA FALSA SICUREZZA",
+        "highlight": "ZERO RISCHIO = ILLUSIONE",
+        "text": "Molti credono che non investire equivalga a 'zero rischio'. In realtà è l'unico investimento con certezza di perdita al 100% del potere d'acquisto."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "CASSA ATTIVA + PRICING POWER",
+        "text": "Anche la cassa viene messa al lavoro con Treasury $IB01, uniti ad asset difensivi e pricing power globale ($AMZN, $RACE) capaci di battere l'inflazione."
+      }
+    ],
+    "post_content": "Tenere 20.000€ sul conto corrente non è prudenza: è una perdita certa al 100%.\n\nSpesso sento dire: \"Preferisco tenere i soldi sul conto, almeno sono al sicuro e non rischio di vederli scendere\".\nMa i numeri storici raccontano una verità completamente diversa:\n\n📉 10.000€ lasciati sul conto corrente nel 2014 oggi hanno un potere d'acquisto reale di poco più di 7.800€. Nessun crollo di borsa, nessuna rapina: semplicemente l'inflazione ha eroso oltre un quinto del tuo lavoro.\n\nLa liquidità ferma non protegge il tuo capitale: lo condanna a una svalutazione silenziosa ogni singolo giorno.\n\n🛡️ COME CI DIFENDIAMO NEL NOSTRO PORTAFOGLIO:\nNel mio portafoglio non lasciamo liquidità improduttiva. Anche la componente prudenziale è allocata su strumenti a brevissimo termine come i Treasury $IB01 che generano rendimento monetario attivo, mentre il motore di crescita è affidato ad aziende con 'pricing power' assoluto — come $AMZN e $RACE — capaci di alzare i prezzi senza perdere clienti.\n\n💬 DOMANDA PER VOI:\nQuanti mesi di spese mantenete liquidi sul conto prima di investire il resto? Ritenete più rischiosa la volatilità di breve termine dei mercati o la perdita invisibile dell'inflazione?\nScrivetemi la vostra opinione qui sotto! 👇\n\n👉 Segui e copia la strategia: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 2,
+    "title": "PETER LYNCH E LA SPESA AL SUPERMERCATO",
+    "subtitle": "I migliori investimenti non nascono nei report di Wall Street, ma nei prodotti che vedi usare ogni giorno.",
+    "palette": "emerald",
+    "tickers": ["LLY", "NOVO-B.CO", "ULVR"],
+    "pillars": [
+      {
+        "label": "LA LEZIONE DI LYNCH",
+        "highlight": "+29% ANNUO PER 13 ANNI",
+        "text": "Peter Lynch batteva i giganti di Wall Street osservando cosa faceva la folla nei negozi e quali abitudini quotidiane creavano fatturati indistruttibili."
+      },
+      {
+        "label": "IL PRICING POWER",
+        "highlight": "BENI INSOPPRIMIBILI",
+        "text": "Aziende con prodotti irrinunciabili possono aumentare i prezzi proteggendo i margini operativi indipendentemente dalla congiuntura economica."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "MONOPOLI SANITARI E CONSUMI",
+        "text": "Siamo esposti a colossi globali dei farmaci GLP-1 ($LLY, $NOVO-B.CO) e ai marchi indispensabili dei beni di largo consumo come $ULVR."
+      }
+    ],
+    "post_content": "Perché Peter Lynch batteva i migliori analisti di Wall Street andando a fare la spesa con sua moglie?\n\nTra il 1977 e il 1990, Peter Lynch ha generato un mostruoso +29.2% medio annuo alla guida del leggendario Fidelity Magellan Fund.\nIl suo segreto non era un algoritmo segreto: era l'osservazione del mondo reale.\n\n🛒 \"Investi in quello che capisci e vedi attorno a te\".\nLynch capì che quando un consumatore si innamora di un prodotto (dalle ciambelle di Dunkin' Donuts ai collant Hanes), i numeri aziendali rifletteranno quell'entusiasmo mesi prima che gli analisti di Wall Street se ne accorgano.\n\nNel mercato moderno, il principio resta identico: cerchiamo aziende che possiedono un monopolio pratico o prodotti che i clienti continueranno a comprare a prescindere da recessioni o tassi d'interesse.\n\n💊 NEL NOSTRO PORTAFOGLIO:\nEcco perché deteniamo posizioni strutturali nei giganti farmaceutici come $LLY ed $NOVO-B.CO — leader indiscussi nella rivoluzione dei trattamenti contro diabete e obesità con domanda globale insoddisfatta — e nella stabilità difensiva di $ULVR.\n\n💬 DIBATTITO APERTO:\nQuando valutate un titolo, vi fidate più dei multipli di bilancio (P/E, DCF) o della forza palpabile del brand e del monopolio di mercato?\nQual è un'azienda di cui oggi nessuno potrebbe fare a meno? Ditemelo nei commenti! 👇\n\n👉 Scopri l'allocazione completa sul mio profilo: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 3,
+    "title": "LA SCOMMESSA DA 1 MILIONE DI BUFFETT",
+    "subtitle": "Nel 2007 Buffett ha sfidato i migliori hedge fund di Wall Street su 10 anni. Il risultato è una pietra miliare.",
+    "palette": "gold",
+    "tickers": ["MSFT", "IEUR"],
+    "pillars": [
+      {
+        "label": "LA SFIDA DECENNALE",
+        "highlight": "+125.8% VS +36.3%",
+        "text": "Un banale indice a basso costo ha polverizzato un paniere di 5 sofisticati fondi speculativi guidati dai trader più pagati di Wall Street."
+      },
+      {
+        "label": "IL VERO NEMICO",
+        "highlight": "COMMISSIONI & OVERTRADING",
+        "text": "Commissioni di gestione esorbitanti (2% + 20%) e il tentativo costante di fare market timing finiscono per dissanguare i rendimenti del cliente."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "BASSO TURNOVER STRATEGICO",
+        "text": "Riduciamo l'attrito speculativo: lasciamo correre i campioni di crescita come $MSFT e combiniamo indici europei diversificati ($IEUR)."
+      }
+    ],
+    "post_content": "Nel 2007 Warren Buffett ha scommesso 1.000.000$ contro i gestori di fondi più pagati del mondo. Chi ha stravinto?\n\nLa sfida era semplice: Protégé Partners scelse un paniere di 5 fondi speculativi (Hedge Funds) ultra-selezionati, mentre Buffett scelse un semplice indice S&P 500 a bassissimo costo. Durata: 10 anni (2008-2017), attraverso la peggiore crisi finanziaria dal 1929.\n\n📊 Il risultato finale:\n• S&P 500 (Buffett): +125.8%\n• Media dei 5 Hedge Fund: +36.3%\n\nPerché professionisti pagati milioni all'anno hanno fatto peggio di un indice passivo? Per due ragioni:\n1. Le commissioni feroci: la classica formula '2% fisso + 20% di performance' mangia gran parte dei guadagni composti.\n2. L'over-trading: il tentativo continuo di prevedere i massimi e i minimi fa quasi sempre vendere prima e rientrare troppo tardi.\n\n🎯 LA NOSTRA FILOSOFIA SU ETORO:\nCostruiamo il portafoglio riducendo l'attrito: posizioni solide a basso turnover sui megatrend globali (come $MSFT) abbinate a indici efficienti come $IEUR. Nessuna scommessa a casaccio, ma disciplina matematica di lungo termine.\n\n💬 VOI COME LA PENSATE?\nNei prossimi 5 anni credete che farà meglio un approccio disciplinato e diversificato oppure il trading aggressivo intraday?\nConfrontiamoci qui sotto nei commenti! 👇\n\n👉 Segui la strategia trasparente: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 4,
+    "title": "IL PARADOSSO DEI MASSIMI STORICI",
+    "subtitle": "\"La borsa è ai massimi, aspetto il crollo per entrare\": la frase che fa perdere più denaro in assoluto.",
+    "palette": "ruby",
+    "tickers": ["NVDA", "GOOG", "TSM"],
+    "pillars": [
+      {
+        "label": "L'EVIDENZA DEI DATI",
+        "highlight": "+14.6% RENDIMENTO MEDIO",
+        "text": "Studi storici dimostrano che investire ai massimi storici genera a 1, 3 e 5 anni rendimenti statisticamente superiori a quelli nei giorni normali."
+      },
+      {
+        "label": "LA TRAPPOLA MENTALE",
+        "highlight": "ASPETTARE IL DIP COSTA CARO",
+        "text": "I bull market durano anni facendo decine di nuovi record; chi aspetta a bordo campo vede il treno allontanarsi del 40% prima di un ritraccio del 10%."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "RILANCI E QUALITÀ ASSOLUTA",
+        "text": "Leader come $NVDA, $GOOG e $TSM hanno segnato ripetuti record storici: restiamo esposti alla qualità invece di uscire per paura."
+      }
+    ],
+    "post_content": "La borsa è ai massimi: quanti di voi si sono detti \"Aspetto un ritraccio prima di investire\"?\n\nÈ la trappola psicologica più comune, ma la statistica dimostra l'esatto contrario:\n\n📈 Uno studio di JP Morgan sui dati dal 1970 evidenzia che investire quando l'indice tocca un nuovo Massimo Storico (All-Time High) ha prodotto un rendimento medio a un anno del +14.6%, contro l'11.7% dei giorni ordinari.\n\nPerché succede? Perché i mercati rialzisti non salgono per magia: riflettono la crescita degli utili, dell'innovazione tecnologica e della produttività. Un'azienda eccezionale che tocca un massimo oggi, con ottime probabilità continuerà a espandersi domani.\n\nChi resta liquido in attesa del crollo perfetto finisce per perdersi un rally del +30% o +40%, per poi farsi prendere dal panico e comprare quando i prezzi sono molto più alti.\n\n🤖 COSA FACCIAMO NOI:\nNon cerchiamo di indovinare quando i giganti come $NVDA, $GOOG o $TSM fermeranno la corsa. Manteniamo la barra dritta sui fondamentali e ribilanciamo con metodo, senza mai farci paralizzare dalla paura dei nuovi record.\n\n💬 DOMANDA PER LA COMMUNITY:\nQuando vedete un titolo di valore ai massimi storici, cosa fate? Entrate con un piano programmato o preferite aspettare alla finestra rischiando di perdere il treno?\nScrivetelo nei commenti! 👇\n\n👉 Profilo e posizioni in tempo reale: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 5,
+    "title": "CHARLIE MUNGER E I PRIMI 100.000$",
+    "subtitle": "\"I primi 100k sono una salita tremenda. Ma una volta superati, la fisica finanziaria inizia a lavorare per te.\"",
+    "palette": "violet",
+    "tickers": ["ETOR", "MSFT"],
+    "pillars": [
+      {
+        "label": "LA SOGLIA CRITICA",
+        "highlight": "LA FORZA DI GRAVITÀ CAMBIA",
+        "text": "Su 5.000€ un guadagno del 10% è appena 500€. Ma su 100.000€ quel medesimo 10% genera 10.000€ all'anno senza muovere un dito."
+      },
+      {
+        "label": "L'INTERESSE COMPOSTO",
+        "highlight": "CRESCITA ESPONENZIALE",
+        "text": "Nei primi anni conta quasi solo il risparmio e l'accumulo; negli anni successivi i guadagni generati dal capitale superano il risparmio stesso."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "STRATEGIA REINVESTITA",
+        "text": "Gestiamo il portafoglio su $ETOR puntando alla capitalizzazione progressiva e a colossi con free cash flow dominante come $MSFT."
+      }
+    ],
+    "post_content": "\"I primi 100.000 dollari sono un inferno. Stringete i denti, risparmiate ogni centesimo, ma arrivateci\".\n\nQuesta celebre frase di Charlie Munger (lo storico socio di Warren Buffett) racchiude una delle verità matematiche più importanti dell'educazione finanziaria:\n\n🚀 L'effetto valanga del capitale.\nQuando si inizia a investire con piccoli importi, i progressi sembrano lenti e frustranti. Se hai 3.000€ investiti e fai un eccellente +10% in un anno, guadagni 300€. Una cifra che non cambia la vita.\n\nMa guardate cosa accade man mano che il capitale cresce:\n• Su 100.000€, quel 10% vale 10.000€ (quasi un secondo stipendio).\n• Su 300.000€, vale 30.000€ all'anno.\n\nAll'inizio dell'avventura finanziaria, il 90% della crescita dipende dalla vostra disciplina di risparmio. Ma dopo aver superato la massa critica, è il rendimento composto a fare la parte del leone.\n\n💼 IL NOSTRO APPROCCIO:\nÈ per questo che il Copy Trading su $ETOR ha il massimo impatto se abbinato a versamenti periodici costanti. Rispettiamo la fisica degli investimenti lasciando maturare aziende dall'immensa generazione di cassa come $MSFT.\n\n💬 RACCONTATEMI:\nIn quale fase del vostro percorso vi sentite oggi? Nella salita iniziale di accumulo o state già vedendo l'accelerazione dell'interesse composto? Ditemi la vostra! 👇\n\n👉 Scopri come copiare il portafoglio: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 6,
+    "title": "IL SANTO GRAAL DI RAY DALIO",
+    "subtitle": "Avere 15 titoli tecnologici diversi non è diversificare. Serve decorrelazione reale.",
+    "palette": "blue",
+    "tickers": ["PPFB.DE", "CCJ", "NVDA", "VOF.L"],
+    "pillars": [
+      {
+        "label": "LA TEORIA MATEMATICA",
+        "highlight": "-80% RISCHIO A PARITÀ DI RESA",
+        "text": "Ray Dalio ha dimostrato che combinare 15-20 fonti di rendimento non correlate tra loro abbatte la volatilità senza intaccare il rendimento atteso."
+      },
+      {
+        "label": "LA FALSA DIVERSIFICAZIONE",
+        "highlight": "CORRELAZIONE NASCOSTA",
+        "text": "Chi possiede 10 titoli tech americani ha un solo fattore di rischio: se il settore scende, tutto il portafoglio crolla all'unisono."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "ORO, ENERGIA E FRONTIERA",
+        "text": "Uniamo tech USA ($NVDA) a Oro fisico ($PPFB.DE), combustibile nucleare ($CCJ) e mercati emergenti dinamici ($VOF.L Vietnam)."
+      }
+    ],
+    "post_content": "Pensate che possedere 10 titoli tech americani diversi significhi essere diversificati?\n\nRay Dalio, fondatore di Bridgewater (il più grande hedge fund del pianeta), ha definito il principio della diversificazione decorrelata come \"Il Santo Graal degli investimenti\".\n\n📐 La regola matematica di Dalio:\nSe inserisci in portafoglio tra 15 e 20 asset con rendimento atteso positivo ma NON correlati tra loro, puoi abbattere il rischio complessivo fino all'80% SENZA ridurre il rendimento potenziale finale.\n\nSe invece compri solo 10 società della Silicon Valley, non hai diversificato: hai fatto una singola scommessa concentrata. Quando cambiano i tassi o il sentiment, tutto il tuo capitale scende contemporaneamente.\n\n🌍 COME APPLICHIAMO QUESTA REGOLA NOI:\nNel nostro portafoglio non ci limitiamo al solito Nasdaq:\n1. Tech & AI per la crescita esponenziale ($NVDA)\n2. Oro fisico come scudo geopolitico e monetario ($PPFB.DE)\n3. Materie prime strategiche per la transizione energetica ($CCJ Uranio)\n4. Mercati emergenti di frontiera ad alta espansione demografica ($VOF.L Vietnam)\n\n💬 DOMANDA D'INGAGGIO:\nNel vostro portafoglio personale avete asset decorrelati (oro, materie prime, mercati emergenti) o siete concentrati quasi al 100% su azioni USA?\nScrivetemi la vostra allocazione nei commenti! 👇\n\n👉 Consulta l'intera allocazione decorrelata: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 7,
+    "title": "IL PREZZO DEL PANICO: PERDERE I 10 GIORNI MIGLIORI",
+    "subtitle": "Uscire dal mercato durante i crolli distrugge quasi il 99% del rendimento complessivo di una vita.",
+    "palette": "ruby",
+    "tickers": ["PLTR", "AVGO"],
+    "pillars": [
+      {
+        "label": "LO STUDIO SHOCK",
+        "highlight": "+17.715% VS +91%",
+        "text": "Chi ha mantenuto la posizione dal 1930 al 2020 ha fatto +17.715%. Chi ha perso solo i 10 giorni migliori di ogni decennio è sceso a un misero +91%."
+      },
+      {
+        "label": "LA PARTE PEGGIORE",
+        "highlight": "I GIORNI ORO DOPO IL BARATRO",
+        "text": "Le giornate con i rialzi più vertiginosi della storia si verificano quasi sempre entro 48-72 ore dai ribassi più spaventosi."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "RESILIENZA E CONVIZIONE",
+        "text": "Manteniamo posizioni ad altissima convinzione ($PLTR, $AVGO) senza mai cedere al panico di vendere sui minimi di mercato."
+      }
+    ],
+    "post_content": "Vendere le proprie posizioni durante un crollo di mercato è l'errore finanziario più costoso che un investitore possa commettere.\n\nBank of America ha condotto uno studio monumentale sui dati di borsa dal 1930 al 2020.\nI risultati fanno riflettere:\n\n• Rimanendo sempre investiti: rendimento complessivo del +17.715%.\n• Mancando solo i 10 GIORNI MIGLIORI di ciascun decennio: il guadagno crolla a un drammatico +91%.\n\nCapite cosa significa? Perdere una manciata di sedute su 90 anni di storia riduce a zero il potere dell'interesse composto.\nE la beffa è che i giorni migliori non arrivano quando splende il sole: si verificano quasi sempre nel mezzo dei crolli più bui (come a marzo 2020 o fine 2008).\n\nChi vende per panico per \"aspettare che le acque si calmino\" si perde puntualmente il violentissimo rimbalzo iniziale, rientrando solo quando i prezzi sono già schizzati in alto.\n\n🛡️ LA NOSTRA DISCIPLINA:\nSelezioniamo società leader nei loro settori (come $PLTR nella difesa dati o $AVGO nei semiconduttori) per la loro solidità decennale, non per le oscillazioni della settimana. La volatilità è il prezzo d'ingresso per avere rendimenti reali.\n\n💬 CONFRONTO:\nNel marzo 2020 durante il Covid o nel bear market del 2022 cosa avete provato d'istinto: la voglia di vendere tutto e scappare o la tentazione di accumulare a sconto?\nParliamone nei commenti! 👇\n\n👉 Segui la gestione disciplinata: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 8,
+    "title": "JOHN BOGLE E LA RIVOLUZIONE DEGLI ETF",
+    "subtitle": "Nel 1976 Wall Street definì i fondi a basso costo 'antiamericani'. Oggi gestiscono trilioni di dollari.",
+    "palette": "emerald",
+    "tickers": ["IEUR", "SX7PEX.DE", "WCLD.L"],
+    "pillars": [
+      {
+        "label": "LA FOLLIA DI BOGLE",
+        "highlight": "ZERO SPECULATORI",
+        "text": "Bogle intuì che la maggior parte dei consulenti non batteva il mercato, ma si intascava il 2-3% di costi togliendolo ai clienti."
+      },
+      {
+        "label": "LA FORZA DEI COSTI BASSI",
+        "highlight": "PIÙ UTILI NELLE TUE TASCHE",
+        "text": "Un risparmio del 2% annuo di commissioni su un orizzonte di 25 anni raddoppia il capitale netto finale rimasto all'investitore."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "ETF SETTORIALI MIRATI",
+        "text": "Sfruttiamo ETF liquidi per coprire interi settori strategici: Europa ($IEUR), Banche ($SX7PEX.DE) e Cloud Computing ($WCLD.L)."
+      }
+    ],
+    "post_content": "Quando John Bogle fondò Vanguard e lanciò il primo fondo indicizzato nel 1976, i banchieri di Wall Street lo definirono pubblicamente \"La Follia di Bogle\" e una minaccia per il capitalismo.\n\nPerché tanto astio?\nPerché Bogle aveva svelato il trucco dell'industria finanziaria tradizionale:\nI fondi attivi delle banche promettono di battere il mercato, ma storicamente l'85-90% di loro fallisce nel farlo su un orizzonte a 10 anni. In compenso, incassano puntualmente il 2% o 3% all'anno di commissioni garantite.\n\nBogle dimostrò che abbattendo i costi di gestione e comprando l'intero mercato, l'investitore comune avrebbe battuto quasi tutti i gestori professionisti.\n\nOggi il mondo degli ETF muove trilioni e ha restituito centinaia di miliardi di risparmi nelle tasche dei cittadini.\n\n🎯 COME LI USIAMO NOI:\nNon compriamo fondi bancari costosi a scatola chiusa. Usiamo ETF specifici e ad alta efficienza per catturare trend interi: come $IEUR per l'azionario europeo di qualità, $SX7PEX.DE per il comparto bancario europeo e $WCLD.L per il cloud computing globale.\n\n💬 DOMANDA:\nAvete mai controllato nel dettaglio le commissioni (TER + costi di ingresso) dei fondi proposti dalla vostra banca tradizionale? Siete ancora invischiati in prodotti con il 2-3% di costi annui o gestite già i vostri investimenti in autonomia?\nScrivetelo qui sotto! 👇\n\n👉 Scopri la trasparenza su eToro: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 9,
+    "title": "LA TRAPPOLA DELL'HOME BIAS",
+    "subtitle": "Investire solo in Italia perché 'è casa nostra' è uno dei peggiori errori di diversificazione statistica.",
+    "palette": "cyan",
+    "tickers": ["RACE", "PRY.MI", "MELI", "INDO.PA"],
+    "pillars": [
+      {
+        "label": "IL DIVARIO STORICO",
+        "highlight": "+400% GLOBALE VS STAGNAZIONE",
+        "text": "Negli ultimi vent'anni mentre gli indici mondiali ed emergenti facevano record, molti indici domestici europei faticavano a ritrovare i massimi del 2007."
+      },
+      {
+        "label": "LA FALSA CONFIDENZA",
+        "highlight": "FAMILIARE NON È SICURO",
+        "text": "Conoscere il nome di un'azienda locale non la rende immune da rischi sistemici, debito sovrano o bassa crescita demografica."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "CAMPIONI LOCALI + MONDO",
+        "text": "Selezioniamo solo eccellenze globali italiane ($RACE, $PRY.MI) e le bilanciamo con i mercati emergenti in Asia ($INDO.PA) e America Latina ($MELI)."
+      }
+    ],
+    "post_content": "Sapete qual è l'errore psicologico più diffuso tra gli investitori europei e italiani? L'Home Bias.\n\nConsiste nel concentrare la maggior parte dei propri risparmi in titoli, BTP e immobili del proprio paese, convinti che ciò che è vicino e familiare sia automaticamente più sicuro.\n\nI dati storici però non perdonano:\nTra il 2007 e il 2024, l'indice italiano (FTSE MIB) ha impiegato quasi due decenni solo per riavvicinare i livelli pre-crisi. Nello stesso identico arco temporale, l'azionario globale e i mercati innovativi hanno registrato crescite del +300% / +500%.\n\nL'Italia rappresenta meno dell'1% della capitalizzazione azionaria mondiale. Perché allocare lì il 70% dei propri risparmi?\n\n🏎️ IL NOSTRO APPROCCIO:\nNon rifiutiamo l'Italia a priori: investiamo nelle aziende italiane che competono e dominano a livello mondiale, come $RACE (Ferrari) o $PRY.MI (Prysmian nei cavi energetici). Ma le affianchiamo ai campioni emergenti che crescono al 20-30% annuo in America Latina ($MELI) o in Indonesia ($INDO.PA).\n\n💬 DOMANDA D'INGAGGIO:\nSe doveste guardare onestamente il vostro patrimonio complessivo (compresi immobili e titoli di stato), quanta percentuale è ancora legata all'Italia? Più del 50% o avete già internazionalizzato?\nDitemelo nei commenti! 👇\n\n👉 Visualizza la nostra esposizione globale: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 10,
+    "title": "HOWARD MARKS E I CICLI ECONOMICI",
+    "subtitle": "\"Non puoi prevedere il futuro, ma puoi prepararti\": perché materie prime e uranio non vanno ignorati.",
+    "palette": "gold",
+    "tickers": ["CCJ", "GLEN.L", "ENI.MI"],
+    "pillars": [
+      {
+        "label": "LA FILOSOFIA DEL PENDOLO",
+        "highlight": "DALL'EUFORIA ALL'OBLIO",
+        "text": "Howard Marks (Oaktree) insegna che i mercati oscillano continuamente come un pendolo tra ottimismo cieco e pessimismo ingiustificato."
+      },
+      {
+        "label": "IL DEFICIT STRUTTURALE",
+        "highlight": "ENERGIA PER L'INTELLIGENZA",
+        "text": "La transizione ecologica e i datacenter per l'AI richiedono una quantità titanica di energia nucleare e metalli che non si creano dal nulla."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "URANIO E COMMODITIES",
+        "text": "Abbiamo posizioni chiave su Cameco ($CCJ) per l'uranio, colossi estrattivi ($GLEN.L) e stabilità energetica con dividendi ($ENI.MI)."
+      }
+    ],
+    "post_content": "La maggior parte delle persone corre a comprare un settore quando è già finito su tutte le prime pagine dei giornali.\n\nHoward Marks, leggendario investitore e co-fondatore di Oaktree Capital, descrive il mercato come un pendolo:\nQuando tutti sono euforici, i prezzi diventano insostenibili; quando un settore viene dimenticato per anni, si creano le opportunità di guadagno asimmetriche più grandi della storia.\n\nPrendiamo l'energia nucleare e l'uranio:\nDopo l'incidente di Fukushima nel 2011, l'uranio è stato abbandonato e i prezzi sono crollati. Per oltre 10 anni nessuno ha aperto nuove miniere.\nOggi cosa succede? Il mondo si rende conto che le rinnovabili intermittenti da sole non bastano e che l'esplosione dei datacenter di Intelligenza Artificiale richiede energia pulita a ciclo continuo 24/7. L'offerta è insufficiente e la domanda è alle stelle.\n\n⚡ NEL NOSTRO PORTAFOGLIO:\nEcco perché siamo investiti con convinzione su $CCJ (Cameco, primo produttore occidentale di uranio), affiancato da materie prime industriali ($GLEN.L) ed energia integrata ad alto rendimento ($ENI.MI). Investiamo sui cicli prima che diventino ovvi per tutti.\n\n💬 COSA NE PENSATE:\nNei vostri investimenti avete mai considerato le materie prime strategiche e l'energia nucleare, oppure preferite rimanere focalizzati esclusivamente sul software e sul tech?\nDite la vostra nei commenti! 👇\n\n👉 Segui l'allocazione energetica su eToro: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 11,
+    "title": "IL DILEMMA DEI DIVIDENDI: RENDITA O ILLUSIONE?",
+    "subtitle": "La trappola del 'dividend yield' elevato: quando incassare la cedola nasconde un'azienda che non cresce.",
+    "palette": "emerald",
+    "tickers": ["ABBV", "ENEL.MI", "ULVR.L"],
+    "pillars": [
+      {
+        "label": "L'ILLUSIONE DELLA CEDOLA",
+        "highlight": "NON SONO SOLDI GRATIS",
+        "text": "Quando un'azione stacca un dividendo di 2€, il prezzo del titolo scende esattamente di 2€ il giorno dell'ex-date, subendo anche la ritenuta fiscale."
+      },
+      {
+        "label": "DIVIDEND TRAP",
+        "highlight": "YIELD ALTO = RISCHIO ALTO",
+        "text": "Un'azienda con un rendimento da dividendo del 9-10% spesso ha un prezzo crollato e utili insufficienti per sostenere la distribuzione futura."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "DIVIDEND GROWER VERI",
+        "text": "Puntiamo su campioni storici con payout sostenibile e flussi di cassa in espansione: $ABBV, $ENEL.MI e $ULVR.L."
+      }
+    ],
+    "post_content": "Chi di voi non ama ricevere dividendi accreditati sul conto? È una delle sensazioni più gratificanti per un investitore.\n\nMa attenzione: la caccia cieca al dividendo più alto è una delle trappole più pericolose sul mercato.\n\n⚠️ Due verità fondamentali che pochi spiegano:\n1. Il dividendo non è un guadagno dal nulla: quando una società stacca 1€ di cedola per azione, la sua cassa diminuisce di 1€ e il valore del titolo viene decurtato esattamente di 1€ all'apertura del mercato (ex-dividend date).\n2. Se una società offre un dividendo del 10% annuo mentre il suo business perde quote di mercato e il titolo scende del 15%, state perdendo soldi reali pur festeggiando la cedola.\n\nLa vera ricchezza non la fa chi stacca cedole disperate erodendo il capitale, ma chi fa crescere gli utili e aumenta il dividendo nel tempo (i cosiddetti Dividend Aristocrats).\n\n🏥 NEL NOSTRO PORTAFOGLIO:\nAbbiamo selezionato colossi come $ABBV (oltre 50 anni consecutivi di dividendi crescenti), la stabilità energetica di $ENEL.MI e i marchi indispensabili di $ULVR.L. Aziende solide che distribuiscono cassa reale senza sacrificare la crescita.\n\n💬 DOMANDA PER VOI:\nNel vostro portafoglio preferite la soddisfazione del flusso cedolare periodico oppure società che reinvestono tutti gli utili per massimizzare la crescita del capitale?\nScrivetelo qui sotto! 👇\n\n👉 Scopri tutti i titoli a dividendo del portafoglio: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 12,
+    "title": "JIM SIMONS E IL METODO QUANTITATIVO",
+    "subtitle": "Perché le emozioni umane distruggono i rendimenti e avere regole algoritmiche rigide vince sempre.",
+    "palette": "violet",
+    "tickers": ["PLTR", "MSFT"],
+    "pillars": [
+      {
+        "label": "IL RECORD DEL MEDALLION",
+        "highlight": "+66% LORDO ANNUO",
+        "text": "Jim Simons ha battuto tutti i gestori della storia eliminando totalmente il giudizio emotivo umano in favore di modelli matematici oggettivi."
+      },
+      {
+        "label": "L'ERRORE EMOTIVO",
+        "highlight": "FOMO & PANICO",
+        "text": "L'essere umano medio compra quando ha paura di perdersi il rialzo (ai massimi) e vende quando il panico diventa insopportabile (sui minimi)."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "SISTEMI E DATI OGGETTIVI",
+        "text": "Combiniamo aziende regine dell'analisi dati ($PLTR, $MSFT) con monitoraggio algoritmico quotidiano per eliminare l'emotività."
+      }
+    ],
+    "post_content": "Jim Simons, il matematico scomparso di recente che ha fondato Renaissance Technologies, ha ottenuto il track record più incredibile nella storia dei mercati: oltre il +66% annuo lordo medio tra il 1988 e il 2018 con il suo Medallion Fund.\n\nSapete qual era la sua regola aurea?\n\"Non permettiamo mai a un'opinione umana o a un'emozione di scavalcare il modello matematico\".\n\n🧠 La mente umana è biologicamente programmata per fallire sui mercati finanziari:\n• Proviamo euforia (FOMO) quando un titolo è salito del 100% e compriamo sui massimi.\n• Proviamo terrore quando il mercato corregge del 20% e vendiamo proprio quando le azioni sono a forte sconto.\n\nI migliori investitori non hanno sfere di cristallo: hanno un sistema di regole predefinito e la disciplina ferrea di non violarlo mai.\n\n🤖 IL NOSTRO METODO:\nNel nostro portafoglio utilizziamo monitoraggi quantitativi continui e selezioniamo i colossi mondiali che dominano l'intelligenza dei dati e il cloud computing — come $PLTR e $MSFT. Nessuna decisione presa di pancia sull'onda della notizia del giorno.\n\n💬 DOMANDA:\nQual è stata l'emozione che vi ha fatto commettere il peggior errore finanziario in passato: l'ansia di restare fuori dal rally (FOMO) o la paura di perdere durante un crollo improvviso?\nConfessatevi nei commenti! 👇\n\n👉 Segui la strategia basata sui dati: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 13,
+    "title": "LA BOLLA DELLE DOT-COM DEL 2000",
+    "subtitle": "La differenza tra cavalcare una moda passeggera e investire in aziende che generano cassa reale.",
+    "palette": "blue",
+    "tickers": ["AMZN", "GOOG", "MSFT"],
+    "pillars": [
+      {
+        "label": "IL COLLASSO DEL 2000",
+        "highlight": "-78% SUL NASDAQ",
+        "text": "Centinaia di società internet senza fatturato né utili sono fallite da un giorno all'altro quando i tassi sono saliti e la liquidità è finita."
+      },
+      {
+        "label": "I SOPRAVVISSUTI",
+        "highlight": "FREE CASH FLOW DOMINANTE",
+        "text": "Aziende come Amazon crollarono del 90%, ma continuarono a generare ricavi esponenziali e clienti fino a dominare il commercio mondiale."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "MONOPOLI AD ALTI MARGINI",
+        "text": "Nell'attuale boom dell'AI selezioniamo solo colossi con bilanci corazzati e miliardi di utili reali: $AMZN, $GOOG e $MSFT."
+      }
+    ],
+    "post_content": "Tutti ricordano la Bolla Dot-Com del 2000 come una catastrofe: il Nasdaq perse il 78% del suo valore in due anni e centinaia di start-up evaporarono nel nulla.\n\nMa sapete cosa distingueva le aziende fallite da quelle che hanno reso ricchi i propri azionisti?\n\n💡 I flussi di cassa e la redditività reale.\nNel 1999 bastava aggiungere \".com\" al nome aziendale per raccogliere decine di milioni da investitori entusiasti, pur bruciando denaro senza avere un singolo cliente pagante (pensate a Pets.com).\n\nAl contrario, società come Amazon videro le proprie azioni crollare da 100$ a 6$, ma il loro fondatore continuava a macinare vendite, efficienza logistica e quote di mercato. Chi comprò Amazon durante le macerie del 2001 oggi si trova un ritorno di oltre 500 volte il capitale iniziale.\n\nOggi viviamo la rivoluzione dell'Intelligenza Artificiale. Il rischio di inseguire aziende senza modelli di business sostenibili è identico a quello di 25 anni fa.\n\n🛡️ LA NOSTRA SELEZIONE:\nNon compriamo l'hype vuoto. Nel nostro portafoglio l'esposizione all'innovazione è affidata a fortezze finanziarie indistruttibili come $AMZN, $GOOG e $MSFT, capaci di finanziare la propria espansione tecnologica con decine di miliardi di utili netti all'anno.\n\n💬 DIBATTITO:\nCredete che l'attuale corsa all'Intelligenza Artificiale presenti i rischi della bolla del 2000 oppure che i colossi tecnologici di oggi abbiano bilanci troppo solidi per crollare?\nScrivetemi la vostra tesi qui sotto! 👇\n\n👉 Scopri come selezioniamo i colossi tech: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 14,
+    "title": "L'ORO FISICO CONTRO LE BANCHE CENTRALI",
+    "subtitle": "5.000 anni di storia umana e perché le banche centrali comprano oro a ritmi record.",
+    "palette": "gold",
+    "tickers": ["PPFB.DE"],
+    "pillars": [
+      {
+        "label": "LA COSTANTE STORICA",
+        "highlight": "5.000 ANNI DI VALORE",
+        "text": "Nessuna valuta cartacea della storia è sopravvissuta intatta nel lungo periodo: l'oro fisico non può essere stampato né azzerato da decreti politici."
+      },
+      {
+        "label": "LA CORSA DELLE BANCHE",
+        "highlight": "ACQUISTI RECORD STORICI",
+        "text": "Negli ultimi tre anni le banche centrali mondiali hanno accumulato oltre 1.000 tonnellate d'oro all'anno per de-dollarizzare le proprie riserve."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "ORO FISICO CUSTODITO",
+        "text": "Manteniamo una quota solida di iShares Physical Gold ETC ($PPFB.DE) con lingotti fisici allocati per proteggere il portafoglio da shock estremi."
+      }
+    ],
+    "post_content": "Perché le banche centrali di tutto il pianeta stanno acquistando lingotti d'oro ai ritmi più elevati degli ultimi 60 anni?\n\nLa risposta è semplice: l'oro è l'unico asset finanziario che non rappresenta il debito o la promessa di pagamento di qualcun altro.\n\nOgni valuta cartacea (dollari, euro, sterline) può essere creata a costo zero con un click delle banche centrali. Dal 1971, anno in cui fu reciso l'ultimo legame con l'oro (Nixon shock), il potere d'acquisto del dollaro è crollato di oltre l'85%.\n\nNell'antica Roma un'oncia d'oro comprava una toga su misura e sandali di prima qualità; oggi quella stessa oncia d'oro compra un abito sartoriale di alta moda e scarpe in pelle. Il valore dell'oro è rimasto costante: sono le monete fiat ad aver perso valore.\n\n🥇 IL NOSTRO ASSETTO DIFENSIVO:\nNel nostro portafoglio non ci affidiamo solo alla crescita azionaria. Deteniamo una posizione strutturale in Oro fisico tramite $PPFB.DE (iShares Physical Gold ETC). Questa riserva agisce come un'assicurazione contro tensioni geopolitiche, svalutazioni monetarie ed escalation impreviste.\n\n💬 DOMANDA PER VOI:\nNel vostro piano di risparmio avete una quota di oro fisico (o strumenti dedicati) come riserva di valore, oppure considerate l'oro una reliquia superata rispetto ad azioni e crypto?\nEsprimetevi nei commenti! 👇\n\n👉 Guarda la nostra allocazione in oro su eToro: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 15,
+    "title": "GEOPOLITICA E IL RITORNO DELLA DIFESA",
+    "subtitle": "La fine dei 'dividendi della pace': perché la sicurezza e le infrastrutture strategiche guidano i mercati.",
+    "palette": "ruby",
+    "tickers": ["WDEF.L", "PRY.MI"],
+    "pillars": [
+      {
+        "label": "IL CAMBIO DI PARADIGMA",
+        "highlight": "2% PIL PER LA DIFESA",
+        "text": "I paesi NATO ed europei hanno avviato piani pluriennali obbligatori di riarmo e ammodernamento tecnologico con ordini garantiti per decenni."
+      },
+      {
+        "label": "LE INFRASTRUTTURE CRITICHE",
+        "highlight": "RETI E CONNESSIONI SICURE",
+        "text": "La sicurezza moderna non è solo armamenti: è la protezione delle reti sottomarine, della trasmissione elettrica e dell'indipendenza energetica."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "DIFESA E INFRASTRUTTURE",
+        "text": "Siamo posizionati sul WisdomTree Europe Defence ($WDEF.L) e sul leader mondiale dei cavi energetici e telecomunicazioni ($PRY.MI)."
+      }
+    ],
+    "post_content": "Per oltre trent'anni l'Occidente ha vissuto nell'illusione dei cosiddetti \"dividendi della pace\": tagliare le spese militari e delocalizzare le catene produttive ovunque costasse meno.\n\nQuel mondo non esiste più.\n\nOggi la geopolitica è tornata a essere il primo fattore determinante per l'economia globale. Tutti i governi europei e occidentali hanno aumentato i budget per la difesa oltre il 2% del PIL, creando commesse certe e garantite per i prossimi 10-15 anni a favore delle aziende della filiera strategica.\n\nAllo stesso tempo, proteggere le infrastrutture critiche — dalle reti elettriche ai cavi di trasmissione dati sottomarini — è diventata una priorità di sicurezza nazionale assoluta.\n\n🛡️ IL NOSTRO POSIZIONAMENTO:\nInvestire con lungimiranza significa guardare il mondo come è, non come vorremmo che fosse. Nel nostro portafoglio abbiamo inserito l'ETF dedicato alla difesa europea ($WDEF.L) e il colosso italiano dei cablaggi strategici e di rete $PRY.MI (Prysmian), protagonista dell'interconnessione energetica mondiale.\n\n💬 DIBATTITO:\nRitenete opportuno e strategico includere il settore della difesa nel proprio portafoglio di investimenti per proteggersi dai rischi geopolitici del decennio?\nCondividete il vostro punto di vista nei commenti! 👇\n\n👉 Analizza i titoli difensivi e infrastrutturali: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 16,
+    "title": "NASSIM TALEB E L'ANTIFRAGILITÀ",
+    "subtitle": "Non puoi prevedere i 'Cigni Neri', ma puoi costruire un portafoglio che beneficia dal disordine.",
+    "palette": "cyan",
+    "tickers": ["IB01.L", "PPFB.DE", "CCJ"],
+    "pillars": [
+      {
+        "label": "IL CONCETTO CHIAVE",
+        "highlight": "ROBUSTO VS ANTIFRAGILE",
+        "text": "Ciò che è fragile si rompe sotto stress; ciò che è robusto resiste; ciò che è antifragile migliora e diventa più forte durante le tempeste."
+      },
+      {
+        "label": "LA STRATEGIA A BILANCIERE",
+        "highlight": "BARBELL STRATEGY",
+        "text": "Taleb consiglia di combinare massima sicurezza iper-prudente da una parte e scommesse asimmetriche ad alto potenziale dall'altra."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "PROTEZIONE ED ASIMMETRIA",
+        "text": "Uniamo la certezza monetaria di $IB01.L e l'oro ($PPFB.DE) alla crescita asimmetrica di materie prime scarse come l'uranio ($CCJ)."
+      }
+    ],
+    "post_content": "Nassim Nicholas Taleb, celebre autore de \"Il Cigno Nero\" e \"Antifragile\", ha formulato uno dei concetti più rivoluzionari della gestione del rischio:\n\nCosa accade quando arriva un evento shock imprevedibile (una pandemia, una guerra, una crisi bancaria improvvisa)?\n• Gli asset fragili si spezzano ed evaporano.\n• Gli asset robusti resistono ma non guadagnano nulla.\n• Gli asset ANTIFRAGILI traggono beneficio dalla volatilità e dal caos.\n\nTaleb suggerisce di abbandonare l'illusione di prevedere il futuro e di adottare la \"Barbell Strategy\" (la strategia a bilanciere):\nDa un lato, una forte ancora di sicurezza iper-prudente che ti garantisce di non morire finanziariamente in nessun scenario.\nDall'altro lato, esposizioni asimmetriche dove il rischio di perdita è limitato ma il potenziale di rialzo è esplosivo in caso di shock.\n\n⚖️ IL NOSTRO BILANCIERE:\nNel nostro portafoglio applichiamo esattamente questo schema: una base di liquidità remunerata a rischio minimo con i Treasury $IB01.L unita alla protezione dell'Oro fisico ($PPFB.DE), abbinata ad asset asimmetrici rari come l'uranio di $CCJ, pronti a beneficiare degli shock energetici globali.\n\n💬 DOMANDA PER LA COMMUNITY:\nSe domani mattina si verificasse un cigno nero globale imprevisto, il vostro portafoglio sarebbe fragile (con perdite pesanti), robusto o antifragile?\nDitemi come vi siete preparati nei commenti! 👇\n\n👉 Esplora la struttura resiliente su eToro: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 17,
+    "title": "LA FABBRICA DEL MONDO: I CHIP DI TAIWAN",
+    "subtitle": "Chi controlla davvero il motore tecnologico dell'Intelligenza Artificiale globale?",
+    "palette": "emerald",
+    "tickers": ["TSM", "NVDA", "AVGO"],
+    "pillars": [
+      {
+        "label": "IL VERO MONOPOLIO",
+        "highlight": "90% DEI CHIP AVANZATI",
+        "text": "Senza le fonderie di TSMC a Taiwan, l'intera industria mondiale dell'AI, degli smartphone e dei datacenter si fermerebbe all'istante."
+      },
+      {
+        "label": "IL MOAT TECNOLOGICO",
+        "highlight": "DECENNI DI DISTACCO",
+        "text": "Replicare le fabbriche di TSMC richiede centinaia di miliardi e competenze fisiche che nessun concorrente occidentale o cinese è riuscito a colmare."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "LA CATENA COMPLETA DEI CHIP",
+        "text": "Investiamo alla fonte con Taiwan Semiconductor ($TSM), unita ai progettisti software dominanti $NVDA e ai connettori di $AVGO."
+      }
+    ],
+    "post_content": "Tutti parlano di Intelligenza Artificiale, ma vi siete mai chiesti chi produce fisicamente il silicio indispensabile per farla funzionare?\n\nNon è la Silicon Valley.\nÈ una singola azienda situata su un'isola a largo della Cina: Taiwan Semiconductor Manufacturing Company ($TSM).\n\nTSMC fabbrica oltre il 90% dei semiconduttori più avanzati del pianeta (a 3 e 2 nanometri). Quando Nvidia progetta i suoi potenti chip grafici H100 o Blackwell, quando Apple progetta i processori degli iPhone, quando AMD o Qualcomm disegnano i loro chip, non hanno fabbriche proprie: mandano i progetti a TSMC affinché li stampi fisicamente.\n\nNon esiste oggi sulla Terra un'altra azienda in grado di produrre chip avanzati con la medesima efficienza, resa e precisione atomica.\n\n🔌 LA NOSTRA STRATEGIA HARDWARE:\nInvece di scommettere su chi vincerà la battaglia tra i software di AI, noi possediamo l'intera catena del valore indispensabile: la fonderia monopolista $TSM, il leader dell'architettura di calcolo $NVDA e il re delle reti di connettività ultra-veloce $AVGO (Broadcom).\n\n💬 DOMANDA D'INGAGGIO:\nConsiderate la concentrazione della produzione a Taiwan un rischio geopolitico eccessivo o un fossato competitivo (moat) talmente immenso da renderlo un investimento obbligato?\nDite la vostra opinione nei commenti! 👇\n\n👉 Segui le nostre posizioni sui semiconduttori: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 18,
+    "title": "LA MATEMATICA DEL PAC: TIMING VS DISCIPLINA",
+    "subtitle": "Perché investire a intervalli regolari (DCA) batte matematicamente l'illusione di indovinare i minimi.",
+    "palette": "blue",
+    "tickers": ["ETOR", "IEUR"],
+    "pillars": [
+      {
+        "label": "LA SIMULAZIONE CLASSICA",
+        "highlight": "IL TIMING PERFETTO NON ESISTE",
+        "text": "Studi di Charles Schwab dimostrano che anche chi avesse avuto la fortuna impossibile di comprare sui minimi batte di poco chi ha fatto un PAC automatico."
+      },
+      {
+        "label": "VOLATILITÀ COME AMICA",
+        "highlight": "PIÙ QUOTE A SCONTO",
+        "text": "Con il Dollar-Cost Averaging, quando i mercati scendono il tuo versamento mensile acquista automaticamente più quote a prezzi stracciati."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "COPY TRADING CONTINUO",
+        "text": "La replica automatica su $ETOR con apporti periodici sfrutta la matematica del PAC senza richiedere tempo o stress operativo."
+      }
+    ],
+    "post_content": "C'è chi passa ore ogni giorno a fissare i grafici di borsa cercando \"il momento perfetto\" per entrare.\n\nE poi c'è chi imposta un Piano di Accumulo Capitale (PAC / Dollar-Cost Averaging) e lascia che la matematica lavori per lui.\n\nUno studio celebre di Charles Schwab ha confrontato 5 tipologie di investitori su 20 anni:\n1. Quello con una fortuna soprannaturale che indovina il punto di minimo perfetto ogni singolo anno.\n2. Quello che investe immediatamente all'inizio di ogni anno.\n3. Quello che divide la somma in versamenti mensili costanti (PAC).\n4. Quello sfortunato che compra sempre sui massimi dell'anno.\n5. Quello che aspetta sempre a bordo campo e non entra mai per paura.\n\nI risultati? L'investitore PAC ha ottenuto quasi lo stesso identico patrimonio finale di chi aveva la palla di cristallo sui minimi! E chi è rimasto fuori ad aspettare è finito drammaticamente all'ultimo posto.\n\nQuando il mercato scende, il tuo versamento periodico compra quote a sconto. Quando risale, il tuo capitale si rivaluta.\n\n⚙️ COME SFRUTTARLO CON IL COPY TRADING:\nImpostare la copia del mio portafoglio su $ETOR e aggiungere un piccolo importo periodico ogni mese è il modo più efficiente per mettere il pilota automatico ai propri risparmi su un portafoglio diversificato ($IEUR e leader globali), azzerando lo stress e l'emotività.\n\n💬 VOI COME FATE?\nInvestite con una strategia periodica automatica (mensile o trimestrale) oppure cercate ancora di indovinare il momento propizio per entrare?\nCondividete le vostre abitudini qui sotto! 👇\n\n👉 Scopri come impostare la copia periodica: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 19,
+    "title": "L'AMERICA LATINA E LA NUOVA FRONTIERA",
+    "subtitle": "Perché la demografia giovane e la digitalizzazione rendono i mercati emergenti irrinunciabili.",
+    "palette": "gold",
+    "tickers": ["MELI", "VOF.L", "INDO.PA"],
+    "pillars": [
+      {
+        "label": "IL VANTAGGIO DEMOGRAFICO",
+        "highlight": "ETÀ MEDIA SOTTO I 32 ANNI",
+        "text": "Mentre l'Europa e l'Occidente affrontano l'invecchiamento della popolazione, i paesi emergenti vivono il boom di milioni di nuovi consumatori digitali."
+      },
+      {
+        "label": "IL CAMPIONE ASSOLUTO",
+        "highlight": "L'AMAZON DELL'AMERICA LATINA",
+        "text": "MercadoLibre ($MELI) cresce a oltre il 30% annuo dominando sia l'e-commerce che i pagamenti digitali (fintech) in Brasile, Messico e Argentina."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "CRESCITA DI FRONTIERA",
+        "text": "Affianchiamo $MELI ai fondi sul dinamismo del Sud-Est asiatico come il Vietnam ($VOF.L) e l'Indonesia ($INDO.PA)."
+      }
+    ],
+    "post_content": "Mentre l'Europa deve fare i conti con l'invecchiamento demografico e tassi di crescita dell'1%, dove stanno nascendo le storie di espansione economica più esplosive del prossimo decennio?\n\nNei mercati emergenti con popolazione giovanissima e in rapida adozione tecnologica.\n\nPrendiamo l'America Latina: oltre 650 milioni di abitanti, un'età media di appena 31 anni e milioni di persone che accedono ai servizi finanziari e bancari per la prima volta grazie allo smartphone.\nIn questo continente non domina Amazon o PayPal, ma un gigante autoctono straordinario: MercadoLibre ($MELI).\n\nMercadoLibre è contemporaneamente l'Amazon dell'e-commerce e la banca digitale più utilizzata attraverso Mercado Pago, con tassi di crescita dei ricavi superiori al 30% anno su anno da oltre un decennio.\n\n🌏 LA NOSTRA ESPOSIZIONE GLOBALE:\nUn portafoglio moderno non può limitarsi al cortile di casa. Ecco perché deteniamo posizioni strategiche su $MELI, abbinate a ETF e fondi sui campioni industriali del Vietnam ($VOF.L) e dell'Indonesia ($INDO.PA), economie protagoniste della rilocalizzazione produttiva globale.\n\n💬 DOMANDA PER VOI:\nAvete mai investito direttamente in campioni dell'America Latina o del Sud-Est asiatico, oppure la volatilità di queste aree vi spaventa ancora?\nScrivetemi la vostra esperienza nei commenti! 👇\n\n👉 Guarda i mercati emergenti nel nostro portafoglio: etoro.com/people/andrearavalli"
+  },
+  {
+    "episode": 20,
+    "title": "IL FUTURO DELLA FINANZA: IL COPY TRADING TRASPARENTE",
+    "subtitle": "Dalla scatola nera dei fondi bancari alla trasparenza totale in tempo reale su eToro.",
+    "palette": "violet",
+    "tickers": ["ETOR"],
+    "pillars": [
+      {
+        "label": "LA VECCHIA FINANZA",
+        "highlight": "ZERO TRASPARENZA",
+        "text": "I fondi tradizionali pubblicano schede informative ogni 3 mesi con ritardo, nascondendo le reali operazioni e prelevando commissioni fisse."
+      },
+      {
+        "label": "LA RIVOLUZIONE SOCIALE",
+        "highlight": "VERIFICA IN TEMPO REALE",
+        "text": "Su eToro ogni singolo trade, performance storica e livello di rischio è pubblico, verificabile matematicamente e replicabile al centesimo."
+      },
+      {
+        "label": "NEL NOSTRO PORTAFOGLIO",
+        "highlight": "CO-INVESTIMENTO TOTALE",
+        "text": "Come Popular Investor su $ETOR, investo il mio stesso capitale esattamente nelle medesime posizioni di chi decide di copiarmi."
+      }
+    ],
+    "post_content": "Si conclude oggi la nostra serie in 20 episodi dedicata all'importanza di investire con metodo, consapevolezza e visione di lungo termine.\n\nAbbiamo attraversato le lezioni dei più grandi investitori della storia — da Buffett a Lynch, da Dalio a Munger — e compreso perché l'inflazione, l'emotività e i costi bancari siano i nemici silenziosi del nostro futuro.\n\nMa alla fine, la vera domanda è: come mettere in pratica tutto questo senza dover passare 8 ore al giorno a studiare bilanci e grafici?\n\nLa risposta della finanza moderna è la TRASPARENZA COLLABORATIVA.\nPer decenni l'industria finanziaria ha chiuso gli investitori in una scatola nera: pagavi commissioni alte senza sapere cosa comprasse realmente il tuo gestore, scoprendo i risultati solo a fine anno.\n\nSu $ETOR il paradigma è completamente capovolto:\n• Vedi ogni singola posizione aperta e chiusa in tempo reale.\n• Conosci il mio livello di rischio, le statistiche mensili degli ultimi anni e la logica dietro ogni operazione.\n• E soprattutto: io investo i miei soldi personali esattamente nelle stesse identiche posizioni di chi mi copia. Se il portafoglio cresce, cresciamo insieme.\n\n🙏 GRAZIE A TUTTI:\nGrazie a chi ha seguito e commentato questi 20 appuntamenti! Continueremo con gli aggiornamenti settimanali sui mercati e sulle nostre posizioni.\n\n💬 DOMANDA FINALE:\nQual è stata la lezione o l'episodio di questa serie che vi ha fatto riflettere di più o cambiare approccio ai vostri investimenti?\nFatemelo sapere nei commenti, vi rispondo a tutti! 👇\n\n👉 Unisciti alla nostra community e copia la strategia: etoro.com/people/andrearavalli"
+  }
+]
