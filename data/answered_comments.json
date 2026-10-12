@@ -537,5 +537,32 @@
       "86648bc4-273f-493c-8f0e-247cd81a5810"
     ],
     "last_updated_at": "2026-10-12T01:09:08.241349+00:00"
+  },
+  "6b90e271-ca37-4cc7-a1b3-f1dc0ae99b86": {
+    "post_id": "da368080-c634-11f1-8080-80004a8ffcc9",
+    "author": "DomenicoLufrano",
+    "first_answered_at": "2026-10-12T16:39:53.924030+00:00",
+    "reply_ids": [
+      "85de1fc3-136d-4d29-b211-fadbbaee49b3"
+    ],
+    "last_updated_at": "2026-10-12T16:39:53.924048+00:00"
+  },
+  "0861b018-6aa1-4949-84e4-77b8fefdddb0": {
+    "post_id": "da368080-c634-11f1-8080-80004a8ffcc9",
+    "author": "TopoTip",
+    "first_answered_at": "2026-10-12T16:40:25.278964+00:00",
+    "reply_ids": [
+      "7a3c4596-47eb-41e1-8e07-39336d4f92be"
+    ],
+    "last_updated_at": "2026-10-12T16:40:25.278980+00:00"
+  },
+  "68662309-af89-4f6e-b126-456c2c96ea7d": {
+    "post_id": "2fca4100-c60b-11f1-8080-80003446364b",
+    "author": "MarcelloMazzaro",
+    "first_answered_at": "2026-10-12T16:40:55.522683+00:00",
+    "reply_ids": [
+      "f392a9b9-2540-436d-b4f4-973cc105da91"
+    ],
+    "last_updated_at": "2026-10-12T16:40:55.522701+00:00"
   }
 }
