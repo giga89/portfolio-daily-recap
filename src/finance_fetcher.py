@@ -781,3 +781,44 @@ def fetch_benchmarks_monthly_performance():
             bench_data[etoro_ticker] = 0.0
             
     return bench_data
+
+
+def fetch_benchmarks_daily_performance(benchmarks_map=None):
+    """
+    Fetch real-time / today's daily percentage return for market benchmark indices.
+    Returns a dictionary of daily percentage returns, e.g.:
+    {'SPX500': -1.11, 'NSDQ100': -2.02, 'GER40': -0.45, ...}
+    """
+    if benchmarks_map is None:
+        benchmarks_map = {
+            'SPX500': '^GSPC',
+            'NSDQ100': '^NDX',
+            'DJ30': '^DJI',
+            'GER40': '^GDAXI',
+            'EUSTX50': '^STOXX50E',
+            'CHINA50': 'FXI',
+        }
+    
+    bench_data = {}
+    print("📈 Fetching benchmark daily performance...")
+    
+    for symbol, yahoo_ticker in benchmarks_map.items():
+        try:
+            stock = yf.Ticker(yahoo_ticker)
+            # Use period='5d' to ensure at least 2 closing bars are available
+            hist = stock.history(period='5d')
+            if not hist.empty and len(hist) >= 2:
+                prev_p = hist['Close'].iloc[-2]
+                curr_p = hist['Close'].iloc[-1]
+                chg = ((curr_p - prev_p) / prev_p) * 100
+                bench_data[symbol] = round(float(chg), 2)
+                print(f"   {symbol} ({yahoo_ticker}) Daily: {bench_data[symbol]:+.2f}%")
+            elif not hist.empty and len(hist) == 1:
+                bench_data[symbol] = 0.0
+            else:
+                bench_data[symbol] = 0.0
+        except Exception as e:
+            print(f"   ⚠️ Error fetching daily benchmark for {symbol} ({yahoo_ticker}): {e}")
+            bench_data[symbol] = 0.0
+            
+    return bench_data

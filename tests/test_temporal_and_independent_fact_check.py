@@ -175,6 +175,50 @@ class TestTemporalAndIndependentFactCheck(unittest.TestCase):
         self.assertTrue(len(issues) >= 3, f"Expected multiple platitude issues, got: {issues}")
         self.assertTrue(any("BANALITÀ VIETATA" in issue for issue in issues))
 
+    def test_sentiment_mismatch_blocks_positive_tone_when_index_negative(self):
+        """Deterministic gate must block positive tone claims when benchmarks are negative."""
+        user_reported_post = (
+            "Buonasera! I mercati USA hanno chiuso: ecco il nostro recap di fine giornata... 🌆 "
+            "La seduta a Wall Street si è chiusa con un tono complessivamente positivo per l'indice $SPX500 , "
+            "che ha metabolizzato i risultati dell'inflazione CPI rilasciati oggi."
+        )
+        benchmarks_negative = {"SPX500": -1.11, "NSDQ100": -2.02}
+        is_clean, issues, _ = verify_post_deterministic(
+            user_reported_post,
+            session_name="US_CLOSE",
+            benchmark_daily=benchmarks_negative,
+        )
+        self.assertFalse(is_clean, "Positive tone on -1.11% drop must fail deterministic verification")
+        self.assertTrue(any("Incongruenza di tono/sentiment" in i for i in issues))
+
+    def test_sanitize_or_prune_post_content_fixes_sentiment_mismatch(self):
+        """Sanitizer must replace positive sentiment with flessione/prese di beneficio when index dropped."""
+        from post_verifier import sanitize_or_prune_post_content
+        user_reported_post = (
+            "Buonasera! I mercati USA hanno chiuso: ecco il nostro recap di fine giornata... 🌆 "
+            "La seduta a Wall Street si è chiusa con un tono complessivamente positivo per l'indice $SPX500 , "
+            "che ha metabolizzato i dati macro."
+        )
+        benchmarks_negative = {"SPX500": -1.11, "NSDQ100": -2.02}
+        sanitized_text, is_modified, _ = sanitize_or_prune_post_content(
+            user_reported_post,
+            benchmark_daily=benchmarks_negative,
+        )
+        self.assertTrue(is_modified)
+        self.assertNotIn("tono complessivamente positivo", sanitized_text)
+        self.assertIn("chiuso con listini in flessione", sanitized_text)
+
+    def test_fetch_benchmarks_daily_performance(self):
+        """Verify fetch_benchmarks_daily_performance returns expected structure with SPX500 and NSDQ100."""
+        from finance_fetcher import fetch_benchmarks_daily_performance
+        perf = fetch_benchmarks_daily_performance()
+        self.assertIsInstance(perf, dict)
+        self.assertIn("SPX500", perf)
+        self.assertIn("NSDQ100", perf)
+        if perf.get("SPX500") is not None:
+            self.assertIsInstance(perf["SPX500"], float)
+
 
 if __name__ == "__main__":
     unittest.main()
+

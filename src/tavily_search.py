@@ -159,18 +159,24 @@ def get_live_market_news_context(
         days = 30
     elif "open" in session_str and "eu" in session_str:
         macro_query = "European stock market open Stoxx 600 DAX today"
+        days = 2
     elif "open" in session_str:
         macro_query = "Wall Street stock market opening futures today S&P 500"
+        days = 2
     elif "close" in session_str:
         macro_query = "Wall Street stock market close today S&P 500 Nasdaq"
+        days = 2
     elif "weekly" in session_str:
         macro_query = "weekly stock market recap Wall Street S&P 500"
+        days = 5
     else:
         macro_query = "financial stock market news today Wall Street"
+        days = 2
 
     # 2. Build list of queries to run in parallel
     search_tasks = [("macro", macro_query, days, 2)]
 
+    ticker_days = 2 if ("monthly" not in session_str and "weekly" not in session_str) else min(days, 7)
     clean_tickers = []
     for t in (tickers or [])[:4]:
         raw_t = t.replace("$", "").strip()
@@ -178,8 +184,9 @@ def get_live_market_news_context(
         if clean_t not in clean_tickers:
             clean_tickers.append(clean_t)
             company_name = TICKER_NAME_MAP.get(clean_t, clean_t)
-            t_query = f"{company_name} stock news earnings" if clean_t in company_name else f"{company_name} {clean_t} stock news earnings"
-            search_tasks.append((clean_t, t_query, 5, 2))
+            # Prioritize live breaking news of the day (contracts, deals, ratings, catalysts) instead of hardcoding stale earnings
+            t_query = f"{company_name} stock latest news today" if clean_t in company_name else f"{company_name} {clean_t} stock news today"
+            search_tasks.append((clean_t, t_query, ticker_days, 2))
 
     def _execute_search(task):
         tag, query, d, m = task

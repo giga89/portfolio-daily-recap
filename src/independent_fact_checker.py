@@ -73,9 +73,12 @@ MISTRAL_MODELS = [
 _MISTRAL_AVAILABLE: Optional[bool] = None
 
 
-def get_current_temporal_context(session_name: Optional[str] = None) -> Dict[str, str]:
+def get_current_temporal_context(
+    session_name: Optional[str] = None,
+    benchmark_daily_data: Optional[Dict[str, float]] = None,
+) -> Dict[str, str]:
     """
-    Builds rich temporal anchors for the exact current moment.
+    Builds rich temporal anchors for the exact current moment, including benchmark closing data.
     """
     now_utc = datetime.now(timezone.utc)
     
@@ -128,12 +131,33 @@ def get_current_temporal_context(session_name: Optional[str] = None) -> Dict[str
     else:
         market_state = "SESSIONE DI RECAP GIORNALIERO."
 
+    # Benchmark daily performance ground truth for close / evening sessions
+    if benchmark_daily_data is None and ("CLOSE" in session_clean or "SERALE" in session_clean):
+        try:
+            from finance_fetcher import fetch_benchmarks_daily_performance
+            b_perf = fetch_benchmarks_daily_performance()
+            if b_perf:
+                benchmark_daily_data = b_perf
+        except Exception:
+            benchmark_daily_data = None
+
+    benchmarks_summary = ""
+    if benchmark_daily_data:
+        parts = []
+        for sym, chg in benchmark_daily_data.items():
+            if chg is not None:
+                sign = "+" if chg > 0 else ""
+                parts.append(f"{sym}: {sign}{chg:.2f}%")
+        if parts:
+            benchmarks_summary = ", ".join(parts)
+
     return {
         "formatted_date": formatted_date,
         "iso_date": now_rome.strftime("%Y-%m-%d"),
         "rome_time": now_rome.strftime("%H:%M CET/CEST"),
         "ny_time": now_ny.strftime("%H:%M ET"),
         "market_state": market_state,
+        "benchmarks_daily": benchmarks_summary,
         "year": str(now_rome.year),
     }
 
@@ -155,6 +179,8 @@ FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY):
 {live_news_context}
 """
 
+    benchmarks_daily_line = f"• PERFORMANCE INDICI OGGI: {temporal_ctx.get('benchmarks_daily') or 'Non specificata'}\n"
+
     return f"""Sei un Lead Financial Fact-Checker & Senior Compliance Auditor per un account pubblico di investimenti su eToro.
 Il tuo obiettivo è effettuare un AUDIT INDIPENDENTE, CRITICO E SPIETATO sul seguente post prima della pubblicazione.
 
@@ -165,7 +191,7 @@ INFORMAZIONI TEMPORALI CERTE (GROUND TRUTH):
 • ORA LOCALE ITALIANA: {temporal_ctx.get('rome_time')}
 • ORA LOCALE WALL STREET: {temporal_ctx.get('ny_time')}
 • STATO DELLA SESSIONE: {temporal_ctx.get('market_state')}
-
+{benchmarks_daily_line}
 =========================================
 METADATI DI PORTAFOGLIO:
 =========================================
@@ -212,6 +238,15 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
    - NON INVENTARE EVENTI NON PRESENTI NEL TESTO: Se il testo da auditare non parla affatto di tassi d'interesse, della Federal Reserve o di uno specifico indicatore macroeconomico, NON devi assolutamente inventarlo o aggiungerlo di tua iniziativa! Correggi al passato SOLO gli eventi che sono già menzionati nel testo.
    - NESSUNA FRASE ASSURDA O CONTRADDITTORIA: È severamente vietato inventare concetti finanziari inesistenti (come 'tassa sui tassi', 'tassa sugli interessi').
    - ZERO RIPETIZIONI: È severamente vietato ripetere la stessa frase o periodo due o più volte nel testo verificato.
+
+8. COERENZA TONO/SENTIMENT DEGLI INDICI (CRITICA):
+   - Se le PERFORMANCE INDICI OGGI indicano un calo (variazione percentuale negativa, es. SPX500 < 0% o NSDQ100 < 0%), il post NON PUÒ per nessun motivo definire la seduta come "positiva", "tono complessivamente positivo", "giornata favorevole", "ottima seduta", "seduta rialzista" o simili.
+   - Definire positiva una seduta in cui l'indice ha perso l'1% o il 2% è una GRAVISSIMA ALLUCINAZIONE fattuale.
+   - CORREZIONE: Sostituisci obbligatoriamente le formule positive errate con espressioni coerenti con la realtà numerica (es. "seduta in flessione", "chiusura in calo", "seduta all'insegna delle prese di beneficio", "giornata debole"), indicando la variazione percentuale reale.
+
+9. PRIORITÀ NOTIZIE FRESCHE DEL GIORNO VS NOIOSE TRIMESTRALI (CRITICA):
+   - I lettori cercano novità e catalizzatori FRESCHI DEL GIORNO (accordi commerciali, partnership strategiche, commesse, lanci di prodotto, upgrade o downgrade di rating con target price, sviluppi regolatori o giudiziari avvenuti oggi o nelle ultime 24-48 ore).
+   - È VIETATO riempire i commenti dei titoli con rimandi generici o noiosi a trimestrali passate o già ampiamente digerite nei giorni scorsi, a meno che i dati finanziari trimestrali non siano stati rilasciati PROPRIO OGGI. Dai sempre priorità a news e catalizzatori operativi freschi.
 
 =========================================
 OUTPUT RICHIESTO:

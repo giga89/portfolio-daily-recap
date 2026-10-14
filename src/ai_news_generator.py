@@ -340,7 +340,7 @@ def _get_top_gainers_with_news(stock_data: dict = None, count: int = 4, max_chec
         if tavily_ok:
             try:
                 search_term = TICKER_NAME_MAP.get(clean_sym, comp_name)
-                query = f"{search_term} stock news earnings catalyst"
+                query = f"{search_term} stock latest news catalyst today"
                 results = search_tavily(query=query, topic="news", days=2, max_results=3)
                 if results:
                     best_r = results[0]
@@ -1548,7 +1548,7 @@ Factual impact and outlook summary...
     return "\n" + final_text + "\n"
 
 
-def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, market_session=None, stock_data=None):
+def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, market_session=None, stock_data=None, benchmark_daily_data=None):
     """
     Generate AI-powered market news recap structured in 5 thematic emoji micro-topics:
     - EU Open: Macro sentiment, Calendar agenda, 2 Follower favorites (rotation), 1 Niche holding (rotation).
@@ -1560,6 +1560,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         excluded_tags: List of tags already used elsewhere in the post
         market_session: Name of the current market session
         stock_data: Optional dictionary containing today's performance data
+        benchmark_daily_data: Optional dictionary containing today's benchmark performance (SPX500, NSDQ100, etc.)
         
     Returns:
         str: Formatted news recap or empty string if API key not set
@@ -1594,6 +1595,15 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
     is_us_open = ("U.S." in session_upper or "US" in session_upper) and "OPEN" in session_upper
     is_weekly = "WEEKLY" in session_upper
     is_us_close = not is_eu_open and not is_us_open and not is_weekly
+    
+    # Auto-fetch daily benchmarks if not provided
+    if benchmark_daily_data is None:
+        try:
+            from finance_fetcher import fetch_benchmarks_daily_performance
+            benchmark_daily_data = fetch_benchmarks_daily_performance()
+        except Exception as b_err:
+            print(f"   ℹ️ Benchmark daily performance note: {b_err}")
+            benchmark_daily_data = {}
     
     try:
         from config import EMOJI_MAP
@@ -1649,6 +1659,10 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         elif is_us_close:
             top_gainers = _get_top_gainers_with_news(stock_data=stock_data, count=4)
             macro_heavy = "SPX500" if (_dt.utcnow().day % 2 == 0) else "NSDQ100"
+            macro_change = benchmark_daily_data.get(macro_heavy, 0.0) if benchmark_daily_data else 0.0
+            spx_change = benchmark_daily_data.get('SPX500', 0.0) if benchmark_daily_data else 0.0
+            ndx_change = benchmark_daily_data.get('NSDQ100', 0.0) if benchmark_daily_data else 0.0
+            
             gainers_filtered = [g for g in top_gainers if g['ticker'] != macro_heavy]
             selected_gainers = gainers_filtered[:3] if len(gainers_filtered) >= 3 else top_gainers[:3]
             g1 = selected_gainers[0] if len(selected_gainers) > 0 else {'ticker': 'NVDA', 'company_name': 'NVIDIA', 'change_pct': 0.0, 'news_snippet': 'NVIDIA guida il sentiment del mercato.'}
@@ -1664,8 +1678,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             g_descrs = f"${g1['ticker']} ({g1.get('daily_change', 0.0):+.2f}%), ${g2['ticker']} ({g2.get('daily_change', 0.0):+.2f}%), ${g3['ticker']} ({g3.get('daily_change', 0.0):+.2f}%)"
             tag_instruction = f"""
 - REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE 4 tag con il simbolo $ nel testo: {selected_tags_str}. Non uno di meno, non uno di più.
-- Inserisci ${macro_heavy} nel Microtema 1 per inquadrare la chiusura generale di Wall Street e l'andamento del mercato.
-- Inserisci i 3 titoli del portafoglio in evidenza ({g_descrs}) nei rispettivi microtemi dedicati spiegando le notizie e i catalizzatori reali che ne hanno guidato il movimento.
+- Inserisci ${macro_heavy} nel Microtema 1 per inquadrare la chiusura generale di Wall Street (${macro_heavy} {macro_change:+.2f}%, $SPX500 {spx_change:+.2f}%, $NSDQ100 {ndx_change:+.2f}%). Il tuo commento DEVE rispettare rigorosamente il segno e l'entità del movimento reale.
+- Inserisci i 3 titoli del portafoglio in evidenza ({g_descrs}) nei rispettivi microtemi dedicati spiegando le notizie fresche del giorno e i catalizzatori reali odierni.
 """
         else:
             # Fallback for weekly recap
@@ -1708,7 +1722,7 @@ NOTIZIE FINANZIARIE REALI & CATALIZZATORI SOCIETARI (GROUND TRUTH WEB LIVE - TAV
 {t_news}
 =====================================================
 REGOLA D'USO TASSATIVA: Usa queste notizie reali e verificate come base OBBLIGATORIA per la tua analisi.
-Estrai e cita i fatti concreti, le cifre, le percentuali, i dati trimestrali e i catalizzatori societari reali menzionati sopra.
+Estrai e cita i fatti concreti, le cifre, le percentuali, le novità del giorno (contratti commerciali, partnership, rating analisti, sviluppi industriali) e i catalizzatori societari reali menzionati sopra. NON concentrarti solo su vecchie trimestrali a meno che non siano uscite OGGI.
 """
                     print(f"   🌐 Tavily Live Grounding: fornite notizie recenti al generatore ({len(t_news)} caratteri).")
         except Exception as tavily_err:
@@ -1760,6 +1774,38 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
   * Se non conosci l'esito reale di una decisione di oggi con certezza assoluta, NON inventarlo e NON menzionare la decisione: concentrati sulle performance effettive e verificate dei titoli del nostro portafoglio.
 """
 
+        benchmarks_close_ground_truth = f"""
+=====================================================
+DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
+=====================================================
+- Indice primario da commentare: ${macro_heavy if is_us_close else 'SPX500'} ({macro_change:+.2f}% if is_us_close else "")
+- S&P 500 ($SPX500): {spx_change:+.2f}% if is_us_close else ""
+- Nasdaq 100 ($NSDQ100): {ndx_change:+.2f}% if is_us_close else ""
+=====================================================
+""" if is_us_close else ""
+
+        index_tone_rules_us_close = f"""
+- REGOLA MATEMATICA E VERBALE SUL TONO DI CHIUSURA DEGLI INDICI (TASSATIVO E RIGIDO):
+  * L'indice ${macro_heavy} ha chiuso la seduta odierna con una variazione di {macro_change:+.2f}%.
+  * SE LA VARIAZIONE È NEGATIVA (< 0%):
+    - È SEVERAMENTE VIETATO usare espressioni come "tono positivo", "tono complessivamente positivo", "chiusura positiva", "seduta positiva", "ottimismo", "rialzo", "guadagni", "in spolvero", "entusiasmo" per descrivere l'andamento dell'indice o di Wall Street.
+    - DEVI descrivere la chiusura coerentemente con i numeri: seduta in calo, flessione, chiusura in territorio negativo, prese di beneficio, correzione, seduta pesante o debolezza dei listini, citando esplicitamente la percentuale reale ({macro_change:+.2f}%).
+  * SE LA VARIAZIONE È POSITIVA (> 0%):
+    - Descrivi la seduta come positiva / in rialzo / guadagni, citando la percentuale reale ({macro_change:+.2f}%).
+  * SE LA VARIAZIONE È PIATTA (-0.15% <= variazione <= +0.15%):
+    - Descrivi la seduta come poco mossa / invariata / all'insegna della cautela / contrastata ({macro_change:+.2f}%).
+  * QUALSIASI DISCORDANZA TRA IL SEGNO DELLA PERCENTUALE E IL TONO VERBALE È UN GRAVISSIMO ERRORE FATTUALE E COMPORTERÀ LA BOCCIATURA IMMEDIATA DEL TESTO.
+""" if is_us_close else ""
+
+        news_of_the_day_rules = (
+            "- REGOLA NOTIZIE TITOLI (NEWS FRESCHE DEL GIORNO VS NOIOSE TRIMESTRALI - TASSATIVO):\n"
+            "  * PRIORITÀ ASSOLUTA ALLE NOTIZIE DEL GIORNO: per ogni titolo del portafoglio, privilegia le notizie vive e fresche della sessione odierna:\n"
+            "    nuovi accordi commerciali o industriali, partnership strategiche, contratti vinti, commesse, investimenti, lanci di prodotti, sviluppi tecnologici o regolatori, giudizi e revisioni di target price degli analisti (upgrade/downgrade), volumi o catalizzatori di settore.\n"
+            "  * STOP ALL'ABUSO DELLE TRIMESTRALI (EARNINGS): È SEVERAMENTE VIETATO concentrarsi sempre e solo sulle trimestrali o riassumere noiosi bilanci già vecchi di giorni o settimane!\n"
+            "    Puoi citare una trimestrale SOLO ED ESCLUSIVAMENTE SE i risultati sono stati comunicati esattamente NELLA GIORNATA DI OGGI. Se non ci sono trimestrali di oggi, parla delle vere novità del giorno, dei contratti o dei driver operativi correnti.\n"
+            "  * Vogliamo post ricchi di attualità viva e catalizzatori di mercato del giorno, NON una monotona ripetizione di numeri contabili già metabolizzati."
+        )
+
         dynamic_greeting = _get_dynamic_greeting(session_upper)
         closing_question_instruction = _get_closing_question_instruction(session_upper)
 
@@ -1795,6 +1841,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             - Parla direttamente in prima persona ("Nel nostro portafoglio...", "Monitoriamo...", "La mia strategia..."). Mai presentarsi col proprio nome nel testo!
             {asset_identity_rules}
             {anti_platitude_rules}
+            {news_of_the_day_rules}
             - Inizia il messaggio ESATTAMENTE con: "{dynamic_greeting}"
 
             STRUTTURA RIGIDA DEI 5 MICROTEMI A EMOTICON (TASSATIVO):
@@ -1815,13 +1862,13 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
                Principali catalizzatori e dati macro della mattinata europea (inflazione, PIL, PMI, decisioni BCE) che possono muovere i listini.
 
             {emoji_fav1} MICRO-TEMA 3: ${fav1}
-               Titolo EU/Asia a rotazione tra i più interessanti per i follower. Riporta dati reali, contratti, numeri di bilancio o catalizzatori industriali concreti.
+               Titolo EU/Asia a rotazione tra i più interessanti per i follower. Riporta news del giorno, contratti, numeri di bilancio o catalizzatori industriali concreti.
 
             {emoji_fav2} MICRO-TEMA 4: ${fav2}
                Secondo titolo EU/Asia a rotazione tra i più interessanti per i follower. Notizie concrete e sviluppi operativi verificati.
 
             {emoji_niche} MICRO-TEMA 5: ${niche1}
-               Titolo EU/Asia tra quelli più di nicchia e diversificazione. Spiega catalizzatori reali e prospettive operative.
+               Titolo EU/Asia tra quelli più di nicchia e diversificazione. Spiega catalizzatori reali e prospettive operative del giorno.
 
             {tag_instruction}
             - {closing_question_instruction}
@@ -1844,6 +1891,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             - Parla direttamente in prima persona ("Nel nostro portafoglio...", "Oggi all'apertura guardiamo...", "La mia strategia..."). Mai presentarsi col proprio nome nel testo!
             {asset_identity_rules}
             {anti_platitude_rules}
+            {news_of_the_day_rules}
             - Inizia il messaggio ESATTAMENTE con: "{dynamic_greeting}"
 
             STRUTTURA RIGIDA DEI 5 MICROTEMI A EMOTICON (TASSATIVO):
@@ -1864,13 +1912,13 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
                Agenda e market movers della sessione americana (dati macro ore 14:30/16:00 italiane come CPI, PPI, sussidi disoccupazione, discorsi Fed).
 
             {emoji_fav1} MICRO-TEMA 3: ${fav1}
-               Titolo USA a rotazione tra i più interessanti per i follower. Approfondimento concreto con numeri di crescita, chip AI, contratti cloud o guidance.
+               Titolo USA a rotazione tra i più interessanti per i follower. Approfondimento concreto con novità del giorno, partnership, chip AI, contratti cloud o guidance.
 
             {emoji_fav2} MICRO-TEMA 4: ${fav2}
-               Secondo titolo USA a rotazione tra i più interessanti per i follower. Dati aziendali e catalizzatori operativi reali.
+               Secondo titolo USA a rotazione tra i più interessanti per i follower. Notizie fresche e catalizzatori operativi reali.
 
             {emoji_niche} MICRO-TEMA 5: ${niche1}
-               Titolo USA tra quelli più di nicchia e diversificazione. Aggiornamento concreto sulla pipeline e tesi industriale.
+               Titolo USA tra quelli più di nicchia e diversificazione. Aggiornamento concreto sulla pipeline e tesi industriale del giorno.
 
             {tag_instruction}
             - {closing_question_instruction}
@@ -1883,7 +1931,9 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
         elif is_us_close:
             prompt = f"""Sei Andrea Ravalli, investitore privato italiano su eToro. Scrivi un resoconto serale caldo, professionale e naturale dopo la chiusura dei mercati USA (U.S. market close).
             {temporal_ground_truth_header}
+            {benchmarks_close_ground_truth}
             {temporal_rules_us_close}
+            {index_tone_rules_us_close}
             {tavily_grounding_section}
             {holdings_fundamental_section}
             {previous_topics_str}
@@ -1895,6 +1945,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             - Parla direttamente in prima persona ("Chiudiamo la sessione...", "Nel nostro portafoglio...", "Oggi abbiamo osservato..."). Mai presentarsi col proprio nome nel testo!
             {asset_identity_rules}
             {anti_platitude_rules}
+            {news_of_the_day_rules}
             - Inizia il messaggio ESATTAMENTE con: "{dynamic_greeting}"
 
             STRUTTURA RIGIDA DEI 5 MICROTEMI A EMOTICON (TASSATIVO):
@@ -1908,22 +1959,24 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             - Se per qualsiasi motivo non sai cosa mettere, usa il simbolo di elenco '🔹'.
             - NON omettere mai l'emoticon a inizio riga per nessun microtema.
 
-            🌆 MICRO-TEMA 1: Riepilogo rapido di chiusura Wall Street (${macro_heavy})
-               Sintesi a bocce ferme di cosa ha guidato i listini oggi (reazione a dati macro, rendimenti, flussi settoriali). Includi il tag ${macro_heavy}.
+            🌆 MICRO-TEMA 1: Riepilogo rapido di chiusura Wall Street (${macro_heavy}: {macro_change:+.2f}%)
+               Sintesi a bocce ferme di cosa ha guidato i listini oggi (${macro_heavy}: {macro_change:+.2f}%, $SPX500: {spx_change:+.2f}%, $NSDQ100: {ndx_change:+.2f}%).
+               Spiega le cause reali del movimento (rendimenti obbligazionari Treasury, dati macroeconomici, reazione dei settori).
+               Ricorda la REGOLA TASSATIVA SUL TONO: rispecchia fedelmente il segno reale ({macro_change:+.2f}%), senza inventare toni positivi se la seduta è stata in calo. Includi il tag ${macro_heavy}.
 
             REGOLA CRITICA SULLA FRESCHEZZA DELLE NOTIZIE:
-            - Per ogni titolo, la notizia citata DEVE essere della giornata odierna o al massimo di ieri. Se la fonte è più vecchia di 2 giorni, NON citarla come catalizzatore di oggi.
+            - Per ogni titolo, privilegia le notizie della giornata odierna o di ieri (accordi, partnership, rating, sviluppi operativi). Se non ci sono trimestrali di oggi, NON citare trimestrali passate.
             - Se il news_snippet include una data [Fonte: YYYY-MM-DD], usala per verificare che sia recente. Se non è recente, spiega il movimento con dati di mercato (volumi, settore, flussi) anziché con notizie stale.
             - MAI presentare una notizia di 3-5 giorni fa come se fosse il catalizzatore della sessione odierna.
 
             {emoji_g1} MICRO-TEMA 2: ${g1['ticker']} ({g1['daily_change']:+.2f}%)
-               Titolo del portafoglio con la più grande variazione positiva di oggi. Spiega la notizia reale e il catalizzatore che lo ha portato a muoversi così: {g1['news_snippet']}.
+               Titolo del portafoglio con la maggiore variazione positiva di oggi. Spiega la news del giorno o il catalizzatore reale che lo ha mosso: {g1['news_snippet']}. Privilegia news fresche (accordi, partnership, rating, contratti) ed evita di citare vecchie trimestrali a meno che non siano uscite oggi.
 
             {emoji_g2} MICRO-TEMA 3: ${g2['ticker']} ({g2['daily_change']:+.2f}%)
-               Secondo titolo per variazione positiva. Spiega la notizia reale e il catalizzatore del movimento: {g2['news_snippet']}.
+               Secondo titolo per variazione positiva. Spiega la news del giorno o il catalizzatore del movimento: {g2['news_snippet']}. Privilegia news fresche ed evita trimestrali vecchie.
 
             {emoji_g3} MICRO-TEMA 4: ${g3['ticker']} ({g3['daily_change']:+.2f}%)
-               Terzo titolo per variazione positiva. Spiega la notizia reale e il catalizzatore del movimento: {g3['news_snippet']}.
+               Terzo titolo per variazione positiva. Spiega la news del giorno o il catalizzatore del movimento: {g3['news_snippet']}. Privilegia news fresche ed evita trimestrali vecchie.
 
             ⚖️ MICRO-TEMA 5: Rotazione Settoriale & Strategia
                Breve sintesi su rotazione settoriale a Wall Street (difensivi vs ciclici, flussi istituzionali) e assetti del nostro portafoglio. NON inserire altri tag oltre ai 4 indicati.
@@ -1944,6 +1997,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             CONTESTO PORTAFOGLIO: {portfolio_context}
             {asset_identity_rules}
             {anti_platitude_rules}
+            {news_of_the_day_rules}
             - Inizia con: "{dynamic_greeting}"
             - Fai un bilancio sincero di cosa ha guidato il portafoglio in questa settimana, menzionando i movimenti principali con fatti e numeri precisi.
             - {tag_instruction}
@@ -1960,6 +2014,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             CONTESTO PORTAFOGLIO: {portfolio_context}
             {asset_identity_rules}
             {anti_platitude_rules}
+            {news_of_the_day_rules}
             - Inizia con: "{dynamic_greeting}"
             - Metti in evidenza i catalizzatori principali della settimana entrante con dati precisi.
             - {tag_instruction}
@@ -1976,6 +2031,7 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
             CONTESTO PORTAFOGLIO: {portfolio_context}
             {asset_identity_rules}
             {anti_platitude_rules}
+            {news_of_the_day_rules}
             - Inizia con: "{dynamic_greeting}"
             - {tag_instruction}
             - {closing_question_instruction}

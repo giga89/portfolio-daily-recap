@@ -181,6 +181,31 @@ PLATITUDE_FORBIDDEN_PATTERNS = [
     ),
 ]
 
+# Patterns indicating tone/sentiment contradictions for market index closing (e.g. positive tone when index dropped)
+SENTIMENT_MISMATCH_PATTERNS = [
+    (
+        r'\b(?:ha\s+chiuso\s+con\s+un\s+tono|si\s+è\s+chiusa\s+con\s+un\s+tono)\s+(?:complessivamente\s+)?positivo\b',
+        "Afferma tono positivo su seduta in calo"
+    ),
+    (
+        r'\b(?:tono|chiusura|seduta|giornata)\s+(?:complessivamente\s+)?positiv[ao]\b',
+        "Definisce la seduta o il tono generale come positivo quando i listini hanno chiuso in calo"
+    ),
+    (
+        r'\b(?:seduta|chiusura)\s+in\s+(?:forte\s+)?territorio\s+positivo\b',
+        "Afferma territorio positivo su mercato in calo"
+    ),
+    (
+        r'\b(?:listini|indici|mercati|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+rialzo\b',
+        "Afferma chiusura in rialzo quando i listini hanno chiuso in calo"
+    ),
+    (
+        r'\b(?:l\'indice|indice)\s+\$?(?:SPX500|NSDQ100|GER40|DJ30)\b.{0,40}\b(?:ha\s+chiuso\s+in\s+rialzo|chiude\s+in\s+rialzo|ha\s+guadagnato|registra\s+guadagni)\b',
+        "Afferma rialzo/guadagni per indice che ha chiuso in calo"
+    ),
+]
+
+
 
 def clean_etoro_formatting(text: str) -> str:
     """
@@ -295,6 +320,7 @@ def verify_post_deterministic(
     text: str,
     primary_ticker: Optional[str] = None,
     session_name: Optional[str] = None,
+    benchmark_daily: Optional[Dict[str, float]] = None,
 ) -> Tuple[bool, List[str], str]:
     """
     Fast, rule-based verification against PORTFOLIO_ASSETS_METADATA and temporal rules.
@@ -351,6 +377,22 @@ def verify_post_deterministic(
     for pattern, reason in PLATITUDE_FORBIDDEN_PATTERNS:
         if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
             issues.append(f"CRITICAL: BANALITÀ VIETATA: {reason}.")
+
+    # 0d. Check for market sentiment mismatch (claiming positive tone/close when market is down)
+    if is_close_session and benchmark_daily:
+        spx_perf = benchmark_daily.get('SPX500')
+        ndx_perf = benchmark_daily.get('NSDQ100')
+        is_market_negative = (spx_perf is not None and spx_perf < -0.15) or (ndx_perf is not None and ndx_perf < -0.15)
+        if is_market_negative:
+            for pattern, reason in SENTIMENT_MISMATCH_PATTERNS:
+                if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
+                    issues.append(
+                        f"CRITICAL: Incongruenza di tono/sentiment di mercato: i listini hanno chiuso in calo "
+                        f"(SPX500: {spx_perf:+.2f}%, NSDQ100: {ndx_perf:+.2f}%), ma il testo descrive la seduta "
+                        f"con toni positivi o rialzisti ({reason}). Sostituire con chiusura in calo o flessione."
+                    )
+                    break
+
 
     # Check for purged assets that must never appear in active communications
     for tag in tickers_to_check:
@@ -437,11 +479,13 @@ def sanitize_or_prune_post_content(
     text: str,
     primary_ticker: Optional[str] = None,
     session_name: Optional[str] = None,
+    benchmark_daily: Optional[Dict[str, float]] = None,
 ) -> Tuple[str, bool, List[str]]:
     """
     Sanitizes or prunes problematic content from a post instead of dropping it entirely.
 
     1. Depura claims non conformi (es. '100% dei copiatori in profitto' -> 'oltre l'80% delle posizioni storiche in profitto').
+    1b. Depura paradossi di sentiment di mercato (es. 'tono positivo' su seduta in calo -> 'listini in flessione e prese di beneficio').
     2. Depura o Epura paragrafi con allucinazioni sui dividendi per asset ad accumulazione:
        - Tenta prima la sostituzione chirurgica di parole vietate (dividendo/cedola -> rendimento/proventi capitalizzati).
        - Se il paragrafo continua a fallire la verifica, EPURA (rimuove) il singolo paragrafo difettoso.
@@ -472,8 +516,51 @@ def sanitize_or_prune_post_content(
         flags=re.IGNORECASE,
     )
 
-    # Verifica preliminare sul testo depurato dai claim generali
-    is_clean, issues, _ = verify_post_deterministic(cleaned, primary_ticker=primary_ticker, session_name=session_name)
+    # 1b. Depurazione automatica paradosso di sentiment su mercati negativi
+    if benchmark_daily:
+        spx_perf = benchmark_daily.get('SPX500')
+        ndx_perf = benchmark_daily.get('NSDQ100')
+        is_market_negative = (spx_perf is not None and spx_perf < -0.15) or (ndx_perf is not None and ndx_perf < -0.15)
+        if is_market_negative:
+            cleaned = re.sub(
+                r'\b(?:ha\s+chiuso\s+con\s+un\s+tono|si\s+è\s+chiusa\s+con\s+un\s+tono)\s+complessivamente\s+positivo\b',
+                'ha chiuso con listini in flessione e prese di beneficio',
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            cleaned = re.sub(
+                r'\b(?:tono|chiusura|seduta|giornata)\s+complessivamente\s+positiv[ao]\b',
+                'seduta all\'insegna delle prese di beneficio e listini in calo',
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            cleaned = re.sub(
+                r'\b(?:tono|chiusura|seduta|giornata)\s+positiv[ao]\b',
+                'seduta in calo',
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            cleaned = re.sub(
+                r'\bchius(?:a|o|ero)\s+in\s+rialzo\b',
+                'chiuso in flessione',
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            cleaned = re.sub(
+                r'\bin\s+territorio\s+molto\s+positivo\b',
+                'in flessione',
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            cleaned = re.sub(
+                r'\bin\s+territorio\s+positivo\b',
+                'in territorio negativo',
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+
+    # Verifica preliminare sul testo depurato dai claim generali e dal sentiment
+    is_clean, issues, _ = verify_post_deterministic(cleaned, primary_ticker=primary_ticker, session_name=session_name, benchmark_daily=benchmark_daily)
     if is_clean:
         return cleaned, True, []
 
@@ -523,7 +610,7 @@ def sanitize_or_prune_post_content(
 
     # Se l'epurazione ha lasciato almeno 2 paragrafi e lunghezza sufficiente, verifica
     if len(cleaned_paras) >= 2 and len(candidate_text) >= 200:
-        is_now_clean, final_issues, _ = verify_post_deterministic(candidate_text, primary_ticker=primary_ticker, session_name=session_name)
+        is_now_clean, final_issues, _ = verify_post_deterministic(candidate_text, primary_ticker=primary_ticker, session_name=session_name, benchmark_daily=benchmark_daily)
         if is_now_clean:
             return candidate_text, True, []
         else:
@@ -690,6 +777,7 @@ def verify_and_clean_post(
     session_name: Optional[str] = None,
     generator_model: Optional[str] = None,
     run_ai_review: bool = True,
+    benchmark_daily: Optional[Dict[str, float]] = None,
 ) -> Tuple[bool, str, Dict[str, Any]]:
     """
     Complete pre-publication verification pipeline.
@@ -702,11 +790,24 @@ def verify_and_clean_post(
     print(f"\n🛡️ PRE-PUBLICATION VERIFICATION GATE:")
     print(f"   Primary Ticker: {primary_ticker or 'N/A'} | Session: {session_name or 'General'}")
 
-    # Stage 1: Deterministic check (structural, asset compliance, temporal rules)
+    session_upper = (session_name or "").upper()
+    is_close_session = (
+        any(k in session_upper for k in ["CLOSE", "SERALE", "CHIUSURA", "FINE GIORNATA"]) or
+        (not session_name and bool(re.search(r'\b(?:chiusura\s+usa|buonasera|fine\s+sessione)\b', text.lower())))
+    )
+    if benchmark_daily is None and is_close_session:
+        try:
+            from finance_fetcher import fetch_benchmarks_daily_performance
+            benchmark_daily = fetch_benchmarks_daily_performance()
+        except Exception:
+            benchmark_daily = {}
+
+    # Stage 1: Deterministic check (structural, asset compliance, temporal rules, sentiment consistency)
     is_clean, issues, cleaned_text = verify_post_deterministic(
         text,
         primary_ticker=primary_ticker,
-        session_name=session_name
+        session_name=session_name,
+        benchmark_daily=benchmark_daily
     )
 
     if issues:
@@ -780,11 +881,26 @@ def verify_and_clean_post(
                 for t_err in audit_data.get("temporal_issues", []):
                     print(f"      • Fixed temporal issue: {t_err}")
                 final_text = limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4)
+                if benchmark_daily:
+                    final_text, _, _ = sanitize_or_prune_post_content(
+                        final_text,
+                        primary_ticker=primary_ticker,
+                        session_name=session_name,
+                        benchmark_daily=benchmark_daily
+                    )
                 return True, final_text, audit_data
 
             # APPROVE
             print(f"   ✅ POST APPROVED BY AUDITOR ({auditor_name}).")
-            return True, limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4), audit_data
+            final_text = limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4)
+            if benchmark_daily:
+                final_text, _, _ = sanitize_or_prune_post_content(
+                    final_text,
+                    primary_ticker=primary_ticker,
+                    session_name=session_name,
+                    benchmark_daily=benchmark_daily
+                )
+            return True, final_text, audit_data
 
     # If AI review not available or skipped, use deterministic outcome
     if not is_clean:
