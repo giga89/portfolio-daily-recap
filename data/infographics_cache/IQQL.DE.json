@@ -1,0 +1,59 @@
+{
+  "name": "ISHARES LISTED PRIVATE EQUITY UCITS ETF USD (DIST)",
+  "tagline": "Il Private Equity Diventa Liquido",
+  "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+  "subtitle": "Esposizione liquida ai colossi globali del private equity, generatori di alpha e fee da performance nel lungo periodo.",
+  "kpis": [
+    {
+      "label": "DIVIDEND YIELD",
+      "val": "~3.50%",
+      "sub": "Distribuzione semestrale certificata"
+    },
+    {
+      "label": "TER (COSTI TOTALI)",
+      "val": "0.75%",
+      "sub": "Costo annuo di gestione ETF"
+    },
+    {
+      "label": "PESO IN PORTAFOGLIO",
+      "val": "1.35%",
+      "sub": "Allocazione gestita nel portafoglio"
+    },
+    {
+      "label": "AUM STRUMENTO",
+      "val": "$1.0B+",
+      "sub": "Replica fisica S&P Listed Private Equity"
+    }
+  ],
+  "pillars": [
+    [
+      "Fossato Competitivo:",
+      "Monopolio di relazioni e capitali bloccati a lungo termine che garantiscono fee stabili e visibili."
+    ],
+    [
+      "Catalizzatore di Crescita:",
+      "Espansione costante della domanda istituzionale e retail verso private equity, direct lending e infrastrutture."
+    ],
+    [
+      "Solidità e Finanze:",
+      "Solidi margini operativi generati da commissioni di gestione fisse amplificati da performance fee sulle exit."
+    ],
+    [
+      "Visione Decennale:",
+      "Strumento strategico ideale per beneficiare del premio di rendimento privato godendo di liquidità di borsa immediata."
+    ]
+  ],
+  "quote": "Catturare il valore del capitale privato globale con la flessibilità e trasparenza di un ETF quotato.",
+  "tags": [
+    "#IQQL_DE",
+    "#PrivateEquity",
+    "#Alternatives",
+    "#Dividends",
+    "#LongTerm"
+  ],
+  "color": [
+    20,
+    100,
+    200
+  ]
+}
