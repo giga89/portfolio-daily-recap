@@ -124,6 +124,44 @@ class TestTavilyIntegration(unittest.TestCase):
             self.assertEqual(call_args.kwargs.get("live_news_context"), "### TAVILY CONTEXT: Market solid")
         self.assertEqual(res["decision"], "APPROVE")
 
+    def test_get_tavily_api_keys_collection(self):
+        from tavily_search import get_tavily_api_keys
+        with patch.dict(os.environ, {
+            "TAVILY_API_KEY": "primary_key",
+            "TAVILY_API_KEY_SECONDARY": "secondary_key",
+        }, clear=True):
+            keys = get_tavily_api_keys()
+            self.assertEqual(keys, ["primary_key", "secondary_key"])
+
+    @patch("requests.post")
+    def test_search_tavily_multi_key_failover_on_432(self, mock_post):
+        import tavily_search
+        # Reset exhausted keys
+        tavily_search._EXHAUSTED_KEYS.clear()
+
+        # Mock: first call returns 432 (plan limit exceeded), second call returns 200
+        resp_432 = MagicMock()
+        resp_432.status_code = 432
+        resp_432.text = '{"error": "plan limit exceeded"}'
+
+        resp_200 = MagicMock()
+        resp_200.status_code = 200
+        resp_200.json.return_value = {
+            "results": [{"title": "Second Key News", "url": "https://example.com"}]
+        }
+
+        mock_post.side_effect = [resp_432, resp_200]
+
+        with patch.dict(os.environ, {
+            "TAVILY_API_KEY": "exhausted_key_1",
+            "TAVILY_API_KEY_SECONDARY": "backup_key_2",
+        }, clear=True):
+            res = tavily_search.search_tavily("test query")
+            self.assertEqual(len(res), 1)
+            self.assertEqual(res[0]["title"], "Second Key News")
+            self.assertEqual(mock_post.call_count, 2)
+
 
 if __name__ == "__main__":
     unittest.main()
+

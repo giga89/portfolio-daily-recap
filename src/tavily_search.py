@@ -62,9 +62,71 @@ TICKER_NAME_MAP = {
 }
 
 
+# Auto-load local .env if present
+_env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+if os.path.exists(_env_path):
+    try:
+        with open(_env_path, "r", encoding="utf-8") as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if _line and not _line.startswith("#") and "=" in _line:
+                    _k, _v = _line.split("=", 1)
+                    os.environ.setdefault(_k.strip(), _v.strip())
+    except Exception:
+        pass
+
+# Track exhausted keys (e.g. 432 usage limit or 401 invalid) with expiry
+_EXHAUSTED_KEYS: Dict[str, float] = {}
+
+
+def get_tavily_api_keys() -> List[str]:
+    """
+    Returns an ordered list of configured Tavily API keys (primary + secondaries/fallbacks).
+    Supports:
+      1. TAVILY_API_KEYS (comma-separated list)
+      2. TAVILY_API_KEY (primary)
+      3. TAVILY_API_KEY_SECONDARY, TAVILY_API_KEY_FALLBACK, TAVILY_API_KEY_2, etc.
+    """
+    keys: List[str] = []
+
+    # 1. Comma-separated list
+    raw_list = os.environ.get("TAVILY_API_KEYS", "")
+    if raw_list:
+        for k in raw_list.split(","):
+            k_clean = k.strip()
+            if k_clean and k_clean not in keys:
+                keys.append(k_clean)
+
+    # 2. Primary key
+    primary = os.environ.get("TAVILY_API_KEY", "").strip()
+    if primary and primary not in keys:
+        keys.append(primary)
+
+    # 3. Secondary and fallback environment variables
+    fallback_env_vars = [
+        "TAVILY_API_KEY_SECONDARY",
+        "TAVILY_API_KEY_FALLBACK",
+        "TAVILY_API_KEY_2",
+        "TAVILY_API_KEY_BACKUP",
+    ]
+    for env_var in fallback_env_vars:
+        val = os.environ.get(env_var, "").strip()
+        if val and val not in keys:
+            keys.append(val)
+
+    # 4. Any other TAVILY_API_KEY_* variables
+    for k, v in os.environ.items():
+        if k.startswith("TAVILY_API_KEY_") and k not in fallback_env_vars:
+            v_clean = v.strip()
+            if v_clean and v_clean not in keys:
+                keys.append(v_clean)
+
+    return keys
+
+
 def is_tavily_available() -> bool:
-    """Check if Tavily API key is configured."""
-    return bool(os.environ.get("TAVILY_API_KEY")) and REQUESTS_AVAILABLE
+    """Check if at least one Tavily API key is configured."""
+    return bool(get_tavily_api_keys()) and REQUESTS_AVAILABLE
 
 
 def search_tavily(
@@ -77,7 +139,10 @@ def search_tavily(
     timeout: int = 8,
 ) -> Optional[List[Dict[str, Any]]]:
     """
-    Executes a real-time web search via Tavily Search API.
+    Executes a real-time web search via Tavily Search API with multi-key auto-failover.
+    
+    If the primary key hits quota limits (HTTP 432 / 429) or fails, it automatically
+    fails over to the secondary key without interruption.
     
     Args:
         query: Search query (e.g. "Wall Street close today", "NVDA stock news")
@@ -85,7 +150,7 @@ def search_tavily(
         topic: "news" or "general"
         days: Limit results to the last N days (default 3 for recent financial news)
         max_results: Max number of search results to return
-        api_key: Optional API key override (defaults to TAVILY_API_KEY env var)
+        api_key: Optional API key override
         timeout: Request timeout in seconds
         
     Returns:
@@ -94,38 +159,68 @@ def search_tavily(
     if not REQUESTS_AVAILABLE:
         return []
 
-    key = api_key or os.environ.get("TAVILY_API_KEY")
-    if not key:
+    # Build candidate keys list
+    if api_key:
+        configured = [api_key]
+        for k in get_tavily_api_keys():
+            if k != api_key and k not in configured:
+                configured.append(k)
+    else:
+        configured = get_tavily_api_keys()
+
+    if not configured:
         return []
 
-    payload = {
-        "api_key": key,
-        "query": query,
-        "search_depth": search_depth,
-        "topic": topic,
-        "days": days,
-        "max_results": max_results,
-    }
+    now = time.time()
+    # Order candidate keys: non-exhausted first, then exhausted
+    active_keys = [k for k in configured if _EXHAUSTED_KEYS.get(k, 0) <= now]
+    exhausted_keys = [k for k in configured if _EXHAUSTED_KEYS.get(k, 0) > now]
+    ordered_keys = active_keys + exhausted_keys
 
-    try:
-        t0 = time.time()
-        resp = requests.post(TAVILY_API_URL, json=payload, timeout=timeout)
-        elapsed = time.time() - t0
+    for idx, key in enumerate(ordered_keys):
+        payload = {
+            "api_key": key,
+            "query": query,
+            "search_depth": search_depth,
+            "topic": topic,
+            "days": days,
+            "max_results": max_results,
+        }
 
-        if resp.status_code == 200:
-            data = resp.json()
-            results = data.get("results", [])
-            print(f"   🌐 Tavily Live Search: {len(results)} risultati in {elapsed:.2f}s per query: '{query[:45]}...'")
-            return results
-        elif resp.status_code == 429:
-            print(f"   ℹ️ Tavily Search rate-limited (429).")
+        key_masked = (key[:8] + "..." + key[-4:]) if len(key) > 12 else "***"
+        try:
+            t0 = time.time()
+            resp = requests.post(TAVILY_API_URL, json=payload, timeout=timeout)
+            elapsed = time.time() - t0
+
+            if resp.status_code == 200:
+                data = resp.json()
+                results = data.get("results", [])
+                key_info = f" (chiave {idx + 1}/{len(ordered_keys)}: {key_masked})" if len(ordered_keys) > 1 else ""
+                print(f"   🌐 Tavily Live Search{key_info}: {len(results)} risultati in {elapsed:.2f}s per query: '{query[:45]}...'")
+                return results
+            elif resp.status_code in (429, 432, 401, 403):
+                # Quota exceeded (432/429) or auth error (401/403)
+                _EXHAUSTED_KEYS[key] = now + 3600  # 1 hour cooldown
+                if idx < len(ordered_keys) - 1:
+                    next_masked = (ordered_keys[idx + 1][:8] + "..." + ordered_keys[idx + 1][-4:]) if len(ordered_keys[idx + 1]) > 12 else "***"
+                    print(f"   ⚠️ Tavily chiave {key_masked} esaurita/limitata (HTTP {resp.status_code}). Failover automatico su chiave successiva ({next_masked})...")
+                    continue
+                else:
+                    print(f"   ⚠️ Tavily chiave {key_masked} esaurita (HTTP {resp.status_code}) e nessun'altra chiave di riserva disponibile.")
+                    return []
+            else:
+                print(f"   ⚠️ Tavily Search returned HTTP {resp.status_code} ({key_masked}): {resp.text[:100]}")
+                if idx < len(ordered_keys) - 1:
+                    continue
+                return []
+        except Exception as exc:
+            print(f"   ⚠️ Tavily Search exception con chiave {key_masked}: {exc}")
+            if idx < len(ordered_keys) - 1:
+                continue
             return []
-        else:
-            print(f"   ⚠️ Tavily Search returned HTTP {resp.status_code}: {resp.text[:100]}")
-            return []
-    except Exception as exc:
-        print(f"   ⚠️ Tavily Search exception: {exc}")
-        return []
+
+    return []
 
 
 def get_live_market_news_context(

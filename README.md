@@ -177,6 +177,7 @@ Il processo editoriale e informativo del portafoglio non si affida all'AI in mod
 | `GROQ_API_KEY` | Groq Cloud API Key for ultrafast independent LPU auditing |
 | `MISTRAL_API_KEY` | Mistral AI API Key for European independent auditor check |
 | `TAVILY_API_KEY` | Tavily Search API Key for real-time live financial news grounding |
+| `TAVILY_API_KEY_SECONDARY` | *(Optional)* Secondary Tavily key for automatic failover when quota is exhausted |
 | `GIST_TOKEN` | GitHub Personal Access Token (PAT) for Gist state persistence |
 | `LINKEDIN_ACCESS_TOKEN` | *(Optional)* LinkedIn OAuth2 token for weekly posts |
 | `TWITTER_API_KEY` / `_SECRET` | *(Optional)* Twitter / X API credentials |
