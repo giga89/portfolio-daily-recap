@@ -507,24 +507,49 @@ def build_card_from_stock_data(
 ) -> "str | None":
     """
     Convenience wrapper: picks winner and loser from stock_data automatically.
+    Includes strict, session-aware validations to guarantee only actively traded
+    instruments are presented as Top & Flop (eliminating stale previous-day prices).
     """
     metric     = SESSION_METRIC.get(session_name, "daily_change")
     is_daily   = metric == "daily_change"
-    candidates = {
-        t: d for t, d in stock_data.items()
-        if (d.get("has_traded_today", True) or not is_daily)
-        and metric in d
-        and d[metric] is not None
-        and t not in {"MNODL.L", "NVTKL.L"}
-    }
+    session_upper = (session_name or "").upper()
+    is_eu_open = "EUROPEAN" in session_upper and "OPEN" in session_upper
+
+    candidates = {}
+    for t, d in stock_data.items():
+        if t in {"MNODL.L", "NVTKL.L"}:
+            continue
+        if metric not in d or d[metric] is None:
+            continue
+
+        # For daily sessions, instrument MUST have actively traded today
+        if is_daily:
+            if not d.get("has_traded_today", False):
+                continue
+            # Must have non-zero movement (0.00% is not a genuine mover)
+            if abs(d.get(metric, 0.0)) < 1e-4:
+                continue
+
+            # Session-specific market protection:
+            # At European Market Open (09:00 CET), US stocks are pre-market and must never appear
+            if is_eu_open:
+                if d.get("is_us_stock", False):
+                    continue
+
+        candidates[t] = d
 
     if len(candidates) < 2:
-        print("Not enough candidates for winners/losers card")
+        print(f"⚠️ [TOP/FLOP CARD] Not enough actively traded candidates for '{session_name}' ({len(candidates)} found). Skipping card to avoid displaying stale/unopened prices.")
         return None
 
     sorted_by = sorted(candidates.items(), key=lambda x: x[1][metric], reverse=True)
     top_sym,  top_data  = sorted_by[0]
     bot_sym,  bot_data  = sorted_by[-1]
+
+    # Sanity check: top and bottom must not be identical or both flat
+    if top_sym == bot_sym or (abs(top_data[metric]) < 1e-4 and abs(bot_data[metric]) < 1e-4):
+        print(f"⚠️ [TOP/FLOP CARD] Candidates have zero or identical performance for '{session_name}'. Skipping card.")
+        return None
 
     return generate_winners_losers_card(
         winner={"ticker": top_sym,  "company_name": top_data.get("company_name", top_sym),

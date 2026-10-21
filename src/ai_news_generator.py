@@ -296,8 +296,10 @@ def _get_top_gainers_with_news(stock_data: dict = None, count: int = 4, max_chec
         for sym, data in stock_data.items():
             if sym in _EXCLUDED_FROM_TAGS:
                 continue
+            if not data.get('has_traded_today', False):
+                continue
             d_chg = data.get('daily_change', 0.0)
-            if isinstance(d_chg, (int, float)):
+            if isinstance(d_chg, (int, float)) and abs(d_chg) > 1e-4:
                 candidates.append({
                     'ticker': sym,
                     'daily_change': float(d_chg),

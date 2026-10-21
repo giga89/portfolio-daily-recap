@@ -353,13 +353,8 @@ def fetch_stock_data():
                 print(f"No historical data for {etoro_symbol}")
                 continue
             
-            # Calculate daily change
-            if len(hist) >= 2:
-                current = hist['Close'].iloc[-1]
-                previous = hist['Close'].iloc[-2]
-                daily_change = ((current - previous) / previous) * 100
-            else:
-                daily_change = 0.0
+            # Daily change will be calculated after rigorous date, volume, and market hours verification
+            daily_change = 0.0
             
             # Calculate monthly change (MTD - Month-To-Date from start of current month)
             # Use the same hist data we already fetched (period='1y') to ensure consistency
@@ -420,24 +415,98 @@ def fetch_stock_data():
             us_exchanges = ['NASDAQ', 'NYSE', 'AMEX', 'NMS', 'NYQ', 'NAS', 'NGM', 'PCX', 'PNK', 'BTS', 'NCM']
             is_us_stock = exchange in us_exchanges or 'USD' in yahoo_ticker
 
-            # Check if the asset has actually traded today
-            # If it's a US stock and it is pre-market, it has NOT traded effectively for "Today's" session.
-            # Even if it has pre-market volume, for a "Daily Recap" usually implies the main session or closed session.
-            # For "Morning Recap" (10:00 CET), US stocks are pre-market.
-            
-            has_traded_today = True
-            
-            if is_us_stock and is_pre_market_hours:
-                print(f"Day not yet started for {etoro_symbol} (Pre-market)")
-                daily_change = 0.0
-                has_traded_today = False
-            
-            # Additional safety: if daily_change is exactly 0.0 and volume is 0?
-            # yfinance sometimes attributes prev close to current.
-            # We explicitly flag it.
+            # ------------------------------------------------------------------
+            # ROBUST MULTI-LAYER CHECK: Has the asset ACTUALLY traded today?
+            # Prevents untraded/unopened assets (e.g. INDO.PA at EU open) from
+            # falsely reporting yesterday's daily change as today's performance.
+            # ------------------------------------------------------------------
+            last_bar = hist.iloc[-1]
+            last_bar_ts = hist.index[-1]
+            last_bar_date = last_bar_ts.date()
 
-            # Sanitize NaN values — yfinance can return NaN for tickers
-            # with missing or partial data (e.g. HK stocks on holidays)
+            # Determine local exchange timezone and current local time
+            if hist.index.tz is not None:
+                now_local = datetime.now(hist.index.tz)
+            else:
+                if yahoo_ticker.endswith('.L'):
+                    tz = pytz.timezone('Europe/London') if pytz else None
+                elif any(yahoo_ticker.endswith(ext) for ext in ['.PA', '.MI', '.DE', '.CO']):
+                    tz = pytz.timezone('Europe/Paris') if pytz else None
+                elif yahoo_ticker.endswith('.HK'):
+                    tz = pytz.timezone('Asia/Hong_Kong') if pytz else None
+                else:
+                    tz = NY_TZ
+                now_local = datetime.now(tz) if tz else datetime.now(NY_TZ) if NY_TZ else datetime.utcnow()
+
+            today_local = now_local.date()
+            local_hour = now_local.hour
+            local_minute = now_local.minute
+            local_weekday = now_local.weekday()  # 0=Monday ... 6=Sunday
+
+            has_traded_today = True
+            untraded_reason = ""
+            last_volume = hist['Volume'].iloc[-1] if 'Volume' in hist.columns else 0
+
+            # 1. Weekend check (Saturday=5, Sunday=6) - stock exchanges closed
+            if local_weekday >= 5 and etoro_symbol != 'TRX':
+                has_traded_today = False
+                untraded_reason = f"Weekend ({now_local.strftime('%A')})"
+
+            # 2. Historical bar date check: latest bar MUST belong to today in local exchange time
+            elif last_bar_date < today_local:
+                has_traded_today = False
+                untraded_reason = f"Last bar date ({last_bar_date}) is prior to today ({today_local})"
+
+            # 3. Volume check: zero volume indicates no executed trades today (unopened / placeholder bar)
+            elif ('Volume' in hist.columns and (pd.isna(last_volume) or last_volume <= 0)) and etoro_symbol != 'TRX':
+                has_traded_today = False
+                untraded_reason = "Zero or NaN trading volume today"
+
+            # 4. Exchange market opening hours (Pre-market filter)
+            elif is_us_stock and (now_ny.hour < US_OPEN_HOUR or (now_ny.hour == US_OPEN_HOUR and now_ny.minute < US_OPEN_MINUTE)):
+                has_traded_today = False
+                untraded_reason = f"US pre-market ({now_ny.strftime('%H:%M')} ET < 09:30)"
+            elif any(yahoo_ticker.endswith(ext) for ext in ['.PA', '.MI', '.DE', '.CO']) and local_hour < 9:
+                has_traded_today = False
+                untraded_reason = f"European pre-market ({now_local.strftime('%H:%M')} < 09:00 CET)"
+            elif yahoo_ticker.endswith('.L') and local_hour < 8:
+                has_traded_today = False
+                untraded_reason = f"UK pre-market ({now_local.strftime('%H:%M')} < 08:00 London)"
+            elif yahoo_ticker.endswith('.HK') and (local_hour < 9 or (local_hour == 9 and local_minute < 30)):
+                has_traded_today = False
+                untraded_reason = f"Hong Kong pre-market ({now_local.strftime('%H:%M')} < 09:30 HKT)"
+
+            # 5. Market Holidays (deterministic check via market_calendar)
+            else:
+                try:
+                    import market_calendar
+                    if is_us_stock:
+                        is_h, h_name = market_calendar.is_us_market_holiday(today_local)
+                        if is_h:
+                            has_traded_today = False
+                            untraded_reason = f"US Market Holiday ({h_name})"
+                    elif any(yahoo_ticker.endswith(ext) for ext in ['.PA', '.MI', '.DE']):
+                        is_eu_h, eu_h_name = market_calendar.is_all_eu_markets_closed(today_local)
+                        if is_eu_h:
+                            has_traded_today = False
+                            untraded_reason = f"EU Market Holiday ({eu_h_name})"
+                except Exception:
+                    pass
+
+            # Calculate daily change ONLY if the asset has genuinely traded today
+            if has_traded_today and len(hist) >= 2:
+                current = hist['Close'].iloc[-1]
+                previous = hist['Close'].iloc[-2]
+                if previous and previous > 0:
+                    daily_change = ((current - previous) / previous) * 100
+                else:
+                    daily_change = 0.0
+            else:
+                daily_change = 0.0
+                if untraded_reason:
+                    print(f"  ℹ️ [{etoro_symbol}] Day not yet started / untraded ({untraded_reason}) -> daily_change=0.0%")
+
+            # Sanitize NaN values
             import math
             if math.isnan(daily_change):
                 print(f"⚠️  {etoro_symbol}: daily_change is NaN, setting to 0.0")
@@ -458,7 +527,8 @@ def fetch_stock_data():
                 'monthly_change': monthly_change,
                 'yearly_change': yearly_change,
                 'has_traded_today': has_traded_today,
-                'is_us_stock': is_us_stock
+                'is_us_stock': is_us_stock,
+                'last_trade_date': str(last_bar_date),
             }
 
             # Calculate weekly change (5 full trading days from previous Friday close)

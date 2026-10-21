@@ -77,8 +77,8 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
         stock_data = {k: v for k, v in stock_data.items() if k not in EXCLUDED_TICKERS}
 
     # Calculate top performers
-    # Filter for active trading today for the "Daily" list
-    stock_data_active = {k: v for k, v in stock_data.items() if v.get('has_traded_today', True)}
+    # Filter for active trading today for the "Daily" list (strictly requiring has_traded_today=True)
+    stock_data_active = {k: v for k, v in stock_data.items() if v.get('has_traded_today', False)}
     
     # If weekly, we use weekly_change for the "TOP 5" section
     # If monthly, we skip the daily/weekly section entirely
@@ -195,7 +195,7 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     available_candidates = [c for c in unique_candidates if c.upper() not in normalized_history]
     
     # Filter by region if morning open
-    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'ULVR.L', 'WCLD.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L', 'IQQL.DE', 'PPFB.DE']
+    EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'ULVR.L', 'WCLD.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L', 'IQQL.DE', 'PPFB.DE', 'INDO.PA', 'VOF.L']
     US_TICKERS = ['NVDA', 'MSFT', 'AMZN', 'GOOG', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY', 'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'MELI', 'IB01.L']
     
     if "EUROPEAN" in session_upper and "OPEN" in session_upper:

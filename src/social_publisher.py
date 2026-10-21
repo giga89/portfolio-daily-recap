@@ -131,16 +131,17 @@ def _extract_top_performers(plain_text: str, stock_data: dict = None) -> list:
     """Extract top 5 performers from stock_data or fallback to text parsing."""
     if stock_data:
         try:
-            sorted_stocks = sorted(
-                stock_data.items(),
-                key=lambda x: x[1].get("daily_change", 0),
-                reverse=True,
-            )
-            return [
-                (sym, d.get("daily_change", 0.0))
-                for sym, d in sorted_stocks[:5]
-                if d.get("has_traded_today", True)
+            # Strictly filter first for active, traded instruments with non-zero change
+            active_stocks = [
+                (sym, float(d.get("daily_change", 0.0)))
+                for sym, d in stock_data.items()
+                if d.get("has_traded_today", False)
+                and d.get("daily_change") is not None
+                and abs(d.get("daily_change", 0.0)) > 1e-4
+                and sym not in {"MNODL.L", "NVTKL.L"}
             ]
+            active_stocks.sort(key=lambda x: x[1], reverse=True)
+            return active_stocks[:5]
         except Exception:
             pass
 
