@@ -239,10 +239,13 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
    - NESSUNA FRASE ASSURDA O CONTRADDITTORIA: È severamente vietato inventare concetti finanziari inesistenti (come 'tassa sui tassi', 'tassa sugli interessi').
    - ZERO RIPETIZIONI: È severamente vietato ripetere la stessa frase o periodo due o più volte nel testo verificato.
 
-8. COERENZA TONO/SENTIMENT DEGLI INDICI (CRITICA):
-   - Se le PERFORMANCE INDICI OGGI indicano un calo (variazione percentuale negativa, es. SPX500 < 0% o NSDQ100 < 0%), il post NON PUÒ per nessun motivo definire la seduta come "positiva", "tono complessivamente positivo", "giornata favorevole", "ottima seduta", "seduta rialzista" o simili.
-   - Definire positiva una seduta in cui l'indice ha perso l'1% o il 2% è una GRAVISSIMA ALLUCINAZIONE fattuale.
-   - CORREZIONE: Sostituisci obbligatoriamente le formule positive errate con espressioni coerenti con la realtà numerica (es. "seduta in flessione", "chiusura in calo", "seduta all'insegna delle prese di beneficio", "giornata debole"), indicando la variazione percentuale reale.
+8. COERENZA TONO/SENTIMENT DEGLI INDICI VS SINGOLI TITOLI (CRITICA):
+   - Se le PERFORMANCE INDICI OGGI indicano un calo (variazione percentuale negativa, es. SPX500 < 0% o NSDQ100 < 0%), il post NON PUÒ definire la seduta complessiva dei mercati / di Wall Street / degli indici come "positiva", "tono complessivamente positivo", "giornata favorevole per i mercati", "ottima seduta per i listini" o simili.
+   - Definire positiva la seduta generale dei mercati in cui l'indice ha perso è una GRAVISSIMA ALLUCINAZIONE fattuale.
+   - CORREZIONE INDICI: Sostituisci le formule positive errate relative a Wall Street/indici con espressioni coerenti con la realtà numerica (es. "seduta in flessione", "chiusura in calo", "seduta all'insegna delle prese di beneficio", "giornata debole"), indicando la variazione percentuale reale degli indici.
+   - DISTINZIONE FONDAMENTALE (SINGOLI TITOLI / SETTORI): Questa regola sugli indici NON SI APPLICA ai singoli titoli, ETF o comparti del portafoglio che hanno registrato una performance POSITIVA (+X.XX%) in controtendenza!
+   - Se un titolo o ETF ha guadagnato (es. $MRVL +2.26%, $WCLD.L +1.2%, $ENI.MI +5.8%), è TASSATIVAMENTE VIETATO descriverlo come "in flessione", "in calo" o "in territorio negativo". Per i singoli titoli positivi, formule come "ottima performance", "chiuso in rialzo", "seduta positiva per il settore", "salito del...", "balzo" sono assolutamente corrette e DEVONO essere preservate.
+   - È UN GRAVISSIMO ERRORE definire in flessione un titolo con percentuale positiva (+X.XX%).
 
 9. PRIORITÀ NOTIZIE FRESCHE DEL GIORNO VS NOIOSE TRIMESTRALI (CRITICA):
    - I lettori cercano novità e catalizzatori FRESCHI DEL GIORNO (accordi commerciali, partnership strategiche, commesse, lanci di prodotto, upgrade o downgrade di rating con target price, sviluppi regolatori o giudiziari avvenuti oggi o nelle ultime 24-48 ore).

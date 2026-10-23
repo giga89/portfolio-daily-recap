@@ -182,18 +182,23 @@ PLATITUDE_FORBIDDEN_PATTERNS = [
 ]
 
 # Patterns indicating tone/sentiment contradictions for market index closing (e.g. positive tone when index dropped)
+# NOTE: Must target ONLY the overall market / Wall Street / major indices, NEVER individual portfolio stocks/ETFs!
 SENTIMENT_MISMATCH_PATTERNS = [
     (
         r'\b(?:ha\s+chiuso\s+con\s+un\s+tono|si\s+è\s+chiusa\s+con\s+un\s+tono)\s+(?:complessivamente\s+)?positivo\b',
         "Afferma tono positivo su seduta in calo"
     ),
     (
-        r'\b(?:tono|chiusura|seduta|giornata)\s+(?:complessivamente\s+)?positiv[ao]\b',
-        "Definisce la seduta o il tono generale come positivo quando i listini hanno chiuso in calo"
+        r'\b(?:tono|chiusura|seduta|giornata)\s+complessivamente\s+positiv[ao]\b',
+        "Definisce il tono generale o la seduta complessiva come positiva quando i listini hanno chiuso in calo"
     ),
     (
-        r'\b(?:seduta|chiusura)\s+in\s+(?:forte\s+)?territorio\s+positivo\b',
-        "Afferma territorio positivo su mercato in calo"
+        r'\b(?:wall\s+street|i\s+listini|i\s+mercati|la\s+borsa\s+usa)\b.{0,40}\b(?:chius(?:a|ura)|seduta|giornata)\s+(?:in\s+territorio\s+)?positiv[ao]\b',
+        "Definisce Wall Street o i mercati con seduta positiva su mercato in calo"
+    ),
+    (
+        r'\b(?:wall\s+street|i\s+listini|i\s+mercati)\s+in\s+(?:forte\s+)?territorio\s+positivo\b',
+        "Afferma territorio positivo per Wall Street o i listini su mercato in calo"
     ),
     (
         r'\b(?:listini|indici|mercati|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+rialzo\b',
@@ -206,6 +211,101 @@ SENTIMENT_MISMATCH_PATTERNS = [
 ]
 
 
+def fix_sign_sentiment_oxymorons(text: str) -> str:
+    """
+    Guarantees mathematical and semantic coherence between direction words and signed percentages.
+    Eliminates contradictions like 'chiuso in flessione del +2.26%' or 'balzo del -3.5%'.
+    """
+    if not text:
+        return ""
+
+    cleaned = text
+
+    # Positive percentage (+X.XX% or +X%) associated with negative terminology
+    cleaned = re.sub(
+        r'\b(?:ha\s+)?chius(?:o|a|ero)\s+in\s+flessione\s+(?:del\s+)?(?=\+\d)',
+        'ha chiuso in rialzo del ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\b(?:in\s+flessione|in\s+calo)\s+(?:del\s+)?(?=\+\d)',
+        'in rialzo del ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\b(?:ha\s+)?(?:registrato|subito)\s+una\s+(?:flessione|correzione)\s+(?:del\s+)?(?=\+\d)',
+        'ha registrato un rialzo del ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\b(?:cedendo|perdendo)\s+(?:il\s+)?(?=\+\d)',
+        'guadagnando il ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\b(?:sceso|scesa|scesi|scese)\s+(?:del\s+)?(?=\+\d)',
+        'salito del ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\bin\s+territorio\s+negativo\s+(?:del\s+)?(?=\+\d)',
+        'in territorio positivo del ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    # Fix 'Seduta in flessione per ... salito dell' / 'chiuso in flessione ... salito dell''
+    cleaned = re.sub(
+        r'\b(?:seduta|giornata)\s+in\s+(?:flessione|calo)\s+(per\b[^\n]{0,120}?\bsalit[oaie]\b)',
+        r'Seduta positiva \1',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+
+    # Negative percentage (-X.XX% or -X%) associated with positive terminology
+    cleaned = re.sub(
+        r'\b(?:ha\s+)?chius(?:o|a|ero)\s+in\s+rialzo\s+(?:del\s+)?(?=-\d)',
+        'ha chiuso in calo del ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\b(?:in\s+rialzo|in\s+guadagno)\s+(?:del\s+)?(?=-\d)',
+        'in calo del ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\b(?:ha\s+)?(?:registrato|messo\s+a\s+segno)\s+un\s+(?:rialzo|balzo|rally)\s+(?:del\s+)?(?=-\d)',
+        'ha registrato una flessione del ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\b(?:guadagnando|avanzando)\s+(?:il\s+)?(?=-\d)',
+        'cedendo il ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\b(?:salito|salita|saliti|salite|balzato|balzata)\s+(?:del\s+)?(?=-\d)',
+        'sceso del ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\bin\s+territorio\s+positivo\s+(?:del\s+)?(?=-\d)',
+        'in territorio negativo del ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+
+    return cleaned
+
 
 def clean_etoro_formatting(text: str) -> str:
     """
@@ -213,6 +313,7 @@ def clean_etoro_formatting(text: str) -> str:
     - Markdown asterisks `**bold**`, `*italic*`, `__bold__`
     - Parentheses wrapping cashtags e.g. '($NVDA)' -> ' $NVDA '
     - Auto-sanitizes common LLM hallucinations regarding asset identities (e.g. WDEF -> Defence, not Income)
+    - Fixes signed percentage / sentiment oxymorons
     """
     if not text:
         return ""
@@ -252,6 +353,9 @@ def clean_etoro_formatting(text: str) -> str:
         cleaned,
         flags=re.IGNORECASE
     )
+
+    # Fix sign/sentiment oxymorons (e.g. 'in flessione del +2.26%')
+    cleaned = fix_sign_sentiment_oxymorons(cleaned)
 
     # Clean multiple spaces caused by regex replacements
     cleaned = re.sub(r' +', ' ', cleaned)
@@ -522,8 +626,10 @@ def sanitize_or_prune_post_content(
         ndx_perf = benchmark_daily.get('NSDQ100')
         is_market_negative = (spx_perf is not None and spx_perf < -0.15) or (ndx_perf is not None and ndx_perf < -0.15)
         if is_market_negative:
+            # Sostituzioni mirate SOLO al tono generale dei mercati / indici di Wall Street
+            # NON toccare mai i singoli titoli, ETF o percentuali positive (+X.XX%)
             cleaned = re.sub(
-                r'\b(?:ha\s+chiuso\s+con\s+un\s+tono|si\s+è\s+chiusa\s+con\s+un\s+tono)\s+complessivamente\s+positivo\b',
+                r'\b(?:ha\s+chiuso\s+con\s+un\s+tono|si\s+è\s+chiusa\s+con\s+un\s+tono)\s+(?:complessivamente\s+)?positivo\b',
                 'ha chiuso con listini in flessione e prese di beneficio',
                 cleaned,
                 flags=re.IGNORECASE,
@@ -535,29 +641,26 @@ def sanitize_or_prune_post_content(
                 flags=re.IGNORECASE,
             )
             cleaned = re.sub(
-                r'\b(?:tono|chiusura|seduta|giornata)\s+positiv[ao]\b',
-                'seduta in calo',
+                r'\b(?:i\s+)?(?:listini|indici|mercati|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+rialzo\b',
+                'i listini hanno chiuso in flessione',
                 cleaned,
                 flags=re.IGNORECASE,
             )
             cleaned = re.sub(
-                r'\bchius(?:a|o|ero)\s+in\s+rialzo\b',
-                'chiuso in flessione',
+                r'\b(?:wall\s+street|i\s+listini|i\s+mercati)\s+in\s+(?:forte\s+)?territorio\s+positivo\b',
+                'listini in territorio negativo',
                 cleaned,
                 flags=re.IGNORECASE,
             )
             cleaned = re.sub(
-                r'\bin\s+territorio\s+molto\s+positivo\b',
-                'in flessione',
+                r'\b(?:l\'indice|indice)\s+(\$?(?:SPX500|NSDQ100|GER40|DJ30))\b.{0,40}\b(?:ha\s+chiuso\s+in\s+rialzo|chiude\s+in\s+rialzo)\b',
+                r"l'indice \1 ha chiuso in calo",
                 cleaned,
                 flags=re.IGNORECASE,
             )
-            cleaned = re.sub(
-                r'\bin\s+territorio\s+positivo\b',
-                'in territorio negativo',
-                cleaned,
-                flags=re.IGNORECASE,
-            )
+
+    # 1c. Risoluzione automatica di ossimori matematici segno/tono (es. 'chiuso in flessione del +2.26%')
+    cleaned = fix_sign_sentiment_oxymorons(cleaned)
 
     # Verifica preliminare sul testo depurato dai claim generali e dal sentiment
     is_clean, issues, _ = verify_post_deterministic(cleaned, primary_ticker=primary_ticker, session_name=session_name, benchmark_daily=benchmark_daily)

@@ -1797,6 +1797,7 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
   * SE LA VARIAZIONE È PIATTA (-0.15% <= variazione <= +0.15%):
     - Descrivi la seduta come poco mossa / invariata / all'insegna della cautela / contrastata ({macro_change:+.2f}%).
   * QUALSIASI DISCORDANZA TRA IL SEGNO DELLA PERCENTUALE E IL TONO VERBALE È UN GRAVISSIMO ERRORE FATTUALE E COMPORTERÀ LA BOCCIATURA IMMEDIATA DEL TESTO.
+  * NOTA BENE SUI SINGOLI TITOLI DEL PORTAFOGLIO: Il divieto sui toni positivi riguarda ESCLUSIVAMENTE l'indice macro e Wall Street nel Microtema 1. I singoli titoli o ETF del portafoglio (Microtemi 2, 3, 4) che hanno una variazione POSITIVA (+X.XX%) DEVONO essere descritti con formule positive (es. 'ottima performance', 'in rialzo', 'seduta positiva per il comparto', 'salito del...'). È SEVERAMENTE VIETATO definire 'in flessione' o 'in calo' un titolo con variazione percentuale positiva!
 """ if is_us_close else ""
 
         news_of_the_day_rules = (
