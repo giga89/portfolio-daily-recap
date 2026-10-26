@@ -158,6 +158,7 @@ def get_current_temporal_context(
         "ny_time": now_ny.strftime("%H:%M ET"),
         "market_state": market_state,
         "benchmarks_daily": benchmarks_summary,
+        "benchmark_data_raw": benchmark_daily_data,
         "year": str(now_rome.year),
     }
 
@@ -239,13 +240,19 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
    - NESSUNA FRASE ASSURDA O CONTRADDITTORIA: È severamente vietato inventare concetti finanziari inesistenti (come 'tassa sui tassi', 'tassa sugli interessi').
    - ZERO RIPETIZIONI: È severamente vietato ripetere la stessa frase o periodo due o più volte nel testo verificato.
 
-8. COERENZA TONO/SENTIMENT DEGLI INDICI VS SINGOLI TITOLI (CRITICA):
-   - Se le PERFORMANCE INDICI OGGI indicano un calo (variazione percentuale negativa, es. SPX500 < 0% o NSDQ100 < 0%), il post NON PUÒ definire la seduta complessiva dei mercati / di Wall Street / degli indici come "positiva", "tono complessivamente positivo", "giornata favorevole per i mercati", "ottima seduta per i listini" o simili.
-   - Definire positiva la seduta generale dei mercati in cui l'indice ha perso è una GRAVISSIMA ALLUCINAZIONE fattuale.
-   - CORREZIONE INDICI: Sostituisci le formule positive errate relative a Wall Street/indici con espressioni coerenti con la realtà numerica (es. "seduta in flessione", "chiusura in calo", "seduta all'insegna delle prese di beneficio", "giornata debole"), indicando la variazione percentuale reale degli indici.
-   - DISTINZIONE FONDAMENTALE (SINGOLI TITOLI / SETTORI): Questa regola sugli indici NON SI APPLICA ai singoli titoli, ETF o comparti del portafoglio che hanno registrato una performance POSITIVA (+X.XX%) in controtendenza!
-   - Se un titolo o ETF ha guadagnato (es. $MRVL +2.26%, $WCLD.L +1.2%, $ENI.MI +5.8%), è TASSATIVAMENTE VIETATO descriverlo come "in flessione", "in calo" o "in territorio negativo". Per i singoli titoli positivi, formule come "ottima performance", "chiuso in rialzo", "seduta positiva per il settore", "salito del...", "balzo" sono assolutamente corrette e DEVONO essere preservate.
-   - È UN GRAVISSIMO ERRORE definire in flessione un titolo con percentuale positiva (+X.XX%).
+8. COERENZA TONO/SENTIMENT DEGLI INDICI VS SINGOLI TITOLI (CRITICA E SIMMETRICA):
+   - Confronta SEMPRE con precisione assoluta le '• PERFORMANCE INDICI OGGI' (Ground Truth).
+   - CASO A: SE GLI INDICI HANNO CHIUSO IN RIALZO (variazione percentuale positiva, es. SPX500 > 0% o NSDQ100 > 0%):
+     * Il post DEVE descrivere la seduta generale dei mercati / di Wall Street / degli indici come POSITIVA / IN RIALZO.
+     * È una GRAVISSIMA ALLUCINAZIONE definire la seduta come "in flessione", "in calo", "seduta negativa", "giornata negativa", "ha perso X%", "in territorio negativo", oppure invertire il segno e scrivere "-X%"!
+     * CORREZIONE INDICI POSITIVI: Sostituisci IMMEDIATAMENTE qualsiasi espressione di calo o flessione con espressioni coerenti (es. "seduta in rialzo", "chiusura positiva", "seduta all'insegna dei guadagni", "ha guadagnato +X%"), riportando il segno corretto (+) e la variazione percentuale reale.
+   - CASO B: SE GLI INDICI HANNO CHIUSO IN CALO (variazione percentuale negativa, es. SPX500 < 0% o NSDQ100 < 0%):
+     * Il post NON PUÒ definire la seduta complessiva dei mercati / di Wall Street / degli indici come "positiva", "tono complessivamente positivo", "giornata favorevole per i mercati", "ottima seduta per i listini" o simili.
+     * CORREZIONE INDICI NEGATIVI: Sostituisci le formule positive errate relative a Wall Street/indici con espressioni coerenti con la realtà numerica (es. "seduta in flessione", "chiusura in calo", "seduta all'insegna delle prese di beneficio", "giornata debole"), indicando la variazione percentuale reale negativa (-).
+   - DISTINZIONE FONDAMENTALE (SINGOLI TITOLI / SETTORI):
+     * Questa regola per Wall Street non va confusa con i singoli titoli del portafoglio! Se un titolo ha chiuso a +X% (es. $MRVL +2.26%, $PRY.MI +3.86%), va sempre descritto come positivo. È TASSATIVAMENTE VIETATO definire in calo o flessione un titolo positivo.
+   - DIVIETO ASSOLUTO DI INVERSIONE SEGNO (+ vs -):
+     * È TASSATIVAMENTE VIETATO invertire il segno matematico di indici o titoli: non trasformare MAI un + in un - né un - in un +! Non omettere il segno affermando che un asset positivo "ha perso".
 
 9. PRIORITÀ NOTIZIE FRESCHE DEL GIORNO VS NOIOSE TRIMESTRALI (CRITICA):
    - I lettori cercano novità e catalizzatori FRESCHI DEL GIORNO (accordi commerciali, partnership strategiche, commesse, lanci di prodotto, upgrade o downgrade di rating con target price, sviluppi regolatori o giudiziari avvenuti oggi o nelle ultime 24-48 ore).
@@ -266,13 +273,19 @@ Restituisci ESCLUSIVAMENTE un oggetto JSON valido (senza testo prima o dopo) con
 """
 
 
-def sanitize_verified_text(original_text: str, verified_text: str) -> str:
+def sanitize_verified_text(
+    original_text: str,
+    verified_text: str,
+    session_name: Optional[str] = None,
+    benchmark_daily_data: Optional[Dict[str, float]] = None,
+) -> str:
     """
     Sanitizes auto-corrections proposed by LLM auditors:
     1. Removes absurd hallucinations (e.g. 'tassa sui tassi', 'tasse sui tassi', 'tassa sugli interessi').
     2. Deduplicates repeated sentences or hallucinations generated in loops.
     3. Rejects hallucinated massive expansions of short non-financial opening sentences.
     4. Cleans whitespace and trailing punctuation artifacts.
+    5. Enforces mathematical benchmark ground truth and eliminates sign inversions.
     """
     if not verified_text:
         return original_text
@@ -316,6 +329,15 @@ def sanitize_verified_text(original_text: str, verified_text: str) -> str:
     cleaned = re.sub(r'\s+([.,!?])', r'\1', cleaned)
     cleaned = re.sub(r'\s{2,}', ' ', cleaned)
     cleaned = cleaned.replace("**", "").replace("__", "")
+
+    # 5. Enforce benchmark ground truth (direction & signs for Wall Street close)
+    try:
+        from post_verifier import enforce_benchmark_ground_truth, fix_sign_sentiment_oxymorons
+        cleaned = fix_sign_sentiment_oxymorons(cleaned)
+        if benchmark_daily_data:
+            cleaned, _ = enforce_benchmark_ground_truth(cleaned, benchmark_daily=benchmark_daily_data, session_name=session_name)
+    except Exception:
+        pass
 
     return cleaned.strip()
 
@@ -379,7 +401,12 @@ def audit_with_groq(
                 parsed = json.loads(content)
                 if "decision" in parsed and "verified_text" in parsed:
                     if parsed.get("verified_text"):
-                        parsed["verified_text"] = sanitize_verified_text(text, parsed["verified_text"])
+                        parsed["verified_text"] = sanitize_verified_text(
+                            text,
+                            parsed["verified_text"],
+                            session_name=session_name,
+                            benchmark_daily_data=temporal_ctx.get("benchmark_data_raw"),
+                        )
                     parsed["auditor"] = f"groq:{model}"
                     parsed["latency_sec"] = round(elapsed, 2)
                     print(f"   ⚡ Groq Independent Audit ({model}) succeeded in {elapsed:.2f}s — Decision: {parsed.get('decision')}")
@@ -458,7 +485,12 @@ def audit_with_mistral(
                 parsed = json.loads(content)
                 if "decision" in parsed and "verified_text" in parsed:
                     if parsed.get("verified_text"):
-                        parsed["verified_text"] = sanitize_verified_text(text, parsed["verified_text"])
+                        parsed["verified_text"] = sanitize_verified_text(
+                            text,
+                            parsed["verified_text"],
+                            session_name=session_name,
+                            benchmark_daily_data=temporal_ctx.get("benchmark_data_raw"),
+                        )
                     _MISTRAL_AVAILABLE = True
                     parsed["auditor"] = f"mistral:{model}"
                     parsed["latency_sec"] = round(elapsed, 2)
@@ -483,6 +515,7 @@ def run_independent_fact_check(
     portfolio_metadata_summary: str = "",
     live_news_context: Optional[str] = None,
     require_consensus: bool = True,
+    benchmark_daily_data: Optional[Dict[str, float]] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Orchestrates the independent fact-checking pipeline across external models
@@ -500,6 +533,13 @@ def run_independent_fact_check(
     5. UNANIMOUS APPROVAL: Both auditors must agree on the final published text.
     6. Fallback: If only one provider is configured/available, it acts as single auditor.
     """
+    if benchmark_daily_data is None and session_name:
+        try:
+            temporal_ctx = get_current_temporal_context(session_name)
+            benchmark_daily_data = temporal_ctx.get("benchmark_data_raw")
+        except Exception:
+            benchmark_daily_data = None
+
     # Auto-fetch Tavily live news context if not provided
     if live_news_context is None:
         try:
@@ -538,10 +578,30 @@ def run_independent_fact_check(
     # Single-auditor fallback if only one is operational
     if groq_audit and not mistral_audit:
         print("   ℹ️ Multi-AI consensus note: Mistral non disponibile, audit affidato al solo Groq.")
+        if groq_audit.get("verified_text") and benchmark_daily_data:
+            try:
+                from post_verifier import enforce_benchmark_ground_truth
+                groq_audit["verified_text"], _ = enforce_benchmark_ground_truth(
+                    groq_audit["verified_text"],
+                    benchmark_daily=benchmark_daily_data,
+                    session_name=session_name,
+                )
+            except Exception:
+                pass
         return groq_audit
 
     if mistral_audit and not groq_audit:
         print("   ℹ️ Multi-AI consensus note: Groq non disponibile, audit affidato alla sola Mistral.")
+        if mistral_audit.get("verified_text") and benchmark_daily_data:
+            try:
+                from post_verifier import enforce_benchmark_ground_truth
+                mistral_audit["verified_text"], _ = enforce_benchmark_ground_truth(
+                    mistral_audit["verified_text"],
+                    benchmark_daily=benchmark_daily_data,
+                    session_name=session_name,
+                )
+            except Exception:
+                pass
         return mistral_audit
 
     # ── DUAL-AI CONSENSUS LOGIC (Both Groq and Mistral active) ──────────────────
@@ -865,6 +925,9 @@ def run_micro_topic_consensus_fact_check(
 
     print(f"   🧩 Scomposizione in {len(micro_topics)} micro-argomenti ({len(topics_to_audit)} da auditare in parallelo)...")
 
+    temporal_ctx = get_current_temporal_context(session_name)
+    benchmark_daily_data = temporal_ctx.get("benchmark_data_raw")
+
     # Fetch live ground truth news from Tavily once for all micro-topics
     live_news_context = ""
     try:
@@ -891,6 +954,7 @@ def run_micro_topic_consensus_fact_check(
                 session_name=session_name,
                 portfolio_metadata_summary=portfolio_metadata_summary,
                 live_news_context=live_news_context,
+                benchmark_daily_data=benchmark_daily_data,
             ): t
             for t in topics_to_audit
         }
@@ -931,7 +995,12 @@ def run_micro_topic_consensus_fact_check(
         elif dec == "AUTO_CORRECT" and res.get("verified_text"):
             corrected_count += 1
             substantive_retained += 1
-            t["verified_text"] = sanitize_verified_text(t["text"], res["verified_text"])
+            t["verified_text"] = sanitize_verified_text(
+                t["text"],
+                res["verified_text"],
+                session_name=session_name,
+                benchmark_daily_data=benchmark_daily_data,
+            )
             all_issues.extend(res.get("temporal_issues", []))
             all_halluc.extend(res.get("hallucinations_detected", []))
             print(f"   🛠️ Micro-argomento [{t['id']} - {t['type']}] CORRETTO CHIRURGICAMENTE: {res.get('explanation')[:80]}...")
@@ -959,6 +1028,13 @@ def run_micro_topic_consensus_fact_check(
         }
 
     final_text = reassemble_micro_topics(micro_topics, session_name=session_name)
+    try:
+        from post_verifier import enforce_benchmark_ground_truth
+        if benchmark_daily_data:
+            final_text, _ = enforce_benchmark_ground_truth(final_text, benchmark_daily=benchmark_daily_data, session_name=session_name)
+    except Exception:
+        pass
+
     overall_decision = "AUTO_CORRECT" if corrected_count > 0 or rejected_count > 0 else "APPROVE"
 
     return {

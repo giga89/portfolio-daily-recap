@@ -678,6 +678,7 @@ def _run_post_verification(
     run_ai_review: bool = True,
     max_tags: int = MAX_TAGS_PER_POST,
     allowed_tickers: list = None,
+    benchmark_daily: dict = None,
 ) -> tuple[bool, str]:
     """Helper to run pre-publication verification and auto-correction on generated content."""
     try:
@@ -688,6 +689,7 @@ def _run_post_verification(
             session_name=session_name,
             generator_model=generator_model,
             run_ai_review=run_ai_review,
+            benchmark_daily=benchmark_daily,
         )
         if not approved:
             print(f"⚠️ Post rejected by verifier: {audit.get('explanation')}")
@@ -1786,19 +1788,40 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
 =====================================================
 """ if is_us_close else ""
 
-        index_tone_rules_us_close = f"""
+        if is_us_close:
+            is_pos = (macro_change > 0.15) or (spx_change > 0.15 and ndx_change > 0.15)
+            is_neg = (macro_change < -0.15) or (spx_change < -0.15 and ndx_change < -0.15)
+            if is_pos:
+                index_tone_rules_us_close = f"""
 - REGOLA MATEMATICA E VERBALE SUL TONO DI CHIUSURA DEGLI INDICI (TASSATIVO E RIGIDO):
-  * L'indice ${macro_heavy} ha chiuso la seduta odierna con una variazione di {macro_change:+.2f}%.
-  * SE LA VARIAZIONE È NEGATIVA (< 0%):
-    - È SEVERAMENTE VIETATO usare espressioni come "tono positivo", "tono complessivamente positivo", "chiusura positiva", "seduta positiva", "ottimismo", "rialzo", "guadagni", "in spolvero", "entusiasmo" per descrivere l'andamento dell'indice o di Wall Street.
-    - DEVI descrivere la chiusura coerentemente con i numeri: seduta in calo, flessione, chiusura in territorio negativo, prese di beneficio, correzione, seduta pesante o debolezza dei listini, citando esplicitamente la percentuale reale ({macro_change:+.2f}%).
-  * SE LA VARIAZIONE È POSITIVA (> 0%):
-    - Descrivi la seduta come positiva / in rialzo / guadagni, citando la percentuale reale ({macro_change:+.2f}%).
-  * SE LA VARIAZIONE È PIATTA (-0.15% <= variazione <= +0.15%):
-    - Descrivi la seduta come poco mossa / invariata / all'insegna della cautela / contrastata ({macro_change:+.2f}%).
-  * QUALSIASI DISCORDANZA TRA IL SEGNO DELLA PERCENTUALE E IL TONO VERBALE È UN GRAVISSIMO ERRORE FATTUALE E COMPORTERÀ LA BOCCIATURA IMMEDIATA DEL TESTO.
-  * NOTA BENE SUI SINGOLI TITOLI DEL PORTAFOGLIO: Il divieto sui toni positivi riguarda ESCLUSIVAMENTE l'indice macro e Wall Street nel Microtema 1. I singoli titoli o ETF del portafoglio (Microtemi 2, 3, 4) che hanno una variazione POSITIVA (+X.XX%) DEVONO essere descritti con formule positive (es. 'ottima performance', 'in rialzo', 'seduta positiva per il comparto', 'salito del...'). È SEVERAMENTE VIETATO definire 'in flessione' o 'in calo' un titolo con variazione percentuale positiva!
-""" if is_us_close else ""
+  * GLI INDICI DI WALL STREET HANNO CHIUSO LA SEDUTA IN RIALZO (${macro_heavy}: {macro_change:+.2f}%, $SPX500: {spx_change:+.2f}%, $NSDQ100: {ndx_change:+.2f}%).
+  * È SEVERAMENTE E TASSATIVAMENTE VIETATO definire la seduta generale o di Wall Street come "in flessione", "in calo", "seduta negativa", "giornata negativa", "ha perso X%", "in territorio negativo", "chiudendo a -X%".
+  * È TASSATIVAMENTE VIETATO invertire il segno positivo (+) trasformandolo in negativo (-) o dire che un indice positivo "ha perso".
+  * DEVI descrivere la chiusura come positiva, in rialzo, con guadagni per i listini USA, citando esplicitamente la percentuale reale positiva con il segno + ({macro_change:+.2f}%).
+  * Spiega i fattori reali che hanno sostenuto il rialzo dei mercati (dati economici, trimestrali, comparto tecnologico, flussi istituzionali).
+  * NOTA BENE SUI SINGOLI TITOLI DEL PORTAFOGLIO: I singoli titoli (Microtemi 2, 3, 4) con variazione POSITIVA (+X.XX%) DEVONO essere descritti con formule positive (es. 'ottima performance', 'in rialzo', 'salito del...').
+"""
+                tone_rule_micro1 = f"Ricorda la REGOLA TASSATIVA SUL TONO: La seduta è stata POSITIVA / IN RIALZO (${macro_heavy}: {macro_change:+.2f}%, $SPX500: {spx_change:+.2f}%, $NSDQ100: {ndx_change:+.2f}%). Rispecchia fedelmente il segno positivo (+): è SEVERAMENTE VIETATO usare espressioni come 'in flessione', 'in calo', 'seduta negativa', 'giornata negativa', 'ha perso', 'chiudendo a -...'. DEVI descrivere la chiusura come positiva/in rialzo. Includi il tag ${macro_heavy}."
+            elif is_neg:
+                index_tone_rules_us_close = f"""
+- REGOLA MATEMATICA E VERBALE SUL TONO DI CHIUSURA DEGLI INDICI (TASSATIVO E RIGIDO):
+  * GLI INDICI DI WALL STREET HANNO CHIUSO LA SEDUTA IN CALO (${macro_heavy}: {macro_change:+.2f}%, $SPX500: {spx_change:+.2f}%, $NSDQ100: {ndx_change:+.2f}%).
+  * È SEVERAMENTE VIETATO usare espressioni come "tono positivo", "tono complessivamente positivo", "chiusura positiva", "seduta positiva", "ottimismo", "rialzo", "guadagni", "in spolvero", "entusiasmo" per descrivere l'andamento dell'indice o di Wall Street.
+  * DEVI descrivere la chiusura coerentemente con i numeri: seduta in calo, flessione, chiusura in territorio negativo, prese di beneficio, correzione, seduta pesante o debolezza dei listini, citando esplicitamente la percentuale reale negativa ({macro_change:+.2f}%).
+  * NOTA BENE SUI SINGOLI TITOLI DEL PORTAFOGLIO: Il divieto sui toni positivi riguarda ESCLUSIVAMENTE l'indice macro e Wall Street nel Microtema 1. I singoli titoli o ETF del portafoglio (Microtemi 2, 3, 4) che hanno una variazione POSITIVA (+X.XX%) in controtendenza DEVONO essere descritti con formule positive (es. 'ottima performance', 'in rialzo', 'salito del...'). È SEVERAMENTE VIETATO definire 'in flessione' o 'in calo' un titolo con variazione percentuale positiva!
+"""
+                tone_rule_micro1 = f"Ricorda la REGOLA TASSATIVA SUL TONO: La seduta è stata IN CALO / FLESSIONE (${macro_heavy}: {macro_change:+.2f}%, $SPX500: {spx_change:+.2f}%, $NSDQ100: {ndx_change:+.2f}%). Rispecchia fedelmente il segno negativo (-): è SEVERAMENTE VIETATO inventare toni positivi, rialzi o guadagni per gli indici. DEVI descrivere la chiusura coerentemente con i numeri (calo, flessione, prese di beneficio). Includi il tag ${macro_heavy}."
+            else:
+                index_tone_rules_us_close = f"""
+- REGOLA MATEMATICA E VERBALE SUL TONO DI CHIUSURA DEGLI INDICI (TASSATIVO E RIGIDO):
+  * GLI INDICI DI WALL STREET HANNO CHIUSO POCO MOSSI (${macro_heavy}: {macro_change:+.2f}%, $SPX500: {spx_change:+.2f}%, $NSDQ100: {ndx_change:+.2f}%).
+  * Descrivi la seduta come poco mossa / invariata / all'insegna della cautela / contrastata ({macro_change:+.2f}%).
+  * Rispetta rigorosamente i numeri esatti senza inventare forti rally né forti crolli.
+"""
+                tone_rule_micro1 = f"Ricorda la REGOLA TASSATIVA SUL TONO: La seduta è stata poco mossa / invariata (${macro_heavy}: {macro_change:+.2f}%, $SPX500: {spx_change:+.2f}%, $NSDQ100: {ndx_change:+.2f}%). Rispecchia la cautela o l'andamento piatto. Includi il tag ${macro_heavy}."
+        else:
+            index_tone_rules_us_close = ""
+            tone_rule_micro1 = ""
 
         news_of_the_day_rules = (
             "- REGOLA NOTIZIE TITOLI (NEWS FRESCHE DEL GIORNO VS NOIOSE TRIMESTRALI - TASSATIVO):\n"
@@ -1965,7 +1988,7 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
             🌆 MICRO-TEMA 1: Riepilogo rapido di chiusura Wall Street (${macro_heavy}: {macro_change:+.2f}%)
                Sintesi a bocce ferme di cosa ha guidato i listini oggi (${macro_heavy}: {macro_change:+.2f}%, $SPX500: {spx_change:+.2f}%, $NSDQ100: {ndx_change:+.2f}%).
                Spiega le cause reali del movimento (rendimenti obbligazionari Treasury, dati macroeconomici, reazione dei settori).
-               Ricorda la REGOLA TASSATIVA SUL TONO: rispecchia fedelmente il segno reale ({macro_change:+.2f}%), senza inventare toni positivi se la seduta è stata in calo. Includi il tag ${macro_heavy}.
+               {tone_rule_micro1}
 
             REGOLA CRITICA SULLA FRESCHEZZA DELLE NOTIZIE:
             - Per ogni titolo, privilegia le notizie della giornata odierna o di ieri (accordi, partnership, rating, sviluppi operativi). Se non ci sono trimestrali di oggi, NON citare trimestrali passate.
@@ -2092,6 +2115,7 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
                         generator_model=model_name,
                         max_tags=max_tags,
                         allowed_tickers=all_allowed_for_validation,
+                        benchmark_daily=benchmark_daily_data,
                     )
                     if not approved or not verified_text:
                         print(f"⚠️ Market news recap rejected by verifier ({model_name}), trying next model...")
@@ -2146,6 +2170,7 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
                                     generator_model=model_name,
                                     max_tags=max_tags,
                                     allowed_tickers=all_allowed_for_validation,
+                                    benchmark_daily=benchmark_daily_data,
                                 )
                                 if approved and verified_text:
                                     recap_text = _limit_tags_in_text(verified_text, all_allowed_for_validation, max_tags)

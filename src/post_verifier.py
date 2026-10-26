@@ -210,6 +210,51 @@ SENTIMENT_MISMATCH_PATTERNS = [
     ),
 ]
 
+# Patterns indicating tone/sentiment contradictions when market index closed POSITIVE (e.g. negative tone when index rose)
+# Inverts + with - or describes a rising market as in flessione / calo / perdite
+SENTIMENT_POSITIVE_MARKET_MISMATCH_PATTERNS = [
+    (
+        r'\b(?:ha\s+chiuso\s+con\s+un\s+tono|si\s+è\s+chiusa\s+con\s+un\s+tono)\s+(?:complessivamente\s+)?negativo\b',
+        "Afferma tono negativo su seduta in rialzo"
+    ),
+    (
+        r'\b(?:tono|chiusura|seduta|giornata)\s+complessivamente\s+negativ[ao]\b',
+        "Definisce il tono generale o la seduta complessiva come negativa quando i listini hanno chiuso in rialzo"
+    ),
+    (
+        r'\b(?:wall\s+street|i\s+listini|i\s+mercati|la\s+borsa\s+usa)\b.{0,50}\b(?:chius(?:a|ura)|seduta|giornata)\s+(?:in\s+flessione|in\s+calo|negativa|in\s+rosso|in\s+territorio\s+negativo)\b',
+        "Definisce Wall Street o i mercati con seduta negativa/in flessione su mercato in rialzo"
+    ),
+    (
+        r'\b(?:wall\s+street|i\s+listini|i\s+mercati)\s+in\s+(?:territorio\s+negativo|forte\s+calo|rosso)\b',
+        "Afferma territorio negativo per Wall Street o i listini su mercato in rialzo"
+    ),
+    (
+        r'\b(?:listini|indici|mercati|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+(?:flessione|calo|ribasso|rosso)\b',
+        "Afferma chiusura in flessione/calo quando i listini hanno chiuso in rialzo"
+    ),
+    (
+        r'\b(?:la\s+prima\s+sessione|la\s+sessione|la\s+seduta|la\s+giornata)\s+d\'oltreoceano\b.{0,40}\bsi\s+è\s+chiusa\s+in\s+(?:flessione|calo|ribasso|rosso)\b',
+        "Definisce la sessione USA chiusa in flessione/calo quando i listini hanno chiuso in rialzo"
+    ),
+    (
+        r'\b(?:l\'indice|indice)\s+\$?(?:SPX500|NSDQ100|GER40|DJ30)\b.{0,50}\b(?:ha\s+chiuso\s+in\s+(?:flessione|calo|ribasso)|ha\s+perso|chiudendo\s+a\s+-|mostrato\s+una\s+performance\s+negativa)\b',
+        "Afferma flessione/perdite/segno meno per indice che ha chiuso in rialzo"
+    ),
+    (
+        r'\b(?:l\'indice|indice)\s+\$?(?:SPX500|NSDQ100|GER40|DJ30)\s+che\s+ha\s+perso\b',
+        "Afferma che l'indice ha perso quando invece ha chiuso in rialzo"
+    ),
+    (
+        r'\b(?:a\s+guidare|a\s+trainare)\s+questa\s+seduta\s+negativa\b',
+        "Definisce la seduta come negativa con tono pessimista su mercato in rialzo"
+    ),
+    (
+        r'\bperformance\s+negativa,?\s*chiudendo\s+a\s+-\d',
+        "Afferma performance negativa chiudendo a -X% per indice su mercato in rialzo"
+    ),
+]
+
 
 def fix_sign_sentiment_oxymorons(text: str) -> str:
     """
@@ -258,6 +303,18 @@ def fix_sign_sentiment_oxymorons(text: str) -> str:
         cleaned,
         flags=re.IGNORECASE,
     )
+    cleaned = re.sub(
+        r'\b(?:ha\s+)?perso\s+(?:il\s+)?(?=\+\d)',
+        'ha guadagnato il ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\b(?:mostrato\s+una\s+)?performance\s+negativa,?\s*(?:chiudendo\s+a\s+)?(?=\+\d)',
+        'ha registrato una performance positiva, chiudendo a ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
     # Fix 'Seduta in flessione per ... salito dell' / 'chiuso in flessione ... salito dell''
     cleaned = re.sub(
         r'\b(?:seduta|giornata)\s+in\s+(?:flessione|calo)\s+(per\b[^\n]{0,120}?\bsalit[oaie]\b)',
@@ -303,8 +360,202 @@ def fix_sign_sentiment_oxymorons(text: str) -> str:
         cleaned,
         flags=re.IGNORECASE,
     )
+    cleaned = re.sub(
+        r'\b(?:ha\s+)?guadagnato\s+(?:il\s+)?(?=-\d)',
+        'ha ceduto il ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\b(?:mostrato\s+una\s+)?performance\s+positiva,?\s*(?:chiudendo\s+a\s+)?(?=-\d)',
+        'ha registrato una performance negativa, chiudendo a ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
 
     return cleaned
+
+
+def enforce_benchmark_ground_truth(
+    text: str,
+    benchmark_daily: Optional[Dict[str, float]] = None,
+    session_name: Optional[str] = None,
+) -> Tuple[str, bool]:
+    """
+    Enforces strict mathematical ground truth and semantic direction for market benchmarks.
+    Prevents and corrects hallucinations where positive benchmark closes (+X%) are reported
+    as losses/negatives ('ha perso 0.66%', 'chiudendo a -1.21%', 'in flessione'),
+    or where negative closes (-X%) are reported as gains ('in rialzo', 'guadagni').
+
+    Returns:
+        tuple: (corrected_text, is_modified)
+    """
+    if not text or not benchmark_daily:
+        return text, False
+
+    session_upper = (session_name or "").upper()
+    is_close_session = (
+        any(k in session_upper for k in ["CLOSE", "SERALE", "CHIUSURA", "FINE GIORNATA"]) or
+        (not session_name and bool(re.search(r'\b(?:chiusura\s+usa|buonasera|fine\s+sessione|seduta\s+d\'oltreoceano)\b', text.lower())))
+    )
+    if not is_close_session:
+        return text, False
+
+    spx_perf = benchmark_daily.get('SPX500')
+    ndx_perf = benchmark_daily.get('NSDQ100')
+    if spx_perf is None and ndx_perf is None:
+        return text, False
+
+    cleaned = text
+    orig = text
+
+    is_market_positive = (
+        (spx_perf is not None and spx_perf > 0.15) or
+        (ndx_perf is not None and ndx_perf > 0.15)
+    )
+    is_market_negative = (
+        (spx_perf is not None and spx_perf < -0.15) or
+        (ndx_perf is not None and ndx_perf < -0.15)
+    )
+
+    if is_market_positive:
+        # Case A: Market closed POSITIVE (e.g. SPX +0.67%, Nasdaq +1.21%)
+        # 1. Correct explicit benchmark loss phrases & sign flips:
+        if spx_perf is not None and spx_perf > 0:
+            cleaned = re.sub(
+                r'(\$?SPX500\b[^\n\.,;]{0,40}?\b(?:che\s+)?ha\s+perso\s+)(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%',
+                f"$SPX500 che ha guadagnato +{spx_perf:.2f}%",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            cleaned = re.sub(
+                r'(\b(?:che\s+)?ha\s+perso\s+(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%\s+[^\n\.,;]{0,40}?\b\$?SPX500\b)',
+                f"ha guadagnato +{spx_perf:.2f}% per l'indice $SPX500",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            # Correct if SPX500 is mentioned followed by negative percentage like "-0.66%"
+            cleaned = re.sub(
+                r'(\$?SPX500\b[^\n\.,;]{0,30}?\b(?:chiuso\s+a|chiudendo\s+a|a)\s+)-(?:\d+[\.,]?\d*%)',
+                rf"\1+{spx_perf:.2f}%",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+
+        if ndx_perf is not None and ndx_perf > 0:
+            cleaned = re.sub(
+                r'((?:il\s+)?(?:Nasdaq(?:\s*100)?|\$NSDQ100)\b[^\n\.,;]{0,50}?\b(?:ha\s+mostrato\s+una\s+)?performance\s+negativa,?\s*(?:chiudendo\s+a\s+)?)(?:\+|-)?\d+[\.,]?\d*%',
+                f"il Nasdaq 100 ($NSDQ100) ha chiuso in rialzo a +{ndx_perf:.2f}%",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            cleaned = re.sub(
+                r'((?:il\s+)?(?:Nasdaq(?:\s*100)?|\$NSDQ100)\b[^\n\.,;]{0,40}?\b(?:che\s+)?ha\s+perso\s+)(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%',
+                f"il Nasdaq 100 ($NSDQ100) che ha guadagnato +{ndx_perf:.2f}%",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            # Correct if Nasdaq/NSDQ100 is followed by negative percentage like "-1.21%"
+            cleaned = re.sub(
+                r'((?:il\s+)?(?:Nasdaq(?:\s*100)?|\$NSDQ100)\b[^\n\.,;]{0,30}?\b(?:chiuso\s+a|chiudendo\s+a|a)\s+)-(?:\d+[\.,]?\d*%)',
+                rf"\1+{ndx_perf:.2f}%",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+
+        # 2. Correct general market opening / wrap-up sentences:
+        cleaned = re.sub(
+            r'\b(sessione\s+d\'oltreoceano\b[^\n\.,;]{0,40}?\bsi\s+è\s+chiusa\s+in\s+)(?:flessione|calo|ribasso|rosso)\b',
+            r'\1rialzo',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r'\b(seduta\s+a\s+Wall\s+Street\b[^\n\.,;]{0,40}?\bsi\s+è\s+chiusa\s+in\s+)(?:flessione|calo|ribasso|rosso)\b',
+            r'\1rialzo',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r'\b(?:ha\s+chiuso\s+con\s+un\s+tono|si\s+è\s+chiusa\s+con\s+un\s+tono)\s+(?:complessivamente\s+)?negativo\b',
+            'ha chiuso in territorio positivo',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r'\b(?:tono|chiusura|seduta|giornata)\s+complessivamente\s+negativ[ao]\b',
+            'seduta complessivamente positiva',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r'\b(?:a\s+guidare|a\s+trainare)\s+questa\s+seduta\s+negativa\b',
+            'A sostenere questa seduta positiva',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r'\b(?:i\s+)?(?:listini|indici|mercati|wall\s+street)\s+(?:hanno\s+chiuso|chiudono)\s+in\s+(?:flessione|calo|ribasso|rosso)\b',
+            'i listini hanno chiuso in rialzo',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r'\b(?:wall\s+street|i\s+listini|i\s+mercati)\s+in\s+(?:territorio\s+negativo|forte\s+calo|rosso)\b',
+            'listini in territorio positivo',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r'\bseduta\s+all\'insegna\s+delle\s+prese\s+di\s+beneficio\b',
+            'seduta all\'insegna degli acquisti',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+
+    elif is_market_negative:
+        # Case B: Market closed NEGATIVE (e.g. SPX -1.11%, Nasdaq -2.02%)
+        cleaned = re.sub(
+            r'\b(?:ha\s+chiuso\s+con\s+un\s+tono|si\s+è\s+chiusa\s+con\s+un\s+tono)\s+(?:complessivamente\s+)?positivo\b',
+            'ha chiuso con listini in flessione e prese di beneficio',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r'\b(?:tono|chiusura|seduta|giornata)\s+complessivamente\s+positiv[ao]\b',
+            'seduta all\'insegna delle prese di beneficio e listini in calo',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r'\b(?:i\s+)?(?:listini|indici|mercati|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+rialzo\b',
+            'i listini hanno chiuso in flessione',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r'\b(?:wall\s+street|i\s+listini|i\s+mercati)\s+in\s+(?:forte\s+)?territorio\s+positivo\b',
+            'listini in territorio negativo',
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        if spx_perf is not None and spx_perf < 0:
+            cleaned = re.sub(
+                r'(\$?SPX500\b[^\n\.,;]{0,40}?\b(?:che\s+)?ha\s+(?:guadagnato|chiuso\s+in\s+rialzo)\s+)(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%',
+                f"$SPX500 che ha ceduto {spx_perf:.2f}%",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+        if ndx_perf is not None and ndx_perf < 0:
+            cleaned = re.sub(
+                r'((?:il\s+)?(?:Nasdaq(?:\s*100)?|\$NSDQ100)\b[^\n\.,;]{0,40}?\b(?:che\s+)?ha\s+(?:guadagnato|chiuso\s+in\s+rialzo)\s+)(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%',
+                f"il Nasdaq 100 ($NSDQ100) che ha ceduto {ndx_perf:.2f}%",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+
+    cleaned = fix_sign_sentiment_oxymorons(cleaned)
+    return cleaned, (cleaned != orig)
 
 
 def clean_etoro_formatting(text: str) -> str:
@@ -482,11 +733,12 @@ def verify_post_deterministic(
         if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
             issues.append(f"CRITICAL: BANALITÀ VIETATA: {reason}.")
 
-    # 0d. Check for market sentiment mismatch (claiming positive tone/close when market is down)
+    # 0d. Check for market sentiment mismatch (claiming positive tone when market is down, or negative tone when market is up)
     if is_close_session and benchmark_daily:
         spx_perf = benchmark_daily.get('SPX500')
         ndx_perf = benchmark_daily.get('NSDQ100')
         is_market_negative = (spx_perf is not None and spx_perf < -0.15) or (ndx_perf is not None and ndx_perf < -0.15)
+        is_market_positive = (spx_perf is not None and spx_perf > 0.15) or (ndx_perf is not None and ndx_perf > 0.15)
         if is_market_negative:
             for pattern, reason in SENTIMENT_MISMATCH_PATTERNS:
                 if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
@@ -494,6 +746,15 @@ def verify_post_deterministic(
                         f"CRITICAL: Incongruenza di tono/sentiment di mercato: i listini hanno chiuso in calo "
                         f"(SPX500: {spx_perf:+.2f}%, NSDQ100: {ndx_perf:+.2f}%), ma il testo descrive la seduta "
                         f"con toni positivi o rialzisti ({reason}). Sostituire con chiusura in calo o flessione."
+                    )
+                    break
+        elif is_market_positive:
+            for pattern, reason in SENTIMENT_POSITIVE_MARKET_MISMATCH_PATTERNS:
+                if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
+                    issues.append(
+                        f"CRITICAL: Incongruenza di tono/sentiment di mercato: i listini hanno chiuso in rialzo "
+                        f"(SPX500: {spx_perf:+.2f}%, NSDQ100: {ndx_perf:+.2f}%), ma il testo descrive la seduta "
+                        f"con toni negativi o ribassisti ({reason}). Sostituire con chiusura in rialzo o positiva."
                     )
                     break
 
@@ -620,44 +881,9 @@ def sanitize_or_prune_post_content(
         flags=re.IGNORECASE,
     )
 
-    # 1b. Depurazione automatica paradosso di sentiment su mercati negativi
+    # 1b. Enforce benchmark ground truth (direction and numbers for both positive and negative markets)
     if benchmark_daily:
-        spx_perf = benchmark_daily.get('SPX500')
-        ndx_perf = benchmark_daily.get('NSDQ100')
-        is_market_negative = (spx_perf is not None and spx_perf < -0.15) or (ndx_perf is not None and ndx_perf < -0.15)
-        if is_market_negative:
-            # Sostituzioni mirate SOLO al tono generale dei mercati / indici di Wall Street
-            # NON toccare mai i singoli titoli, ETF o percentuali positive (+X.XX%)
-            cleaned = re.sub(
-                r'\b(?:ha\s+chiuso\s+con\s+un\s+tono|si\s+è\s+chiusa\s+con\s+un\s+tono)\s+(?:complessivamente\s+)?positivo\b',
-                'ha chiuso con listini in flessione e prese di beneficio',
-                cleaned,
-                flags=re.IGNORECASE,
-            )
-            cleaned = re.sub(
-                r'\b(?:tono|chiusura|seduta|giornata)\s+complessivamente\s+positiv[ao]\b',
-                'seduta all\'insegna delle prese di beneficio e listini in calo',
-                cleaned,
-                flags=re.IGNORECASE,
-            )
-            cleaned = re.sub(
-                r'\b(?:i\s+)?(?:listini|indici|mercati|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+rialzo\b',
-                'i listini hanno chiuso in flessione',
-                cleaned,
-                flags=re.IGNORECASE,
-            )
-            cleaned = re.sub(
-                r'\b(?:wall\s+street|i\s+listini|i\s+mercati)\s+in\s+(?:forte\s+)?territorio\s+positivo\b',
-                'listini in territorio negativo',
-                cleaned,
-                flags=re.IGNORECASE,
-            )
-            cleaned = re.sub(
-                r'\b(?:l\'indice|indice)\s+(\$?(?:SPX500|NSDQ100|GER40|DJ30))\b.{0,40}\b(?:ha\s+chiuso\s+in\s+rialzo|chiude\s+in\s+rialzo)\b',
-                r"l'indice \1 ha chiuso in calo",
-                cleaned,
-                flags=re.IGNORECASE,
-            )
+        cleaned, _ = enforce_benchmark_ground_truth(cleaned, benchmark_daily=benchmark_daily, session_name=session_name)
 
     # 1c. Risoluzione automatica di ossimori matematici segno/tono (es. 'chiuso in flessione del +2.26%')
     cleaned = fix_sign_sentiment_oxymorons(cleaned)
@@ -991,6 +1217,19 @@ def verify_and_clean_post(
                         session_name=session_name,
                         benchmark_daily=benchmark_daily
                     )
+                # Re-verify deterministic gate on post-audit text
+                is_clean_final, final_issues, _ = verify_post_deterministic(
+                    final_text,
+                    primary_ticker=primary_ticker,
+                    session_name=session_name,
+                    benchmark_daily=benchmark_daily,
+                )
+                critical_final = [i for i in final_issues if i.startswith("CRITICAL")]
+                if critical_final:
+                    print(f"   ❌ POST BLOCKED after auto-correct due to remaining critical issues: {critical_final[0]}")
+                    rejection_dict = dict(audit_data)
+                    rejection_dict.update({"decision": "REJECT", "issues": final_issues, "auditor": auditor_name, "explanation": critical_final[0]})
+                    return False, "", rejection_dict
                 return True, final_text, audit_data
 
             # APPROVE
@@ -1003,6 +1242,19 @@ def verify_and_clean_post(
                     session_name=session_name,
                     benchmark_daily=benchmark_daily
                 )
+            # Re-verify deterministic gate on post-audit text
+            is_clean_final, final_issues, _ = verify_post_deterministic(
+                final_text,
+                primary_ticker=primary_ticker,
+                session_name=session_name,
+                benchmark_daily=benchmark_daily,
+            )
+            critical_final = [i for i in final_issues if i.startswith("CRITICAL")]
+            if critical_final:
+                print(f"   ❌ POST BLOCKED after audit approval due to critical issues: {critical_final[0]}")
+                rejection_dict = dict(audit_data)
+                rejection_dict.update({"decision": "REJECT", "issues": final_issues, "auditor": auditor_name, "explanation": critical_final[0]})
+                return False, "", rejection_dict
             return True, final_text, audit_data
 
     # If AI review not available or skipped, use deterministic outcome
