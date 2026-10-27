@@ -39,6 +39,7 @@ DEFAULT_TICKERS = {
     'AVGO': ('AVGO', 'Broadcom Inc'),
     'PLTR': ('PLTR', 'Palantir Technologies Inc'),
     'BESI.NV': ('BESI.AS', 'BE Semiconductor Industries N.V.'),
+    'ANT.24-7': ('ANT.24-7', 'Anthropic Early Access'),
     
     # Energy, Nuclear, Utilities & Commodities
     'ENI.MI': ('ENI.MI', 'Eni S.p.A.'),
@@ -96,6 +97,7 @@ DEFAULT_EMOJIS = {
     'MRVL': '📊',
     'BESI.NV': '🔬',
     'BESI': '🔬',
+    'ANT.24-7': '🧠',
     
     # Energy, Utilities & Commodities
     'CCJ': '⚡',
@@ -212,6 +214,11 @@ def load_config():
             if "IB01.L" not in config.get("tickers", {}):
                 config["tickers"]["IB01.L"] = ["IB01.L", "iShares $ Treasury Bond 0-1yr UCITS ETF"]
                 config["emojis"]["IB01.L"] = "💵"
+                needs_save = True
+
+            if "ANT.24-7" not in config.get("tickers", {}):
+                config["tickers"]["ANT.24-7"] = ["ANT.24-7", "Anthropic Early Access"]
+                config["emojis"]["ANT.24-7"] = "🧠"
                 needs_save = True
 
             if needs_save:
@@ -465,9 +472,11 @@ MULTI_TAG_MAP = {
     'MRVL': ['$MRVL'],
     'BESI.NV': ['$BESI.NV', '$BESI', '$BESI.AS'],
     'BESI': ['$BESI.NV', '$BESI', '$BESI.AS'],
+    'ANT.24-7': ['$ANT.24-7'],
 }
 
 RELATED_TICKERS_MAP = {
+    'ANT.24-7': ['$AMZN', '$GOOG', '$MSFT', '$NVDA'],
     'NVDA': ['$AMD', '$AVGO', '$TSM'],
     'MSFT': ['$GOOG', '$AMZN', '$AAPL'],
     'AMZN': ['$MELI', '$WMT', '$MSFT'],
@@ -517,6 +526,26 @@ RELATED_TICKERS_MAP = {
 # ══════════════════════════════════════════════════════════════════════════════
 PORTFOLIO_ASSETS_METADATA = {
     # ── US Tech & AI Megatrend ───────────────────────────────────────────────
+    "ANT.24-7": {
+        "ticker": "ANT.24-7", "yahoo_ticker": "ANT.24-7", "name": "Anthropic Early Access", "emoji": "🧠",
+        "asset_class": "Stock / Pre-IPO", "sector": "Intelligenza Artificiale Generativa & Modelli LLM", "geo": "USA", "tier": "Frontier AI",
+        "is_dividend_paying": False, "dividend_policy": "Nessun dividendo distribuito; reinvestimento totale in ricerca, compute e sviluppo modelli di frontiera (Claude)", "annual_yield_pct": 0.0, "frequency": "Nessuna",
+        "domain": "anthropic.com", "color": (217, 119, 87),
+        "desc": "Frontier AI research lab and foundation model pioneer, creator of the Claude AI family and Constitutional AI.",
+        "thesis": "Laboratorio di ricerca e sviluppo di intelligenza artificiale di frontiera leader a livello globale (famiglia di modelli Claude 3.5 Sonnet / Claude 3.7), pioniere della Constitutional AI e riferimento assoluto per coding, benchmark logici e flussi agentici enterprise, supportato da partnership strategiche con Amazon AWS e Google Cloud.",
+        "upside_catalysts": [
+            "Leadership indiscussa di Claude nel coding, benchmark logici avanzati e sviluppo di agenti autonomi enterprise",
+            "Espansione esponenziale dell'ARR (Annual Recurring Revenue) trainata dall'adozione massiccia B2B e dalle integrazioni API native",
+            "Partnership strategica e infrastrutturale profonda con Amazon AWS e Google Cloud",
+            "Attesa per l'approdo sui mercati pubblici tramite IPO (con ticker designato $ANT)"
+        ],
+        "downside_risks": [
+            "Competizione serrata nel panorama dei frontier LLM (OpenAI, Google Gemini, Meta Llama)",
+            "Elevati requisiti di Capex e costi di calcolo per l'addestramento dei cluster di prossima generazione",
+            "Volatilità e spread di negoziazione tipici dei contratti 24/7 Early Access pre-IPO su eToro"
+        ],
+        "related_tickers": ["$AMZN", "$GOOG", "$MSFT", "$NVDA"], "primary_tags": ["$ANT.24-7"]
+    },
     "NVDA": {
         "ticker": "NVDA", "yahoo_ticker": "NVDA", "name": "NVIDIA Corporation", "emoji": "🤖",
         "asset_class": "Stock", "sector": "AI & Semiconduttori", "geo": "USA", "tier": "Core Growth",

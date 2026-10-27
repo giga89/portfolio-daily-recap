@@ -95,6 +95,7 @@ DOMAIN_MAP = {
     "SPCX.RTH":   "spacex.com",
     "ETOR":       "etoro.com",
     "TRX":        "tron.network",
+    "ANT.24-7":   "anthropic.com",
 }
 
 # CDN base URL

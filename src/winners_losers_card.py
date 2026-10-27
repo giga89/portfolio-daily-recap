@@ -89,6 +89,7 @@ SECTOR_TAGS = {
     "WCLD.L":    "Cloud · Software SaaS",
     "WMT":       "Retail · e-commerce",
     "MRVL":      "Chip custom · ottica AI",
+    "ANT.24-7":  "Anthropic · AI di frontiera",
     "SPCX.RTH":  "SpaceX · aerospazio",
 }
 
@@ -162,6 +163,7 @@ _TICKER_DOMAIN_MAP = {
     "WDEF.L":    "wisdomtree.com",
     "ETOR":      "etoro.com",
     "TRX":       "tron.network",
+    "ANT.24-7":  "anthropic.com",
 }
 
 
