@@ -37,18 +37,19 @@ POLL_TEMPLATES = [
         "title": "Quale megatrend guiderà le performance nei prossimi mesi? 🚀",
         "options": [
             "AI & Tech ($NVDA, $PLTR)",
-            "Sanità & GLP-1 ($LLY, $NOVO)",
+            "GLP-1 ($LLY, $NOVO-B.CO)",
             "Energia & Uranio ($CCJ)",
-            "Difesa & Aerospazio ($WDEF)"
+            "Difesa Europea ($WDEF.L)"
         ],
         "tickers": [
             "NVDA",
             "PLTR",
             "LLY",
+            "NOVO-B.CO",
             "CCJ",
             "WDEF.L"
         ],
-        "message": "🗳️ SONDAGGIO COMMUNITY: I GRANDI MEGATREND GLOBALI\n\nNel nostro portafoglio bilanciamo crescita secolare (AI & Semiconduttori) con pilastri strategici ad alta visibilità (Sanità, Energia nucleare e Difesa europea).\n\nSecondo voi, quale tra questi 4 megatrend offrirà il miglior profilo rischio/rendimento nei prossimi trimestri?\n\nVotate l'opzione e lasciate un commento con la vostra analisi! 👇"
+        "message": "🗳️ SONDAGGIO COMMUNITY: I GRANDI MEGATREND GLOBALI\n\nNel nostro portafoglio bilanciamo la crescita secolare dell'infrastruttura AI su $NVDA e $PLTR con pilastri strategici ad alta visibilità: terapie GLP-1 di nuova generazione con $LLY e $NOVO-B.CO, riattivazione nucleare per data center con $CCJ e riarmo NATO europeo tramite $WDEF.L.\n\nSecondo voi, quale tra questi 4 megatrend offrirà il miglior profilo rischio/rendimento nei prossimi trimestri?\n\nVotate l'opzione e lasciate un commento con la vostra analisi! 👇"
     },
     {
         "id": "ai_valuation_debate",
@@ -63,9 +64,10 @@ POLL_TEMPLATES = [
             "PLTR",
             "NVDA",
             "TSM",
-            "MSFT"
+            "MSFT",
+            "GOOG"
         ],
-        "message": "🗳️ SONDAGGIO COMMUNITY: IL FUTURO DELL'ECOSISTEMA AI & SOFTWARE\n\nTra contratti enterprise AIP ($PLTR), architetture Blackwell ($NVDA) e hyperscaler cloud ($MSFT, $GOOGL), l'AI continua a ridefinire la produttività globale.\n\nCome vi state posizionando sui titoli leader del settore tech?\n\nDite la vostra nel sondaggio con 1 tap! 👇"
+        "message": "🗳️ SONDAGGIO COMMUNITY: IL FUTURO DELL'ECOSISTEMA AI & SOFTWARE\n\nTra l'adozione enterprise e sovrana di AIP su $PLTR, la transizione dalle architetture Blackwell alla nuova piattaforma Vera Rubin di $NVDA e gli investimenti infrastrutturali degli hyperscaler cloud come $MSFT e $GOOG, l'AI agente continua a ridefinire la produttività globale.\n\nCome vi state posizionando sui titoli leader del settore tech?\n\nDite la vostra nel sondaggio con 1 tap! 👇"
     },
     {
         "id": "risk_management_choice",
@@ -82,11 +84,11 @@ POLL_TEMPLATES = [
             "SX7PEX.DE",
             "PPFB.DE"
         ],
-        "message": "🗳️ SONDAGGIO: GESTIONE DEL RISCHIO E ASSET ALLOCATION\n\nLa nostra strategia mantiene un Risk Score eToro certificato di 3/10 con zero leva finanziaria e +200% di performance cumulata dal 2020.\n\nQual è il vostro approccio attuale al rapporto rischio/rendimento sui mercati?\n\nVotate qui sotto per confrontarvi con la community! 👇"
+        "message": "🗳️ SONDAGGIO: GESTIONE DEL RISCHIO E ASSET ALLOCATION\n\nLa nostra strategia mantiene un Risk Score eToro certificato di 3/10 con zero leva finanziaria e oltre +200% di performance cumulata dal 2020, bilanciando leader growth come $PLTR e $LLY con flussi di cassa su $SX7PEX.DE e oro fisico $PPFB.DE.\n\nQual è il vostro approccio attuale al rapporto rischio/rendimento sui mercati?\n\nVotate qui sotto per confrontarvi con la community! 👇"
     },
     {
         "id": "pltr_conviction",
-        "title": "Palantir ($PLTR): Quale scenario vi aspettate a medio termine? 🛡️",
+        "title": "Palantir $PLTR: Quale scenario vi aspettate a medio termine? 🛡️",
         "options": [
             "Nuovi massimi grazie ad AIP",
             "Crescita solida e costante",
@@ -97,11 +99,11 @@ POLL_TEMPLATES = [
             "PLTR",
             "NVDA"
         ],
-        "message": "🗳️ SONDAGGIO DEL GIORNO: FOCUS SU PALANTIR ($PLTR)\n\nPalantir si conferma uno dei pilastri a più alta convinzione del nostro portafoglio, spinto dalla continua adozione commerciale di AIP e margini operativi solidissimi.\n\nQual è la vostra visione sul titolo nei prossimi mesi?\n\nVotate e commentate con il vostro target! 👇"
+        "message": "🗳️ SONDAGGIO DEL GIORNO: FOCUS SU PALANTIR $PLTR\n\nPalantir $PLTR si conferma uno dei pilastri a più alta convinzione del nostro portafoglio, spinto dall'accelerazione del segmento US Commercial tramite AIP, dai contratti di difesa per l'AI sovrana e dalla partnership strategica con $NVDA.\n\nQual è la vostra visione sul titolo nei prossimi mesi?\n\nVotate e commentate con il vostro target! 👇"
     },
     {
         "id": "gold_safe_haven",
-        "title": "Oro fisico ($PPFB.DE): Quale ruolo deve avere in portafoglio? 🥇",
+        "title": "Oro fisico $PPFB.DE: Quale ruolo deve avere in portafoglio? 🥇",
         "options": [
             "Copertura chiave (5-10%)",
             "Ottimo trend rialzista",
@@ -112,14 +114,14 @@ POLL_TEMPLATES = [
             "PPFB.DE",
             "IB01.L"
         ],
-        "message": "🗳️ SONDAGGIO: ORO FISICO E BENI RIFUGIO ($PPFB.DE)\n\nManteniamo in portafoglio una quota strutturale di Oro fisico tramite ETC ($PPFB.DE) come scudo contro svalutazione monetaria e shock macroeconomici.\n\nCome considerate l'oro nella vostra asset allocation strategica?\n\nVotate l'opzione che rispecchia la vostra strategia! 👇"
+        "message": "🗳️ SONDAGGIO: ORO FISICO E BENI RIFUGIO $PPFB.DE\n\nManteniamo in portafoglio una quota strutturale di Oro fisico tramite l'ETC $PPFB.DE, sostenuto dagli acquisti record delle Banche Centrali e fondamentale come scudo contro debito sovrano, svalutazione monetaria e tensioni geopolitiche.\n\nCome considerate l'oro nella vostra asset allocation strategica?\n\nVotate l'opzione che rispecchia la vostra strategia! 👇"
     },
     {
         "id": "glp1_pharma_battle",
         "title": "Rivoluzione GLP-1 / Obesità: Chi dominerà il mercato pharma? 💊",
         "options": [
             "Eli Lilly ($LLY) leader",
-            "Novo Nordisk ($NOVO-B)",
+            "Novo Nordisk ($NOVO-B.CO)",
             "Duopolio paritario a lungo",
             "Nuovi competitor emergenti"
         ],
@@ -128,11 +130,11 @@ POLL_TEMPLATES = [
             "NOVO-B.CO",
             "ABBV"
         ],
-        "message": "🗳️ SONDAGGIO HEALTHCARE: IL BOOM DEI TRATTAMENTI GLP-1\n\nIl mercato dei farmaci contro obesità e patologie metaboliche ($LLY con Mounjaro/Zepbound e $NOVO-B con Ozempic/Wegovy) rappresenta uno dei trend terapeutici più redditizi del decennio.\n\nChi secondo voi manterrà la leadership e i margini più elevati nel lungo periodo?\n\nVotate qui sotto! 👇"
+        "message": "🗳️ SONDAGGIO HEALTHCARE: IL BOOM DEI TRATTAMENTI GLP-1\n\nOltre al successo globale di Mounjaro/Zepbound per $LLY e Ozempic/Wegovy per $NOVO-B.CO, la sfida si gioca ora sulle pillole orali come Orforglipron di $LLY e sulle combinazioni di nuova generazione come CagriSema di $NOVO-B.CO (>25% di riduzione peso in Fase 3).\n\nChi manterrà la leadership e i margini più elevati nel lungo periodo?\n\nVotate qui sotto! 👇"
     },
     {
         "id": "nuclear_energy_ai",
-        "title": "Nucleare & Uranio ($CCJ): Saranno essenziali per i Data Center AI? ⚡",
+        "title": "Nucleare & Uranio $CCJ: Saranno essenziali per i Data Center AI? ⚡",
         "options": [
             "Sì, energia pulita 24/7",
             "Sì, ma orizzonte lungo",
@@ -144,7 +146,7 @@ POLL_TEMPLATES = [
             "TRIG.L",
             "ENEL.MI"
         ],
-        "message": "🗳️ SONDAGGIO ENERGIA: IL RINASCIMENTO NUCLEARE ($CCJ)\n\nL'esplosione dei consumi energetici per l'Intelligenza Artificiale sta spingendo i giganti tech verso contratti nucleari baseload a zero emissioni. Con Cameco ($CCJ) siamo esposti al principale produttore occidentale di uranio.\n\nCredete che il nucleare sarà il vincitore energetico del decennio?\n\nDite la vostra! 👇"
+        "message": "🗳️ SONDAGGIO ENERGIA: IL RINASCIMENTO NUCLEARE $CCJ\n\nL'esplosione dei consumi elettrici dei cluster AI sta spingendo gli hyperscaler tech a siglare contratti PPA nucleari 24/7 a zero emissioni e riattivare reattori. Con Cameco $CCJ siamo esposti alle principali miniere occidentali di uranio e al 49% di Westinghouse.\n\nCredete che il nucleare sarà il vincitore energetico del decennio?\n\nDite la vostra! 👇"
     },
     {
         "id": "semiconductor_foundry_moat",
@@ -161,11 +163,11 @@ POLL_TEMPLATES = [
             "AVGO",
             "MRVL"
         ],
-        "message": "🗳️ SONDAGGIO CHIP: DOVE RISIEDE IL VERO VANTAGGIO COMPETITIVO?\n\nDai nodi a 2nm/3nm di TSMC ai chip ASIC custom di Broadcom per hyperscaler, i semiconduttori sono le fondamenta irrinunciabili della trasformazione digitale.\n\nTra questi giganti nel nostro portafoglio, chi ha il fossato competitivo più inespugnabile?\n\nVotate e motivate nei commenti! 👇"
+        "message": "🗳️ SONDAGGIO CHIP: DOVE RISIEDE IL VERO VANTAGGIO COMPETITIVO?\n\nDai nodi a 2nm/3nm e packaging avanzato CoWoS di $TSM all'ecosistema CUDA e Vera Rubin di $NVDA, fino agli acceleratori XPU custom di $AVGO e alle interconnessioni ottiche di $MRVL, i semiconduttori sono le fondamenta dell'economia AI.\n\nTra questi giganti nel nostro portafoglio, chi ha il fossato competitivo più inespugnabile?\n\nVotate e motivate nei commenti! 👇"
     },
     {
         "id": "defense_europe_rearmament",
-        "title": "Difesa Europea ($WDEF): Cosa aspettarsi dalla spesa militare NATO? 🛡️",
+        "title": "Difesa Europea $WDEF.L: Cosa aspettarsi dalla spesa militare NATO? 🛡️",
         "options": [
             "Crescita secolare NATO",
             "Valutazioni già tirate",
@@ -176,16 +178,16 @@ POLL_TEMPLATES = [
             "WDEF.L",
             "PLTR"
         ],
-        "message": "🗳️ SONDAGGIO SETTORE DIFESA: LA RI-MILITARIZZAZIONE EUROPEA ($WDEF)\n\nCon i budget NATO in aumento verso e oltre il 2% del PIL e la ricostituzione degli inventari strategici europei, l'ETF WisdomTree Europe Defence ($WDEF.L) cattura i leader industriali del continente.\n\nRitenete che il settore Difesa rimarrà un driver strutturale di rendimento nei prossimi anni?\n\nEsprimete il vostro voto! 👇"
+        "message": "🗳️ SONDAGGIO SETTORE DIFESA: LA RI-MILITARIZZAZIONE EUROPEA $WDEF.L\n\nCon la soglia NATO del 2% del PIL ormai superata verso i nuovi target del 3%-3,5%+ e i programmi UE di approvvigionamento domestico, l'ETF WisdomTree Europe Defence $WDEF.L e i sistemi AI di $PLTR beneficiano di portafogli ordini pluriennali record.\n\nIl settore Difesa resterà un driver strutturale nei prossimi anni?\n\nEsprimete il vostro voto! 👇"
     },
     {
         "id": "dividends_cash_yield",
         "title": "Titoli da dividendo: Quale settore offre il flusso più solido? 💰",
         "options": [
-            "Banche Europee ($SX7PEX)",
-            "Energy & Utilities ($ENI)",
+            "Banche UE ($SX7PEX.DE)",
+            "Energy & Utility ($ENI.MI)",
             "Pharma Aristocrat ($ABBV)",
-            "Infrastrutture Green ($TRIG)"
+            "Infrastrutture ($TRIG.L)"
         ],
         "tickers": [
             "SX7PEX.DE",
@@ -194,7 +196,7 @@ POLL_TEMPLATES = [
             "ABBV",
             "TRIG.L"
         ],
-        "message": "🗳️ SONDAGGIO CASH FLOW: GENERAZIONE DI RENDITA PASSIVA\n\nIl nostro portafoglio bilancia posizioni growth con asset a dividendo sostenibile (~3-4% yield medio sul comparto income) per finanziare costantemente nuova liquidità.\n\nQuale comparto ritenete più affidabile per la generazione di flussi di cassa?\n\nVotate con 1 tap! 👇"
+        "message": "🗳️ SONDAGGIO CASH FLOW: GENERAZIONE DI RENDITA PASSIVA\n\nIl nostro portafoglio bilancia posizioni growth con asset a dividendo sostenibile (~3-4% yield medio sul comparto income tra $SX7PEX.DE, $ENI.MI, $ENEL.MI, $ABBV e $TRIG.L) per finanziare costantemente nuova liquidità.\n\nQuale comparto ritenete più affidabile per la generazione di flussi di cassa?\n\nVotate con 1 tap! 👇"
     },
     {
         "id": "emerging_markets_opportunity",
@@ -202,8 +204,8 @@ POLL_TEMPLATES = [
         "options": [
             "America Latina ($MELI)",
             "Cina & EV leader ($1211.HK)",
-            "Vietnam & Frontiera ($VOF)",
-            "Indonesia & Metalli ($INDO)"
+            "Vietnam & Frontiera ($VOF.L)",
+            "Indonesia ETF ($INDO.PA)"
         ],
         "tickers": [
             "MELI",
@@ -211,7 +213,7 @@ POLL_TEMPLATES = [
             "VOF.L",
             "INDO.PA"
         ],
-        "message": "🗳️ SONDAGGIO MERCATI EMERGENTI: CRESCITA E DEMOGRAFIA\n\nDall'espansione e-commerce e fintech di MercadoLibre ($MELI) al boom manifatturiero del Vietnam ($VOF.L) e alle riserve indonesiane ($INDO.PA), cerchiamo alpha selettivo globale.\n\nQuale area geografica emergente offre il miglior potenziale di rivalutazione?\n\nVotate e commentate la vostra scelta! 👇"
+        "message": "🗳️ SONDAGGIO MERCATI EMERGENTI: CRESCITA E DEMOGRAFIA\n\nDall'ecosistema e-commerce e fintech di MercadoLibre $MELI in America Latina alla leadership globale EV di BYD $1211.HK, fino al boom manifatturiero del Vietnam $VOF.L e alle materie prime critiche dell'Indonesia $INDO.PA, cerchiamo alpha selettivo globale.\n\nQuale area emergente offre il miglior potenziale?\n\nVotate e commentate la vostra scelta! 👇"
     },
     {
         "id": "luxury_vs_defensive_consumer",
@@ -219,8 +221,8 @@ POLL_TEMPLATES = [
         "options": [
             "Ultra-Luxury Moat ($RACE)",
             "Retail difensivo ($WMT)",
-            "Beni di consumo ($ULVR)",
-            "Auto globale ($VOW3)"
+            "Beni di consumo ($ULVR.L)",
+            "Auto globale ($VOW3.DE)"
         ],
         "tickers": [
             "RACE",
@@ -228,15 +230,15 @@ POLL_TEMPLATES = [
             "ULVR.L",
             "VOW3.DE"
         ],
-        "message": "🗳️ SONDAGGIO CONSUMI: PRICING POWER E RESILIENZA\n\nNelle diverse fasi di mercato, due strategie spiccano: l'inimitabile pricing power del lusso estremo ($RACE con liste d'attesa pluriennali) o la scala dei colossi dei consumi quotidiani ($WMT, $ULVR.L).\n\nSu quale modello puntereste con un orizzonte di 3-5 anni?\n\nDite la vostra nel sondaggio! 👇"
+        "message": "🗳️ SONDAGGIO CONSUMI: PRICING POWER E RESILIENZA\n\nNelle diverse fasi del ciclo economico, due strategie spiccano: l'inimitabile pricing power dell'ultra-lusso di Ferrari $RACE (con portafoglio ordini pluriennale e margini record) o la scala difensiva dei colossi quotidiani come $WMT e $ULVR.L.\n\nSu quale modello puntereste con un orizzonte di 3-5 anni?\n\nDite la vostra nel sondaggio! 👇"
     },
     {
         "id": "electrification_grid_supercycle",
         "title": "Elettrificazione globale: Quale segmento sarà più redditizio? 🔌",
         "options": [
-            "Cavi & Reti ($PRY)",
-            "Rame & Metalli ($GLEN)",
-            "Rinnovabili & Rete ($ENEL)",
+            "Cavi & Reti ($PRY.MI)",
+            "Rame & Metalli ($GLEN.L)",
+            "Reti Elettriche ($ENEL.MI)",
             "Intera filiera elettrica"
         ],
         "tickers": [
@@ -244,7 +246,7 @@ POLL_TEMPLATES = [
             "GLEN.L",
             "ENEL.MI"
         ],
-        "message": "🗳️ SONDAGGIO INFRASTRUTTURE: IL SUPERCICLO DELL'ELETTRIFICAZIONE\n\nIl potenziamento delle reti elettriche per data center, rinnovabili e mobilità elettrica genera una domanda senza precedenti per cavi sottomarini (Prysmian $PRY.MI) e rame industriale (Glencore $GLEN.L).\n\nQuale comparto beneficerà maggiormente di questo mega-trend infrastrutturale?\n\nVotate qui sotto! 👇"
+        "message": "🗳️ SONDAGGIO INFRASTRUTTURE: IL SUPERCICLO DELL'ELETTRIFICAZIONE\n\nL'ammodernamento delle reti elettriche per data center AI e rinnovabili guida una domanda storica per i cavi ad alta tensione e in fibra ottica di Prysmian $PRY.MI (rafforzata in Nord America con Encore Wire e Channell), il rame di Glencore $GLEN.L e le smart grid di $ENEL.MI.\n\nQuale comparto premierà di più?\n\nVotate qui sotto! 👇"
     },
     {
         "id": "big_tech_cloud_battle",
@@ -252,7 +254,7 @@ POLL_TEMPLATES = [
         "options": [
             "Microsoft Azure ($MSFT)",
             "Amazon AWS ($AMZN)",
-            "Google Cloud ($GOOGL)",
+            "Google Cloud ($GOOG)",
             "Crescita condivisa per tutti"
         ],
         "tickers": [
@@ -260,31 +262,31 @@ POLL_TEMPLATES = [
             "AMZN",
             "GOOG"
         ],
-        "message": "🗳️ SONDAGGIO BIG TECH: LA BATTAGLIA DELL'INFRASTRUTTURA CLOUD\n\nI tre giganti del Cloud ($MSFT, $AMZN, $GOOGL) stanno investendo centinaia di miliardi per dotare le proprie infrastrutture dei migliori cluster di accelerazione AI.\n\nQuale piattaforma conquisterà la quota maggiore di budget IT aziendali nei prossimi anni?\n\nVotate e lasciate la vostra previsione! 👇"
+        "message": "🗳️ SONDAGGIO BIG TECH: LA BATTAGLIA DELL'INFRASTRUTTURA CLOUD\n\nI tre giganti del Cloud $MSFT, $AMZN e $GOOG stanno investendo centinaia di miliardi in cluster AI, chip proprietari (Maia, Trainium, TPU) e agenti AI aziendali per monetizzare il backlog miliardario dei clienti enterprise.\n\nQuale piattaforma conquisterà la quota maggiore di budget IT nei prossimi anni?\n\nVotate e lasciate la vostra previsione! 👇"
     },
     {
         "id": "ev_revolution_byd",
-        "title": "Auto Elettriche e Mobilità: BYD ($1211.HK) guiderà il mercato globale? 🔋",
+        "title": "Auto Elettriche e Mobilità: BYD $1211.HK guiderà il mercato globale? 🔋",
         "options": [
             "Sì, integrazione verticale",
-            "Sì, ma con freno dazi",
+            "Sì, anche con fabbriche UE",
             "I brand storici recuperano",
-            "Crescita EV più lenta"
+            "Crescita EV più selettiva"
         ],
         "tickers": [
             "1211.HK",
             "VOW3.DE"
         ],
-        "message": "🗳️ SONDAGGIO MOBILITÀ: LA SCALA INDUSTRIALE DI BYD ($1211.HK)\n\nCon la tecnologia Blade Battery, produzione proprietaria di semiconduttori e prezzi ultra-competitivi, BYD sta espandendo la propria quota di mercato a livello globale.\n\nCome valutate il posizionamento di BYD rispetto all'automotive tradizionale ($VOW3.DE)?\n\nVotate il sondaggio! 👇"
+        "message": "🗳️ SONDAGGIO MOBILITÀ: LA SCALA INDUSTRIALE DI BYD $1211.HK\n\nGrazie a batterie Blade, ibridi plug-in DM-i di quinta generazione e nuovi stabilimenti produttivi in Europa (Ungheria) per superare le barriere doganali UE, BYD $1211.HK continua a guadagnare quote di mercato globali sfidando i gruppi storici come $VOW3.DE.\n\nQual è la vostra visione sul futuro del settore auto?\n\nVotate il sondaggio! 👇"
     },
     {
         "id": "alternative_assets_frontier",
         "title": "Asset Alternativi: Quale asset class per diversificare? 🏛️",
         "options": [
-            "Private Equity ($IQQL)",
-            "Difesa Europea ($WDEF)",
-            "Mercati frontiera ($VOF)",
-            "Oro fisico ($PPFB)"
+            "Private Equity ($IQQL.DE)",
+            "Difesa Europea ($WDEF.L)",
+            "Mercati frontiera ($VOF.L)",
+            "Oro fisico ($PPFB.DE)"
         ],
         "tickers": [
             "IQQL.DE",
@@ -292,11 +294,11 @@ POLL_TEMPLATES = [
             "VOF.L",
             "PPFB.DE"
         ],
-        "message": "🗳️ SONDAGGIO ASSET ALTERNATIVI: DIVERSIFICAZIONE FUORI DAI LISTINI TRADIZIONALI\n\nDai giganti del private equity (Blackstone, KKR via $IQQL.DE) al riarmo strategico europeo ($WDEF.L) e mercati di frontiera ($VOF.L), ricerchiamo fonti di rendimento decorrelate.\n\nQuale classe di asset alternativi ritenete più interessante per diversificare?\n\nEsprimete la vostra preferenza! 👇"
+        "message": "🗳️ SONDAGGIO ASSET ALTERNATIVI: DIVERSIFICAZIONE FUORI DAI LISTINI TRADIZIONALI\n\nDai colossi globali del private equity e private credit via $IQQL.DE al riarmo strategico europeo $WDEF.L, fino ai mercati di frontiera $VOF.L e all'oro fisico $PPFB.DE, ricerchiamo fonti di rendimento decorrelate.\n\nQuale classe di asset alternativi ritenete più interessante per diversificare?\n\nEsprimete la vostra preferenza! 👇"
     },
     {
         "id": "european_banking_profitability",
-        "title": "Banche Europee ($SX7PEX.DE): Extra-rendimenti e buyback sostenibili? 🏛️",
+        "title": "Banche Europee $SX7PEX.DE: Extra-rendimenti e buyback sostenibili? 🏛️",
         "options": [
             "Sì, dividendi record",
             "Sì, con crescita moderata",
@@ -307,13 +309,13 @@ POLL_TEMPLATES = [
             "SX7PEX.DE",
             "2318.HK"
         ],
-        "message": "🗳️ SONDAGGIO BANCHE EUROPEE: REDDITIVITÀ E REMUNERAZIONE DEGLI AZIONISTI\n\nIl settore bancario europeo ($SX7PEX.DE) continua a offrire flussi di cassa solidi, distribuzioni di capitale generose e valutazioni a multipli contenuti.\n\nQual è la vostra aspettativa sul comparto bancario per i prossimi mesi?\n\nVotate qui sotto! 👇"
+        "message": "🗳️ SONDAGGIO BANCHE EUROPEE: REDDITIVITÀ E REMUNERAZIONE DEGLI AZIONISTI\n\nCon tassi BCE stabilizzati in territorio positivo (~2,50%), solidi coefficienti patrimoniali CET1 e piani miliardari di dividendi e buyback, il settore bancario europeo $SX7PEX.DE mantiene multipli ancora contenuti.\n\nQual è la vostra aspettativa sul comparto bancario per i prossimi mesi?\n\nVotate qui sotto! 👇"
     },
     {
         "id": "healthcare_biopharma_defensive",
         "title": "Sanità & Diagnostica: Quale comparto offre la massima solidità? 🏥",
         "options": [
-            "Diagnostica medica ($ABT)",
+            "Diagnostica ($ABT.US)",
             "Oncologia & Bio ($ABBV)",
             "Assicurazioni ($HUM)",
             "GLP-1 & Diabete ($LLY)"
@@ -325,7 +327,7 @@ POLL_TEMPLATES = [
             "HUM",
             "LLY"
         ],
-        "message": "🗳️ SONDAGGIO HEALTHCARE: DOMANDA ANELASTICA E INNOVAZIONE\n\nLa sanità offre una protezione unica grazie ai trend demografici globali, unita a catalizzatori di crescita nell'oncologia, monitoraggio glicemico ($ABT) e blockbuster biologici ($ABBV, $AZN.L).\n\nQuale area sanitaria preferite avere in portafoglio?\n\nDite la vostra nel sondaggio! 👇"
+        "message": "🗳️ SONDAGGIO HEALTHCARE: DOMANDA ANELASTICA E INNOVAZIONE\n\nLa sanità offre una protezione unica grazie ai trend demografici globali, unita a forti catalizzatori nel monitoraggio glicemico continuo Libre di $ABT.US, nei blockbuster immunologici post-Humira (Skyrizi e Rinvoq di $ABBV) e nell'oncologia di $AZN.L.\n\nQuale area sanitaria preferite avere in portafoglio?\n\nDite la vostra nel sondaggio! 👇"
     },
     {
         "id": "copytrading_portfolio_secrets",
@@ -342,7 +344,7 @@ POLL_TEMPLATES = [
             "PPFB.DE",
             "SX7PEX.DE"
         ],
-        "message": "🗳️ SONDAGGIO STRATEGIA: I PILASTRI DEL NOSTRO SUCCESSO (+200% DAL 2020)\n\nGenerare rendimento composto costante riducendo i drawdown richiede metodo: niente leva finanziaria, Risk Score controllato 3/10 e diversificazione tra Growth, Valore e Oro.\n\nSecondo la vostra esperienza, qual è l'elemento più cruciale per investire con successo?\n\nVotate e raccontateci il vostro approccio! 👇"
+        "message": "🗳️ SONDAGGIO STRATEGIA: I PILASTRI DEL NOSTRO SUCCESSO (+200% DAL 2020)\n\nGenerare rendimento composto costante riducendo i drawdown richiede metodo: niente leva finanziaria, Risk Score controllato 3/10 e diversificazione tra leader AI come $PLTR e $NVDA, flussi di cassa su $SX7PEX.DE e Oro fisico $PPFB.DE.\n\nSecondo la vostra esperienza, qual è l'elemento più cruciale per investire con successo?\n\nVotate e raccontateci il vostro approccio! 👇"
     },
     {
         "id": "fintech_digital_assets_future",
@@ -358,7 +360,7 @@ POLL_TEMPLATES = [
             "TRX",
             "MELI"
         ],
-        "message": "🗳️ SONDAGGIO FINTECH: IL FUTURO DEI SERVIZI FINANZIARI\n\nDall'evoluzione del social trading ($ETOR) all'utilizzo massivo di stablecoin per settlement istantanei su rete TRON ($TRX), fino alle super-app di credito e pagamenti digitali ($MELI), i canali finanziari cambiano rapidamente.\n\nQuale tecnologia/piattaforma sarà più rilevante nel prossimo quinquennio?\n\nVotate e confrontatevi con noi! 👇"
+        "message": "🗳️ SONDAGGIO FINTECH: IL FUTURO DEI SERVIZI FINANZIARI\n\nDall'espansione globale del social investing con $ETOR (quotata al Nasdaq) al dominio di TRON $TRX nei regolamenti globali in stablecoin USDT, fino all'ecosistema di credito e pagamenti digitali Mercado Pago di $MELI, la finanza digitale scala rapidamente.\n\nQuale piattaforma sarà più rilevante nel prossimo quinquennio?\n\nVotate e confrontatevi con noi! 👇"
     }
 ]
 
@@ -369,6 +371,13 @@ def _clean_no_hashtags(text: str) -> str:
     cleaned = re.sub(r"[ \t]+", " ", cleaned)
     cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
     return cleaned.strip()
+
+
+def _unwrap_cashtag_parens(text: str) -> str:
+    """Remove parentheses directly wrapping cashtags so eToro parses them as clickable links."""
+    cleaned = re.sub(r"\(\s*(\$[A-Za-z0-9\.\-]+)\s*\)", r"\1", text)
+    cleaned = re.sub(r"\(\s*(\$[A-Za-z0-9\.\-]+(?:\s*,\s*\$[A-Za-z0-9\.\-]+)+)\s*\)", r"\1", cleaned)
+    return cleaned
 
 
 def generate_monday_macro_poll() -> Dict[str, Any]:
@@ -486,7 +495,7 @@ def generate_friday_performers_poll() -> Dict[str, Any]:
 
     message = (
         "🗳️ SONDAGGIO COMMUNITY: I TOP PERFORMER DELLA SETTIMANA 🚀\n\n"
-        "Si chiude un'altra intensa settimana sui mercati globali ($SPX500, $NSDQ100).\n\n"
+        "Si chiude un'altra intensa settimana sui mercati globali su $SPX500 e $NSDQ100.\n\n"
         "Tra i titoli del nostro portafoglio a lungo termine, le 3 migliori performance degli ultimi 5 giorni sono state:\n"
         f"🥇 ${top1[0]} ({top1[1]}): {top1[2]:+.1f}%\n"
         f"🥈 ${top2[0]} ({top2[1]}): {top2[2]:+.1f}%\n"
@@ -566,15 +575,19 @@ def publish_etoro_poll(
     raw_message = custom_message or poll_data["message"]
     tickers = custom_tickers or poll_data["tickers"]
 
-    # Strictly sanitize and strip '#' hashtags
-    title = _clean_no_hashtags(raw_title)[:200].strip()
+    # Strictly sanitize, unwrap parenthesized cashtags in title/message, and strip '#' hashtags
+    title = _clean_no_hashtags(_unwrap_cashtag_parens(raw_title))[:200].strip()
     options = [_clean_no_hashtags(str(opt))[:28].strip() for opt in raw_options[:4]]
-    message = _clean_no_hashtags(raw_message).strip()
+    message = _clean_no_hashtags(_unwrap_cashtag_parens(raw_message)).strip()
 
-    # Extract any mentioned cashtags from title, options, and message
+    # Extract any mentioned cashtags from title, options, and message (strip sentence-ending periods)
     all_text = f"{title} {' '.join(options)} {message} {' '.join(tickers)}"
-    found_tickers = re.findall(r"\$([A-Za-z0-9\.\-]+)", all_text)
-    all_tickers = list(dict.fromkeys(tickers + found_tickers))  # preserve order & deduplicate
+    found_tickers = [
+        t.rstrip(".-")
+        for t in re.findall(r"\$([A-Za-z0-9\.\-]+)", all_text)
+        if t.rstrip(".-")
+    ]
+    all_tickers = list(dict.fromkeys([t.rstrip(".-") for t in tickers] + found_tickers))  # preserve order & deduplicate
 
     market_ids = etoro_client.get_market_ids_for_tickers(all_tickers)
 

@@ -42,6 +42,7 @@ MARKET_IDS = {
     "HUM": 1512,
     "ABBV": 1452,
     "ABT.US": 1552,
+    "ABT": 1552,
     "AZN.L": 2010,
 
     # Energy, Utilities, Commodities & Nuclear

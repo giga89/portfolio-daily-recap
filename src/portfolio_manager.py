@@ -1260,7 +1260,7 @@ PORTFOLIO_ASSETS_METADATA = {
         "upside_catalysts": [
             "Crescita dei volumi di trading e dell'adozione globale dei programmi Popular Investor e Copy Trading",
             "Espansione dei servizi finanziari digitali e diversificazione delle fonti di ricavo (interessi su cassa, carte di debito)",
-            "Opportunità di sbarco sui mercati regolamentati tramite IPO pubblica"
+            "Quotazione al Nasdaq ($ETOR) che accelera visibilità istituzionale, acquisizioni strategiche ed espansione globale"
         ],
         "downside_risks": [
             "Ciclicità dei volumi di trading retail legata alla volatilità generale dei mercati",

@@ -244,6 +244,26 @@ class TestPollGeneratorScheduleRouting(unittest.TestCase):
         self.assertIn("Palantir", pltr_poll["title"])
         self.assertEqual(len(pltr_poll["options"]), 4)
 
+    def test_all_poll_templates_have_valid_market_ids_and_no_parenthesized_cashtags(self):
+        import re
+        for t in poll_generator.POLL_TEMPLATES:
+            tid = t["id"]
+            self.assertIsNone(
+                re.search(r"\(\s*\$[A-Za-z0-9\.\-]+\s*\)", t["title"]),
+                f"Template {tid} title has parenthesized cashtag: {t['title']}",
+            )
+            self.assertIsNone(
+                re.search(r"\(\s*\$[A-Za-z0-9\.\-]+\s*\)", t["message"]),
+                f"Template {tid} message has parenthesized cashtag: {t['message']}",
+            )
+            res = poll_generator.publish_etoro_poll(poll_id=tid, dry_run=True)
+            self.assertTrue(res.get("success"), f"Dry run failed for {tid}")
+            self.assertEqual(
+                len(res["market_ids"]),
+                len(res["tickers"]),
+                f"Template {tid} has unmapped tickers: {res['tickers']} -> {res['market_ids']}",
+            )
+
 
 class TestAiCommentResponderFilters(unittest.TestCase):
     """Test third-party mention detection and syntax validation in ai_comment_responder."""
