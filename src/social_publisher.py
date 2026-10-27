@@ -16,7 +16,6 @@ eToro profile + referral link appended to all posts.
 """
 
 import os
-from datetime import datetime
 from datetime import datetime, timezone
 
 import telegram_sender
@@ -754,9 +753,9 @@ def _save_post_to_artifacts(filename: str, title: str, content: str):
         f.write(content)
     print(f"💾 Saved post to {out_path}")
 
-    # Also attempt to copy to conversation artifacts directory if it exists
-    brain_dir = os.environ.get("CONVERSATION_ARTIFACTS_DIR", r"C:\Users\andre\.gemini\antigravity\brain\0f2f1dd3-ac81-49cc-b9be-1d45e0dd1585")
-    if os.path.exists(brain_dir):
+    # Also attempt to copy to conversation artifacts directory if explicitly configured
+    brain_dir = os.environ.get("CONVERSATION_ARTIFACTS_DIR")
+    if brain_dir and os.path.isdir(brain_dir):
         art_dir = os.path.join(brain_dir, "generated_posts")
         os.makedirs(art_dir, exist_ok=True)
         art_path = os.path.join(art_dir, filename)
@@ -1121,11 +1120,6 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
     full_text = post_text + ETORO_FOOTER_LONG
     _save_post_to_artifacts("copy_trading_post.txt", "Copy Trading Post", full_text)
 
-    # 1. eToro Social Feed
-    print("\n🐂 eToro Social Feed (Copy Trading Post):")
-    if etoro_sender.etoro_client.is_configured():
-        # Use existing card as visual if available
-        visual_path = None
     # Generate dedicated Copy Trading visual card with live eToro metrics & rotation
     visual_path = None
     try:
@@ -1180,14 +1174,10 @@ def _publish_copy_trading_post(portfolio_perf: float = None) -> dict:
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
         try:
             header = "<b>🔁 COPY TRADING — IL MIO PORTFOLIO SU ETORO</b>\n\n"
-            telegram_sender.send_telegram_message((header + post_text + ETORO_FOOTER_LONG)[:4096])
             full_tg_text = (header + post_text + ETORO_FOOTER_LONG)
+            telegram_sender.send_telegram_message(full_tg_text[:4096])
             if visual_path and os.path.exists(visual_path):
-                # Telegram photo captions are limited to 1024 chars
-                short_caption = full_tg_text[:1020]
-                telegram_sender.send_telegram_photo(visual_path, caption=short_caption)
-            else:
-                telegram_sender.send_telegram_message(full_tg_text[:4096])
+                telegram_sender.send_telegram_photo(visual_path, caption="📊 Copy Trading Strategy Card")
             print("   ✅ Copy trading post sent to Telegram")
             results["telegram_copy_trading"] = True
         except Exception as exc:

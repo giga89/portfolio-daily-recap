@@ -31,7 +31,8 @@ class TestThematicMicroTopics(unittest.TestCase):
         self.assertEqual(len(niche), 1)
         self.assertEqual(len(set(favs + niche)), 3)
 
-    def test_get_top_gainers_with_news_sorting_and_fallback(self):
+    @patch("tavily_search.search_tavily", return_value=[{"title": "Catalyst news", "content": "Strong operational momentum"}])
+    def test_get_top_gainers_with_news_sorting_and_fallback(self, _mock_tavily):
         mock_stock_data = {
             'MRVL': {'daily_change': 4.5, 'company_name': 'Marvell Technology'},
             'PRY.MI': {'daily_change': 3.2, 'company_name': 'Prysmian'},

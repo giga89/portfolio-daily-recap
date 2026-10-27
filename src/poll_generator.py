@@ -88,10 +88,10 @@ POLL_TEMPLATES = [
         "id": "pltr_conviction",
         "title": "Palantir ($PLTR): Quale scenario vi aspettate a medio termine? 🛡️",
         "options": [
+            "Nuovi massimi grazie ad AIP",
+            "Crescita solida e costante",
             "Correzione tecnica salutare",
-            "Preferisco altri titoli tech",
-            "Correzione salutare",
-            "Preferisco altri tech"
+            "Preferisco altri titoli tech"
         ],
         "tickers": [
             "PLTR",
@@ -106,7 +106,7 @@ POLL_TEMPLATES = [
             "Copertura chiave (5-10%)",
             "Ottimo trend rialzista",
             "Preferisco i dividendi",
-            "Meglio bond e cassa ()"
+            "Meglio bond e liquidità"
         ],
         "tickers": [
             "PPFB.DE",
@@ -118,10 +118,10 @@ POLL_TEMPLATES = [
         "id": "glp1_pharma_battle",
         "title": "Rivoluzione GLP-1 / Obesità: Chi dominerà il mercato pharma? 💊",
         "options": [
+            "Eli Lilly ($LLY) leader",
+            "Novo Nordisk ($NOVO-B)",
             "Duopolio paritario a lungo",
-            "Nuovi competitor emergenti",
-            "Duopolio paritario",
-            "Nuovi competitor"
+            "Nuovi competitor emergenti"
         ],
         "tickers": [
             "LLY",
@@ -136,7 +136,7 @@ POLL_TEMPLATES = [
         "options": [
             "Sì, energia pulita 24/7",
             "Sì, ma orizzonte lungo",
-            "Meglio solare/eolico ()",
+            "Meglio solare ed eolico",
             "Gas e combustibili ponte"
         ],
         "tickers": [
@@ -200,10 +200,10 @@ POLL_TEMPLATES = [
         "id": "emerging_markets_opportunity",
         "title": "Mercati Emergenti: Dove vedete la maggiore opportunità? 🌏",
         "options": [
-            "America Latina ()",
-            "Cina & EV leader (211.HK)",
-            "Vietnam & Frontiera ()",
-            "Indonesia & Metalli ()"
+            "America Latina ($MELI)",
+            "Cina & EV leader ($1211.HK)",
+            "Vietnam & Frontiera ($VOF)",
+            "Indonesia & Metalli ($INDO)"
         ],
         "tickers": [
             "MELI",
@@ -250,10 +250,10 @@ POLL_TEMPLATES = [
         "id": "big_tech_cloud_battle",
         "title": "Hyperscale Cloud & AI: Chi vincerà la sfida enterprise? ☁️",
         "options": [
+            "Microsoft Azure ($MSFT)",
             "Amazon AWS ($AMZN)",
             "Google Cloud ($GOOGL)",
-            "Crescita condivisa per tutti",
-            "Crescita condivisa"
+            "Crescita condivisa per tutti"
         ],
         "tickers": [
             "MSFT",

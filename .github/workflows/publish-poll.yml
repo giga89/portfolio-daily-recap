@@ -28,11 +28,19 @@ on:
         required: false
         type: boolean
         default: false
+      dry_run:
+        description: 'Dry run mode (prepare and verify poll without publishing to eToro)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   publish-poll:
     runs-on: ubuntu-latest
     environment: Etoro
+    permissions:
+      contents: write
+      pages: write
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -92,11 +100,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
           POLL_TEMPLATE: ${{ inputs.poll_template || 'auto' }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
         run: |
-          python src/poll_generator.py ${POLL_TEMPLATE}
+          ARGS="${POLL_TEMPLATE}"
+          if [ "$DRY_RUN_INPUT" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python src/poll_generator.py $ARGS
 
       - name: Update GitHub Pages Dashboard & Analytics
-        if: steps.dedup_check.outputs.skip != 'true'
+        if: steps.dedup_check.outputs.skip != 'true' && inputs.dry_run != true
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -104,6 +117,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to analytics database."
           else
-            git commit -m "chore(analytics): update social analytics dashboard after poll publication"
+            git commit -m "chore(analytics): update social analytics dashboard after poll publication [skip ci]"
             git push origin main || echo "Git push failed or branch protected"
           fi

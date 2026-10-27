@@ -25,6 +25,9 @@ jobs:
   stock-news-commenter:
     runs-on: ubuntu-latest
     environment: Etoro
+    permissions:
+      contents: write
+      pages: write
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 

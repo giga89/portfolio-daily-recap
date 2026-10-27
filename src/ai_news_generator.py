@@ -293,20 +293,29 @@ def _get_top_gainers_with_news(stock_data: dict = None, count: int = 4, max_chec
     candidates = []
     
     if stock_data:
+        excluded_gainers = _EXCLUDED_FROM_TAGS | {'IB01.L', 'XEON.DE', 'SPCX.RTH', 'MAU.PA'}
+        positive_candidates = []
+        other_candidates = []
         for sym, data in stock_data.items():
-            if sym in _EXCLUDED_FROM_TAGS:
+            if sym in excluded_gainers:
                 continue
-            if not data.get('has_traded_today', False):
+            if not data.get('has_traded_today', True):
                 continue
             d_chg = data.get('daily_change', 0.0)
             if isinstance(d_chg, (int, float)) and abs(d_chg) > 1e-4:
-                candidates.append({
+                entry = {
                     'ticker': sym,
                     'daily_change': float(d_chg),
                     'company_name': data.get('company_name', sym),
                     'emoji': EMOJI_MAP.get(sym, '📊')
-                })
-        candidates.sort(key=lambda x: x['daily_change'], reverse=True)
+                }
+                if float(d_chg) > 0:
+                    positive_candidates.append(entry)
+                else:
+                    other_candidates.append(entry)
+        positive_candidates.sort(key=lambda x: x['daily_change'], reverse=True)
+        other_candidates.sort(key=lambda x: x['daily_change'], reverse=True)
+        candidates = positive_candidates if len(positive_candidates) >= count else (positive_candidates + other_candidates)
     
     # Fallback to key portfolio movers if stock_data is empty or simulated
     if not candidates:
@@ -1709,7 +1718,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         
         # Temporal context
         from independent_fact_checker import get_current_temporal_context
-        temporal_ctx = get_current_temporal_context(session_name=market_session)
+        temporal_ctx = get_current_temporal_context(session_name=market_session, benchmark_daily_data=benchmark_daily_data)
         
         # Grounding with live Tavily news
         tavily_grounding_section = ""
@@ -1782,9 +1791,9 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
 =====================================================
 DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
 =====================================================
-- Indice primario da commentare: ${macro_heavy if is_us_close else 'SPX500'} ({macro_change:+.2f}% if is_us_close else "")
-- S&P 500 ($SPX500): {spx_change:+.2f}% if is_us_close else ""
-- Nasdaq 100 ($NSDQ100): {ndx_change:+.2f}% if is_us_close else ""
+- Indice primario da commentare: ${macro_heavy} ({macro_change:+.2f}%)
+- S&P 500 ($SPX500): {spx_change:+.2f}%
+- Nasdaq 100 ($NSDQ100): {ndx_change:+.2f}%
 =====================================================
 """ if is_us_close else ""
 
@@ -2191,8 +2200,8 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
                 # lasts 30-50 minutes. Retry with 10-minute intervals (up to 5 times = 50 min
                 # max) before giving up and trying the next model.
                 if '503' in error_msg or 'unavailable' in error_msg:
-                    max_503_retries = 5
-                    retry_wait_secs = 600  # 10 minutes
+                    max_503_retries = 2
+                    retry_wait_secs = 5
                     for attempt in range(1, max_503_retries + 1):
                         print(f"   503 on {model_name} (retry {attempt}/{max_503_retries}), waiting {retry_wait_secs}s...")
                         time.sleep(retry_wait_secs)
@@ -2208,8 +2217,20 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
                                     log_api_request(model_name, True, "daily_recap")
                                 recap_text = response.text.strip()
                                 recap_text = _remove_intro_text(recap_text)
+                                recap_text = _clean_robotic_phrases(recap_text)
                                 recap_text = _remove_market_section_tags(recap_text)
                                 recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
+                                recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
+                                approved, verified_recap = _run_post_verification(
+                                    recap_text,
+                                    primary_ticker=selected_tags[0] if selected_tags else None,
+                                    session_name=market_session or "Daily recap",
+                                    generator_model=model_name,
+                                )
+                                if not approved or not verified_recap:
+                                    print(f"   ⚠️ Draft from {model_name} rejected by verification gate after 503 retry.")
+                                    break
+                                recap_text = verified_recap
                                 if selected_tags:
                                     update_rotation_history(selected_tags)
                                 if GIST_STORAGE_AVAILABLE:
@@ -2243,8 +2264,20 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
                             
                             # Post-process
                             recap_text = _remove_intro_text(recap_text)
+                            recap_text = _clean_robotic_phrases(recap_text)
                             recap_text = _remove_market_section_tags(recap_text)
                             recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
+                            recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
+                            approved, verified_recap = _run_post_verification(
+                                recap_text,
+                                primary_ticker=selected_tags[0] if selected_tags else None,
+                                session_name=market_session or "Daily recap",
+                                generator_model=model_name,
+                            )
+                            if not approved or not verified_recap:
+                                print(f"   ⚠️ Draft from {model_name} (without tools) rejected by verification gate.")
+                                continue
+                            recap_text = verified_recap
                             
                             # Update rotation history with the tags actually selected for the post
                             if selected_tags:
@@ -2527,78 +2560,6 @@ Output ONLY the post text, no introduction or explanation."""
         print(f"❌ Error generating empathy post: {exc}")
         return ""
 
-
-def generate_copy_trading_post(
-    history_stats_text: str = "",
-    gain_history: list = None,
-    portfolio_perf: float = None,
-    rankings_data: dict = None,
-) -> str:
-    """
-    Generate a weekly Copy Trading education + persuasion post for eToro (Saturday).
-
-    Explains how Copy Trading works, why copying AndreaRavalli makes sense,
-    and uses REAL historical performance data (P&L, win rate, copiers count,
-    AUM, risk score, monthly gains) from the eToro account history and live rankings.
-
-    Args:
-        history_stats_text: Short stats summary from etoro_history (win rate, P&L, etc.)
-        gain_history:       List of monthly gain dicts from fetch_gain_history()
-        portfolio_perf:     Cumulative portfolio performance % (e.g. 156.0)
-        rankings_data:      Dict with live eToro rankings, copiers, AUM, risk score
-
-    Returns:
-        str: Formatted post text in Italian, or fallback text on failure
-    """
-    if not GENAI_AVAILABLE:
-        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data)
-
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        return _copy_trading_fallback(history_stats_text, gain_history, portfolio_perf, rankings_data)
-
-    models_to_try = list(DEFAULT_GEMINI_MODELS)
-
-    # Build rankings and copier context if available from live eToro API
-    rankings_context = ""
-    if rankings_data:
-        copiers = rankings_data.get("copiers", 0)
-        aum = rankings_data.get("aumValue", 0)
-        risk = rankings_data.get("riskScore", 3)
-        win_ratio = rankings_data.get("winRatio", 0.0)
-        ytd_gain = rankings_data.get("gain", 0.0) * 100
-        five_y_gain = rankings_data.get("fiveYearGain", 0.0) * 100
-        weeks = rankings_data.get("weeksSinceRegistration", 0)
-        years = round(weeks / 52, 1) if weeks else 0
-        rankings_context = (
-            f"STATISTICHE UFFICIALI eToro (da API):\n"
-            f"- Copiatori attivi: {copiers}\n"
-            f"- Asset in gestione (AUM): ~${aum:,.0f}\n"
-            f"- Status: Popular Investor Elite\n"
-            f"- Punteggio di Rischio: {risk}/10 (Basso rischio, profilo prudente e disciplinato)\n"
-            f"- Win Ratio: {win_ratio:.1f}%\n"
-            f"- Rendimento YTD 2026: +{ytd_gain:.2f}%\n"
-            f"- Rendimento 5 Anni: +{five_y_gain:.1f}%\n"
-            f"- Anni di esperienza e presenza su eToro: ~{years} anni\n"
-            f"- Profilo Leva: 100% posizioni a zero/bassa leva (no trading con leva speculativa)\n"
-        )
-
-    # Build gain history context (last 12 months)
-    gain_context = ""
-    if gain_history:
-        recent = gain_history[-12:] if len(gain_history) > 12 else gain_history
-        lines = []
-        for entry in recent:
-            month = entry.get("date", entry.get("month", "?"))
-            gain = entry.get("gain", entry.get("value", 0.0))
-            sign = "+" if float(gain) >= 0 else ""
-            lines.append(f"  {month}: {sign}{float(gain):.1f}%")
-        gain_context = "GUADAGNO MENSILE (ultimi 12 mesi):\n" + "\n".join(lines)
-
-    perf_context = ""
-    if portfolio_perf is not None:
-        sign = "+" if portfolio_perf >= 0 else ""
-        perf_context = f"Performance cumulativa portafoglio: {sign}{portfolio_perf:.1f}%"
 
 COPY_TRADING_ETORO_THEMES = [
     {
@@ -2889,7 +2850,6 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
     Returns:
         tuple: (ticker_symbol, formatted_post_text)
     """
-    from portfolio_manager import load_config, get_ticker_all_tags, get_related_tickers
     from portfolio_manager import load_config, get_ticker_all_tags, get_related_tickers, get_asset_metadata
     from gist_storage import get_used_stock_focus_tickers, save_used_stock_focus_ticker
     import random
@@ -3035,9 +2995,6 @@ Output ONLY the post text in Italian, no extra conversational preamble."""
                     if not approved or not verified_text:
                         print(f"⚠️ Stock focus post on {ticker} rejected by verifier ({model_name}), trying next model...")
                         continue
-                    save_used_stock_focus_ticker(ticker)
-                    cleaned_post = _clean_robotic_phrases(response.text.strip())
-                    return ticker, cleaned_post
                     return ticker, verified_text
             except Exception as exc:
                 print(f"⚠️ Stock focus model {model_name} failed: {exc}")
@@ -3110,8 +3067,7 @@ Output ONLY the post text in Italian."""
                     print(f"✅ Portfolio Outlook post generated using {model_name}")
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "portfolio_outlook_post")
-                    return response.text.strip()
-                    raw_text = response.text.strip()
+                    raw_text = _clean_robotic_phrases(response.text.strip())
                     approved, verified_text = _run_post_verification(
                         raw_text,
                         session_name="Weekly portfolio outlook",
@@ -3335,7 +3291,6 @@ Output ONLY the post text in Italian."""
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "crypto_daily_post")
                     cleaned_post = _clean_robotic_phrases(response.text.strip())
-                    return "Daily crypto recap", cleaned_post
                     approved, verified_text = _run_post_verification(
                         cleaned_post,
                         session_name="Daily crypto recap",

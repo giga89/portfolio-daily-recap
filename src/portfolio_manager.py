@@ -1228,7 +1228,7 @@ PORTFOLIO_ASSETS_METADATA = {
             "Rallentamento delle raccolte fondi tra gli investitori istituzionali in periodi di incertezza",
             "Volatilità delle quotazioni azionarie dei gestori quotati"
         ],
-        "related_tickers": ["$QUAL", "$IWDA.L", "$VWCE.L"], "primary_tags": ["$IQQL.DE"]
+        "related_tickers": ["$BX", "$KKR", "$PSP"], "primary_tags": ["$IQQL.DE"]
     },
     "IB01.L": {
         "ticker": "IB01.L", "yahoo_ticker": "IB01.L", "name": "iShares $ Treasury Bond 0-1yr UCITS ETF", "emoji": "💵",
@@ -1246,47 +1246,10 @@ PORTFOLIO_ASSETS_METADATA = {
             "Discesa dei rendimenti monetari con il ciclo di allentamento della Federal Reserve",
             "Rischio di cambio per investitori la cui valuta di base non è il dollaro USA"
         ],
-        "related_tickers": ["$SHY", "$BIL", "$XEON.DE"], "primary_tags": ["$IB01.L"]
-    },
-    "XEON.DE": {
-        "ticker": "XEON.DE", "yahoo_ticker": "XEON.DE", "name": "Xtrackers II EUR Overnight Rate Swap UCITS ETF", "emoji": "💤",
-        "asset_class": "Fixed Income", "sector": "Liquidità Remunerata Tasso BCE (Overnight €STR)", "geo": "Europe", "tier": "Cash Yield & Dry Powder",
-        "is_dividend_paying": False, "dividend_policy": "Accumulazione (Acc) - Nessun dividendo distribuito, il rendimento overnight (€STR swap) viene capitalizzato giornalmente nel NAV della quota", "annual_yield_pct": 0.0, "frequency": "Nessuna (Accumulazione)",
-        "domain": "dws.com", "color": (0, 40, 100),
-        "desc": "Euro money market ETF tracking the €STR interbank rate with daily compounding, zero duration risk, and capital preservation.",
-        "thesis": "Cassa remunerata in Euro al tasso ufficiale overnight interbancario (€STR) con capitalizzazione quotidiana dei rendimenti, zero rischio duration e massima protezione del capitale.",
-        "upside_catalysts": [
-            "Remunerazione priva di rischio della liquidità denominata in Euro",
-            "Crescita giornaliera lineare del NAV senza alcuna oscillazione di mercato",
-            "Riserva di liquidità sicura per il ribilanciamento tempestivo del portafoglio"
-        ],
-        "downside_risks": [
-            "Rendimento legato all'evoluzione dei tassi sui depositi stabiliti dalla BCE",
-            "Rendimento reale negativo in scenari di inflazione superiore al tasso overnight"
-        ],
-        "related_tickers": ["$CSH2.PA", "$XEON.DE", "$IB01.L"], "primary_tags": ["$XEON.DE"]
+        "related_tickers": ["$SHY", "$BIL", "$TLT"], "primary_tags": ["$IB01.L"]
     },
 
-    # ── Private / Space & Crypto Assets ───────────────────────────────────────
-    "SPCX.RTH": {
-        "ticker": "SPCX.RTH", "yahoo_ticker": "SPCX.RTH", "name": "Space Exploration Technologies Corp. (SpaceX)", "emoji": "🚀",
-        "asset_class": "Private Equity", "sector": "Aerospazio, Razzi Orbitali & Starlink", "geo": "USA", "tier": "Pre-IPO Moat",
-        "is_dividend_paying": False, "dividend_policy": "Nessun dividendo distribuito (Società privata pre-IPO); reinvestimento totale nei vettori Starship e costellazione Starlink", "annual_yield_pct": 0.0, "frequency": "Nessuna",
-        "domain": "spacex.com", "color": (0, 80, 180),
-        "desc": "Dominant global orbital rocket launch provider and operator of the Starlink broadband satellite constellation.",
-        "thesis": "Monopolio assoluto mondiale nei lanci spaziali orbitali riutilizzabili (Falcon 9, Falcon Heavy, Starship), fornitore strategico della NASA e del Pentagono, e proprietario dell'infrastruttura internet satellitare Starlink.",
-        "upside_catalysts": [
-            "Crescita esplosiva degli abbonati e dei flussi di cassa operativi di Starlink in tutto il mondo",
-            "Successo dei test e piena operatività commerciale del vettore pesante riutilizzabile Starship",
-            "Potenziale quotazione IPO o spin-off di Starlink con creazione di enorme valore per gli investitori"
-        ],
-        "downside_risks": [
-            "Società non quotata su mercati regolamentati, con liquidità limitata e valutazioni basate su round secondari",
-            "Rischi tecnologici e complessità ingegneristica nei voli di collaudo orbitali",
-            "Regolamentazione sulle frequenze satellitari e autorizzazioni di lancio FAA"
-        ],
-        "related_tickers": ["$RKLB", "$LMT", "$BA"], "primary_tags": ["$SPCX.RTH", "$SPACE"]
-    },
+    # ── Fintech & Crypto Assets ───────────────────────────────────────────────
     "ETOR": {
         "ticker": "ETOR", "yahoo_ticker": "ETOR", "name": "eToro Group Ltd", "emoji": "🏛️",
         "asset_class": "Stock", "sector": "Piattaforma Social Investing & Finanza Digitale", "geo": "Global", "tier": "Fintech Ecosystem",

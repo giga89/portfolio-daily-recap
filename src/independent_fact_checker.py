@@ -349,6 +349,8 @@ def audit_with_groq(
     live_news_context: str = "",
     api_key: Optional[str] = None,
     timeout: int = 10,
+    temporal_ctx: Optional[Dict[str, Any]] = None,
+    benchmark_daily_data: Optional[Dict[str, float]] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Runs fact-checking audit via Groq API.
@@ -361,7 +363,8 @@ def audit_with_groq(
     if not key:
         return None
 
-    temporal_ctx = get_current_temporal_context(session_name)
+    if temporal_ctx is None:
+        temporal_ctx = get_current_temporal_context(session_name, benchmark_daily_data=benchmark_daily_data)
     prompt = _build_audit_prompt(
         text=text,
         session_name=session_name,
@@ -430,6 +433,8 @@ def audit_with_mistral(
     live_news_context: str = "",
     api_key: Optional[str] = None,
     timeout: int = 10,
+    temporal_ctx: Optional[Dict[str, Any]] = None,
+    benchmark_daily_data: Optional[Dict[str, float]] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Runs fact-checking audit via Mistral API.
@@ -445,7 +450,8 @@ def audit_with_mistral(
     if not key:
         return None
 
-    temporal_ctx = get_current_temporal_context(session_name)
+    if temporal_ctx is None:
+        temporal_ctx = get_current_temporal_context(session_name, benchmark_daily_data=benchmark_daily_data)
     prompt = _build_audit_prompt(
         text=text,
         session_name=session_name,
@@ -515,6 +521,7 @@ def run_independent_fact_check(
     portfolio_metadata_summary: str = "",
     live_news_context: Optional[str] = None,
     require_consensus: bool = True,
+    temporal_ctx: Optional[Dict[str, Any]] = None,
     benchmark_daily_data: Optional[Dict[str, float]] = None,
 ) -> Optional[Dict[str, Any]]:
     """
@@ -533,12 +540,13 @@ def run_independent_fact_check(
     5. UNANIMOUS APPROVAL: Both auditors must agree on the final published text.
     6. Fallback: If only one provider is configured/available, it acts as single auditor.
     """
-    if benchmark_daily_data is None and session_name:
-        try:
-            temporal_ctx = get_current_temporal_context(session_name)
+    try:
+        if temporal_ctx is None:
+            temporal_ctx = get_current_temporal_context(session_name, benchmark_daily_data=benchmark_daily_data)
+        if benchmark_daily_data is None and isinstance(temporal_ctx, dict):
             benchmark_daily_data = temporal_ctx.get("benchmark_data_raw")
-        except Exception:
-            benchmark_daily_data = None
+    except Exception:
+        temporal_ctx = None
 
     # Auto-fetch Tavily live news context if not provided
     if live_news_context is None:
@@ -561,6 +569,8 @@ def run_independent_fact_check(
         session_name=session_name,
         portfolio_metadata_summary=portfolio_metadata_summary,
         live_news_context=live_news_context,
+        temporal_ctx=temporal_ctx,
+        benchmark_daily_data=benchmark_daily_data,
     )
 
     # 2. Query Mistral
@@ -569,6 +579,8 @@ def run_independent_fact_check(
         session_name=session_name,
         portfolio_metadata_summary=portfolio_metadata_summary,
         live_news_context=live_news_context,
+        temporal_ctx=temporal_ctx,
+        benchmark_daily_data=benchmark_daily_data,
     )
 
     # If neither is available, return None for fallback
@@ -650,6 +662,8 @@ def run_independent_fact_check(
             session_name=session_name,
             portfolio_metadata_summary=portfolio_metadata_summary,
             live_news_context=live_news_context,
+            temporal_ctx=temporal_ctx,
+            benchmark_daily_data=benchmark_daily_data,
         )
         if _is_audit_clean(cross_m):
             print("   🤝 Dual-AI Consensus: Groq auto-correction cross-verified and APPROVED by Mistral!")
@@ -692,6 +706,8 @@ def run_independent_fact_check(
             session_name=session_name,
             portfolio_metadata_summary=portfolio_metadata_summary,
             live_news_context=live_news_context,
+            temporal_ctx=temporal_ctx,
+            benchmark_daily_data=benchmark_daily_data,
         )
         if _is_audit_clean(cross_g):
             print("   🤝 Dual-AI Consensus: Mistral auto-correction cross-verified and APPROVED by Groq!")
@@ -904,6 +920,7 @@ def run_micro_topic_consensus_fact_check(
     text: str,
     session_name: Optional[str] = None,
     portfolio_metadata_summary: str = "",
+    benchmark_daily_data: Optional[Dict[str, float]] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Modular fact-checking architecture:
@@ -921,12 +938,14 @@ def run_micro_topic_consensus_fact_check(
             text=text,
             session_name=session_name,
             portfolio_metadata_summary=portfolio_metadata_summary,
+            benchmark_daily_data=benchmark_daily_data,
         )
 
     print(f"   🧩 Scomposizione in {len(micro_topics)} micro-argomenti ({len(topics_to_audit)} da auditare in parallelo)...")
 
-    temporal_ctx = get_current_temporal_context(session_name)
-    benchmark_daily_data = temporal_ctx.get("benchmark_data_raw")
+    temporal_ctx = get_current_temporal_context(session_name, benchmark_daily_data=benchmark_daily_data)
+    if benchmark_daily_data is None:
+        benchmark_daily_data = temporal_ctx.get("benchmark_data_raw")
 
     # Fetch live ground truth news from Tavily once for all micro-topics
     live_news_context = ""

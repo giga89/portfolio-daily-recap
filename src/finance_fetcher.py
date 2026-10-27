@@ -14,6 +14,7 @@ except ImportError:
     BeautifulSoup = None
 import os
 import re
+import time
 from datetime import datetime
 import json
 try:
@@ -632,10 +633,6 @@ def calculate_portfolio_weighted_change(stock_data, portfolio_weights=None, metr
     return weighted_performance
 
 
-
-    return bench_data
-
-
 def fetch_portfolio_history_from_etoro(start_year=2020):
     """
     Fetch historical monthly returns from eToro's public API and calculate cumulative return.
@@ -853,13 +850,20 @@ def fetch_benchmarks_monthly_performance():
     return bench_data
 
 
+_BENCHMARKS_DAILY_CACHE = {"timestamp": 0.0, "data": None}
+
+
 def fetch_benchmarks_daily_performance(benchmarks_map=None):
     """
     Fetch real-time / today's daily percentage return for market benchmark indices.
     Returns a dictionary of daily percentage returns, e.g.:
     {'SPX500': -1.11, 'NSDQ100': -2.02, 'GER40': -0.45, ...}
     """
-    if benchmarks_map is None:
+    use_default_map = benchmarks_map is None
+    if use_default_map:
+        now_ts = time.time()
+        if _BENCHMARKS_DAILY_CACHE["data"] and (now_ts - _BENCHMARKS_DAILY_CACHE["timestamp"] < 120.0):
+            return dict(_BENCHMARKS_DAILY_CACHE["data"])
         benchmarks_map = {
             'SPX500': '^GSPC',
             'NSDQ100': '^NDX',
@@ -890,5 +894,9 @@ def fetch_benchmarks_daily_performance(benchmarks_map=None):
         except Exception as e:
             print(f"   ⚠️ Error fetching daily benchmark for {symbol} ({yahoo_ticker}): {e}")
             bench_data[symbol] = 0.0
+
+    if use_default_map and bench_data:
+        _BENCHMARKS_DAILY_CACHE["timestamp"] = time.time()
+        _BENCHMARKS_DAILY_CACHE["data"] = dict(bench_data)
             
     return bench_data

@@ -240,33 +240,9 @@ REGOLE OBBLIGATORIE:
 Output SOLO il testo del commento in italiano."""
 
     try:
-        from post_verifier import verify_and_clean_comment
-    except ImportError:
-        try:
-            from src.post_verifier import verify_and_clean_comment
-        except ImportError:
-            verify_and_clean_comment = None
-
-    try:
         client = genai.Client(api_key=api_key)
-        config_gen = types.GenerateContentConfig(temperature=0.6)
         config_gen = types.GenerateContentConfig(temperature=0.4)
 
-        for model_name in DEFAULT_GEMINI_MODELS:
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=prompt,
-                    config=config_gen,
-                )
-                if response and response.text:
-                    out = response.text.strip()
-                    if API_TRACKER_AVAILABLE:
-                        log_api_request(model_name, True, "stock_news_catalyst_comment")
-                    return out
-            except Exception as exc:
-                print(f"   ⚠️ Gemini {model_name} failed: {exc}")
-                continue
         for idx, model_name in enumerate(DEFAULT_GEMINI_MODELS):
             for attempt in range(2):
                 try:

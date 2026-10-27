@@ -1172,12 +1172,14 @@ def verify_and_clean_post(
                     text=cleaned_text,
                     session_name=session_name,
                     portfolio_metadata_summary=meta_str,
+                    benchmark_daily_data=benchmark_daily,
                 )
             else:
                 ext_audit = run_independent_fact_check(
                     text=cleaned_text,
                     session_name=session_name,
                     portfolio_metadata_summary=meta_str,
+                    benchmark_daily_data=benchmark_daily,
                 )
             if ext_audit and "decision" in ext_audit:
                 audit_data = ext_audit

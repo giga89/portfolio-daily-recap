@@ -117,7 +117,7 @@ DEFENSIVE_VALUE_PROFILES = {
         "role": "Cura del Diabete & Terapie Semaglutide",
         "thesis": "Pioniere globale e leader europeo nelle terapie a base di semaglutide con Ozempic e Wegovy, approvati anche per la riduzione dei rischi cardiovascolari e renali.",
         "driver": "Margini operativi superiori al 45% e ROIC ai vertici europei che finanziano buyback e ricerca all'avanguardia.",
-        "question": "Preferite espormi al megatrend salute attraverso Novo Nordisk o Eli Lilly nel vostro portafoglio?"
+        "question": "Preferite esporvi al megatrend salute attraverso Novo Nordisk o Eli Lilly nel vostro portafoglio?"
     },
     "CCJ": {
         "name": "Cameco Corporation",
@@ -143,13 +143,13 @@ DEFENSIVE_VALUE_PROFILES = {
         "driver": "Portafoglio ordini record (>€18B), barriere all'entrata elevate ed espansione sul mercato USA con l'acquisizione di Encore Wire.",
         "question": "Avete titoli infrastrutturali nel vostro portafoglio per beneficiare del megatrend decennale dell'elettrificazione?"
     },
-    "BMW.DE": {
-        "name": "BMW Group",
-        "emoji": "🚗",
-        "role": "Manifattura Automobilistica Premium & Neue Klasse",
-        "thesis": "Flessibilità produttiva unica (linee condivise per termico, ibrido ed elettrico), forte brand value e margini EBIT costantemente ai vertici industriali.",
-        "driver": "Cassa netta industriale solida, dividendo generoso (>6%) e lancio della piattaforma nativa elettrica Neue Klasse.",
-        "question": "Ritenete che la flessibilità tecnologica di BMW sia la scelta più prudente e redditizia nell'automotive?"
+    "ULVR.L": {
+        "name": "Unilever PLC",
+        "emoji": "🧴",
+        "role": "Beni di Largo Consumo & Power Brands Globali",
+        "thesis": "Portafoglio di 30 Power Brands presenti nelle case di 3,4 miliardi di consumatori ogni giorno, con forte pricing power ed esposizione ai mercati emergenti.",
+        "driver": "Flussi di cassa difensivi e prevedibili, dividendo trimestrale affidabile (~3.6%) e rifocalizzazione sui marchi a più alto margine.",
+        "question": "Ritenete che i colossi dei beni di prima necessità come Unilever siano essenziali per stabilizzare il portafoglio?"
     },
     "ENEL.MI": {
         "name": "Enel S.p.A.",
@@ -176,7 +176,7 @@ ETF_MACRO_PROFILES = {
         "role": "Settore Bancario Europeo ad Alto Rendimento",
         "thesis": "Esposizione ai maggiori istituti bancari europei con bilanci solidi, coefficienti patrimoniali (CET1 >15.5%) ai massimi storici e crediti deteriorati ai minimi.",
         "driver": "Dividend yield superiore al 7% accompagnato da consistenti programmi di buyback che incrementano il valore per azione.",
-        "question": "Preferite espormi al settore bancario tramite ETF diversificato o tramite la selezione di singoli titoli?"
+        "question": "Preferite esporvi al settore bancario tramite ETF diversificato o tramite la selezione di singoli titoli?"
     },
     "WDEF.L": {
         "name": "WisdomTree Europe Defence ETF",

@@ -128,7 +128,6 @@ def check_and_publish_dividends(dry_run: bool = False, lookback_days: int = 4) -
         results.append(res)
 
     if not results:
-        print("ℹ️ No new dividend Pay Days detected for today.")
         print("ℹ️ No new dividend Pay Days detected.")
 
     return results
@@ -428,9 +427,11 @@ def publish_earnings_for_ticker(
     except Exception as e:
         print(f"⚠️ Telegram send error: {e}")
 
-    # Record in Gist deduplication
-    now_year = datetime.now(timezone.utc).year
-    gist_storage.mark_earnings_posted(clean_sym, quarter, now_year, post_id=post_id)
+    # Record in Gist deduplication (parse year from quarter if present, e.g. "Q4 2025")
+    import re as _re
+    year_match = _re.search(r"20\d{2}", str(quarter))
+    event_year = int(year_match.group(0)) if year_match else datetime.now(timezone.utc).year
+    gist_storage.mark_earnings_posted(clean_sym, quarter, event_year, post_id=post_id)
 
     # Notify Andrea on Telegram
     _send_event_alert_telegram(
@@ -494,19 +495,14 @@ if __name__ == "__main__":
         publish_earnings_for_ticker(ticker=ticker, dry_run=dry_run)
     elif "--trigger-dividend" in sys.argv:
         idx = sys.argv.index("--trigger-dividend")
-        ticker = sys.argv[idx + 1].upper() if idx + 1 < len(sys.argv) else "WMT"
         ticker = sys.argv[idx + 1].upper() if idx + 1 < len(sys.argv) else "GLEN.L"
         publish_dividend_for_ticker(ticker=ticker, dry_run=dry_run)
     elif "--check-dividends" in sys.argv:
-        check_and_publish_dividends(dry_run=dry_run)
         check_and_publish_dividends(dry_run=dry_run, lookback_days=lookback)
     elif "--check-earnings" in sys.argv:
-        check_and_publish_earnings(dry_run=dry_run)
         check_and_publish_earnings(dry_run=dry_run, lookback_days=lookback)
     else:
         # Default: check both automatically
-        check_and_publish_dividends(dry_run=dry_run)
-        check_and_publish_earnings(dry_run=dry_run)
         check_and_publish_dividends(dry_run=dry_run, lookback_days=lookback)
         check_and_publish_earnings(dry_run=dry_run, lookback_days=lookback)
 

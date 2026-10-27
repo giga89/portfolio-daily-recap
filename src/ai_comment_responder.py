@@ -504,12 +504,9 @@ OFFICIAL CERTIFIED METADATA (SINGLE SOURCE OF TRUTH):
 {criticism_note}
 
 EVALUATION RUBRIC:
-1. Relevance & Substance: Does the reply genuinely address the topics and questions raised by @{user_author} (e.g. specific tickers like AMZN/NVDA/PLTR, GPU additions, tech sentiment, valuation, DCA, pullback)?
-2. Completeness: Is the text 100% complete with no truncated sentences, no dangling prepositions, and a natural closing?
-3. Compliance & Tone: Is it polite, disciplined (Risk 3/10, 0 leverage, 3-5+ years horizon), and free of financial advice or markdown asterisks (**)?
 1. Factual Accuracy: Strict adherence to certified metadata. If an asset is accumulating ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), NEVER claim it pays dividends. NEVER mention purged assets like XEON, MAU, or SPCX.
-2. Relevance & Substance: Does the reply genuinely address the topics and questions raised by @{user_author}?
-3. Completeness & Ending: 100% complete text, no dangling prepositions, natural closing with valid punctuation/emoji.
+2. Relevance & Substance: Does the reply genuinely address the topics and questions raised by @{user_author} (e.g. specific tickers like AMZN/NVDA/PLTR, GPU additions, tech sentiment, valuation, DCA, pullback)?
+3. Completeness & Ending: 100% complete text, no truncated sentences, no dangling prepositions, natural closing with valid punctuation/emoji.
 4. Compliance & Tone: Polite, disciplined (Risk 3/10, 0 leverage, 3-5+ years horizon), no financial advice, NO markdown bold asterisks (**).
 
 TASK:
@@ -577,8 +574,6 @@ Output ONLY valid JSON.
             if "429" in err_s or "quota" in err_s:
                 print(f"   ⏳ Reviewer {model_name} quota/rate limit (429). Pausing 2s...")
                 time.sleep(2.0)
-            else:
-                print(f"⚠️ Pass 2 Validator error with {model_name}: {e}")
             continue
 
     return True, candidate_reply, "Pass 2 fallback (validator model timeout)"
@@ -881,8 +876,6 @@ CRITICAL RULES:
                         wait_t = 3.0 * (attempt + 1)
                         print(f"   ⏳ Model {model_name} quota/rate limit (429). Pausing {wait_t:.1f}s before trying next...")
                         time.sleep(wait_t)
-                    else:
-                        print(f"⚠️ Gemini API attempt failed with {model_name}: {e}")
                     continue
 
     print("🛡️ Falling back to certified topic-aware contextual template...")

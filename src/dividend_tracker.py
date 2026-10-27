@@ -15,6 +15,7 @@ Features:
 import os
 import sys
 import json
+import time
 import hashlib
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List, Optional, Tuple
@@ -567,20 +568,6 @@ Output ONLY the post text in Italian."""
         client = genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.5)
 
-        for model_name in DEFAULT_GEMINI_MODELS:
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=prompt,
-                    config=config_gen,
-                )
-                if response and response.text:
-                    if API_TRACKER_AVAILABLE:
-                        log_api_request(model_name, True, "dividend_announcement_post")
-                    return f"Dividendi: {prof['cashtag']}", response.text.strip()
-            except Exception as exc:
-                print(f"   ⚠️ Gemini {model_name} failed: {exc}")
-                continue
         for idx, model_name in enumerate(DEFAULT_GEMINI_MODELS):
             for attempt in range(2):
                 try:

@@ -7,6 +7,13 @@ Sends portfolio recap messages to a Telegram bot
 import os
 import requests
 
+def _redact_secret(text: str, secret: str) -> str:
+    """Mask secret tokens in log or exception strings."""
+    if not text or not secret:
+        return str(text)
+    return str(text).replace(secret, "***REDACTED***")
+
+
 def send_telegram_message(message: str) -> bool:
     """
     Send a message to Telegram bot
@@ -20,7 +27,7 @@ def send_telegram_message(message: str) -> bool:
     bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
     chat_id = os.environ.get('TELEGRAM_CHAT_ID')
     
-    # Debug logs to verify environment variables
+    # Debug logs to verify environment variables (without leaking credentials)
     print("=" * 50)
     print("🔍 DEBUG: Checking Telegram configuration...")
     print(f"Bot token present: {bool(bot_token)}")
@@ -28,13 +35,10 @@ def send_telegram_message(message: str) -> bool:
     
     if bot_token:
         print(f"Bot token length: {len(bot_token)} characters")
-        print(f"Bot token starts with: {bot_token[:10]}...")
     else:
         print("❌ ERROR: TELEGRAM_BOT_TOKEN environment variable is not set or empty")
     
-    if chat_id:
-        print(f"Chat ID value: {chat_id}")
-    else:
+    if not chat_id:
         print("❌ ERROR: TELEGRAM_CHAT_ID environment variable is not set or empty")
     
     print("=" * 50)
@@ -46,8 +50,7 @@ def send_telegram_message(message: str) -> bool:
     
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     
-    print(f"📡 Attempting to send message to Telegram API...")
-    print(f"API URL: {url[:50]}...")
+    print("📡 Attempting to send message to Telegram API...")
     
     payload = {
         'chat_id': chat_id,
@@ -60,17 +63,17 @@ def send_telegram_message(message: str) -> bool:
         response = requests.post(url, json=payload, timeout=10)
         
         print(f"Response status code: {response.status_code}")
-        print(f"Response content: {response.text[:200]}")
         
         response.raise_for_status()
         print("✅ Message sent to Telegram successfully!")
         return True
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to send message to Telegram: {e}")
+        safe_err = _redact_secret(str(e), bot_token)
+        print(f"❌ Failed to send message to Telegram: {safe_err}")
         print(f"Error type: {type(e).__name__}")
         if hasattr(e, 'response') and e.response is not None:
             print(f"Error response status: {e.response.status_code}")
-            print(f"Error response body: {e.response.text}")
+            print(f"Error response body: {_redact_secret(e.response.text, bot_token)}")
         return False
 
 def send_telegram_photo(image_path: str, caption: str = None) -> bool:
@@ -100,7 +103,8 @@ def send_telegram_photo(image_path: str, caption: str = None) -> bool:
             print("✅ Photo sent successfully!")
             return True
     except Exception as e:
-        print(f"❌ Failed to send photo: {e}")
+        safe_err = _redact_secret(str(e), bot_token)
+        print(f"❌ Failed to send photo: {safe_err}")
         return False
 
 def send_recap_to_telegram(recap_file_path: str, image_path: str = None) -> bool:

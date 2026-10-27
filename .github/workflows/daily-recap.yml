@@ -407,6 +407,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to docs or analytics database."
           else
-            git commit -m "chore(analytics): update social analytics dashboard & post history"
+            git commit -m "chore(analytics): update social analytics dashboard & post history [skip ci]"
             git push origin main || echo "Git push failed or branch protected"
           fi
