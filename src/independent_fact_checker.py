@@ -151,6 +151,23 @@ def get_current_temporal_context(
         if parts:
             benchmarks_summary = ", ".join(parts)
 
+    # Next trading session information (especially relevant for close/evening recaps)
+    next_session_timing = "nella prossima seduta"
+    next_session_short = "Prossima seduta"
+    next_earnings_summary = "Nessuna trimestrale prevista per il portafoglio"
+    next_session_is_tomorrow = True
+    try:
+        import market_calendar
+        next_sess = market_calendar.get_next_trading_session_info(now_rome.date(), market="US")
+        next_session_timing = next_sess["timing_phrase"]
+        next_session_short = next_sess["timing_short"]
+        next_session_is_tomorrow = next_sess["is_tomorrow"]
+        next_earnings = market_calendar.get_earnings_for_session(next_sess["next_date"])
+        if next_earnings:
+            next_earnings_summary = ", ".join([f"{e['name']} ({e['ticker']})" for e in next_earnings])
+    except Exception:
+        pass
+
     return {
         "formatted_date": formatted_date,
         "iso_date": now_rome.strftime("%Y-%m-%d"),
@@ -160,6 +177,10 @@ def get_current_temporal_context(
         "benchmarks_daily": benchmarks_summary,
         "benchmark_data_raw": benchmark_daily_data,
         "year": str(now_rome.year),
+        "next_session_timing": next_session_timing,
+        "next_session_short": next_session_short,
+        "next_session_is_tomorrow": next_session_is_tomorrow,
+        "next_session_earnings": next_earnings_summary,
     }
 
 
@@ -192,6 +213,8 @@ INFORMAZIONI TEMPORALI CERTE (GROUND TRUTH):
 • ORA LOCALE ITALIANA: {temporal_ctx.get('rome_time')}
 • ORA LOCALE WALL STREET: {temporal_ctx.get('ny_time')}
 • STATO DELLA SESSIONE: {temporal_ctx.get('market_state')}
+• PROSSIMA SEDUTA DI BORSA (CALENDARIO UFFICIALE): {temporal_ctx.get('next_session_timing', 'nella prossima seduta')}
+• TRIMESTRALI CONFERMATE PROSSIMA SEDUTA: {temporal_ctx.get('next_session_earnings', 'Nessuna trimestrale prevista per il portafoglio')}
 {benchmarks_daily_line}
 =========================================
 METADATI DI PORTAFOGLIO:
@@ -257,6 +280,12 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
 9. PRIORITÀ NOTIZIE FRESCHE DEL GIORNO VS NOIOSE TRIMESTRALI (CRITICA):
    - I lettori cercano novità e catalizzatori FRESCHI DEL GIORNO (accordi commerciali, partnership strategiche, commesse, lanci di prodotto, upgrade o downgrade di rating con target price, sviluppi regolatori o giudiziari avvenuti oggi o nelle ultime 24-48 ore).
    - È VIETATO riempire i commenti dei titoli con rimandi generici o noiosi a trimestrali passate o già ampiamente digerite nei giorni scorsi, a meno che i dati finanziari trimestrali non siano stati rilasciati PROPRIO OGGI. Dai sempre priorità a news e catalizzatori operativi freschi.
+
+10. VERIFICA SGUARDO ALLA PROSSIMA SEDUTA & TRIMESTRALI (MICRO-TEMA 5):
+   - Nel Microtema 5 (Sguardo alla prossima seduta / After-Hours), il testo guarda legittimamente in avanti verso la PROSSIMA SEDUTA di borsa.
+   - VERIFICA GIORNO CORRETTO: Se oggi è venerdì o pre-festivo, è severamente vietato dire 'domani' per le contrattazioni di mercato: deve riferirsi a lunedì (o al giorno feriale di riapertura dei mercati indicato nel Ground Truth).
+   - VERIFICA TRIMESTRALI (EARNINGS): Qualsiasi trimestrale societaria citata per la prossima seduta DEVE corrispondere alle 'TRIMESTRALI CONFERMATE PROSSIMA SEDUTA'. Se il post inventa che un'azienda non presente nel Ground Truth riporterà i conti domani o nella prossima seduta, DEVI RIMUOVERE l'annuncio della trimestrale e sostituirlo con catalizzatori macroeconomici o aziendali confermati.
+   - ZERO RIPETIZIONI DELLA SEDUTA DI OGGI: Il Microtema 5 NON deve ripetere le percentuali di chiusura, i numeri o la rotazione settoriale della giornata appena terminata (già trattati nel Microtema 1).
 
 =========================================
 OUTPUT RICHIESTO:

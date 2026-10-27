@@ -326,6 +326,98 @@ class TestTemporalAndIndependentFactCheck(unittest.TestCase):
         if perf.get("SPX500") is not None:
             self.assertIsInstance(perf["SPX500"], float)
 
+    def test_next_trading_session_info_deterministic(self):
+        """Verify get_next_trading_session_info handles weekdays, weekends, and holidays."""
+        import datetime
+        import market_calendar
+
+        # 1. Tuesday Oct 27, 2026 -> Wednesday Oct 28, 2026 (Tomorrow)
+        tue = datetime.date(2026, 10, 27)
+        info_tue = market_calendar.get_next_trading_session_info(tue, market="US")
+        self.assertTrue(info_tue["is_tomorrow"])
+        self.assertEqual(info_tue["next_date"], datetime.date(2026, 10, 28))
+        self.assertIn("domani", info_tue["timing_phrase"])
+
+        # 2. Friday Oct 30, 2026 -> Monday Nov 2, 2026 (Weekend skip)
+        fri = datetime.date(2026, 10, 30)
+        info_fri = market_calendar.get_next_trading_session_info(fri, market="US")
+        self.assertFalse(info_fri["is_tomorrow"])
+        self.assertEqual(info_fri["next_date"], datetime.date(2026, 11, 2))
+        self.assertIn("lunedì", info_fri["timing_phrase"])
+        self.assertNotIn("domani", info_fri["timing_phrase"])
+
+        # 3. Wednesday Nov 25, 2026 -> Friday Nov 27, 2026 (Thanksgiving skipped)
+        wed_tg = datetime.date(2026, 11, 25)
+        info_tg = market_calendar.get_next_trading_session_info(wed_tg, market="US")
+        self.assertFalse(info_tg["is_tomorrow"])
+        self.assertEqual(info_tg["next_date"], datetime.date(2026, 11, 27))
+        self.assertIn("Thanksgiving Day", info_tg["skipped_holidays"])
+
+    def test_deterministic_gate_blocks_domani_on_friday_close(self):
+        """On a Friday close, claiming 'domani a Wall Street' must fail the deterministic gate."""
+        import datetime
+        with patch("market_calendar.get_next_trading_session_info") as mock_info:
+            mock_info.return_value = {
+                "is_tomorrow": False,
+                "timing_phrase": "alla riapertura dei mercati di lunedì (2 novembre)",
+                "next_date": datetime.date(2026, 11, 2),
+            }
+            friday_post = (
+                "🌆 Wall Street ha chiuso in territorio positivo. $SPX500 +0.80% $NSDQ100 +1.20%.\n\n"
+                "🔹 $NVDA consolida la leadership con nuovi ordini enterprise.\n\n"
+                "🔮 Domani a Wall Street vedremo come reagiranno i tecnologici all'apertura."
+            )
+            is_clean, issues, _ = verify_post_deterministic(friday_post, session_name="US_CLOSE")
+            self.assertFalse(is_clean, "Stating 'domani a Wall Street' on a Friday must fail")
+            self.assertTrue(any("Paradosso temporale sul giorno successivo" in i for i in issues))
+
+    def test_deterministic_gate_blocks_hallucinated_earnings_date(self):
+        """Claiming a company reports earnings tomorrow when scheduled weeks later must fail."""
+        import datetime
+        with patch("market_calendar.get_next_trading_session_info") as mock_info, \
+             patch("market_calendar.get_upcoming_earnings_calendar") as mock_cal:
+            mock_info.return_value = {
+                "is_tomorrow": True,
+                "timing_phrase": "nella seduta di domani (mercoledì 28 ottobre)",
+                "next_date": datetime.date(2026, 10, 28),
+            }
+            mock_cal.return_value = {
+                "NVDA": "2026-11-17",
+                "MSFT": "2026-10-28",
+            }
+            hallucinated_post = (
+                "🌆 Wall Street ha chiuso in territorio positivo. $SPX500 $NSDQ100\n\n"
+                "🔹 $PLTR accelera.\n\n"
+                "🔮 Nella seduta di domani riflettori puntati su $NVDA attesa per la trimestrale del quarto trimestre."
+            )
+            is_clean, issues, _ = verify_post_deterministic(hallucinated_post, session_name="US_CLOSE")
+            self.assertFalse(is_clean, "Hallucinated earnings for NVDA tomorrow must fail")
+            self.assertTrue(any("Allucinazione data trimestrale" in i for i in issues))
+            self.assertTrue(any("NVDA" in i and "2026-11-17" in i for i in issues))
+
+    def test_deterministic_gate_allows_verified_earnings_and_macro(self):
+        """Verified earnings (Microsoft on 2026-10-28) or forward-looking macro must pass."""
+        import datetime
+        with patch("market_calendar.get_next_trading_session_info") as mock_info, \
+             patch("market_calendar.get_upcoming_earnings_calendar") as mock_cal:
+            mock_info.return_value = {
+                "is_tomorrow": True,
+                "timing_phrase": "nella seduta di domani (mercoledì 28 ottobre)",
+                "next_date": datetime.date(2026, 10, 28),
+            }
+            mock_cal.return_value = {
+                "MSFT": "2026-10-28",
+                "GOOG": "2026-10-28",
+            }
+            valid_earnings_post = (
+                "🌆 Wall Street ha archiviato la seduta in rialzo. $SPX500 $NSDQ100\n\n"
+                "🔹 $PLTR consolida i guadagni.\n\n"
+                "🔹 $AMZN mostra volumi sostenuti.\n\n"
+                "🔮 Nella seduta di domani grande attesa per Microsoft che presenterà i conti trimestrali."
+            )
+            is_clean, issues, _ = verify_post_deterministic(valid_earnings_post, session_name="US_CLOSE")
+            self.assertTrue(is_clean, f"Verified Microsoft earnings should pass: {issues}")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -17,6 +17,7 @@ Rules:
 import os
 import sys
 import re
+import json
 import random
 import datetime
 from typing import Tuple, Optional, Dict, Any, List
@@ -317,6 +318,227 @@ def publish_holiday_meme_session(
         results["telegram"] = False
 
     return results
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. Deterministic Next Trading Session & Upcoming Earnings Calendar
+# ─────────────────────────────────────────────────────────────────────────────
+
+WEEKDAY_IT = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"]
+MONTH_IT = [
+    "", "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
+    "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"
+]
+
+PORTFOLIO_EARNINGS_TICKERS = [
+    # Core US holdings and Mega-cap Tech Titans
+    "NVDA", "MSFT", "AMZN", "GOOG", "PLTR", "AVGO", "TSM", "MRVL",
+    "LLY", "ABBV", "ABT", "HUM", "CCJ", "WMT", "MELI", "AAPL", "META",
+    # European corporate holdings
+    "NOVO-B.CO", "AZN.L", "ENEL.MI", "ENI.MI", "PRY.MI", "BESI.NV", "RACE", "GLEN.L", "ULVR.L"
+]
+
+
+def get_equity_holdings_for_earnings() -> List[Tuple[str, str]]:
+    """
+    Dynamically returns a list of (portfolio_symbol, yahoo_ticker) tuples for all
+    active equity holdings in the portfolio, excluding ETFs, commodities, and crypto.
+    """
+    excluded_non_equities = {
+        "PPFB.DE", "IB01.L", "SX7PEX.DE", "IEUR", "IQQL.DE", "TRX", "SPCX.RTH",
+        "WCLD.L", "INDO.PA", "WDEF.L", "XEON.DE", "MAU.PA", "ANT.24-7"
+    }
+    candidates: List[Tuple[str, str]] = []
+    try:
+        from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+        for sym, meta in PORTFOLIO_ASSETS_METADATA.items():
+            if sym in excluded_non_equities:
+                continue
+            sector = meta.get("sector", "")
+            if any(term in sector for term in ["ETF", "Safe Haven", "Titoli di Stato", "Blockchain"]):
+                continue
+            yf_sym = meta.get("yahoo_ticker", sym.replace(".US", "").replace(".NV", ".AS"))
+            candidates.append((sym, yf_sym))
+    except Exception:
+        candidates = [(t, t.replace(".US", "").replace(".NV", ".AS")) for t in PORTFOLIO_EARNINGS_TICKERS]
+
+    # Add mega-cap tech bellwethers if not present
+    for titan in [("AAPL", "AAPL"), ("META", "META")]:
+        if not any(c[0] == titan[0] for c in candidates):
+            candidates.append(titan)
+
+    return candidates
+
+
+def get_next_trading_session_info(
+    current_date: Optional[datetime.date] = None,
+    market: str = "US",
+) -> Dict[str, Any]:
+    """
+    Computes deterministic information about the NEXT trading session.
+    Takes into account weekends (Saturday/Sunday) and official market holidays.
+    """
+    if current_date is None:
+        current_date = datetime.datetime.now(datetime.timezone.utc).date()
+
+    check_date = current_date + datetime.timedelta(days=1)
+    skipped_holidays: List[str] = []
+
+    while True:
+        # Check weekends
+        if check_date.weekday() >= 5:  # 5=Sat, 6=Sun
+            check_date += datetime.timedelta(days=1)
+            continue
+
+        # Check market holidays
+        if market.upper() == "US":
+            is_hol, hol_name = is_us_market_holiday(check_date)
+        else:
+            is_hol, hol_name = is_all_eu_markets_closed(check_date)
+
+        if is_hol:
+            if hol_name and hol_name not in skipped_holidays:
+                skipped_holidays.append(hol_name)
+            check_date += datetime.timedelta(days=1)
+            continue
+
+        # Found active trading day
+        break
+
+    next_date = check_date
+    days_ahead = (next_date - current_date).days
+    is_tomorrow = (days_ahead == 1)
+
+    next_weekday_it = WEEKDAY_IT[next_date.weekday()]
+    month_name_it = MONTH_IT[next_date.month]
+    formatted_date = f"{next_weekday_it} {next_date.day} {month_name_it}"
+    full_formatted_date = f"{next_weekday_it} {next_date.day} {month_name_it} {next_date.year}"
+
+    # Build natural timing phrasing for prompts and verification
+    if is_tomorrow and not skipped_holidays:
+        timing_phrase = f"nella seduta di domani ({formatted_date})"
+        timing_short = f"Domani ({formatted_date})"
+    elif current_date.weekday() == 4:  # Friday close looking to Monday
+        timing_phrase = f"alla riapertura dei mercati di lunedì ({next_date.day} {month_name_it})"
+        timing_short = f"Lunedì ({next_date.day} {month_name_it})"
+    elif skipped_holidays:
+        hol_str = ", ".join(skipped_holidays)
+        timing_phrase = f"nella prossima seduta di {formatted_date} (mercati chiusi nel frattempo per {hol_str})"
+        timing_short = f"{next_weekday_it.capitalize()} ({next_date.day} {month_name_it})"
+    else:
+        timing_phrase = f"nella prossima seduta di {formatted_date}"
+        timing_short = f"{next_weekday_it.capitalize()} ({next_date.day} {month_name_it})"
+
+    return {
+        "current_date": current_date,
+        "next_date": next_date,
+        "days_ahead": days_ahead,
+        "is_tomorrow": is_tomorrow,
+        "is_friday_close": (current_date.weekday() == 4),
+        "next_weekday_it": next_weekday_it,
+        "formatted_date": formatted_date,
+        "full_formatted_date": full_formatted_date,
+        "timing_phrase": timing_phrase,
+        "timing_short": timing_short,
+        "skipped_holidays": skipped_holidays,
+    }
+
+
+def get_upcoming_earnings_calendar(
+    target_date: Optional[datetime.date] = None,
+    max_cache_age_hours: float = 12.0,
+    force_refresh: bool = False,
+) -> Dict[str, str]:
+    """
+    Returns a dict mapping ticker -> 'YYYY-MM-DD' of known upcoming corporate earnings dates.
+    Caches results in data/earnings_calendar_cache.json to guarantee sub-millisecond execution.
+    """
+    cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+    cache_path = os.path.join(cache_dir, "earnings_calendar_cache.json")
+
+    # Attempt cache load
+    if not force_refresh and os.path.exists(cache_path):
+        try:
+            with open(cache_path, "r", encoding="utf-8") as f:
+                cached_data = json.load(f)
+            updated_str = cached_data.get("updated_at", "")
+            if updated_str:
+                updated_dt = datetime.datetime.fromisoformat(updated_str.replace("Z", "+00:00"))
+                age = (datetime.datetime.now(datetime.timezone.utc) - updated_dt).total_seconds() / 3600.0
+                if age < max_cache_age_hours and isinstance(cached_data.get("earnings"), dict):
+                    return cached_data["earnings"]
+        except Exception as c_err:
+            print(f"ℹ️ Earnings cache read note: {c_err}")
+
+    # Refresh via yfinance
+    earnings_map: Dict[str, str] = {}
+    try:
+        import yfinance as yf
+        symbols_to_query = get_equity_holdings_for_earnings()
+        for sym, yf_sym in symbols_to_query:
+            try:
+                t = yf.Ticker(yf_sym)
+                c = t.calendar
+                if c and "Earnings Date" in c:
+                    ed = c["Earnings Date"]
+                    d = ed[0] if isinstance(ed, list) else ed
+                    if isinstance(d, (datetime.date, datetime.datetime)):
+                        earnings_map[sym] = d.strftime("%Y-%m-%d")
+                    elif isinstance(d, str):
+                        earnings_map[sym] = d[:10]
+            except Exception:
+                continue
+    except Exception as yf_err:
+        print(f"ℹ️ yfinance earnings lookup note: {yf_err}")
+
+    # Fallback to existing cache if refresh produced few results
+    if not earnings_map and os.path.exists(cache_path):
+        try:
+            with open(cache_path, "r", encoding="utf-8") as f:
+                return json.load(f).get("earnings", {})
+        except Exception:
+            pass
+
+    # Save to cache
+    if earnings_map:
+        try:
+            os.makedirs(cache_dir, exist_ok=True)
+            with open(cache_path, "w", encoding="utf-8") as f:
+                json.dump({
+                    "updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    "earnings": earnings_map,
+                }, f, indent=2)
+        except Exception as save_err:
+            print(f"⚠️ Failed to save earnings cache: {save_err}")
+
+    return earnings_map
+
+
+def get_earnings_for_session(target_date: datetime.date) -> List[Dict[str, Any]]:
+    """
+    Returns corporate earnings scheduled precisely on target_date for monitored portfolio assets.
+    """
+    calendar_map = get_upcoming_earnings_calendar(target_date)
+    target_str = target_date.strftime("%Y-%m-%d")
+    matches = []
+
+    try:
+        from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+    except ImportError:
+        PORTFOLIO_ASSETS_METADATA = {}
+
+    for sym, date_str in calendar_map.items():
+        if date_str == target_str:
+            meta = PORTFOLIO_ASSETS_METADATA.get(sym, {})
+            name = meta.get("name", sym)
+            matches.append({
+                "ticker": sym,
+                "name": name,
+                "tag": f"${sym}",
+                "date_str": date_str,
+            })
+
+    return matches
 
 
 if __name__ == "__main__":

@@ -896,9 +896,10 @@ def _get_closing_question_instruction(session_upper: str) -> str:
         ]
     else:  # US Close / generic
         examples = [
+            "Cosa vi aspettate dalla prossima seduta per i nostri titoli?",
+            "Quale catalizzatore o trimestrale monitorerete con più attenzione nella prossima sessione?",
             "Com'è andata la vostra giornata? Soddisfatti dell'andamento del portafoglio?",
             "Qual è stato il movimento di mercato che vi ha sorpreso di più oggi?",
-            "Cosa pensate delle performance di oggi sul nostro portafoglio?",
             "Avete domande sull'andamento di oggi o su qualche titolo in particolare?",
         ]
 
@@ -1692,7 +1693,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             tag_instruction = f"""
 - REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE 4 tag con il simbolo $ nel testo: {selected_tags_str}. Non uno di meno, non uno di più.
 - Inserisci ${macro_heavy} nel Microtema 1 per inquadrare la chiusura generale di Wall Street (${macro_heavy} {macro_change:+.2f}%, $SPX500 {spx_change:+.2f}%, $NSDQ100 {ndx_change:+.2f}%). Il tuo commento DEVE rispettare rigorosamente il segno e l'entità del movimento reale.
-- Inserisci i 3 titoli del portafoglio in evidenza ({g_descrs}) nei rispettivi microtemi dedicati spiegando le notizie fresche del giorno e i catalizzatori reali odierni.
+- Inserisci i 3 titoli del portafoglio in evidenza ({g_descrs}) nei rispettivi microtemi 2, 3, 4 dedicati spiegando le notizie fresche del giorno e i catalizzatori reali odierni.
+- Nel Microtema 5 (Sguardo alla prossima seduta), se citi società per le trimestrali non comprese nei 4 tag autorizzati, usa solo il nome aziendale semplice SENZA il prefisso '$' (es. 'Microsoft', 'Alphabet') per NON superare la quota tassativa di 4 tag.
 """
         else:
             # Fallback for weekly recap
@@ -1828,9 +1830,70 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
   * Rispetta rigorosamente i numeri esatti senza inventare forti rally né forti crolli.
 """
                 tone_rule_micro1 = f"Ricorda la REGOLA TASSATIVA SUL TONO: La seduta è stata poco mossa / invariata (${macro_heavy}: {macro_change:+.2f}%, $SPX500: {spx_change:+.2f}%, $NSDQ100: {ndx_change:+.2f}%). Rispecchia la cautela o l'andamento piatto. Includi il tag ${macro_heavy}."
+
+            # Sguardo alla prossima seduta (Micro-tema 5) & Calendario trimestrali
+            import market_calendar
+            next_sess_info = market_calendar.get_next_trading_session_info(current_date=_dt.utcnow().date(), market="US")
+            next_date = next_sess_info["next_date"]
+            next_timing_phrase = next_sess_info["timing_phrase"]
+            next_timing_short = next_sess_info["timing_short"]
+            next_is_tomorrow = next_sess_info["is_tomorrow"]
+            next_weekday_it = next_sess_info["next_weekday_it"]
+            next_earnings = market_calendar.get_earnings_for_session(next_date)
+
+            if next_earnings:
+                earnings_items = [f"• {e['name']} ({e['ticker']}) - data annunciata: {next_sess_info['full_formatted_date']}" for e in next_earnings]
+                earnings_gt_str = "\n".join(earnings_items)
+                next_session_ground_truth_section = f"""
+=====================================================
+CALENDARIO TRIMESTRALI DELLA PROSSIMA SEDUTA ({next_timing_short}) [GROUND TRUTH CERTO]:
+=====================================================
+Le seguenti aziende del portafoglio hanno la pubblicazione dei conti confermata per questa data:
+{earnings_gt_str}
+
+REGOLA TASSATIVA SULLE TRIMESTRALI:
+- Cita ESCLUSIVAMENTE le aziende sopra elencate per le trimestrali in uscita nella prossima seduta.
+- È SEVERAMENTE E TASSATIVAMENTE VIETATO inventare trimestrali per qualsiasi altra azienda non presente in questa lista (es. non dire che NVDA, Apple, Tesla o altre riportano se non sono qui sopra)!
+- Per rispettare il limite tassativo di 4 cashtag totali del post, cita queste aziende con il loro NOME AZIENDALE SEMPLICE (es. 'Microsoft', 'Alphabet') SENZA aggiungere il prefisso '$' se non fanno parte dei 4 tag selezionati ({selected_tags_str}).
+=====================================================
+"""
+                micro5_focus_instruction = (
+                    f"Commenta l'attesa del mercato per le trimestrali in arrivo: {', '.join([e['name'] for e in next_earnings])}. "
+                    f"Spiega su cosa saranno puntati i riflettori degli investitori senza inventare numeri o stime non verificate."
+                )
+            else:
+                next_session_ground_truth_section = f"""
+=====================================================
+CALENDARIO TRIMESTRALI DELLA PROSSIMA SEDUTA ({next_timing_short}) [GROUND TRUTH CERTO]:
+=====================================================
+NESSUNA AZIENDA DEL NOSTRO PORTAFOGLIO HA TRIMESTRALI IN PROGRAMMA PER QUESTA DATA ({next_sess_info['full_formatted_date']}).
+
+REGOLA TASSATIVA SULLE TRIMESTRALI:
+- È SEVERAMENTE E TASSATIVAMENTE VIETATO inventare che una qualsiasi azienda del nostro portafoglio (es. NVIDIA, Microsoft, Apple, Eli Lilly, ecc.) riporterà la trimestrale o pubblicherà i conti in questa data!
+- Nel Microtema 5, concentrati ESCLUSIVAMENTE sui catalizzatori macroeconomici attesi in agenda, sulle decisioni/discorsi di politica monetaria, sulle aste di titoli di Stato o sulle aspettative per la riapertura dei listini.
+=====================================================
+"""
+                micro5_focus_instruction = (
+                    "Non ci sono trimestrali del nostro portafoglio in programma per questa data. "
+                    "Concentrati sui catalizzatori macroeconomici attesi in agenda, discorsi di banchieri centrali, "
+                    "aste obbligazionarie o sul clima e sentiment con cui apriranno i mercati."
+                )
+
+            temporal_rules_micro5 = f"""
+- REGOLE TASSATIVE PER LO SGUARDO ALLA PROSSIMA SEDUTA (MICRO-TEMA 5):
+  * FORMULAZIONE TEMPORALE RIGIDA: La prossima seduta di borsa è: "{next_timing_phrase}".
+  * DIVIETO 'DOMANI' SE FINE SETTIMANA: Se oggi è venerdì o pre-festivo ({'OGGI È VENERDÌ' if not next_is_tomorrow else 'OGGI È INFRASETTIMANALE'}), è SEVERAMENTE VIETATO dire 'domani' o 'nella seduta di domani'. DEVI riferirti a '{next_weekday_it}' / 'alla riapertura della prossima settimana'!
+  * ZERO RIPETIZIONI DELLA GIORNATA CHIUSA: È SEVERAMENTE VIETATO ripetere i numeri di chiusura, le variazioni percentuali o la rotazione settoriale della giornata appena terminata (già trattati nel Microtema 1). Il Microtema 5 deve guardare SOLO ED ESCLUSIVAMENTE IN AVANTI verso la prossima sessione!
+  * NESSUNA INVENZIONE SULLE TRIMESTRALI: Rispetta scrupolosamente il Ground Truth sopra riportato.
+"""
         else:
             index_tone_rules_us_close = ""
             tone_rule_micro1 = ""
+            next_session_ground_truth_section = ""
+            temporal_rules_micro5 = ""
+            micro5_focus_instruction = ""
+            next_timing_short = ""
+            next_timing_phrase = ""
 
         news_of_the_day_rules = (
             "- REGOLA NOTIZIE TITOLI (NEWS FRESCHE DEL GIORNO VS NOIOSE TRIMESTRALI - TASSATIVO):\n"
@@ -1967,14 +2030,17 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
             prompt = f"""Sei Andrea Ravalli, investitore privato italiano su eToro. Scrivi un resoconto serale caldo, professionale e naturale dopo la chiusura dei mercati USA (U.S. market close).
             {temporal_ground_truth_header}
             {benchmarks_close_ground_truth}
+            {next_session_ground_truth_section}
             {temporal_rules_us_close}
+            {temporal_rules_micro5}
             {index_tone_rules_us_close}
             {tavily_grounding_section}
             {holdings_fundamental_section}
             {previous_topics_str}
 
             LINEE GUIDA GENERALI:
-            - La seduta è DEFINITIVAMENTE CONCLUSA: parla ESCLUSIVAMENTE al PASSATO.
+            - La seduta di oggi è DEFINITIVAMENTE CONCLUSA: parla di quanto accaduto oggi ESCLUSIVAMENTE al PASSATO.
+            - Il Microtema 5 guarda invece IN AVANTI verso la prossima seduta: usa le formule temporali e il calendario trimestrali indicati nel Ground Truth.
             - Scrivi in ITALIANO naturale, fluido e colloquiale (un resoconto serale sincero per i tuoi compagni investitori).
             - NON usare mai markdown per il grassetto (no **testo** o asterischi), solo testo semplice.
             - Parla direttamente in prima persona ("Chiudiamo la sessione...", "Nel nostro portafoglio...", "Oggi abbiamo osservato..."). Mai presentarsi col proprio nome nel testo!
@@ -1990,13 +2056,13 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
               * Microtema 2 DEVE iniziare con: {emoji_g1}
               * Microtema 3 DEVE iniziare con: {emoji_g2}
               * Microtema 4 DEVE iniziare con: {emoji_g3}
-              * Microtema 5 DEVE iniziare con: ⚖️ (oppure 🔹)
+              * Microtema 5 DEVE iniziare con: 🔮 (oppure 📅 o 🔹)
             - Se per qualsiasi motivo non sai cosa mettere, usa il simbolo di elenco '🔹'.
             - NON omettere mai l'emoticon a inizio riga per nessun microtema.
 
-            🌆 MICRO-TEMA 1: Riepilogo rapido di chiusura Wall Street (${macro_heavy}: {macro_change:+.2f}%)
-               Sintesi a bocce ferme di cosa ha guidato i listini oggi (${macro_heavy}: {macro_change:+.2f}%, $SPX500: {spx_change:+.2f}%, $NSDQ100: {ndx_change:+.2f}%).
-               Spiega le cause reali del movimento (rendimenti obbligazionari Treasury, dati macroeconomici, reazione dei settori).
+            🌆 MICRO-TEMA 1: Chiusura ufficiale Wall Street (${macro_heavy}: {macro_change:+.2f}%)
+               Sintesi a bocce ferme dei numeri ufficiali di chiusura di Wall Street (${macro_heavy}: {macro_change:+.2f}%, $SPX500: {spx_change:+.2f}%, $NSDQ100: {ndx_change:+.2f}%).
+               Spiega i driver macroeconomici e monetari che hanno guidato la seduta (rendimenti obbligazionari Treasury, dati macroeconomici, dollaro). Concentrati sui dati oggettivi della giornata senza anticipare o fare divagazioni su rotazioni settoriali o strategie di portafoglio.
                {tone_rule_micro1}
 
             REGOLA CRITICA SULLA FRESCHEZZA DELLE NOTIZIE:
@@ -2013,8 +2079,10 @@ DATI CHIUSURA INDICI WALL STREET OGGI (GROUND TRUTH ASSOLUTA):
             {emoji_g3} MICRO-TEMA 4: ${g3['ticker']} ({g3['daily_change']:+.2f}%)
                Terzo titolo per variazione positiva. Spiega la news del giorno o il catalizzatore del movimento: {g3['news_snippet']}. Privilegia news fresche ed evita trimestrali vecchie.
 
-            ⚖️ MICRO-TEMA 5: Rotazione Settoriale & Strategia
-               Breve sintesi su rotazione settoriale a Wall Street (difensivi vs ciclici, flussi istituzionali) e assetti del nostro portafoglio. NON inserire altri tag oltre ai 4 indicati.
+            🔮 MICRO-TEMA 5: Sguardo alla prossima seduta ({next_timing_short}) & Catalizzatori
+               Guarda in avanti verso {next_timing_phrase}.
+               {micro5_focus_instruction}
+               Ricorda: è SEVERAMENTE VIETATO ripetere la chiusura di oggi o la rotazione settoriale passata. Se citi società per le trimestrali non comprese nei 4 tag autorizzati, usa solo il nome aziendale semplice senza '$'.
 
             {tag_instruction}
             - {closing_question_instruction}

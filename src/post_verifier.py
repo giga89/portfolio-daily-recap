@@ -758,6 +758,57 @@ def verify_post_deterministic(
                     )
                     break
 
+    # 0e. Next-session temporal and earnings verification for close/evening sessions
+    if is_close_session:
+        try:
+            import market_calendar
+            import datetime as _dt_local
+            next_info = market_calendar.get_next_trading_session_info()
+
+            # If next trading session is NOT tomorrow (e.g. today is Friday, weekend, or holiday eve)
+            if not next_info.get("is_tomorrow", True):
+                bad_tomorrow_pattern = r'\b(?:nella\s+seduta\s+di\s+domani|domani\s+(?:a\s+wall\s+street|i\s+mercati|la\s+borsa|aprono|apriranno|all\'apertura))\b'
+                if re.search(bad_tomorrow_pattern, cleaned_text, flags=re.IGNORECASE) or re.search(bad_tomorrow_pattern, text, flags=re.IGNORECASE):
+                    issues.append(
+                        f"CRITICAL: Paradosso temporale sul giorno successivo: la prossima seduta di contrattazione non è domani ma {next_info.get('timing_phrase')}. È tassativamente vietato usare 'domani' per le contrattazioni di mercato."
+                    )
+
+            # Strict verification of corporate earnings claims for the next session
+            names_pattern = r"NVIDIA|Microsoft|Alphabet|Google|Amazon|Apple|Palantir|Broadcom|Eli\s+Lilly|Lilly|AbbVie|Abbott|Cameco|Tesla|Meta|Enel|Eni|Prysmian"
+            pat_fwd = r"(?:\$([A-Za-z0-9\.\-]+)|\b(" + names_pattern + r")\b).{0,60}\b(?:pubblicherà|presenterà|rilascerà|attesa\s+per|in\s+attesa\s+dei)\b.{0,40}\b(?:trimestrale|conti|utili|risultati|earnings)\b"
+            pat_rev = r"\b(?:trimestrale|conti|utili|risultati|earnings)\b.{0,60}(?:\$([A-Za-z0-9\.\-]+)|\b(" + names_pattern + r")\b)"
+
+            earnings_matches = list(re.finditer(pat_fwd, cleaned_text, flags=re.IGNORECASE)) + list(re.finditer(pat_rev, cleaned_text, flags=re.IGNORECASE))
+            if earnings_matches:
+                cal_map = market_calendar.get_upcoming_earnings_calendar()
+                next_date = next_info["next_date"]
+                next_date_str = next_date.strftime("%Y-%m-%d")
+                name_to_sym = {
+                    "MICROSOFT": "MSFT", "ALPHABET": "GOOG", "GOOGLE": "GOOG", "AMAZON": "AMZN",
+                    "APPLE": "AAPL", "NVIDIA": "NVDA", "PALANTIR": "PLTR", "BROADCOM": "AVGO",
+                    "ELI LILLY": "LLY", "LILLY": "LLY", "ABBVIE": "ABBV", "ABBOTT": "ABT",
+                    "CAMECO": "CCJ", "TESLA": "TSLA", "META": "META", "ENEL": "ENEL.MI",
+                    "ENI": "ENI.MI", "PRYSMIAN": "PRY.MI"
+                }
+
+                for m in earnings_matches:
+                    raw_id = (m.group(1) or m.group(2) or "").strip().upper()
+                    sym_clean = name_to_sym.get(raw_id, raw_id)
+                    # Check if ticker is in known earnings calendar
+                    if sym_clean in cal_map:
+                        actual_str = cal_map[sym_clean]
+                        try:
+                            actual_d = _dt_local.datetime.strptime(actual_str, "%Y-%m-%d").date() if isinstance(actual_str, str) else actual_str
+                            diff_days = abs((actual_d - next_date).days)
+                            if diff_days > 1:
+                                issues.append(
+                                    f"CRITICAL: Allucinazione data trimestrale: il post afferma la trimestrale di {sym_clean} nella prossima seduta ({next_date_str}), ma la data ufficiale di calendario è {actual_str}."
+                                )
+                        except Exception:
+                            pass
+        except Exception as verif_err:
+            pass
+
 
     # Check for purged assets that must never appear in active communications
     for tag in tickers_to_check:
