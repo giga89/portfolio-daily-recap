@@ -230,28 +230,6 @@ COMPANY_INFOGRAPHICS = {
         "color": (200, 30, 30),
         "domain": "tsmc.com"
     },
-    "0005.HK": {
-        "name": "HSBC",
-        "tagline": "Global Banking & Wealth Management",
-        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
-        "subtitle": "HSBC è la banca leader nei flussi commerciali e nella gestione dei patrimoni tra Europa e Asia.",
-        "kpis": [
-            {"label": "DIVIDEND YIELD", "val": "7.0%+", "sub": "Rendimento da dividendo elevato"},
-            {"label": "CET1 RATIO", "val": "15.2%", "sub": "Solidità patrimoniale ai vertici"},
-            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Pilastro dividendi e finanza globale"},
-            {"label": "ROTE (REDDITIVITÀ)", "val": "15%+", "sub": "Redditività sul patrimonio solida"},
-        ],
-        "pillars": [
-            ("Ponte Commerciale Occidente-Oriente:", "Leader indiscusso nel finanziamento al commercio internazionale."),
-            ("Generazione di Cassa Massiccia:", "Dividendi trimestrali costanti accompagnati da programmi di buyback."),
-            ("Espansione nel Wealth Management Asiatico:", "Crescita costante dei patrimoni gestiti a Hong Kong e Singapore."),
-            ("Valutazioni Attrattive:", "Multipli a sconto che offrono un eccellente profilo di rischio/rendimento."),
-        ],
-        "quote": "I flussi commerciali globali generano rendimenti stabili attraverso qualsiasi ciclo economico.",
-        "tags": ["#HSBC", "#Banking", "#Dividends", "#Asia", "#GlobalFinance"],
-        "color": (220, 20, 20),
-        "domain": "hsbc.com"
-    },
     "1211.HK": {
         "name": "BYD",
         "tagline": "Electric Vehicles & Blade Battery Leader",
@@ -821,7 +799,7 @@ def _get_live_weight_for_ticker(ticker: str) -> str:
         "AMZN": "3.80%", "SX7PEX.DE": "3.43%", "BMW.DE": "3.30%", "NVDA": "3.30%",
         "HUM": "3.19%", "GOOG": "3.14%", "ENEL.MI": "2.94%", "PLTR": "2.87%",
         "TSM": "2.87%", "MELI": "2.72%", "PYPL": "2.56%",
-        "1211.HK": "2.35%", "MSFT": "2.19%", "LLY": "2.19%", "0005.HK": "2.04%",
+        "1211.HK": "2.35%", "MSFT": "2.19%", "LLY": "2.19%",
         "VOW3.DE": "1.24%", "AVGO": "0.05%"
     }
     return defaults.get(clean, "2.50%")

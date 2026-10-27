@@ -142,6 +142,10 @@ def publish_dividend_for_ticker(
 ) -> Dict[str, Any]:
     """Publish a dedicated dividend Pay Day card & post for a specific ticker."""
     clean_sym = ticker.strip().upper()
+    from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+    if clean_sym not in PORTFOLIO_ASSETS_METADATA:
+        print(f"🛑 REJECTED: ${clean_sym} is not a valid active portfolio holding in PORTFOLIO_ASSETS_METADATA. Skipping dividend.")
+        return {"ticker": clean_sym, "success": False, "error": f"${clean_sym} not in portfolio"}
     pay_date = pay_date or datetime.now(timezone.utc).strftime("%d %b %Y")
 
     info = TICKER_THEMES.get(clean_sym, {})
@@ -275,15 +279,17 @@ def check_and_publish_earnings(dry_run: bool = False, lookback_days: int = 3) ->
         "WCLD.L", "INDO.PA", "WDEF.L", "XEON.DE", "MAU.PA", "ANT.24-7"
     }
 
-    for ticker in list(TICKER_THEMES.keys()):
+    from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+
+    for ticker in list(PORTFOLIO_ASSETS_METADATA.keys()):
+        meta = PORTFOLIO_ASSETS_METADATA.get(ticker, {})
+        sector_str = meta.get("sector", "") or TICKER_THEMES.get(ticker, {}).get("sector", "")
         # Exclude ETFs / Commodities without earnings
-        if any(ticker.endswith(sfx) for sfx in [".DE", ".PA", ".L"]) and "ETF" in TICKER_THEMES[ticker].get("sector", ""):
+        if any(ticker.endswith(sfx) for sfx in [".DE", ".PA", ".L"]) and "ETF" in sector_str:
             continue
         if ticker in EXCLUDED_EARNINGS_TICKERS:
             continue
 
-        from portfolio_manager import PORTFOLIO_ASSETS_METADATA
-        meta = PORTFOLIO_ASSETS_METADATA.get(ticker, {})
         yf_sym = meta.get("yahoo_ticker", ticker.replace(".US", ""))
         try:
             t = yf.Ticker(yf_sym)
@@ -339,6 +345,10 @@ def publish_earnings_for_ticker(
 ) -> Dict[str, Any]:
     """Publish a dedicated corporate earnings card & post for a specific ticker."""
     clean_sym = ticker.strip().upper()
+    from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+    if clean_sym not in PORTFOLIO_ASSETS_METADATA:
+        print(f"🛑 REJECTED: ${clean_sym} is not a valid active portfolio holding in PORTFOLIO_ASSETS_METADATA. Skipping earnings.")
+        return {"ticker": clean_sym, "success": False, "error": f"${clean_sym} not in portfolio"}
     info = TICKER_THEMES.get(clean_sym, {})
     comp_name = info.get("company_name", clean_sym)
     weight_pct = _get_current_weight(clean_sym)

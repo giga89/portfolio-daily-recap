@@ -819,6 +819,26 @@ def get_comment_replies(post_id: str, comment_id: str) -> List[Dict[str, Any]]:
     return []
 
 
+def delete_post(post_id: str) -> bool:
+    """
+    Delete a specific post from eToro Social Feed via DELETE /api/v1/posts/{postId}.
+    """
+    headers = get_headers()
+    if not headers:
+        return False
+    url = f"{BASE_URL}/api/v1/posts/{post_id}"
+    try:
+        resp = requests.delete(url, headers=headers, timeout=15)
+        if resp.status_code in (200, 204):
+            print(f"🗑️ Successfully deleted post {post_id}")
+            return True
+        print(f"⚠️ Failed to delete post {post_id} (HTTP {resp.status_code}): {resp.text}")
+        return False
+    except Exception as e:
+        print(f"⚠️ Error deleting post {post_id}: {e}")
+        return False
+
+
 def delete_comment_reply(post_id: str, comment_id: str, reply_id: str) -> bool:
     """
     Delete a specific reply from a comment via DELETE /api/v1/posts/{postId}/comments/{commentId}/replies/{replyId}.

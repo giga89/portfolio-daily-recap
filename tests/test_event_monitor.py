@@ -121,6 +121,22 @@ class TestEventMonitor(unittest.TestCase):
             self.assertTrue(res.get("success"))
             self.assertTrue(res.get("dry_run"))
 
+    def test_non_portfolio_ticker_rejected(self):
+        """Verify that any asset not in PORTFOLIO_ASSETS_METADATA (e.g. 0005.HK) is rejected."""
+        from stock_focus_card import TICKER_THEMES
+        from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+
+        self.assertNotIn("0005.HK", PORTFOLIO_ASSETS_METADATA)
+        self.assertNotIn("0005.HK", TICKER_THEMES)
+
+        res_earnings = event_monitor.publish_earnings_for_ticker("0005.HK", dry_run=True)
+        self.assertFalse(res_earnings["success"])
+        self.assertIn("not in portfolio", res_earnings["error"])
+
+        res_div = event_monitor.publish_dividend_for_ticker("0005.HK", dry_run=True)
+        self.assertFalse(res_div["success"])
+        self.assertIn("not in portfolio", res_div["error"])
+
 
 if __name__ == "__main__":
     unittest.main()
