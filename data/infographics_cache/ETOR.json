@@ -1,0 +1,59 @@
+{
+  "name": "ETORO GROUP LTD.",
+  "tagline": "Pioniere globale del social trading",
+  "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+  "subtitle": "Piattaforma multi-asset leader nel copy trading con potente effetto network, scalabilità fintech e solida crescita operativa.",
+  "kpis": [
+    {
+      "label": "UTENTI REGISTRATI",
+      "val": "35M+",
+      "sub": "Community retail globale attiva"
+    },
+    {
+      "label": "MARGINE EBITDA",
+      "val": "28%",
+      "sub": "Forte leva operativa fintech"
+    },
+    {
+      "label": "PESO IN PORTAFOGLIO",
+      "val": "0.97%",
+      "sub": "Allocazione gestita nel portafoglio"
+    },
+    {
+      "label": "FREE CASH FLOW",
+      "val": "$180M+",
+      "sub": "Elevata conversione di cassa"
+    }
+  ],
+  "pillars": [
+    [
+      "Fossato Competitivo:",
+      "Potente effetto network difensivo generato dalla tecnologia proprietaria brevettata CopyTrader."
+    ],
+    [
+      "Catalizzatore di Crescita:",
+      "Monetizzazione multi-asset su azioni, ETF, derivati e crypto in mercati internazionali emergenti."
+    ],
+    [
+      "Solidità e Finanze:",
+      "Modello capital-light a forte redditività con bilancio solido e assenza di debito strutturale."
+    ],
+    [
+      "Visione Decennale:",
+      "Consolidamento come super-app finanziaria primaria di riferimento per le nuove generazioni di investitori."
+    ]
+  ],
+  "quote": "Democratizzare gli investimenti combinando condivisione social, tecnologia scalabile e diversificazione multi-asset senza confini.",
+  "tags": [
+    "#ETOR",
+    "#Fintech",
+    "#SocialTrading",
+    "#Growth",
+    "#DigitalFinance"
+  ],
+  "color": [
+    33,
+    206,
+    153
+  ]
+}
