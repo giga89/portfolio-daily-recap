@@ -76,7 +76,6 @@ MARKET_IDS = {
     "ULVR.L": 2093,
 
     # E-Commerce, Fintech, Pre-IPO, Retail & Crypto
-    "MELI": 4108,
     "ETOR": 12200,
     "2318.HK": 2316,
     "WMT": 1035,

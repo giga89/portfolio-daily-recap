@@ -70,6 +70,21 @@ class TestUniversalDualCheck(unittest.TestCase):
         ok_c, _, _ = verify_and_clean_comment(bad_comment_spcx, run_ai_review=False)
         self.assertFalse(ok_c, "Comment containing SPCX must be rejected")
 
+    def test_purged_asset_meli_blocked(self):
+        """Purged asset MELI / MercadoLibre must be blocked deterministically."""
+        bad_comment_meli = "Abbiamo $MELI in portafoglio per la crescita in America Latina."
+        is_ok, issues, _ = verify_post_deterministic(bad_comment_meli)
+        self.assertFalse(is_ok, "MELI should be flagged as critical error")
+        self.assertTrue(any("dismesso" in i or "MELI" in i for i in issues))
+
+        bad_text_mercado = "MercadoLibre continua la sua espansione fintech con Mercado Pago."
+        is_ok_m, issues_m, _ = verify_post_deterministic(bad_text_mercado)
+        self.assertFalse(is_ok_m, "MercadoLibre text should be flagged as critical error")
+        self.assertTrue(any("dismesso" in i or "MELI" in i for i in issues_m))
+
+        ok_c, _, _ = verify_and_clean_comment(bad_comment_meli, run_ai_review=False)
+        self.assertFalse(ok_c, "Comment containing MELI must be rejected")
+
     def test_accumulating_etf_comment_blocked(self):
         """Dividend claims on accumulating ETF WDEF.L must fail deterministic check."""
         hallucinated_reply = "@copier $WDEF.L è un ottimo ETF che stacca un generoso dividendo trimestrale per i nostri flussi di cassa."

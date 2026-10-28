@@ -204,7 +204,7 @@
     "title": "LA TRAPPOLA DELL'HOME BIAS",
     "subtitle": "Investire solo in Italia perché 'è casa nostra' è uno dei peggiori errori di diversificazione statistica.",
     "palette": "cyan",
-    "tickers": ["RACE", "PRY.MI", "MELI", "INDO.PA"],
+    "tickers": ["RACE", "PRY.MI", "VOF.L", "INDO.PA"],
     "pillars": [
       {
         "label": "IL DIVARIO STORICO",
@@ -219,10 +219,10 @@
       {
         "label": "NEL NOSTRO PORTAFOGLIO",
         "highlight": "CAMPIONI LOCALI + MONDO",
-        "text": "Selezioniamo solo eccellenze globali italiane ($RACE, $PRY.MI) e le bilanciamo con i mercati emergenti in Asia ($INDO.PA) e America Latina ($MELI)."
+        "text": "Selezioniamo solo eccellenze globali italiane ($RACE, $PRY.MI) e le bilanciamo con i mercati emergenti e di frontiera in Asia ($INDO.PA, $VOF.L)."
       }
     ],
-    "post_content": "Sapete qual è l'errore psicologico più diffuso tra gli investitori europei e italiani? L'Home Bias.\n\nConsiste nel concentrare la maggior parte dei propri risparmi in titoli, BTP e immobili del proprio paese, convinti che ciò che è vicino e familiare sia automaticamente più sicuro.\n\nI dati storici però non perdonano:\nTra il 2007 e il 2024, l'indice italiano (FTSE MIB) ha impiegato quasi due decenni solo per riavvicinare i livelli pre-crisi. Nello stesso identico arco temporale, l'azionario globale e i mercati innovativi hanno registrato crescite del +300% / +500%.\n\nL'Italia rappresenta meno dell'1% della capitalizzazione azionaria mondiale. Perché allocare lì il 70% dei propri risparmi?\n\n🏎️ IL NOSTRO APPROCCIO:\nNon rifiutiamo l'Italia a priori: investiamo nelle aziende italiane che competono e dominano a livello mondiale, come $RACE (Ferrari) o $PRY.MI (Prysmian nei cavi energetici). Ma le affianchiamo ai campioni emergenti che crescono al 20-30% annuo in America Latina ($MELI) o in Indonesia ($INDO.PA).\n\n💬 DOMANDA D'INGAGGIO:\nSe doveste guardare onestamente il vostro patrimonio complessivo (compresi immobili e titoli di stato), quanta percentuale è ancora legata all'Italia? Più del 50% o avete già internazionalizzato?\nDitemelo nei commenti! 👇\n\n👉 Visualizza la nostra esposizione globale: etoro.com/people/andrearavalli"
+    "post_content": "Sapete qual è l'errore psicologico più diffuso tra gli investitori europei e italiani? L'Home Bias.\n\nConsiste nel concentrare la maggior parte dei propri risparmi in titoli, BTP e immobili del proprio paese, convinti che ciò che è vicino e familiare sia automaticamente più sicuro.\n\nI dati storici però non perdonano:\nTra il 2007 e il 2024, l'indice italiano (FTSE MIB) ha impiegato quasi due decenni solo per riavvicinare i livelli pre-crisi. Nello stesso identico arco temporale, l'azionario globale e i mercati innovativi hanno registrato crescite del +300% / +500%.\n\nL'Italia rappresenta meno dell'1% della capitalizzazione azionaria mondiale. Perché allocare lì il 70% dei propri risparmi?\n\n🏎️ IL NOSTRO APPROCCIO:\nNon rifiutiamo l'Italia a priori: investiamo nelle aziende italiane che competono e dominano a livello mondiale, come $RACE (Ferrari) o $PRY.MI (Prysmian nei cavi energetici). Ma le affianchiamo ai mercati emergenti dinamici che crescono a ritmi elevati in Vietnam ($VOF.L) o in Indonesia ($INDO.PA).\n\n💬 DOMANDA D'INGAGGIO:\nSe doveste guardare onestamente il vostro patrimonio complessivo (compresi immobili e titoli di stato), quanta percentuale è ancora legata all'Italia? Più del 50% o avete già internazionalizzato?\nDitemelo nei commenti! 👇\n\n👉 Visualizza la nostra esposizione globale: etoro.com/people/andrearavalli"
   },
   {
     "episode": 10,
@@ -451,28 +451,28 @@
   },
   {
     "episode": 19,
-    "title": "L'AMERICA LATINA E LA NUOVA FRONTIERA",
-    "subtitle": "Perché la demografia giovane e la digitalizzazione rendono i mercati emergenti irrinunciabili.",
+    "title": "IL SUD-EST ASIATICO E LE NUOVE FRONTIERE",
+    "subtitle": "Perché demografia giovane e rilocalizzazione industriale rendono i mercati di frontiera irrinunciabili.",
     "palette": "gold",
-    "tickers": ["MELI", "VOF.L", "INDO.PA"],
+    "tickers": ["VOF.L", "INDO.PA", "1211.HK"],
     "pillars": [
       {
         "label": "IL VANTAGGIO DEMOGRAFICO",
         "highlight": "ETÀ MEDIA SOTTO I 32 ANNI",
-        "text": "Mentre l'Europa e l'Occidente affrontano l'invecchiamento della popolazione, i paesi emergenti vivono il boom di milioni di nuovi consumatori digitali."
+        "text": "Mentre l'Europa e l'Occidente affrontano l'invecchiamento della popolazione, il Sud-Est asiatico vive il boom di milioni di nuovi consumatori e lavoratori giovani."
       },
       {
-        "label": "IL CAMPIONE ASSOLUTO",
-        "highlight": "L'AMAZON DELL'AMERICA LATINA",
-        "text": "MercadoLibre ($MELI) cresce a oltre il 30% annuo dominando sia l'e-commerce che i pagamenti digitali (fintech) in Brasile, Messico e Argentina."
+        "label": "I NUOVI HUB GLOBALI",
+        "highlight": "VIETNAM & INDONESIA",
+        "text": "Il Vietnam ($VOF.L) guida la rilocalizzazione industriale e tech, mentre l'Indonesia ($INDO.PA) controlla le risorse critiche per la transizione globale."
       },
       {
         "label": "NEL NOSTRO PORTAFOGLIO",
         "highlight": "CRESCITA DI FRONTIERA",
-        "text": "Affianchiamo $MELI ai fondi sul dinamismo del Sud-Est asiatico come il Vietnam ($VOF.L) e l'Indonesia ($INDO.PA)."
+        "text": "Catturiamo questo megatrend con fondi dedicati come il Vietnam ($VOF.L) e l'Indonesia ($INDO.PA), affiancati a leader industriali asiatici come BYD ($1211.HK)."
       }
     ],
-    "post_content": "Mentre l'Europa deve fare i conti con l'invecchiamento demografico e tassi di crescita dell'1%, dove stanno nascendo le storie di espansione economica più esplosive del prossimo decennio?\n\nNei mercati emergenti con popolazione giovanissima e in rapida adozione tecnologica.\n\nPrendiamo l'America Latina: oltre 650 milioni di abitanti, un'età media di appena 31 anni e milioni di persone che accedono ai servizi finanziari e bancari per la prima volta grazie allo smartphone.\nIn questo continente non domina Amazon o PayPal, ma un gigante autoctono straordinario: MercadoLibre ($MELI).\n\nMercadoLibre è contemporaneamente l'Amazon dell'e-commerce e la banca digitale più utilizzata attraverso Mercado Pago, con tassi di crescita dei ricavi superiori al 30% anno su anno da oltre un decennio.\n\n🌏 LA NOSTRA ESPOSIZIONE GLOBALE:\nUn portafoglio moderno non può limitarsi al cortile di casa. Ecco perché deteniamo posizioni strategiche su $MELI, abbinate a ETF e fondi sui campioni industriali del Vietnam ($VOF.L) e dell'Indonesia ($INDO.PA), economie protagoniste della rilocalizzazione produttiva globale.\n\n💬 DOMANDA PER VOI:\nAvete mai investito direttamente in campioni dell'America Latina o del Sud-Est asiatico, oppure la volatilità di queste aree vi spaventa ancora?\nScrivetemi la vostra esperienza nei commenti! 👇\n\n👉 Guarda i mercati emergenti nel nostro portafoglio: etoro.com/people/andrearavalli"
+    "post_content": "Mentre l'Europa deve fare i conti con l'invecchiamento demografico e tassi di crescita dell'1%, dove stanno nascendo le storie di espansione economica più esplosive del prossimo decennio?\n\nNei mercati emergenti e di frontiera con popolazione giovanissima e in rapida adozione industriale e tecnologica.\n\nPrendiamo il Sud-Est asiatico: oltre 600 milioni di abitanti, un'età media straordinariamente giovane e flussi imponenti di capitali internazionali che stanno rilocalizzando le filiere produttive globali.\n\nIn questa regione spiccano due vere potenze di crescita:\n1️⃣ Il Vietnam ($VOF.L): la nuova fabbrica del mondo per l'elettronica avanzata e il manifatturiero ad alto valore aggiunto.\n2️⃣ L'Indonesia ($INDO.PA): la prima economia del Sud-Est asiatico, ricca di risorse strategiche come il nichel indispensabile per le batterie globali.\n\n🌏 LA NOSTRA ESPOSIZIONE GLOBALE:\nUn portafoglio moderno non può limitarsi al cortile di casa. Ecco perché deteniamo posizioni strategiche su ETF e fondi sui campioni industriali del Vietnam ($VOF.L) e dell'Indonesia ($INDO.PA), affiancati ai giganti industriali asiatici come BYD ($1211.HK).\n\n💬 DOMANDA PER VOI:\nAvete mai investito direttamente in campioni del Sud-Est asiatico, oppure la volatilità di queste aree vi spaventa ancora?\nScrivetemi la vostra esperienza nei commenti! 👇\n\n👉 Guarda i mercati emergenti nel nostro portafoglio: etoro.com/people/andrearavalli"
   },
   {
     "episode": 20,

@@ -186,28 +186,6 @@ COMPANY_INFOGRAPHICS = {
         "color": (0, 90, 180),
         "domain": "marvell.com"
     },
-    "MELI": {
-        "name": "MERCADOLIBRE",
-        "tagline": "Latin America E-Commerce & Fintech Giant",
-        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
-        "subtitle": "MercadoLibre è l'ecosistema integrato dominante di commercio elettronico, logistica e pagamenti digitali in America Latina.",
-        "kpis": [
-            {"label": "CRESCITA VOLUMI (GMV)", "val": "+35%", "sub": "Leader in Brasile e Messico"},
-            {"label": "MERCADOPAGO (TPV)", "val": "+50%", "sub": "Volume pagamenti fintech record"},
-            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Esposizione mercati emergenti"},
-            {"label": "CONSEGNA IN 24H", "val": ">75%", "sub": "Rete logistica proprietaria unica"},
-        ],
-        "pillars": [
-            ("Fossato Logistico Insuperabile:", "Rete proprietaria di magazzini e aerei che garantisce consegne record."),
-            ("Volano Fintech MercadoPago:", "I servizi finanziari e di credito crescono più velocemente dell'e-commerce."),
-            ("Bassa Penetrazione Digitale:", "L'America Latina ha ancora decenni di crescita nell'adozione dell'e-commerce."),
-            ("Redditività e Margini in Espansione:", "Crescita autofinanziata con leva operativa ed espansione dei margini."),
-        ],
-        "quote": "Dominare simultaneamente commercio, logistica e finanza crea un ecosistema inarrestabile.",
-        "tags": ["#MercadoLibre", "#Fintech", "#Ecommerce", "#LatinAmerica", "#GrowthInvesting"],
-        "color": (255, 200, 0),
-        "domain": "mercadolibre.com"
-    },
     "TSM": {
         "name": "TSMC",
         "tagline": "Pure-Play Semiconductor Foundry Leader",
@@ -798,7 +776,7 @@ def _get_live_weight_for_ticker(ticker: str) -> str:
         "NOVO-B.CO": "4.30%", "CCJ": "4.01%", "ENI.MI": "3.94%", "PRY.MI": "3.86%",
         "AMZN": "3.80%", "SX7PEX.DE": "3.43%", "BMW.DE": "3.30%", "NVDA": "3.30%",
         "HUM": "3.19%", "GOOG": "3.14%", "ENEL.MI": "2.94%", "PLTR": "2.87%",
-        "TSM": "2.87%", "MELI": "2.72%", "PYPL": "2.56%",
+        "TSM": "2.87%", "PYPL": "2.56%",
         "1211.HK": "2.35%", "MSFT": "2.19%", "LLY": "2.19%",
         "VOW3.DE": "1.24%", "AVGO": "0.05%"
     }

@@ -202,18 +202,18 @@ POLL_TEMPLATES = [
         "id": "emerging_markets_opportunity",
         "title": "Mercati Emergenti: Dove vedete la maggiore opportunità? 🌏",
         "options": [
-            "America Latina ($MELI)",
+            "Finanza Cina ($2318.HK)",
             "Cina & EV leader ($1211.HK)",
             "Vietnam & Frontiera ($VOF.L)",
             "Indonesia ETF ($INDO.PA)"
         ],
         "tickers": [
-            "MELI",
+            "2318.HK",
             "1211.HK",
             "VOF.L",
             "INDO.PA"
         ],
-        "message": "🗳️ SONDAGGIO MERCATI EMERGENTI: CRESCITA E DEMOGRAFIA\n\nDall'ecosistema e-commerce e fintech di MercadoLibre $MELI in America Latina alla leadership globale EV di BYD $1211.HK, fino al boom manifatturiero del Vietnam $VOF.L e alle materie prime critiche dell'Indonesia $INDO.PA, cerchiamo alpha selettivo globale.\n\nQuale area emergente offre il miglior potenziale?\n\nVotate e commentate la vostra scelta! 👇"
+        "message": "🗳️ SONDAGGIO MERCATI EMERGENTI: CRESCITA E DEMOGRAFIA\n\nDalla leadership fintech e assicurativa di Ping An $2318.HK e il dominio EV di BYD $1211.HK, fino al boom manifatturiero del Vietnam $VOF.L e alle materie prime critiche dell'Indonesia $INDO.PA, cerchiamo alpha selettivo globale.\n\nQuale area emergente offre il miglior potenziale?\n\nVotate e commentate la vostra scelta! 👇"
     },
     {
         "id": "luxury_vs_defensive_consumer",
@@ -352,15 +352,15 @@ POLL_TEMPLATES = [
         "options": [
             "Social Investing ($ETOR)",
             "Stablecoin & Rails ($TRX)",
-            "Fintech & E-comm ($MELI)",
+            "Banche Europee ($SX7PEX.DE)",
             "Banche e circuiti legacy"
         ],
         "tickers": [
             "ETOR",
             "TRX",
-            "MELI"
+            "SX7PEX.DE"
         ],
-        "message": "🗳️ SONDAGGIO FINTECH: IL FUTURO DEI SERVIZI FINANZIARI\n\nDall'espansione globale del social investing con $ETOR (quotata al Nasdaq) al dominio di TRON $TRX nei regolamenti globali in stablecoin USDT, fino all'ecosistema di credito e pagamenti digitali Mercado Pago di $MELI, la finanza digitale scala rapidamente.\n\nQuale piattaforma sarà più rilevante nel prossimo quinquennio?\n\nVotate e confrontatevi con noi! 👇"
+        "message": "🗳️ SONDAGGIO FINTECH: IL FUTURO DEI SERVIZI FINANZIARI\n\nDall'espansione globale del social investing con $ETOR (quotata al Nasdaq) al dominio di TRON $TRX nei regolamenti globali in stablecoin USDT, fino alla trasformazione digitale dei grandi istituti bancari con $SX7PEX.DE, la finanza digitale scala rapidamente.\n\nQuale piattaforma sarà più rilevante nel prossimo quinquennio?\n\nVotate e confrontatevi con noi! 👇"
     }
 ]
 
@@ -454,7 +454,7 @@ def generate_friday_performers_poll() -> Dict[str, Any]:
         stock_data = finance_fetcher.fetch_stock_data()
         
         # Filter for active portfolio holdings with valid weekly_change
-        excluded = {"MNODL.L", "NVTKL.L", "XEON.DE", "IB01.L", "ANT.24-7", "ANT"}
+        excluded = {"MNODL.L", "NVTKL.L", "XEON.DE", "IB01.L", "ANT.24-7", "ANT", "MELI"}
         candidates = []
         for ticker, data in stock_data.items():
             if ticker in excluded:

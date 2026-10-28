@@ -276,7 +276,7 @@ def check_and_publish_earnings(dry_run: bool = False, lookback_days: int = 3) ->
     # Non-equity holdings or ETFs without quarterly EPS/Revenue reports
     EXCLUDED_EARNINGS_TICKERS = {
         "PPFB.DE", "IB01.L", "SX7PEX.DE", "IEUR", "IQQL.DE", "TRX", "SPCX.RTH",
-        "WCLD.L", "INDO.PA", "WDEF.L", "XEON.DE", "MAU.PA"
+        "WCLD.L", "INDO.PA", "WDEF.L", "XEON.DE", "MAU.PA", "MELI"
     }
 
     from portfolio_manager import PORTFOLIO_ASSETS_METADATA

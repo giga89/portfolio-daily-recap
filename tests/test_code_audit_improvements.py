@@ -213,7 +213,7 @@ class TestPortfolioMetadataAndCrossLinkIntegrity(unittest.TestCase):
     """Ensure PORTFOLIO_ASSETS_METADATA and cross_link_scheduler have zero purged or non-portfolio tickers."""
 
     def test_no_purged_assets_in_portfolio_metadata(self):
-        purged = {"XEON.DE", "SPCX.RTH", "MAU.PA", "VWCE.L"}
+        purged = {"XEON.DE", "SPCX.RTH", "MAU.PA", "VWCE.L", "MELI"}
         for ticker, meta in portfolio_manager.PORTFOLIO_ASSETS_METADATA.items():
             self.assertNotIn(ticker, purged, f"Purged asset {ticker} still in PORTFOLIO_ASSETS_METADATA")
             for rel in meta.get("related_tickers", []):

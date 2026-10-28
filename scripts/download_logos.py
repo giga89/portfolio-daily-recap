@@ -57,7 +57,6 @@ DOMAIN_MAP = {
     "ABBV":       "abbvie.com",
     "ABT.US":     "abbott.com",
     "HUM":        "humana.com",
-    "MELI":       "mercadolibre.com",
     "CCJ":        "cameco.com",
     "NET":        "cloudflare.com",
     "PYPL":       "paypal.com",

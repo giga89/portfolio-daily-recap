@@ -48,7 +48,6 @@ TICKER_NAME_MAP = {
     'PPFB': 'Physical Gold ETC',
     'IB01': 'Treasury Bond 0-1yr ETF',
     'ETOR': 'eToro Group',
-    'MELI': 'MercadoLibre',
     'MRVL': 'Marvell Technology',
     'HUM': 'Humana',
     'WMT': 'Walmart',

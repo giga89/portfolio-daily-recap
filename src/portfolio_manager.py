@@ -55,7 +55,6 @@ DEFAULT_TICKERS = {
     'ULVR.L': ('ULVR.L', 'Unilever PLC'),
     
     # E-Commerce, Fintech, Pre-IPO, Retail & Crypto
-    'MELI': ('MELI', 'MercadoLibre Inc'),
     'ETOR': ('ETOR', 'eToro Group Ltd'),
     '2318.HK': ('2318.HK', 'Ping An Insurance Group'),
     'WMT': ('WMT', 'Walmart Inc.'),
@@ -113,7 +112,6 @@ DEFAULT_EMOJIS = {
     'ULVR.L': '🧼',    # Unilever
     
     # E-Commerce, Fintech, Pre-IPO, Retail & Crypto
-    'MELI': '🛒',
     'WMT': '🛒',
     'ETOR': '🏛️',
     '2318.HK': '🏦',
@@ -195,8 +193,8 @@ def load_config():
             # Add new positions: IB01.L
             if "IB01.L" not in config["tickers"]:
                 config["tickers"]["IB01.L"] = ["IB01.L", "iShares Treasury Bond 0-1yr UCITS ETF"]
-            # Ensure purged positions are removed: XEON.DE, MAU.PA, SPCX.RTH, SPCX, ANT.24-7 and legacy unheld assets
-            for purged in ["XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT"]:
+            # Ensure purged positions are removed: XEON.DE, MAU.PA, SPCX.RTH, SPCX, ANT.24-7, MELI and legacy unheld assets
+            for purged in ["XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI"]:
                 if purged in config.get("tickers", {}):
                     del config["tickers"][purged]
                     needs_save = True
@@ -391,7 +389,7 @@ def sync_portfolio(bullaware_weights):
     if not bullaware_weights:
         return {}
 
-    PURGED_ASSETS = {"XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT"}
+    PURGED_ASSETS = {"XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI"}
     bullaware_weights = {k: v for k, v in bullaware_weights.items() if k not in PURGED_ASSETS}
 
     current_config = load_config()
@@ -470,7 +468,7 @@ MULTI_TAG_MAP = {
 RELATED_TICKERS_MAP = {
     'NVDA': ['$AMD', '$AVGO', '$TSM'],
     'MSFT': ['$GOOG', '$AMZN', '$AAPL'],
-    'AMZN': ['$MELI', '$WMT', '$MSFT'],
+    'AMZN': ['$WMT', '$MSFT', '$GOOG'],
     'WMT': ['$AMZN', '$COST', '$TGT'],
     'GOOG': ['$MSFT', '$AMZN', '$META'],
     'LLY': ['$NOVO-B.CO', '$NVO', '$PFE'],
@@ -494,7 +492,6 @@ RELATED_TICKERS_MAP = {
     'RACE': ['$VOW3.DE', '$MBG.DE', '$P911.DE'],
     'VOW3.DE': ['$RACE', '$MBG.DE', '$BMW.DE'],
     'ULVR.L': ['$PG', '$NESN.SW', '$KO'],
-    'MELI': ['$AMZN', '$BABA', '$SE'],
     '1211.HK': ['$TSLA', '$NIO', '$XPEV'],
     '1919.HK': ['$ZIM', '$MATX', '$1138.HK'],
     '2318.HK': ['$2628.HK', '$3968.HK', '$939.HK'],
@@ -572,7 +569,7 @@ PORTFOLIO_ASSETS_METADATA = {
             "Concorrenza agguerrita di retailer cinesi low-cost (Temu, Shein)",
             "Pressione regolatoria FTC e antitrust sull'ecosistema marketplace"
         ],
-        "related_tickers": ["$MELI", "$WMT", "$MSFT"], "primary_tags": ["$AMZN"]
+        "related_tickers": ["$WMT", "$MSFT", "$GOOG"], "primary_tags": ["$AMZN"]
     },
     "GOOG": {
         "ticker": "GOOG", "yahoo_ticker": "GOOGL", "name": "Alphabet Inc", "emoji": "🔍",
@@ -959,25 +956,6 @@ PORTFOLIO_ASSETS_METADATA = {
             "Sensibilità ai dazi commerciali sulle merci importate"
         ],
         "related_tickers": ["$AMZN", "$COST", "$TGT"], "primary_tags": ["$WMT"]
-    },
-    "MELI": {
-        "ticker": "MELI", "yahoo_ticker": "MELI", "name": "MercadoLibre Inc", "emoji": "🛒",
-        "asset_class": "Stock", "sector": "E-Commerce & Fintech America Latina", "geo": "Emerging", "tier": "High Growth",
-        "is_dividend_paying": False, "dividend_policy": "Nessun dividendo distribuito; reinvestimento al 100% dell'enorme flusso di cassa per espandere il monopolio in America Latina", "annual_yield_pct": 0.0, "frequency": "Nessuna",
-        "domain": "mercadolibre.com", "color": (255, 220, 0),
-        "desc": "The 'Amazon + PayPal' of Latin America, delivering exponential growth in digital commerce, credit, and logistics.",
-        "thesis": "L'indiscusso 'Amazon + PayPal' dell'America Latina (Brasile, Messico, Argentina): barriera all'entrata insormontabile grazie alla rete logistica proprietaria Mercado Envíos e all'ecosistema finanziario Mercado Pago.",
-        "upside_catalysts": [
-            "Crescita a doppia cifra dei volumi venduti (GMV) e leadership consolidata nel commercio elettronico",
-            "Espansione esponenziale dei servizi bancari digitali, carte di credito e prestiti con Mercado Pago",
-            "Monetizzazione rapida del business pubblicitario retail media (Mercado Ads)"
-        ],
-        "downside_risks": [
-            "Volatilità macroeconomica e svalutazioni valutarie nei paesi latinoamericani (Real, Peso)",
-            "Incremento del tasso di insolvenza nel portafoglio prestiti consumer credit",
-            "Concorrenza di marketplace asiatici su determinate categorie di prodotto"
-        ],
-        "related_tickers": ["$AMZN", "$BABA", "$SE"], "primary_tags": ["$MELI"]
     },
     "RACE": {
         "ticker": "RACE", "yahoo_ticker": "RACE", "name": "Ferrari N.V.", "emoji": "🏎️",

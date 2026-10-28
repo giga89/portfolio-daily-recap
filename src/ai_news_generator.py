@@ -70,7 +70,7 @@ def _throttle_request(delay: float = 2.0):
 # Valid eToro symbols for tagging (only use these in posts)
 # These are confirmed to exist on eToro platform
 # Exclude Russian stocks (sanctioned/untradeable) and purged/closed assets
-_EXCLUDED_FROM_TAGS = {'MNODL.L', 'NVTKL.L', 'ANT.24-7', 'ANT'}
+_EXCLUDED_FROM_TAGS = {'MNODL.L', 'NVTKL.L', 'ANT.24-7', 'ANT', 'MELI'}
 ETORO_VALID_SYMBOLS = [t for t in PORTFOLIO_TICKERS.keys() if t not in _EXCLUDED_FROM_TAGS]
 
 
@@ -293,7 +293,7 @@ def _get_top_gainers_with_news(stock_data: dict = None, count: int = 4, max_chec
     candidates = []
     
     if stock_data:
-        excluded_gainers = _EXCLUDED_FROM_TAGS | {'IB01.L', 'XEON.DE', 'SPCX.RTH', 'MAU.PA'}
+        excluded_gainers = _EXCLUDED_FROM_TAGS | {'IB01.L', 'XEON.DE', 'SPCX.RTH', 'MAU.PA', 'MELI'}
         positive_candidates = []
         other_candidates = []
         for sym, data in stock_data.items():
@@ -1339,7 +1339,7 @@ def generate_monthly_ai_recap(
     port_monthly_str = f"{portfolio_monthly:+.2f}%" if portfolio_monthly is not None else "N/A"
 
     # Get all portfolio tickers for context with descriptions (exclude Russian stocks and closed/purged assets)
-    excluded_tickers = {'MNODL.L', 'NVTKL.L', 'ANT.24-7', 'ANT'}
+    excluded_tickers = {'MNODL.L', 'NVTKL.L', 'ANT.24-7', 'ANT', 'MELI'}
     portfolio_items = []
     for t, (_, descr) in PORTFOLIO_TICKERS.items():
         if t not in excluded_tickers:
@@ -1601,7 +1601,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
     ]
     US_TICKERS = [
         'NVDA', 'MSFT', 'AMZN', 'GOOG', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY',
-        'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'MELI', 'IB01.L'
+        'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'IB01.L'
     ]
     
     session_upper = market_session.upper()
@@ -1703,7 +1703,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             tag_instruction = f"- Usa esattamente {max_tags} tag con $ inclusi {selected_tags_str} e un indice $SPX500 o $NSDQ100."
 
         # Get all portfolio tickers for context with descriptions (exclude Russian stocks and closed/purged assets)
-        excluded_tickers = {'MNODL.L', 'NVTKL.L', 'ANT.24-7', 'ANT'}
+        excluded_tickers = {'MNODL.L', 'NVTKL.L', 'ANT.24-7', 'ANT', 'MELI'}
         portfolio_items = []
         for t, (_, descr) in PORTFOLIO_TICKERS.items():
             if t not in excluded_tickers:
@@ -1912,7 +1912,7 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
             "(difesa e aerospazio UE, ad accumulazione, ZERO dividendi/cedole). È SEVERAMENTE VIETATO chiamarlo "
             "'WisdomTree Europe Equity Income', 'Windows Europe' o attribuirgli dividendi! "
             "$IQQL.DE è iShares Listed Private Equity UCITS ETF (Private Equity, es. KKR, Blackstone), NON World Quality. "
-            "Nessuna menzione di XEON, MAU, SPCX o ANT.24-7 / Anthropic (dismessi dal portafoglio)."
+            "Nessuna menzione di XEON, MAU, SPCX, MELI o ANT.24-7 / Anthropic (dismessi dal portafoglio)."
         )
 
         anti_platitude_rules = (
@@ -2935,7 +2935,7 @@ def generate_stock_focus_post(ticker: str = None) -> tuple[str, str]:
     ticker_map = {t.upper(): t for t in tickers.keys()}
 
     # Exclude money market ETFs, physical metal ETFs, frozen Russian assets, and purged assets from stock focus candidates
-    excluded_focus = {'IB01.L', 'XEON.DE', 'PPFB.DE', 'MNODL.L', 'NVTKL.L', 'MAU.PA', 'SPCX.RTH', 'SPCX', 'ANT.24-7', 'ANT'}
+    excluded_focus = {'IB01.L', 'XEON.DE', 'PPFB.DE', 'MNODL.L', 'NVTKL.L', 'MAU.PA', 'SPCX.RTH', 'SPCX', 'ANT.24-7', 'ANT', 'MELI'}
     stock_candidates = sorted([t for t in tickers.keys() if t not in excluded_focus])
     if not stock_candidates:
         stock_candidates = sorted(list(tickers.keys()))

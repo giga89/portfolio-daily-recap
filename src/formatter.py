@@ -9,7 +9,7 @@ import random
 import ai_news_generator
 
 # Russian stocks & closed positions to exclude from all rankings and AI news
-EXCLUDED_TICKERS = {'MNODL.L', 'NVTKL.L', 'ANT.24-7', 'ANT'}
+EXCLUDED_TICKERS = {'MNODL.L', 'NVTKL.L', 'ANT.24-7', 'ANT', 'MELI'}
 
 # Import API usage tracker
 try:
@@ -196,7 +196,7 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     
     # Filter by region if morning open
     EUROPEAN_TICKERS = ['ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE', 'NOVO-B.CO', 'AZN.L', 'GLEN.L', 'TRIG.L', 'ULVR.L', 'WCLD.L', 'SX7PEX.DE', 'IEUR', 'WDEF.L', 'IQQL.DE', 'PPFB.DE', 'INDO.PA', 'VOF.L']
-    US_TICKERS = ['NVDA', 'MSFT', 'AMZN', 'GOOG', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY', 'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'MELI', 'IB01.L']
+    US_TICKERS = ['NVDA', 'MSFT', 'AMZN', 'GOOG', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY', 'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'IB01.L']
     
     if "EUROPEAN" in session_upper and "OPEN" in session_upper:
         available_candidates = [c for c in available_candidates if c.upper() in [t.upper() for t in EUROPEAN_TICKERS]]

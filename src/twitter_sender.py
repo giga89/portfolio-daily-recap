@@ -250,11 +250,11 @@ COPY_TRADING_THEMES = [
     },
     {
         "id": "global_fintech",
-        "name": "Global Fintech & E-Commerce",
-        "pillars": "Global Fintech & E-Commerce",
-        "tickers_line": "$MELI TRX ETOR",
-        "hashtags": "#Fintech #Ecommerce #Markets",
-        "audience": "Fintech & emerging markets investors",
+        "name": "Global Fintech & Digital Assets",
+        "pillars": "Global Fintech & Digital Assets",
+        "tickers_line": "$TRX ETOR SX7PEX.DE",
+        "hashtags": "#Fintech #DigitalAssets #Markets",
+        "audience": "Fintech & global markets investors",
     },
     {
         "id": "popular_investor",

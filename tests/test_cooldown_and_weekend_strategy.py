@@ -140,7 +140,7 @@ class TestCooldownAndWeekendStrategy(unittest.TestCase):
         with patch("analytics_tracker.etoro_client.is_configured", return_value=False), \
              patch("finance_fetcher.fetch_portfolio_weights_from_bullaware", return_value={}):
             weights = analytics_tracker.load_portfolio_weights()
-        self.assertTrue(len(weights) >= 40)
+        self.assertTrue(len(weights) >= 38)
         total_w = sum(weights.values())
         self.assertAlmostEqual(total_w, 100.0, delta=0.1, msg="Portfolio weights must sum to 100%")
 

@@ -287,7 +287,7 @@ def fetch_portfolio_weights_from_bullaware():
                     PURGED_ASSETS = {
                         "XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX",
                         "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD",
-                        "ANT.24-7", "ANT"
+                        "ANT.24-7", "ANT", "MELI"
                     }
                     weights = {k: v for k, v in normalized_weights.items() if k not in PURGED_ASSETS}
 

@@ -29,7 +29,6 @@ EMOJIS = {
     "CCJ":       "⚡",
     "RACE":      "🏎️",
     "AVGO":      "💻",
-    "MELI":      "🛒",
     "ENEL.MI":   "🔋",
     "IB01.L":    "💵",
 }

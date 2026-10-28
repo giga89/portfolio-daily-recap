@@ -2517,7 +2517,6 @@
       "hour_local": 15,
       "title": "🌅 APERTURA WALL STREET 🇺🇸  🌱 🌱 🌱 LIEVE CRESCITA 🌱: +0.37% 🌱 🌱 🌱 🏔️ Distanza dal...",
       "tickers": [
-        "MELI",
         "INDO.PA",
         "MSFT",
         "LLY",
@@ -4909,7 +4908,6 @@
         "NVDA",
         "INDO.PA",
         "NOVO-B.CO",
-        "MELI",
         "MAU.PA"
       ],
       "image_type": "winners_losers_card",
@@ -5025,8 +5023,7 @@
         "HUM",
         "INDO.PA",
         "MAU.PA",
-        "ENI.MI",
-        "MELI"
+        "ENI.MI"
       ],
       "image_type": "winners_losers_card",
       "likes": 1,
@@ -5271,7 +5268,6 @@
       "title": "🏆 CLASSIFICA SETTIMANALE DEI TITOLI 📊  ⚖️ ⚖️ ⚖️ STABILE / LIEVE CALO ⚖️: -0.36%...",
       "tickers": [
         "AMZN",
-        "MELI",
         "GOOG",
         "MSFT",
         "RACE"
@@ -5385,7 +5381,6 @@
         "AMZN",
         "VOW3.DE",
         "MAU.PA",
-        "MELI",
         "GOOG"
       ],
       "image_type": "winners_losers_card",

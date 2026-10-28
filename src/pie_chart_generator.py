@@ -79,7 +79,6 @@ SECTOR_MAP: dict[str, str] = {
     '1919.HK': 'Logistics',
     # EM / Asia Tech
     '9618.HK': 'Asia Tech',
-    'MELI':    'Asia Tech',
     # Crypto
     'TRX':     'Crypto',
     'BTC':     'Crypto',
@@ -101,7 +100,7 @@ GEO_MAP: dict[str, str] = {
     'NVDA': 'USA', 'AMD': 'USA', 'AVGO': 'USA', 'MSFT': 'USA', 'GOOG': 'USA',
     'AMZN': 'USA', 'META': 'USA', 'AAPL': 'USA', 'PLTR': 'USA', 'NET': 'USA',
     'LLY': 'USA', 'ABT': 'USA', 'ABT.US': 'USA', 'ABBV': 'USA', 'HUM': 'USA',
-    'CCJ': 'USA', 'PYPL': 'USA', 'ETOR': 'USA', 'IEMG': 'USA', 'MELI': 'USA', 'WCLD.L': 'USA',
+    'CCJ': 'USA', 'PYPL': 'USA', 'ETOR': 'USA', 'IEMG': 'USA', 'WCLD.L': 'USA',
     # Europe
     'AZN.L': 'Europe', 'ENEL.MI': 'Europe', 'ENI.MI': 'Europe',
     'GLEN.L': 'Europe', 'VOW3.DE': 'Europe', 'RACE': 'Europe',
