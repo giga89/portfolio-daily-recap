@@ -1,0 +1,31 @@
+{
+  "last_published_episode": 4,
+  "last_published_date": "2026-10-28",
+  "total_published_count": 4,
+  "history": [
+    {
+      "episode": 1,
+      "title": "L'EROSIONE SILENZIOSA DELLA LIQUIDITÀ",
+      "date": "2026-10-07T19:01:49.802027",
+      "post_id": "8ce6ed30-c281-11f1-8080-80006238222b"
+    },
+    {
+      "episode": 2,
+      "title": "PETER LYNCH E LA SPESA AL SUPERMERCATO",
+      "date": "2026-10-14T17:26:25.207244",
+      "post_id": "616606a0-c7f4-11f1-8080-800028763ee6"
+    },
+    {
+      "episode": 3,
+      "title": "LA SCOMMESSA DA 1 MILIONE DI BUFFETT",
+      "date": "2026-10-21T17:30:16.947486",
+      "post_id": "149b3620-cd75-11f1-8080-80004cbbd5bf"
+    },
+    {
+      "episode": 4,
+      "title": "IL PARADOSSO DEI MASSIMI STORICI",
+      "date": "2026-10-28T18:25:48.749896",
+      "post_id": "ff43c8e0-d2fc-11f1-8080-80015b54c645"
+    }
+  ]
+}
