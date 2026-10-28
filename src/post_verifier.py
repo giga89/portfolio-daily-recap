@@ -131,6 +131,9 @@ GLOBAL_FORBIDDEN_HALLUCINATIONS = [
     (r'\bwisdomtree\s+europe\s+equity\s+income\b', "WisdomTree Europe Equity Income (non presente in portafoglio; WDEF.L è Europe Defence)"),
     (r'\beurope\s+equity\s+income\b', "Europe Equity Income (non presente in portafoglio; WDEF.L è Europe Defence)"),
     (r'\bwindows\s+europe\s+quity\s+income\b', "Windows Europe Quity Income (allucinazione evidente)"),
+    (r'\bEPS[:\s]+\$1\.85\s+vs\s+\$1\.75\b', "Allucinazione dati finanziari mock: EPS $1.85 vs $1.75"),
+    (r'\bRicavi[:\s]+\$(?:331|445)\s*,\s*[89]B\b', "Allucinazione ricavi trimestrali (valore TTM annuale scambiato per trimestrale)"),
+    (r'\bRicavi[:\s]+\$986\.0B\b', "Allucinazione valuta/ricavi: 986B RMB scambiati per USD"),
 ]
 
 # Patterns that indicate severe temporal paradoxes or outdated institutional figures in recap posts

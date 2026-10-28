@@ -91,15 +91,15 @@ def generate_earnings_card(
     sector_name = info.get("sector", "Settore")
     comp_name = company_name or ticker
 
-    # Sensible defaults for missing values
-    eps_val = eps_actual or "$1.85"
-    eps_sub = f"vs stima {eps_est}" if eps_est else "Supera il consensus"
-    eps_beat_str = eps_diff_pct or ("+3.8% Beat" if eps_beat else "-1.2% Miss")
+    # Real metrics formatting without hallucinated mock defaults
+    eps_val = eps_actual or "N/D"
+    eps_sub = f"vs stima {eps_est}" if eps_est else "Consensus analisti"
+    eps_beat_str = eps_diff_pct or ("Beat" if eps_beat else "Miss")
 
-    rev_val = rev_actual or "$15.4B"
-    rev_sub = f"Crescita {rev_growth_yoy}" if rev_growth_yoy else "+24% YoY"
+    rev_val = rev_actual or "In rilascio"
+    rev_sub = f"YoY {rev_growth_yoy}" if rev_growth_yoy else "Dato in consolidamento"
 
-    guidance_val = guidance_text or "Solida / In linea con le attese societarie"
+    guidance_val = guidance_text or "Commenti e guidance attesi in call"
     thesis_val = thesis_impact or info.get("thesis", "Rafforza la leadership di mercato e la marginalità.")
 
     # 1. Base Canvas

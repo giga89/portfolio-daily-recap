@@ -43,6 +43,7 @@ import bluesky_sender
 import ai_news_generator
 import earnings_card
 import dividend_card
+import earnings_timing
 from stock_focus_card import TICKER_THEMES
 
 try:
@@ -260,17 +261,16 @@ def publish_dividend_for_ticker(
 def check_and_publish_earnings(dry_run: bool = False, lookback_days: int = 3) -> List[Dict[str, Any]]:
     """
     Scan all portfolio holdings for corporate earnings released in the last few days (within lookback_days).
-    If not yet published, generate card and post.
+    Enforces strict release time guards (hours/BMO/AMC) and requires verified Reported EPS before publishing.
     """
     print("\n" + "=" * 65)
-    print("📊 CHECKING FOR RECENT CORPORATE EARNINGS")
+    print("📊 CHECKING FOR RECENT CORPORATE EARNINGS (STRICT TIMING GUARD)")
     print("=" * 65)
 
     if not YFINANCE_AVAILABLE:
         print("⚠️ yfinance not installed, cannot auto-scan earnings.")
         return []
 
-    today = datetime.now(timezone.utc).date()
     results = []
 
     # Non-equity holdings or ETFs without quarterly EPS/Revenue reports
@@ -292,40 +292,43 @@ def check_and_publish_earnings(dry_run: bool = False, lookback_days: int = 3) ->
 
         yf_sym = meta.get("yahoo_ticker", ticker.replace(".US", ""))
         try:
-            t = yf.Ticker(yf_sym)
-            cal = t.calendar
-            if not cal or "Earnings Date" not in cal:
+            is_released, data, reason = earnings_timing.verify_earnings_release_status(
+                ticker=ticker,
+                yf_sym=yf_sym,
+                lookback_days=lookback_days,
+            )
+            if not is_released:
+                if "Market release time not reached" in reason or "still NaN" in reason:
+                    print(f"⏳ ${ticker}: {reason}")
                 continue
 
-            e_dates = cal.get("Earnings Date", [])
-            if not e_dates:
+            quarter_str = data["quarter"]
+            event_year = data["scheduled_dt"].year
+
+            if gist_storage.is_earnings_posted(ticker, quarter_str, event_year):
+                print(f"   ℹ️ Earnings post for ${ticker} ({quarter_str}) already published. Skipping.")
                 continue
 
-            target_date = e_dates[0] if isinstance(e_dates, list) else e_dates
-            if isinstance(target_date, datetime):
-                target_date = target_date.date()
+            print(f"🎯 Verified Corporate Earnings released for ${ticker} ({quarter_str}): EPS {data['eps_actual']} (vs {data['eps_est'] or 'N/D'}), Rev: {data['rev_actual'] or 'In corso'}")
 
-            # Check if earnings occurred within lookback window
-            days_ago = (today - target_date).days
-            if 0 <= days_ago <= lookback_days:
-                quarter_str = f"Q{((target_date.month - 1) // 3) + 1} {target_date.year}"
-                print(f"🎯 Detected Earnings for ${ticker} on {target_date} ({quarter_str}, {days_ago} days ago)")
-
-                if gist_storage.is_earnings_posted(ticker, quarter_str, target_date.year):
-                    print(f"   ℹ️ Earnings post for ${ticker} ({quarter_str}) already published. Skipping.")
-                    continue
-
-                res = publish_earnings_for_ticker(
-                    ticker=ticker,
-                    quarter=quarter_str,
-                    dry_run=dry_run,
-                )
-                results.append(res)
-        except Exception:
+            res = publish_earnings_for_ticker(
+                ticker=ticker,
+                quarter=quarter_str,
+                eps_actual=data["eps_actual"],
+                eps_est=data["eps_est"],
+                eps_beat=data["eps_beat"],
+                eps_diff_pct=data.get("eps_diff_pct"),
+                rev_actual=data.get("rev_actual"),
+                rev_growth=data.get("rev_growth"),
+                dry_run=dry_run,
+            )
+            results.append(res)
+        except Exception as e:
+            print(f"⚠️ Error checking earnings for ${ticker}: {e}")
             continue
 
     if not results:
-        print(f"ℹ️ No un-posted earnings reports found in the last {lookback_days} days.")
+        print(f"ℹ️ No un-posted verified earnings reports found in the last {lookback_days} days.")
 
     return results
 
@@ -334,10 +337,11 @@ def check_and_publish_earnings(dry_run: bool = False, lookback_days: int = 3) ->
 
 def publish_earnings_for_ticker(
     ticker: str,
-    quarter: str = "Q3 2026",
+    quarter: Optional[str] = None,
     eps_actual: Optional[str] = None,
     eps_est: Optional[str] = None,
-    eps_beat: bool = True,
+    eps_beat: Optional[bool] = None,
+    eps_diff_pct: Optional[str] = None,
     rev_actual: Optional[str] = None,
     rev_growth: Optional[str] = None,
     guidance_text: Optional[str] = None,
@@ -352,34 +356,41 @@ def publish_earnings_for_ticker(
     info = TICKER_THEMES.get(clean_sym, {})
     comp_name = info.get("company_name", clean_sym)
     weight_pct = _get_current_weight(clean_sym)
+    meta = PORTFOLIO_ASSETS_METADATA.get(clean_sym, {})
+    yf_sym = meta.get("yahoo_ticker", clean_sym.replace(".US", ""))
 
-    # Fetch live fundamentals if missing
-    if YFINANCE_AVAILABLE:
-        try:
-            t = yf.Ticker(clean_sym)
-            y_info = t.info
-            if not comp_name or comp_name == clean_sym:
-                comp_name = y_info.get("shortName") or y_info.get("longName") or clean_sym
+    # If eps_actual is missing, attempt to resolve verified data from earnings_timing
+    if not eps_actual and YFINANCE_AVAILABLE:
+        is_rel, data, reason = earnings_timing.verify_earnings_release_status(
+            ticker=clean_sym,
+            yf_sym=yf_sym,
+            lookback_days=7,
+        )
+        if is_rel and data:
+            eps_actual = data["eps_actual"]
+            eps_est = eps_est or data["eps_est"]
+            eps_beat = eps_beat if eps_beat is not None else data["eps_beat"]
+            eps_diff_pct = eps_diff_pct or data.get("eps_diff_pct")
+            rev_actual = rev_actual or data.get("rev_actual")
+            rev_growth = rev_growth or data.get("rev_growth")
+            quarter = quarter or data.get("quarter")
+        else:
+            print(f"🛑 REJECTED: Reported EPS is not yet published or verified for ${clean_sym} ({reason}). Aborting publish to prevent fabricated figures.")
+            return {"ticker": clean_sym, "success": False, "error": f"Reported EPS not released/verified for ${clean_sym}: {reason}"}
 
-            cal = t.calendar
-            if cal and not eps_est and "Earnings Average" in cal:
-                avg_eps = cal.get("Earnings Average")
-                if avg_eps:
-                    eps_est = f"${avg_eps:.2f}"
+    # CRITICAL GUARD: eps_actual must be present; NEVER use placeholder mock values ($1.85, $1.75)
+    if not eps_actual:
+        print(f"🛑 REJECTED: Missing verified actual EPS for ${clean_sym}. Refusing to publish unverified earnings.")
+        return {"ticker": clean_sym, "success": False, "error": f"Missing verified actual EPS for ${clean_sym}"}
 
-            if not rev_actual and "totalRevenue" in y_info:
-                tot_rev = y_info.get("totalRevenue")
-                if tot_rev:
-                    rev_actual = f"${tot_rev / 1e9:.1f}B"
-        except Exception as e:
-            print(f"   ⚠️ Could not fetch yfinance data for {clean_sym}: {e}")
+    if not quarter:
+        quarter = earnings_timing.get_reporting_quarter(clean_sym, datetime.now(timezone.utc).date())
 
-    # Sensible defaults if not available
-    eps_actual = eps_actual or "$1.85"
-    eps_est = eps_est or "$1.75"
-    rev_actual = rev_actual or "$15.8B"
-    rev_growth = rev_growth or "+24% YoY"
-    guidance_text = guidance_text or "Outlook confermato con solidità dei flussi operativi e marginalità sostenuta."
+    if eps_beat is None:
+        eps_beat = True
+
+    # Guidance fallback: neutral and professional, never fake claims
+    guidance_text = guidance_text or "Commenti del management e outlook strategico approfonditi durante la earnings call."
 
     # Generate visual card
     out_card = f"output/earnings_card_{clean_sym.lower()}.png"
@@ -390,6 +401,7 @@ def publish_earnings_for_ticker(
         eps_actual=eps_actual,
         eps_est=eps_est,
         eps_beat=eps_beat,
+        eps_diff_pct=eps_diff_pct,
         rev_actual=rev_actual,
         rev_growth_yoy=rev_growth,
         guidance_text=guidance_text,

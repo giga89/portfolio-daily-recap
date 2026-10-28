@@ -137,6 +137,126 @@ class TestEventMonitor(unittest.TestCase):
         self.assertFalse(res_div["success"])
         self.assertIn("not in portfolio", res_div["error"])
 
+    def test_reporting_quarter_calculation(self):
+        """Verify corporate reporting quarter logic calculates preceding completed quarter."""
+        import datetime
+        import earnings_timing
+
+        oct_28 = datetime.date(2026, 10, 28)
+        nov_17 = datetime.date(2026, 11, 17)
+        nov_02 = datetime.date(2026, 11, 2)
+
+        # MSFT FY ends in June -> Oct is Q1 FY(year+1)
+        self.assertEqual(earnings_timing.get_reporting_quarter("MSFT", oct_28), "Q1 FY2027")
+        # GOOG calendar year -> Oct is Q3
+        self.assertEqual(earnings_timing.get_reporting_quarter("GOOG", oct_28), "Q3 2026")
+        # NVDA FY ends in Jan -> Nov is Q3 FY(year+1)
+        self.assertEqual(earnings_timing.get_reporting_quarter("NVDA", nov_17), "Q3 FY2027")
+        # AAPL FY ends in Sept -> Nov is Q4 FY(year)
+        self.assertEqual(earnings_timing.get_reporting_quarter("AAPL", nov_02), "Q4 FY2026")
+        # Standard European calendar
+        self.assertEqual(earnings_timing.get_reporting_quarter("BESI.NV", oct_28), "Q3 2026")
+
+    def test_premature_earnings_release_blocked_before_release_time(self):
+        """Verify that scheduled earnings cannot be published prior to market close / release hour."""
+        import datetime
+        import pandas as pd
+        from unittest.mock import MagicMock, patch
+        import earnings_timing
+
+        mock_ticker = MagicMock()
+        # Scheduled at 20:00 UTC (AMC)
+        sched_dt = datetime.datetime(2026, 10, 28, 20, 0, tzinfo=datetime.timezone.utc)
+        df = pd.DataFrame(
+            [{"EPS Estimate": 4.72, "Reported EPS": float("nan"), "Surprise(%)": float("nan")}],
+            index=[sched_dt],
+        )
+        mock_ticker.earnings_dates = df
+
+        with patch("earnings_timing.yf.Ticker", return_value=mock_ticker):
+            # Simulated check at 15:00 UTC (hours before release)
+            check_time = datetime.datetime(2026, 10, 28, 15, 0, tzinfo=datetime.timezone.utc)
+            is_rel, data, reason = earnings_timing.verify_earnings_release_status(
+                "MSFT", "MSFT", lookback_days=1, check_time=check_time
+            )
+            self.assertFalse(is_rel)
+            self.assertIn("Market release time not reached yet", reason)
+
+    def test_nan_reported_eps_blocks_earnings_publication(self):
+        """Verify that even after scheduled hour, if Reported EPS is still NaN, publication is blocked."""
+        import datetime
+        import pandas as pd
+        from unittest.mock import MagicMock, patch
+        import earnings_timing
+
+        mock_ticker = MagicMock()
+        sched_dt = datetime.datetime(2026, 10, 28, 20, 0, tzinfo=datetime.timezone.utc)
+        df = pd.DataFrame(
+            [{"EPS Estimate": 4.72, "Reported EPS": float("nan"), "Surprise(%)": float("nan")}],
+            index=[sched_dt],
+        )
+        mock_ticker.earnings_dates = df
+
+        with patch("earnings_timing.yf.Ticker", return_value=mock_ticker):
+            # Simulated check at 21:00 UTC (after release hour, but data provider still NaN)
+            check_time = datetime.datetime(2026, 10, 28, 21, 0, tzinfo=datetime.timezone.utc)
+            is_rel, data, reason = earnings_timing.verify_earnings_release_status(
+                "MSFT", "MSFT", lookback_days=1, check_time=check_time
+            )
+            self.assertFalse(is_rel)
+            self.assertIn("Reported EPS is still NaN/pending", reason)
+
+    def test_verified_reported_eps_allows_earnings_publication(self):
+        """Verify that when release hour has passed and Reported EPS is present, verification succeeds."""
+        import datetime
+        import pandas as pd
+        from unittest.mock import MagicMock, patch
+        import earnings_timing
+
+        mock_ticker = MagicMock()
+        sched_dt = datetime.datetime(2026, 10, 28, 20, 0, tzinfo=datetime.timezone.utc)
+        df = pd.DataFrame(
+            [{"EPS Estimate": 4.72, "Reported EPS": 4.88, "Surprise(%)": 3.39}],
+            index=[sched_dt],
+        )
+        mock_ticker.earnings_dates = df
+        mock_ticker.info = {"currency": "USD"}
+        mock_ticker.quarterly_income_stmt = pd.DataFrame()
+
+        with patch("earnings_timing.yf.Ticker", return_value=mock_ticker):
+            check_time = datetime.datetime(2026, 10, 28, 21, 0, tzinfo=datetime.timezone.utc)
+            is_rel, data, reason = earnings_timing.verify_earnings_release_status(
+                "MSFT", "MSFT", lookback_days=1, check_time=check_time
+            )
+            self.assertTrue(is_rel)
+            self.assertEqual(data["eps_actual"], "$4.88")
+            self.assertEqual(data["eps_est"], "$4.72")
+            self.assertTrue(data["eps_beat"])
+            self.assertEqual(data["quarter"], "Q1 FY2027")
+
+    def test_publish_earnings_for_ticker_rejects_missing_eps_actual(self):
+        """Calling publish_earnings_for_ticker without eps_actual on an unreleased ticker must reject."""
+        from unittest.mock import patch
+
+        with patch("earnings_timing.verify_earnings_release_status", return_value=(False, None, "Market release time not reached")):
+            res = event_monitor.publish_earnings_for_ticker("MSFT", dry_run=True)
+            self.assertFalse(res["success"])
+            self.assertIn("Reported EPS not released/verified", res["error"])
+
+    def test_post_verifier_blocks_mock_earnings_figures(self):
+        """Ensure post_verifier strictly blocks hallucinated mock figures ($1.85 vs $1.75, $986.0B)."""
+        import post_verifier
+
+        mock_post = (
+            "Trimestrale Q4 2026 per $MSFT.\n"
+            "- EPS: $1.85 vs $1.75 stimati (beat netto)\n"
+            "- Ricavi: $331,8B con crescita del +24% YoY"
+        )
+        is_clean, issues, _ = post_verifier.verify_post_deterministic(mock_post)
+        self.assertFalse(is_clean)
+        self.assertTrue(any("Allucinazione dati finanziari mock" in i for i in issues))
+        self.assertTrue(any("Allucinazione ricavi trimestrali" in i for i in issues))
+
 
 if __name__ == "__main__":
     unittest.main()
