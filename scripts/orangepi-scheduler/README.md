@@ -11,17 +11,26 @@ Orange Pi 5 crontab (precise to the second)
       → Recap generated and sent within ~5–8 min of market event
 ```
 
-## Schedule (UTC)
+## Schedule (Italian Local Time — Europe/Rome)
 
-Each session has **two cron entries** (summer/winter) to handle the EU/US DST mismatch (~3 weeks/year). The dispatch script deduplicates automatically.
+All cron entries are scheduled directly in Italian local time (`Europe/Rome` - CET/CEST), matching real market opening and community hours. Wall Street sessions include dual slots and are guarded in `dispatch.sh` by live New York exchange time to automatically handle daylight saving transitions without manual adjustments.
 
-| Session | Trigger (UTC) | Market Time | Italian Time |
+| Session | Cron Trigger (ITA) | Real Market Time | Description |
 |---|---|---|---|
-| **EU Open** | 07:02 / 08:02 | 08:02 London | ~09:02 |
-| **US Open** | 13:32 / 14:32 | 09:32 New York | ~15:32 |
-| **US Close** | 20:02 / 21:02 | 16:02 New York | ~22:02 |
-| **Weekly (Sat)** | 08:00 / 09:00 | — | ~10:00 |
-| **Weekly (Sun)** | 20:00 / 21:00 | — | ~22:00 |
+| **EU Open** | Mon–Fri 09:02 | 09:00 Milan/Frankfurt, 08:00 London | European market open recap |
+| **Dividend Post** | Mon, Thu 09:45 | — | Dividend announcements check |
+| **Event Monitor** | Mon–Fri 10:00 | — | Corporate earnings & dividend pay days |
+| **Weekly (Sat)** | Sat 10:00 | — | Saturday weekly portfolio recap |
+| **Stock News** | Daily 11:30, 17:00, 23:30 | — | Catalyst follow-ups (3x daily) |
+| **Copy Trading** | Mon–Fri 13:30 / Sat 12:00 | — | Educational copy trading post |
+| **Community Poll** | Mon, Wed, Fri 12:30 | — | Interactive community sentiment poll |
+| **Stock Focus** | Mon–Fri 14:00 | — | Midday stock deep-dive & infographic |
+| **US Open** | Mon–Fri 14:32 / 15:32 | 09:32 New York | Wall Street opening moves (guarded by ET) |
+| **Crypto Recap** | Mon–Sat 18:00 / Sun 14:00 | — | Crypto card, fear & greed, altcoins |
+| **US Close** | Mon–Fri 21:02 / 22:02 | 16:02 New York | Daily wrap-up & benchmark charts (guarded by ET) |
+| **Monthly Recap** | Month end 21:02 / 22:02 | 16:02 New York | Full month recap (replaces US close on final day) |
+| **Weekly (Sun)** | Sun 22:00 | — | Sunday macro & week ahead preview |
+| **Dashboard Sync** | Daily 02:00 | — | Nightly metrics & track record sync |
 
 ## Setup
 
@@ -31,6 +40,7 @@ Each session has **two cron entries** (summer/winter) to handle the EU/US DST mi
 sudo mkdir -p /opt/portfolio-dispatch
 sudo chown $USER:$USER /opt/portfolio-dispatch
 cp dispatch.sh /opt/portfolio-dispatch/
+cp crontab.txt /opt/portfolio-dispatch/
 cp .env.example /opt/portfolio-dispatch/.env
 chmod +x /opt/portfolio-dispatch/dispatch.sh
 chmod 600 /opt/portfolio-dispatch/.env
@@ -50,10 +60,10 @@ GITHUB_TOKEN=ghp_your_actual_token
 GITHUB_REPO=giga89/portfolio-daily-recap
 ```
 
-### 3. Set timezone to UTC
+### 3. Set timezone to Europe/Rome
 
 ```bash
-sudo timedatectl set-timezone UTC
+sudo timedatectl set-timezone Europe/Rome
 ```
 
 ### 4. Install the crontab

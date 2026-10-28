@@ -7,18 +7,26 @@ Last reviewed: May 2026.
 
 ## What runs and when
 
-| Trigger (Orange Pi 5 / Fallback GitHub Cron) | Session name | What it does | Targets |
+| Trigger (Orange Pi 5 in Europe/Rome / Fallback GitHub Cron) | Session name | What it does | Targets |
 |---|---|---|---|
-| Mon–Fri 07:02 UTC (09:02 ITA) | `European market open` | Recap + Top 5 + ATH distance + 3 automatic cross-linking comments | Telegram, eToro Feed |
-| Mon–Fri 12:00 UTC (14:00 ITA) | `Stock focus` | Single stock deep-dive with 1:1 HD Infographic, bull/bear thesis & valuation | Telegram, eToro Feed |
-| Mon–Fri 13:32 / 14:32 UTC (15:32 / 16:32 ITA) | `U.S. market open` | Opening moves, AI/Tech catalysts + 3 automatic cross-linking comments | Telegram, eToro Feed |
-| Daily 16:00 UTC (18:00 ITA) | `Daily crypto recap` | 16:9 Crypto Card, Fear & Greed Index, $BTC, $ETH, $TRX, and dynamic altcoin | Telegram, eToro Feed |
-| Mon–Fri 20:02 / 21:02 UTC (22:02 / 23:02 ITA) | `U.S. market close` | Full daily wrap-up, benchmark charts, pie chart, Top & Flop card + 3 comments | Telegram, eToro, Twitter, Bluesky, Threads, FB, IG |
-| Saturday 08:00 / 09:00 UTC (10:00 ITA) | `Weekly recap (Sat)` | Weekly portfolio & macro recap with Top & Flop card | Telegram, eToro Feed, LinkedIn |
-| Mon–Fri 11:30 / 12:30 UTC (13:30 ITA) & Sat 10:00 / 11:00 UTC (12:00 ITA) | `Copy trading post` | Educational & conviction post "Perché Copiarmi" + Dedicated Copy Trading Card | Telegram, eToro Feed, Twitter, Bluesky |
-| Sunday 20:00 / 21:00 UTC (22:00 ITA) | `Weekly recap (Sun)` | Upcoming catalysts, earnings & central banks schedule | Telegram, eToro Feed, LinkedIn |
+| Mon–Fri 09:02 ITA (08:02 UTC winter / 07:02 UTC summer) | `European market open` | Recap + Top 5 + ATH distance + 3 automatic cross-linking comments | Telegram, eToro Feed |
+| Mon, Thu 09:45 ITA | `Dividend Announcement` | Check announced corporate dividends for monitored portfolio assets | Telegram, eToro Feed |
+| Mon–Fri 10:00 ITA | `Event Monitor` | Scan dividend pay dates & corporate earnings for portfolio holdings | Telegram, eToro Feed |
+| Daily 11:30 ITA | `Stock News Monitor` | Morning news scanner & catalyst follow-up commenter | eToro Feed comments |
+| Mon, Wed, Fri 12:30 ITA | `Community Poll` | Interactive community sentiment & strategy poll | Telegram, eToro Feed |
+| Mon–Fri 13:30 ITA & Sat 12:00 ITA | `Copy trading post` | Educational & conviction post "Perché Copiarmi" + Dedicated Copy Trading Card | Telegram, eToro Feed, Twitter, Bluesky |
+| Mon–Fri 14:00 ITA | `Stock focus` | Single stock deep-dive with 1:1 HD Infographic, bull/bear thesis & valuation | Telegram, eToro Feed |
+| Mon–Fri 14:32 ITA (transition) / 15:32 ITA (normal) | `U.S. market open` | Opening moves, AI/Tech catalysts + 3 automatic cross-linking comments | Telegram, eToro Feed |
+| Daily 17:00 ITA | `Stock News Monitor` | Afternoon news scanner & catalyst follow-up commenter | eToro Feed comments |
+| Daily 18:00 ITA (Mon-Sat) / 14:00 ITA (Sun) | `Daily crypto recap` | 16:9 Crypto Card, Fear & Greed Index, $BTC, $ETH, $TRX, and dynamic altcoin | Telegram, eToro Feed |
+| Mon–Fri 21:02 ITA (transition) / 22:02 ITA (normal) | `U.S. market close` | Full daily wrap-up, benchmark charts, pie chart, Top & Flop card + 3 comments | Telegram, eToro, Twitter, Bluesky, Threads, FB, IG |
+| Month end 21:02 / 22:02 ITA | `Monthly recap` | Replaces US close on final calendar day: monthly performance & review | Telegram, eToro, Socials |
+| Daily 23:30 ITA | `Stock News Monitor` | Evening / post-market news scanner & catalyst commenter | eToro Feed comments |
+| Saturday 10:00 ITA | `Weekly recap (Sat)` | Weekly portfolio & macro recap with Top & Flop card | Telegram, eToro Feed, LinkedIn |
+| Sunday 22:00 ITA | `Weekly recap (Sun)` | Upcoming catalysts, earnings & central banks schedule | Telegram, eToro Feed, LinkedIn |
+| Daily 02:00 ITA | `Daily Dashboard Sync` | Refresh analytics metrics, track record, and social dashboard | GitHub Pages |
 
-**Important:** Triggered primarily by the Orange Pi 5 local scheduler (`dispatch.sh`) with hour-bucket deduplication to guarantee on-the-minute execution regardless of daylight saving time (DST).
+**Important:** Triggered primarily by the Orange Pi 5 local scheduler (`dispatch.sh`) configured in `Europe/Rome` timezone with exchange-time guards (checking real New York/Rome opening hours) to guarantee exact on-the-minute execution regardless of daylight saving time (DST) shifts.
 
 ---
 

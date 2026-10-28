@@ -1,110 +1,73 @@
 # ============================================================================
 # Portfolio Daily Recap — Market Session Scheduler
-# Orange Pi 5 cron configuration (all times in UTC)
+# Orange Pi 5 cron configuration (Timezone: Europe/Rome)
 # ============================================================================
-# Two entries per session to handle EU/US DST mismatch (~3 weeks/year).
-# The dispatch script has built-in dedup, so double triggers are harmless.
+# Configured in Italian local time (Europe/Rome - CET/CEST).
+# Market opening and closing times are strictly enforced by dispatch.sh
+# guards (checking live New York and Rome exchange times) to eliminate any
+# risk of premature execution during daylight saving time (DST) shifts.
 # ============================================================================
+CRON_TZ=Europe/Rome
 
-# ── European Market Open ─────────────────────────────────────────────────────
-# London open: 08:00 local → trigger at 08:02 local
-# Summer (BST): 08:02 BST = 07:02 UTC
-# Winter (GMT): 08:02 GMT = 08:02 UTC
-2 7 * * 1-5   /opt/portfolio-dispatch/dispatch.sh eu_open  >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-2 8 * * 1-5   /opt/portfolio-dispatch/dispatch.sh eu_open  >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── European Market Open (Mon-Fri 09:02 ITA) ──────────────────────────────────
+# Milan/Frankfurt open at 09:00 local; London opens at 08:00 GMT/BST (09:00 ITA)
+2 9 * * 1-5       /opt/portfolio-dispatch/dispatch.sh eu_open >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── Interactive Community Poll (Mon, Wed, Fri) ───────────────────────────────
+# ── Dividend Announcement Check (Mon & Thu 09:45 ITA) ─────────────────────────
+45 9 * * 1,4      /opt/portfolio-dispatch/dispatch.sh dividend_post >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
+# ── Event Monitor (Earnings & Dividend Pay Days - Mon-Fri 10:00 ITA) ──────────
+0 10 * * 1-5      /opt/portfolio-dispatch/dispatch.sh event_monitor >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
+# ── Stock News & Catalyst Follow-up Check - Morning (Daily 11:30 ITA) ─────────
+30 11 * * *       /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
+# ── Interactive Community Poll (Mon, Wed, Fri 12:30 ITA) ──────────────────────
 # Mon: Macro Calendar | Wed: Thematic Strategy | Fri: Weekly Top Performers
-# 12:30 local (CET/CEST) → 10:30 UTC (summer) / 11:30 UTC (winter)
-30 10 * * 1,3,5  /opt/portfolio-dispatch/dispatch.sh community_poll >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-30 11 * * 1,3,5  /opt/portfolio-dispatch/dispatch.sh community_poll >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+30 12 * * 1,3,5   /opt/portfolio-dispatch/dispatch.sh community_poll >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── Stock Focus (Midday) ───────────────────────────────────────────────────────
-# 14:00 local (CET/CEST) → 12:00 UTC (summer) / 13:00 UTC (winter)
-0 12 * * 1-5   /opt/portfolio-dispatch/dispatch.sh stock_focus >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 13 * * 1-5   /opt/portfolio-dispatch/dispatch.sh stock_focus >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── Copy Trading Education & Megatrend Deep-Dive ──────────────────────────────
+# Mon-Fri: 13:30 ITA | Saturday: 12:00 ITA
+30 13 * * 1-5     /opt/portfolio-dispatch/dispatch.sh copy_trading >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+0 12 * * 6        /opt/portfolio-dispatch/dispatch.sh copy_trading >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── U.S. Market Open ─────────────────────────────────────────────────────────
-# NYSE open: 09:30 local → trigger at 09:32 local
-# Summer (EDT): 09:32 EDT = 13:32 UTC
-# Winter (EST): 09:32 EST = 14:32 UTC
-32 13 * * 1-5  /opt/portfolio-dispatch/dispatch.sh us_open  >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-32 14 * * 1-5  /opt/portfolio-dispatch/dispatch.sh us_open  >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── Stock Focus (Mon-Fri 14:00 ITA) ───────────────────────────────────────────
+0 14 * * 1-5      /opt/portfolio-dispatch/dispatch.sh stock_focus >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── Daily Crypto Pulse & Sentiment Recap ─────────────────────────────────────
-# 18:00 local (CET/CEST) → 16:00 UTC (summer) / 17:00 UTC (winter)
-0 16 * * *     /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 17 * * *     /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-# Mon-Sat: 18:00 local (CET/CEST) → 16:00 UTC (summer) / 17:00 UTC (winter)
-0 16 * * 1-6   /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 17 * * 1-6   /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── U.S. Market Open (Mon-Fri) ────────────────────────────────────────────────
+# Wall Street opens at 09:30 America/New_York:
+# - Normal (summer EDT & winter EST): 15:30 ITA -> trigger at 15:32 ITA
+# - Transition weeks (autumn/spring mismatch): 14:30 ITA -> trigger at 14:32 ITA
+# dispatch.sh verifies New York time >= 09:30 ET and auto-deduplicates.
+32 14,15 * * 1-5  /opt/portfolio-dispatch/dispatch.sh us_open >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# Sunday Crypto Pulse (early afternoon to leave room for evening outlook):
-# 14:00 local (CET/CEST) → 12:00 UTC (summer) / 13:00 UTC (winter)
-0 12 * * 0     /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 13 * * 0     /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── Stock News & Catalyst Follow-up Check - Afternoon (Daily 17:00 ITA) ───────
+0 17 * * *        /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
+# ── Daily Crypto Pulse & Sentiment Recap ──────────────────────────────────────
+# Mon-Sat: 18:00 ITA | Sunday: 14:00 ITA
+0 18 * * 1-6      /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+0 14 * * 0        /opt/portfolio-dispatch/dispatch.sh crypto_recap >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── U.S. Market Close ────────────────────────────────────────────────────────
-# NYSE close: 16:00 local → trigger at 16:02 local
-# Summer (EDT): 16:02 EDT = 20:02 UTC
-# Winter (EST): 16:02 EST = 21:02 UTC
-2 20 * * 1-5   /opt/portfolio-dispatch/dispatch.sh us_close >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-2 21 * * 1-5   /opt/portfolio-dispatch/dispatch.sh us_close >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── U.S. Market Close (Mon-Fri) ───────────────────────────────────────────────
+# Wall Street closes at 16:00 America/New_York:
+# - Normal (summer EDT & winter EST): 22:00 ITA -> trigger at 22:02 ITA
+# - Transition weeks (autumn/spring mismatch): 21:00 ITA -> trigger at 21:02 ITA
+# dispatch.sh verifies New York time >= 16:00 ET and auto-deduplicates.
+2 21,22 * * 1-5   /opt/portfolio-dispatch/dispatch.sh us_close >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── Monthly Market & Portfolio Recap (Last calendar day of each month) ───────
-# Runs on the final day of each month at 20:00 local (20:02 UTC summer / 21:02 UTC winter)
-# Automatically replaces normal US close with comprehensive monthly performance & review
-2 20 28-31 * * [ "$(date -u -d '+1 day' +%d)" = "01" ] && /opt/portfolio-dispatch/dispatch.sh monthly >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-2 21 28-31 * * [ "$(date -u -d '+1 day' +%d)" = "01" ] && /opt/portfolio-dispatch/dispatch.sh monthly >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── Monthly Market & Portfolio Recap (Last calendar day of each month) ────────
+# Automatically replaces normal US close on the final calendar day of each month
+2 21,22 28-31 * * [ "$(date -u -d '+1 day' +%d)" = "01" ] && /opt/portfolio-dispatch/dispatch.sh monthly >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── Stock News & Catalyst Follow-up Commenter (3x daily, Mon-Sun) ───────────
-# Morning:    11:30 local → 09:30 UTC (summer) / 10:30 UTC (winter)
-30 9 * * *    /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-30 10 * * *   /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── Stock News & Catalyst Follow-up Check - Evening (Daily 23:30 ITA) ─────────
+30 23 * * *       /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# Afternoon:  17:00 local → 15:00 UTC (summer) / 16:00 UTC (winter)
-0 15 * * *    /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 16 * * *    /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── Weekly Recap (Saturday 10:00 ITA) ─────────────────────────────────────────
+0 10 * * 6        /opt/portfolio-dispatch/dispatch.sh weekly_sat >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# Evening:    23:30 local → 21:30 UTC (summer) / 22:30 UTC (winter)
-30 21 * * *   /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-30 22 * * *   /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── Sunday: Weekly Macro & Portfolio Outlook (Sunday 22:00 ITA) ───────────────
+0 22 * * 0        /opt/portfolio-dispatch/dispatch.sh weekly_sun >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── Weekly Recap (Saturday) ──────────────────────────────────────────────────
-# 10:00 CET = 09:00 UTC (summer: 08:00 UTC)
-0 8 * * 6     /opt/portfolio-dispatch/dispatch.sh weekly_sat >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 9 * * 6     /opt/portfolio-dispatch/dispatch.sh weekly_sat >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-# ── Copy Trading Education & Megatrend Deep-Dive (Mon-Fri) ────────────────────
-# 13:30 local (CET/CEST) → 11:30 UTC (summer) / 12:30 UTC (winter)
-30 11 * * 1-5  /opt/portfolio-dispatch/dispatch.sh copy_trading >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-30 12 * * 1-5  /opt/portfolio-dispatch/dispatch.sh copy_trading >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-
-# ── Saturday: Copy Trading Education & Megatrend Deep-Dive ───────────────────
-# 12:00 local (CET/CEST) → 10:00 UTC (summer) / 11:00 UTC (winter)
-0 10 * * 6    /opt/portfolio-dispatch/dispatch.sh copy_trading >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 11 * * 6    /opt/portfolio-dispatch/dispatch.sh copy_trading >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-
-# ── Weekly Recap (Sunday) ────────────────────────────────────────────────────
-# 22:00 CET = 21:00 UTC (summer: 20:00 UTC)
-0 20 * * 0    /opt/portfolio-dispatch/dispatch.sh weekly_sun >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 21 * * 0    /opt/portfolio-dispatch/dispatch.sh weekly_sun >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-# ── Sunday: Weekly Macro & Portfolio Outlook (Week Ahead Preview) ────────────
-# 18:00 local (CET/CEST) → 16:00 UTC (summer) / 17:00 UTC (winter)
-0 16 * * 0    /opt/portfolio-dispatch/dispatch.sh weekly_sun >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 17 * * 0    /opt/portfolio-dispatch/dispatch.sh weekly_sun >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-
-# ── Nightly Dashboard & Metrics Sync (Daily at 02:00 CET) ────────────────────
-# 02:00 CEST = 00:00 UTC / 02:00 CET = 01:00 UTC
-0 0 * * *     /opt/portfolio-dispatch/dispatch.sh dashboard_sync >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-
-# ── Dividend Announcement Check (Mon & Thu mornings) ───────────
-# 09:45 local (CET/CEST) → 07:45 UTC (summer) / 08:45 UTC (winter)
-45 7 * * 1,4   /opt/portfolio-dispatch/dispatch.sh dividend_post >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-45 8 * * 1,4   /opt/portfolio-dispatch/dispatch.sh dividend_post >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-
-# ── Event Monitor (Earnings & Dividend Pay Days - Mon-Fri mornings) ───────────
-# 10:00 local (CET/CEST) → 08:00 UTC (summer) / 09:00 UTC (winter)
-0 8 * * 1-5   /opt/portfolio-dispatch/dispatch.sh event_monitor >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-0 9 * * 1-5   /opt/portfolio-dispatch/dispatch.sh event_monitor >> /opt/portfolio-dispatch/logs/cron.log 2>&1
-
+# ── Nightly Dashboard & Metrics Sync (Daily 02:00 ITA) ────────────────────────
+0 2 * * *         /opt/portfolio-dispatch/dispatch.sh dashboard_sync >> /opt/portfolio-dispatch/logs/cron.log 2>&1

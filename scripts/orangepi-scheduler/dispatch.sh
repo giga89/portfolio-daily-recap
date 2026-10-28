@@ -27,9 +27,15 @@ source "$ENV_FILE"
 
 # Session name from argument
 SESSION="${1:-}"
+FORCE_FLAG="${2:-}"
 if [ -z "$SESSION" ]; then
-    echo "Usage: $0 <eu_open|community_poll|stock_focus|us_open|stock_news|crypto_recap|us_close|weekly_sat|weekly_sun|monthly>" >&2
+    echo "Usage: $0 <eu_open|community_poll|stock_focus|us_open|stock_news|crypto_recap|us_close|weekly_sat|weekly_sun|monthly> [--force]" >&2
     exit 1
+fi
+
+FORCE="false"
+if [ "$FORCE_FLAG" = "--force" ]; then
+    FORCE="true"
 fi
 
 # Map session argument to workflow session name
@@ -72,20 +78,49 @@ if [ "$SESSION" = "us_close" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Dedup: use SESSION + current hour bucket to avoid blocking scheduled runs
-# when a manual test runs earlier in the day.
-#
-# Each cron fires in a specific UTC-hour window. We record
-# "SESSION:HH" so that eu_open at 07 does not block eu_open at 08,
-# and a manual us_close at 13 does not block the real us_close at 20.
+# Market Hour Protection Guards:
+# Ensure market sessions only trigger when the respective exchanges are
+# actually open/closed, preventing premature triggers during DST transitions
+# or timezone mismatches.
+# ---------------------------------------------------------------------------
+if [ "$FORCE" != "true" ]; then
+    if [ "$SESSION" = "eu_open" ]; then
+        EU_TIME=$(TZ=Europe/Rome date +%H%M)
+        if [[ "$EU_TIME" < "0900" || "$EU_TIME" > "1030" ]]; then
+            echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP eu_open — Rome time is $EU_TIME, market not open (waiting for 09:00 CET/CEST)" >> "$LOG_DIR/dispatch.log"
+            exit 0
+        fi
+    elif [ "$SESSION" = "us_open" ]; then
+        NY_TIME=$(TZ=America/New_York date +%H%M)
+        if [[ "$NY_TIME" < "0930" || "$NY_TIME" > "1100" ]]; then
+            echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP us_open — New York time is $NY_TIME, market not open (waiting for 09:30 ET)" >> "$LOG_DIR/dispatch.log"
+            exit 0
+        fi
+    elif [ "$SESSION" = "us_close" ] || [ "$SESSION" = "monthly" ]; then
+        NY_TIME=$(TZ=America/New_York date +%H%M)
+        if [[ "$NY_TIME" < "1600" || "$NY_TIME" > "1800" ]]; then
+            echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP $SESSION — New York time is $NY_TIME, market not closed (waiting for 16:00 ET)" >> "$LOG_DIR/dispatch.log"
+            exit 0
+        fi
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Dedup: prevent duplicate dispatches for the same session on the same day.
+# - stock_news runs 3x daily (morning, afternoon, evening); deduplicates by hour bucket.
+# - all other sessions run once daily; deduplicates strictly once per day.
 # ---------------------------------------------------------------------------
 TODAY=$(date -u +%Y-%m-%d)
 CURRENT_HOUR=$(date -u +%H)
-DEDUP_KEY="${SESSION}:${CURRENT_HOUR}"
+if [ "$SESSION" = "stock_news" ]; then
+    DEDUP_KEY="stock_news:${CURRENT_HOUR}"
+else
+    DEDUP_KEY="${SESSION}"
+fi
 DEDUP_FILE="$LOG_DIR/dispatched_${TODAY}.txt"
 
-if grep -qF "$DEDUP_KEY" "$DEDUP_FILE" 2>/dev/null; then
-    echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') DEDUP $SESSION (hour $CURRENT_HOUR) — already dispatched today" >> "$LOG_DIR/dispatch.log"
+if [ "$FORCE" != "true" ] && grep -qF "$DEDUP_KEY" "$DEDUP_FILE" 2>/dev/null; then
+    echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') DEDUP $SESSION — already dispatched today" >> "$LOG_DIR/dispatch.log"
     exit 0
 fi
 
