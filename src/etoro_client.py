@@ -82,8 +82,6 @@ MARKET_IDS = {
     "WMT": 1035,
     "SPCX.RTH": 15623,
     "TRX": 100026,
-    "ANT.24-7": 15777,
-    "ANT": 15777,
 
     # Major Market Indices & Currencies
     "SPX500": 27,

@@ -101,5 +101,27 @@ class TestPostSanitizationAndEpuration(unittest.TestCase):
             self.assertIn("Copy Trading", post)
 
 
+    def test_purged_ant_blocked_and_epurated(self):
+        """Verifies ANT.24-7 and Anthropic are strictly blocked and pruned from posts."""
+        flawed_post = (
+            "🌆 CHIUSURA DEI MERCATI USA\n\n"
+            "Wall Street ha chiuso una seduta positiva con l'indice $SPX500 in rialzo dello 0.8%.\n\n"
+            "🤖 Per $NVDA (+3.20%) la domanda di chip per infrastrutture AI resta solida.\n\n"
+            "🧠 Continuiamo a monitorare $ANT.24-7 e la ricerca di Anthropic nel campo dei modelli di frontiera.\n\n"
+            "⚖️ Rotazione settoriale favorevole ai titoli difensivi e liquidi del nostro portafoglio.\n\n"
+            "Come avete vissuto la seduta di oggi? Parliamone nei commenti! 👇"
+        )
+        is_clean, issues, _ = verify_post_deterministic(flawed_post)
+        self.assertFalse(is_clean, "Post with ANT.24-7 must fail deterministic verification")
+        self.assertTrue(any("ANT" in iss or "Anthropic" in iss for iss in issues), f"Expected ANT issue: {issues}")
+
+        sanitized, is_now_clean, remaining_issues = sanitize_or_prune_post_content(flawed_post)
+        self.assertTrue(is_now_clean, f"Sanitization should purge the ANT paragraph: {remaining_issues}")
+        self.assertNotIn("ANT", sanitized)
+        self.assertNotIn("Anthropic", sanitized)
+        self.assertIn("$NVDA", sanitized)
+        self.assertIn("$SPX500", sanitized)
+
+
 if __name__ == "__main__":
     unittest.main()

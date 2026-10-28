@@ -350,7 +350,6 @@ HOLDINGS_DATA = [
     {"ticker": "TSM", "name": "Taiwan Semiconductor", "emoji": "🏭", "asset_class": "Stock", "curr": "USD", "sector": "Global Chip Foundry", "geo": "Asia", "tier": "Core Holding", "desc": "The world's most advanced semiconductor foundry, sole manufacturing partner for Apple, NVIDIA, and AMD."},
     {"ticker": "MRVL", "name": "Marvell Technology", "emoji": "📊", "asset_class": "Stock", "curr": "USD", "sector": "Custom Silicon & Optical", "geo": "USA", "tier": "Growth", "desc": "Custom AI processors for cloud hyperscalers and electro-optics interconnects enabling high-bandwidth clusters."},
     {"ticker": "BESI.NV", "name": "BE Semiconductor Industries", "emoji": "🔬", "asset_class": "Stock", "curr": "EUR", "sector": "Advanced Packaging & Hybrid Bonding", "geo": "Europe", "tier": "AI Hardware Leader", "desc": "Leading Dutch semiconductor assembly equipment manufacturer, dominating sub-micron hybrid bonding critical for next-gen HBM4 and advanced AI chip packaging."},
-    {"ticker": "ANT.24-7", "name": "Anthropic Early Access", "emoji": "🧠", "asset_class": "Stock", "curr": "USD", "sector": "AI & Semiconductors", "geo": "USA", "tier": "Frontier AI", "desc": "Frontier foundation model leader, creator of Claude AI, with massive enterprise adoption backed by Amazon and Google."},
 
     # ── Healthcare & GLP-1 Megatrend ──────────────────────────────────────────
     {"ticker": "LLY", "name": "Eli Lilly and Co", "emoji": "💊", "asset_class": "Stock", "curr": "USD", "sector": "Pharma & GLP-1 Therapeutics", "geo": "USA", "tier": "Core Growth", "desc": "Global pioneer in revolutionary GLP-1/GIP treatments (Mounjaro, Zepbound) for diabetes, obesity, and oncology."},
@@ -409,7 +408,6 @@ BASELINE_WEIGHTS: Dict[str, float] = {
     "TSM": 3.0,
     "MRVL": 2.0,
     "BESI.NV": 0.5,
-    "ANT.24-7": 1.0,
     # Healthcare & GLP-1 (17.5%)
     "LLY": 4.5,
     "NOVO-B.CO": 4.0,
@@ -477,7 +475,7 @@ def load_portfolio_weights() -> Dict[str, float]:
         except Exception as e:
             print(f"⚠️ Error reading {PORTFOLIO_WEIGHTS_FILE}: {e}")
 
-    PURGED_ASSETS = {"XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD"}
+    PURGED_ASSETS = {"XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD", "ANT.24-7", "ANT"}
     weights = {k: v for k, v in weights.items() if k not in PURGED_ASSETS}
 
     if weights:

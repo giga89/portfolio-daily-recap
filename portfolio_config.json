@@ -6,7 +6,6 @@
         "ABBV": "💉",
         "ABT.US": "🏥",
         "AMZN": "📦",
-        "ANT.24-7": "🧠",
         "AVGO": "🔌",
         "AZN.L": "🧬",
         "CCJ": "⚡",
@@ -65,10 +64,6 @@
         "AMZN": [
             "AMZN",
             "Amazon.com Inc"
-        ],
-        "ANT.24-7": [
-            "ANT.24-7",
-            "Anthropic Early Access"
         ],
         "AVGO": [
             "AVGO",

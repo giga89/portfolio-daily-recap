@@ -48,8 +48,6 @@ TICKER_NAME_MAP = {
     'PPFB': 'Physical Gold ETC',
     'IB01': 'Treasury Bond 0-1yr ETF',
     'ETOR': 'eToro Group',
-    'ANT.24-7': 'Anthropic AI Claude',
-    'ANT': 'Anthropic AI Claude',
     'MELI': 'MercadoLibre',
     'MRVL': 'Marvell Technology',
     'HUM': 'Humana',

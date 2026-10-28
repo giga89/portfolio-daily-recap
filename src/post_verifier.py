@@ -812,13 +812,19 @@ def verify_post_deterministic(
 
     # Check for purged assets that must never appear in active communications
     for tag in tickers_to_check:
-        if tag in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX"):
+        if tag in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT"):
             issues.append(
                 f"CRITICAL: L'asset ${tag} è stato definitivamente dismesso dal portafoglio e non deve comparire in alcun post o commento."
             )
-    if primary_clean and primary_clean in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX"):
+    if primary_clean and primary_clean in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT"):
         issues.append(
             f"CRITICAL: L'asset ${primary_clean} è stato definitivamente dismesso dal portafoglio e non deve comparire in alcun post o commento."
+        )
+
+    # Explicit check for ANT.24-7 / Anthropic in text
+    if re.search(r'\b(ant\.24-7|anthropic)\b', cleaned_text, flags=re.IGNORECASE) or bool(re.search(r'\$ant\b', cleaned_text, flags=re.IGNORECASE)):
+        issues.append(
+            "CRITICAL: L'asset ANT.24-7 / Anthropic è stato definitivamente dismesso dal portafoglio e non deve mai comparire in alcun post o commento."
         )
 
     # Check for forbidden identity and strategy misconceptions per asset
@@ -950,6 +956,18 @@ def sanitize_or_prune_post_content(
 
     for para in paragraphs:
         p_tags = extract_cashtags(para)
+        p_lower = para.lower()
+
+        # Check if paragraph references purged assets (e.g. ANT.24-7, Anthropic, XEON, MAU, SPCX)
+        contains_purged = (
+            any(t in p_tags for t in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT"))
+            or bool(re.search(r'\b(ant\.24-7|anthropic)\b', p_lower))
+            or bool(re.search(r'\$ant\b', p_lower))
+        )
+        if contains_purged:
+            print(f"⚠️ [EPURAZIONE PARAGRAFO]: Rimosso paragrafo contenente asset dismesso: {para[:80]}...")
+            continue
+
         has_non_div_conflict = False
 
         for t in p_tags:
@@ -1401,7 +1419,7 @@ TESTO DA REVISIONARE:
 
 REGOLE DI AUDIT:
 1. DIVIETO ASSOLUTO DI CEDOLE SU ASSET AD ACCUMULAZIONE: Se un asset è ad accumulazione ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), non deve mai essere citato come fonte di dividendi o reddito.
-2. DIVIETO ASSET DISMESSI: Nessuna menzione di XEON, MAU o SPCX / SPCX.RTH (completamente dismessi dal portafoglio).
+2. DIVIETO ASSET DISMESSI: Nessuna menzione di XEON, MAU, SPCX o ANT.24-7 / Anthropic (completamente dismessi dal portafoglio).
 3. TONO & COMPLIANCE: Rispettoso, pacato, nessun consiglio finanziario sollecitatore ("non è un consiglio finanziario", focus sulla strategia a lungo termine e gestione del rischio 3/10).
 4. COMPLETEZZA: Nessuna frase troncata, nessuna interruzione a metà parola o senza punteggiatura/emoji finale. NO markdown con asterischi (**).
 5. VERDETTO:

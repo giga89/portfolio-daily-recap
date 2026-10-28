@@ -50,8 +50,6 @@ SECTOR_MAP: dict[str, str] = {
     'PLTR': 'AI & Tech',
     'NET':  'AI & Tech',
     'WCLD.L': 'AI & Tech',
-    'ANT.24-7': 'AI & Tech',
-    'ANT': 'AI & Tech',
     # Healthcare / Pharma
     'LLY':     'Healthcare',
     'NVO':     'Healthcare',
@@ -104,7 +102,6 @@ GEO_MAP: dict[str, str] = {
     'AMZN': 'USA', 'META': 'USA', 'AAPL': 'USA', 'PLTR': 'USA', 'NET': 'USA',
     'LLY': 'USA', 'ABT': 'USA', 'ABT.US': 'USA', 'ABBV': 'USA', 'HUM': 'USA',
     'CCJ': 'USA', 'PYPL': 'USA', 'ETOR': 'USA', 'IEMG': 'USA', 'MELI': 'USA', 'WCLD.L': 'USA',
-    'ANT.24-7': 'USA', 'ANT': 'USA',
     # Europe
     'AZN.L': 'Europe', 'ENEL.MI': 'Europe', 'ENI.MI': 'Europe',
     'GLEN.L': 'Europe', 'VOW3.DE': 'Europe', 'RACE': 'Europe',

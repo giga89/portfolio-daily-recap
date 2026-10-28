@@ -346,7 +346,7 @@ def get_equity_holdings_for_earnings() -> List[Tuple[str, str]]:
     """
     excluded_non_equities = {
         "PPFB.DE", "IB01.L", "SX7PEX.DE", "IEUR", "IQQL.DE", "TRX", "SPCX.RTH",
-        "WCLD.L", "INDO.PA", "WDEF.L", "XEON.DE", "MAU.PA", "ANT.24-7"
+        "WCLD.L", "INDO.PA", "WDEF.L", "XEON.DE", "MAU.PA"
     }
     candidates: List[Tuple[str, str]] = []
     try:

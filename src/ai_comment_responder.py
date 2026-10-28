@@ -504,7 +504,7 @@ OFFICIAL CERTIFIED METADATA (SINGLE SOURCE OF TRUTH):
 {criticism_note}
 
 EVALUATION RUBRIC:
-1. Factual Accuracy: Strict adherence to certified metadata. If an asset is accumulating ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), NEVER claim it pays dividends. NEVER mention purged assets like XEON, MAU, or SPCX.
+1. Factual Accuracy: Strict adherence to certified metadata. If an asset is accumulating ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), NEVER claim it pays dividends. NEVER mention purged assets like XEON, MAU, SPCX, or ANT.24-7 / Anthropic.
 2. Relevance & Substance: Does the reply genuinely address the topics and questions raised by @{user_author} (e.g. specific tickers like AMZN/NVDA/PLTR, GPU additions, tech sentiment, valuation, DCA, pullback)?
 3. Completeness & Ending: 100% complete text, no truncated sentences, no dangling prepositions, natural closing with valid punctuation/emoji.
 4. Compliance & Tone: Polite, disciplined (Risk 3/10, 0 leverage, 3-5+ years horizon), no financial advice, NO markdown bold asterisks (**).

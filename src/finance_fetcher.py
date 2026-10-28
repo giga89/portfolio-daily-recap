@@ -286,7 +286,8 @@ def fetch_portfolio_weights_from_bullaware():
                     # Exclude purged positions that BullAware may lag in updating
                     PURGED_ASSETS = {
                         "XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX",
-                        "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD"
+                        "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD",
+                        "ANT.24-7", "ANT"
                     }
                     weights = {k: v for k, v in normalized_weights.items() if k not in PURGED_ASSETS}
 
