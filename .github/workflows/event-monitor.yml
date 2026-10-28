@@ -2,10 +2,12 @@ name: Event Monitor (Earnings & Dividend Pay Days)
 
 on:
   # ── Automatic Daily Crons (Mon-Fri) ──
-  # 08:00 UTC (10:00 CET): European pre-market & prior-day AMC earnings
-  # 21:30 UTC (22:30 CET): US AMC (After Market Close) earnings
+  # 08:00 UTC (09:00/10:00 CET): European pre-market & prior-day AMC earnings
+  # 20:30 UTC (21:30 CET during US-EU DST overlap): US AMC first window
+  # 21:30 UTC (22:30 CET standard winter): US AMC second window / standard winter
   schedule:
     - cron: '0 8 * * 1-5'
+    - cron: '30 20 * * 1-5'
     - cron: '30 21 * * 1-5'
   repository_dispatch:
     types: [event_monitor, check_events, check_dividends, check_earnings, pay_day]
