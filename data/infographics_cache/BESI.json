@@ -1,0 +1,59 @@
+{
+  "name": "BESI",
+  "tagline": "Leader globale nell'Advanced Packaging",
+  "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+  "subtitle": "Dominio tecnologico nell'hybrid bonding e packaging avanzato per chip AI a elevate prestazioni.",
+  "kpis": [
+    {
+      "label": "MARGINE LORDO",
+      "val": "~65%",
+      "sub": "Efficienza produttiva al vertice"
+    },
+    {
+      "label": "MARGINE OPERATIVO",
+      "val": "~38%",
+      "sub": "Redditività strutturale eccellente"
+    },
+    {
+      "label": "PESO IN PORTAFOGLIO",
+      "val": "0.11%",
+      "sub": "Allocazione gestita nel portafoglio"
+    },
+    {
+      "label": "FREE CASH FLOW",
+      "val": "Elevato",
+      "sub": "Forte conversione del cassa"
+    }
+  ],
+  "pillars": [
+    [
+      "Fossato Competitivo:",
+      "Monopolio di fatto e brevetti chiave nella tecnologia di Hybrid Bonding per la produzione di microchip."
+    ],
+    [
+      "Catalizzatore di Crescita:",
+      "Esplosione della domanda di chiplet e memoria HBM per infrastrutture di Intelligenza Artificiale."
+    ],
+    [
+      "Solidità e Finanze:",
+      "Bilancio estremamente solido con eccellente generazione di cassa e assenza di debito netto."
+    ],
+    [
+      "Visione Decennale:",
+      "Fornitore insostituibile per i grandi fonderie nella transizione verso architetture di chip 3D."
+    ]
+  ],
+  "quote": "L'architettura del futuro dei chiplet dipende dalla precisione assoluta dei nostri sistemi avanzati.",
+  "tags": [
+    "#BESI",
+    "#Semiconductors",
+    "#AdvancedPackaging",
+    "#AI",
+    "#Tech"
+  ],
+  "color": [
+    20,
+    90,
+    180
+  ]
+}
