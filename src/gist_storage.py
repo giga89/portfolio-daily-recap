@@ -735,14 +735,24 @@ def mark_dividend_posted(
 # Corporate Earnings Deduplication
 # ---------------------------------------------------------------------------
 
-def is_earnings_posted(ticker: str, quarter: str, year: int) -> bool:
+def is_earnings_posted(ticker: str, quarter: str, year: Optional[int] = None) -> bool:
     """Check if an earnings report post for ticker, quarter and year was already published."""
     ticker = ticker.replace('$', '').upper().strip()
     data = load_data()
     posted = data.get('posted_earnings', {})
     clean_q = quarter.strip().replace(' ', '_')
-    key = f"{ticker}_{clean_q}_{year}"
-    return key in posted
+    if year:
+        key = f"{ticker}_{clean_q}_{year}"
+        if key in posted:
+            return True
+    # Robust guard against fiscal-year vs calendar-year mismatch (e.g. MSFT Q1 FY2027 reported in 2026)
+    prefix = f"{ticker}_{clean_q}"
+    if prefix in posted:
+        return True
+    for k in posted:
+        if k == prefix or k.startswith(f"{prefix}_"):
+            return True
+    return False
 
 
 def mark_earnings_posted(
@@ -757,14 +767,18 @@ def mark_earnings_posted(
     data = load_data()
     posted = data.get('posted_earnings', {})
     clean_q = quarter.strip().replace(' ', '_')
-    key = f"{ticker}_{clean_q}_{year}"
-    posted[key] = {
+    entry = {
         'ticker': ticker,
         'quarter': quarter,
         'year': year,
         'post_id': str(post_id or ''),
         'posted_at': datetime.now(timezone.utc).isoformat(),
     }
+    # Store standard key with year
+    key = f"{ticker}_{clean_q}_{year}"
+    posted[key] = entry
+    # Also store key with clean_q as prefix to make fiscal year deduplication bulletproof
+    posted[f"{ticker}_{clean_q}"] = entry
     data['posted_earnings'] = posted
     _invalidate_cache()
     return save_data(data)

@@ -198,8 +198,8 @@ class TestEventMonitor(unittest.TestCase):
         mock_ticker.earnings_dates = df
 
         with patch("earnings_timing.yf.Ticker", return_value=mock_ticker):
-            # Simulated check at 21:00 UTC (after release hour, but data provider still NaN)
-            check_time = datetime.datetime(2026, 10, 28, 21, 0, tzinfo=datetime.timezone.utc)
+            # Simulated check in European morning (after release hour and within publication window, but Reported EPS is still NaN)
+            check_time = datetime.datetime(2026, 10, 29, 8, 0, tzinfo=datetime.timezone.utc)
             is_rel, data, reason = earnings_timing.verify_earnings_release_status(
                 "MSFT", "MSFT", lookback_days=1, check_time=check_time
             )
@@ -224,7 +224,8 @@ class TestEventMonitor(unittest.TestCase):
         mock_ticker.quarterly_income_stmt = pd.DataFrame()
 
         with patch("earnings_timing.yf.Ticker", return_value=mock_ticker):
-            check_time = datetime.datetime(2026, 10, 28, 21, 0, tzinfo=datetime.timezone.utc)
+            # Simulated check in the European morning (08:00 UTC next day) per new timing policy
+            check_time = datetime.datetime(2026, 10, 29, 8, 0, tzinfo=datetime.timezone.utc)
             is_rel, data, reason = earnings_timing.verify_earnings_release_status(
                 "MSFT", "MSFT", lookback_days=1, check_time=check_time
             )
@@ -233,6 +234,124 @@ class TestEventMonitor(unittest.TestCase):
             self.assertEqual(data["eps_est"], "$4.72")
             self.assertTrue(data["eps_beat"])
             self.assertEqual(data["quarter"], "Q1 FY2027")
+
+    def test_amc_earnings_held_until_european_morning(self):
+        """Verify that AMC earnings on release evening are held until European morning window."""
+        import datetime
+        import pandas as pd
+        from unittest.mock import MagicMock, patch
+        import earnings_timing
+
+        mock_ticker = MagicMock()
+        sched_dt = datetime.datetime(2026, 10, 28, 20, 0, tzinfo=datetime.timezone.utc)
+        df = pd.DataFrame(
+            [{"EPS Estimate": 4.72, "Reported EPS": 4.88, "Surprise(%)": 3.39}],
+            index=[sched_dt],
+        )
+        mock_ticker.earnings_dates = df
+
+        with patch("earnings_timing.yf.Ticker", return_value=mock_ticker):
+            # Checked on the evening of release (21:30 UTC): must be held
+            check_evening = datetime.datetime(2026, 10, 28, 21, 30, tzinfo=datetime.timezone.utc)
+            is_rel, _, reason = earnings_timing.verify_earnings_release_status(
+                "MSFT", "MSFT", lookback_days=1, check_time=check_evening
+            )
+            self.assertFalse(is_rel)
+            self.assertIn("European morning window", reason)
+
+            # Checked the next morning at 08:00 UTC: must be allowed
+            check_morning = datetime.datetime(2026, 10, 29, 8, 0, tzinfo=datetime.timezone.utc)
+            is_rel_m, _, _ = earnings_timing.verify_earnings_release_status(
+                "MSFT", "MSFT", lookback_days=1, check_time=check_morning
+            )
+            self.assertTrue(is_rel_m)
+
+    def test_bmo_earnings_held_until_after_us_open(self):
+        """Verify that BMO earnings are held until shortly after US market open (>= 10:00 ET)."""
+        import datetime
+        import pandas as pd
+        from unittest.mock import MagicMock, patch
+        import earnings_timing
+
+        mock_ticker = MagicMock()
+        # 08:00 EDT = 12:00 UTC
+        sched_dt = datetime.datetime(2026, 10, 29, 12, 0, tzinfo=datetime.timezone.utc)
+        df = pd.DataFrame(
+            [{"EPS Estimate": 5.10, "Reported EPS": 5.40, "Surprise(%)": 5.88}],
+            index=[sched_dt],
+        )
+        mock_ticker.earnings_dates = df
+
+        with patch("earnings_timing.yf.Ticker", return_value=mock_ticker):
+            # Checked at 12:30 UTC (08:30 EDT - pre-market): must be held
+            check_pre = datetime.datetime(2026, 10, 29, 12, 30, tzinfo=datetime.timezone.utc)
+            is_rel, _, reason = earnings_timing.verify_earnings_release_status(
+                "LLY", "LLY", lookback_days=1, check_time=check_pre
+            )
+            self.assertFalse(is_rel)
+            self.assertIn("shortly after US market open", reason)
+
+            # Checked at 14:15 UTC (10:15 EDT - after US open): must be allowed
+            check_open = datetime.datetime(2026, 10, 29, 14, 15, tzinfo=datetime.timezone.utc)
+            is_rel_open, _, _ = earnings_timing.verify_earnings_release_status(
+                "LLY", "LLY", lookback_days=1, check_time=check_open
+            )
+            self.assertTrue(is_rel_open)
+
+    def test_box3_fallback_c_b_a_and_rigid_verification(self):
+        """Verify Box 3 fallback chain C -> B -> A and rigid rejection of generic boilerplate."""
+        import earnings_timing
+        from unittest.mock import MagicMock
+
+        # Test rigid verification rejects boilerplate
+        fluff = ["• Commenti del management e outlook strategico", "• Crescita continua"]
+        ok, _, reason = earnings_timing.verify_option_c_highlights("MSFT", fluff)
+        self.assertFalse(ok)
+        self.assertIn("Contains forbidden generic boilerplate", reason)
+
+        # Test valid Option C bullets pass
+        valid = ["• Azure Cloud cresce del +29% YoY trainato da AI", "• Margini operativi in espansione al 45%"]
+        ok, lines, _ = earnings_timing.verify_option_c_highlights("MSFT", valid)
+        self.assertTrue(ok)
+        self.assertEqual(len(lines), 2)
+
+        # Test Option B when Option C is absent
+        mock_t = MagicMock()
+        import pandas as pd
+        q_df = pd.DataFrame(
+            {"2026-09-30": [40e9, 90e9]},
+            index=["Operating Income", "Total Revenue"]
+        )
+        mock_t.quarterly_income_stmt = q_df
+        res_b = earnings_timing.resolve_box3_content("MSFT", "Q1 FY2027", yf_ticker_obj=mock_t)
+        self.assertEqual(res_b["mode"], "metric")
+        self.assertIn("44.4%", res_b["metric"])
+
+        # Test Option A fallback when Option B has no income statement
+        mock_t_empty = MagicMock()
+        mock_t_empty.quarterly_income_stmt = pd.DataFrame()
+        res_a = earnings_timing.resolve_box3_content("MSFT", "Q1 FY2027", yf_ticker_obj=mock_t_empty)
+        self.assertEqual(res_a["mode"], "text")
+        self.assertIn("DRIVER STRATEGICO", res_a["title"])
+        self.assertTrue(len(res_a["text"]) > 10)
+
+    def test_fiscal_year_deduplication_sync(self):
+        """Verify that fiscal year quarter (Q1 FY2027) prevents duplicate publishing regardless of year key."""
+        import gist_storage
+        from unittest.mock import patch
+
+        fake_store = {}
+        with patch.object(gist_storage, "load_data", side_effect=lambda: {"posted_earnings": fake_store}), \
+             patch.object(gist_storage, "save_data", return_value=True):
+            # Save using fiscal year (2027)
+            gist_storage.mark_earnings_posted("MSFT", "Q1 FY2027", 2027, post_id="test-post-123")
+
+            # Check using calendar year (2026) -> MUST RETURN TRUE!
+            self.assertTrue(gist_storage.is_earnings_posted("MSFT", "Q1 FY2027", 2026))
+            # Check using fiscal year (2027) -> MUST RETURN TRUE!
+            self.assertTrue(gist_storage.is_earnings_posted("MSFT", "Q1 FY2027", 2027))
+            # Check without explicit year -> MUST RETURN TRUE!
+            self.assertTrue(gist_storage.is_earnings_posted("MSFT", "Q1 FY2027"))
 
     def test_publish_earnings_for_ticker_rejects_missing_eps_actual(self):
         """Calling publish_earnings_for_ticker without eps_actual on an unreleased ticker must reject."""

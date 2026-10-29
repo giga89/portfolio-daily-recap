@@ -72,6 +72,7 @@ def generate_earnings_card(
     weight_pct: Optional[float] = None,
     output_path: str = "output/earnings_card.png",
     lang: str = "it",
+    box3_data: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
     Generate a 1280x720 landscape Earnings Report Card.
@@ -99,7 +100,14 @@ def generate_earnings_card(
     rev_val = rev_actual or "In rilascio"
     rev_sub = f"YoY {rev_growth_yoy}" if rev_growth_yoy else "Dato in consolidamento"
 
-    guidance_val = guidance_text or "Commenti e guidance attesi in call"
+    # Box 3 resolution (Option C + B + A Fallback sequence)
+    b3 = box3_data or {}
+    b3_mode = b3.get("mode", "text")
+    b3_title = b3.get("title")
+    b3_metric = b3.get("metric")
+    b3_sub = b3.get("sub", "")
+    b3_lines = b3.get("lines", [])
+    b3_text = b3.get("text") or guidance_text or info.get("driver") or info.get("thesis", "Leadership di mercato e solidità dei flussi di cassa.")
     thesis_val = thesis_impact or info.get("thesis", "Rafforza la leadership di mercato e la marginalità.")
 
     # 1. Base Canvas
@@ -210,30 +218,60 @@ def generate_earnings_card(
     if rev_est:
         draw.text((b2_x + 20 + rev_pill_w + 14, b2_y + 114), f"vs stima {rev_est}", fill=C_MUTED, font=f_body)
 
-    # ── BOX 3: GUIDANCE & OUTLOOK (Bottom-Left) ──
+    # ── BOX 3: HIGHLIGHTS / REDDITIVITÀ / DRIVER STRATEGICO (Bottom-Left) ──
     b3_x, b3_y = b1_x, b1_y + grid_h + 16
     draw.rounded_rectangle([b3_x, b3_y, b3_x + grid_w, b3_y + grid_h], radius=16, fill=(*C_BOX, 240), outline=C_GOLD, width=1)
-    lbl3 = "OUTLOOK & GUIDANCE PROSSIMO TRIMESTRE" if lang == "it" else "OUTLOOK & NEXT QUARTER GUIDANCE"
-    draw.text((b3_x + 20, b3_y + 16), lbl3, fill=C_GOLD, font=f_box_title)
-    
-    # Wrap guidance text
-    words = guidance_val.split()
-    glines, current = [], ""
-    for w in words:
-        test = (current + " " + w).strip()
-        bb = draw.textbbox((0, 0), test, font=f_body)
-        if bb[2] - bb[0] < grid_w - 40:
-            current = test
-        else:
-            glines.append(current)
-            current = w
-    if current:
-        glines.append(current)
 
-    gy = b3_y + 52
-    for l in glines[:3]:
-        draw.text((b3_x + 20, gy), l, fill=C_WHITE, font=f_body)
-        gy += 28
+    if b3_mode == "metric" and b3_metric:
+        # Option B: Profitability / Cash KPI
+        lbl3 = b3_title or ("REDDITIVITÀ OPERATIVA" if lang == "it" else "OPERATING PROFITABILITY")
+        draw.text((b3_x + 20, b3_y + 16), lbl3, fill=C_GOLD, font=f_box_title)
+        draw.text((b3_x + 20, b3_y + 48), str(b3_metric), fill=C_WHITE, font=f_num)
+
+        pill_text = b3_sub or ("Margine Operativo" if lang == "it" else "Operating Margin")
+        p_bb = draw.textbbox((0, 0), pill_text, font=f_num_sub)
+        p_w = p_bb[2] - p_bb[0] + 24
+        draw.rounded_rectangle([b3_x + 20, b3_y + 105, b3_x + 20 + p_w, b3_y + 137], radius=8, fill=C_GOLD_TINT, outline=C_GOLD, width=1)
+        draw.text((b3_x + 32, b3_y + 112), pill_text, fill=C_GOLD, font=f_num_sub)
+        if b3.get("sub_note"):
+            draw.text((b3_x + 20 + p_w + 14, b3_y + 114), b3["sub_note"], fill=C_MUTED, font=f_body)
+
+    elif b3_mode == "bullets" and b3_lines:
+        # Option C: Operational Highlights
+        lbl3 = b3_title or ("HIGHLIGHT OPERATIVI TRIMESTRE" if lang == "it" else "OPERATIONAL HIGHLIGHTS")
+        draw.text((b3_x + 20, b3_y + 16), lbl3, fill=C_GOLD, font=f_box_title)
+        by = b3_y + 54
+        for line in b3_lines[:2]:
+            clean_line = line if line.startswith("•") else f"• {line}"
+            bb = draw.textbbox((0, 0), clean_line, font=f_body)
+            if bb[2] - bb[0] > grid_w - 40:
+                while bb[2] - bb[0] > grid_w - 55 and len(clean_line) > 10:
+                    clean_line = clean_line[:-4] + "..."
+                    bb = draw.textbbox((0, 0), clean_line, font=f_body)
+            draw.text((b3_x + 20, by), clean_line, fill=C_WHITE, font=f_body)
+            by += 36
+
+    else:
+        # Option A (Rock-solid Fallback): Curated Strategic Driver
+        lbl3 = b3_title or ("DRIVER STRATEGICO & CORE BUSINESS" if lang == "it" else "STRATEGIC DRIVER & CORE BUSINESS")
+        draw.text((b3_x + 20, b3_y + 16), lbl3, fill=C_GOLD, font=f_box_title)
+        words = b3_text.split()
+        glines, current = [], ""
+        for w in words:
+            test = (current + " " + w).strip()
+            bb = draw.textbbox((0, 0), test, font=f_body)
+            if bb[2] - bb[0] < grid_w - 40:
+                current = test
+            else:
+                glines.append(current)
+                current = w
+        if current:
+            glines.append(current)
+
+        gy = b3_y + 52
+        for l in glines[:3]:
+            draw.text((b3_x + 20, gy), l, fill=C_WHITE, font=f_body)
+            gy += 28
 
     # ── BOX 4: TESI & IMPATTO PORTAFOGLIO (Bottom-Right) ──
     b4_x, b4_y = b2_x, b3_y

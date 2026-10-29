@@ -311,6 +311,13 @@ def check_and_publish_earnings(dry_run: bool = False, lookback_days: int = 3) ->
 
             print(f"🎯 Verified Corporate Earnings released for ${ticker} ({quarter_str}): EPS {data['eps_actual']} (vs {data['eps_est'] or 'N/D'}), Rev: {data['rev_actual'] or 'In corso'}")
 
+            # Resolve Box 3 content via Option C + B + A Fallback with rigid verification
+            box3_data = earnings_timing.resolve_box3_content(
+                ticker=ticker,
+                quarter=quarter_str,
+                lang="it",
+            )
+
             res = publish_earnings_for_ticker(
                 ticker=ticker,
                 quarter=quarter_str,
@@ -320,6 +327,8 @@ def check_and_publish_earnings(dry_run: bool = False, lookback_days: int = 3) ->
                 eps_diff_pct=data.get("eps_diff_pct"),
                 rev_actual=data.get("rev_actual"),
                 rev_growth=data.get("rev_growth"),
+                box3_data=box3_data,
+                event_year=event_year,
                 dry_run=dry_run,
             )
             results.append(res)
@@ -345,6 +354,8 @@ def publish_earnings_for_ticker(
     rev_actual: Optional[str] = None,
     rev_growth: Optional[str] = None,
     guidance_text: Optional[str] = None,
+    box3_data: Optional[Dict[str, Any]] = None,
+    event_year: Optional[int] = None,
     dry_run: bool = False,
 ) -> Dict[str, Any]:
     """Publish a dedicated corporate earnings card & post for a specific ticker."""
@@ -374,6 +385,8 @@ def publish_earnings_for_ticker(
             rev_actual = rev_actual or data.get("rev_actual")
             rev_growth = rev_growth or data.get("rev_growth")
             quarter = quarter or data.get("quarter")
+            if event_year is None:
+                event_year = data["scheduled_dt"].year
         else:
             print(f"🛑 REJECTED: Reported EPS is not yet published or verified for ${clean_sym} ({reason}). Aborting publish to prevent fabricated figures.")
             return {"ticker": clean_sym, "success": False, "error": f"Reported EPS not released/verified for ${clean_sym}: {reason}"}
@@ -389,8 +402,13 @@ def publish_earnings_for_ticker(
     if eps_beat is None:
         eps_beat = True
 
-    # Guidance fallback: neutral and professional, never fake claims
-    guidance_text = guidance_text or "Commenti del management e outlook strategico approfonditi durante la earnings call."
+    # Resolve Box 3 content via Option C + B + A fallback if not passed
+    if box3_data is None:
+        box3_data = earnings_timing.resolve_box3_content(
+            ticker=clean_sym,
+            quarter=quarter,
+            lang="it",
+        )
 
     # Generate visual card
     out_card = f"output/earnings_card_{clean_sym.lower()}.png"
@@ -405,6 +423,7 @@ def publish_earnings_for_ticker(
         rev_actual=rev_actual,
         rev_growth_yoy=rev_growth,
         guidance_text=guidance_text,
+        box3_data=box3_data,
         weight_pct=weight_pct,
         output_path=out_card,
         lang="it",
@@ -421,6 +440,7 @@ def publish_earnings_for_ticker(
         rev_actual=rev_actual,
         rev_growth_yoy=rev_growth,
         guidance_text=guidance_text,
+        box3_data=box3_data,
         thesis_impact=info.get("thesis"),
         weight_pct=weight_pct,
     )
@@ -449,10 +469,11 @@ def publish_earnings_for_ticker(
     except Exception as e:
         print(f"⚠️ Telegram send error: {e}")
 
-    # Record in Gist deduplication (parse year from quarter if present, e.g. "Q4 2025")
-    import re as _re
-    year_match = _re.search(r"20\d{2}", str(quarter))
-    event_year = int(year_match.group(0)) if year_match else datetime.now(timezone.utc).year
+    # Record in Gist deduplication
+    if event_year is None:
+        import re as _re
+        year_match = _re.search(r"20\d{2}", str(quarter))
+        event_year = int(year_match.group(0)) if year_match else datetime.now(timezone.utc).year
     gist_storage.mark_earnings_posted(clean_sym, quarter, event_year, post_id=post_id)
 
     # Notify Andrea on Telegram

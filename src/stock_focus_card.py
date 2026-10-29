@@ -51,31 +51,36 @@ URL_TEXT = "etoro.com/people/andrearavalli"
 AUTHOR_TEXT = "Andrea Ravalli · Popular Investor"
 
 TICKER_THEMES = {
-    "PLTR": {"sector": "Enterprise AI & Difesa Governativo", "domain": "palantir.com", "thesis": "Dominio nei contratti governativi US e rapida espansione commerciale con AIP.", "color": (0, 220, 255)},
-    "NVDA": {"sector": "Chip AI & Acceleratori Grafici", "domain": "nvidia.com", "thesis": "Monopolio dell'ecosistema CUDA e architetture Blackwell per data center.", "color": (118, 185, 0)},
-    "MSFT": {"sector": "Cloud Azure & Software Enterprise", "domain": "microsoft.com", "thesis": "Integrazione di OpenAI in tutto l'ecosistema Windows, Office e Azure.", "color": (0, 164, 239)},
-    "AMZN": {"sector": "E-Commerce Globale & Cloud AWS", "domain": "amazon.com", "thesis": "Leadership assoluta di AWS e margini in forte espansione dalla pubblicità.", "color": (255, 153, 0)},
-    "GOOG": {"sector": "Search, Cloud & Intelligenza Artificiale", "domain": "google.com", "thesis": "Fossato difensivo nei motori di ricerca, YouTube e crescita di Google Cloud.", "color": (66, 133, 244)},
-    "CCJ":  {"sector": "Uranio & Combustibile Nucleare", "domain": "cameco.com", "thesis": "Deficit strutturale di offerta globale di uranio per la transizione nucleare.", "color": (255, 180, 0)},
-    "LLY":  {"sector": "Farmaceutica & Trattamenti GLP-1", "domain": "lilly.com", "thesis": "Leadership nei farmaci antidiabete e obesità con Mounjaro e Zepbound.", "color": (230, 40, 40)},
-    "NOVO-B.CO": {"sector": "Biotecnologie & Cura del Diabete", "domain": "novonordisk.com", "thesis": "Pioniere mondiale del GLP-1 con Ozempic e Wegovy, forte pipeline clinica.", "color": (0, 110, 200)},
-    "SX7PEX.DE": {"sector": "ETF Bancario Europeo", "domain": "stoxx.com", "thesis": "Elevati dividendi, solidità patrimoniale e redditività da tassi d'interesse.", "color": (70, 130, 240)},
-    "MRVL": {"sector": "Semiconduttori & Networking AI Data Center", "domain": "marvell.com", "thesis": "Leader nei chip ottici ad altissima velocità e silicio custom per hyperscaler.", "color": (0, 90, 180)},
-    "TSM":  {"sector": "Fonderia di Chip Avanzati", "domain": "tsmc.com", "thesis": "Produce oltre il 90% dei chip più avanzati al mondo a 3nm e 2nm.", "color": (220, 50, 50)},
-    "AVGO": {"sector": "Chip Custom & Networking AI", "domain": "broadcom.com", "thesis": "Dominio negli switch per cluster AI e integrazione strategica di VMware.", "color": (204, 0, 0)},
-    "VOW3.DE": {"sector": "Leader Automotive Globale", "domain": "volkswagen.com", "thesis": "Portafoglio marchi iconici, transizione software e dividendi generosi.", "color": (0, 70, 150)},
-    "1211.HK": {"sector": "Veicoli Elettrici & Batterie EV", "domain": "byd.com", "thesis": "Integrazione verticale completa dalle batterie alla produzione su larga scala.", "color": (30, 144, 255)},
-    "WMT": {"sector": "Retail Globale & Logistica Omnicanale", "domain": "walmart.com", "thesis": "Dominio nella grande distribuzione, crescita continua dell'e-commerce e margini dalla pubblicità retail.", "color": (0, 113, 206)},
+    "PLTR": {"sector": "Enterprise AI & Difesa Governativo", "domain": "palantir.com", "thesis": "Dominio nei contratti governativi US e rapida espansione commerciale con AIP.", "driver": "Adozione enterprise di AIP e contratti strategici per difesa e intelligence.", "color": (0, 220, 255)},
+    "NVDA": {"sector": "Chip AI & Acceleratori Grafici", "domain": "nvidia.com", "thesis": "Monopolio dell'ecosistema CUDA e architetture Blackwell per data center.", "driver": "Data Center & Blackwell: domanda trainata dai CSP globali per cluster di calcolo AI.", "color": (118, 185, 0)},
+    "MSFT": {"sector": "Cloud Azure & Software Enterprise", "domain": "microsoft.com", "thesis": "Integrazione di OpenAI in tutto l'ecosistema Windows, Office e Azure.", "driver": "Intelligent Cloud & Azure trainano la crescita enterprise con forte monetizzazione AI.", "color": (0, 164, 239)},
+    "AMZN": {"sector": "E-Commerce Globale & Cloud AWS", "domain": "amazon.com", "thesis": "Leadership assoluta di AWS e margini in forte espansione dalla pubblicità.", "driver": "Accelerazione di AWS Cloud e incremento dei margini operativi da pubblicità e logistica.", "color": (255, 153, 0)},
+    "GOOG": {"sector": "Search, Cloud & Intelligenza Artificiale", "domain": "google.com", "thesis": "Fossato difensivo nei motori di ricerca, YouTube e crescita di Google Cloud.", "driver": "Google Cloud in espansione e tenuta solida dei ricavi pubblicitari su Search e YouTube.", "color": (66, 133, 244)},
+    "CCJ":  {"sector": "Uranio & Combustibile Nucleare", "domain": "cameco.com", "thesis": "Deficit strutturale di offerta globale di uranio per la transizione nucleare.", "driver": "Contratti pluriennali a prezzo fisso elevato e sicurezza energetica nucleare globale.", "color": (255, 180, 0)},
+    "LLY":  {"sector": "Farmaceutica & Trattamenti GLP-1", "domain": "lilly.com", "thesis": "Leadership nei farmaci antidiabete e obesità con Mounjaro e Zepbound.", "driver": "Franchise GLP-1 (Mounjaro e Zepbound) ed espansione della capacità produttiva.", "color": (230, 40, 40)},
+    "NOVO-B.CO": {"sector": "Biotecnologie & Cura del Diabete", "domain": "novonordisk.com", "thesis": "Pioniere mondiale del GLP-1 con Ozempic e Wegovy, forte pipeline clinica.", "driver": "Volumi di Ozempic e Wegovy, nuove linee produttive e pipeline cardiometabolica.", "color": (0, 110, 200)},
+    "SX7PEX.DE": {"sector": "ETF Bancario Europeo", "domain": "stoxx.com", "thesis": "Elevati dividendi, solidità patrimoniale e redditività da tassi d'interesse.", "driver": "Redditività da margine di interesse (NII) e distribuzioni record di dividendi.", "color": (70, 130, 240)},
+    "MRVL": {"sector": "Semiconduttori & Networking AI Data Center", "domain": "marvell.com", "thesis": "Leader nei chip ottici ad altissima velocità e silicio custom per hyperscaler.", "driver": "Interconnessioni elettro-ottiche PAM4 per data center e chip custom per cloud.", "color": (0, 90, 180)},
+    "TSM":  {"sector": "Fonderia di Chip Avanzati", "domain": "tsmc.com", "thesis": "Produce oltre il 90% dei chip più avanzati al mondo a 3nm e 2nm.", "driver": "Saturazione produttiva sui nodi avanzati N3/N2 guidata dalla domanda di chip AI.", "color": (220, 50, 50)},
+    "AVGO": {"sector": "Chip Custom & Networking AI", "domain": "broadcom.com", "thesis": "Dominio negli switch per cluster AI e integrazione strategica di VMware.", "driver": "Switch AI Tomahawk/Jericho, chip ASIC proprietari e transizione VMware.", "color": (204, 0, 0)},
+    "VOW3.DE": {"sector": "Leader Automotive Globale", "domain": "volkswagen.com", "thesis": "Portafoglio marchi iconici, transizione software e dividendi generosi.", "driver": "Crescita dei marchi premium e disciplina dei costi nell'elettrificazione.", "color": (0, 70, 150)},
+    "1211.HK": {"sector": "Veicoli Elettrici & Batterie EV", "domain": "byd.com", "thesis": "Integrazione verticale completa dalle batterie alla produzione su larga scala.", "driver": "Espansione delle esportazioni globali ed economie di scala sulle batterie Blade.", "color": (30, 144, 255)},
+    "WMT": {"sector": "Retail Globale & Logistica Omnicanale", "domain": "walmart.com", "thesis": "Dominio nella grande distribuzione, crescita continua dell'e-commerce e margini dalla pubblicità retail.", "driver": "Crescita costante dell'e-commerce e margini ad alta redditività dal retail advertising.", "color": (0, 113, 206)},
 }
 
 for t, m in PORTFOLIO_ASSETS_METADATA.items():
+    catalysts = m.get("upside_catalysts", [])
+    default_driver = catalysts[0] if catalysts else m.get("thesis", "Leadership di mercato e solidità dei flussi di cassa.")
     if t not in TICKER_THEMES:
         TICKER_THEMES[t] = {
             "sector": m.get("sector", "Settore"),
             "domain": m.get("domain", f"{t.lower()}.com"),
             "thesis": m.get("thesis", ""),
+            "driver": default_driver,
             "color": m.get("color", (0, 200, 255))
         }
+    elif "driver" not in TICKER_THEMES[t]:
+        TICKER_THEMES[t]["driver"] = default_driver
 
 
 def _font(size: int) -> "ImageFont.FreeTypeFont":

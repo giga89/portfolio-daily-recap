@@ -2,13 +2,14 @@ name: Event Monitor (Earnings & Dividend Pay Days)
 
 on:
   # ── Automatic Daily Crons (Mon-Fri) ──
-  # 08:00 UTC (09:00/10:00 CET): European pre-market & prior-day AMC earnings
-  # 20:30 UTC (21:30 CET during US-EU DST overlap): US AMC first window
-  # 21:30 UTC (22:30 CET standard winter): US AMC second window / standard winter
+  # 08:00 UTC (09:00 CET / 10:00 CEST): European Morning window
+  #   -> Publishes prior-day AMC (POST) earnings after full call digestion & European morning releases
+  # 14:15 UTC (10:15 EDT summer) / 15:15 UTC (10:15 EST winter): Shortly after US Market Open
+  #   -> Publishes BMO (PRE) earnings once regular trading session and conference calls are digested
   schedule:
     - cron: '0 8 * * 1-5'
-    - cron: '30 20 * * 1-5'
-    - cron: '30 21 * * 1-5'
+    - cron: '15 14 * * 1-5'
+    - cron: '15 15 * * 1-5'
   repository_dispatch:
     types: [event_monitor, check_events, check_dividends, check_earnings, pay_day]
   workflow_dispatch:

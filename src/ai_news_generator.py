@@ -3513,6 +3513,7 @@ def _earnings_post_fallback(
     guidance_text: Optional[str] = None,
     thesis_impact: Optional[str] = None,
     weight_pct: Optional[float] = None,
+    box3_data: Optional[Dict[str, Any]] = None,
 ) -> str:
     clean_ticker = ticker.replace("$", "").strip().upper()
     cashtag = f"${clean_ticker}"
@@ -3520,7 +3521,21 @@ def _earnings_post_fallback(
     beat_str = "superando le stime degli analisti" if eps_beat else "in linea con la traiettoria operativa"
     eps_line = f"• Utile per Azione (EPS): {eps_actual} (vs stime {eps_est})" if eps_actual and eps_est else (f"• EPS: {eps_actual}" if eps_actual else "")
     rev_line = f"• Ricavi trimestrali: {rev_actual} ({rev_growth_yoy})" if rev_actual and rev_growth_yoy else (f"• Ricavi: {rev_actual}" if rev_actual else "")
-    guidance_line = f"• Outlook / Guidance: {guidance_text}\n" if guidance_text else ""
+
+    # Format Box 3 line based on fallback tier (C, B, or A)
+    box3_line = ""
+    if box3_data:
+        mode = box3_data.get("mode")
+        if mode == "metric" and box3_data.get("metric"):
+            sub = box3_data.get("sub", "Margine Operativo")
+            box3_line = f"• {box3_data.get('title', 'Redditività')}: {box3_data['metric']} ({sub})\n"
+        elif mode == "bullets" and box3_data.get("lines"):
+            box3_line = "\n".join(box3_data["lines"]) + "\n"
+        elif mode == "text" and box3_data.get("text"):
+            box3_line = f"• Driver strategico: {box3_data['text']}\n"
+    elif guidance_text:
+        box3_line = f"• Focus operativo: {guidance_text}\n"
+
     thesis_line = f"\nTesi di portafoglio: {thesis_impact}\n" if thesis_impact else ""
 
     text = (
@@ -3529,7 +3544,7 @@ def _earnings_post_fallback(
         f"I punti chiave della trimestrale:\n"
         f"{eps_line}\n"
         f"{rev_line}\n"
-        f"{guidance_line}"
+        f"{box3_line}"
         f"{thesis_line}\n"
         f"Con un peso del {weight_str} nel nostro portafoglio su eToro, confermiamo l'importanza di posizionarsi su business con bilanci solidi, forte generazione di cassa libera e barriere all'entrata difendibili.\n\n"
         f"Come valutate la reazione del mercato sui conti di {cashtag}?\n\n"
@@ -3551,16 +3566,18 @@ def generate_earnings_post(
     guidance_text: Optional[str] = None,
     thesis_impact: Optional[str] = None,
     weight_pct: Optional[float] = None,
+    box3_data: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
     Generate an Italian post for eToro commenting on corporate earnings release.
-    Analyzes EPS, revenue growth, guidance, and portfolio thesis impact.
+    Analyzes EPS, revenue growth, box3 driver/highlights, and portfolio thesis impact.
     """
     clean_ticker = ticker.replace("$", "").strip().upper()
     cashtag = f"${clean_ticker}"
     fallback = _earnings_post_fallback(
         ticker, company_name, quarter, eps_actual, eps_est, eps_beat,
-        rev_actual, rev_growth_yoy, guidance_text, thesis_impact, weight_pct
+        rev_actual, rev_growth_yoy, guidance_text, thesis_impact, weight_pct,
+        box3_data=box3_data,
     )
 
     if not GENAI_AVAILABLE:
@@ -3573,13 +3590,26 @@ def generate_earnings_post(
     weight_str = f"{weight_pct:.2f}%" if weight_pct else "strategico"
     beat_sentiment = "BATTUTE LE STIME (BEAT)" if eps_beat else "IN LINEA / SFIDE TEMPORANEE"
 
+    # Contextualize Box 3 focus for prompt
+    box3_context = "Guidance confermata e continuazione dell'esecuzione strategica."
+    if box3_data:
+        mode = box3_data.get("mode")
+        if mode == "metric" and box3_data.get("metric"):
+            box3_context = f"Redditività/Margini: {box3_data['metric']} ({box3_data.get('sub', 'Margine Operativo')})"
+        elif mode == "bullets" and box3_data.get("lines"):
+            box3_context = "Punti operativi chiave: " + "; ".join(box3_data["lines"])
+        elif mode == "text" and box3_data.get("text"):
+            box3_context = f"Driver strategico del business: {box3_data['text']}"
+    elif guidance_text:
+        box3_context = f"Focus operativo: {guidance_text}"
+
     prompt = f"""Sei Andrea Ravalli, Popular Investor Elite italiano su eToro.
 Scrivi un post tempestivo, chiaro e penetrante per commentare i risultati trimestrali appena pubblicati per uno dei titoli del nostro portafoglio:
 - Società: {company_name} ({cashtag})
 - Trimestre: {quarter}
 - Risultato EPS: {eps_actual or 'N/D'} vs Stime analisti: {eps_est or 'N/D'} ({beat_sentiment})
 - Fatturato/Ricavi: {rev_actual or 'N/D'} (Crescita YoY: {rev_growth_yoy or 'N/D'})
-- Guidance/Outlook: {guidance_text or 'Outlook confermato dal management.'}
+- Focus Operativo / Driver Chiave: {box3_context}
 - Tesi d'investimento nel portafoglio: {thesis_impact or 'Esposizione su megatrend strutturale di lungo termine.'}
 - Peso in portafoglio: {weight_str}
 

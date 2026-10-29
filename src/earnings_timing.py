@@ -9,8 +9,11 @@ Enforces:
 5. Safe quarterly revenue & YoY extraction (never annual TTM).
 """
 
+import os
+import re
 import datetime
 from datetime import timezone, timedelta
+import zoneinfo
 from typing import Optional, Dict, Any, Tuple
 import pandas as pd
 
@@ -159,6 +162,7 @@ def verify_earnings_release_status(
     yf_sym: str,
     lookback_days: int = 3,
     check_time: Optional[datetime.datetime] = None,
+    enforce_market_session_window: bool = True,
 ) -> Tuple[bool, Optional[Dict[str, Any]], str]:
     """
     Strictly verifies whether a corporate earnings report for `ticker` has ALREADY
@@ -203,7 +207,41 @@ def verify_earnings_release_status(
                     f"(in {hours_remaining:.1f}h). Market release time not reached yet.",
                 )
 
-            # ── GUARD 2: Reported EPS must be published and non-NaN ──
+            # ── GUARD 2: Session timing policy (POST -> European morning, PRE -> Shortly after US open) ──
+            if enforce_market_session_window:
+                import zoneinfo
+                ny_tz = zoneinfo.ZoneInfo("America/New_York")
+                dt_et = dt_utc.astimezone(ny_tz)
+                now_et = now_utc.astimezone(ny_tz)
+                is_european = any(ticker.endswith(sfx) for sfx in [".MI", ".DE", ".PA", ".AS", ".CO", ".L", ".NV"])
+
+                # AMC (Post-market close): Release hour in ET >= 15 (e.g. 16:00 ET / 20:00 UTC)
+                if dt_et.hour >= 15 or dt_utc.hour >= 19:
+                    # User rule: Hold until European morning (>= 07:00 UTC next morning / CET)
+                    # to ensure earnings call is finished, transcripts available, and numbers verified.
+                    if now_utc.date() <= dt_utc.date() or now_utc.hour < 7:
+                        return (
+                            False,
+                            None,
+                            f"Earnings for ${ticker} released AMC (post-market close). "
+                            f"Holding publication until European morning window (>= 08:00 UTC) "
+                            f"for complete earnings call digestion and verified data.",
+                        )
+
+                # BMO (Pre-market open): Release hour in ET < 12 (e.g. 06:00-09:00 ET)
+                elif (dt_et.hour < 12 or dt_utc.hour < 16) and not is_european:
+                    # User rule: Hold until shortly after US market open (>= 10:00 ET / ~14:15 UTC summer, 15:15 UTC winter)
+                    # to ensure consistent regular trading session data.
+                    if now_et.hour < 10:
+                        return (
+                            False,
+                            None,
+                            f"Earnings for ${ticker} released BMO (pre-market). "
+                            f"Holding publication until shortly after US market open (>= 10:00 ET) "
+                            f"to ensure regular session data consistency.",
+                        )
+
+            # ── GUARD 3: Reported EPS must be published and non-NaN ──
             rep_eps = row.get("Reported EPS")
             if pd.isna(rep_eps) or rep_eps is None:
                 return (
@@ -255,4 +293,170 @@ def verify_earnings_release_status(
 
     except Exception as e:
         return False, None, f"Error verifying earnings for {ticker}: {e}"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# BOX 3 RESOLUTION ENGINE: OPTION C + B + A FALLBACK WITH RIGID VERIFICATION
+# ══════════════════════════════════════════════════════════════════════════
+
+FORBIDDEN_BOX3_PHRASES = [
+    "commenti del management", "outlook strategico", "solida traiettoria",
+    "forte impegno", "domanda solida", "crescita sostenuta",
+    "continua ad accelerare", "risultati eccezionali", "approfonditi durante",
+    "earnings call", "prospettive future", "visione a lungo termine",
+    "in corso di valutazione", "in linea con le aspettative", "sostenuta dalla domanda",
+    "attesi in call", "conference call", "dettagli in call", "disclaimer",
+]
+
+
+def verify_option_c_highlights(ticker: str, lines: list) -> Tuple[bool, list, str]:
+    """Rigidly verifies Option C operational highlights against strict quality rules."""
+    if not lines or len(lines) < 2:
+        return False, [], "Option C requires at least 2 distinct operational bullet points"
+
+    clean_lines = []
+    for l in lines[:2]:
+        text = str(l).strip()
+        if text.startswith("•") or text.startswith("-"):
+            text = text[1:].strip()
+        if not text:
+            return False, [], "Empty bullet line"
+        if len(text) > 75:
+            return False, [], f"Bullet line exceeds maximum length ({len(text)} > 75 chars)"
+        lower = text.lower()
+        for f in FORBIDDEN_BOX3_PHRASES:
+            if f in lower:
+                return False, [], f"Contains forbidden generic boilerplate: '{f}'"
+
+        # Must have at least one concrete anchor: numbers, symbols (%, $, €) or recognized business entities
+        has_number = bool(re.search(r"\d", text)) or any(sym in text for sym in ["%", "$", "€", "£", "B", "M", "bps"])
+        has_business_entity = any(kw in lower for kw in [
+            "cloud", "azure", "aws", "gpu", "blackwell", "chip", "mounjaro", "zepbound",
+            "glp-1", "data center", "ricavi", "margini", "cassa", "fcf", "ebitda", "ebit",
+            "utile", "buyback", "dividendo", "contratti", "aip", "retail", "server", "nodi",
+            "fonderia", "rame", "eolico", "solare", "spedizioni", "volumi", "pre-market"
+        ])
+        if not (has_number or has_business_entity):
+            return False, [], f"Bullet lacks concrete quantitative or business entity: '{text}'"
+        clean_lines.append(f"• {text}")
+
+    return True, clean_lines, "Verified"
+
+
+def extract_option_c_bullets(ticker: str, quarter: str, raw_news: Optional[str] = None) -> Optional[list]:
+    """Attempt to generate 2 verified operational highlight bullets via AI cascade."""
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return None
+    try:
+        from google import genai
+        client = genai.Client(api_key=api_key)
+        prompt = f"""Sei un analista finanziario istituzionale. Estrai ESATTAMENTE 2 sintetici punti elenco operativi sui risultati trimestrali appena pubblicati per ${ticker} ({quarter}).
+News / Contesto: {raw_news or 'Trimestrale appena pubblicata'}
+
+REGOLE TASSATIVE:
+- Massimo 60 caratteri per punto.
+- Punto 1: Focus su prodotto/divisione chiave o crescita segmento principale.
+- Punto 2: Focus su margini, efficienza industriale o generazione di cassa.
+- ZERO opinioni, ZERO frasi vaghe, ZERO 'commenti del management'.
+- DEVI citare o un numero/percentuale o il nome specifico di un prodotto/divisione.
+- Rispondi SOLO con 2 righe, ciascuna che inizia con '• '."""
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+        )
+        if response and response.text:
+            raw_lines = [l.strip() for l in response.text.strip().split("\n") if l.strip()]
+            ok, verified, reason = verify_option_c_highlights(ticker, raw_lines)
+            if ok:
+                return verified
+            else:
+                print(f"⚠️ Option C candidate rejected by rigid gate: {reason}")
+    except Exception as e:
+        print(f"⚠️ Option C extraction note: {e}")
+    return None
+
+
+def resolve_box3_content(
+    ticker: str,
+    quarter: str,
+    yf_ticker_obj: Optional[Any] = None,
+    raw_news: Optional[str] = None,
+    lang: str = "it",
+) -> Dict[str, Any]:
+    """
+    Resolves Box 3 content following user-specified Option C + B + A fallback sequence:
+      1. Option C (Operational Highlights with Rigid Verification)
+      2. Option B (Profitability / Cash Quantitative KPI: Margin % or Net Income)
+      3. Option A (Curated Strategic Driver from portfolio metadata)
+    """
+    clean_sym = ticker.replace("$", "").strip().upper()
+
+    # ── 1. Attempt Option C (Verified Operational Highlights) ──
+    c_bullets = extract_option_c_bullets(clean_sym, quarter, raw_news=raw_news)
+    if c_bullets:
+        print(f"✅ Box 3: Option C verified highlights accepted for ${clean_sym}")
+        return {
+            "mode": "bullets",
+            "title": "HIGHLIGHT OPERATIVI TRIMESTRE" if lang == "it" else "OPERATIONAL HIGHLIGHTS",
+            "lines": c_bullets,
+            "source": "Option C (Verified Operational Highlights)",
+        }
+    else:
+        print(f"ℹ️ Box 3: Option C not available or rejected. Evaluating Option B for ${clean_sym}...")
+
+    # ── 2. Attempt Option B (Profitability / Cash Quantitative KPI) ──
+    try:
+        t = yf_ticker_obj or (yf.Ticker(clean_sym) if YFINANCE_AVAILABLE else None)
+        if t is not None:
+            q_stmt = getattr(t, "quarterly_income_stmt", None)
+            if q_stmt is not None and not q_stmt.empty:
+                col = q_stmt.columns[0]
+                if "Operating Income" in q_stmt.index and "Total Revenue" in q_stmt.index:
+                    op_inc = float(q_stmt.loc["Operating Income", col])
+                    tot_rev = float(q_stmt.loc["Total Revenue", col])
+                    if tot_rev > 0 and op_inc > 0:
+                        margin_pct = (op_inc / tot_rev) * 100
+                        print(f"✅ Box 3: Option B profitability KPI accepted for ${clean_sym}: Operating Margin {margin_pct:.1f}%")
+                        return {
+                            "mode": "metric",
+                            "title": "REDDITIVITÀ OPERATIVA" if lang == "it" else "OPERATING PROFITABILITY",
+                            "metric": f"{margin_pct:.1f}%",
+                            "sub": "Margine Operativo EBIT" if lang == "it" else "Operating Margin",
+                            "source": "Option B (Profitability KPI - Operating Margin)",
+                        }
+                if "Net Income" in q_stmt.index:
+                    net_inc = float(q_stmt.loc["Net Income", col])
+                    if net_inc > 0:
+                        y_info = getattr(t, "info", {}) or {}
+                        curr = get_currency_symbol(clean_sym, y_info)
+                        val_str = f"{curr}{net_inc/1e9:.1f}B" if net_inc >= 1e9 else f"{curr}{net_inc/1e6:.1f}M"
+                        print(f"✅ Box 3: Option B net income accepted for ${clean_sym}: {val_str}")
+                        return {
+                            "mode": "metric",
+                            "title": "UTILE NETTO TRIMESTRE" if lang == "it" else "NET INCOME",
+                            "metric": val_str,
+                            "sub": "Utile Netto GAAP" if lang == "it" else "GAAP Net Income",
+                            "source": "Option B (Profitability KPI - Net Income)",
+                        }
+    except Exception as e:
+        print(f"⚠️ Box 3 Option B evaluation note: {e}")
+
+    # ── 3. Option A Fallback (Curated Strategic Driver - Rock-Solid Bedrock) ──
+    print(f"ℹ️ Box 3: Option B not available. Using Option A (Curated Strategic Driver) for ${clean_sym}")
+    from stock_focus_card import TICKER_THEMES
+    info = TICKER_THEMES.get(clean_sym, {})
+    driver_text = info.get("driver")
+    if not driver_text:
+        from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+        meta = PORTFOLIO_ASSETS_METADATA.get(clean_sym, {})
+        catalysts = meta.get("upside_catalysts", [])
+        driver_text = catalysts[0] if catalysts else meta.get("thesis", "Leadership di mercato e solidità dei flussi di cassa.")
+
+    return {
+        "mode": "text",
+        "title": "DRIVER STRATEGICO & CORE BUSINESS" if lang == "it" else "STRATEGIC DRIVER & CORE BUSINESS",
+        "text": driver_text,
+        "source": "Option A (Curated Strategic Driver)",
+    }
 
