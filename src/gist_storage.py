@@ -8,6 +8,7 @@ import os
 import json
 import requests
 from datetime import datetime
+from typing import Optional, Dict, Any
 
 # Gist configuration
 GIST_ID = os.environ.get('GIST_ID', '')  # Will be set after first run
