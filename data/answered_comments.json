@@ -717,22 +717,69 @@
   "c09aa469-27ab-470b-be10-43937aa06674": {
     "post_id": "d2abf610-d377-11f1-8080-80016a842ba8",
     "author": "TopoTip",
-    "first_answered_at": "2026-10-29T10:11:51.491988+00:00",
-    "reply_ids": [],
-    "last_updated_at": "2026-10-29T10:11:51.492002+00:00"
+    "first_answered_at": "2026-10-29T10:02:15.911874+00:00",
+    "reply_ids": [
+      "6cf4db75-fdab-485f-8567-fd6f4128b3b2"
+    ],
+    "last_updated_at": "2026-10-29T10:02:15.911893+00:00"
   },
   "64c261f6-411a-4e8b-9d7c-74fe8f1fa90a": {
     "post_id": "783cc960-d1ed-11f1-8080-80003f53c260",
     "author": "FabioBertoldo",
-    "first_answered_at": "2026-10-29T10:11:54.722661+00:00",
+    "first_answered_at": "2026-10-29T09:57:17.209060+00:00",
     "reply_ids": [],
-    "last_updated_at": "2026-10-29T10:11:54.722674+00:00"
+    "last_updated_at": "2026-10-29T09:57:17.209073+00:00"
   },
   "775f986a-d692-4806-bfe9-27e2b7bd9778": {
     "post_id": "fe6f0280-d1e5-11f1-8080-8001700c515e",
     "author": "Massi_1989",
-    "first_answered_at": "2026-10-29T10:11:56.834703+00:00",
+    "first_answered_at": "2026-10-29T09:57:22.345300+00:00",
     "reply_ids": [],
-    "last_updated_at": "2026-10-29T10:11:56.834717+00:00"
+    "last_updated_at": "2026-10-29T09:57:22.345313+00:00"
+  },
+  "949eb7ff-68f2-4f0f-b866-1cc51eb2f8a8": {
+    "post_id": "986d3810-d313-11f1-8080-80015ccd83fb",
+    "author": "AndreaMella",
+    "first_answered_at": "2026-10-29T10:23:00.739565+00:00",
+    "reply_ids": [
+      "877fffb4-d1e1-4ee8-a1fe-3e56a9307a8b"
+    ],
+    "last_updated_at": "2026-10-29T10:23:00.739582+00:00"
+  },
+  "9f02275f-ddac-4067-b00a-b08e75fdc406": {
+    "post_id": "986d3810-d313-11f1-8080-80015ccd83fb",
+    "author": "Marios982",
+    "first_answered_at": "2026-10-29T10:23:03.655702+00:00",
+    "reply_ids": [
+      "6d905c67-dc93-47c8-a9f4-fc281b5143bd"
+    ],
+    "last_updated_at": "2026-10-29T10:23:03.655717+00:00"
+  },
+  "b969d206-17ec-46a1-abc3-1fece1253dfa": {
+    "post_id": "ff43c8e0-d2fc-11f1-8080-80015b54c645",
+    "author": "elenadianaionita",
+    "first_answered_at": "2026-10-29T10:23:06.706446+00:00",
+    "reply_ids": [
+      "625d16f5-2d67-4c63-a5ce-853b557edfb5"
+    ],
+    "last_updated_at": "2026-10-29T10:23:06.706464+00:00"
+  },
+  "906954f4-4de1-4642-99e8-8950f8191db0": {
+    "post_id": "a47c7d00-cef4-11f1-8080-800116cdaa7a",
+    "author": "TopoTip",
+    "first_answered_at": "2026-10-29T10:23:09.665501+00:00",
+    "reply_ids": [
+      "e8b3c7eb-aaac-4bbb-b120-330c14356d4a"
+    ],
+    "last_updated_at": "2026-10-29T10:23:09.665516+00:00"
+  },
+  "c205d1df-c2af-4aa6-9dd5-9f553db54c17": {
+    "post_id": "80091990-ce33-11f1-8080-80005f37692c",
+    "author": "Tigadava",
+    "first_answered_at": "2026-10-29T10:23:12.942790+00:00",
+    "reply_ids": [
+      "b22c1edc-86b6-4c48-8d7f-e015d4da56b9"
+    ],
+    "last_updated_at": "2026-10-29T10:23:12.942804+00:00"
   }
 }
