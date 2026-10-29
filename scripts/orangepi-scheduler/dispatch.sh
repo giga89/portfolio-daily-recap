@@ -102,18 +102,36 @@ if [ "$FORCE" != "true" ]; then
             echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP $SESSION — New York time is $NY_TIME, market not closed (waiting for 16:00 ET)" >> "$LOG_DIR/dispatch.log"
             exit 0
         fi
+    elif [ "$SESSION" = "event_monitor" ]; then
+        # If triggered in the afternoon window (>= 14:00 ITA), ensure US market has been open for at least 30 mins (NY time >= 10:00 ET)
+        CURRENT_ITA_HOUR=$(TZ=Europe/Rome date +%H)
+        if [ "$CURRENT_ITA_HOUR" -ge 14 ]; then
+            NY_TIME=$(TZ=America/New_York date +%H%M)
+            if [[ "$NY_TIME" < "1000" || "$NY_TIME" > "1200" ]]; then
+                echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP event_monitor (US Window) — New York time is $NY_TIME, waiting for >= 10:00 ET" >> "$LOG_DIR/dispatch.log"
+                exit 0
+            fi
+        fi
     fi
 fi
 
 # ---------------------------------------------------------------------------
 # Dedup: prevent duplicate dispatches for the same session on the same day.
 # - stock_news runs 3x daily (morning, afternoon, evening); deduplicates by hour bucket.
+# - event_monitor runs 2x daily (European morning & post-US-open); deduplicates by window bucket.
 # - all other sessions run once daily; deduplicates strictly once per day.
 # ---------------------------------------------------------------------------
 TODAY=$(date -u +%Y-%m-%d)
 CURRENT_HOUR=$(date -u +%H)
 if [ "$SESSION" = "stock_news" ]; then
     DEDUP_KEY="stock_news:${CURRENT_HOUR}"
+elif [ "$SESSION" = "event_monitor" ]; then
+    CURRENT_ITA_HOUR=$(TZ=Europe/Rome date +%H)
+    if [ "$CURRENT_ITA_HOUR" -ge 14 ]; then
+        DEDUP_KEY="event_monitor:us_open_window"
+    else
+        DEDUP_KEY="event_monitor:eu_morning_window"
+    fi
 else
     DEDUP_KEY="${SESSION}"
 fi

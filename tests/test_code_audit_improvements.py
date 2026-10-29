@@ -398,8 +398,10 @@ class TestEventMonitorQuarterYearExtraction(unittest.TestCase):
     @patch("event_monitor.telegram_sender.send_telegram_photo", return_value=True)
     @patch("event_monitor.telegram_sender.send_telegram_message", return_value=True)
     @patch("event_monitor.gist_storage.mark_earnings_posted")
+    @patch("event_monitor.analytics_tracker.record_post")
     def test_publish_earnings_for_ticker_extracts_year_from_quarter(
         self,
+        _mock_record_post,
         mock_mark_earnings,
         _mock_tg_msg,
         _mock_tg_photo,

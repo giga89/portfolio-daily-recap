@@ -1076,6 +1076,8 @@ def find_unreplied_comments(
     """
     Scans posts published within the last `days_back` days (default: 7) and returns
     comments by other users needing a reply (STRICT 1-shot: max 1 reply per thread, no loops/duplicates).
+    Discovers posts dynamically from live eToro feed (all posts on user profile: automated + manual),
+    complemented by local post_analytics.json and Gist storage.
     """
     unreplied = []
 
@@ -1085,8 +1087,17 @@ def find_unreplied_comments(
 
     answered_db = load_answered_comments()
 
-    # 1. Load posts from local analytics & gist
+    # 1. Fetch live posts directly from user's eToro feed (includes manual and automated posts)
     posts_candidates = []
+    try:
+        live_feed_posts = etoro_client.get_user_feed_posts(days_back=days_back)
+        if live_feed_posts:
+            print(f"📡 Recuperati {len(live_feed_posts)} post direttamente dal live feed eToro di @{my_username}.")
+            posts_candidates.extend(live_feed_posts)
+    except Exception as e:
+        print(f"⚠️ Errore nel recupero del feed eToro: {e}")
+
+    # 2. Complement with posts from local analytics & gist
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     local_analytics_path = os.path.join(root_dir, "data", "post_analytics.json")
     if os.path.exists(local_analytics_path):
@@ -1103,12 +1114,22 @@ def find_unreplied_comments(
     except Exception:
         pass
 
-    # Deduplicate posts by ID
+    # Deduplicate posts by ID, preserving richer metadata
     unique_posts = {}
     for p in posts_candidates:
         p_id = p.get("id") or p.get("post_id")
-        if p_id and p_id not in unique_posts:
+        if not p_id:
+            continue
+        if p_id not in unique_posts:
             unique_posts[p_id] = p
+        else:
+            existing = unique_posts[p_id]
+            # Merge tickers if existing is empty
+            if not existing.get("tickers") and p.get("tickers"):
+                existing["tickers"] = p.get("tickers")
+            # Preserve comments_count if present in one of them
+            if "comments_count" in p and "comments_count" not in existing:
+                existing["comments_count"] = p["comments_count"]
 
     # Filter to posts from last `days_back` days
     cutoff_time = datetime.now(timezone.utc) - timedelta(days=days_back)
@@ -1129,7 +1150,7 @@ def find_unreplied_comments(
         else:
             recent_posts.append(p)
 
-    print(f"🔍 Trovati {len(recent_posts)} post pubblicati negli ultimi {days_back} giorni.")
+    print(f"🔍 Trovati {len(recent_posts)} post unici pubblicati negli ultimi {days_back} giorni (live feed + archivio).")
 
     total_comments_scanned = 0
     total_user_comments_found = 0
@@ -1139,8 +1160,19 @@ def find_unreplied_comments(
         if not post_id:
             continue
 
-        time.sleep(0.3)  # Gentle delay to prevent eToro API HTTP 429 rate limit
-        raw_comments = etoro_client.get_post_comments(post_id)
+        # Fast path 1: if live feed confirmed 0 comments, skip API call to save rate limit
+        if p.get("comments_count") == 0:
+            continue
+
+        # Fast path 2: if all comments are already embedded in live feed, use them directly
+        embedded = p.get("embedded_comments", [])
+        comments_cnt = p.get("comments_count")
+        if embedded and comments_cnt is not None and len(embedded) >= comments_cnt:
+            raw_comments = embedded
+        else:
+            time.sleep(0.3)  # Gentle delay to prevent eToro API HTTP 429 rate limit
+            raw_comments = etoro_client.get_post_comments(post_id)
+
         if not raw_comments:
             continue
 
@@ -1159,8 +1191,9 @@ def find_unreplied_comments(
                 print(f"ℹ️ Commento {c_id[:8]} da @{owner} già evaso in memoria persistente.")
                 continue
 
-            # Fetch live replies if not embedded
-            if not replies:
+            # Fetch live replies if not embedded and replies exist
+            replies_cnt = c.get("repliesCount", c.get("entity", {}).get("repliesCount", 0)) if isinstance(c, dict) else 0
+            if not replies and replies_cnt > 0:
                 live_replies = etoro_client.get_comment_replies(post_id, c_id)
                 if live_replies:
                     replies = live_replies

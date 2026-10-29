@@ -19,7 +19,7 @@ All cron entries are scheduled directly in Italian local time (`Europe/Rome` - C
 |---|---|---|---|
 | **EU Open** | Mon–Fri 09:02 | 09:00 Milan/Frankfurt, 08:00 London | European market open recap |
 | **Dividend Post** | Mon, Thu 09:45 | — | Dividend announcements check |
-| **Event Monitor** | Mon–Fri 10:00 | — | Corporate earnings & dividend pay days |
+| **Event Monitor** | Mon–Fri 10:00 & 15:15/16:15 | — / 10:15 New York | Corporate earnings (prior-day AMC morning & BMO post-US open) + dividend pay days |
 | **Weekly (Sat)** | Sat 10:00 | — | Saturday weekly portfolio recap |
 | **Stock News** | Daily 11:30, 17:00, 23:30 | — | Catalyst follow-ups (3x daily) |
 | **Copy Trading** | Mon–Fri 13:30 / Sat 12:00 | — | Educational copy trading post |

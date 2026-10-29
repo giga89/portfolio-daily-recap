@@ -20,3 +20,9 @@
 ## 3. GitHub Actions Verification
 - Use GitHub CLI (`gh run list`, `gh api`) to monitor and verify workflow runs after triggering or pushing changes.
 - Never leave broken workflow runs uninvestigated.
+
+## 4. Orange Pi Scheduler Synchronization (MANDATORY)
+- Whenever workflow schedules, crons, market session hours, or event triggers are added, modified, or shifted in GitHub Actions (`.github/workflows/*.yml`):
+  - **You MUST ALWAYS update and synchronize the Orange Pi 5 scheduler files in `scripts/orangepi-scheduler/`** (`crontab.txt`, `dispatch.sh`, and `README.md`).
+  - Ensure timezone awareness (`Europe/Rome` vs `America/New_York`), market open/close protection guards, and deduplication keys in `dispatch.sh` match the new session timing.
+  - Never allow Orange Pi cron schedules to drift or become inconsistent with GitHub Actions workflows.

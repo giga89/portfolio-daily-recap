@@ -16,8 +16,17 @@ CRON_TZ=Europe/Rome
 # ── Dividend Announcement Check (Mon & Thu 09:45 ITA) ─────────────────────────
 45 9 * * 1,4      /opt/portfolio-dispatch/dispatch.sh dividend_post >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
-# ── Event Monitor (Earnings & Dividend Pay Days - Mon-Fri 10:00 ITA) ──────────
+# ── Event Monitor (Earnings & Dividend Pay Days) ──────────────────────────────
+# Window 1 (Mattina Europea - Mon-Fri 10:00 ITA):
+#   Prior-day AMC (post-market close) earnings after full call digestion & European morning releases
 0 10 * * 1-5      /opt/portfolio-dispatch/dispatch.sh event_monitor >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
+# Window 2 (Poco dopo apertura USA - Mon-Fri):
+#   BMO (pre-market open) earnings once regular trading session is established (~10:15 ET)
+#   - Normal (summer EDT & winter EST): 16:15 ITA
+#   - Transition weeks (autumn/spring mismatch): 15:15 ITA
+#   dispatch.sh verifies New York time >= 10:00 ET and auto-deduplicates.
+15 15,16 * * 1-5  /opt/portfolio-dispatch/dispatch.sh event_monitor >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
 # ── Stock News & Catalyst Follow-up Check - Morning (Daily 11:30 ITA) ─────────
 30 11 * * *       /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1

@@ -227,6 +227,18 @@ def publish_dividend_for_ticker(
             image_path=card_path,
         )
         post_id = etoro_sender.LAST_PUBLISHED_POST_ID
+        if ok_etoro and post_id:
+            try:
+                analytics_tracker.record_post(
+                    platform="etoro",
+                    post_id=post_id,
+                    session_name=f"Dividend Pay Day: ${clean_sym}",
+                    text=post_text,
+                    image_type="dividend_card",
+                    tickers=[clean_sym],
+                )
+            except Exception as e:
+                print(f"⚠️ Warning recording dividend post analytics: {e}")
 
     # Dispatch to Telegram, Twitter, Bluesky
     try:
@@ -462,6 +474,18 @@ def publish_earnings_for_ticker(
             image_path=card_path,
         )
         post_id = etoro_sender.LAST_PUBLISHED_POST_ID
+        if ok_etoro and post_id:
+            try:
+                analytics_tracker.record_post(
+                    platform="etoro",
+                    post_id=post_id,
+                    session_name=f"Earnings Release: ${clean_sym} {quarter}",
+                    text=post_text,
+                    image_type="earnings_card",
+                    tickers=[clean_sym],
+                )
+            except Exception as e:
+                print(f"⚠️ Warning recording earnings post analytics: {e}")
 
     # Dispatch to Telegram, Twitter, Bluesky
     try:

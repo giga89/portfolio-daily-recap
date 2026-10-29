@@ -35,9 +35,10 @@ class TestCooldownAndWeekendStrategy(unittest.TestCase):
 
         with patch.dict(os.environ, {"FORCE_RUN": "false"}):
             with patch("gist_storage.get_last_etoro_post", return_value=mock_post):
-                can_post, reason = social_publisher.check_cooldown_and_similarity("European market open", min_cooldown_minutes=75)
-                self.assertFalse(can_post)
-                self.assertIn("COOLDOWN ACTIVE", reason)
+                with patch("os.path.exists", return_value=False):
+                    can_post, reason = social_publisher.check_cooldown_and_similarity("European market open", min_cooldown_minutes=75)
+                    self.assertFalse(can_post)
+                    self.assertIn("COOLDOWN ACTIVE", reason)
 
     def test_cooldown_allows_after_interval(self):
         """Ensure post is allowed if last post was 90 minutes ago (> 75 min threshold)."""

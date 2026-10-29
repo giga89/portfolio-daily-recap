@@ -15,7 +15,9 @@ Supports:
 import os
 import json
 import time
+import re
 import requests
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, List, Tuple
 
 import uuid
@@ -661,6 +663,126 @@ def like_post(post_id: str) -> bool:
     except Exception as e:
         print(f"⚠️ Error liking post {post_id}: {e}")
         return False
+
+
+
+_cached_gcid: Optional[int] = None
+
+
+def get_user_gcid() -> int:
+    """
+    Returns the user's gcid needed for feed endpoints (/api/v1/feeds/users/{gcid}).
+    Queries /api/v1/me and caches result, falling back to 8029424 (AndreaRavalli) if unavailable.
+    """
+    global _cached_gcid
+    if _cached_gcid:
+        return _cached_gcid
+
+    headers = get_headers()
+    if headers:
+        try:
+            resp = requests.get(f"{BASE_URL}/api/v1/me", headers=headers, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json()
+                gcid = data.get("gcid")
+                if gcid:
+                    _cached_gcid = int(gcid)
+                    return _cached_gcid
+        except Exception:
+            pass
+    _cached_gcid = 8029424
+    return _cached_gcid
+
+
+def get_user_feed_posts(days_back: int = 7, max_posts: int = 60) -> List[Dict[str, Any]]:
+    """
+    Fetches the live feed of posts from the user's profile (/api/v1/feeds/users/{gcid}).
+    Discovers ALL posts on the profile (both automated bot posts and posts written manually by Andrea).
+    Returns normalized posts containing id, published_at, title, content, tickers, comments_count, embedded_comments.
+    """
+    headers = get_headers()
+    if not headers:
+        return []
+
+    gcid = get_user_gcid()
+    cutoff_time = datetime.now(timezone.utc) - timedelta(days=days_back)
+
+    posts = []
+    take = min(max_posts, 50)
+    offset = 0
+
+    while len(posts) < max_posts:
+        url = f"{BASE_URL}/api/v1/feeds/users/{gcid}?take={take}&offset={offset}&reactionsPageSize=50"
+        try:
+            resp = requests.get(url, headers=headers, timeout=15)
+            if resp.status_code != 200:
+                print(f"⚠️ Feed fetch error (HTTP {resp.status_code}): {resp.text[:100]}")
+                break
+
+            data = resp.json()
+            discussions = data.get("discussions", [])
+            if not discussions:
+                break
+
+            reached_cutoff = False
+            for d in discussions:
+                p = d.get("post", {})
+                pid = p.get("id")
+                if not pid:
+                    continue
+
+                created_str = p.get("created")
+                if created_str:
+                    try:
+                        clean_created = created_str.replace("Z", "+00:00")
+                        dt = datetime.fromisoformat(clean_created)
+                        if dt.tzinfo is None:
+                            dt = dt.replace(tzinfo=timezone.utc)
+                        if dt < cutoff_time:
+                            reached_cutoff = True
+                            break
+                    except Exception:
+                        pass
+
+                msg = p.get("message", {})
+                content = (msg.get("text") if isinstance(msg, dict) else str(msg)) or ""
+                first_line = content.split("\n")[0].strip() if content else "eToro Post"
+
+                tickers = []
+                for tag in p.get("tags", []):
+                    sym = tag.get("market", {}).get("symbolName")
+                    if sym and sym not in tickers:
+                        tickers.append(sym)
+                for m in re.findall(r"\$([A-Za-z0-9_.-]+)", content):
+                    clean_m = m.strip().upper()
+                    if clean_m not in tickers:
+                        tickers.append(clean_m)
+
+                cd = d.get("commentsData", {})
+                total_comments = cd.get("reactionPaging", {}).get("totalCount", 0)
+                embedded_comments = cd.get("comments", [])
+
+                posts.append({
+                    "id": pid,
+                    "post_id": pid,
+                    "published_at": created_str,
+                    "title": first_line,
+                    "session_name": first_line,
+                    "content": content,
+                    "tickers": tickers,
+                    "comments_count": total_comments,
+                    "embedded_comments": embedded_comments,
+                    "source": "etoro_live_feed",
+                })
+
+            if reached_cutoff or len(discussions) < take:
+                break
+            offset += len(discussions)
+        except Exception as e:
+            print(f"⚠️ Exception fetching user feed: {e}")
+            break
+
+    return posts
 
 
 def get_post_comments(post_id: str) -> List[Dict[str, Any]]:
