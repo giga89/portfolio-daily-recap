@@ -33,6 +33,12 @@ import time
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List, Optional, Tuple
 
+# Ensure unbuffered output in CI / background executions
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(line_buffering=True)
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(line_buffering=True)
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Load local .env if available
@@ -520,7 +526,8 @@ Provide your verdict in exact JSON format:
 Output ONLY valid JSON.
 """
 
-    client = genai.Client(api_key=api_key)
+    http_opts = types.HttpOptions(timeout=20.0) if (HAS_GENAI and hasattr(types, "HttpOptions")) else None
+    client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
 
     # Use prioritized reviewer models starting with the best reasoning model
     reviewers = [m for m in REVIEWER_GEMINI_MODELS if m in DEFAULT_GEMINI_MODELS] or DEFAULT_GEMINI_MODELS
@@ -826,12 +833,14 @@ CRITICAL RULES:
 """
 
     if HAS_GENAI and api_key:
-        client = genai.Client(api_key=api_key)
+        http_opts = types.HttpOptions(timeout=25.0) if (HAS_GENAI and hasattr(types, "HttpOptions")) else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
 
         for attempt in range(2):
             for model_name in DEFAULT_GEMINI_MODELS:
                 try:
                     # Pass 1: Draft Generation
+                    print(f"   🤖 [Pass 1/Tentativo {attempt+1}] Interrogazione {model_name}...")
                     response = client.models.generate_content(
                         model=model_name,
                         contents=prompt,
