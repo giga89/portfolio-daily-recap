@@ -85,6 +85,21 @@ class TestUniversalDualCheck(unittest.TestCase):
         ok_c, _, _ = verify_and_clean_comment(bad_comment_meli, run_ai_review=False)
         self.assertFalse(ok_c, "Comment containing MELI must be rejected")
 
+    def test_purged_asset_wcld_blocked(self):
+        """Purged asset WCLD / WCLD.L must be blocked deterministically."""
+        bad_comment_wcld = "Abbiamo $WCLD.L in portafoglio per la crescita del cloud computing."
+        is_ok, issues, _ = verify_post_deterministic(bad_comment_wcld)
+        self.assertFalse(is_ok, "WCLD.L should be flagged as critical error")
+        self.assertTrue(any("dismesso" in i or "WCLD" in i for i in issues))
+
+        bad_text_wcld = "L'ETF WisdomTree Cloud Computing WCLD offre una copertura sul SaaS."
+        is_ok_w, issues_w, _ = verify_post_deterministic(bad_text_wcld)
+        self.assertFalse(is_ok_w, "WCLD text should be flagged as critical error")
+        self.assertTrue(any("dismesso" in i or "WCLD" in i for i in issues_w))
+
+        ok_c, _, _ = verify_and_clean_comment(bad_comment_wcld, run_ai_review=False)
+        self.assertFalse(ok_c, "Comment containing WCLD.L must be rejected")
+
     def test_accumulating_etf_comment_blocked(self):
         """Dividend claims on accumulating ETF WDEF.L must fail deterministic check."""
         hallucinated_reply = "@copier $WDEF.L è un ottimo ETF che stacca un generoso dividendo trimestrale per i nostri flussi di cassa."

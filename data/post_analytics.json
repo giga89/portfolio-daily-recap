@@ -605,7 +605,6 @@
       "tickers": [
         "ENI.MI",
         "MRVL",
-        "WCLD.L",
         "TRIG.L",
         "TSM"
       ],
@@ -829,7 +828,6 @@
       "tickers": [
         "PLTR",
         "PRY.MI",
-        "WCLD.L",
         "NVDA",
         "INDO.PA"
       ],
@@ -915,7 +913,6 @@
       "title": "🌅 APERTURA MERCATI EUROPEI 🇪🇺  ⚖️ ⚖️ ⚖️ STABILE / LIEVE CALO ⚖️: -0.33% ⚖️ ⚖️ ⚖️...",
       "tickers": [
         "NOVO-B.CO",
-        "WCLD.L",
         "VOW3.DE",
         "ENI.MI",
         "1919.HK"
@@ -940,7 +937,6 @@
         "INDO.PA",
         "LLY",
         "HUM",
-        "WCLD.L",
         "ABBV"
       ],
       "image_type": "winners_losers_card",
@@ -988,8 +984,7 @@
         "INDO.PA",
         "LLY",
         "ENI.MI",
-        "ABBV",
-        "WCLD.L"
+        "ABBV"
       ],
       "image_type": "winners_losers_card",
       "likes": 3,
@@ -1034,8 +1029,7 @@
         "AMZN",
         "PLTR",
         "MRVL",
-        "TSM",
-        "WCLD.L"
+        "TSM"
       ],
       "image_type": "winners_losers_card",
       "likes": 2,
@@ -1349,7 +1343,6 @@
       "title": "🌅 APERTURA WALL STREET 🇺🇸  ⚖️ ⚖️ ⚖️ STABILE / LIEVE CALO ⚖️: -0.08% ⚖️ ⚖️ ⚖️ 🏔️...",
       "tickers": [
         "WDEF.L",
-        "WCLD.L",
         "VOW3.DE",
         "IQQL.DE",
         "PLTR"
@@ -1773,7 +1766,6 @@
       "hour_local": 9,
       "title": "🌅 APERTURA MERCATI EUROPEI 🇪🇺  🌱 🌱 🌱 LIEVE CRESCITA 🌱: +0.43% 🌱 🌱 🌱 🏔️ Distanza...",
       "tickers": [
-        "WCLD.L",
         "GLEN.L",
         "1919.HK",
         "VOW3.DE",
@@ -1867,7 +1859,6 @@
       "title": "🌅 APERTURA WALL STREET 🇺🇸  ⚖️ ⚖️ ⚖️ STABILE / LIEVE CALO ⚖️: -0.12% ⚖️ ⚖️ ⚖️ 🏔️...",
       "tickers": [
         "WDEF.L",
-        "WCLD.L",
         "ABT.US",
         "SX7PEX.DE",
         "TRIG.L"
@@ -1908,7 +1899,6 @@
       "hour_local": 9,
       "title": "🌅 APERTURA MERCATI EUROPEI 🇪🇺  🌱 🌱 🌱 LIEVE CRESCITA 🌱: +0.39% 🌱 🌱 🌱 🏔️ Distanza...",
       "tickers": [
-        "WCLD.L",
         "GLEN.L",
         "VOW3.DE",
         "IQQL.DE",
@@ -1934,8 +1924,7 @@
         "HUM",
         "PLTR",
         "1211.HK",
-        "AMZN",
-        "WCLD.L"
+        "AMZN"
       ],
       "image_type": "meme_card",
       "likes": 2,
@@ -1957,8 +1946,7 @@
         "HUM",
         "PLTR",
         "1211.HK",
-        "AMZN",
-        "WCLD.L"
+        "AMZN"
       ],
       "image_type": "meme_card",
       "likes": 2,
@@ -2048,7 +2036,6 @@
         "HUM",
         "PLTR",
         "1211.HK",
-        "WCLD.L",
         "AMZN"
       ],
       "image_type": "meme_card",
@@ -2118,7 +2105,6 @@
         "HUM",
         "1211.HK",
         "GLEN.L",
-        "WCLD.L",
         "1919.HK"
       ],
       "image_type": "meme_card",
@@ -2520,7 +2506,6 @@
       "title": "🌅 APERTURA WALL STREET 🇺🇸  ✅ ✅ ✅ OTTIMA GIORNATA! 🟢: +0.66% ✅ ✅ ✅ 🏔️ Distanza da...",
       "tickers": [
         "CCJ",
-        "WCLD.L",
         "SX7PEX.DE",
         "AZN.L",
         "MRVL"
@@ -2564,8 +2549,7 @@
         "PRY.MI",
         "GLEN.L",
         "INDO.PA",
-        "ENEL.MI",
-        "WCLD.L"
+        "ENEL.MI"
       ],
       "image_type": "winners_losers_card",
       "likes": 0,
@@ -2649,8 +2633,7 @@
         "PRY.MI",
         "GLEN.L",
         "INDO.PA",
-        "ENEL.MI",
-        "WCLD.L"
+        "ENEL.MI"
       ],
       "image_type": "winners_losers_card",
       "likes": 0,
@@ -2852,7 +2835,6 @@
       "tickers": [
         "PRY.MI",
         "MRVL",
-        "WCLD.L",
         "GLEN.L",
         "ETOR"
       ],
@@ -2892,7 +2874,6 @@
       "hour_local": 9,
       "title": "🌅 APERTURA MERCATI EUROPEI 🇪🇺  ⚖️ ⚖️ ⚖️ STABILE / LIEVE CALO ⚖️: -0.11% ⚖️ ⚖️ ⚖️...",
       "tickers": [
-        "WCLD.L",
         "VOF.L",
         "GLEN.L",
         "1919.HK",
@@ -2915,7 +2896,6 @@
       "hour_local": 22,
       "title": "🌆 CHIUSURA DEI MERCATI 📈  🩸 🩸 🩸 GIORNATA DIFFICILE 🩸: -0.61% 🩸 🩸 🩸 🏔️ Distanza d...",
       "tickers": [
-        "WCLD.L",
         "PLTR",
         "MRVL",
         "NVDA",
@@ -2985,7 +2965,6 @@
       "hour_local": 15,
       "title": "🌅 APERTURA WALL STREET 🇺🇸  ⚖️ ⚖️ ⚖️ STABILE / LIEVE CALO ⚖️: -0.23% ⚖️ ⚖️ ⚖️ 🏔️...",
       "tickers": [
-        "WCLD.L",
         "PRY.MI",
         "GOOGL",
         "MSFT",
@@ -3054,7 +3033,6 @@
       "hour_local": 21,
       "title": "📅 RESOCONTO MENSILE PORTAFOGLIO 🗓️  ⚖️ ⚖️ ⚖️ STABILE / LIEVE CALO ⚖️: -0.25% ⚖️...",
       "tickers": [
-        "WCLD.L",
         "NVDA",
         "AMZN",
         "TRX",
@@ -3595,7 +3573,6 @@
       "title": "🌅 APERTURA MERCATI EUROPEI 🇪🇺  ⚖️ ⚖️ ⚖️ STABILE / LIEVE CALO ⚖️: -0.01% ⚖️ ⚖️ ⚖️...",
       "tickers": [
         "ENI.MI",
-        "WCLD.L",
         "WDEF.L",
         "INDO.PA",
         "GLEN.L"
@@ -3641,7 +3618,6 @@
       "tickers": [
         "1919.HK",
         "LLY",
-        "WCLD.L",
         "ENI.MI",
         "ULVR.L"
       ],
@@ -3706,7 +3682,6 @@
       "tickers": [
         "PLTR",
         "ENI.MI",
-        "WCLD.L",
         "GLEN.L",
         "VOF.L"
       ],
@@ -3818,7 +3793,6 @@
       "tickers": [
         "PRY.MI",
         "SX7PEX.DE",
-        "WCLD.L",
         "WDEF.L",
         "ENEL.MI"
       ],
@@ -4380,7 +4354,6 @@
       "hour_local": 22,
       "title": "🌆 CHIUSURA DEI MERCATI 📈  🩸 🩸 🩸 GIORNATA DIFFICILE 🩸: -0.66% 🩸 🩸 🩸 🏔️ Distanza d...",
       "tickers": [
-        "WCLD.L",
         "WDEF.L",
         "ENI.MI",
         "MRVL",

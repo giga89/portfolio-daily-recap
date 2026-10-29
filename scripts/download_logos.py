@@ -86,7 +86,6 @@ DOMAIN_MAP = {
     "IEMG":       "ishares.com",
     "IB01.L":     "ishares.com",
     "WDEF.L":     "wisdomtree.com",
-    "WCLD.L":     "wisdomtree.com",
     "INDO.PA":    "amundi.com",
     "PPFB.DE":    "ishares.com",
     "VOF.L":      "vinacapital.com",

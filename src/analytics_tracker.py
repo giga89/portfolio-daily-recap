@@ -387,7 +387,6 @@ HOLDINGS_DATA = [
     {"ticker": "IQQL.DE", "name": "iShares Listed Private Equity", "emoji": "🔥", "asset_class": "ETF", "curr": "EUR", "sector": "Listed Private Equity", "geo": "Global", "tier": "Alternative Asset", "desc": "Liquid access to the world's premier alternative asset managers and buyout leaders (Blackstone, KKR, Carlyle)."},
     {"ticker": "IB01.L", "name": "iShares $ Treasury 0-1yr ETF", "emoji": "💵", "asset_class": "Fixed Income", "curr": "USD", "sector": "Ultra-Short US Treasuries", "geo": "USA", "tier": "Cash Yield & Dry Powder", "desc": "Ultra-short US government paper yielding risk-free USD interest while preserving dry powder for market corrections."},
     {"ticker": "WDEF.L", "name": "WisdomTree Europe Defence", "emoji": "🛡️", "asset_class": "ETF", "curr": "GBP", "sector": "European Defence Equity", "geo": "Europe", "tier": "Strategic Defence ETF", "desc": "Targeted exposure to leading European aerospace and defence companies benefiting from structural NATO rearmament."},
-    {"ticker": "WCLD.L", "name": "WisdomTree Cloud Computing ETF", "emoji": "☁️", "asset_class": "ETF", "curr": "USD", "sector": "Cloud Computing & Enterprise SaaS", "geo": "USA / Global", "tier": "Next-Gen Cloud ETF", "desc": "UCITS ETF tracking BVP Nasdaq Emerging Cloud Index capturing pure-play enterprise cloud software (SaaS) leaders benefiting from AI monetization."},
 
     # ── Private / Space & Crypto Assets ───────────────────────────────────────
     {"ticker": "ETOR", "name": "eToro Group Ltd", "emoji": "🏛️", "asset_class": "Stock", "curr": "USD", "sector": "Social Investing Platform", "geo": "Global", "tier": "Fintech Ecosystem", "desc": "Pioneering global social investing and multi-asset trading platform with millions of active global users."},
@@ -423,12 +422,11 @@ BASELINE_WEIGHTS: Dict[str, float] = {
     "TRIG.L": 2.0,
     # Strategic ETFs, Gold & Treasuries (21.0%)
     "PPFB.DE": 5.0,
-    "IB01.L": 4.0,
+    "IB01.L": 5.0,
     "SX7PEX.DE": 3.0,
-    "IEUR": 2.5,
-    "WDEF.L": 2.5,
+    "IEUR": 3.0,
+    "WDEF.L": 3.0,
     "IQQL.DE": 2.0,
-    "WCLD.L": 2.0,
     # Asia & Emerging Markets (8.0%)
     "1211.HK": 2.0,
     "1919.HK": 1.5,
@@ -473,7 +471,7 @@ def load_portfolio_weights() -> Dict[str, float]:
         except Exception as e:
             print(f"⚠️ Error reading {PORTFOLIO_WEIGHTS_FILE}: {e}")
 
-    PURGED_ASSETS = {"XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD", "ANT.24-7", "ANT", "MELI"}
+    PURGED_ASSETS = {"XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD", "WCLD.L", "ANT.24-7", "ANT", "MELI"}
     weights = {k: v for k, v in weights.items() if k not in PURGED_ASSETS}
 
     if weights:

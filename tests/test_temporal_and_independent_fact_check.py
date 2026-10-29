@@ -217,7 +217,7 @@ class TestTemporalAndIndependentFactCheck(unittest.TestCase):
         text = (
             "🌆 La seduta a Wall Street si è chiusa con listini in flessione: l'indice $SPX500 ha perso il -0.52%.\n\n"
             "📊 Ottima performance per $MRVL , che ha chiuso in rialzo del +2.26%.\n\n"
-            "☁️ Seduta positiva per il software con l'ETF $WCLD.L , salito dell'1,2%.\n\n"
+            "🛡️ Seduta positiva per la difesa con l'ETF $WDEF.L , salito dell'1,2%.\n\n"
             "⚖️ Rotazione settoriale selettiva."
         )
         benchmarks_negative = {"SPX500": -0.52, "NSDQ100": -0.00}
@@ -228,21 +228,21 @@ class TestTemporalAndIndependentFactCheck(unittest.TestCase):
         )
         self.assertIn("chiuso in rialzo del +2.26%", sanitized_text)
         self.assertNotIn("chiuso in flessione del +2.26%", sanitized_text)
-        self.assertIn("Seduta positiva per il software", sanitized_text)
-        self.assertNotIn("Seduta in flessione per il software", sanitized_text)
+        self.assertIn("Seduta positiva per la difesa", sanitized_text)
+        self.assertNotIn("Seduta in flessione per la difesa", sanitized_text)
 
     def test_fix_sign_sentiment_oxymorons(self):
         """Oxymorons like 'chiuso in flessione del +2.26%' must be auto-corrected to positive wording."""
         from post_verifier import fix_sign_sentiment_oxymorons
         flawed = (
             "Ottima performance per $MRVL , che ha chiuso in flessione del +2.26%.\n"
-            "Seduta in flessione per il software con l'ETF $WCLD.L , salito dell'1,2%.\n"
+            "Seduta in flessione per la difesa con l'ETF $WDEF.L , salito dell'1,2%.\n"
             "Titolo debole $TSLA , che ha chiuso in rialzo del -3.10%."
         )
         fixed = fix_sign_sentiment_oxymorons(flawed)
         self.assertIn("chiuso in rialzo del +2.26%", fixed)
         self.assertNotIn("chiuso in flessione del +2.26%", fixed)
-        self.assertIn("Seduta positiva per il software con l'ETF $WCLD.L , salito dell'1,2%", fixed)
+        self.assertIn("Seduta positiva per la difesa con l'ETF $WDEF.L , salito dell'1,2%", fixed)
         self.assertIn("chiuso in calo del -3.10%", fixed)
         self.assertNotIn("chiuso in rialzo del -3.10%", fixed)
 

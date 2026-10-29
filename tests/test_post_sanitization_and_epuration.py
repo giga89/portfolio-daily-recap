@@ -43,19 +43,19 @@ class TestPostSanitizationAndEpuration(unittest.TestCase):
 
     def test_epuration_of_flawed_non_dividend_paragraph(self):
         """
-        If a specific paragraph falsely claims dividends for an accumulation asset (like WCLD.L),
+        If a specific paragraph falsely claims dividends for an accumulation asset (like WDEF.L),
         the system should sanitize or prune that paragraph while preserving the rest of the post.
         """
         post_with_flawed_para = (
             "🌆 CHIUSURA DEI MERCATI USA\n\n"
             "Wall Street ha chiuso una seduta volatile con l'indice $SPX500 in modesto recupero.\n\n"
             "🤖 Per $NVDA (+3.20%) la domanda di chip per infrastrutture AI resta solida.\n\n"
-            "☁️ L'asset $WCLD.L ha staccato un ricco dividendo con un yield straordinario per tutti gli investitori.\n\n"
+            "🛡️ L'asset $WDEF.L ha staccato un ricco dividendo con un yield straordinario per tutti gli investitori.\n\n"
             "⚖️ Rotazione settoriale favorevole ai titoli difensivi e liquidi del nostro portafoglio.\n\n"
             "Come avete vissuto la seduta di oggi? Parliamone nei commenti! 👇"
         )
         is_clean, issues, _ = verify_post_deterministic(post_with_flawed_para)
-        self.assertFalse(is_clean, "Should fail due to WCLD.L accumulation violation")
+        self.assertFalse(is_clean, "Should fail due to WDEF.L accumulation violation")
 
         sanitized, is_now_clean, remaining_issues = sanitize_or_prune_post_content(post_with_flawed_para)
         self.assertTrue(is_now_clean, f"Auto-epuration should salvage the post: {remaining_issues}")

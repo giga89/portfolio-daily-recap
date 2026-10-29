@@ -36,8 +36,7 @@
         "VOF.L": "🇻🇳",
         "VOW3.DE": "🚗",
         "WDEF.L": "🛡️",
-        "WMT": "🛒",
-        "WCLD.L": "☁️"
+        "WMT": "🛒"
     },
     "tickers": {
         "1211.HK": [
@@ -187,10 +186,6 @@
         "WMT": [
             "WMT",
             "Walmart Inc."
-        ],
-        "WCLD.L": [
-            "WCLD.L",
-            "WisdomTree Cloud Computing UCITS ETF"
         ]
     }
 }

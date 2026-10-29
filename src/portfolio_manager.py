@@ -19,7 +19,6 @@ DEFAULT_TICKERS = {
     'IEUR': ('IEUR', 'iShares Core MSCI Europe ETF'),
     'IQQL.DE': ('IQQL.DE', 'iShares Listed Private Equity UCITS ETF'),
     'VOF.L': ('VOF.L', 'VinaCapital Vietnam Opportunity Fund'),
-    'WCLD.L': ('WCLD.L', 'WisdomTree Cloud Computing UCITS ETF'),
     
     # Healthcare & Pharma
     'ABT.US': ('ABT', 'Abbott Laboratories'),
@@ -72,7 +71,6 @@ DEFAULT_EMOJIS = {
     'IEUR': '🇪🇺',     # Europe
     'IQQL.DE': '🔥',   # Listed Private Equity
     'VOF.L': '🇻🇳',     # Vietnam Opportunity Fund
-    'WCLD.L': '☁️',    # Cloud Computing & SaaS ETF
     
     # Healthcare & Pharmaceuticals
     'AZN.L': '🧬',
@@ -193,19 +191,14 @@ def load_config():
             # Add new positions: IB01.L
             if "IB01.L" not in config["tickers"]:
                 config["tickers"]["IB01.L"] = ["IB01.L", "iShares Treasury Bond 0-1yr UCITS ETF"]
-            # Ensure purged positions are removed: XEON.DE, MAU.PA, SPCX.RTH, SPCX, ANT.24-7, MELI and legacy unheld assets
-            for purged in ["XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI"]:
+            # Ensure purged positions are removed: XEON.DE, MAU.PA, SPCX.RTH, SPCX, ANT.24-7, MELI, WCLD, WCLD.L and legacy unheld assets
+            for purged in ["XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "WCLD.L", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI"]:
                 if purged in config.get("tickers", {}):
                     del config["tickers"][purged]
                     needs_save = True
                 if purged in config.get("emojis", {}):
                     del config["emojis"][purged]
                     needs_save = True
-
-            if "WCLD.L" not in config.get("tickers", {}):
-                config["tickers"]["WCLD.L"] = ["WCLD.L", "WisdomTree Cloud Computing UCITS ETF"]
-                config["emojis"]["WCLD.L"] = "☁️"
-                needs_save = True
 
             if "IB01.L" not in config.get("tickers", {}):
                 config["tickers"]["IB01.L"] = ["IB01.L", "iShares $ Treasury Bond 0-1yr UCITS ETF"]
@@ -389,7 +382,7 @@ def sync_portfolio(bullaware_weights):
     if not bullaware_weights:
         return {}
 
-    PURGED_ASSETS = {"XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI"}
+    PURGED_ASSETS = {"XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "WCLD.L", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI"}
     bullaware_weights = {k: v for k, v in bullaware_weights.items() if k not in PURGED_ASSETS}
 
     current_config = load_config()
@@ -487,7 +480,6 @@ RELATED_TICKERS_MAP = {
     'ENI.MI': ['$SHEL', '$TTE', '$BP'],
     'ETOR': ['$HOOD', '$COIN', '$IBKR'],
     'GLEN.L': ['$RIO.L', '$BHP.L', '$AAL.L'],
-    'WCLD.L': ['$MSFT', '$PLTR', '$CRM', '$NOW', '$DDOG'],
     'PRY.MI': ['$NEX.PA', '$NKT.CO', '$ENEL.MI'],
     'RACE': ['$VOW3.DE', '$MBG.DE', '$P911.DE'],
     'VOW3.DE': ['$RACE', '$MBG.DE', '$BMW.DE'],
@@ -916,25 +908,6 @@ PORTFOLIO_ASSETS_METADATA = {
             "Variabilità climatica e ventosità stagionale inferiore alle medie storiche"
         ],
         "related_tickers": ["$UKW.L", "$FSFL.L", "$ENEL.MI"], "primary_tags": ["$TRIG.L"]
-    },
-    "WCLD.L": {
-        "ticker": "WCLD.L", "yahoo_ticker": "WCLD.L", "name": "WisdomTree Cloud Computing UCITS ETF", "emoji": "☁️",
-        "asset_class": "ETF", "sector": "Cloud Computing & Enterprise SaaS", "geo": "USA / Global", "tier": "Next-Gen Cloud ETF",
-        "is_dividend_paying": False, "dividend_policy": "Ad accumulazione (Acc) - tutti i proventi vengono automaticamente reinvestiti nel fondo, nessun dividendo distribuito", "annual_yield_pct": 0.0, "frequency": "Accumulazione (Nessun Dividendo)",
-        "domain": "wisdomtree.com", "color": (41, 128, 185),
-        "desc": "UCITS ETF tracking the BVP Nasdaq Emerging Cloud Index, capturing pure-play enterprise software and cloud (SaaS) leaders benefiting from the AI monetization cycle.",
-        "thesis": "Esposizione pura e diversificata ai leader globali del software cloud enterprise e del modello SaaS (BVP Nasdaq Emerging Cloud Index). Dopo il rally dei semiconduttori, il software applicativo rappresenta il livello della catena del valore che monetizzerà i guadagni di produttività dell'AI attraverso ricavi ricorrenti e margini elevati.",
-        "upside_catalysts": [
-            "Monetizzazione enterprise dell'AI integrata nei software applicativi (agenti autonomi, copilot e automazione dei flussi di lavoro)",
-            "Forte leva operativa, margini lordi elevati (>70%) e robusta generazione di Free Cash Flow al maturare delle piattaforme SaaS",
-            "Rotazione settoriale dei flussi d'investimento dal comparto hardware/semiconduttori (già ampiamente prezzato) verso il software applicativo a multipli compressi"
-        ],
-        "downside_risks": [
-            "Sensibilità delle valutazioni 'growth' all'andamento dei tassi d'interesse a lungo termine",
-            "Possibile allungamento dei cicli di vendita dei budget IT aziendali in contesti macroeconomici incerti",
-            "Concorrenza tra hyperscaler e vendor SaaS specializzati"
-        ],
-        "related_tickers": ["$MSFT", "$PLTR", "$CRM", "$NOW", "$DDOG"], "primary_tags": ["$WCLD.L"]
     },
 
     # ── Consumer, Retail & Luxury ─────────────────────────────────────────────

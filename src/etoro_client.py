@@ -66,8 +66,6 @@ MARKET_IDS = {
     "INDO.PA": 15327,
     "IQQL.DE": 2913,
     "VOF.L": 2828,
-    "WCLD.L": 15398,
-    "WCLD": 6369,
 
     # Automotive, Luxury & Industrials
     "RACE": 1917,

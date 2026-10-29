@@ -815,11 +815,11 @@ def verify_post_deterministic(
 
     # Check for purged assets that must never appear in active communications
     for tag in tickers_to_check:
-        if tag in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI"):
+        if tag in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI", "WCLD.L", "WCLD"):
             issues.append(
                 f"CRITICAL: L'asset ${tag} è stato definitivamente dismesso dal portafoglio e non deve comparire in alcun post o commento."
             )
-    if primary_clean and primary_clean in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI"):
+    if primary_clean and primary_clean in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI", "WCLD.L", "WCLD"):
         issues.append(
             f"CRITICAL: L'asset ${primary_clean} è stato definitivamente dismesso dal portafoglio e non deve comparire in alcun post o commento."
         )
@@ -834,6 +834,12 @@ def verify_post_deterministic(
     if re.search(r'\b(meli|mercadolibre)\b', cleaned_text, flags=re.IGNORECASE) or bool(re.search(r'\$meli\b', cleaned_text, flags=re.IGNORECASE)):
         issues.append(
             "CRITICAL: L'asset MELI / MercadoLibre è stato definitivamente dismesso dal portafoglio e non deve mai comparire in alcun post o commento."
+        )
+
+    # Explicit check for WCLD / WCLD.L in text
+    if re.search(r'\b(wcld)\b', cleaned_text, flags=re.IGNORECASE) or bool(re.search(r'\$wcld(\.l)?\b', cleaned_text, flags=re.IGNORECASE)):
+        issues.append(
+            "CRITICAL: L'asset WCLD / WCLD.L è stato definitivamente dismesso dal portafoglio e non deve mai comparire in alcun post o commento."
         )
 
     # Check for forbidden identity and strategy misconceptions per asset
@@ -967,11 +973,11 @@ def sanitize_or_prune_post_content(
         p_tags = extract_cashtags(para)
         p_lower = para.lower()
 
-        # Check if paragraph references purged assets (e.g. ANT.24-7, Anthropic, XEON, MAU, SPCX, MELI)
+        # Check if paragraph references purged assets (e.g. ANT.24-7, Anthropic, XEON, MAU, SPCX, MELI, WCLD)
         contains_purged = (
-            any(t in p_tags for t in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI"))
-            or bool(re.search(r'\b(ant\.24-7|anthropic|meli|mercadolibre)\b', p_lower))
-            or bool(re.search(r'\$(ant|meli)\b', p_lower))
+            any(t in p_tags for t in ("XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI", "WCLD.L", "WCLD"))
+            or bool(re.search(r'\b(ant\.24-7|anthropic|meli|mercadolibre|wcld)\b', p_lower))
+            or bool(re.search(r'\$(ant|meli|wcld(\.l)?)\b', p_lower))
         )
         if contains_purged:
             print(f"⚠️ [EPURAZIONE PARAGRAFO]: Rimosso paragrafo contenente asset dismesso: {para[:80]}...")
@@ -1428,7 +1434,7 @@ TESTO DA REVISIONARE:
 
 REGOLE DI AUDIT:
 1. DIVIETO ASSOLUTO DI CEDOLE SU ASSET AD ACCUMULAZIONE: Se un asset è ad accumulazione ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), non deve mai essere citato come fonte di dividendi o reddito.
-2. DIVIETO ASSET DISMESSI: Nessuna menzione di XEON, MAU, SPCX, MELI o ANT.24-7 / Anthropic (completamente dismessi dal portafoglio).
+2. DIVIETO ASSET DISMESSI: Nessuna menzione di XEON, MAU, SPCX, MELI, WCLD o ANT.24-7 / Anthropic (completamente dismessi dal portafoglio).
 3. TONO & COMPLIANCE: Rispettoso, pacato, nessun consiglio finanziario sollecitatore ("non è un consiglio finanziario", focus sulla strategia a lungo termine e gestione del rischio 3/10).
 4. COMPLETEZZA: Nessuna frase troncata, nessuna interruzione a metà parola o senza punteggiatura/emoji finale. NO markdown con asterischi (**).
 5. VERDETTO:
