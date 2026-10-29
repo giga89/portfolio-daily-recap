@@ -1,6 +1,24 @@
 {
-  "last_updated": "2026-10-29T14:44:38.328116+00:00",
+  "last_updated": "2026-10-29T15:01:48.253326+00:00",
   "posts": [
+    {
+      "id": "a9d924b0-d3a9-11f1-8080-8000073355d8",
+      "platform": "etoro",
+      "session": "Earnings Release: $LLY Q3 2026",
+      "published_at": "2026-10-29T15:01:48Z",
+      "day_of_week": "Thursday",
+      "hour_utc": 15,
+      "hour_local": 17,
+      "title": "Trimestrale straordinaria per Eli Lilly $LLY , che archivia il Q3 2026 con fonda...",
+      "tickers": [
+        "LLY"
+      ],
+      "image_type": "earnings_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
     {
       "id": "7a1d79e0-d3a6-11f1-8080-80005120286b",
       "platform": "etoro",
