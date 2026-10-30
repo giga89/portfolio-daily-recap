@@ -73,7 +73,6 @@ SECTOR_MAP: dict[str, str] = {
     'TRIG.L':  'Energy & Resources',
     # Auto
     'VOW3.DE': 'Auto',
-    'RACE':    'Auto',
     # Logistics / Shipping
     '1919.HK': 'Logistics',
     # EM / Asia Tech
@@ -102,7 +101,7 @@ GEO_MAP: dict[str, str] = {
     'CCJ': 'USA', 'PYPL': 'USA', 'ETOR': 'USA', 'IEMG': 'USA',
     # Europe
     'AZN.L': 'Europe', 'ENEL.MI': 'Europe', 'ENI.MI': 'Europe',
-    'GLEN.L': 'Europe', 'VOW3.DE': 'Europe', 'RACE': 'Europe',
+    'GLEN.L': 'Europe', 'VOW3.DE': 'Europe',
     'PRY.MI': 'Europe', 'SX7PEX.DE': 'Europe',
     'TRIG.L': 'Europe', 'WDEF.L': 'Europe', 'IEUR': 'Europe',
     'IB01.L': 'USA', 'IQQL.DE': 'Europe',

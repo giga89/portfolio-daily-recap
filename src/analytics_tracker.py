@@ -369,7 +369,6 @@ HOLDINGS_DATA = [
 
     # ── Consumer, Retail & Luxury ─────────────────────────────────────────────
     {"ticker": "WMT", "name": "Walmart Inc", "emoji": "🛒", "asset_class": "Stock", "curr": "USD", "sector": "Omnichannel Retail Leader", "geo": "USA", "tier": "Core Defensive", "desc": "World's largest retailer by revenue, accelerating automated fulfillment, e-commerce scale, and retail media network."},
-    {"ticker": "RACE", "name": "Ferrari N.V.", "emoji": "🏎️", "asset_class": "Stock", "curr": "EUR", "sector": "Ultra-Luxury Automotive", "geo": "Europe", "tier": "Ultra-Luxury Moat", "desc": "Peerless luxury pricing power, industry-leading operating margins, and multi-year waitlists across all models."},
     {"ticker": "VOW3.DE", "name": "Volkswagen AG", "emoji": "🚗", "asset_class": "Stock", "curr": "EUR", "sector": "Automotive & EV Platforms", "geo": "Europe", "tier": "Deep Value", "desc": "Global automotive conglomerate (Porsche, Audi, VW) with massive industrial manufacturing scale in transition."},
     {"ticker": "ULVR.L", "name": "Unilever PLC", "emoji": "🧼", "asset_class": "Stock", "curr": "GBP", "sector": "Consumer Staples & Household", "geo": "Europe", "tier": "Core Defensive", "desc": "Portfolio of 400+ household consumer staple brands used daily by over 3.4 billion people worldwide."},
 
@@ -433,9 +432,8 @@ BASELINE_WEIGHTS: Dict[str, float] = {
     "2318.HK": 1.5,
     "VOF.L": 1.5,
     "INDO.PA": 1.5,
-    # Consumer, Retail & Luxury (8.0%)
-    "WMT": 2.5,
-    "RACE": 2.5,
+    # Consumer, Retail & Luxury (5.0%)
+    "WMT": 2.0,
     "ULVR.L": 2.0,
     "VOW3.DE": 1.0,
     # Alternative & Crypto (2.5%)
@@ -471,7 +469,7 @@ def load_portfolio_weights() -> Dict[str, float]:
         except Exception as e:
             print(f"⚠️ Error reading {PORTFOLIO_WEIGHTS_FILE}: {e}")
 
-    PURGED_ASSETS = {"XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD", "WCLD.L", "ANT.24-7", "ANT", "MELI"}
+    PURGED_ASSETS = {"XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD", "WCLD.L", "ANT.24-7", "ANT", "MELI", "RACE"}
     weights = {k: v for k, v in weights.items() if k not in PURGED_ASSETS}
 
     if weights:

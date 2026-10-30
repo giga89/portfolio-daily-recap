@@ -18,6 +18,7 @@ When an event is detected:
 import os
 import sys
 import time
+import json
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, List
 
@@ -56,11 +57,16 @@ except ImportError:
 def _get_current_weight(ticker: str) -> Optional[float]:
     """Extract current portfolio weight percentage for ticker if available."""
     try:
-        from analytics_tracker import CURRENT_PORTFOLIO_HOLDINGS
-        clean = ticker.strip().upper()
-        for h in CURRENT_PORTFOLIO_HOLDINGS:
-            if h.get("ticker", "").upper() == clean:
-                return float(h.get("weight", 0.0))
+        weights_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "portfolio_weights.json")
+        if os.path.exists(weights_path):
+            with open(weights_path, "r", encoding="utf-8") as f:
+                weights = json.load(f)
+            clean = ticker.strip().upper()
+            if clean in weights:
+                return float(weights[clean])
+            for k, v in weights.items():
+                if k.upper() == clean or k.upper().replace(".US", "") == clean or clean.replace(".US", "") == k.upper():
+                    return float(v)
     except Exception:
         pass
     return None

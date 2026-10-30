@@ -217,20 +217,20 @@ POLL_TEMPLATES = [
     },
     {
         "id": "luxury_vs_defensive_consumer",
-        "title": "Consumi & Pricing Power: Quale modello di business preferite? 🏎️",
+        "title": "Consumi & Resilienza: Quale pilastro difensivo preferite? 🛒",
         "options": [
-            "Ultra-Luxury Moat ($RACE)",
             "Retail difensivo ($WMT)",
             "Beni di consumo ($ULVR.L)",
-            "Auto globale ($VOW3.DE)"
+            "Auto globale ($VOW3.DE)",
+            "Pharma difensivo ($LLY)"
         ],
         "tickers": [
-            "RACE",
             "WMT",
             "ULVR.L",
-            "VOW3.DE"
+            "VOW3.DE",
+            "LLY"
         ],
-        "message": "🗳️ SONDAGGIO CONSUMI: PRICING POWER E RESILIENZA\n\nNelle diverse fasi del ciclo economico, due strategie spiccano: l'inimitabile pricing power dell'ultra-lusso di Ferrari $RACE (con portafoglio ordini pluriennale e margini record) o la scala difensiva dei colossi quotidiani come $WMT e $ULVR.L.\n\nSu quale modello puntereste con un orizzonte di 3-5 anni?\n\nDite la vostra nel sondaggio! 👇"
+        "message": "🗳️ SONDAGGIO CONSUMI & DIFENSIVI: PRICING POWER E RESILIENZA\n\nNelle diverse fasi del ciclo economico, la resilienza dei consumi e della salute rappresenta una solida ancora: la scala omnicanale globale di $WMT, i marchi di beni di largo consumo usati quotidianamente da miliardi di persone come $ULVR.L o la leadership farmaceutica con pricing power inattaccabile come $LLY.\n\nSu quale pilastro puntereste con un orizzonte di 3-5 anni?\n\nDite la vostra nel sondaggio! 👇"
     },
     {
         "id": "electrification_grid_supercycle",

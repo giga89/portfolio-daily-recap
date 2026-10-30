@@ -100,6 +100,21 @@ class TestUniversalDualCheck(unittest.TestCase):
         ok_c, _, _ = verify_and_clean_comment(bad_comment_wcld, run_ai_review=False)
         self.assertFalse(ok_c, "Comment containing WCLD.L must be rejected")
 
+    def test_purged_asset_race_blocked(self):
+        """Purged asset RACE / Ferrari must be blocked deterministically."""
+        bad_comment_race = "Abbiamo $RACE in portafoglio per il lusso e la marginalità elevata."
+        is_ok, issues, _ = verify_post_deterministic(bad_comment_race)
+        self.assertFalse(is_ok, "RACE should be flagged as critical error")
+        self.assertTrue(any("dismesso" in i or "RACE" in i for i in issues))
+
+        bad_text_ferrari = "Ferrari continua ad avere ordini record per le sue vetture sportive."
+        is_ok_f, issues_f, _ = verify_post_deterministic(bad_text_ferrari)
+        self.assertFalse(is_ok_f, "Ferrari text should be flagged as critical error")
+        self.assertTrue(any("dismesso" in i or "RACE" in i or "Ferrari" in i for i in issues_f))
+
+        ok_c, _, _ = verify_and_clean_comment(bad_comment_race, run_ai_review=False)
+        self.assertFalse(ok_c, "Comment containing RACE must be rejected")
+
     def test_accumulating_etf_comment_blocked(self):
         """Dividend claims on accumulating ETF WDEF.L must fail deterministic check."""
         hallucinated_reply = "@copier $WDEF.L è un ottimo ETF che stacca un generoso dividendo trimestrale per i nostri flussi di cassa."

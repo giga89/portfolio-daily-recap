@@ -126,7 +126,7 @@ def generate_educational_card(
         title: Main bold title
         subtitle: High impact hook or paradox quote
         pillars: List of 3 dicts with keys 'label', 'text'
-        tickers: List of 2-4 ticker symbols (e.g. ['IB01', 'AMZN', 'RACE'])
+        tickers: List of 2-4 ticker symbols (e.g. ['IB01', 'AMZN', 'MSFT'])
         palette_name: One of 'cyan', 'emerald', 'gold', 'violet', 'ruby', 'blue'
         output_path: Target PNG file path
 

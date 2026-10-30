@@ -335,7 +335,7 @@ PORTFOLIO_EARNINGS_TICKERS = [
     "NVDA", "MSFT", "AMZN", "GOOG", "PLTR", "AVGO", "TSM", "MRVL",
     "LLY", "ABBV", "ABT", "HUM", "CCJ", "WMT", "AAPL", "META",
     # European corporate holdings
-    "NOVO-B.CO", "AZN.L", "ENEL.MI", "ENI.MI", "PRY.MI", "BESI.NV", "RACE", "GLEN.L", "ULVR.L"
+    "NOVO-B.CO", "AZN.L", "ENEL.MI", "ENI.MI", "PRY.MI", "BESI.NV", "GLEN.L", "ULVR.L"
 ]
 
 
@@ -346,7 +346,7 @@ def get_equity_holdings_for_earnings() -> List[Tuple[str, str]]:
     """
     excluded_non_equities = {
         "PPFB.DE", "IB01.L", "SX7PEX.DE", "IEUR", "IQQL.DE", "TRX", "SPCX.RTH",
-        "WCLD.L", "WCLD", "INDO.PA", "WDEF.L", "XEON.DE", "MAU.PA", "MELI"
+        "WCLD.L", "WCLD", "INDO.PA", "WDEF.L", "XEON.DE", "MAU.PA", "MELI", "RACE"
     }
     candidates: List[Tuple[str, str]] = []
     try:

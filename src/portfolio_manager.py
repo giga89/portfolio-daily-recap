@@ -46,7 +46,6 @@ DEFAULT_TICKERS = {
     'GLEN.L': ('GLEN.L', 'Glencore PLC'),
     
     # Automotive, Luxury & Industrials
-    'RACE': ('RACE', 'Ferrari N.V.'),
     'PRY.MI': ('PRY.MI', 'Prysmian S.p.A.'),
     '1919.HK': ('1919.HK', 'COSCO SHIPPING Holdings Co Ltd'),
     'VOW3.DE': ('VOW3.DE', 'Volkswagen AG'),
@@ -103,7 +102,6 @@ DEFAULT_EMOJIS = {
     'PRY.MI': '🔌',
     
     # Automotive, Luxury & Industrials
-    'RACE': '🏎️',
     'VOW3.DE': '🚗',
     '1919.HK': '🚢',
     '1211.HK': '🔋',   # BYD
@@ -445,7 +443,6 @@ MULTI_TAG_MAP = {
     '1211.HK': ['$1211.HK'],
     '1919.HK': ['$1919.HK'],
     '2318.HK': ['$2318.HK'],
-    'RACE': ['$RACE'],
     'ULVR.L': ['$ULVR.L', '$UL'],
     'VOW3.DE': ['$VOW3.DE'],
     'ABT.US': ['$ABT'],
@@ -481,8 +478,7 @@ RELATED_TICKERS_MAP = {
     'ETOR': ['$HOOD', '$COIN', '$IBKR'],
     'GLEN.L': ['$RIO.L', '$BHP.L', '$AAL.L'],
     'PRY.MI': ['$NEX.PA', '$NKT.CO', '$ENEL.MI'],
-    'RACE': ['$VOW3.DE', '$MBG.DE', '$P911.DE'],
-    'VOW3.DE': ['$RACE', '$MBG.DE', '$BMW.DE'],
+    'VOW3.DE': ['$MBG.DE', '$BMW.DE', '$P911.DE'],
     'ULVR.L': ['$PG', '$NESN.SW', '$KO'],
     '1211.HK': ['$TSLA', '$NIO', '$XPEV'],
     '1919.HK': ['$ZIM', '$MATX', '$1138.HK'],
@@ -930,25 +926,6 @@ PORTFOLIO_ASSETS_METADATA = {
         ],
         "related_tickers": ["$AMZN", "$COST", "$TGT"], "primary_tags": ["$WMT"]
     },
-    "RACE": {
-        "ticker": "RACE", "yahoo_ticker": "RACE", "name": "Ferrari N.V.", "emoji": "🏎️",
-        "asset_class": "Stock", "sector": "Automotive Ultra-Luxury & Motorsport", "geo": "Europe", "tier": "Ultra-Luxury Moat",
-        "is_dividend_paying": True, "dividend_policy": "Distribuzione annuale con dividendo in costante aumento (~0.7% yield) e forte politica di buyback", "annual_yield_pct": 0.7, "frequency": "Annuale (Maggio)",
-        "domain": "ferrari.com", "color": (255, 40, 0),
-        "desc": "Peerless luxury pricing power, industry-leading operating margins, and multi-year waitlists across all models.",
-        "thesis": "Marchio del lusso assoluto con potere di prezzo totale, margini operativi EBITDA leader nel settore automobilistico (>38%), liste d'attesa pluriennali su ogni modello e lancio della prima supercar 100% elettrica.",
-        "upside_catalysts": [
-            "Portafoglio ordini completamente esaurito per oltre 2 anni con personalizzazioni 'Tailor Made' ad altissimo margine",
-            "Successo commerciale continuo di modelli esclusivi a tiratura limitata (serie Icona e supercar speciali)",
-            "Debutto e accoglienza trionfale della prima Ferrari completamente elettrica"
-        ],
-        "downside_risks": [
-            "Rallentamento generale della spesa tra i clienti ultra-high-net-worth (UHNW)",
-            "Complessità nello sviluppo e percezione del sound/DNA emozionale sui modelli a batteria",
-            "Impatti valutari sul cambio euro/dollaro"
-        ],
-        "related_tickers": ["$VOW3.DE", "$MBG.DE", "$P911.DE"], "primary_tags": ["$RACE"]
-    },
     "VOW3.DE": {
         "ticker": "VOW3.DE", "yahoo_ticker": "VOW3.DE", "name": "Volkswagen AG", "emoji": "🚗",
         "asset_class": "Stock", "sector": "Automotive Conglomerate & Piattaforme EV", "geo": "Europe", "tier": "Deep Value",
@@ -966,7 +943,7 @@ PORTFOLIO_ASSETS_METADATA = {
             "Costi elevati di transizione energetica, sviluppo software e vincoli sindacali in Germania",
             "Normative europee stringenti sulle emissioni medie di flotta"
         ],
-        "related_tickers": ["$RACE", "$MBG.DE", "$BMW.DE"], "primary_tags": ["$VOW3.DE"]
+        "related_tickers": ["$MBG.DE", "$BMW.DE", "$P911.DE"], "primary_tags": ["$VOW3.DE"]
     },
     "ULVR.L": {
         "ticker": "ULVR.L", "yahoo_ticker": "ULVR.L", "name": "Unilever PLC", "emoji": "🧼",

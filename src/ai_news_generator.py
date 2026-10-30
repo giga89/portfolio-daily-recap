@@ -83,7 +83,7 @@ def _get_all_portfolio_tags():
 HEAVY_ANCHOR_TICKERS = {
     "SPX500", "NSDQ100", "GER40",
     "NVDA", "PLTR", "MSFT", "AMZN", "TSM", "GOOG", "GOOGL",
-    "BTC", "ETH", "SOL", "CCJ", "LLY", "PRYMI", "ENIMI", "RACE"
+    "BTC", "ETH", "SOL", "CCJ", "LLY", "PRYMI", "ENIMI"
 }
 
 
@@ -1595,7 +1595,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         market_session = os.environ.get('MARKET_SESSION', 'Daily recap')
         
     EU_ASIA_TICKERS = [
-        'AZN.L', 'NOVO-B.CO', 'ENEL.MI', 'ENI.MI', 'PRY.MI', 'RACE', 'VOW3.DE',
+        'AZN.L', 'NOVO-B.CO', 'ENEL.MI', 'ENI.MI', 'PRY.MI', 'VOW3.DE',
         'GLEN.L', 'TRIG.L', 'ULVR.L', 'WDEF.L', 'IQQL.DE', 'SX7PEX.DE', 'IEUR',
         'PPFB.DE', '1211.HK', '1919.HK', '2318.HK', 'INDO.PA', 'VOF.L'
     ]

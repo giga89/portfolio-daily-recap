@@ -70,7 +70,6 @@ DOMAIN_MAP = {
     "ENEL.MI":    "enel.com",
     "ENI.MI":     "eni.com",
     "PRY.MI":     "prysmiangroup.com",
-    "RACE":       "ferrari.com",
     "VOW3.DE":    "volkswagenag.com",
     "GLEN.L":     "glencore.com",
     "TRIG.L":     "trig-ltd.com",

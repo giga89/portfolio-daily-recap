@@ -27,7 +27,6 @@
         "PLTR": "🛡️",
         "PPFB.DE": "🥇",
         "PRY.MI": "🔌",
-        "RACE": "🏎️",
         "SX7PEX.DE": "🏛️",
         "TRIG.L": "🌬️",
         "TRX": "🪙",
@@ -146,10 +145,6 @@
         "PRY.MI": [
             "PRY.MI",
             "Prysmian S.p.A."
-        ],
-        "RACE": [
-            "RACE",
-            "Ferrari N.V."
         ],
         "SX7PEX.DE": [
             "EXV1.DE",

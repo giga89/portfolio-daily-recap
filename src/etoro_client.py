@@ -68,7 +68,6 @@ MARKET_IDS = {
     "VOF.L": 2828,
 
     # Automotive, Luxury & Industrials
-    "RACE": 1917,
     "PRY.MI": 1296,
     "VOW3.DE": 1210,
     "1211.HK": 2380,

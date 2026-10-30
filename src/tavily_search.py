@@ -37,7 +37,6 @@ TICKER_NAME_MAP = {
     'ENEL': 'Enel',
     'ENI': 'Eni',
     'PRY': 'Prysmian',
-    'RACE': 'Ferrari',
     'VOW3': 'Volkswagen',
     'GLEN': 'Glencore',
     'AZN': 'AstraZeneca',

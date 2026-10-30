@@ -28,7 +28,7 @@ class TestEtoroCashtags(unittest.TestCase):
         """Ensure limit_cashtags strips '$' from 5th ticker onwards while keeping first 4."""
         sample_text = (
             "Nel portafoglio abbiamo $NVDA, $MSFT, $AMZN e $TSM in crescita. "
-            "Anche $GOOG, $PLTR, $PRY.MI e $RACE si sono mossi oggi. "
+            "Anche $GOOG, $PLTR, $PRY.MI e $ULVR.L si sono mossi oggi. "
             "Abbiamo investito $500 e poi $10,000 aggiuntivi."
         )
         limited = limit_cashtags(sample_text, max_tags=4)
@@ -61,7 +61,7 @@ class TestEtoroCashtags(unittest.TestCase):
 
     def test_verify_post_deterministic_caps_tags(self):
         """verify_post_deterministic should warn and clean if post exceeds 4 cashtags."""
-        bad_post = "Analisi di $TSM, $VOW3.DE, $MRVL, $PRY.MI, $RACE, $LLY, $ABBV, $AMZN."
+        bad_post = "Analisi di $TSM, $VOW3.DE, $MRVL, $PRY.MI, $CCJ, $LLY, $ABBV, $AMZN."
         is_clean, issues, cleaned = verify_post_deterministic(bad_post)
 
         cleaned_tags = extract_cashtags(cleaned)
@@ -70,7 +70,7 @@ class TestEtoroCashtags(unittest.TestCase):
 
     def test_etoro_sender_market_ids_capped(self):
         """Check regex and capping logic in etoro_sender ensures max 4 unique market IDs."""
-        post_text = "$TSM $VOW3.DE $TSM $MRVL $PRY.MI $RACE $LLY $ABBV"
+        post_text = "$TSM $VOW3.DE $TSM $MRVL $PRY.MI $CCJ $LLY $ABBV"
         # Simulate etoro_sender logic
         found_tickers = re.findall(r"\$([A-Za-z0-9\.\-]+)", post_text)
         unique_tickers = []

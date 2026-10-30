@@ -226,11 +226,11 @@ COPY_TRADING_THEMES = [
     },
     {
         "id": "european_champions",
-        "name": "European Quality & Luxury Leaders",
-        "pillars": "European Leaders & Luxury",
-        "tickers_line": "$RACE PRY.MI VOW3",
-        "hashtags": "#Luxury #Stocks #Ferrari",
-        "audience": "European equities & luxury investors",
+        "name": "European Quality & Industrial Champions",
+        "pillars": "European Leaders & Infrastructure",
+        "tickers_line": "$PRY.MI ENI.MI VOW3",
+        "hashtags": "#Europe #Stocks #Investing",
+        "audience": "European equities & industrial investors",
     },
     {
         "id": "defense_security",

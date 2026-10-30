@@ -406,28 +406,6 @@ COMPANY_INFOGRAPHICS = {
         "color": (0, 102, 177),
         "domain": "bmwgroup.com"
     },
-    "RACE": {
-        "name": "FERRARI",
-        "tagline": "Ultra-Luxury & High Performance Supercars",
-        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
-        "subtitle": "Ferrari è il brand di lusso assoluto con portafoglio ordini blindato per oltre 2 anni e margini incomparabili.",
-        "kpis": [
-            {"label": "MARGINE EBITDA", "val": "38%+", "sub": "Margini paragonabili all'alta moda"},
-            {"label": "ORDER BOOK", "val": "2+ Anni", "sub": "Produzione interamente venduta"},
-            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Marchio di lusso e pricing power"},
-            {"label": "PERSONALIZZAZIONE", "val": "+20%", "sub": "Optional su misura ad altissimo margine"},
-        ],
-        "pillars": [
-            ("Potere di Prezzo Incomparabile:", "I clienti accettano qualsiasi aumento di prezzo pur di avere una Ferrari."),
-            ("Scarsità Controllata:", "Produzione deliberatamente inferiore alla domanda globale per proteggere il valore."),
-            ("Elettrificazione ed E-Building:", "Nuovo impianto per supercar ibride e prima Ferrari 100% elettrica nel 2025."),
-            ("Resilienza alle Crisi Economiche:", "Clientela ultra-facoltosa totalmente insensibile ai cicli macroeconomici."),
-        ],
-        "quote": "La Ferrari è un sogno: la gente sogna di possedere questa vettura speciale e per la maggior parte resterà un sogno.",
-        "tags": ["#Ferrari", "#Luxury", "#Supercars", "#PricingPower", "#MadeInItaly"],
-        "color": (220, 0, 0),
-        "domain": "ferrari.com"
-    },
     "WMT": {
         "name": "WALMART",
         "tagline": "Global Retail & Omnichannel Ecosystem",

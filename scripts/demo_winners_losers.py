@@ -27,7 +27,6 @@ EMOJIS = {
     "AZN.L":     "🧬",
     "TSM":       "🏭",
     "CCJ":       "⚡",
-    "RACE":      "🏎️",
     "AVGO":      "💻",
     "ENEL.MI":   "🔋",
     "IB01.L":    "💵",
