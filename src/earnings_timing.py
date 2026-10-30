@@ -317,8 +317,35 @@ def verify_earnings_release_status(
             # ── Data is VERIFIED released! ──
             est_eps = row.get("EPS Estimate")
             surp_val = row.get("Surprise(%)")
-            y_info = getattr(t, "info", {}) or {}
-            curr_sym = get_currency_symbol(ticker, y_info)
+            # Safe currency lookup without slow web scraping
+            curr_sym = "$"
+            if any(ticker.endswith(sfx) for sfx in [".MI", ".DE", ".NV", ".PA", ".AS"]):
+                curr_sym = "€"
+            elif ticker.endswith(".L"):
+                curr_sym = "£"
+            elif ticker.endswith(".HK"):
+                curr_sym = "HK$"
+            else:
+                try:
+                    from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+                    meta_curr = PORTFOLIO_ASSETS_METADATA.get(ticker, {}).get("curr")
+                    if meta_curr == "EUR":
+                        curr_sym = "€"
+                    elif meta_curr == "GBP":
+                        curr_sym = "£"
+                    elif meta_curr == "HKD":
+                        curr_sym = "HK$"
+                    elif meta_curr == "DKK":
+                        curr_sym = "DKK "
+                except Exception:
+                    pass
+            y_info = {}
+            try:
+                if hasattr(t, "fast_info") and t.fast_info:
+                    y_info = {"currency": getattr(t.fast_info, "currency", "USD")}
+            except Exception:
+                pass
+            curr_sym = get_currency_symbol(ticker, y_info) or curr_sym
             quarter_str = get_reporting_quarter(ticker, dt_utc.date())
 
             rep_float = float(rep_eps)
@@ -420,7 +447,9 @@ def extract_option_c_bullets(ticker: str, quarter: str, raw_news: Optional[str] 
         return None
     try:
         from google import genai
-        client = genai.Client(api_key=api_key)
+        from google.genai import types
+        http_opts = types.HttpOptions(timeout=25.0) if hasattr(types, "HttpOptions") else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         prompt = f"""Sei un analista finanziario istituzionale. Estrai ESATTAMENTE 2 sintetici punti elenco operativi sui risultati trimestrali appena pubblicati per ${ticker} ({quarter}).
 News / Contesto: {raw_news or 'Trimestrale appena pubblicata'}
 

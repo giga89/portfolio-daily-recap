@@ -383,9 +383,9 @@ def publish_earnings_for_ticker(
         print(f"🛑 REJECTED: ${clean_sym} is not a valid active portfolio holding in PORTFOLIO_ASSETS_METADATA. Skipping earnings.")
         return {"ticker": clean_sym, "success": False, "error": f"${clean_sym} not in portfolio"}
     info = TICKER_THEMES.get(clean_sym, {})
-    comp_name = info.get("company_name", clean_sym)
-    weight_pct = _get_current_weight(clean_sym)
     meta = PORTFOLIO_ASSETS_METADATA.get(clean_sym, {})
+    comp_name = info.get("company_name") or meta.get("name", clean_sym)
+    weight_pct = _get_current_weight(clean_sym)
     yf_sym = meta.get("yahoo_ticker", clean_sym.replace(".US", ""))
 
     # If eps_actual is missing, attempt to resolve verified data from earnings_timing
@@ -459,7 +459,7 @@ def publish_earnings_for_ticker(
         rev_growth_yoy=rev_growth,
         guidance_text=guidance_text,
         box3_data=box3_data,
-        thesis_impact=info.get("thesis"),
+        thesis_impact=info.get("thesis") or meta.get("thesis"),
         weight_pct=weight_pct,
     )
 

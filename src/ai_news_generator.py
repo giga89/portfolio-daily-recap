@@ -2492,7 +2492,8 @@ FORMAT: Plain text, no HTML. Use emojis naturally (2-3 max). No bullet lists.
 Output ONLY the post text, no introduction or explanation."""
 
     try:
-        client = genai.Client(api_key=api_key)
+        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config = types.GenerateContentConfig(temperature=0.85)
 
         for model_name in models_to_try:
@@ -2593,7 +2594,8 @@ FORMAT: Plain text. 2-4 natural emojis. No bullet lists. Conversational paragrap
 Output ONLY the post text, no introduction or explanation."""
 
     try:
-        client = genai.Client(api_key=api_key)
+        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config = types.GenerateContentConfig(temperature=0.90)
 
         for model_name in models_to_try:
@@ -2825,7 +2827,8 @@ Output format (ONLY return the plain Italian post text, no greetings to the syst
 """
 
     try:
-        client = genai.Client(api_key=api_key)
+        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config = types.GenerateContentConfig(temperature=0.85)
 
         for model_name in models_to_try:
@@ -3039,7 +3042,8 @@ REGOLE MANDATARIE PER IL TESTO (in ITALIANO):
 Output ONLY the post text in Italian, no extra conversational preamble."""
 
     try:
-        client = genai.Client(api_key=api_key)
+        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.7)
 
         for model_name in models_to_try:
@@ -3121,7 +3125,8 @@ REGOLE PER IL TESTO (in ITALIANO):
 Output ONLY the post text in Italian."""
 
     try:
-        client = genai.Client(api_key=api_key)
+        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.85)
 
         for model_name in models_to_try:
@@ -3205,7 +3210,8 @@ REGOLE PER IL TESTO (in ITALIANO):
 Output ONLY the post text in Italian."""
 
     try:
-        client = genai.Client(api_key=api_key)
+        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.85)
 
         for model_name in models_to_try:
@@ -3344,7 +3350,8 @@ REGOLE PER IL POST:
 Output ONLY the post text in Italian."""
 
     try:
-        client = genai.Client(api_key=api_key)
+        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.8)
 
         for model_name in models_to_try:
@@ -3473,7 +3480,8 @@ REGOLE TASSATIVE:
 Output ONLY the final Italian post text, with no introductory meta-comments."""
 
     try:
-        client = genai.Client(api_key=api_key)
+        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config = types.GenerateContentConfig(temperature=0.75)
         for model_name in DEFAULT_GEMINI_MODELS:
             try:
@@ -3631,7 +3639,8 @@ REGOLE TASSATIVE:
 Output ONLY the final Italian post text, with no introductory meta-comments."""
 
     try:
-        client = genai.Client(api_key=api_key)
+        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config = types.GenerateContentConfig(temperature=0.75)
         for model_name in DEFAULT_GEMINI_MODELS:
             try:
