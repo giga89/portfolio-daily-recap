@@ -1,6 +1,24 @@
 {
-  "last_updated": "2026-10-30T13:41:48.472704+00:00",
+  "last_updated": "2026-10-30T14:23:22.115039+00:00",
   "posts": [
+    {
+      "id": "75c84920-d46d-11f1-8080-8001570be35f",
+      "platform": "etoro",
+      "session": "Earnings Release: $ABBV Q3 2026",
+      "published_at": "2026-10-30T14:23:22Z",
+      "day_of_week": "Friday",
+      "hour_utc": 14,
+      "hour_local": 16,
+      "title": "📊 EARNINGS FLASH: RISULTATI TRIMESTRALI Q3 2026  AbbVie Inc $ABBV ha appena alza...",
+      "tickers": [
+        "ABBV"
+      ],
+      "image_type": "earnings_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
     {
       "id": "c5931720-d466-11f1-8080-800100809404",
       "platform": "etoro",
