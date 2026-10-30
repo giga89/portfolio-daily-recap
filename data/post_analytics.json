@@ -1,6 +1,42 @@
 {
-  "last_updated": "2026-10-30T08:11:43.867139+00:00",
+  "last_updated": "2026-10-30T09:03:10.517480+00:00",
   "posts": [
+    {
+      "id": "bac23040-d440-11f1-8080-80013a2bebec",
+      "platform": "etoro",
+      "session": "Earnings Release: $VOW3.DE Q3 2026",
+      "published_at": "2026-10-30T09:03:10Z",
+      "day_of_week": "Friday",
+      "hour_utc": 9,
+      "hour_local": 11,
+      "title": "Volkswagen $VOW3.DE ha pubblicato i risultati del Q3 2026. Una trimestrale compl...",
+      "tickers": [
+        "VOW3.DE"
+      ],
+      "image_type": "earnings_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
+    {
+      "id": "a0518ad0-d440-11f1-8080-80015bf32c1a",
+      "platform": "etoro",
+      "session": "Earnings Release: $AMZN Q3 2026",
+      "published_at": "2026-10-30T09:02:26Z",
+      "day_of_week": "Friday",
+      "hour_utc": 9,
+      "hour_local": 11,
+      "title": "Amazon $AMZN ha appena pubblicato i risultati del Q3 2026. Come sempre, guardiam...",
+      "tickers": [
+        "AMZN"
+      ],
+      "image_type": "earnings_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
     {
       "id": "b7dc20f0-d438-11f1-8080-8000502c484f",
       "platform": "etoro",
