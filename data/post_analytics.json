@@ -1,6 +1,24 @@
 {
-  "last_updated": "2026-10-30T17:08:54.729402+00:00",
+  "last_updated": "2026-10-30T19:22:04.323734+00:00",
   "posts": [
+    {
+      "id": "303a66c0-d497-11f1-8080-800121156ae3",
+      "platform": "etoro",
+      "session": "Earnings Release: $CCJ Q3 2026",
+      "published_at": "2026-10-30T19:22:04Z",
+      "day_of_week": "Friday",
+      "hour_utc": 19,
+      "hour_local": 21,
+      "title": "📊 EARNINGS FLASH: RISULTATI TRIMESTRALI Q3 2026  Cameco Corp. $CCJ ha appena alz...",
+      "tickers": [
+        "CCJ"
+      ],
+      "image_type": "earnings_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
     {
       "id": "b1d31100-d483-11f1-8080-80001f4737ea",
       "platform": "etoro",
