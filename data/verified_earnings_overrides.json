@@ -1,0 +1,24 @@
+{
+  "ABBV": {
+    "quarter": "Q3 2026",
+    "scheduled_dt": "2026-10-30T11:00:00+00:00",
+    "currency_sym": "$",
+    "eps_actual": "$3.82",
+    "eps_est": "$3.73",
+    "eps_beat": true,
+    "eps_diff_pct": "+2.4% Surprise",
+    "rev_actual": "$17.4B",
+    "rev_growth": "+10.3% YoY"
+  },
+  "PRY.MI": {
+    "quarter": "Q3 2026",
+    "scheduled_dt": "2026-10-29T07:00:00+00:00",
+    "currency_sym": "€",
+    "eps_actual": "€1.41",
+    "eps_est": null,
+    "eps_beat": true,
+    "eps_diff_pct": null,
+    "rev_actual": "€6.4B",
+    "rev_growth": "+13.1% YoY"
+  }
+}

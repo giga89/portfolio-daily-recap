@@ -11,6 +11,7 @@ Enforces:
 
 import os
 import re
+import json
 import datetime
 from datetime import timezone, timedelta
 import zoneinfo
@@ -157,6 +158,63 @@ def extract_quarterly_financials(
     return res
 
 
+def _get_verified_earnings_override(
+    ticker: str,
+    lookback_days: int = 4,
+    now_utc: Optional[datetime.datetime] = None,
+) -> Optional[Dict[str, Any]]:
+    """
+    Check data/verified_earnings_overrides.json for certified earnings releases
+    that Yahoo Finance's earnings_dates table misses or lags on.
+    """
+    try:
+        overrides_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "verified_earnings_overrides.json")
+        if not os.path.exists(overrides_path):
+            return None
+
+        with open(overrides_path, "r", encoding="utf-8") as f:
+            overrides = json.load(f)
+
+        clean = ticker.strip().upper()
+        entry = (
+            overrides.get(clean)
+            or overrides.get(clean.replace(".US", ""))
+            or overrides.get(clean.replace(".MI", ""))
+        )
+        if not entry:
+            return None
+
+        sched_str = entry.get("scheduled_dt", "")
+        sched_dt = datetime.datetime.fromisoformat(sched_str.replace("Z", "+00:00"))
+        if sched_dt.tzinfo is None:
+            sched_dt = sched_dt.replace(tzinfo=timezone.utc)
+
+        now = now_utc or datetime.datetime.now(timezone.utc)
+        days_ago = (now.date() - sched_dt.date()).days
+        if days_ago < 0 or days_ago > lookback_days:
+            return None
+
+        data = {
+            "ticker": clean,
+            "yf_sym": entry.get("yf_sym", clean),
+            "scheduled_dt": sched_dt,
+            "days_ago": days_ago,
+            "quarter": entry["quarter"],
+            "currency_sym": entry.get("currency_sym", "$"),
+            "eps_actual": entry["eps_actual"],
+            "eps_est": entry.get("eps_est"),
+            "eps_beat": entry.get("eps_beat", True),
+            "eps_diff_pct": entry.get("eps_diff_pct"),
+            "rev_actual": entry.get("rev_actual"),
+            "rev_growth": entry.get("rev_growth"),
+            "y_info": entry.get("y_info", {}),
+        }
+        return data
+    except Exception as e:
+        print(f"ℹ️ Earnings override lookup note: {e}")
+        return None
+
+
 def verify_earnings_release_status(
     ticker: str,
     yf_sym: str,
@@ -182,6 +240,11 @@ def verify_earnings_release_status(
         t = yf.Ticker(yf_sym)
         ed = t.earnings_dates
         if ed is None or ed.empty:
+            override = _get_verified_earnings_override(ticker, lookback_days, now_utc)
+            if override:
+                if not override.get("y_info"):
+                    override["y_info"] = getattr(t, "info", {}) or {}
+                return True, override, "Verified earnings report published (curated registry)"
             return False, None, f"No earnings dates available in data provider for {yf_sym}"
 
         # Search the most recent entries within the lookback window
@@ -288,6 +351,13 @@ def verify_earnings_release_status(
                 "y_info": y_info,
             }
             return True, data, "Verified earnings report published"
+
+        # Check verified overrides / curated fallback registry if yfinance table is missing or lagging
+        override = _get_verified_earnings_override(ticker, lookback_days, now_utc)
+        if override:
+            if not override.get("y_info"):
+                override["y_info"] = getattr(t, "info", {}) or {}
+            return True, override, "Verified earnings report published (curated registry)"
 
         return False, None, f"No earnings release found within last {lookback_days} days for {ticker}"
 
