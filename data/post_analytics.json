@@ -1,6 +1,29 @@
 {
-  "last_updated": "2026-11-02T17:03:09.791232+00:00",
+  "last_updated": "2026-11-02T21:14:19.578517+00:00",
   "posts": [
+    {
+      "id": "7677ae10-d701-11f1-8080-800135e846d0",
+      "platform": "etoro",
+      "session": "U.S. market close",
+      "published_at": "2026-11-02T21:07:51Z",
+      "day_of_week": "Monday",
+      "hour_utc": 21,
+      "hour_local": 23,
+      "title": "🌆 CHIUSURA DEI MERCATI 📈  ⚖️ ⚖️ ⚖️ STABILE / LIEVE CALO ⚖️: -0.38% ⚖️ ⚖️ ⚖️ 🏔️ D...",
+      "tickers": [
+        "ABT.US",
+        "WMT",
+        "IQQL.DE",
+        "AMZN",
+        "TRX"
+      ],
+      "image_type": "winners_losers_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli",
+      "last_synced": "2026-11-02T21:08:05.919652+00:00"
+    },
     {
       "id": "96aeec20-d6ca-11f1-8080-80003e3f63b7",
       "platform": "etoro",
@@ -22,7 +45,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:43.060325+00:00"
+      "last_synced": "2026-11-02T21:08:07.036715+00:00"
     },
     {
       "id": "d00c8010-d6b9-11f1-8080-80016853b795",
@@ -47,7 +70,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:44.188048+00:00"
+      "last_synced": "2026-11-02T21:08:08.040843+00:00"
     },
     {
       "id": "dfc083c0-d6b0-11f1-8080-80004e869fb0",
@@ -68,7 +91,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:45.325798+00:00"
+      "last_synced": "2026-11-02T21:08:09.516486+00:00"
     },
     {
       "id": "1029ba30-d694-11f1-8080-8000444e9560",
@@ -90,7 +113,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:46.802252+00:00"
+      "last_synced": "2026-11-02T21:08:10.521633+00:00"
     },
     {
       "id": "8fc5fdd0-d5f4-11f1-8080-80007aa83e45",
@@ -112,7 +135,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:47.946662+00:00"
+      "last_synced": "2026-11-02T21:08:11.519066+00:00"
     },
     {
       "id": "a9a28ff0-d54c-11f1-8080-800027741ff1",
@@ -134,7 +157,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:49.142174+00:00"
+      "last_synced": "2026-11-02T21:08:12.551857+00:00"
     },
     {
       "id": "e3bff4a0-d53f-11f1-8080-80011d6c887e",
@@ -153,7 +176,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:50.301083+00:00"
+      "last_synced": "2026-11-02T21:08:13.555907+00:00"
     },
     {
       "id": "fa1aea90-d51a-11f1-8080-80013180ef28",
@@ -178,7 +201,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:51.770088+00:00"
+      "last_synced": "2026-11-02T21:08:14.679494+00:00"
     },
     {
       "id": "06333fa0-d4bf-11f1-8080-80017ced30fa",
@@ -197,7 +220,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:52.931144+00:00"
+      "last_synced": "2026-11-02T21:08:15.714134+00:00"
     },
     {
       "id": "d93ef990-d4b8-11f1-8080-8000264e149f",
@@ -220,7 +243,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:54.314510+00:00"
+      "last_synced": "2026-11-02T21:08:16.723797+00:00"
     },
     {
       "id": "12c01c10-d49d-11f1-8080-800125c67fd5",
@@ -243,7 +266,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:55.459569+00:00"
+      "last_synced": "2026-11-02T21:08:17.697888+00:00"
     },
     {
       "id": "303a66c0-d497-11f1-8080-800121156ae3",
@@ -262,7 +285,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:56:56.615572+00:00"
+      "last_synced": "2026-11-02T21:08:18.667868+00:00"
     },
     {
       "id": "b1d31100-d483-11f1-8080-80001f4737ea",
@@ -284,7 +307,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:35:38.698012+00:00"
+      "last_synced": "2026-11-02T21:08:19.905890+00:00"
     },
     {
       "id": "1f204330-d47b-11f1-8080-80016b33af29",
@@ -303,7 +326,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:17.066678+00:00"
+      "last_synced": "2026-11-02T21:08:20.925109+00:00"
     },
     {
       "id": "75c84920-d46d-11f1-8080-8001570be35f",
@@ -322,7 +345,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:18.206529+00:00"
+      "last_synced": "2026-11-02T21:08:21.918796+00:00"
     },
     {
       "id": "c5931720-d466-11f1-8080-800100809404",
@@ -345,7 +368,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:19.372627+00:00"
+      "last_synced": "2026-11-02T21:08:22.906216+00:00"
     },
     {
       "id": "02316b40-d463-11f1-8080-80012182988f",
@@ -364,7 +387,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:20.511899+00:00"
+      "last_synced": "2026-11-02T21:08:23.898687+00:00"
     },
     {
       "id": "0cc6c1d0-d45f-11f1-8080-80013eee6d3d",
@@ -389,7 +412,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:21.631416+00:00"
+      "last_synced": "2026-11-02T21:08:24.953675+00:00"
     },
     {
       "id": "5dc423c0-d455-11f1-8080-80016c0ba2c7",
@@ -412,7 +435,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:22.781872+00:00"
+      "last_synced": "2026-11-02T21:08:25.947111+00:00"
     },
     {
       "id": "bac23040-d440-11f1-8080-80013a2bebec",
@@ -431,7 +454,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:23.922808+00:00"
+      "last_synced": "2026-11-02T21:08:26.926937+00:00"
     },
     {
       "id": "a0518ad0-d440-11f1-8080-80015bf32c1a",
@@ -450,7 +473,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:25.084339+00:00"
+      "last_synced": "2026-11-02T21:08:28.018861+00:00"
     },
     {
       "id": "b7dc20f0-d438-11f1-8080-8000502c484f",
@@ -472,7 +495,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:26.457358+00:00"
+      "last_synced": "2026-11-02T21:08:29.332170+00:00"
     },
     {
       "id": "047fae00-d3d4-11f1-8080-80011e8b8f7e",
@@ -495,7 +518,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:28.324877+00:00"
+      "last_synced": "2026-11-02T21:08:30.328210+00:00"
     },
     {
       "id": "9c6d42a0-d3ba-11f1-8080-80006e105510",
@@ -517,7 +540,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:29.492548+00:00"
+      "last_synced": "2026-11-02T21:08:31.289346+00:00"
     },
     {
       "id": "a9d924b0-d3a9-11f1-8080-8000073355d8",
@@ -536,7 +559,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:30.637784+00:00"
+      "last_synced": "2026-11-02T21:08:32.313130+00:00"
     },
     {
       "id": "7a1d79e0-d3a6-11f1-8080-80005120286b",
@@ -555,7 +578,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:31.857765+00:00"
+      "last_synced": "2026-11-02T21:08:33.374431+00:00"
     },
     {
       "id": "6bc1ea00-d39e-11f1-8080-80010d87d018",
@@ -578,7 +601,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:32.995625+00:00"
+      "last_synced": "2026-11-02T21:08:34.633810+00:00"
     },
     {
       "id": "d9eae0c0-d396-11f1-8080-800015b879f3",
@@ -622,7 +645,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:35.268999+00:00"
+      "last_synced": "2026-11-02T21:08:50.740064+00:00"
     },
     {
       "id": "bc3b8580-d35e-11f1-8080-800072b21533",
@@ -643,7 +666,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:36.708905+00:00"
+      "last_synced": "2026-11-02T21:08:51.783019+00:00"
     },
     {
       "id": "2ab08f50-d329-11f1-8080-80015d190397",
@@ -666,7 +689,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:37.820184+00:00"
+      "last_synced": "2026-11-02T21:08:52.779531+00:00"
     },
     {
       "id": "0fc61b40-d303-11f1-8080-800016189425",
@@ -689,7 +712,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:38.967626+00:00"
+      "last_synced": "2026-11-02T21:08:53.825568+00:00"
     },
     {
       "id": "d8f35e70-d2f3-11f1-8080-800062a921ec",
@@ -714,7 +737,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:40.239377+00:00"
+      "last_synced": "2026-11-02T21:08:54.870279+00:00"
     },
     {
       "id": "d1c787c0-d2ee-11f1-8080-80014443b778",
@@ -735,7 +758,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:41.739672+00:00"
+      "last_synced": "2026-11-02T21:08:55.879761+00:00"
     },
     {
       "id": "d07371d0-d2e0-11f1-8080-800000429038",
@@ -757,7 +780,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:42.949970+00:00"
+      "last_synced": "2026-11-02T21:08:56.904266+00:00"
     },
     {
       "id": "83cf2c70-d2cc-11f1-8080-800035f45579",
@@ -780,7 +803,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:44.119039+00:00"
+      "last_synced": "2026-11-02T21:08:58.069222+00:00"
     },
     {
       "id": "d50f9cc0-d2c0-11f1-8080-80014dd046e2",
@@ -799,7 +822,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:45.292947+00:00"
+      "last_synced": "2026-11-02T21:08:59.557625+00:00"
     },
     {
       "id": "bfa24980-d295-11f1-8080-800069b75823",
@@ -820,7 +843,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:46.561160+00:00"
+      "last_synced": "2026-11-02T21:09:00.558649+00:00"
     },
     {
       "id": "4b6b0630-d239-11f1-8080-800152ef5dbd",
@@ -843,7 +866,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:47.736974+00:00"
+      "last_synced": "2026-11-02T21:09:01.740219+00:00"
     },
     {
       "id": "7c6e58c0-d227-11f1-8080-80010785515e",
@@ -868,7 +891,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:48.862797+00:00"
+      "last_synced": "2026-11-02T21:09:02.717337+00:00"
     },
     {
       "id": "32e23690-d218-11f1-8080-80007aefedf7",
@@ -890,7 +913,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:49.992164+00:00"
+      "last_synced": "2026-11-02T21:09:03.720305+00:00"
     },
     {
       "id": "d660c630-d202-11f1-8080-80007c8bccc6",
@@ -913,7 +936,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:51.664573+00:00"
+      "last_synced": "2026-11-02T21:09:04.887145+00:00"
     },
     {
       "id": "70ca0b60-d1f8-11f1-8080-800013261f68",
@@ -932,7 +955,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:57:52.851364+00:00"
+      "last_synced": "2026-11-02T21:09:05.938172+00:00"
     },
     {
       "id": "43907430-d1cc-11f1-8080-80013472359c",
@@ -953,7 +976,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:36:25.566706+00:00"
+      "last_synced": "2026-11-02T21:09:06.944534+00:00"
     },
     {
       "id": "ecc594b0-d170-11f1-8080-800013c86363",
@@ -976,7 +999,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:36:26.971176+00:00"
+      "last_synced": "2026-11-02T21:09:07.938194+00:00"
     },
     {
       "id": "16c46fb0-d14f-11f1-8080-80001b87d494",
@@ -998,7 +1021,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:20.250114+00:00"
+      "last_synced": "2026-11-02T21:09:08.903574+00:00"
     },
     {
       "id": "2a056120-d13a-11f1-8080-80003aae7a79",
@@ -1021,7 +1044,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:21.614038+00:00"
+      "last_synced": "2026-11-02T21:09:09.868985+00:00"
     },
     {
       "id": "065d7e40-d12d-11f1-8080-80000fbb17a1",
@@ -1040,7 +1063,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:22.749307+00:00"
+      "last_synced": "2026-11-02T21:09:10.911751+00:00"
     },
     {
       "id": "b938cad0-d103-11f1-8080-8000069a4619",
@@ -1061,7 +1084,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:23.922716+00:00"
+      "last_synced": "2026-11-02T21:09:11.917309+00:00"
     },
     {
       "id": "43d1f310-d0a5-11f1-8080-80001594e999",
@@ -1080,7 +1103,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:25.068331+00:00"
+      "last_synced": "2026-11-02T21:09:12.870728+00:00"
     },
     {
       "id": "06a3c560-d085-11f1-8080-80002851a924",
@@ -1102,7 +1125,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:26.437749+00:00"
+      "last_synced": "2026-11-02T21:09:13.852655+00:00"
     },
     {
       "id": "8430b400-cfc4-11f1-8080-800172250f8b",
@@ -1124,7 +1147,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:27.579408+00:00"
+      "last_synced": "2026-11-02T21:09:14.851037+00:00"
     },
     {
       "id": "fbed13f0-cfb3-11f1-8080-80007e53056c",
@@ -1149,7 +1172,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:28.783787+00:00"
+      "last_synced": "2026-11-02T21:09:16.004854+00:00"
     },
     {
       "id": "aa456a10-cf82-11f1-8080-80004a21ebc8",
@@ -1170,7 +1193,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:29.920280+00:00"
+      "last_synced": "2026-11-02T21:09:17.035755+00:00"
     },
     {
       "id": "578aa020-cf1d-11f1-8080-80003cc92a83",
@@ -1192,7 +1215,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:31.242359+00:00"
+      "last_synced": "2026-11-02T21:09:18.048108+00:00"
     },
     {
       "id": "90b62cc0-cefa-11f1-8080-80017ba4f8fd",
@@ -1217,7 +1240,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:32.366147+00:00"
+      "last_synced": "2026-11-02T21:09:19.329131+00:00"
     },
     {
       "id": "923b3630-cee6-11f1-8080-8000364b8845",
@@ -1240,7 +1263,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:33.491393+00:00"
+      "last_synced": "2026-11-02T21:09:20.308085+00:00"
     },
     {
       "id": "69c4bed0-ceda-11f1-8080-80017d1accdf",
@@ -1259,7 +1282,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:34.622104+00:00"
+      "last_synced": "2026-11-02T21:09:21.312797+00:00"
     },
     {
       "id": "3877fe70-ceb0-11f1-8080-800178ea49bc",
@@ -1329,7 +1352,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:38.477466+00:00"
+      "last_synced": "2026-11-02T21:09:54.813633+00:00"
     },
     {
       "id": "7d8dbb50-ce1d-11f1-8080-80005494b9a3",
@@ -1352,7 +1375,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:39.613312+00:00"
+      "last_synced": "2026-11-02T21:09:55.790055+00:00"
     },
     {
       "id": "3f28a430-ce11-11f1-8080-80015788b92c",
@@ -1371,7 +1394,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:40.989998+00:00"
+      "last_synced": "2026-11-02T21:09:56.796330+00:00"
     },
     {
       "id": "c21cb730-cde6-11f1-8080-800165a69b48",
@@ -1393,7 +1416,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:42.163981+00:00"
+      "last_synced": "2026-11-02T21:09:57.814067+00:00"
     },
     {
       "id": "af870b40-cd8a-11f1-8080-800128fe8430",
@@ -1415,7 +1438,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:43.273231+00:00"
+      "last_synced": "2026-11-02T21:09:58.791345+00:00"
     },
     {
       "id": "2c1c2c20-cd69-11f1-8080-800102e16c52",
@@ -1437,7 +1460,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:44.387263+00:00"
+      "last_synced": "2026-11-02T21:09:59.806936+00:00"
     },
     {
       "id": "38ebcb00-cd54-11f1-8080-80010816b0c0",
@@ -1460,7 +1483,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:45.541282+00:00"
+      "last_synced": "2026-11-02T21:10:00.843272+00:00"
     },
     {
       "id": "58f2b830-cd47-11f1-8080-80003f1ffce4",
@@ -1479,7 +1502,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:46.718409+00:00"
+      "last_synced": "2026-11-02T21:10:02.039164+00:00"
     },
     {
       "id": "d3829760-cd1e-11f1-8080-80012e085831",
@@ -1501,7 +1524,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:47.904337+00:00"
+      "last_synced": "2026-11-02T21:10:03.082704+00:00"
     },
     {
       "id": "905f38b0-ccc1-11f1-8080-80004e58b5d0",
@@ -1523,7 +1546,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:49.076504+00:00"
+      "last_synced": "2026-11-02T21:10:04.462092+00:00"
     },
     {
       "id": "3c965420-cc9e-11f1-8080-80010aafa5dd",
@@ -1548,7 +1571,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:50.236379+00:00"
+      "last_synced": "2026-11-02T21:10:05.496901+00:00"
     },
     {
       "id": "edb6a840-cc8a-11f1-8080-80013b8eae63",
@@ -1570,7 +1593,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:51.600859+00:00"
+      "last_synced": "2026-11-02T21:10:06.534999+00:00"
     },
     {
       "id": "aaf2e400-cc54-11f1-8080-80001afd71be",
@@ -1593,7 +1616,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:52.755803+00:00"
+      "last_synced": "2026-11-02T21:10:07.590871+00:00"
     },
     {
       "id": "5d06f120-cbf8-11f1-8080-80015562a494",
@@ -1615,7 +1638,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:53.934877+00:00"
+      "last_synced": "2026-11-02T21:10:08.686046+00:00"
     },
     {
       "id": "bc42ea40-cbe4-11f1-8080-80004a2cc0da",
@@ -1640,7 +1663,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:58:55.051822+00:00"
+      "last_synced": "2026-11-02T21:10:09.708762+00:00"
     },
     {
       "id": "30b5c7b0-cbd8-11f1-8080-800041e00884",
@@ -1662,7 +1685,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:37:25.774151+00:00"
+      "last_synced": "2026-11-02T21:10:10.780006+00:00"
     },
     {
       "id": "d4a44ca0-cbc1-11f1-8080-800039030ecc",
@@ -1685,7 +1708,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:37:26.963484+00:00"
+      "last_synced": "2026-11-02T21:10:11.937445+00:00"
     },
     {
       "id": "fb3eba60-cbb4-11f1-8080-80001217b77c",
@@ -1704,7 +1727,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:22.288929+00:00"
+      "last_synced": "2026-11-02T21:10:12.963193+00:00"
     },
     {
       "id": "4110f8c0-cb8b-11f1-8080-80016db14b90",
@@ -1727,7 +1750,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:23.421629+00:00"
+      "last_synced": "2026-11-02T21:10:14.395159+00:00"
     },
     {
       "id": "79ec4550-cb22-11f1-8080-8001276e0bae",
@@ -1750,7 +1773,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:24.606645+00:00"
+      "last_synced": "2026-11-02T21:10:15.001570+00:00"
     },
     {
       "id": "4a8d3ea0-cb0d-11f1-8080-800147ad2850",
@@ -1772,7 +1795,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:25.279323+00:00"
+      "last_synced": "2026-11-02T21:10:15.423931+00:00"
     },
     {
       "id": "51812100-ca44-11f1-8080-8000504ed8fc",
@@ -1794,7 +1817,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:26.216430+00:00"
+      "last_synced": "2026-11-02T21:10:15.854198+00:00"
     },
     {
       "id": "51724e90-ca31-11f1-8080-8001028b0876",
@@ -1819,7 +1842,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:26.724948+00:00"
+      "last_synced": "2026-11-02T21:10:16.287336+00:00"
     },
     {
       "id": "06e11b70-ca01-11f1-8080-80005558d675",
@@ -1839,7 +1862,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:27.202317+00:00"
+      "last_synced": "2026-11-02T21:10:16.744449+00:00"
     },
     {
       "id": "158fcc70-c99d-11f1-8080-80000d8aca62",
@@ -1862,7 +1885,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:27.693240+00:00"
+      "last_synced": "2026-11-02T21:10:17.195187+00:00"
     },
     {
       "id": "9637e810-c97c-11f1-8080-80001099e0ba",
@@ -1884,7 +1907,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:28.205377+00:00"
+      "last_synced": "2026-11-02T21:10:17.628257+00:00"
     },
     {
       "id": "b0bf7fa0-c976-11f1-8080-80012986b79e",
@@ -1909,7 +1932,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:28.690492+00:00"
+      "last_synced": "2026-11-02T21:10:18.085076+00:00"
     },
     {
       "id": "59411280-c966-11f1-8080-800148e5b1b4",
@@ -1931,7 +1954,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:29.167196+00:00"
+      "last_synced": "2026-11-02T21:10:18.586147+00:00"
     },
     {
       "id": "c0cde180-c92f-11f1-8080-800109425e0a",
@@ -1954,7 +1977,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:29.685883+00:00"
+      "last_synced": "2026-11-02T21:10:19.137868+00:00"
     },
     {
       "id": "afa692a0-c8d3-11f1-8080-8000680ea572",
@@ -1977,7 +2000,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:30.169222+00:00"
+      "last_synced": "2026-11-02T21:10:19.574183+00:00"
     },
     {
       "id": "53eedbe0-c8b3-11f1-8080-80006f5fb292",
@@ -1999,7 +2022,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:31.170043+00:00"
+      "last_synced": "2026-11-02T21:10:20.001907+00:00"
     },
     {
       "id": "a529fb60-c8af-11f1-8080-80010e6553f3",
@@ -2024,7 +2047,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:31.648477+00:00"
+      "last_synced": "2026-11-02T21:10:20.415745+00:00"
     },
     {
       "id": "213729c0-c89d-11f1-8080-80011e39bcd9",
@@ -2047,7 +2070,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:32.131788+00:00"
+      "last_synced": "2026-11-02T21:10:20.914181+00:00"
     },
     {
       "id": "dd125cd0-c890-11f1-8080-80014af90d18",
@@ -2066,7 +2089,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:32.621774+00:00"
+      "last_synced": "2026-11-02T21:10:21.297307+00:00"
     },
     {
       "id": "9d692890-c866-11f1-8080-8001726a4feb",
@@ -2089,7 +2112,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:33.131937+00:00"
+      "last_synced": "2026-11-02T21:10:21.701026+00:00"
     },
     {
       "id": "675248b0-c80a-11f1-8080-80015e4271ea",
@@ -2112,7 +2135,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:33.591423+00:00"
+      "last_synced": "2026-11-02T21:10:22.166227+00:00"
     },
     {
       "id": "1d7049e0-c7f1-11f1-8080-800144f5f991",
@@ -2134,7 +2157,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:34.065218+00:00"
+      "last_synced": "2026-11-02T21:10:22.586928+00:00"
     },
     {
       "id": "2b1a3040-c7e9-11f1-8080-800125a29060",
@@ -2156,7 +2179,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:34.559552+00:00"
+      "last_synced": "2026-11-02T21:10:22.983645+00:00"
     },
     {
       "id": "10117610-c7d4-11f1-8080-800064f169db",
@@ -2179,7 +2202,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:35.029919+00:00"
+      "last_synced": "2026-11-02T21:10:23.407146+00:00"
     },
     {
       "id": "1c384640-c7c9-11f1-8080-80015a19b600",
@@ -2198,7 +2221,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:35.518305+00:00"
+      "last_synced": "2026-11-02T21:10:23.809621+00:00"
     },
     {
       "id": "4905fce0-c7a0-11f1-8080-800025471c33",
@@ -2221,7 +2244,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:36.237311+00:00"
+      "last_synced": "2026-11-02T21:10:24.324195+00:00"
     },
     {
       "id": "64d09930-c741-11f1-8080-800018604d13",
@@ -2291,7 +2314,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:37.668390+00:00"
+      "last_synced": "2026-11-02T21:10:56.318186+00:00"
     },
     {
       "id": "d2186310-c70a-11f1-8080-800139f4850e",
@@ -2314,7 +2337,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:38.138839+00:00"
+      "last_synced": "2026-11-02T21:10:56.721389+00:00"
     },
     {
       "id": "46143bc0-c6fe-11f1-8080-80010ba2d8f8",
@@ -2333,7 +2356,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:38.619487+00:00"
+      "last_synced": "2026-11-02T21:10:57.108174+00:00"
     },
     {
       "id": "773849a0-c6d4-11f1-8080-8000353b5559",
@@ -2355,7 +2378,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:39.110105+00:00"
+      "last_synced": "2026-11-02T21:10:57.514532+00:00"
     },
     {
       "id": "41565510-c67b-11f1-8080-800109cf3ee9",
@@ -2380,7 +2403,7 @@
       "comments": 2,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:39.591847+00:00"
+      "last_synced": "2026-11-02T21:10:57.958793+00:00"
     },
     {
       "id": "1abbb380-c678-11f1-8080-80012e9ee5d9",
@@ -2403,7 +2426,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:40.100922+00:00"
+      "last_synced": "2026-11-02T21:10:58.377332+00:00"
     },
     {
       "id": "900f3980-c656-11f1-8080-80010bd10646",
@@ -2425,7 +2448,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:40.599989+00:00"
+      "last_synced": "2026-11-02T21:10:58.785421+00:00"
     },
     {
       "id": "fa037980-c649-11f1-8080-800169016c99",
@@ -2447,7 +2470,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:41.095143+00:00"
+      "last_synced": "2026-11-02T21:10:59.307976+00:00"
     },
     {
       "id": "da368080-c634-11f1-8080-80004a8ffcc9",
@@ -2466,7 +2489,7 @@
       "comments": 2,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:41.606951+00:00"
+      "last_synced": "2026-11-02T21:10:59.711004+00:00"
     },
     {
       "id": "2fca4100-c60b-11f1-8080-80003446364b",
@@ -2488,7 +2511,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:42.085401+00:00"
+      "last_synced": "2026-11-02T21:11:00.123198+00:00"
     },
     {
       "id": "f88afc00-c5d5-11f1-8080-8000793c9e33",
@@ -2510,7 +2533,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:42.575027+00:00"
+      "last_synced": "2026-11-02T21:11:00.557715+00:00"
     },
     {
       "id": "b2a5fcc0-c5ae-11f1-8080-80001e5aa843",
@@ -2532,7 +2555,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:43.075223+00:00"
+      "last_synced": "2026-11-02T21:11:00.951395+00:00"
     },
     {
       "id": "59b54ab0-c58d-11f1-8080-8001613aaca7",
@@ -2554,7 +2577,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:43.575549+00:00"
+      "last_synced": "2026-11-02T21:11:01.325173+00:00"
     },
     {
       "id": "0a368cd0-c4c3-11f1-8080-80001db0be50",
@@ -2579,7 +2602,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:44.104076+00:00"
+      "last_synced": "2026-11-02T21:11:01.723782+00:00"
     },
     {
       "id": "debafb50-c480-11f1-8080-80012297952e",
@@ -2600,7 +2623,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:44.582617+00:00"
+      "last_synced": "2026-11-02T21:11:02.140815+00:00"
     },
     {
       "id": "14ece080-c41d-11f1-8080-80013e264c24",
@@ -2622,7 +2645,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:45.069308+00:00"
+      "last_synced": "2026-11-02T21:11:02.516190+00:00"
     },
     {
       "id": "b6de6780-c407-11f1-8080-80003cd72dfa",
@@ -2647,7 +2670,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:45.543074+00:00"
+      "last_synced": "2026-11-02T21:11:02.896887+00:00"
     },
     {
       "id": "0b06aaf0-c3fb-11f1-8080-80002adec922",
@@ -2669,7 +2692,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:46.295694+00:00"
+      "last_synced": "2026-11-02T21:11:03.282595+00:00"
     },
     {
       "id": "3a334910-c3e6-11f1-8080-80004093e50f",
@@ -2691,7 +2714,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:46.780671+00:00"
+      "last_synced": "2026-11-02T21:11:03.679211+00:00"
     },
     {
       "id": "598257f0-c3d9-11f1-8080-80002c7c0f7f",
@@ -2710,7 +2733,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:47.277526+00:00"
+      "last_synced": "2026-11-02T21:11:04.455822+00:00"
     },
     {
       "id": "98ece0b0-c3af-11f1-8080-800128aa5fc6",
@@ -2733,7 +2756,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:47.762410+00:00"
+      "last_synced": "2026-11-02T21:11:04.878157+00:00"
     },
     {
       "id": "99059da0-c353-11f1-8080-80010f1ad091",
@@ -2756,7 +2779,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:48.269489+00:00"
+      "last_synced": "2026-11-02T21:11:05.289047+00:00"
     },
     {
       "id": "38485b80-c342-11f1-8080-80000be17736",
@@ -2781,7 +2804,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:48.753934+00:00"
+      "last_synced": "2026-11-02T21:11:05.678520+00:00"
     },
     {
       "id": "461b03c0-c333-11f1-8080-80006982c228",
@@ -2803,7 +2826,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:49.225467+00:00"
+      "last_synced": "2026-11-02T21:11:06.113221+00:00"
     },
     {
       "id": "057a3900-c31d-11f1-8080-8000740d1ba1",
@@ -2826,7 +2849,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:50.452975+00:00"
+      "last_synced": "2026-11-02T21:11:06.514413+00:00"
     },
     {
       "id": "754b2cb0-c310-11f1-8080-80016babceb2",
@@ -2845,7 +2868,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:51.008710+00:00"
+      "last_synced": "2026-11-02T21:11:06.926902+00:00"
     },
     {
       "id": "cea989c0-c2e6-11f1-8080-800144322f96",
@@ -2890,7 +2913,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:51.934180+00:00"
+      "last_synced": "2026-11-02T21:11:07.735037+00:00"
     },
     {
       "id": "1c942480-c27c-11f1-8080-80003bf8cbe2",
@@ -2915,7 +2938,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:52.426142+00:00"
+      "last_synced": "2026-11-02T21:11:08.125305+00:00"
     },
     {
       "id": "f1dea150-c269-11f1-8080-800030df3e1a",
@@ -2937,7 +2960,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:52.890140+00:00"
+      "last_synced": "2026-11-02T21:11:08.532514+00:00"
     },
     {
       "id": "decd8100-c253-11f1-8080-80007bad8039",
@@ -2960,7 +2983,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T16:59:53.390838+00:00"
+      "last_synced": "2026-11-02T21:11:09.228703+00:00"
     },
     {
       "id": "21a19ef0-c248-11f1-8080-800050f0ce9a",
@@ -2979,7 +3002,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:38:27.517890+00:00"
+      "last_synced": "2026-11-02T21:11:09.629710+00:00"
     },
     {
       "id": "46a98170-c21d-11f1-8080-800011de4f63",
@@ -3002,7 +3025,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:38:28.069007+00:00"
+      "last_synced": "2026-11-02T21:11:10.011137+00:00"
     },
     {
       "id": "2e0c8f60-c1c1-11f1-8080-800151284e6e",
@@ -3025,7 +3048,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:21.851197+00:00"
+      "last_synced": "2026-11-02T21:11:10.414265+00:00"
     },
     {
       "id": "f8fe6a20-c1aa-11f1-8080-80015ef6b556",
@@ -3050,7 +3073,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:22.344895+00:00"
+      "last_synced": "2026-11-02T21:11:10.810392+00:00"
     },
     {
       "id": "a81ed5f0-c19f-11f1-8080-80005b51c5d8",
@@ -3072,7 +3095,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:22.868519+00:00"
+      "last_synced": "2026-11-02T21:11:11.209204+00:00"
     },
     {
       "id": "c12c7580-c18a-11f1-8080-8001593b0e54",
@@ -3094,7 +3117,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:23.371805+00:00"
+      "last_synced": "2026-11-02T21:11:11.606074+00:00"
     },
     {
       "id": "48fa4f80-c17e-11f1-8080-80004d51ffcc",
@@ -3113,7 +3136,7 @@
       "comments": 2,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:23.926245+00:00"
+      "last_synced": "2026-11-02T21:11:12.073927+00:00"
     },
     {
       "id": "cde93630-c155-11f1-8080-8001514679ce",
@@ -3156,7 +3179,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:24.928910+00:00"
+      "last_synced": "2026-11-02T21:11:12.847114+00:00"
     },
     {
       "id": "8f626f10-c0c1-11f1-8080-80016e028fdb",
@@ -3178,7 +3201,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:25.465506+00:00"
+      "last_synced": "2026-11-02T21:11:13.251433+00:00"
     },
     {
       "id": "5dae2230-c0b6-11f1-8080-800060648f02",
@@ -3197,7 +3220,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:26.211813+00:00"
+      "last_synced": "2026-11-02T21:11:13.652336+00:00"
     },
     {
       "id": "0137b050-c08b-11f1-8080-8001101d7274",
@@ -3241,7 +3264,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:27.201515+00:00"
+      "last_synced": "2026-11-02T21:11:14.851478+00:00"
     },
     {
       "id": "11a5c360-c00d-11f1-8080-8001368aa68f",
@@ -3263,7 +3286,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:27.719139+00:00"
+      "last_synced": "2026-11-02T21:11:15.240031+00:00"
     },
     {
       "id": "d69f1560-bf43-11f1-8080-800057e64626",
@@ -3285,7 +3308,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:28.210936+00:00"
+      "last_synced": "2026-11-02T21:11:15.629778+00:00"
     },
     {
       "id": "69488f00-bf39-11f1-8080-800174369515",
@@ -3310,7 +3333,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:28.713797+00:00"
+      "last_synced": "2026-11-02T21:11:15.997678+00:00"
     },
     {
       "id": "bca8a470-bf00-11f1-8080-80011c755ca1",
@@ -3330,7 +3353,7 @@
       "comments": 2,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:29.235802+00:00"
+      "last_synced": "2026-11-02T21:11:16.468360+00:00"
     },
     {
       "id": "a1252de0-be9c-11f1-8080-80000a7b00a5",
@@ -3353,7 +3376,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:29.716154+00:00"
+      "last_synced": "2026-11-02T21:11:16.945199+00:00"
     },
     {
       "id": "48b005b0-be81-11f1-8080-800121bf1a50",
@@ -3378,7 +3401,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:30.232073+00:00"
+      "last_synced": "2026-11-02T21:11:17.337971+00:00"
     },
     {
       "id": "8dfc19c0-be7b-11f1-8080-800041ae0660",
@@ -3400,7 +3423,7 @@
       "comments": 2,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:31.092463+00:00"
+      "last_synced": "2026-11-02T21:11:17.729122+00:00"
     },
     {
       "id": "3dab63a0-be66-11f1-8080-80011e11f277",
@@ -3422,7 +3445,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:31.610103+00:00"
+      "last_synced": "2026-11-02T21:11:18.138236+00:00"
     },
     {
       "id": "d346df00-be59-11f1-8080-80004dc7047a",
@@ -3441,7 +3464,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:32.117357+00:00"
+      "last_synced": "2026-11-02T21:11:18.538244+00:00"
     },
     {
       "id": "a6292250-be2f-11f1-8080-80015d1cd66d",
@@ -3463,7 +3486,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:32.610991+00:00"
+      "last_synced": "2026-11-02T21:11:19.358078+00:00"
     },
     {
       "id": "6377a2d0-bdd3-11f1-8080-80015d31b0d7",
@@ -3485,7 +3508,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:33.127184+00:00"
+      "last_synced": "2026-11-02T21:11:19.743896+00:00"
     },
     {
       "id": "78b35d60-bdbf-11f1-8080-80014be31826",
@@ -3510,7 +3533,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:33.724385+00:00"
+      "last_synced": "2026-11-02T21:11:20.126787+00:00"
     },
     {
       "id": "afca5550-bdb1-11f1-8080-800145ecb42e",
@@ -3532,7 +3555,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:34.236293+00:00"
+      "last_synced": "2026-11-02T21:11:20.515311+00:00"
     },
     {
       "id": "def48270-bd9c-11f1-8080-8001479860db",
@@ -3554,7 +3577,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:34.763614+00:00"
+      "last_synced": "2026-11-02T21:11:20.901636+00:00"
     },
     {
       "id": "68459320-bd66-11f1-8080-8000133e964f",
@@ -3577,7 +3600,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:35.297573+00:00"
+      "last_synced": "2026-11-02T21:11:21.286150+00:00"
     },
     {
       "id": "f5e20a20-bd24-11f1-8080-8000499f1c18",
@@ -3600,7 +3623,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:36.188746+00:00"
+      "last_synced": "2026-11-02T21:11:21.688191+00:00"
     },
     {
       "id": "fd818d30-bd08-11f1-8080-80005ebebfe3",
@@ -3687,7 +3710,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:38.106467+00:00"
+      "last_synced": "2026-11-02T21:11:59.751167+00:00"
     },
     {
       "id": "95912530-bca1-11f1-8080-80004821da42",
@@ -3708,7 +3731,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:38.610005+00:00"
+      "last_synced": "2026-11-02T21:12:00.132241+00:00"
     },
     {
       "id": "106ef7c0-bc41-11f1-8080-8000028cfe34",
@@ -3731,7 +3754,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:39.121252+00:00"
+      "last_synced": "2026-11-02T21:12:00.537927+00:00"
     },
     {
       "id": "d3065f80-bc28-11f1-8080-800031b5579e",
@@ -3756,7 +3779,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:39.602988+00:00"
+      "last_synced": "2026-11-02T21:12:00.935287+00:00"
     },
     {
       "id": "c22f64d0-bc1f-11f1-8080-80005f7334cd",
@@ -3778,7 +3801,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:40.126853+00:00"
+      "last_synced": "2026-11-02T21:12:01.318793+00:00"
     },
     {
       "id": "9d667b30-bc0a-11f1-8080-8001705b8170",
@@ -3801,7 +3824,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:40.634445+00:00"
+      "last_synced": "2026-11-02T21:12:01.702821+00:00"
     },
     {
       "id": "0e3b9870-bbfe-11f1-8080-80001e9ef507",
@@ -3820,7 +3843,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:41.150347+00:00"
+      "last_synced": "2026-11-02T21:12:02.126566+00:00"
     },
     {
       "id": "7b93ada0-bbd5-11f1-8080-80000bb43f4b",
@@ -3843,7 +3866,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:41.622130+00:00"
+      "last_synced": "2026-11-02T21:12:02.521175+00:00"
     },
     {
       "id": "d214d900-bb77-11f1-8080-80017acd38d4",
@@ -3866,7 +3889,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:42.132254+00:00"
+      "last_synced": "2026-11-02T21:12:02.921058+00:00"
     },
     {
       "id": "bab80440-bb6c-11f1-8080-800143be5d52",
@@ -3891,7 +3914,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:42.634579+00:00"
+      "last_synced": "2026-11-02T21:12:03.310085+00:00"
     },
     {
       "id": "b4dc6e90-bb57-11f1-8080-8000131a60a7",
@@ -3913,7 +3936,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:43.158921+00:00"
+      "last_synced": "2026-11-02T21:12:03.728959+00:00"
     },
     {
       "id": "75c26ae0-bb41-11f1-8080-80005dfd85b3",
@@ -3936,7 +3959,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:43.643833+00:00"
+      "last_synced": "2026-11-02T21:12:04.428848+00:00"
     },
     {
       "id": "dcfecff0-bb0a-11f1-8080-80016b641dca",
@@ -3959,7 +3982,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:44.129927+00:00"
+      "last_synced": "2026-11-02T21:12:04.846791+00:00"
     },
     {
       "id": "8243c750-baab-11f1-8080-8000140a4bfc",
@@ -3982,7 +4005,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:44.718820+00:00"
+      "last_synced": "2026-11-02T21:12:05.252800+00:00"
     },
     {
       "id": "cd224900-ba8c-11f1-8080-8000765c2ecc",
@@ -4004,7 +4027,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:45.202109+00:00"
+      "last_synced": "2026-11-02T21:12:05.638259+00:00"
     },
     {
       "id": "c3e78f90-b9c3-11f1-8080-80014a338419",
@@ -4026,7 +4049,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:46.078419+00:00"
+      "last_synced": "2026-11-02T21:12:06.008524+00:00"
     },
     {
       "id": "cea4f470-b9a7-11f1-8080-80014d46fafc",
@@ -4051,7 +4074,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:46.575892+00:00"
+      "last_synced": "2026-11-02T21:12:06.383920+00:00"
     },
     {
       "id": "7ec4b890-b980-11f1-8080-80007016267f",
@@ -4071,7 +4094,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:47.067065+00:00"
+      "last_synced": "2026-11-02T21:12:06.772948+00:00"
     },
     {
       "id": "7451b250-b91c-11f1-8080-80017ac47340",
@@ -4094,7 +4117,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:47.553630+00:00"
+      "last_synced": "2026-11-02T21:12:07.147563+00:00"
     },
     {
       "id": "29a38e10-b8fc-11f1-8080-800100982561",
@@ -4116,7 +4139,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:48.045518+00:00"
+      "last_synced": "2026-11-02T21:12:07.543084+00:00"
     },
     {
       "id": "d8326940-b8e5-11f1-8080-80015d6d1ae8",
@@ -4139,7 +4162,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:48.559864+00:00"
+      "last_synced": "2026-11-02T21:12:07.926774+00:00"
     },
     {
       "id": "5e61a080-b8af-11f1-8080-800119d4bf4c",
@@ -4161,7 +4184,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:49.058712+00:00"
+      "last_synced": "2026-11-02T21:12:08.303575+00:00"
     },
     {
       "id": "e1bc36c0-b832-11f1-8080-800030df24a9",
@@ -4183,7 +4206,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:49.579591+00:00"
+      "last_synced": "2026-11-02T21:12:08.685450+00:00"
     },
     {
       "id": "b4978520-b81c-11f1-8080-80012daa62d1",
@@ -4205,7 +4228,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:50.097219+00:00"
+      "last_synced": "2026-11-02T21:12:09.557080+00:00"
     },
     {
       "id": "67968ab0-b811-11f1-8080-80004397fd98",
@@ -4224,7 +4247,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:50.568401+00:00"
+      "last_synced": "2026-11-02T21:12:09.947630+00:00"
     },
     {
       "id": "40edbf80-b7e6-11f1-8080-800029efdd81",
@@ -4247,7 +4270,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:51.166337+00:00"
+      "last_synced": "2026-11-02T21:12:10.510508+00:00"
     },
     {
       "id": "3f911a80-b78a-11f1-8080-8000628238ca",
@@ -4269,7 +4292,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:51.671681+00:00"
+      "last_synced": "2026-11-02T21:12:10.998487+00:00"
     },
     {
       "id": "10c66160-b771-11f1-8080-8000513d11b2",
@@ -4291,7 +4314,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:52.155417+00:00"
+      "last_synced": "2026-11-02T21:12:11.562033+00:00"
     },
     {
       "id": "487955c0-b764-11f1-8080-800024ab5e00",
@@ -4316,7 +4339,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:52.644460+00:00"
+      "last_synced": "2026-11-02T21:12:11.962766+00:00"
     },
     {
       "id": "871a4390-b753-11f1-8080-8001415861e0",
@@ -4339,7 +4362,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:00:53.129633+00:00"
+      "last_synced": "2026-11-02T21:12:12.482464+00:00"
     },
     {
       "id": "832d9680-b747-11f1-8080-800147224b1e",
@@ -4358,7 +4381,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:39:30.106017+00:00"
+      "last_synced": "2026-11-02T21:12:12.870309+00:00"
     },
     {
       "id": "424bc8f0-b722-11f1-8080-80013f45658c",
@@ -4380,7 +4403,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:39:31.529565+00:00"
+      "last_synced": "2026-11-02T21:12:13.261758+00:00"
     },
     {
       "id": "14837960-b6c1-11f1-8080-800079df4ae3",
@@ -4403,7 +4426,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:26.054507+00:00"
+      "last_synced": "2026-11-02T21:12:13.662231+00:00"
     },
     {
       "id": "45a0fdf0-b69f-11f1-8080-80001a84cf80",
@@ -4425,7 +4448,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:26.544182+00:00"
+      "last_synced": "2026-11-02T21:12:14.243833+00:00"
     },
     {
       "id": "a1a8dae0-b69b-11f1-8080-8000473fb51e",
@@ -4450,7 +4473,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:27.048436+00:00"
+      "last_synced": "2026-11-02T21:12:14.654516+00:00"
     },
     {
       "id": "204bb3d0-b67f-11f1-8080-800128fe1898",
@@ -4469,7 +4492,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:27.570907+00:00"
+      "last_synced": "2026-11-02T21:12:15.052825+00:00"
     },
     {
       "id": "dd5a75f0-b653-11f1-8080-80014c478af1",
@@ -4491,7 +4514,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:28.072046+00:00"
+      "last_synced": "2026-11-02T21:12:15.445097+00:00"
     },
     {
       "id": "f4415d30-b5f7-11f1-8080-800125a11c2f",
@@ -4514,7 +4537,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:28.562487+00:00"
+      "last_synced": "2026-11-02T21:12:15.821198+00:00"
     },
     {
       "id": "26a9f3d0-b5e0-11f1-8080-80000e8aa82a",
@@ -4539,7 +4562,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:29.060470+00:00"
+      "last_synced": "2026-11-02T21:12:16.214012+00:00"
     },
     {
       "id": "1beafd90-b5d6-11f1-8080-800106b434fa",
@@ -4561,7 +4584,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:29.969683+00:00"
+      "last_synced": "2026-11-02T21:12:16.618694+00:00"
     },
     {
       "id": "541e1810-b5c1-11f1-8080-80006954e3af",
@@ -4584,7 +4607,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:30.465825+00:00"
+      "last_synced": "2026-11-02T21:12:17.021450+00:00"
     },
     {
       "id": "bc9fb540-b5b4-11f1-8080-8000397f8b02",
@@ -4603,7 +4626,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:31.082928+00:00"
+      "last_synced": "2026-11-02T21:12:17.402027+00:00"
     },
     {
       "id": "c33f0ec0-b58a-11f1-8080-800123f1337e",
@@ -4626,7 +4649,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:31.588679+00:00"
+      "last_synced": "2026-11-02T21:12:17.790107+00:00"
     },
     {
       "id": "95c6df30-b522-11f1-8080-80012702bd55",
@@ -4649,7 +4672,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:32.122049+00:00"
+      "last_synced": "2026-11-02T21:12:18.286566+00:00"
     },
     {
       "id": "d68e96e0-b50c-11f1-8080-800104b8e9b8",
@@ -4671,7 +4694,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:32.617548+00:00"
+      "last_synced": "2026-11-02T21:12:18.679737+00:00"
     },
     {
       "id": "8fa4b260-b443-11f1-8080-80011f3704b8",
@@ -4693,7 +4716,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:33.106654+00:00"
+      "last_synced": "2026-11-02T21:12:19.336954+00:00"
     },
     {
       "id": "e1b90e20-b42f-11f1-8080-8000256fe8f6",
@@ -4718,7 +4741,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:33.609399+00:00"
+      "last_synced": "2026-11-02T21:12:19.737130+00:00"
     },
     {
       "id": "6f3ceee0-b400-11f1-8080-800017fa160f",
@@ -4739,7 +4762,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:34.092554+00:00"
+      "last_synced": "2026-11-02T21:12:20.124822+00:00"
     },
     {
       "id": "1c03fed0-b39c-11f1-8080-80007b6711d0",
@@ -4762,7 +4785,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:34.594237+00:00"
+      "last_synced": "2026-11-02T21:12:20.564735+00:00"
     },
     {
       "id": "32452800-b373-11f1-8080-8000382b24d3",
@@ -4787,7 +4810,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:35.082209+00:00"
+      "last_synced": "2026-11-02T21:12:20.966429+00:00"
     },
     {
       "id": "853f99d0-b366-11f1-8080-8000728cb813",
@@ -4810,7 +4833,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:35.558172+00:00"
+      "last_synced": "2026-11-02T21:12:21.361493+00:00"
     },
     {
       "id": "2f37fff0-b32f-11f1-8080-800037a7f5b6",
@@ -4833,7 +4856,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:36.090923+00:00"
+      "last_synced": "2026-11-02T21:12:21.751439+00:00"
     },
     {
       "id": "134ea200-b2d3-11f1-8080-80011608af67",
@@ -4856,7 +4879,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:36.613661+00:00"
+      "last_synced": "2026-11-02T21:12:22.162241+00:00"
     },
     {
       "id": "ec7e9730-b290-11f1-8080-80006dc7d0ef",
@@ -4875,7 +4898,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:37.115996+00:00"
+      "last_synced": "2026-11-02T21:12:22.556469+00:00"
     },
     {
       "id": "00b9e810-b1d5-11f1-8080-80017cea8a69",
@@ -4898,7 +4921,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:37.672096+00:00"
+      "last_synced": "2026-11-02T21:12:22.989778+00:00"
     },
     {
       "id": "50a755e0-b1a5-11f1-8080-800116965bc9",
@@ -4921,7 +4944,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:38.187753+00:00"
+      "last_synced": "2026-11-02T21:12:23.372017+00:00"
     },
     {
       "id": "c33ca1b0-b140-11f1-8080-80015c59c637",
@@ -4943,7 +4966,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:38.685594+00:00"
+      "last_synced": "2026-11-02T21:12:23.770028+00:00"
     },
     {
       "id": "e9e6dad0-b11b-11f1-8080-800164431b2c",
@@ -4968,7 +4991,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:39.181996+00:00"
+      "last_synced": "2026-11-02T21:12:24.460166+00:00"
     },
     {
       "id": "646de5c0-b106-11f1-8080-800032a74145",
@@ -4987,7 +5010,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:39.639904+00:00"
+      "last_synced": "2026-11-02T21:12:24.852261+00:00"
     },
     {
       "id": "ed65dd20-b0d3-11f1-8080-800063c0eff0",
@@ -5010,7 +5033,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:40.142436+00:00"
+      "last_synced": "2026-11-02T21:12:25.226127+00:00"
     },
     {
       "id": "e6b10f30-abc0-11f1-8080-800047dd5fb5",
@@ -5103,7 +5126,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:42.213459+00:00"
+      "last_synced": "2026-11-02T21:13:03.242088+00:00"
     },
     {
       "id": "7c3dc9b0-ab55-11f1-8080-8000208db39d",
@@ -5126,7 +5149,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:42.740321+00:00"
+      "last_synced": "2026-11-02T21:13:03.642787+00:00"
     },
     {
       "id": "5743f890-aade-11f1-8080-80016b3d895f",
@@ -5151,7 +5174,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:43.221901+00:00"
+      "last_synced": "2026-11-02T21:13:04.438979+00:00"
     },
     {
       "id": "bda4dbd0-aad5-11f1-8080-800017c02a15",
@@ -5173,7 +5196,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:43.729595+00:00"
+      "last_synced": "2026-11-02T21:13:04.815760+00:00"
     },
     {
       "id": "9cf487b0-aac0-11f1-8080-80001667508e",
@@ -5195,7 +5218,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:44.239275+00:00"
+      "last_synced": "2026-11-02T21:13:05.231460+00:00"
     },
     {
       "id": "2035d4b0-aab4-11f1-8080-80002dccee69",
@@ -5214,7 +5237,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:44.720811+00:00"
+      "last_synced": "2026-11-02T21:13:05.616143+00:00"
     },
     {
       "id": "6ce63130-aa8a-11f1-8080-8001052361ec",
@@ -5237,7 +5260,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:45.219057+00:00"
+      "last_synced": "2026-11-02T21:13:05.997788+00:00"
     },
     {
       "id": "cd3ea100-aa2d-11f1-8080-80007fb2f774",
@@ -5260,7 +5283,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:46.020263+00:00"
+      "last_synced": "2026-11-02T21:13:06.396835+00:00"
     },
     {
       "id": "883f5f20-aa0c-11f1-8080-80006c18afae",
@@ -5282,7 +5305,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:46.506802+00:00"
+      "last_synced": "2026-11-02T21:13:06.779681+00:00"
     },
     {
       "id": "c2a9db30-a977-11f1-8080-800175a4fa89",
@@ -5305,7 +5328,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:47.036458+00:00"
+      "last_synced": "2026-11-02T21:13:07.226283+00:00"
     },
     {
       "id": "f797af40-a871-11f1-8080-800065c9b53d",
@@ -5330,7 +5353,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:47.491952+00:00"
+      "last_synced": "2026-11-02T21:13:07.602331+00:00"
     },
     {
       "id": "4c2480e0-a865-11f1-8080-8001082a8fcb",
@@ -5353,7 +5376,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:48.159474+00:00"
+      "last_synced": "2026-11-02T21:13:07.994115+00:00"
     },
     {
       "id": "b5b40ba0-a858-11f1-8080-80006de8e947",
@@ -5372,7 +5395,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:48.683031+00:00"
+      "last_synced": "2026-11-02T21:13:08.392715+00:00"
     },
     {
       "id": "353442b0-a830-11f1-8080-8000329b514e",
@@ -5395,7 +5418,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:49.202462+00:00"
+      "last_synced": "2026-11-02T21:13:08.792804+00:00"
     },
     {
       "id": "172b6de0-a7d9-11f1-8080-80004aafa515",
@@ -5417,7 +5440,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:49.678587+00:00"
+      "last_synced": "2026-11-02T21:13:09.283770+00:00"
     },
     {
       "id": "a3b64c00-a7d2-11f1-8080-8001546c604e",
@@ -5440,7 +5463,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:50.204561+00:00"
+      "last_synced": "2026-11-02T21:13:09.661029+00:00"
     },
     {
       "id": "37cec0f0-a7b2-11f1-8080-80015cb3af98",
@@ -5462,7 +5485,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:51.251272+00:00"
+      "last_synced": "2026-11-02T21:13:10.067129+00:00"
     },
     {
       "id": "40a87710-a7a9-11f1-8080-80006a7aa468",
@@ -5487,7 +5510,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:51.802573+00:00"
+      "last_synced": "2026-11-02T21:13:10.488137+00:00"
     },
     {
       "id": "27d986a0-a79c-11f1-8080-800111d2c331",
@@ -5510,7 +5533,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:52.329142+00:00"
+      "last_synced": "2026-11-02T21:13:10.870409+00:00"
     },
     {
       "id": "00228b50-a767-11f1-8080-80012adc566c",
@@ -5533,7 +5556,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:52.867185+00:00"
+      "last_synced": "2026-11-02T21:13:11.256437+00:00"
     },
     {
       "id": "6c3b0eb0-a709-11f1-8080-800076261f6b",
@@ -5555,7 +5578,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:53.367745+00:00"
+      "last_synced": "2026-11-02T21:13:11.646051+00:00"
     },
     {
       "id": "33c8fef0-a6e8-11f1-8080-800075212172",
@@ -5577,7 +5600,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:53.876006+00:00"
+      "last_synced": "2026-11-02T21:13:12.046651+00:00"
     },
     {
       "id": "a9af5ad0-a6e1-11f1-8080-80013222abc7",
@@ -5602,7 +5625,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:54.370915+00:00"
+      "last_synced": "2026-11-02T21:13:12.431113+00:00"
     },
     {
       "id": "84ce5120-a6d3-11f1-8080-8000514be128",
@@ -5625,7 +5648,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:54.864399+00:00"
+      "last_synced": "2026-11-02T21:13:12.812911+00:00"
     },
     {
       "id": "7396d5d0-a69c-11f1-8080-800155d0cedc",
@@ -5648,7 +5671,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:55.348638+00:00"
+      "last_synced": "2026-11-02T21:13:13.181613+00:00"
     },
     {
       "id": "49f00320-a640-11f1-8080-80004d81a7b8",
@@ -5670,7 +5693,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:55.989155+00:00"
+      "last_synced": "2026-11-02T21:13:13.558539+00:00"
     },
     {
       "id": "f850adf0-a61f-11f1-8080-800043979cc3",
@@ -5692,7 +5715,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:56.471642+00:00"
+      "last_synced": "2026-11-02T21:13:14.384828+00:00"
     },
     {
       "id": "d340dd00-a61a-11f1-8080-8001068b7626",
@@ -5715,7 +5738,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:01:56.986562+00:00"
+      "last_synced": "2026-11-02T21:13:14.790066+00:00"
     },
     {
       "id": "508dd930-a61a-11f1-8080-80005eb8f36c",
@@ -5740,7 +5763,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:40:31.398914+00:00"
+      "last_synced": "2026-11-02T21:13:15.174418+00:00"
     },
     {
       "id": "01af2340-a5fd-11f1-8080-800009a91e3b",
@@ -5759,7 +5782,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:40:31.924855+00:00"
+      "last_synced": "2026-11-02T21:13:15.581027+00:00"
     },
     {
       "id": "46bcb210-a5d3-11f1-8080-8001755c0f92",
@@ -5782,7 +5805,7 @@
       "comments": 2,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:23.846085+00:00"
+      "last_synced": "2026-11-02T21:13:15.982115+00:00"
     },
     {
       "id": "14dc9e10-a577-11f1-8080-80013f5d4dfc",
@@ -5805,7 +5828,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:24.349421+00:00"
+      "last_synced": "2026-11-02T21:13:16.358132+00:00"
     },
     {
       "id": "c4cbbdd0-a566-11f1-8080-80010f7bd214",
@@ -5830,7 +5853,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:24.821569+00:00"
+      "last_synced": "2026-11-02T21:13:16.750422+00:00"
     },
     {
       "id": "a39643e0-a540-11f1-8080-800016bed651",
@@ -5853,7 +5876,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:25.354848+00:00"
+      "last_synced": "2026-11-02T21:13:17.147570+00:00"
     },
     {
       "id": "d4b2e6a0-a535-11f1-8080-800151109e68",
@@ -5872,7 +5895,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:26.194880+00:00"
+      "last_synced": "2026-11-02T21:13:17.547522+00:00"
     },
     {
       "id": "9a2a6910-a50b-11f1-8080-80011a7176dd",
@@ -5895,7 +5918,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:26.691642+00:00"
+      "last_synced": "2026-11-02T21:13:17.947289+00:00"
     },
     {
       "id": "a83e51f0-a4ad-11f1-8080-80005883d5c3",
@@ -5917,7 +5940,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:27.210859+00:00"
+      "last_synced": "2026-11-02T21:13:18.355338+00:00"
     },
     {
       "id": "380a6ca0-a48c-11f1-8080-800060497868",
@@ -5939,7 +5962,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:27.743611+00:00"
+      "last_synced": "2026-11-02T21:13:18.743056+00:00"
     },
     {
       "id": "f6963810-a37f-11f1-8080-800120b038a0",
@@ -5959,7 +5982,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:28.230071+00:00"
+      "last_synced": "2026-11-02T21:13:19.498057+00:00"
     },
     {
       "id": "f2dc94a0-a341-11f1-8080-800020585621",
@@ -5981,7 +6004,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:28.870894+00:00"
+      "last_synced": "2026-11-02T21:13:19.894354+00:00"
     },
     {
       "id": "c2967b90-a327-11f1-8080-800139ddedc3",
@@ -6006,7 +6029,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:29.351503+00:00"
+      "last_synced": "2026-11-02T21:13:20.294215+00:00"
     },
     {
       "id": "ad535480-a31b-11f1-8080-80003e66d23c",
@@ -6028,7 +6051,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:29.877192+00:00"
+      "last_synced": "2026-11-02T21:13:20.671017+00:00"
     },
     {
       "id": "9f680180-a2e5-11f1-8080-80016d37d882",
@@ -6051,7 +6074,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:30.385638+00:00"
+      "last_synced": "2026-11-02T21:13:21.078634+00:00"
     },
     {
       "id": "767b6530-a2d8-11f1-8080-80005c31812c",
@@ -6070,7 +6093,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:30.936259+00:00"
+      "last_synced": "2026-11-02T21:13:21.480522+00:00"
     },
     {
       "id": "6d9776b0-a2b1-11f1-8080-800163c924ed",
@@ -6093,7 +6116,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:31.393041+00:00"
+      "last_synced": "2026-11-02T21:13:21.863169+00:00"
     },
     {
       "id": "f8885f40-a27b-11f1-8080-80000a1deffc",
@@ -6115,7 +6138,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:31.928306+00:00"
+      "last_synced": "2026-11-02T21:13:22.226479+00:00"
     },
     {
       "id": "3552d2a0-a25b-11f1-8080-80016168b29e",
@@ -6140,7 +6163,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:32.445447+00:00"
+      "last_synced": "2026-11-02T21:13:22.641941+00:00"
     },
     {
       "id": "7b6ac990-a252-11f1-8080-800100540a28",
@@ -6163,7 +6186,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:33.026240+00:00"
+      "last_synced": "2026-11-02T21:13:23.027944+00:00"
     },
     {
       "id": "71ba5f20-a232-11f1-8080-800038ec50fe",
@@ -6185,7 +6208,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:33.575795+00:00"
+      "last_synced": "2026-11-02T21:13:23.429587+00:00"
     },
     {
       "id": "f98a1970-a21b-11f1-8080-800014c4efbf",
@@ -6208,7 +6231,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:34.476047+00:00"
+      "last_synced": "2026-11-02T21:13:23.826206+00:00"
     },
     {
       "id": "ee210b10-a212-11f1-8080-80006819161c",
@@ -6233,7 +6256,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:34.976973+00:00"
+      "last_synced": "2026-11-02T21:13:24.763075+00:00"
     },
     {
       "id": "9080c290-a210-11f1-8080-80005320f67d",
@@ -6252,7 +6275,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:36.182348+00:00"
+      "last_synced": "2026-11-02T21:13:25.155178+00:00"
     },
     {
       "id": "773e9990-a1e5-11f1-8080-800009cb67ac",
@@ -6275,7 +6298,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:36.686278+00:00"
+      "last_synced": "2026-11-02T21:13:25.551260+00:00"
     },
     {
       "id": "3476e810-a18b-11f1-8080-8001549d81da",
@@ -6298,7 +6321,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:37.176160+00:00"
+      "last_synced": "2026-11-02T21:13:25.943804+00:00"
     },
     {
       "id": "3ed8f440-a174-11f1-8080-800041dd5a5a",
@@ -6320,7 +6343,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:37.647832+00:00"
+      "last_synced": "2026-11-02T21:13:26.330633+00:00"
     },
     {
       "id": "ba1fc460-a16c-11f1-8080-80001e6ea2c0",
@@ -6345,7 +6368,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:38.143263+00:00"
+      "last_synced": "2026-11-02T21:13:26.710757+00:00"
     },
     {
       "id": "cac45250-a152-11f1-8080-8000159b6b85",
@@ -6368,7 +6391,7 @@
       "comments": 2,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:38.702321+00:00"
+      "last_synced": "2026-11-02T21:13:27.179867+00:00"
     },
     {
       "id": "6f6b77e0-a147-11f1-8080-80010adf1e1c",
@@ -6387,7 +6410,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:39.246229+00:00"
+      "last_synced": "2026-11-02T21:13:27.574234+00:00"
     },
     {
       "id": "700c36a0-a145-11f1-8080-8001722f2e7b",
@@ -6412,7 +6435,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:39.749617+00:00"
+      "last_synced": "2026-11-02T21:13:27.952956+00:00"
     },
     {
       "id": "b39117b0-a11d-11f1-8080-800001b1794f",
@@ -6435,7 +6458,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:40.229983+00:00"
+      "last_synced": "2026-11-02T21:13:28.363230+00:00"
     },
     {
       "id": "256a3b40-a0c0-11f1-8080-800147ead856",
@@ -6522,7 +6545,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:43.218354+00:00"
+      "last_synced": "2026-11-02T21:14:06.455043+00:00"
     },
     {
       "id": "63a829b0-a07c-11f1-8080-80017488585b",
@@ -6547,7 +6570,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:43.838945+00:00"
+      "last_synced": "2026-11-02T21:14:06.856444+00:00"
     },
     {
       "id": "37c3bae0-a053-11f1-8080-800002d739e8",
@@ -6570,7 +6593,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:44.326023+00:00"
+      "last_synced": "2026-11-02T21:14:07.273167+00:00"
     },
     {
       "id": "1d999920-9ff7-11f1-8080-800000fbe14b",
@@ -6593,7 +6616,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:44.846741+00:00"
+      "last_synced": "2026-11-02T21:14:07.677943+00:00"
     },
     {
       "id": "2fda4480-9fd5-11f1-8080-800101d9fa4f",
@@ -6615,7 +6638,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:45.929153+00:00"
+      "last_synced": "2026-11-02T21:14:08.216986+00:00"
     },
     {
       "id": "737c28d0-9fc0-11f1-8080-80003df8ae32",
@@ -6638,7 +6661,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:46.415445+00:00"
+      "last_synced": "2026-11-02T21:14:08.702309+00:00"
     },
     {
       "id": "5a27b4b0-9fb3-11f1-8080-80012e201dfe",
@@ -6663,7 +6686,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:46.908251+00:00"
+      "last_synced": "2026-11-02T21:14:09.629157+00:00"
     },
     {
       "id": "0245fb40-9f8a-11f1-8080-8000060a0675",
@@ -6686,7 +6709,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:47.411590+00:00"
+      "last_synced": "2026-11-02T21:14:10.052175+00:00"
     },
     {
       "id": "cfc871f0-9f31-11f1-8080-80015cad8395",
@@ -6709,7 +6732,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:47.917457+00:00"
+      "last_synced": "2026-11-02T21:14:10.501610+00:00"
     },
     {
       "id": "dd1df290-9f30-11f1-8080-800171ab7e2d",
@@ -6777,7 +6800,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:49.432331+00:00"
+      "last_synced": "2026-11-02T21:14:11.788846+00:00"
     },
     {
       "id": "ac85bfc0-9e43-11f1-8080-800156a0c905",
@@ -6799,7 +6822,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:49.944922+00:00"
+      "last_synced": "2026-11-02T21:14:12.184053+00:00"
     },
     {
       "id": "3c859bd0-9dfa-11f1-8080-800174ac1f34",
@@ -6818,7 +6841,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:50.410780+00:00"
+      "last_synced": "2026-11-02T21:14:12.580055+00:00"
     },
     {
       "id": "d23883e0-9dfa-11f1-8080-80016ce1cf05",
@@ -6837,7 +6860,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:51.106271+00:00"
+      "last_synced": "2026-11-02T21:14:12.964933+00:00"
     },
     {
       "id": "52ae5e60-9dfa-11f1-8080-80003592087b",
@@ -6856,7 +6879,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:51.577929+00:00"
+      "last_synced": "2026-11-02T21:14:13.359955+00:00"
     },
     {
       "id": "e71fecd0-9dfa-11f1-8080-80011941e541",
@@ -6875,7 +6898,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:52.052402+00:00"
+      "last_synced": "2026-11-02T21:14:13.757019+00:00"
     },
     {
       "id": "2a31fd20-9dfa-11f1-8080-8000444d3348",
@@ -6894,7 +6917,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:52.523791+00:00"
+      "last_synced": "2026-11-02T21:14:14.471292+00:00"
     },
     {
       "id": "3d9b5190-9dfa-11f1-8080-80002a83f57c",
@@ -6913,7 +6936,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:53.014233+00:00"
+      "last_synced": "2026-11-02T21:14:14.863986+00:00"
     },
     {
       "id": "395877c0-9dfa-11f1-8080-800173c8e64f",
@@ -6932,7 +6955,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:53.493574+00:00"
+      "last_synced": "2026-11-02T21:14:15.284239+00:00"
     },
     {
       "id": "2d3fb250-9dfa-11f1-8080-80014090669a",
@@ -6951,7 +6974,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:53.964378+00:00"
+      "last_synced": "2026-11-02T21:14:15.689600+00:00"
     },
     {
       "id": "e0636070-9dfa-11f1-8080-80003b135995",
@@ -6970,7 +6993,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:54.434970+00:00"
+      "last_synced": "2026-11-02T21:14:16.081735+00:00"
     },
     {
       "id": "fd27fd70-9df9-11f1-8080-800101b6778e",
@@ -6989,7 +7012,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:54.913490+00:00"
+      "last_synced": "2026-11-02T21:14:16.507849+00:00"
     },
     {
       "id": "7e956e10-9d9b-11f1-8080-80014a6d0d9e",
@@ -7013,7 +7036,7 @@
       "comments": 6,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:55.391940+00:00"
+      "last_synced": "2026-11-02T21:14:17.456176+00:00"
     },
     {
       "id": "33f50140-9d82-11f1-8080-800058c4ea47",
@@ -7032,7 +7055,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:56.040765+00:00"
+      "last_synced": "2026-11-02T21:14:17.882151+00:00"
     },
     {
       "id": "dad81e00-9d7f-11f1-8080-800043fa3b90",
@@ -7052,7 +7075,7 @@
       "comments": 1,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:56.562425+00:00"
+      "last_synced": "2026-11-02T21:14:18.287023+00:00"
     },
     {
       "id": "cdf384b0-9cdd-11f1-8080-800173628dcd",
@@ -7078,7 +7101,7 @@
       "comments": 6,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T17:02:57.059529+00:00"
+      "last_synced": "2026-11-02T21:14:18.865188+00:00"
     },
     {
       "id": "080ba0c0-9ca6-11f1-8080-800145afd43e",
@@ -7100,7 +7123,7 @@
       "comments": 0,
       "shares": 0,
       "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-02T14:41:35.252620+00:00"
+      "last_synced": "2026-11-02T21:14:19.528145+00:00"
     }
   ]
 }
