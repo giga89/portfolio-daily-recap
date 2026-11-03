@@ -1,6 +1,24 @@
 {
-  "last_updated": "2026-11-03T08:10:53.086104+00:00",
+  "last_updated": "2026-11-03T09:00:40.010454+00:00",
   "posts": [
+    {
+      "id": "0ab9bf10-d765-11f1-8080-80004707df61",
+      "platform": "etoro",
+      "session": "Earnings Release: $PLTR Q3 2026",
+      "published_at": "2026-11-03T09:00:40Z",
+      "day_of_week": "Tuesday",
+      "hour_utc": 9,
+      "hour_local": 11,
+      "title": "📊 EARNINGS FLASH: RISULTATI TRIMESTRALI Q3 2026  Palantir Technologies Inc $PLTR...",
+      "tickers": [
+        "PLTR"
+      ],
+      "image_type": "earnings_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
     {
       "id": "301ccc00-d75d-11f1-8080-80006ff4225b",
       "platform": "etoro",
