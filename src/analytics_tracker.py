@@ -278,7 +278,6 @@ DIVIDEND_BREAKDOWN = [
     {"ticker": "SX7PEX.DE", "name": "iShares European Banks", "port_yield": "0.07%", "comp_yield": "4.10%", "dps": "$1.15"},
     {"ticker": "GLEN.L", "name": "Glencore PLC", "port_yield": "0.07%", "comp_yield": "3.15%", "dps": "$0.09"},
     {"ticker": "ABBV", "name": "AbbVie Inc", "port_yield": "0.08%", "comp_yield": "2.58%", "dps": "$6.06"},
-    {"ticker": "NOVO-B.CO", "name": "Novo Nordisk A/S", "port_yield": "0.06%", "comp_yield": "1.35%", "dps": "$1.20"},
     {"ticker": "WMT", "name": "Walmart Inc", "port_yield": "0.05%", "comp_yield": "1.28%", "dps": "$0.25"},
     {"ticker": "AVGO", "name": "Broadcom Inc", "port_yield": "0.05%", "comp_yield": "1.10%", "dps": "$0.53"},
     {"ticker": "MSFT", "name": "Microsoft Corporation", "port_yield": "0.04%", "comp_yield": "0.75%", "dps": "$0.75"},
@@ -353,7 +352,6 @@ HOLDINGS_DATA = [
 
     # ── Healthcare & GLP-1 Megatrend ──────────────────────────────────────────
     {"ticker": "LLY", "name": "Eli Lilly and Co", "emoji": "💊", "asset_class": "Stock", "curr": "USD", "sector": "Pharma & GLP-1 Therapeutics", "geo": "USA", "tier": "Core Growth", "desc": "Global pioneer in revolutionary GLP-1/GIP treatments (Mounjaro, Zepbound) for diabetes, obesity, and oncology."},
-    {"ticker": "NOVO-B.CO", "name": "Novo Nordisk A/S", "emoji": "💉", "asset_class": "Stock", "curr": "DKK", "sector": "Pharma & GLP-1 Therapeutics", "geo": "Europe", "tier": "Core Growth", "desc": "Danish healthcare giant leading worldwide metabolic healthcare and obesity solutions (Ozempic, Wegovy)."},
     {"ticker": "ABBV", "name": "AbbVie Inc", "emoji": "💉", "asset_class": "Stock", "curr": "USD", "sector": "Biopharma & Immunology", "geo": "USA", "tier": "Dividend Aristocrat", "desc": "High-yield dividend champion with next-gen blockbuster immunology drugs (Skyrizi, Rinvoq) and robust oncology pipeline."},
     {"ticker": "ABT.US", "name": "Abbott Laboratories", "emoji": "🏥", "asset_class": "Stock", "curr": "USD", "sector": "Medical Devices & Diagnostics", "geo": "USA", "tier": "Core Defensive", "desc": "Essential medical technologies leader (FreeStyle Libre continuous glucose monitoring) and adult clinical nutrition."},
     {"ticker": "HUM", "name": "Humana Inc", "emoji": "🏥", "asset_class": "Stock", "curr": "USD", "sector": "US Health Insurance", "geo": "USA", "tier": "Value / Healthcare", "desc": "Leading US healthcare provider specialized in Medicare Advantage programs for the aging baby-boomer demographic."},
@@ -405,9 +403,8 @@ BASELINE_WEIGHTS: Dict[str, float] = {
     "TSM": 3.0,
     "MRVL": 2.0,
     "BESI.NV": 0.5,
-    # Healthcare & GLP-1 (17.5%)
+    # Healthcare & GLP-1 (13.5%)
     "LLY": 4.5,
-    "NOVO-B.CO": 4.0,
     "ABBV": 3.0,
     "AZN.L": 2.5,
     "ABT.US": 2.0,
@@ -419,11 +416,11 @@ BASELINE_WEIGHTS: Dict[str, float] = {
     "PRY.MI": 2.5,
     "GLEN.L": 2.0,
     "TRIG.L": 2.0,
-    # Strategic ETFs, Gold & Treasuries (21.0%)
+    # Strategic ETFs, Gold & Treasuries (25.0%)
     "PPFB.DE": 5.0,
     "IB01.L": 5.0,
     "SX7PEX.DE": 3.0,
-    "IEUR": 3.0,
+    "IEUR": 7.0,
     "WDEF.L": 3.0,
     "IQQL.DE": 2.0,
     # Asia & Emerging Markets (8.0%)

@@ -1595,7 +1595,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         market_session = os.environ.get('MARKET_SESSION', 'Daily recap')
         
     EU_ASIA_TICKERS = [
-        'AZN.L', 'NOVO-B.CO', 'ENEL.MI', 'ENI.MI', 'PRY.MI', 'VOW3.DE',
+        'AZN.L', 'ENEL.MI', 'ENI.MI', 'PRY.MI', 'VOW3.DE',
         'GLEN.L', 'TRIG.L', 'ULVR.L', 'WDEF.L', 'IQQL.DE', 'SX7PEX.DE', 'IEUR',
         'PPFB.DE', '1211.HK', '1919.HK', '2318.HK', 'INDO.PA', 'VOF.L'
     ]
@@ -3203,7 +3203,7 @@ REGOLE PER IL TESTO (in ITALIANO):
 1. Inizio chiaro e d'impatto: "🌍 MACRO OUTLOOK: Il calendario e gli eventi chiave della prossima settimana sui mercati"
 2. Elenca e spiega i 3-4 principali appuntamenti macroeconomici previsti per la settimana in arrivo (es. decisioni sui tassi di interesse FED o BCE, dati sull'inflazione CPI/PCE, report sul lavoro NFP, PIL, stime di crescita o tensioni geopolitiche).
 3. Fornisci la tua interpretazione di come questi dati potrebbero influenzare i mercati globali e l'impatto potenziale sul nostro portafoglio.
-4. OBBLIGATORIO - INSERISCI I TAG NEL TESTO: Devi obbligatoriamente includere ed integrare nel testo i tag degli indici di mercato principali (es. $SPX500, $NSDQ100, $EuroStoxx) E ALMENO 2-3 TAG di titoli del nostro portafoglio particolarmente sensibili ai dati macro (es. $NVDA, $ENI.MI, $NOVO-B.CO, $MSFT, $CCJ, $ABBV).
+4. OBBLIGATORIO - INSERISCI I TAG NEL TESTO: Devi obbligatoriamente includere ed integrare nel testo i tag degli indici di mercato principali (es. $SPX500, $NSDQ100, $EuroStoxx) E ALMENO 2-3 TAG di titoli del nostro portafoglio particolarmente sensibili ai dati macro (es. $NVDA, $ENI.MI, $IEUR, $MSFT, $CCJ, $ABBV).
 5. Mantieni la lunghezza totale sotto i 1500 caratteri.
 6. Stile lucido, professionale, accessibile ed esaustivo.
 

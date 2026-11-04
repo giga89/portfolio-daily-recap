@@ -220,7 +220,7 @@ COPY_TRADING_THEMES = [
         "id": "healthcare_pharma",
         "name": "Healthcare & Biotech Quality",
         "pillars": "Healthcare & Biotech",
-        "tickers_line": "$LLY ABBV NOVO",
+        "tickers_line": "$LLY ABBV AZN",
         "hashtags": "#Healthcare #Biotech #Dividends",
         "audience": "Healthcare & dividend compounder investors",
     },

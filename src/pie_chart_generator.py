@@ -51,8 +51,6 @@ SECTOR_MAP: dict[str, str] = {
     'NET':  'AI & Tech',
     # Healthcare / Pharma
     'LLY':     'Healthcare',
-    'NVO':     'Healthcare',
-    'NOVO-B':  'Healthcare',
     'AZN':     'Healthcare',
     'AZN.L':   'Healthcare',
     'ABT':     'Healthcare',
@@ -107,8 +105,6 @@ GEO_MAP: dict[str, str] = {
     'IB01.L': 'USA', 'IQQL.DE': 'Europe',
     # Asia / Pacific
     '2318.HK': 'Asia', '9618.HK': 'Asia', '1919.HK': 'Asia', 'TSM': 'Asia',
-    'NVO': 'Europe',  # Novo Nordisk - Denmark
-    'NOVO-B': 'Europe',
     'ARM': 'Europe',  # UK-headquartered
     # Global / Diversified
     'SWDA': 'Global', 'VWCE.L': 'Global', 'INDO.PA': 'Global',

@@ -21,7 +21,6 @@ EMOJIS = {
     "GLEN.L":    "⛏️",
     "HUM":       "🏥",
     "ABBV":      "💉",
-    "NOVO-B.CO": "💉",
     "GOOG":      "🔍",
     "AMZN":      "📦",
     "AZN.L":     "🧬",

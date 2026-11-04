@@ -23,7 +23,6 @@ DEFAULT_TICKERS = {
     # Healthcare & Pharma
     'ABT.US': ('ABT', 'Abbott Laboratories'),
     'HUM': ('HUM', 'Humana Inc'),
-    'NOVO-B.CO': ('NOVO-B.CO', 'Novo Nordisk A/S'),
     'ABBV': ('ABBV', 'AbbVie Inc'),
     'AZN.L': ('AZN.L', 'AstraZeneca PLC'),
     'LLY': ('LLY', 'Eli Lilly and Co'),
@@ -77,7 +76,6 @@ DEFAULT_EMOJIS = {
     'ABT.US': '🏥',
     'ABBV': '💉',
     'LLY': '💊',
-    'NOVO-B.CO': '💉',
     'HUM': '🏥',
     
     # Technology & Semiconductors
@@ -176,21 +174,11 @@ def load_config():
                         config["emojis"][eni_key] = "⛽"
                         needs_save = True
 
-            # Fix NOVO-B → NOVO-B.CO emoji key
-            if "NOVO-B" in config["emojis"] and "NOVO-B.CO" not in config["emojis"]:
-                config["emojis"]["NOVO-B.CO"] = config["emojis"].pop("NOVO-B")
-                needs_save = True
-
-            # Fix NOVO-B.CO YF ticker: use native Copenhagen listing instead of US ADR
-            if config["tickers"].get("NOVO-B.CO", [""])[0] == "NVO":
-                config["tickers"]["NOVO-B.CO"] = ["NOVO-B.CO", "Novo Nordisk"]
-                needs_save = True
-
             # Add new positions: IB01.L
             if "IB01.L" not in config["tickers"]:
                 config["tickers"]["IB01.L"] = ["IB01.L", "iShares Treasury Bond 0-1yr UCITS ETF"]
-            # Ensure purged positions are removed: XEON.DE, MAU.PA, SPCX.RTH, SPCX, ANT.24-7, MELI, WCLD, WCLD.L and legacy unheld assets
-            for purged in ["XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "WCLD.L", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI"]:
+            # Ensure purged positions are removed: XEON.DE, MAU.PA, SPCX.RTH, SPCX, ANT.24-7, MELI, WCLD, WCLD.L, NOVO-B.CO, and legacy unheld assets
+            for purged in ["XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "WCLD.L", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI", "NOVO-B.CO", "NOVO-B", "NVO"]:
                 if purged in config.get("tickers", {}):
                     del config["tickers"][purged]
                     needs_save = True
@@ -438,7 +426,6 @@ def sync_portfolio(bullaware_weights):
 MULTI_TAG_MAP = {
     'ENI.MI': ['$ENI.MI', '$E'],
     'ENI': ['$ENI.MI', '$E'],
-    'NOVO-B.CO': ['$NOVO-B.CO', '$NVO'],
     'AZN.L': ['$AZN.L', '$AZN'],
     '1211.HK': ['$1211.HK'],
     '1919.HK': ['$1919.HK'],
@@ -461,8 +448,7 @@ RELATED_TICKERS_MAP = {
     'AMZN': ['$WMT', '$MSFT', '$GOOG'],
     'WMT': ['$AMZN', '$COST', '$TGT'],
     'GOOG': ['$MSFT', '$AMZN', '$META'],
-    'LLY': ['$NOVO-B.CO', '$NVO', '$PFE'],
-    'NOVO-B.CO': ['$LLY', '$NVO', '$PFE'],
+    'LLY': ['$ABBV', '$AZN.L', '$PFE'],
     'PLTR': ['$SNOW', '$AI', '$MSFT'],
     'AVGO': ['$NVDA', '$QCOM', '$TXN'],
     'TSM': ['$NVDA', '$AVGO', '$INTC', '$BESI.NV'],
@@ -494,7 +480,7 @@ RELATED_TICKERS_MAP = {
     'TRIG.L': ['$UKW.L', '$FSFL.L', '$ENEL.MI'],
     'VOF.L': ['$VNM', '$VEIL.L'],
     'TRX': ['$BTC', '$ETH', '$SOL'],
-    'AZN.L': ['$LLY', '$NOVO-B.CO', '$PFE'],
+    'AZN.L': ['$LLY', '$ABBV', '$PFE'],
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -690,28 +676,9 @@ PORTFOLIO_ASSETS_METADATA = {
         "downside_risks": [
             "Pressione sui rimborsi assicurativi e negoziati sui prezzi con i governi",
             "Vincoli di capacità produttiva a breve termine negli stabilimenti",
-            "Concorrenza diretta con Novo Nordisk e nuovi entranti"
+            "Concorrenza diretta nel settore metabolico e nuovi entranti"
         ],
-        "related_tickers": ["$NOVO-B.CO", "$NVO", "$PFE"], "primary_tags": ["$LLY"]
-    },
-    "NOVO-B.CO": {
-        "ticker": "NOVO-B.CO", "yahoo_ticker": "NOVO-B.CO", "name": "Novo Nordisk A/S", "emoji": "💉",
-        "asset_class": "Stock", "sector": "Farmaceutica & Cura del Diabete e Obesità", "geo": "Europe", "tier": "Core Growth",
-        "is_dividend_paying": True, "dividend_policy": "Distribuzione semestrale con solido dividend yield (~1.4%) e crescita a doppia cifra", "annual_yield_pct": 1.4, "frequency": "Semestrale (Marzo / Agosto)",
-        "domain": "novonordisk.com", "color": (0, 110, 200),
-        "desc": "Danish healthcare giant leading worldwide metabolic healthcare and obesity solutions (Ozempic, Wegovy).",
-        "thesis": "Pioniere danese e colosso globale nella cura del diabete e dell'obesità (Ozempic, Wegovy, Semaglutide), dotato di un fossato competitivo straordinario e leadership scientifica centenaria.",
-        "upside_catalysts": [
-            "Approvazioni internazionali estese per la riduzione degli eventi cardiovascolari",
-            "Integrazione dei siti produttivi acquisiti da Catalent per triplicare l'output di penne iniettabili",
-            "Avanzamento clinico promettente della molecola CagriSema per la perdita di peso superiore"
-        ],
-        "downside_risks": [
-            "Pressioni politiche e audizioni parlamentari USA sui prezzi di listino",
-            "Fenomeno del compounding e delle preparazioni galeniche non autorizzate",
-            "Fluttuazioni valutarie corona danese ed euro rispetto al dollaro"
-        ],
-        "related_tickers": ["$LLY", "$NVO", "$PFE"], "primary_tags": ["$NOVO-B.CO", "$NVO"]
+        "related_tickers": ["$ABBV", "$AZN.L", "$PFE"], "primary_tags": ["$LLY"]
     },
     "ABBV": {
         "ticker": "ABBV", "yahoo_ticker": "ABBV", "name": "AbbVie Inc", "emoji": "💉",
@@ -787,7 +754,7 @@ PORTFOLIO_ASSETS_METADATA = {
             "Pressioni negoziali sui prezzi dei medicinali negli USA (Inflation Reduction Act)",
             "Incertezza regolatoria e investigativa sul mercato farmaceutico cinese"
         ],
-        "related_tickers": ["$LLY", "$NOVO-B.CO", "$PFE"], "primary_tags": ["$AZN.L", "$AZN"]
+        "related_tickers": ["$LLY", "$ABBV", "$PFE"], "primary_tags": ["$AZN.L", "$AZN"]
     },
 
     # ── Energy, Utilities, Commodities & Nuclear ──────────────────────────────

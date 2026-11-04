@@ -40,7 +40,6 @@ TICKER_NAME_MAP = {
     'VOW3': 'Volkswagen',
     'GLEN': 'Glencore',
     'AZN': 'AstraZeneca',
-    'NOVO-B': 'Novo Nordisk',
     'WDEF': 'WisdomTree Europe Defence ETF',
     'SX7PEX': 'European Banks ETF STOXX 600',
     'IQQL': 'iShares Listed Private Equity ETF',

@@ -66,7 +66,6 @@ DOMAIN_MAP = {
     "BESI.NV":    "besi.com",
     "BESI":       "besi.com",
     "AZN.L":      "astrazeneca.com",
-    "NOVO-B.CO":  "novonordisk.com",
     "ENEL.MI":    "enel.com",
     "ENI.MI":     "eni.com",
     "PRY.MI":     "prysmiangroup.com",

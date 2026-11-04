@@ -37,7 +37,7 @@ POLL_TEMPLATES = [
         "title": "Quale megatrend guiderà le performance nei prossimi mesi? 🚀",
         "options": [
             "AI & Tech ($NVDA, $PLTR)",
-            "GLP-1 ($LLY, $NOVO-B.CO)",
+            "GLP-1 ($LLY)",
             "Energia & Uranio ($CCJ)",
             "Difesa Europea ($WDEF.L)"
         ],
@@ -45,11 +45,10 @@ POLL_TEMPLATES = [
             "NVDA",
             "PLTR",
             "LLY",
-            "NOVO-B.CO",
             "CCJ",
             "WDEF.L"
         ],
-        "message": "🗳️ SONDAGGIO COMMUNITY: I GRANDI MEGATREND GLOBALI\n\nNel nostro portafoglio bilanciamo la crescita secolare dell'infrastruttura AI su $NVDA e $PLTR con pilastri strategici ad alta visibilità: terapie GLP-1 di nuova generazione con $LLY e $NOVO-B.CO, riattivazione nucleare per data center con $CCJ e riarmo NATO europeo tramite $WDEF.L.\n\nSecondo voi, quale tra questi 4 megatrend offrirà il miglior profilo rischio/rendimento nei prossimi trimestri?\n\nVotate l'opzione e lasciate un commento con la vostra analisi! 👇"
+        "message": "🗳️ SONDAGGIO COMMUNITY: I GRANDI MEGATREND GLOBALI\n\nNel nostro portafoglio bilanciamo la crescita secolare dell'infrastruttura AI su $NVDA e $PLTR con pilastri strategici ad alta visibilità: terapie GLP-1 di nuova generazione con $LLY, riattivazione nucleare per data center con $CCJ e riarmo NATO europeo tramite $WDEF.L.\n\nSecondo voi, quale tra questi 4 megatrend offrirà il miglior profilo rischio/rendimento nei prossimi trimestri?\n\nVotate l'opzione e lasciate un commento con la vostra analisi! 👇"
     },
     {
         "id": "ai_valuation_debate",
@@ -121,16 +120,15 @@ POLL_TEMPLATES = [
         "title": "Rivoluzione GLP-1 / Obesità: Chi dominerà il mercato pharma? 💊",
         "options": [
             "Eli Lilly ($LLY) leader",
-            "Novo Nordisk ($NOVO-B.CO)",
+            "Novo Nordisk",
             "Duopolio paritario a lungo",
             "Nuovi competitor emergenti"
         ],
         "tickers": [
             "LLY",
-            "NOVO-B.CO",
             "ABBV"
         ],
-        "message": "🗳️ SONDAGGIO HEALTHCARE: IL BOOM DEI TRATTAMENTI GLP-1\n\nOltre al successo globale di Mounjaro/Zepbound per $LLY e Ozempic/Wegovy per $NOVO-B.CO, la sfida si gioca ora sulle pillole orali come Orforglipron di $LLY e sulle combinazioni di nuova generazione come CagriSema di $NOVO-B.CO (>25% di riduzione peso in Fase 3).\n\nChi manterrà la leadership e i margini più elevati nel lungo periodo?\n\nVotate qui sotto! 👇"
+        "message": "🗳️ SONDAGGIO HEALTHCARE: IL BOOM DEI TRATTAMENTI GLP-1\n\nOltre al successo globale di Mounjaro/Zepbound per $LLY e Ozempic/Wegovy per Novo Nordisk, la sfida si gioca ora sulle pillole orali come Orforglipron di $LLY e sulle combinazioni di nuova generazione come CagriSema (>25% di riduzione peso in Fase 3).\n\nChi manterrà la leadership e i margini più elevati nel lungo periodo?\n\nVotate qui sotto! 👇"
     },
     {
         "id": "nuclear_energy_ai",

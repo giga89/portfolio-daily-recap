@@ -40,7 +40,6 @@ MARKET_IDS = {
 
     # Healthcare & Pharma
     "LLY": 1567,
-    "NOVO-B.CO": 2260,
     "HUM": 1512,
     "ABBV": 1452,
     "ABT.US": 1552,

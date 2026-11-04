@@ -11,6 +11,7 @@ Verifies:
 import os
 import sys
 import unittest
+from datetime import datetime, timezone, timedelta
 from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
@@ -24,6 +25,9 @@ class TestFeedCommentsDiscovery(unittest.TestCase):
     @patch("requests.get")
     def test_get_user_feed_posts(self, mock_get, mock_headers):
         mock_headers.return_value = {"x-user-key": "test"}
+        now = datetime.now(timezone.utc)
+        t1 = (now - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        t2 = (now - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
         
         mock_resp = MagicMock()
         mock_resp.status_code = 200
@@ -32,7 +36,7 @@ class TestFeedCommentsDiscovery(unittest.TestCase):
                 {
                     "post": {
                         "id": "post-manual-1",
-                        "created": "2026-10-28T20:00:00Z",
+                        "created": t1,
                         "message": {"text": "Manual post by Andrea $MSFT $NVDA"},
                         "tags": [{"market": {"symbolName": "MSFT"}}]
                     },
@@ -51,7 +55,7 @@ class TestFeedCommentsDiscovery(unittest.TestCase):
                 {
                     "post": {
                         "id": "post-bot-2",
-                        "created": "2026-10-28T10:00:00Z",
+                        "created": t2,
                         "message": {"text": "Bot post 0 comments"},
                         "tags": []
                     },
@@ -81,11 +85,14 @@ class TestFeedCommentsDiscovery(unittest.TestCase):
     ):
         mock_is_configured.return_value = True
         mock_answered.return_value = {}
+        now = datetime.now(timezone.utc)
+        t1 = (now - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        t2 = (now - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         mock_get_feed.return_value = [
             {
                 "id": "post-zero-comments",
-                "published_at": "2026-10-28T12:00:00Z",
+                "published_at": t1,
                 "title": "Post with zero comments",
                 "session_name": "Zero Comments",
                 "tickers": ["MSFT"],
@@ -94,7 +101,7 @@ class TestFeedCommentsDiscovery(unittest.TestCase):
             },
             {
                 "id": "post-manual-with-comment",
-                "published_at": "2026-10-28T18:00:00Z",
+                "published_at": t2,
                 "title": "Manual Post by Andrea",
                 "session_name": "Manual Post",
                 "tickers": ["GOOGL"],

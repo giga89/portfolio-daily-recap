@@ -71,18 +71,6 @@
     "rev_est": "$880M",
     "notes": "Official IR confirmation: Monday Nov 2, 2026 after US market close. Conference call at 17:00 ET."
   },
-  "NOVO-B.CO": {
-    "name": "Novo Nordisk A/S",
-    "quarter": "Q3 2026",
-    "status": "upcoming",
-    "scheduled_dt": "2026-11-04T06:30:00+00:00",
-    "session_window": "EUROPEAN_MORNING",
-    "currency_sym": "DKK ",
-    "eps_actual": null,
-    "eps_est": "DKK 4.89",
-    "rev_est": "DKK 71.5B",
-    "notes": "Official IR financial calendar: Wednesday Nov 4, 2026 at ~07:30 CET / 06:30 UTC."
-  },
   "HUM": {
     "name": "Humana Inc.",
     "quarter": "Q3 2026",

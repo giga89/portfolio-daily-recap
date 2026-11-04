@@ -22,7 +22,6 @@
         "LLY": "💊",
         "MRVL": "📊",
         "MSFT": "💻",
-        "NOVO-B.CO": "💉",
         "NVDA": "🤖",
         "PLTR": "🛡️",
         "PPFB.DE": "🥇",
@@ -125,10 +124,6 @@
         "MSFT": [
             "MSFT",
             "Microsoft Corporation"
-        ],
-        "NOVO-B.CO": [
-            "NOVO-B.CO",
-            "Novo Nordisk A/S"
         ],
         "NVDA": [
             "NVDA",

@@ -17,7 +17,7 @@ from independent_fact_checker import split_into_micro_topics
 
 class TestThematicMicroTopics(unittest.TestCase):
     def test_select_rotation_favorites_and_niche_eu_asia(self):
-        tickers = ['AZN.L', 'NOVO-B.CO', 'ENEL.MI', 'ENI.MI', 'PRY.MI', '1919.HK', '1211.HK', 'TRIG.L']
+        tickers = ['AZN.L', 'ULVR.L', 'ENEL.MI', 'ENI.MI', 'PRY.MI', '1919.HK', '1211.HK', 'TRIG.L']
         favs, niche = ai_news_generator._select_rotation_favorites_and_niche(tickers, count_favorites=2, count_niche=1)
         self.assertEqual(len(favs), 2)
         self.assertEqual(len(niche), 1)

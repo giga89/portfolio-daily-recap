@@ -222,7 +222,7 @@ AstraZeneca ha un peso del 2.21% nel mio portafoglio. È la seconda major farmac
 • Rischi di Fallimento nei Trial Clinici: Studi di Fase 3 che possono non raggiungere gli endpoint primari prefissati.
 • Pressione sui Prezzi dei Farmaci: Riforme negoziali sui prezzi dei medicinali negli USA (Inflation Reduction Act) ed Europa.
 
-Punto su $AZN.L $AZN accanto a $LLY e $NOVO-B.CO per costruire un pilastro farmaceutico guidato dalla pura innovazione scientifica.
+Punto su $AZN.L $AZN accanto a $LLY e $ABBV per costruire un pilastro farmaceutico guidato dalla pura innovazione scientifica.
 
 👇 Quale area terapeutica considerereste più redditizia nel prossimo decennio?"""
     },

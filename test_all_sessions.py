@@ -71,12 +71,12 @@ def generate_mock_stock_data():
             'yearly_change': 42.15,
             'has_traded_today': True
         },
-        'NOVO-B.CO': {
-            'company_name': 'Novo Nordisk',
+        'IEUR': {
+            'company_name': 'iShares Core MSCI Europe',
             'daily_change': 0.85,
-            'weekly_change': 8.12,
-            'monthly_change': 9.20,
-            'yearly_change': 38.12,
+            'weekly_change': 2.12,
+            'monthly_change': 3.20,
+            'yearly_change': 18.12,
             'has_traded_today': True
         },
         'AZN.L': {
@@ -183,8 +183,8 @@ def main():
     # 1. European Market Open
     eu_open_mock = (
         "Buongiorno! Iniziamo una nuova giornata sui mercati europei con un clima piuttosto positivo. "
-        "Oggi gli occhi sono tutti puntati su $NOVO-B.CO, che continua a far parlare di sé grazie ai dati "
-        "eccezionali sulle vendite dei suoi trattamenti contro l'obesità. Nel settore energetico, $ENEL.MI "
+        "Oggi gli occhi sono tutti puntati su $IEUR, che continua a mostrare solidità sul comparto azionario "
+        "europeo. Nel settore energetico, $ENEL.MI "
         "mostra una buona intonazione in avvio grazie ad alcune indiscrezioni su nuove collaborazioni "
         "europee per le rinnovabili, mentre $AZN.L beneficia di un upgrade da parte di una primaria banca "
         "d'affari. Troviamo anche un buon riscontro per $PRY.MI, trainata dalla domanda globale di "
@@ -220,8 +220,8 @@ def main():
         "Buon fine settimana! Con i mercati chiusi, facciamo il punto su questa settimana davvero molto positiva "
         "per il nostro portafoglio, che consolida un guadagno del +3.25%. A guidare i rialzi è stata la straordinaria "
         "forza di $PLTR, protagonista assoluta grazie a eccellenti trimestrali e all'espansione dei suoi contratti "
-        "commerciali nel settore privato. Nel comparto sanitario, $NOVO-B.CO ha registrato progressi significativi "
-        "sostenuta dall'approvazione di nuovi impianti di produzione in Europa. Ottima settimana anche per $MSFT "
+        "commerciali nel settore privato. Nel comparto sanitario, $AZN.L ha registrato progressi significativi "
+        "sostenuta da nuovi avanzamenti nella pipeline clinica in Europa. Ottima settimana anche per $MSFT "
         "e $AMZN, che continuano a beneficiare di flussi d'acquisto solidi e costanti. Chiudiamo la settimana "
         "in una posizione ottimale, pronti e fiduciosi per le prossime sfide di mercato!"
     )
@@ -232,7 +232,7 @@ def main():
         "Buona domenica! Oggi diamo un'occhiata più da vicino ai titoli che hanno guidato la classifica delle "
         "performance settimanali del nostro portafoglio. In cima alla classifica troviamo una strepitosa $PLTR "
         "con un balzo del +12.45%, spinta dall'incredibile slancio nell'adozione commerciale della sua piattaforma AIP. "
-        "Medaglia d'argento per $NOVO-B.CO (+8.12%), che consolida la sua leadership indiscussa nel settore biofarmaceutico "
+        "Medaglia d'argento per $LLY (+8.12%), che consolida la sua leadership indiscussa nel settore biofarmaceutico "
         "globale grazie a una domanda che supera di gran lunga l'offerta. Al terzo posto si piazza $MSFT (+4.20%), "
         "che continua a dimostrare come la sua strategia legata all'intelligenza artificiale generativa stia "
         "producendo ricavi reali e crescenti. Questa classifica dimostra ancora una volta la forza dei nostri megatrend!"

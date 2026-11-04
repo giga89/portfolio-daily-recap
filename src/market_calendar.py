@@ -335,7 +335,7 @@ PORTFOLIO_EARNINGS_TICKERS = [
     "NVDA", "MSFT", "AMZN", "GOOG", "PLTR", "AVGO", "TSM", "MRVL",
     "LLY", "ABBV", "ABT", "HUM", "CCJ", "WMT", "AAPL", "META",
     # European corporate holdings
-    "NOVO-B.CO", "AZN.L", "ENEL.MI", "ENI.MI", "PRY.MI", "BESI.NV", "GLEN.L", "ULVR.L"
+    "AZN.L", "ENEL.MI", "ENI.MI", "PRY.MI", "BESI.NV", "GLEN.L", "ULVR.L"
 ]
 
 

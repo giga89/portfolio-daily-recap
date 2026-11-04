@@ -643,7 +643,7 @@ def render_slide_5() -> Image.Image:
             "Healthcare & Dividendi",
             "15 - 20%",
             "Farmaceutica blockbuster (GLP-1), beni essenziali e flussi costanti.",
-            ["LLY (Eli Lilly)", "ABBV (AbbVie)", "NOVO", "ULVR"],
+            ["LLY (Eli Lilly)", "ABBV (AbbVie)", "AZN (AstraZeneca)", "ULVR"],
             ACCENT_GREEN
         ),
         (

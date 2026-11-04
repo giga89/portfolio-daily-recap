@@ -232,17 +232,6 @@ DIVIDEND_PROFILES = {
         "approx_dps": "Distribuzione cassa semestrale",
         "thesis": "Spina dorsale del commercio marittimo mondiale con cassa netta massiccia e dividendi straordinari.",
     },
-    "NOVO-B.CO": {
-        "name": "Novo Nordisk A/S",
-        "cashtag": "$NOVO-B.CO",
-        "emoji": "💉",
-        "sector": "Farmaceutica & Trattamenti GLP-1",
-        "annual_yield_pct": 1.4,
-        "frequency": "Semestrale (Marzo / Agosto)",
-        "tranche_pct": 0.7,
-        "approx_dps": "Distribuzione semestrale DKK",
-        "thesis": "Leadership mondiale nel diabete e obesità con crescita continua della remunerazione.",
-    },
     "2318.HK": {
         "name": "Ping An Insurance Group",
         "cashtag": "$2318.HK",
@@ -318,7 +307,6 @@ DIVIDEND_CALENDAR = {
     "MSFT": [(2, 15, "Q1"), (5, 15, "Q2"), (8, 15, "Q3"), (11, 15, "Q4")],
     "AVGO": [(3, 20, "Q1"), (6, 20, "Q2"), (9, 21, "Q3"), (12, 20, "Q4")],
     "1919.HK": [(6, 10, "Final"), (10, 15, "Interim")],
-    "NOVO-B.CO": [(3, 25, "Final"), (8, 15, "Interim")],
     "2318.HK": [(6, 5, "Final"), (10, 20, "Interim")],
     "IQQL.DE": [(5, 15, "Semestrale H1"), (11, 15, "Semestrale H2")],
     "IEUR": [(6, 20, "Semestrale H1"), (12, 20, "Semestrale H2")],
@@ -628,7 +616,7 @@ def publish_dividend_post(
         "VOW3.DE": 1.24, "ABBV": 2.80, "ABT.US": 2.20, "AZN.L": 2.10,
         "GLEN.L": 2.50, "TRIG.L": 2.20, "ULVR.L": 2.00, "WMT": 1.80,
         "MSFT": 2.19, "AVGO": 1.50, "1919.HK": 2.12,
-        "NOVO-B.CO": 2.00, "2318.HK": 1.06,
+        "2318.HK": 1.06,
     }
 
     # Determine live weight

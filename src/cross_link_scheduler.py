@@ -5,7 +5,7 @@ Dynamic Cross-Link Comments Generator & Scheduler for eToro
 Publishes 3 curated, dynamic cross-link comments on an eToro recap post.
 Each comment focuses on EXACTLY ONE SINGLE ASSET from a specific category:
   • Comment 1/3: Single AI & Tech Asset (e.g. $PLTR, $NVDA, $MRVL, $TSM, $MSFT, $GOOG, $AVGO, $AMZN)
-  • Comment 2/3: Single Defensive, Healthcare, Energy or Value Asset (e.g. $LLY, $NOVO-B.CO, $CCJ, $ENI.MI, $PRY.MI, $ENEL.MI, $VOW3.DE, $ULVR.L)
+  • Comment 2/3: Single Defensive, Healthcare, Energy or Value Asset (e.g. $LLY, $AZN.L, $CCJ, $ENI.MI, $PRY.MI, $ENEL.MI, $VOW3.DE, $ULVR.L)
   • Comment 3/3: Single ETF & Macro Strategy Asset (e.g. $SX7PEX.DE, $WDEF.L, $INDO.PA, $IEUR)
 
 Features:
@@ -110,14 +110,6 @@ DEFENSIVE_VALUE_PROFILES = {
         "thesis": "Leadership mondiale nei trattamenti terapeutici contro obesità e diabete (Mounjaro e Zepbound), con domanda secolare resiliente a qualsiasi ciclo economico.",
         "driver": "Mercato potenziale superiore a $100B, brevetti protetti per oltre un decennio e massicci investimenti in espansione produttiva.",
         "question": "Qual è il vostro outlook sul settore sanitario e sui farmaci metabolici di nuova generazione per il lungo periodo?"
-    },
-    "NOVO-B.CO": {
-        "name": "Novo Nordisk",
-        "emoji": "💉",
-        "role": "Cura del Diabete & Terapie Semaglutide",
-        "thesis": "Pioniere globale e leader europeo nelle terapie a base di semaglutide con Ozempic e Wegovy, approvati anche per la riduzione dei rischi cardiovascolari e renali.",
-        "driver": "Margini operativi superiori al 45% e ROIC ai vertici europei che finanziano buyback e ricerca all'avanguardia.",
-        "question": "Preferite esporvi al megatrend salute attraverso Novo Nordisk o Eli Lilly nel vostro portafoglio?"
     },
     "CCJ": {
         "name": "Cameco Corporation",

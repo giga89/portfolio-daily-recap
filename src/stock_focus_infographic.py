@@ -142,28 +142,6 @@ COMPANY_INFOGRAPHICS = {
         "color": (220, 40, 40),
         "domain": "lilly.com"
     },
-    "NOVO-B.CO": {
-        "name": "NOVO NORDISK",
-        "tagline": "Global Diabetes & Obesity Therapeutics",
-        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
-        "subtitle": "Novo Nordisk è la principale multinazionale europea per capitalizzazione, leader mondiale nelle terapie a base di semaglutide.",
-        "kpis": [
-            {"label": "CRESCITA OZEMPIC / WEGOVY", "val": "+30%", "sub": "Adozione globale inarrestabile"},
-            {"label": "ROIC (REDDITIVITÀ)", "val": ">60%", "sub": "Efficienza del capitale al top"},
-            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Posizione core difensiva"},
-            {"label": "MARGINE OPERATIVO", "val": "45%+", "sub": "Potere di prezzo inattaccabile"},
-        ],
-        "pillars": [
-            ("Leadership Globale nel Diabete:", "Oltre un secolo di esperienza e specializzazione nelle terapie metaboliche."),
-            ("Vantaggi Cardiovascolari Certificati:", "Wegovy approvato anche per ridurre rischi cardiaci e renali."),
-            ("Capacità di Cassa Enorme:", "Flussi di cassa operativi che finanziano buyback e ricerca all'avanguardia."),
-            ("Fossato Difensivo Europeo:", "La società più solida e redditizia dell'intero panorama azionario continentale."),
-        ],
-        "quote": "Investire in aziende che migliorano la vita di milioni di persone genera valore per decenni.",
-        "tags": ["#NovoNordisk", "#Ozempic", "#Wegovy", "#Healthcare", "#EuropeanQuality"],
-        "color": (0, 100, 200),
-        "domain": "novonordisk.com"
-    },
     "MRVL": {
         "name": "MARVELL",
         "tagline": "AI Data Center Connectivity & Custom Silicon",
@@ -751,7 +729,7 @@ def _get_live_weight_for_ticker(ticker: str) -> str:
     
     # Fallback known actual live portfolio weights
     defaults = {
-        "NOVO-B.CO": "4.30%", "CCJ": "4.01%", "ENI.MI": "3.94%", "PRY.MI": "3.86%",
+        "CCJ": "4.01%", "ENI.MI": "3.94%", "PRY.MI": "3.86%",
         "AMZN": "3.80%", "SX7PEX.DE": "3.43%", "BMW.DE": "3.30%", "NVDA": "3.30%",
         "HUM": "3.19%", "GOOG": "3.14%", "ENEL.MI": "2.94%", "PLTR": "2.87%",
         "TSM": "2.87%", "PYPL": "2.56%",
