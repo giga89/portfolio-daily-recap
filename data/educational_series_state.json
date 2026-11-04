@@ -1,7 +1,7 @@
 {
-  "last_published_episode": 4,
-  "last_published_date": "2026-10-28",
-  "total_published_count": 4,
+  "last_published_episode": 5,
+  "last_published_date": "2026-11-04",
+  "total_published_count": 5,
   "history": [
     {
       "episode": 1,
@@ -26,6 +26,12 @@
       "title": "IL PARADOSSO DEI MASSIMI STORICI",
       "date": "2026-10-28T18:25:48.749896",
       "post_id": "ff43c8e0-d2fc-11f1-8080-80015b54c645"
+    },
+    {
+      "episode": 5,
+      "title": "CHARLIE MUNGER E I PRIMI 100.000$",
+      "date": "2026-11-04T19:56:59.664445",
+      "post_id": "e5457690-d889-11f1-8080-80017250337e"
     }
   ]
 }
