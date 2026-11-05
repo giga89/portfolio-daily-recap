@@ -257,7 +257,7 @@ DIVIDEND_PROFILES = {
     "IEUR": {
         "name": "iShares Core MSCI Europe ETF",
         "cashtag": "$IEUR",
-        "emoji": "🇪🇺",
+        "emoji": "🌍",
         "sector": "Azionario Europeo Broad Market",
         "annual_yield_pct": 2.5,
         "frequency": "Semestrale (Giugno / Dicembre)",
@@ -268,7 +268,7 @@ DIVIDEND_PROFILES = {
     "VOF.L": {
         "name": "VinaCapital Vietnam Opportunity Fund",
         "cashtag": "$VOF.L",
-        "emoji": "🇻🇳",
+        "emoji": "🌏",
         "sector": "Azionario Frontier Market Vietnam",
         "annual_yield_pct": 1.5,
         "frequency": "Semestrale (Marzo / Ottobre)",

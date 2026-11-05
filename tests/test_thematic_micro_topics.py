@@ -114,8 +114,8 @@ class TestThematicMicroTopics(unittest.TestCase):
         lines = [p.strip() for p in formatted.split("\n\n") if p.strip()]
         # Greeting kept
         self.assertTrue(lines[0].startswith("Ci siamo"))
-        # Macro got 🇺🇸
-        self.assertTrue(lines[1].startswith("🇺🇸"))
+        # Macro got 🗽
+        self.assertTrue(lines[1].startswith("🗽"))
         # Agenda got 📅
         self.assertTrue(lines[2].startswith("📅"))
         # NVDA kept 🤖

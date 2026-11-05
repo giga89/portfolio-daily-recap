@@ -61,14 +61,14 @@ DEFAULT_TICKERS = {
 DEFAULT_EMOJIS = {
     # Cash, Fixed Income & Macro ETFs
     'IB01.L': '💵',    # US Treasury short-term bonds
-    'INDO.PA': '🇮🇩',   # Indonesia
+    'INDO.PA': '🌴',   # Indonesia
     'PPFB.DE': '🥇',   # Physical Gold
     'SX7PEX.DE': '🏛️', # Banking
     'TRIG.L': '🌬️',    # Renewables (Wind/Solar)
     'WDEF.L': '🛡️',    # European Defence
-    'IEUR': '🇪🇺',     # Europe
+    'IEUR': '🌍',     # Europe
     'IQQL.DE': '🔥',   # Listed Private Equity
-    'VOF.L': '🇻🇳',     # Vietnam Opportunity Fund
+    'VOF.L': '🌏',     # Vietnam Opportunity Fund
     
     # Healthcare & Pharmaceuticals
     'AZN.L': '🧬',
@@ -991,7 +991,7 @@ PORTFOLIO_ASSETS_METADATA = {
         "related_tickers": ["$2628.HK", "$3968.HK", "$939.HK"], "primary_tags": ["$2318.HK", "$PNGAY"]
     },
     "VOF.L": {
-        "ticker": "VOF.L", "yahoo_ticker": "VOF.L", "name": "VinaCapital Vietnam Opportunity Fund", "emoji": "🇻🇳",
+        "ticker": "VOF.L", "yahoo_ticker": "VOF.L", "name": "VinaCapital Vietnam Opportunity Fund", "emoji": "🌏",
         "asset_class": "Fund / Closed-End", "sector": "Azionario Frontier Market Vietnam", "geo": "Asia / Frontier", "tier": "High Growth Explorer",
         "is_dividend_paying": True, "dividend_policy": "Distribuzione semestrale con dividend yield moderato (~1.5%) e buyback per ridurre lo sconto sul NAV", "annual_yield_pct": 1.5, "frequency": "Semestrale (Marzo / Ottobre)",
         "domain": "vinacapital.com", "color": (218, 37, 29),
@@ -1010,7 +1010,7 @@ PORTFOLIO_ASSETS_METADATA = {
         "related_tickers": ["$VNM", "$VEIL.L", "$VOF.L"], "primary_tags": ["$VOF.L"]
     },
     "INDO.PA": {
-        "ticker": "INDO.PA", "yahoo_ticker": "INDO.PA", "name": "Amundi MSCI Indonesia UCITS ETF Acc", "emoji": "🇮🇩",
+        "ticker": "INDO.PA", "yahoo_ticker": "INDO.PA", "name": "Amundi MSCI Indonesia UCITS ETF Acc", "emoji": "🌴",
         "asset_class": "ETF", "sector": "Azionario Mercati Emergenti Indonesia", "geo": "Asia / Emerging", "tier": "Emerging Market",
         "is_dividend_paying": False, "dividend_policy": "Accumulazione (Acc) - Nessun dividendo distribuito, tutti i proventi e dividendi sono automaticamente capitalizzati e reinvestiti nel NAV", "annual_yield_pct": 0.0, "frequency": "Nessuna (Accumulazione)",
         "domain": "amundi.com", "color": (255, 0, 0),
@@ -1088,7 +1088,7 @@ PORTFOLIO_ASSETS_METADATA = {
         "related_tickers": ["$BAC", "$JPM", "$HSBA.L"], "primary_tags": ["$SX7PEX.DE", "$EXV1.DE"]
     },
     "IEUR": {
-        "ticker": "IEUR", "yahoo_ticker": "IEUR", "name": "iShares Core MSCI Europe ETF", "emoji": "🇪🇺",
+        "ticker": "IEUR", "yahoo_ticker": "IEUR", "name": "iShares Core MSCI Europe ETF", "emoji": "🌍",
         "asset_class": "ETF", "sector": "Azionario Europeo Broad Market", "geo": "Europe", "tier": "Core Diversifier",
         "is_dividend_paying": True, "dividend_policy": "Distribuzione semestrale con dividend yield diversificato (~2.5%)", "annual_yield_pct": 2.5, "frequency": "Semestrale (Giugno / Dicembre)",
         "domain": "ishares.com", "color": (0, 51, 153),

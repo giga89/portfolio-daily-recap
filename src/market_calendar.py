@@ -199,7 +199,7 @@ def generate_holiday_post_text(holiday_name: str, market: str = "US") -> str:
     """Generate high-engagement Italian post text for market holiday."""
     if market == "US":
         post_text = (
-            f"🛋️ WALL STREET CHIUSA PER FESTIVITÀ: {holiday_name.upper()} 🇺🇸\n\n"
+            f"🛋️ WALL STREET CHIUSA PER FESTIVITÀ: {holiday_name.upper()} 🗽\n\n"
             f"Oggi i mercati finanziari statunitensi (NYSE e NASDAQ) rimangono chiusi per la festività nazionale del {holiday_name}. "
             "Nessuna sessione di contrattazione sui listini azionari USA.\n\n"
             "I mercati europei ($SX7PEX.DE, $ENI.MI, $WDEF.L) e il comparto crypto proseguono invece regolarmente le negoziazioni.\n\n"
@@ -211,7 +211,7 @@ def generate_holiday_post_text(holiday_name: str, market: str = "US") -> str:
         )
     else:
         post_text = (
-            f"🏖️ BORSE EUROPEE CHIUSE PER FESTIVITÀ: {holiday_name.upper()} 🇪🇺\n\n"
+            f"🏖️ BORSE EUROPEE CHIUSE PER FESTIVITÀ: {holiday_name.upper()} 🌍\n\n"
             f"Oggi i principali listini europei (XETRA, London Stock Exchange, Euronext e Borsa Italiana) rimangono chiusi "
             f"in occasione di {holiday_name}.\n\n"
             "Le negoziazioni sulle borse del continente sono sospese, mentre il nostro portafoglio continua a lavorare a lungo termine "

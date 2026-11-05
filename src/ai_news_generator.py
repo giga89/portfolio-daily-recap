@@ -588,7 +588,7 @@ def ensure_thematic_emojis(text: str, session_name: Optional[str] = None) -> str
     """
     Ensures that every micro-topic paragraph starts with a consistent, thematic emoticon:
     - Stocks: uses mapped emoji from EMOJI_MAP / portfolio_config.json (e.g. $MRVL -> 📊, $WDEF.L -> 🛡️, $1919.HK -> 🚢).
-    - Macro: uses session emoji (🌍 for EU, 🇺🇸 for US open, 🌆 for US close).
+    - Macro: uses session emoji (🌍 for EU, 🗽 for US open, 🌆 for US close).
     - Agenda: uses 📅.
     - Fallback: uses '🔹' as requested by user if no specific emoji is known.
     - Preserves greetings and closing community questions cleanly.
@@ -605,7 +605,7 @@ def ensure_thematic_emojis(text: str, session_name: Optional[str] = None) -> str
     is_eu = "EUROPEAN" in session_upper or "EU" in session_upper
     is_us_open = ("U.S." in session_upper or "US" in session_upper) and "OPEN" in session_upper
     is_weekly = "WEEKLY" in session_upper
-    macro_default_emoji = "🌍" if is_eu else ("🇺🇸" if is_us_open else ("📊" if is_weekly else "🌆"))
+    macro_default_emoji = "🌍" if is_eu else ("🗽" if is_us_open else ("📊" if is_weekly else "🌆"))
 
     blocks = [b.strip() for b in re.split(r'\n\s*\n', text) if b.strip()]
     formatted_blocks = []
@@ -1043,7 +1043,7 @@ TEXT TO TRANSLATE:
                 if resp.status_code == 200:
                     translated = resp.json()["choices"][0]["message"]["content"].strip()
                     if _validate_translation(translated):
-                        print(f"🇮🇹 Monthly recap translated to Italian via Groq ({model})")
+                        print(f"🌐 Monthly recap translated to Italian via Groq ({model})")
                         if API_TRACKER_AVAILABLE:
                             log_api_request(f"groq:{model}", True, "monthly_recap_translate")
                         return translated
@@ -1078,7 +1078,7 @@ TEXT TO TRANSLATE:
                 if resp.status_code == 200:
                     translated = resp.json()["choices"][0]["message"]["content"].strip()
                     if _validate_translation(translated):
-                        print(f"🇮🇹 Monthly recap translated to Italian via Mistral ({model})")
+                        print(f"🌐 Monthly recap translated to Italian via Mistral ({model})")
                         if API_TRACKER_AVAILABLE:
                             log_api_request(f"mistral:{model}", True, "monthly_recap_translate")
                         return translated
@@ -1106,7 +1106,7 @@ TEXT TO TRANSLATE:
                 if response and response.text:
                     translated = response.text.strip()
                     if _validate_translation(translated):
-                        print(f"🇮🇹 Monthly recap translated to Italian via Gemini ({model_name})")
+                        print(f"🌐 Monthly recap translated to Italian via Gemini ({model_name})")
                         if API_TRACKER_AVAILABLE:
                             log_api_request(model_name, True, "monthly_recap_translate")
                         return translated
@@ -1995,7 +1995,7 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
             STRUTTURA RIGIDA DEI 5 MICROTEMI A EMOTICON (TASSATIVO):
             - NON USARE NUMERI PER ORDINARE I MICROTEMI (È SEVERAMENTE VIETATO usare elenchi numerati come '1)', '2)', '3)', '4)', '5)' o '1.', '2.').
             - OGNI microtema DEVE iniziare TASSATIVAMENTE con la sua emoticon dedicata all'inizio della prima riga:
-              * Microtema 1 DEVE iniziare con: 🇺🇸
+              * Microtema 1 DEVE iniziare con: 🗽
               * Microtema 2 DEVE iniziare con: 📅
               * Microtema 3 DEVE iniziare con: {emoji_fav1}
               * Microtema 4 DEVE iniziare con: {emoji_fav2}
@@ -2003,7 +2003,7 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
             - Se per qualsiasi motivo non sai cosa mettere, usa il simbolo di elenco '🔹'.
             - NON omettere mai l'emoticon a inizio riga per nessun microtema.
 
-            🇺🇸 MICRO-TEMA 1: Sentiment generale con macro news
+            🗽 MICRO-TEMA 1: Sentiment generale con macro news
                Panoramica su futures di Wall Street, rendimenti obbligazionari Treasury a 10 anni e rotazione settoriale. Includi il tag ${macro_tag}.
 
             📅 MICRO-TEMA 2: Appuntamenti del giorno che possono far variare l'indice

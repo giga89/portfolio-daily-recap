@@ -39,7 +39,7 @@ SESSION_STYLES = {
         "mood": "fresh start, anticipation, opportunity",
         "accent_color": "blue and gold tones",
         "icon": "sunrise over European cityscape",
-        "overlay_label": "APERTURA MERCATI EU 🇪🇺",
+        "overlay_label": "APERTURA MERCATI EU 🌍",
     },
     "U.S. market open": {
         "time_of_day": "bright midday",
@@ -47,7 +47,7 @@ SESSION_STYLES = {
         "mood": "energy, momentum, action",
         "accent_color": "electric blue and green tones",
         "icon": "Wall Street bull, trading floor energy",
-        "overlay_label": "APERTURA WALL STREET 🇺🇸",
+        "overlay_label": "APERTURA WALL STREET 🗽",
     },
     "U.S. market close": {
         "time_of_day": "dramatic sunset / dusk",

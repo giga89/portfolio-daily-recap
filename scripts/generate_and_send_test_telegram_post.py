@@ -54,9 +54,9 @@ def generate_and_send_test(session_name: str = "US_CLOSE") -> bool:
         session_num = "1/3"
         session_display_name = "APERTURA MERCATI EUROPEI (EU OPEN)"
         session_badge_emoji = "🌅"
-        session_flag_emoji = "🇪🇺"
+        session_flag_emoji = "🌍"
         portfolio_header = (
-            "🌅 APERTURA MERCATI EUROPEI 🇪🇺\n\n"
+            "🌅 APERTURA MERCATI EUROPEI 🌍\n\n"
             "🌱 🌱 🌱 LIEVE CRESCITA 🌱: +0.42% 🌱 🌱 🌱\n"
             "🏔️ Distanza dal Massimo Storico (ATH): -8.70%\n\n"
         )
@@ -66,9 +66,9 @@ def generate_and_send_test(session_name: str = "US_CLOSE") -> bool:
         session_num = "2/3"
         session_display_name = "APERTURA WALL STREET (US OPEN)"
         session_badge_emoji = "🌅"
-        session_flag_emoji = "🇺🇸"
+        session_flag_emoji = "🗽"
         portfolio_header = (
-            "🌅 APERTURA WALL STREET 🇺🇸\n\n"
+            "🌅 APERTURA WALL STREET 🗽\n\n"
             "✅ ✅ ✅ OTTIMA GIORNATA! 🟢: +0.86% ✅ ✅ ✅\n"
             "🏔️ Distanza dal Massimo Storico (ATH): -8.20%\n\n"
         )
@@ -144,7 +144,7 @@ def generate_and_send_test(session_name: str = "US_CLOSE") -> bool:
         elif "OPEN" in session_upper:
             candidate_news = (
                 f"Buon pomeriggio! Tra poco apre Wall Street: facciamo il punto sulla sessione americana ({formatted_date}): ☕\n\n"
-                f"🇺🇸 Futures positivi a New York prima della campana, con l'indice $NSDQ100 che guadagna lo 0.7% "
+                f"🗽 Futures positivi a New York prima della campana, con l'indice $NSDQ100 che guadagna lo 0.7% "
                 f"trainato dal rimbalzo tecnologico, mentre i rendimenti dei Treasury a 10 anni si attestano al 4.12%.\n\n"
                 f"📅 L'agenda di oggi prevede l'uscita delle richieste settimanali di sussidi di disoccupazione "
                 f"e le dichiarazioni di esponenti della Federal Reserve, determinanti per valutare la traiettoria economica USA.\n\n"

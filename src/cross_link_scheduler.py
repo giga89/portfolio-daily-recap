@@ -180,7 +180,7 @@ ETF_MACRO_PROFILES = {
     },
     "INDO.PA": {
         "name": "Amundi MSCI Indonesia ETF",
-        "emoji": "🇮🇩",
+        "emoji": "🌴",
         "role": "Mercati Emergenti & Megatrend Risorse Critiche",
         "thesis": "Esposizione mirata alla crescita demografica del sud-est asiatico e al ruolo chiave dell'Indonesia nella fornitura globale di nickel e materie prime per batterie.",
         "driver": "Forte crescita del PIL reale e diversificazione macroeconomica non correlata ai mercati occidentali.",

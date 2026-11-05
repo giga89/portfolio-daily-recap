@@ -116,9 +116,9 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
             header = f"📅 RESOCONTO SETTIMANALE 📆"
     elif "OPEN" in session_upper:
         if "EUROPEAN" in session_upper:
-            header = f"🌅 APERTURA MERCATI EUROPEI 🇪🇺"
+            header = f"🌅 APERTURA MERCATI EUROPEI 🌍"
         else:
-            header = f"🌅 APERTURA WALL STREET 🇺🇸"
+            header = f"🌅 APERTURA WALL STREET 🗽"
     elif "CLOSE" in session_upper:
         header = f"🌆 CHIUSURA DEI MERCATI 📈"
     elif "RECAP" in session_upper:
