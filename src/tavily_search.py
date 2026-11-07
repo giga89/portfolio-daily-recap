@@ -230,12 +230,21 @@ def filter_live_news_for_topic(
     single-stock paragraphs do not get cross-contaminated by global macro headlines
     (e.g. a previous day's index drop being injected into an individual stock paragraph).
     """
-    if not live_news_context or topic_type not in ("stock_paragraph", "stock_bullet"):
+    if (
+        not live_news_context
+        or topic_type not in ("stock_paragraph", "stock_bullet")
+        or ("📊 NOTIZIE E DATI REALI PER $" not in live_news_context and "🌍 CONTESTO MACRO" not in live_news_context)
+    ):
         return live_news_context
 
     import re
     raw_tags = re.findall(r'\$([A-Za-z0-9\-\.]+)', topic_text or "")
     target_bases = {t.split(".")[0].upper() for t in raw_tags if t}
+    if not target_bases:
+        # Also detect exchange-suffixed tickers when '$' was stripped (e.g. 1919.HK, PRY.MI, VOW3.DE)
+        suffixed = re.findall(r'\b([0-9]{4}\.HK|[A-Z0-9]{2,8}\.[A-Z]{1,4})\b', topic_text or "")
+        for s_tok in suffixed:
+            target_bases.add(s_tok.split(".")[0].upper())
     if not target_bases:
         # Check plain uppercase ticker tokens or company names if $ was stripped
         for known_base, comp_desc in TICKER_NAME_MAP.items():

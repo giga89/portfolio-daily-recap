@@ -67,6 +67,9 @@ def send_etoro_post(
     text: str,
     image_path: Optional[str] = None,
     language: str = "it",
+    session_name: Optional[str] = None,
+    stock_data: Optional[dict] = None,
+    benchmark_daily: Optional[dict] = None,
 ) -> bool:
     """
     Format and send a post to the eToro Social Feed using official eToro API.
@@ -75,6 +78,9 @@ def send_etoro_post(
         text (str): Post content in plain text / markdown / HTML.
         image_path (str, optional): Local path to image file to attach.
         language (str): Post language code (default "it").
+        session_name (str, optional): Market session label for deterministic checks.
+        stock_data (dict, optional): Certified Yahoo Finance stock performance dict.
+        benchmark_daily (dict, optional): Certified Yahoo Finance index performance dict.
 
     Returns:
         bool: True if published successfully, False otherwise
@@ -105,18 +111,28 @@ def send_etoro_post(
             limit_cashtags,
             sanitize_or_prune_post_content,
         )
-        clean_content = clean_etoro_formatting(clean_content)
-        clean_content = limit_cashtags(clean_content, max_tags=4)
-        is_clean, issues, clean_content = verify_post_deterministic(clean_content)
+        is_clean, issues, verified_draft = verify_post_deterministic(
+            clean_content,
+            session_name=session_name,
+            benchmark_daily=benchmark_daily,
+            stock_data=stock_data,
+        )
         if not is_clean:
             print(f"⚠️ Pre-publication verifier flagged issues: {issues}. Tentativo di auto-depurazione / epurazione...")
-            sanitized_content, is_now_clean, remaining_issues = sanitize_or_prune_post_content(clean_content)
+            sanitized_content, is_now_clean, remaining_issues = sanitize_or_prune_post_content(
+                clean_content,
+                session_name=session_name,
+                benchmark_daily=benchmark_daily,
+                stock_data=stock_data,
+            )
             if is_now_clean:
                 print(f"✅ [AUTO-EPURAZIONE]: Post depurato/epurato con successo. Procedo alla pubblicazione su eToro.")
-                clean_content = sanitized_content
+                clean_content = limit_cashtags(clean_etoro_formatting(sanitized_content), max_tags=4)
             else:
                 print(f"🛑 ETORO POST BLOCKED BY PRE-PUBLICATION GATE (anche dopo tentativi di epurazione): {remaining_issues}")
                 return False
+        else:
+            clean_content = limit_cashtags(clean_etoro_formatting(verified_draft), max_tags=4)
     except Exception as e_ver:
         print(f"⚠️ Pre-publication verifier check in etoro_sender: {e_ver}")
 

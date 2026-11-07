@@ -527,6 +527,8 @@ def publish_all(
         ok = etoro_sender.send_etoro_post(
             text=etoro_text,
             image_path=card_to_upload,
+            session_name=market_session,
+            stock_data=stock_data,
         )
         results["etoro"] = ok
         if ok:

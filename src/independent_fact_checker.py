@@ -194,6 +194,7 @@ def _build_audit_prompt(
     temporal_ctx: Dict[str, str],
     portfolio_metadata_summary: str = "",
     live_news_context: str = "",
+    stock_data: Optional[Dict[str, Any]] = None,
 ) -> str:
     """Creates the adversarial fact-checker prompt for Groq/Mistral with optional Tavily live grounding."""
     live_news_section = ""
@@ -207,6 +208,27 @@ FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY):
 
     benchmarks_daily_line = f"• PERFORMANCE INDICI OGGI: {temporal_ctx.get('benchmarks_daily') or 'Non specificata'}\n"
 
+    stock_gt_section = ""
+    if stock_data:
+        try:
+            from post_verifier import _resolve_stock_pct_map
+            pct_map = _resolve_stock_pct_map(stock_data, session_name=session_name)
+            if pct_map:
+                seen_canon = set()
+                gt_items = []
+                for _, (canon_sym, pct_val) in sorted(pct_map.items()):
+                    if canon_sym not in seen_canon:
+                        seen_canon.add(canon_sym)
+                        dir_lbl = "RIALZO (+)" if pct_val >= 0 else "CALO (-)"
+                        gt_items.append(f"  - ${canon_sym}: {pct_val:+.2f}% [{dir_lbl}]")
+                if gt_items:
+                    stock_gt_section = (
+                        "• PERFORMANCE CERTIFICATA SINGOLI TITOLI OGGI (YAHOO FINANCE GROUND TRUTH - INVIOLABILE):\n"
+                        + "\n".join(gt_items) + "\n"
+                    )
+        except Exception:
+            stock_gt_section = ""
+
     return f"""Sei un Lead Financial Fact-Checker & Senior Compliance Auditor per un account pubblico di investimenti su eToro.
 Il tuo obiettivo è effettuare un AUDIT INDIPENDENTE, CRITICO E SPIETATO sul seguente post prima della pubblicazione.
 
@@ -219,8 +241,7 @@ INFORMAZIONI TEMPORALI CERTE (GROUND TRUTH):
 • STATO DELLA SESSIONE: {temporal_ctx.get('market_state')}
 • PROSSIMA SEDUTA DI BORSA (CALENDARIO UFFICIALE): {temporal_ctx.get('next_session_timing', 'nella prossima seduta')}
 • TRIMESTRALI CONFERMATE PROSSIMA SEDUTA: {temporal_ctx.get('next_session_earnings', 'Nessuna trimestrale prevista per il portafoglio')}
-{benchmarks_daily_line}
-=========================================
+{benchmarks_daily_line}{stock_gt_section}=========================================
 METADATI DI PORTAFOGLIO:
 =========================================
 {portfolio_metadata_summary or "Nessun asset specifico indicato."}
@@ -244,10 +265,13 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
    - NOTA BENE (ANACRONISMI NOTI): Il mandato di Jerome Powell come Presidente della Fed termina a maggio 2026. Citare Powell per decisioni o annunci nel 2026 è anacronistico: rimuovi tassativamente il nome 'Powell' e usa genericamente 'la Federal Reserve' / 'la banca centrale'.
    - Se viene attribuita una decisione a una figura che non ricopre più la carica o se c'è un'allucinazione su chi guida un'istituzione, correggi immediatamente o rimuovi il riferimento.
 
-3. CONFERMA NOTIZIE CON LE FONTI LIVE TAVILY:
+3. CONFERMA NOTIZIE CON LE FONTI LIVE TAVILY (SENZA SOVRASCRIVERE I PREZZI CERTIFICATI):
    - Consulta le 'FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY)' sopra riportate per verificare i fatti menzionati nel post (partnership, catalizzatori, trimestrali, rating).
    - Se una notizia o catalizzatore è confermato dalle fonti live, consideralo autentico e approvalo.
    - Se un fatto è palesemente inventato e in contrasto con la realtà, correggilo chirurgicamente.
+   - GERARCHIA INVIOLABILE DEI PREZZI: Le percentuali e i segni (+/-) riportati in 'PERFORMANCE INDICI OGGI' e 'PERFORMANCE CERTIFICATA SINGOLI TITOLI OGGI (YAHOO FINANCE GROUND TRUTH)' sono dati ufficiali di chiusura certificati al 100%, anche quando gli articoli web di Tavily non riportano ancora il dato di chiusura. NON considerare MAI un'allucinazione e NON respingere (REJECT) un paragrafo solo perché Tavily non cita la percentuale di chiusura di un titolo già certificata da Yahoo Finance!
+   - Gli articoli web di Tavily possono riferirsi a sedute dei giorni precedenti: è TASSATIVAMENTE VIETATO sovrascrivere la performance odierna certificata di un titolo (es. +6.24% o -3.40%) con percentuali pescate da vecchi articoli Tavily (es. -9.8%). Se invece il testo da auditare riporta un segno/direzione opposto al Ground Truth Yahoo Finance (es. scrive -9.8% o 'in calo' su un titolo a +6.24%, oppure +4.15% o 'in rialzo' su un titolo a -3.40%), usa 'AUTO_CORRECT' per ripristinare la direzione e la percentuale certificata Yahoo Finance!
+   - DIVIETO ASSOLUTO DI META-COMMENTI NEL TESTO PUBBLICO: Non inserire MAI dentro 'verified_text' commenti interni da revisore come 'nelle fonti principali', 'non confermata dalle fonti', 'le fonti non menzionano' o 'secondo i dati forniti'. Il campo 'verified_text' viene pubblicato direttamente ai lettori!
 
 4. FORMATTAZIONE ETORO:
    - Nessun markdown bold (** o __).
@@ -276,10 +300,12 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
    - CASO B: SE GLI INDICI HANNO CHIUSO IN CALO (variazione percentuale negativa, es. SPX500 < 0% o NSDQ100 < 0%):
      * Il post NON PUÒ definire la seduta complessiva dei mercati / di Wall Street / degli indici come "positiva", "tono complessivamente positivo", "giornata favorevole per i mercati", "ottima seduta per i listini" o simili.
      * CORREZIONE INDICI NEGATIVI: Sostituisci le formule positive errate relative a Wall Street/indici con espressioni coerenti con la realtà numerica (es. "seduta in flessione", "chiusura in calo", "seduta all'insegna delle prese di beneficio", "giornata debole"), indicando la variazione percentuale reale negativa (-).
-   - DISTINZIONE FONDAMENTALE (SINGOLI TITOLI / SETTORI):
-     * Questa regola per Wall Street non va confusa con i singoli titoli del portafoglio! Se un titolo ha chiuso a +X% (es. $MRVL +2.26%, $PRY.MI +3.86%), va sempre descritto come positivo. È TASSATIVAMENTE VIETATO definire in calo o flessione un titolo positivo.
+   - DISTINZIONE FONDAMENTALE (SINGOLI TITOLI / SETTORI - SIMMETRICA):
+     * Questa regola per Wall Street non va confusa con i singoli titoli del portafoglio!
+     * Se nel Ground Truth Yahoo Finance un titolo ha variazione POSITIVA (+X%, es. $TSM +6.24%, $MRVL +2.26%), DEVE essere descritto come positivo/in rialzo (+X%): è TASSATIVAMENTE VIETATO definirlo in calo o flessione o mettergli il segno meno.
+     * VICEVERSA, se nel Ground Truth Yahoo Finance un titolo ha variazione NEGATIVA (-X%, es. $NVDA -3.40%), DEVE essere descritto in calo/flessione (-X%): è TASSATIVAMENTE VIETATO definirlo in rialzo, positivo, brillante o mettergli il segno più!
    - DIVIETO ASSOLUTO DI INVERSIONE SEGNO (+ vs -):
-     * È TASSATIVAMENTE VIETATO invertire il segno matematico di indici o titoli: non trasformare MAI un + in un - né un - in un +! Non omettere il segno affermando che un asset positivo "ha perso".
+     * È TASSATIVAMENTE VIETATO invertire il segno matematico di indici o titoli: non trasformare MAI un + in un - né un - in un +! Non omettere il segno affermando che un asset positivo "ha perso" o che un asset negativo "ha guadagnato".
 
 9. PRIORITÀ NOTIZIE FRESCHE DEL GIORNO VS NOIOSE TRIMESTRALI (CRITICA):
    - I lettori cercano novità e catalizzatori FRESCHI DEL GIORNO (accordi commerciali, partnership strategiche, commesse, lanci di prodotto, upgrade o downgrade di rating con target price, sviluppi regolatori o giudiziari avvenuti oggi o nelle ultime 24-48 ore).
@@ -311,25 +337,29 @@ def sanitize_verified_text(
     verified_text: str,
     session_name: Optional[str] = None,
     benchmark_daily_data: Optional[Dict[str, float]] = None,
+    stock_data: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
     Sanitizes auto-corrections proposed by LLM auditors:
-    1. Removes absurd hallucinations (e.g. 'tassa sui tassi', 'tasse sui tassi', 'tassa sugli interessi').
+    1. Removes absurd hallucinations (e.g. 'tassa sui tassi', 'tasse sui tassi', 'tassa sugli interessi') and leaked auditor meta-commentary.
     2. Deduplicates repeated sentences or hallucinations generated in loops.
     3. Rejects hallucinated massive expansions of short non-financial opening sentences.
     4. Cleans whitespace and trailing punctuation artifacts.
-    5. Enforces mathematical benchmark ground truth and eliminates sign inversions.
+    5. Enforces mathematical benchmark & individual stock ground truth BEFORE fixing oxymorons.
     """
     if not verified_text:
         return original_text
 
     cleaned = verified_text.strip()
 
-    # 1. Strip absurd/hallucinated financial phrases
+    # 1. Strip absurd/hallucinated financial phrases and leaked auditor meta-commentary clauses
     absurd_patterns = [
         r'(?i)\bnuova\s+tassa\s+sui\s+tassi(?:\s+di\s+interesse)?\b[.,]?',
         r'(?i)\btass[ae]\s+sui\s+tassi(?:\s+di\s+interesse)?\b[.,]?',
         r'(?i)\btass[ae]\s+sugli\s+interessi\b[.,]?',
+        r'(?i),?\s*(?:sebbene|benché|nonostante)\s+(?:(?!\.(?:\s|$))[^\n!?]){0,120}?\b(?:nelle|dalle)\s+fonti\s+(?:principali|disponibili|fornite|live|ufficiali)(?:(?!\.(?:\s|$))[^\n!?])*',
+        r'(?i),?\s*(?:sebbene|benché)\s+le\s+fonti\s+(?:disponibili\s+|fornite\s+|principali\s+)?non\s+conferm(?:(?!\.(?:\s|$))[^\n!?])*',
+        r'(?i),?\s*(?:secondo\s+quanto\s+(?:riportato|emerge)\s+)?\b(?:nelle|dalle)\s+fonti\s+(?:principali|disponibili|fornite|live|ufficiali)\b',
     ]
     for pat in absurd_patterns:
         cleaned = re.sub(pat, '', cleaned).strip()
@@ -363,12 +393,14 @@ def sanitize_verified_text(
     cleaned = re.sub(r'\s{2,}', ' ', cleaned)
     cleaned = cleaned.replace("**", "").replace("__", "")
 
-    # 5. Enforce benchmark ground truth (direction & signs for Wall Street close)
+    # 5. Enforce certified benchmark & stock ground truth FIRST, then fix sign/sentiment oxymorons
     try:
-        from post_verifier import enforce_benchmark_ground_truth, fix_sign_sentiment_oxymorons
-        cleaned = fix_sign_sentiment_oxymorons(cleaned)
+        from post_verifier import enforce_benchmark_ground_truth, enforce_stock_ground_truth, fix_sign_sentiment_oxymorons
         if benchmark_daily_data:
             cleaned, _ = enforce_benchmark_ground_truth(cleaned, benchmark_daily=benchmark_daily_data, session_name=session_name)
+        if stock_data:
+            cleaned, _ = enforce_stock_ground_truth(cleaned, stock_data=stock_data, session_name=session_name)
+        cleaned = fix_sign_sentiment_oxymorons(cleaned)
     except Exception:
         pass
 
@@ -384,6 +416,7 @@ def audit_with_groq(
     timeout: int = 10,
     temporal_ctx: Optional[Dict[str, Any]] = None,
     benchmark_daily_data: Optional[Dict[str, float]] = None,
+    stock_data: Optional[Dict[str, Any]] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Runs fact-checking audit via Groq API.
@@ -404,6 +437,7 @@ def audit_with_groq(
         temporal_ctx=temporal_ctx,
         portfolio_metadata_summary=portfolio_metadata_summary,
         live_news_context=live_news_context,
+        stock_data=stock_data,
     )
 
     url = "https://api.groq.com/openai/v1/chat/completions"
@@ -442,6 +476,7 @@ def audit_with_groq(
                             parsed["verified_text"],
                             session_name=session_name,
                             benchmark_daily_data=temporal_ctx.get("benchmark_data_raw"),
+                            stock_data=stock_data,
                         )
                     parsed["auditor"] = f"groq:{model}"
                     parsed["latency_sec"] = round(elapsed, 2)
@@ -468,6 +503,7 @@ def audit_with_mistral(
     timeout: int = 10,
     temporal_ctx: Optional[Dict[str, Any]] = None,
     benchmark_daily_data: Optional[Dict[str, float]] = None,
+    stock_data: Optional[Dict[str, Any]] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Runs fact-checking audit via Mistral API.
@@ -491,6 +527,7 @@ def audit_with_mistral(
         temporal_ctx=temporal_ctx,
         portfolio_metadata_summary=portfolio_metadata_summary,
         live_news_context=live_news_context,
+        stock_data=stock_data,
     )
 
     url = "https://api.mistral.ai/v1/chat/completions"
@@ -529,6 +566,7 @@ def audit_with_mistral(
                             parsed["verified_text"],
                             session_name=session_name,
                             benchmark_daily_data=temporal_ctx.get("benchmark_data_raw"),
+                            stock_data=stock_data,
                         )
                     _MISTRAL_AVAILABLE = True
                     parsed["auditor"] = f"mistral:{model}"
@@ -556,6 +594,7 @@ def run_independent_fact_check(
     require_consensus: bool = True,
     temporal_ctx: Optional[Dict[str, Any]] = None,
     benchmark_daily_data: Optional[Dict[str, float]] = None,
+    stock_data: Optional[Dict[str, Any]] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Orchestrates the independent fact-checking pipeline across external models
@@ -604,6 +643,7 @@ def run_independent_fact_check(
         live_news_context=live_news_context,
         temporal_ctx=temporal_ctx,
         benchmark_daily_data=benchmark_daily_data,
+        stock_data=stock_data,
     )
 
     # 2. Query Mistral
@@ -614,6 +654,7 @@ def run_independent_fact_check(
         live_news_context=live_news_context,
         temporal_ctx=temporal_ctx,
         benchmark_daily_data=benchmark_daily_data,
+        stock_data=stock_data,
     )
 
     # If neither is available, return None for fallback
@@ -623,28 +664,42 @@ def run_independent_fact_check(
     # Single-auditor fallback if only one is operational
     if groq_audit and not mistral_audit:
         print("   ℹ️ Multi-AI consensus note: Mistral non disponibile, audit affidato al solo Groq.")
-        if groq_audit.get("verified_text") and benchmark_daily_data:
+        if groq_audit.get("verified_text") and (benchmark_daily_data or stock_data):
             try:
-                from post_verifier import enforce_benchmark_ground_truth
-                groq_audit["verified_text"], _ = enforce_benchmark_ground_truth(
-                    groq_audit["verified_text"],
-                    benchmark_daily=benchmark_daily_data,
-                    session_name=session_name,
-                )
+                from post_verifier import enforce_benchmark_ground_truth, enforce_stock_ground_truth
+                if benchmark_daily_data:
+                    groq_audit["verified_text"], _ = enforce_benchmark_ground_truth(
+                        groq_audit["verified_text"],
+                        benchmark_daily=benchmark_daily_data,
+                        session_name=session_name,
+                    )
+                if stock_data:
+                    groq_audit["verified_text"], _ = enforce_stock_ground_truth(
+                        groq_audit["verified_text"],
+                        stock_data=stock_data,
+                        session_name=session_name,
+                    )
             except Exception:
                 pass
         return groq_audit
 
     if mistral_audit and not groq_audit:
         print("   ℹ️ Multi-AI consensus note: Groq non disponibile, audit affidato alla sola Mistral.")
-        if mistral_audit.get("verified_text") and benchmark_daily_data:
+        if mistral_audit.get("verified_text") and (benchmark_daily_data or stock_data):
             try:
-                from post_verifier import enforce_benchmark_ground_truth
-                mistral_audit["verified_text"], _ = enforce_benchmark_ground_truth(
-                    mistral_audit["verified_text"],
-                    benchmark_daily=benchmark_daily_data,
-                    session_name=session_name,
-                )
+                from post_verifier import enforce_benchmark_ground_truth, enforce_stock_ground_truth
+                if benchmark_daily_data:
+                    mistral_audit["verified_text"], _ = enforce_benchmark_ground_truth(
+                        mistral_audit["verified_text"],
+                        benchmark_daily=benchmark_daily_data,
+                        session_name=session_name,
+                    )
+                if stock_data:
+                    mistral_audit["verified_text"], _ = enforce_stock_ground_truth(
+                        mistral_audit["verified_text"],
+                        stock_data=stock_data,
+                        session_name=session_name,
+                    )
             except Exception:
                 pass
         return mistral_audit
@@ -697,6 +752,7 @@ def run_independent_fact_check(
             live_news_context=live_news_context,
             temporal_ctx=temporal_ctx,
             benchmark_daily_data=benchmark_daily_data,
+            stock_data=stock_data,
         )
         if _is_audit_clean(cross_m):
             print("   🤝 Dual-AI Consensus: Groq auto-correction cross-verified and APPROVED by Mistral!")
@@ -741,6 +797,7 @@ def run_independent_fact_check(
             live_news_context=live_news_context,
             temporal_ctx=temporal_ctx,
             benchmark_daily_data=benchmark_daily_data,
+            stock_data=stock_data,
         )
         if _is_audit_clean(cross_g):
             print("   🤝 Dual-AI Consensus: Mistral auto-correction cross-verified and APPROVED by Groq!")
@@ -817,10 +874,22 @@ def split_into_micro_topics(text: str) -> List[Dict[str, Any]]:
     raw_blocks = [b.strip() for b in re.split(r'\n\s*\n', cleaned) if b.strip()]
 
     micro_topics = []
+    in_static_why_copy_footer = False
 
     for block_idx, block in enumerate(raw_blocks):
-        # Footer / Tag / link lines
-        if block.startswith("📌") or block.startswith("👤") or block.startswith("#") or block.startswith("http"):
+        if (
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━" in block
+            or "💡 PERCHÈ COPIARE QUESTO PORTAFOGLIO" in block
+            or "💡 PERCHÉ COPIARE QUESTO PORTAFOGLIO" in block
+        ):
+            in_static_why_copy_footer = True
+
+        # Static footer / Tag / link lines / deterministic Yahoo Finance performance & MTD/YTD ranking tables
+        if (
+            in_static_why_copy_footer
+            or block.startswith(("📌", "👤", "#", "http", "📊 PERFORMANCE DEL PORTAFOGLIO", "🏔️"))
+            or re.match(r'^(?:🏆\s*)?MIGLIORI\s+\d+\s+', block, flags=re.IGNORECASE)
+        ):
             micro_topics.append({
                 "id": len(micro_topics),
                 "type": "footer",
@@ -954,6 +1023,7 @@ def run_micro_topic_consensus_fact_check(
     session_name: Optional[str] = None,
     portfolio_metadata_summary: str = "",
     benchmark_daily_data: Optional[Dict[str, float]] = None,
+    stock_data: Optional[Dict[str, Any]] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Modular fact-checking architecture:
@@ -972,6 +1042,7 @@ def run_micro_topic_consensus_fact_check(
             session_name=session_name,
             portfolio_metadata_summary=portfolio_metadata_summary,
             benchmark_daily_data=benchmark_daily_data,
+            stock_data=stock_data,
         )
 
     print(f"   🧩 Scomposizione in {len(micro_topics)} micro-argomenti ({len(topics_to_audit)} da auditare in parallelo)...")
@@ -995,7 +1066,7 @@ def run_micro_topic_consensus_fact_check(
     except Exception as t_err:
         print(f"   ℹ️ Tavily grounding note: {t_err}")
 
-    # Run consensus audits concurrently across micro-topics
+    # Run consensus audits concurrently across micro-topics (with topic-isolated Tavily news)
     from concurrent.futures import ThreadPoolExecutor
 
     with ThreadPoolExecutor(max_workers=min(4, len(topics_to_audit))) as executor:
@@ -1005,8 +1076,12 @@ def run_micro_topic_consensus_fact_check(
                 t["text"],
                 session_name=session_name,
                 portfolio_metadata_summary=portfolio_metadata_summary,
-                live_news_context=live_news_context,
+                live_news_context=(
+                    filter_live_news_for_topic(live_news_context, t["text"], topic_type=t.get("type", "full_post"))
+                    if filter_live_news_for_topic else live_news_context
+                ),
                 benchmark_daily_data=benchmark_daily_data,
+                stock_data=stock_data,
             ): t
             for t in topics_to_audit
         }
@@ -1052,6 +1127,7 @@ def run_micro_topic_consensus_fact_check(
                 res["verified_text"],
                 session_name=session_name,
                 benchmark_daily_data=benchmark_daily_data,
+                stock_data=stock_data,
             )
             all_issues.extend(res.get("temporal_issues", []))
             all_halluc.extend(res.get("hallucinations_detected", []))
@@ -1060,9 +1136,9 @@ def run_micro_topic_consensus_fact_check(
             rejected_count += 1
             all_issues.extend(res.get("temporal_issues", []))
             all_halluc.extend(res.get("hallucinations_detected", []))
-            if t.get("type") == "stock_bullet":
+            if t.get("type") in ("stock_bullet", "stock_paragraph"):
                 t["excluded"] = True
-                print(f"   ⚠️ Micro-bullet [{t['id']}] con allucinazione irreversibile ESCLUSO: {t['text'][:60]}...")
+                print(f"   ⚠️ Micro-argomento [{t['id']} - {t['type']}] con allucinazione irreversibile ESCLUSO: {t['text'][:60]}...")
             else:
                 # If a macro paragraph was rejected without auto-correct
                 print(f"   ❌ Micro-argomento [{t['id']} - {t['type']}] RESPINTO: {res.get('explanation')[:80]}...")
@@ -1081,9 +1157,11 @@ def run_micro_topic_consensus_fact_check(
 
     final_text = reassemble_micro_topics(micro_topics, session_name=session_name)
     try:
-        from post_verifier import enforce_benchmark_ground_truth
+        from post_verifier import enforce_benchmark_ground_truth, enforce_stock_ground_truth
         if benchmark_daily_data:
             final_text, _ = enforce_benchmark_ground_truth(final_text, benchmark_daily=benchmark_daily_data, session_name=session_name)
+        if stock_data:
+            final_text, _ = enforce_stock_ground_truth(final_text, stock_data=stock_data, session_name=session_name)
     except Exception:
         pass
 

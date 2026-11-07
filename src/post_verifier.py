@@ -204,11 +204,34 @@ AUDITOR_META_COMMENTARY_PATTERNS = [
     ),
 ]
 
-# Semantic oxymorons within a single stock sentence (e.g., bullish superlative paired with a negative close without contrast)
+# Semantic oxymorons within a single stock sentence (both UP-intro + DOWN-close and DOWN-intro + UP-close without contrast)
+_SENT_CHAR = r'(?:(?!\.(?:\s|$))[^\n!?])'
 SEMANTIC_STOCK_OXYMORON_PATTERNS = [
     (
-        r'\b(?:tra\s+i\s+titoli\s+più\s+brillanti|tra\s+i\s+migliori\s+(?:di\s+oggi|della\s+seduta|del\s+portafoglio)|ottima\s+(?:seduta|giornata|chiusura|prova)\s+per|eccellente\s+(?:seduta|giornata|performance)\s+per|spicca\s+in\s+positivo)(?!(?:[^\n\.!?]{0,90}?\b(?:nonostante|malgrado|sebbene|mentre|invece|ma)\b))[^\n\.!?]{0,90}?\b(?:ha\s+chiuso\s+in\s+(?:calo|flessione|ribasso|rosso)|in\s+(?:calo|flessione|ribasso)\s+del\s+-|cedendo\s+il\s+-|sces[oa]\s+del\s+-)',
+        r'\b(?:tra\s+i\s+titoli\s+più\s+brillanti|tra\s+i\s+migliori(?:\s+titoli)?(?:\s+(?:di\s+oggi|della\s+seduta|del\s+portafoglio))?|'
+        r'(?:ottima|eccellente|solida|brillante)\s+(?:seduta|giornata|chiusura|prova|performance)\s+(?:anche\s+)?per|'
+        r'forte\s+(?:accelerazione|rialzo|rimbalzo|spunto|progresso)\s+(?:anche\s+)?(?:di|per|su)|'
+        r'spicca\s+in\s+positivo|guida\s+i\s+rialzi|brilla(?:\s+anche)?)'
+        rf'(?!(?:{_SENT_CHAR}{{0,110}}?\b(?:nonostante|malgrado|sebbene|mentre|invece|ma|contro|tuttavia|eppure)\b))'
+        rf'{_SENT_CHAR}{{0,110}}?\b(?:ha\s+chiuso\s+(?:la\s+seduta\s+|la\s+giornata\s+)?in\s+(?:forte\s+|lieve\s+|netto\s+)?(?:calo|flessione|ribasso|rosso|territorio\s+negativo)|'
+        r'chiude\s+(?:la\s+seduta\s+)?in\s+(?:forte\s+|lieve\s+|netto\s+)?(?:calo|flessione|ribasso|rosso|territorio\s+negativo)|'
+        r'in\s+(?:forte\s+|lieve\s+|netto\s+)?(?:calo|flessione|ribasso)\s+(?:del|dello|dell[\'’])\s*-?\d|'
+        r'(?:cedendo|perdendo)\s+(?:il|lo|l[\'’]|del|dello|dell[\'’])\s*-?\d|(?:è\s+)?sces[oa]\s+(?:del|dello|dell[\'’])\s*-?\d|'
+        r'ha\s+(?:perso|ceduto)\s+(?:il|lo|l[\'’]|del|dello|dell[\'’])\s*-?\d)',
         "Ossimoro semantico sul titolo: esordio elogiativo/rialzista abbinato a chiusura in calo nella stessa proposizione"
+    ),
+    (
+        r'\b(?:tra\s+i\s+(?:titoli\s+)?peggiori(?:\s+(?:di\s+oggi|della\s+seduta|del\s+portafoglio))?|'
+        r'(?:seduta|giornata|chiusura)\s+(?:difficile|pesante|negativa|debole|in\s+calo|in\s+flessione)\s+(?:anche\s+)?per|'
+        r'(?:forte|netto|pesante)\s+(?:calo|flessione|ribasso|arretramento|ripiegamento|correzione)\s+(?:anche\s+)?(?:di|per|su)|'
+        r'prese\s+di\s+beneficio\s+su|guida\s+i\s+ribassi|scivola(?:\s+anche)?|crolla(?:\s+anche)?)'
+        rf'(?!(?:{_SENT_CHAR}{{0,110}}?\b(?:nonostante|malgrado|sebbene|mentre|invece|ma|contro|tuttavia|eppure)\b))'
+        rf'{_SENT_CHAR}{{0,110}}?\b(?:ha\s+chiuso\s+(?:la\s+seduta\s+|la\s+giornata\s+)?in\s+(?:forte\s+|lieve\s+|netto\s+)?(?:rialzo|progresso|guadagno|verde|territorio\s+positivo)|'
+        r'chiude\s+(?:la\s+seduta\s+)?in\s+(?:forte\s+|lieve\s+|netto\s+)?(?:rialzo|progresso|verde|territorio\s+positivo)|'
+        r'in\s+(?:forte\s+|lieve\s+|netto\s+)?(?:rialzo|progresso|guadagno)\s+(?:del|dello|dell[\'’])\s*\+?\d|'
+        r'(?:guadagnando|avanzando)\s+(?:il|lo|l[\'’]|del|dello|dell[\'’])\s*\+?\d|(?:è\s+)?(?:salit[oa]|balzat[oa])\s+(?:del|dello|dell[\'’])\s*\+?\d|'
+        r'ha\s+guadagnato\s+(?:il|lo|l[\'’]|del|dello|dell[\'’])\s*\+?\d)',
+        "Ossimoro semantico inverso sul titolo: esordio ribassista/negativo abbinato a chiusura in rialzo nella stessa proposizione"
     ),
 ]
 
@@ -296,46 +319,48 @@ def fix_sign_sentiment_oxymorons(text: str) -> str:
         return ""
 
     cleaned = text
+    _del_opt = r"(?:(?:del|dello|dell['’]|di)\s+)?"
+    _il_opt = r"(?:(?:il|lo|l['’]|del|dello|dell['’])\s+)?"
 
     # Positive percentage (+X.XX% or +X%) associated with negative terminology
     cleaned = re.sub(
-        r'\b(?:ha\s+)?chius(?:o|a|ero)\s+in\s+flessione\s+(?:del\s+)?(?=\+\d)',
+        rf'\b(?:ha\s+)?chius(?:o|a|ero)\s+in\s+(?:forte\s+|lieve\s+)?(?:flessione|calo|ribasso)\s+{_del_opt}(?=\+\d)',
         'ha chiuso in rialzo del ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\b(?:in\s+flessione|in\s+calo)\s+(?:del\s+)?(?=\+\d)',
+        rf'\b(?:in\s+(?:forte\s+|lieve\s+)?(?:flessione|calo|ribasso))\s+{_del_opt}(?=\+\d)',
         'in rialzo del ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\b(?:ha\s+)?(?:registrato|subito)\s+una\s+(?:flessione|correzione)\s+(?:del\s+)?(?=\+\d)',
+        rf'\b(?:ha\s+)?(?:registrato|subito)\s+una\s+(?:flessione|correzione|perdita)\s+{_del_opt}(?=\+\d)',
         'ha registrato un rialzo del ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\b(?:cedendo|perdendo)\s+(?:il\s+)?(?=\+\d)',
+        rf'\b(?:cedendo|perdendo|arretrando)\s+{_il_opt}(?=\+\d)',
         'guadagnando il ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\b(?:sceso|scesa|scesi|scese)\s+(?:del\s+)?(?=\+\d)',
+        rf'\b(?:sceso|scesa|scesi|scese|arretrato|arretrata|crollato|crollata)\s+{_del_opt}(?=\+\d)',
         'salito del ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\bin\s+territorio\s+negativo\s+(?:del\s+)?(?=\+\d)',
+        rf'\bin\s+territorio\s+negativo\s+{_del_opt}(?=\+\d)',
         'in territorio positivo del ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\b(?:ha\s+)?perso\s+(?:il\s+)?(?=\+\d)',
+        rf'\b(?:ha\s+)?(?:perso|ceduto)\s+{_il_opt}(?=\+\d)',
         'ha guadagnato il ',
         cleaned,
         flags=re.IGNORECASE,
@@ -346,9 +371,12 @@ def fix_sign_sentiment_oxymorons(text: str) -> str:
         cleaned,
         flags=re.IGNORECASE,
     )
-    # Fix 'Seduta in flessione per ... salito dell' / 'chiuso in flessione ... salito dell''
+    # Fix 'Seduta in flessione/difficile per ... salito / chiuso in rialzo' (without contrast conjunctions; allow '.' inside tickers like $WDEF.L)
     cleaned = re.sub(
-        r'\b(?:seduta|giornata)\s+in\s+(?:flessione|calo)\s+(per\b[^\n]{0,120}?\bsalit[oaie]\b)',
+        r'\b(?:seduta|giornata)\s+(?:in\s+(?:flessione|calo|ribasso)|difficile|pesante|negativa|debole)\s+'
+        rf'((?:anche\s+)?per\b(?!(?:{_SENT_CHAR}{{0,110}}?\b(?:nonostante|malgrado|sebbene|mentre|invece|ma|contro|tuttavia|eppure)\b))'
+        rf'{_SENT_CHAR}{{0,110}}?\b(?:salit[oaie]|balzat[oaie]|ha\s+chiuso\s+in\s+(?:rialzo|progresso)|'
+        r'in\s+(?:rialzo|progresso)\s+(?:del|dello|dell[\'’])\s*\+|guadagnando\s+(?:il|lo|l[\'’])\s*\+))',
         r'Seduta positiva \1',
         cleaned,
         flags=re.IGNORECASE,
@@ -356,43 +384,43 @@ def fix_sign_sentiment_oxymorons(text: str) -> str:
 
     # Negative percentage (-X.XX% or -X%) associated with positive terminology
     cleaned = re.sub(
-        r'\b(?:ha\s+)?chius(?:o|a|ero)\s+in\s+rialzo\s+(?:del\s+)?(?=-\d)',
+        rf'\b(?:ha\s+)?chius(?:o|a|ero)\s+in\s+(?:forte\s+|lieve\s+)?(?:rialzo|progresso|guadagno)\s+{_del_opt}(?=-\d)',
         'ha chiuso in calo del ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\b(?:in\s+rialzo|in\s+guadagno)\s+(?:del\s+)?(?=-\d)',
+        rf'\b(?:in\s+(?:forte\s+|lieve\s+)?(?:rialzo|guadagno|progresso))\s+{_del_opt}(?=-\d)',
         'in calo del ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\b(?:ha\s+)?(?:registrato|messo\s+a\s+segno)\s+un\s+(?:rialzo|balzo|rally)\s+(?:del\s+)?(?=-\d)',
+        rf'\b(?:ha\s+)?(?:registrato|messo\s+a\s+segno)\s+un\s+(?:rialzo|balzo|rally|progresso|rimbalzo)\s+{_del_opt}(?=-\d)',
         'ha registrato una flessione del ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\b(?:guadagnando|avanzando)\s+(?:il\s+)?(?=-\d)',
+        rf'\b(?:guadagnando|avanzando|salendo)\s+{_il_opt}(?=-\d)',
         'cedendo il ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\b(?:salito|salita|saliti|salite|balzato|balzata)\s+(?:del\s+)?(?=-\d)',
+        rf'\b(?:salito|salita|saliti|salite|balzato|balzata|avanzato|avanzata|rimbalzato|rimbalzata)\s+{_del_opt}(?=-\d)',
         'sceso del ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\bin\s+territorio\s+positivo\s+(?:del\s+)?(?=-\d)',
+        rf'\bin\s+territorio\s+positivo\s+{_del_opt}(?=-\d)',
         'in territorio negativo del ',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r'\b(?:ha\s+)?guadagnato\s+(?:il\s+)?(?=-\d)',
+        rf'\b(?:ha\s+)?guadagnato\s+{_il_opt}(?=-\d)',
         'ha ceduto il ',
         cleaned,
         flags=re.IGNORECASE,
@@ -400,6 +428,25 @@ def fix_sign_sentiment_oxymorons(text: str) -> str:
     cleaned = re.sub(
         r'\b(?:mostrato\s+una\s+)?performance\s+positiva,?\s*(?:chiudendo\s+a\s+)?(?=-\d)',
         'ha registrato una performance negativa, chiudendo a ',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    # Fix reverse sentence oxymoron: 'Ottima seduta / intonazione / Forte accelerazione per ... ha chiuso in calo / sceso del -'
+    cleaned = re.sub(
+        r'\b(?:ottima|eccellente|solida|brillante)\s+(?:seduta|giornata|performance|prova|intonazione)\s+'
+        rf'((?:anche\s+)?per\b(?!(?:{_SENT_CHAR}{{0,110}}?\b(?:nonostante|malgrado|sebbene|mentre|invece|ma|contro|tuttavia|eppure)\b))'
+        rf'{_SENT_CHAR}{{0,110}}?\b(?:sces[oaie]|ha\s+chiuso\s+in\s+(?:calo|flessione|ribasso)|'
+        r'in\s+(?:calo|flessione)\s+(?:del|dello|dell[\'’])\s*-|cedendo\s+(?:il|lo|l[\'’])\s*-))',
+        r'Seduta in flessione \1',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\bforte\s+(?:accelerazione|rialzo|rimbalzo|spunto|progresso)\s+'
+        rf'((?:anche\s+)?(?:di|per|su)\b(?!(?:{_SENT_CHAR}{{0,110}}?\b(?:nonostante|malgrado|sebbene|mentre|invece|ma|contro|tuttavia|eppure)\b))'
+        rf'{_SENT_CHAR}{{0,110}}?\b(?:sces[oaie]|ha\s+chiuso\s+in\s+(?:calo|flessione|ribasso)|'
+        r'in\s+(?:calo|flessione)\s+(?:del|dello|dell[\'’])\s*-|cedendo\s+(?:il|lo|l[\'’])\s*-))',
+        r'Flessione \1',
         cleaned,
         flags=re.IGNORECASE,
     )
@@ -438,11 +485,17 @@ def _extract_narrative_body_for_daily_checks(text: str) -> str:
     narrative, _ = _split_narrative_and_footer(text)
     if not narrative:
         return ""
-    # Strip ranking tables (e.g. MIGLIORI 5 DI OGGI / PERFORMANCE MENSILI / DI SEMPRE (YTD))
+    # Strip ranking tables (e.g. MIGLIORI 5 DI OGGI / PERFORMANCE MENSILI / DI SEMPRE (YTD) / 🏆 MIGLIORI 3 DEL MESE)
     cleaned = re.sub(
-        r'MIGLIORI\s+\d+\s+[^\n]+📈\n(?:[^\n]+\n)+',
+        r'(?:🏆\s*)?MIGLIORI\s+\d+\s+[^\n]+\n(?:[^\n]+\n?)+',
         '\n',
         narrative,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'📊\s*PERFORMANCE\s+DEL\s+PORTAFOGLIO[^\n]*\n(?:[^\n]+\n?)+',
+        '\n',
+        cleaned,
         flags=re.IGNORECASE,
     )
     # Strip ATH distance banner line so ATH % is never mistaken for daily stock/index %
@@ -674,31 +727,70 @@ def enforce_benchmark_ground_truth(
 
 
 _FUNDAMENTAL_METRIC_EXCLUSION_RE = re.compile(
-    r'\b(?:ricavi|fatturato|utili|eps|margine|margini|ebitda|cash\s*flow|guidance|dividendo|dividendi|cedola|cedole|'
-    r'peso|allocazione|target|upside|cagr|yoy|a/a|su\s+base\s+annua|trimestr\w*|semestr\w*|annual\w*|dal\s+20\d\d|ytd|nel\s+mese)\b',
+    r'\b(?:ricavi|fatturato|utile|utili|eps|margine|margini|ebitda|cash\s*flow|guidance|dividendo|dividendi|cedola|cedole|'
+    r'peso|allocazione|target|upside|cagr|debito|indebitamento|costi|spese|capex|'
+    r'yoy|a/a|su\s+base\s+annua|trimestr\w*|semestr\w*|annual\w*|dal\s+20\d\d|ytd|nel\s+mese|da\s+inizio\s+anno)\b',
     flags=re.IGNORECASE,
 )
 
+_POST_PCT_TIMEFRAME_EXCLUSION_RE = re.compile(
+    r'^\s*(?:a/a|yoy|q/q|m/m|su\s+base\s+(?:annua|trimestrale|mensile)|'
+    r'nel(?:l[\'’]ultimo)?\s+(?:trimestre|semestre|anno|mese)|ytd|da\s+inizio\s+anno|dal\s+20\d\d|'
+    r'di\s+(?:ricavi|fatturato|utili|dividendo|margine|peso|allocazione))\b',
+    flags=re.IGNORECASE,
+)
+
+_POST_DIR_METRIC_EXCLUSION_RE = re.compile(
+    r'^\s*(?:(?:del|dello|dell[\'’]|di|nei|sui)\s+(?:i\s+|le\s+|gli\s+)?'
+    r'(?:ricavi|utili|fatturato|margini|dividendi|costi|debito|volumi)\b|'
+    r'(?:a/a|yoy|su\s+base\s+annua|nel(?:l[\'’]ultimo)?\s+trimestre|ytd)\b)',
+    flags=re.IGNORECASE,
+)
+
+_PRE_IN_NOUN_EXCLUSION_RE = re.compile(
+    r'\b(?:rendimenti|treasury|tassi|inflazione|dollaro|petrolio|oro|costi|spese|debito|indebitamento|'
+    r'ricavi|utili|fatturato|margine|margini|tariffe)\s*$',
+    flags=re.IGNORECASE,
+)
+
+_CONTRAST_CLAUSE_RE = re.compile(
+    r'\b(?:nonostante|malgrado|sebbene|mentre|invece|ma|però|contro|a\s+fronte\s+di|dopo)\b',
+    flags=re.IGNORECASE,
+)
+
+_OTHER_SUBJECT_EXCLUSION_RE = re.compile(
+    r'\b(?:mercato|mercati|listini|settore|comparto|indice|indici|wall\s+street|rendimenti|treasury|tassi|'
+    r'inflazione|dollaro|petrolio|oro|costi|spese|debito|tariffe|prezzi|domanda|ordini|commesse|volumi)\b',
+    flags=re.IGNORECASE,
+)
+
+_PCT_PREP = r"(?:del|dello|dell['’]|di|a|al|il|lo|l['’]|un|uno)"
+
 _SESSION_MOVE_VERB_PATTERN = (
-    r'(?:ha\s+chiuso\s+(?:la\s+seduta\s+|la\s+giornata\s+|la\s+settimana\s+)?(?:in\s+(?:forte\s+|netto\s+|lieve\s+)?'
-    r'(?:rialzo|calo|flessione|ribasso|progresso|territorio\s+positivo|territorio\s+negativo)\s+(?:del|dell[\'’]|di|a)|a)|'
-    r'chiude\s+(?:la\s+seduta\s+)?(?:in\s+(?:forte\s+|lieve\s+)?(?:rialzo|calo|flessione|ribasso|progresso)\s+(?:del|dell[\'’]|a)|a)|'
-    r'chiudendo\s+(?:in\s+(?:forte\s+|lieve\s+)?(?:rialzo|calo|flessione|ribasso)\s+(?:del|dell[\'’]|a)|a)|'
-    r'(?:è\s+)?(?:salit[oa]|sces[oa]|balzat[oa]|crollat[oa]|arretrat[oa]|avanzat[oa])\s+(?:del|dell[\'’]|di)|'
-    r'(?:sale|scende|balza|cede|perde|guadagna|avanza|arretra)\s+(?:del|dell[\'’]|il|l[\'’])|'
-    r'ha\s+(?:ceduto|perso|guadagnato|registrato\s+un[a]?\s+(?:rialzo|calo|flessione|balzo|progresso)|'
-    r'subito\s+un[a]?\s+(?:calo|flessione|ribasso)|messo\s+a\s+segno\s+un\s+(?:rialzo|progresso|balzo))\s+(?:il|l[\'’]|del|dell[\'’])|'
-    r'(?:cedendo|perdendo|guadagnando|avanzando)\s+(?:il|l[\'’]|del|dell[\'’])|'
-    r'in\s+(?:forte\s+|lieve\s+|netto\s+)?(?:rialzo|calo|flessione|ribasso|progresso)\s+(?:del|dell[\'’]|di))'
+    rf'(?:ha\s+chiuso\s+(?:la\s+seduta\s+|la\s+giornata\s+|la\s+settimana\s+|oggi\s+)?(?:in\s+(?:forte\s+|netto\s+|lieve\s+|leggero\s+|deciso\s+)?'
+    rf'(?:rialzo|calo|flessione|ribasso|progresso|guadagno|perdita|rosso|verde|territorio\s+positivo|territorio\s+negativo)\s+{_PCT_PREP}|a|al)|'
+    rf'chiude\s+(?:la\s+seduta\s+|la\s+giornata\s+|oggi\s+)?(?:in\s+(?:forte\s+|netto\s+|lieve\s+|leggero\s+)?'
+    rf'(?:rialzo|calo|flessione|ribasso|progresso|guadagno|rosso|verde|territorio\s+positivo|territorio\s+negativo)\s+{_PCT_PREP}|a|al)|'
+    rf'chiudendo\s+(?:in\s+(?:forte\s+|netto\s+|lieve\s+)?(?:rialzo|calo|flessione|ribasso|progresso|rosso|verde)\s+{_PCT_PREP}|a|al)|'
+    rf'(?:è\s+|era\s+)?(?:salit[oa]|sces[oa]|balzat[oa]|crollat[oa]|arretrat[oa]|avanzat[oa]|scivolat[oa]|rimbalzat[oa])\s+{_PCT_PREP}|'
+    rf'(?:sale|scende|balza|crolla|cede|perde|guadagna|avanza|arretra|scivola|rimbalza|segna)\s+{_PCT_PREP}|'
+    rf'ha\s+(?:ceduto|perso|guadagnato|segnato|registrato\s+un[a]?\s+(?:rialzo|calo|flessione|ribasso|balzo|progresso|rimbalzo|correzione|perdita)|'
+    rf'subito\s+un[a]?\s+(?:calo|flessione|ribasso|correzione|perdita)|messo\s+a\s+segno\s+un\s+(?:rialzo|progresso|balzo|rimbalzo))\s+{_PCT_PREP}|'
+    rf'(?:cedendo|perdendo|guadagnando|avanzando|arretrando|salendo|scendendo)\s+{_PCT_PREP}|'
+    rf'in\s+(?:forte\s+|lieve\s+|netto\s+|leggero\s+|deciso\s+)?(?:rialzo|calo|flessione|ribasso|progresso|guadagno|rosso|verde)\s+{_PCT_PREP})'
 )
 
 _NEGATIVE_MOVE_WORDS_RE = re.compile(
-    r'\b(?:calo|flessione|ribasso|negativo|rosso|sces[oa]|scende|cede|perde|ceduto|perso|crollat[oa]|arretrat[oa]|arretra|cedendo|perdendo)\b',
+    r'\b(?:calo|flessione|ribasso|negativ[oa]|rosso|sces[oa]|scende|cede|perde|ceduto|perso|crollat[oa]|crolla|'
+    r'arretrat[oa]|arretra|scivolat[oa]|scivola|cedendo|perdendo|arretrando|scendendo|correzione|perdita|'
+    r'prese\s+di\s+beneficio|ribassi|peggiori|difficile|pesante|debole)\b',
     flags=re.IGNORECASE,
 )
 
 _POSITIVE_MOVE_WORDS_RE = re.compile(
-    r'\b(?:rialzo|progresso|positivo|salit[oa]|sale|balzat[oa]|balza|guadagna|guadagnato|avanzat[oa]|avanza|guadagnando|avanzando)\b',
+    r'\b(?:rialzo|progresso|positiv[oa]|guadagno|verde|salit[oa]|sale|balzat[oa]|balza|balzo|guadagna|guadagnato|'
+    r'avanzat[oa]|avanza|rimbalzat[oa]|rimbalza|rimbalzo|guadagnando|avanzando|salendo|spolvero|allungo|'
+    r'accelerazione|spunto|brilla|brillanti|ottima|eccellente|solida|tonic[oa]|migliori|rialzi)\b',
     flags=re.IGNORECASE,
 )
 
@@ -710,6 +802,7 @@ def _resolve_stock_pct_map(
     """
     Builds a lookup map {UPPERCASE_TOKEN: (canonical_symbol, certified_pct)} from stock_data.
     Uses weekly_change on WEEKLY sessions and daily_change on daily sessions (skipping untraded assets).
+    Numeric base tickers (e.g. 1919.HK) also register '$1919' so cashtags match without matching bare years.
     """
     if not stock_data or not isinstance(stock_data, dict):
         return {}
@@ -731,17 +824,62 @@ def _resolve_stock_pct_map(
             key = "weekly_change" if is_weekly else "daily_change"
             if key in info and info[key] is not None:
                 val = float(info[key])
-            elif "daily_change" in info and info["daily_change"] is not None and not is_weekly:
+            elif not is_weekly and info.get("daily_change") is not None:
                 val = float(info["daily_change"])
+            elif not is_weekly and info.get("change_pct") is not None:
+                val = float(info["change_pct"])
         if val is None:
             continue
 
         sym_clean = str(raw_sym).strip().lstrip("$").upper()
         pct_map[sym_clean] = (sym_clean, val)
         base = sym_clean.split(".")[0]
-        if len(base) >= 2 and not base.isdigit() and base not in pct_map:
-            pct_map[base] = (sym_clean, val)
+        if len(base) >= 2:
+            if not base.isdigit() and base not in pct_map:
+                pct_map[base] = (sym_clean, val)
+            elif base.isdigit() and f"${base}" not in pct_map:
+                pct_map[f"${base}"] = (sym_clean, val)
     return pct_map
+
+
+def _lookup_stock_pct(
+    tok_raw: str,
+    pct_map: Dict[str, Tuple[str, float]],
+) -> Optional[Tuple[str, float]]:
+    tok = (tok_raw or "").strip()
+    if not tok:
+        return None
+    has_dollar = tok.startswith("$")
+    clean = tok.lstrip("$")
+    key = clean.upper()
+    if not has_dollar and clean != key:
+        return None
+    if key in pct_map and (has_dollar or not key.isdigit()):
+        return pct_map[key]
+    if has_dollar and f"${key}" in pct_map:
+        return pct_map[f"${key}"]
+    return None
+
+
+def _build_stock_token_pattern(pct_map: Dict[str, Tuple[str, float]]) -> str:
+    """
+    Builds a precise regex alternation matching ONLY known tickers from pct_map
+    ($cashtag case-insensitively or exact uppercase bare symbol), preventing greedy capture
+    of ordinary prose words before a ticker (e.g. 'spicca $TSM, che ha chiuso in calo del -9.8%').
+    """
+    dollar_syms = sorted({k.lstrip("$") for k in pct_map if k.lstrip("$")}, key=lambda s: (-len(s), s))
+    bare_syms = sorted(
+        {k for k in pct_map if not k.startswith("$") and not k.isdigit()},
+        key=lambda s: (-len(s), s),
+    )
+    parts: List[str] = []
+    if dollar_syms:
+        d_alt = "|".join(re.escape(s) for s in dollar_syms)
+        parts.append(rf"\$(?:{d_alt})(?![A-Za-z0-9]|\.[A-Za-z0-9])")
+    if bare_syms:
+        b_alt = "|".join(re.escape(s) for s in bare_syms)
+        parts.append(rf"(?-i:(?<![A-Za-z0-9\.\-\$])(?:{b_alt})(?![A-Za-z0-9]|\.[A-Za-z0-9]))")
+    return "(?:" + "|".join(parts) + ")"
 
 
 def _parse_signed_move(verb_phrase: str, num_str: str) -> float:
@@ -761,21 +899,22 @@ def enforce_stock_ground_truth(
     session_name: Optional[str] = None,
 ) -> Tuple[str, bool]:
     """
-    Enforces certified Yahoo Finance daily/weekly % moves for portfolio stocks in the narrative body.
-    Prevents AI auditors (Groq/Mistral) from overwriting today's stock performance (e.g. $TSM +6.24%)
-    with stale percentages from previous days' news articles (e.g. -9.8%).
+    Enforces certified Yahoo Finance daily/weekly % moves and direction for portfolio stocks in the narrative body.
+    Prevents AI models or auditors from inverting stock direction (UP->DOWN or DOWN->UP) or overwriting
+    today's stock performance (e.g. $TSM +6.24%) with stale percentages from old news (e.g. -9.8%).
     """
     pct_map = _resolve_stock_pct_map(stock_data, session_name=session_name)
     if not text or not pct_map:
         return text, False
 
+    tok_pat = _build_stock_token_pattern(pct_map)
     narrative_part, footer_part = _split_narrative_and_footer(text)
     orig = text
     cleaned = narrative_part
 
-    # Pattern A: $TICKER / TICKER followed in same clause by session move verb + %
+    # Pattern A: Known $TICKER / TICKER followed in same clause (without crossing another ticker) by session move verb + %
     pat_a = re.compile(
-        rf'(\$?[A-Za-z0-9]{{2,8}}(?:\.[A-Za-z]{{1,4}})?)\b([^\n\.;!?]{{0,55}}?)({_SESSION_MOVE_VERB_PATTERN}\s*)([+\-]?\d+(?:[\.,]\d+)?)\s*%',
+        rf'({tok_pat})((?:(?!{tok_pat})(?!\.(?:\s|$))[^\n;!?\$]){{0,85}}?)({_SESSION_MOVE_VERB_PATTERN}\s*)([+\-]?\d+(?:[\.,]\d+)?)\s*%',
         flags=re.IGNORECASE,
     )
 
@@ -786,23 +925,16 @@ def enforce_stock_ground_truth(
         num_str = match.group(4)
         after_slice = cleaned[match.end(): match.end() + 18]
 
-        lookup_key = tok_raw.lstrip("$").upper()
-        if lookup_key not in pct_map:
+        resolved = _lookup_stock_pct(tok_raw, pct_map)
+        if not resolved:
             return match.group(0)
-        # Skip bare lowercase common words if not $cashtag and not uppercase in text
-        if not tok_raw.startswith("$") and tok_raw != tok_raw.upper():
+        if _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(mid) or _POST_PCT_TIMEFRAME_EXCLUSION_RE.search(after_slice):
             return match.group(0)
-        # Do not cross into another ticker or fundamental metric
-        if "$" in mid or _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(mid) or _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(after_slice):
-            return match.group(0)
-        for other_k in pct_map:
-            if other_k != lookup_key and other_k != lookup_key.split(".")[0] and re.search(rf'\b{re.escape(other_k)}\b', mid):
-                return match.group(0)
 
-        _, actual = pct_map[lookup_key]
+        _, actual = resolved
         claimed = _parse_signed_move(verb_str, num_str)
         tol = max(0.85, abs(actual) * 0.25)
-        sign_flip = (actual > 0.25 and claimed < -0.10) or (actual < -0.25 and claimed > 0.10)
+        sign_flip = (actual > 0.20 and claimed < -0.05) or (actual < -0.20 and claimed > 0.05)
         if not sign_flip and abs(claimed - actual) <= tol:
             return match.group(0)
 
@@ -810,25 +942,30 @@ def enforce_stock_ground_truth(
         if actual >= 0:
             if verb_trim.startswith("in "):
                 new_verb = "in rialzo del "
-            elif verb_trim.startswith(("cedendo", "perdendo", "guadagnando", "avanzando")):
+            elif verb_trim.startswith(("cedendo", "perdendo", "arretrando", "scendendo", "guadagnando", "avanzando", "salendo")):
                 new_verb = "guadagnando il "
+            elif verb_trim.startswith("chiudendo"):
+                new_verb = "chiudendo in rialzo del "
             else:
                 new_verb = "ha chiuso in rialzo del "
             return f"{tok_raw}{mid}{new_verb}+{actual:.2f}%"
         else:
             if verb_trim.startswith("in "):
                 new_verb = "in calo del "
-            elif verb_trim.startswith(("cedendo", "perdendo", "guadagnando", "avanzando")):
+            elif verb_trim.startswith(("cedendo", "perdendo", "arretrando", "scendendo", "guadagnando", "avanzando", "salendo")):
                 new_verb = "cedendo il "
+            elif verb_trim.startswith("chiudendo"):
+                new_verb = "chiudendo in calo del "
             else:
                 new_verb = "ha chiuso in calo del "
             return f"{tok_raw}{mid}{new_verb}{actual:.2f}%"
 
     cleaned = pat_a.sub(_repl_a, cleaned)
 
-    # Pattern B: Shorthand '$TICKER (+X.X%)' or 'TICKER +X.X%' in prose (excluding ranking tables)
+    # Pattern B: Shorthand '$TICKER (+X.X%)' or 'TICKER +X.X%' in prose (excluding MTD/YTD ranking tables)
     pat_b = re.compile(
-        r'(\$?[A-Z]{2,6}(?:\.[A-Z]{1,4})?)(\s*\(\s*|\s+)([+\-]\d+(?:[\.,]\d+)?)\s*%(\s*\))?'
+        rf'({tok_pat})(\s*\(\s*|\s+)([+\-]\d+(?:[\.,]\d+)?)\s*%(\s*\))?',
+        flags=re.IGNORECASE,
     )
 
     def _repl_b(match: re.Match) -> str:
@@ -836,7 +973,10 @@ def enforce_stock_ground_truth(
         sep_open = match.group(2)
         num_str = match.group(3)
         sep_close = match.group(4) or ""
-        # Skip ranking table lines like '🥇 TSM +6.24%' or '💻 MSFT +12.30%' if they are monthly/YTD tables
+        resolved = _lookup_stock_pct(tok_raw, pct_map)
+        if not resolved:
+            return match.group(0)
+
         line_start = cleaned.rfind("\n", 0, match.start()) + 1
         line_end = cleaned.find("\n", match.end())
         if line_end == -1:
@@ -844,23 +984,101 @@ def enforce_stock_ground_truth(
         line_str = cleaned[line_start:line_end]
         if _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(line_str):
             return match.group(0)
-        # Check if inside a monthly/YTD ranking section
-        before_block = cleaned[max(0, match.start() - 220): match.start()]
-        if re.search(r'MIGLIORI\s+\d+\s+(?:PERFORMANCE\s+MENSILI|DI\s+SEMPRE|YTD|DELL\'ANNO)', before_block, flags=re.IGNORECASE):
+        # Check if inside a monthly/YTD ranking block (within the same double-newline paragraph only)
+        para_start = cleaned.rfind("\n\n", 0, match.start())
+        para_start = 0 if para_start == -1 else para_start + 2
+        para_prefix = cleaned[para_start:match.start()]
+        if re.search(r'MIGLIORI\s+\d+\s+(?:PERFORMANCE\s+MENSILI|DEL\s+MESE|DI\s+SEMPRE|YTD|DELL[\'’]ANNO)', para_prefix, flags=re.IGNORECASE):
             return match.group(0)
 
-        lookup_key = tok_raw.lstrip("$").upper()
-        if lookup_key not in pct_map:
-            return match.group(0)
-        _, actual = pct_map[lookup_key]
+        _, actual = resolved
         claimed = float(num_str.replace(",", "."))
         tol = max(0.85, abs(actual) * 0.25)
-        sign_flip = (actual > 0.25 and claimed < -0.10) or (actual < -0.25 and claimed > 0.10)
+        sign_flip = (actual > 0.20 and claimed < -0.05) or (actual < -0.20 and claimed > 0.05)
         if not sign_flip and abs(claimed - actual) <= tol:
             return match.group(0)
         return f"{tok_raw}{sep_open}{actual:+.2f}%{sep_close}"
 
     cleaned = pat_b.sub(_repl_b, cleaned)
+
+    # Pattern C: Qualitative direction-only inversion without explicit % (both UP->DOWN and DOWN->UP)
+    pat_c = re.compile(
+        rf'({tok_pat})((?:(?!{tok_pat})(?!\.(?:\s|$))[^\n;!?\$]){{0,65}}?)\b'
+        r'((?:ha\s+chiuso|chiude)\s+(?:la\s+seduta\s+|la\s+giornata\s+|la\s+settimana\s+|oggi\s+)?'
+        r'in\s+(?:forte\s+|lieve\s+|netto\s+|deciso\s+|leggero\s+)?(?:calo|flessione|ribasso|rosso|territorio\s+negativo|rialzo|progresso|guadagno|verde|territorio\s+positivo))'
+        rf'(?!\s*{_PCT_PREP}\s*[+\-]?\d)',
+        flags=re.IGNORECASE,
+    )
+
+    def _repl_c(match: re.Match) -> str:
+        tok_raw, mid, dir_phrase = match.group(1), match.group(2), match.group(3)
+        resolved = _lookup_stock_pct(tok_raw, pct_map)
+        if not resolved:
+            return match.group(0)
+        if _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(mid) or _CONTRAST_CLAUSE_RE.search(mid) or _OTHER_SUBJECT_EXCLUSION_RE.search(mid):
+            return match.group(0)
+        _, actual = resolved
+        if actual > 0.30 and _NEGATIVE_MOVE_WORDS_RE.search(dir_phrase):
+            return f"{tok_raw}{mid}ha chiuso in rialzo del +{actual:.2f}%"
+        if actual < -0.30 and _POSITIVE_MOVE_WORDS_RE.search(dir_phrase):
+            return f"{tok_raw}{mid}ha chiuso in calo del {actual:.2f}%"
+        return match.group(0)
+
+    cleaned = pat_c.sub(_repl_c, cleaned)
+
+    # Pattern D: Heal contradicted superlative/bearish intro phrases directly preceding a certified stock
+    pat_d_pre = re.compile(
+        rf'\b({_QUAL_PRE_PHRASE_PATTERN})(\s+(?:(?!{tok_pat})(?!\.(?:\s|$))[^\n;!?\$,]){{0,45}}?)({tok_pat})',
+        flags=re.IGNORECASE,
+    )
+
+    def _repl_d_pre(match: re.Match) -> str:
+        dir_phrase, pre_mid, tok_raw = match.group(1), match.group(2), match.group(3)
+        resolved = _lookup_stock_pct(tok_raw, pct_map)
+        if not resolved:
+            return match.group(0)
+        if (
+            _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(pre_mid)
+            or _CONTRAST_CLAUSE_RE.search(pre_mid)
+            or (
+                not re.match(r'^tra\s+i\b', dir_phrase.strip(), flags=re.IGNORECASE)
+                and _OTHER_SUBJECT_EXCLUSION_RE.search(pre_mid)
+            )
+        ):
+            return match.group(0)
+        _, actual = resolved
+        is_cap = dir_phrase[0].isupper()
+        dp_low = dir_phrase.strip().lower()
+        if actual < -0.30 and _POSITIVE_MOVE_WORDS_RE.search(dir_phrase):
+            new_mid = re.sub(r'\bspicca\b', 'figura', pre_mid, flags=re.IGNORECASE)
+            if re.match(r'^tra\s+i\b', dp_low):
+                new_intro = "Tra i titoli in flessione" if is_cap else "tra i titoli in flessione"
+            elif dp_low.endswith(" per"):
+                new_intro = "Seduta in flessione per" if is_cap else "seduta in flessione per"
+            elif dp_low.endswith(" di"):
+                new_intro = "Flessione di" if is_cap else "flessione di"
+            elif dp_low in ("tonica", "tonico", "solida", "solido"):
+                new_intro = "Debole" if is_cap else "debole"
+            else:
+                new_intro = "In calo" if is_cap else "in calo"
+            return f"{new_intro}{new_mid}{tok_raw}"
+        elif actual > 0.30 and _NEGATIVE_MOVE_WORDS_RE.search(dir_phrase):
+            if re.match(r'^tra\s+i\b', dp_low):
+                new_intro = "Tra i titoli più brillanti" if is_cap else "tra i titoli più brillanti"
+            elif dp_low == "prese di beneficio su":
+                new_intro = "Acquisti su" if is_cap else "acquisti su"
+            elif dp_low.endswith(" per"):
+                new_intro = "Seduta positiva per" if is_cap else "seduta positiva per"
+            elif dp_low.endswith(" di"):
+                new_intro = "Rialzo di" if is_cap else "rialzo di"
+            elif dp_low == "debole":
+                new_intro = "Solida" if is_cap else "solida"
+            else:
+                new_intro = "In rialzo" if is_cap else "in rialzo"
+            return f"{new_intro}{pre_mid}{tok_raw}"
+        return match.group(0)
+
+    cleaned = pat_d_pre.sub(_repl_d_pre, cleaned)
     cleaned = fix_sign_sentiment_oxymorons(cleaned)
     full_out = cleaned + footer_part
     return full_out, (full_out != orig)
@@ -894,7 +1112,7 @@ def _verify_index_ground_truth(
                 rf"(?<!VS\s)(?:{alias_pat})\b[^\n\.;!?]{{0,45}}?\b"
                 r"(?:ha\s+chiuso\s+in\s+(?:forte\s+)?(?:calo|flessione|ribasso|rosso)|"
                 r"(?:che\s+)?ha\s+(?:perso|ceduto)\b|"
-                r"in\s+(?:forte\s+)?(?:calo|flessione|ribasso)\s+(?:del|dell['’]|di)\b|"
+                r"in\s+(?:forte\s+)?(?:calo|flessione|ribasso)\s+(?:del|dello|dell['’]|di)\b|"
                 r"chiudendo\s+a\s+-\d)"
             )
             if re.search(neg_idx_pat, narrative_body, flags=re.IGNORECASE):
@@ -907,7 +1125,7 @@ def _verify_index_ground_truth(
                 rf"(?<!VS\s)(?:{alias_pat})\b[^\n\.;!?]{{0,45}}?\b"
                 r"(?:ha\s+chiuso\s+in\s+(?:forte\s+)?rialzo|"
                 r"(?:che\s+)?ha\s+guadagnato\b|"
-                r"in\s+(?:forte\s+)?rialzo\s+(?:del|dell['’])\b|"
+                r"in\s+(?:forte\s+)?rialzo\s+(?:del|dello|dell['’]|di)\b|"
                 r"chiudendo\s+a\s+\+\d)"
             )
             if re.search(pos_idx_pat, narrative_body, flags=re.IGNORECASE):
@@ -919,8 +1137,9 @@ def _verify_index_ground_truth(
         # 2. Numerical % check per index
         num_idx_pat = re.compile(
             rf"(?<!VS\s)({alias_pat})\b([^\n\.;!?]{{0,40}}?\b"
-            r"(?:ha\s+(?:perso|ceduto|guadagnato|chiuso\s+a)|chiudendo\s+a|"
-            r"in\s+(?:forte\s+|lieve\s+)?(?:rialzo|calo|flessione|progresso|ribasso)\s+(?:del|dell['’]|di))\s*(?:il\s+|l['’])?)"
+            r"(?:(?:che\s+)?(?:guadagna|perde|cede|sale|scende|balza)\s+(?:il|lo|l['’]|del|dello|dell['’])|"
+            r"ha\s+(?:perso|ceduto|guadagnato|chiuso\s+a)|chiudendo\s+a|"
+            r"in\s+(?:forte\s+|lieve\s+)?(?:rialzo|calo|flessione|progresso|ribasso)\s+(?:del|dello|dell['’]|di))\s*(?:il\s+|lo\s+|l['’])?)"
             r"([+\-]?\d+(?:[\.,]\d+)?)\s*%",
             flags=re.IGNORECASE,
         )
@@ -953,6 +1172,32 @@ def _verify_index_ground_truth(
     return issues
 
 
+_QUAL_POST_PREDICATE_PATTERN = (
+    r'(?:(?:ha\s+chiuso|chiude|chiudendo)\s+(?:la\s+seduta\s+|la\s+giornata\s+|la\s+settimana\s+|oggi\s+)?'
+    r'in\s+(?:forte\s+|lieve\s+|netto\s+|deciso\s+|leggero\s+)?(?:calo|flessione|ribasso|rosso|territorio\s+negativo|rialzo|progresso|guadagno|verde|territorio\s+positivo)|'
+    r'(?:è\s+)?(?:sces[oa]|crollat[oa]|arretrat[oa]|scivolat[oa]|salit[oa]|balzat[oa]|avanzat[oa]|rimbalzat[oa])\b|'
+    r'(?:scende|crolla|arretra|scivola|(?:cede|perde)\s+terreno|sale|balza|avanza|rimbalza|guadagna\s+terreno|brilla)\b|'
+    r'ha\s+(?:perso|ceduto|guadagnato)(?:\s+terreno)?\b|'
+    r'(?:ha\s+)?(?:registrato|subito|messo\s+a\s+segno)\s+un[a]?\s+(?:ottima\s+performance|(?:forte\s+|lieve\s+|bel\s+)?'
+    r'(?:calo|flessione|ribasso|correzione|perdita|rialzo|progresso|balzo|rimbalzo))\b|'
+    r'subisce\s+prese\s+di\s+beneficio\b|'
+    r'guida\s+i\s+(?:rialzi|ribassi)\b|'
+    r'in\s+(?:forte\s+|lieve\s+|netto\s+|deciso\s+|leggero\s+)?(?:calo|flessione|ribasso|territorio\s+negativo|rialzo|progresso|territorio\s+positivo)\b)'
+)
+
+_QUAL_PRE_PHRASE_PATTERN = (
+    r'(?:in\s+(?:forte\s+|lieve\s+|netto\s+|deciso\s+|leggero\s+)?(?:calo|flessione|ribasso|rosso|territorio\s+negativo|rialzo|progresso|spolvero|verde|territorio\s+positivo)|'
+    r'(?:forte\s+|netto\s+|pesante\s+|lieve\s+)?(?:calo|flessione|ribasso|arretramento|correzione)\s+(?:di|per)|'
+    r'(?:forte\s+|netto\s+|ottimo\s+|bel\s+)?(?:rialzo|rimbalzo|balzo|allungo|accelerazione|spunto|progresso)\s+(?:di|per)|'
+    r'(?:seduta|giornata|chiusura)\s+(?:in\s+calo|in\s+flessione|in\s+ribasso|negativa|difficile|pesante|debole)\s+per|'
+    r'(?:ottima|eccellente|solida|brillante|positiva)\s+(?:seduta|giornata|chiusura|performance|prova|intonazione)\s+per|'
+    r'prese\s+di\s+beneficio\s+su|'
+    r'(?:scende|cede|arretra|scivola|crolla|debole|sale|balza|avanza|rimbalza|brilla|tonic[oa]|spicca\s+in\s+positivo|guida\s+i\s+(?:rialzi|ribassi))|'
+    r'tra\s+i\s+(?:(?:titoli\s+)?peggiori(?:\s+(?:di\s+oggi|della\s+seduta|del\s+portafoglio))?|'
+    r'titoli\s+più\s+brillanti|migliori(?:\s+titoli)?(?:\s+(?:di\s+oggi|della\s+seduta|del\s+portafoglio))?))'
+)
+
+
 def _verify_stock_ground_truth(
     narrative_body: str,
     stock_data: Optional[Dict[str, Any]],
@@ -960,37 +1205,32 @@ def _verify_stock_ground_truth(
 ) -> List[str]:
     """
     Deterministic per-stock direction and numerical verification against certified stock_data.
-    Ensures no stock is published with an inverted sign or stale-day crash/rally percentage.
+    Ensures no stock is published with an inverted sign/direction (UP->DOWN or DOWN->UP) or stale-day %.
     """
     issues: List[str] = []
     pct_map = _resolve_stock_pct_map(stock_data, session_name=session_name)
     if not narrative_body or not pct_map:
         return issues
 
+    tok_pat = _build_stock_token_pattern(pct_map)
+
     # 1. Clause-level session move + percentage
     pat_a = re.compile(
-        rf'(\$?[A-Za-z0-9]{{2,8}}(?:\.[A-Za-z]{{1,4}})?)\b([^\n\.;!?]{{0,55}}?)({_SESSION_MOVE_VERB_PATTERN}\s*)([+\-]?\d+(?:[\.,]\d+)?)\s*%',
+        rf'({tok_pat})((?:(?!{tok_pat})(?!\.(?:\s|$))[^\n;!?\$]){{0,85}}?)({_SESSION_MOVE_VERB_PATTERN}\s*)([+\-]?\d+(?:[\.,]\d+)?)\s*%',
         flags=re.IGNORECASE,
     )
     for m in pat_a.finditer(narrative_body):
         tok_raw, mid, verb_str, num_str = m.group(1), m.group(2), m.group(3), m.group(4)
-        after_slice = narrative_body[m.end(): m.end() + 18]
-        lookup_key = tok_raw.lstrip("$").upper()
-        if lookup_key not in pct_map:
+        after_slice = narrative_body[m.end(): m.end() + 24]
+        resolved = _lookup_stock_pct(tok_raw, pct_map)
+        if not resolved:
             continue
-        if not tok_raw.startswith("$") and tok_raw != tok_raw.upper():
+        if _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(mid) or _POST_PCT_TIMEFRAME_EXCLUSION_RE.search(after_slice):
             continue
-        if "$" in mid or _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(mid) or _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(after_slice):
-            continue
-        if any(
-            other_k != lookup_key and other_k != lookup_key.split(".")[0] and re.search(rf'\b{re.escape(other_k)}\b', mid)
-            for other_k in pct_map
-        ):
-            continue
-        canon_sym, actual = pct_map[lookup_key]
+        canon_sym, actual = resolved
         claimed = _parse_signed_move(verb_str, num_str)
         tol = max(0.85, abs(actual) * 0.25)
-        if (actual > 0.25 and claimed < -0.10) or (actual < -0.25 and claimed > 0.10):
+        if (actual > 0.20 and claimed < -0.05) or (actual < -0.20 and claimed > 0.05):
             issues.append(
                 f"CRITICAL: Inversione di segno sul titolo {canon_sym}: il testo riporta {claimed:+.2f}% "
                 f"mentre la variazione reale certificata Yahoo Finance è {actual:+.2f}%."
@@ -1002,9 +1242,15 @@ def _verify_stock_ground_truth(
             )
 
     # 2. Shorthand '$TICKER (+X.X%)' or 'TICKER +X.X%' in narrative body
-    pat_b = re.compile(r'(\$?[A-Z]{2,6}(?:\.[A-Z]{1,4})?)(\s*\(\s*|\s+)([+\-]\d+(?:[\.,]\d+)?)\s*%(\s*\))?')
+    pat_b = re.compile(
+        rf'({tok_pat})(\s*\(\s*|\s+)([+\-]\d+(?:[\.,]\d+)?)\s*%(\s*\))?',
+        flags=re.IGNORECASE,
+    )
     for m in pat_b.finditer(narrative_body):
         tok_raw, num_str = m.group(1), m.group(3)
+        resolved = _lookup_stock_pct(tok_raw, pct_map)
+        if not resolved:
+            continue
         line_start = narrative_body.rfind("\n", 0, m.start()) + 1
         line_end = narrative_body.find("\n", m.end())
         if line_end == -1:
@@ -1012,13 +1258,10 @@ def _verify_stock_ground_truth(
         line_str = narrative_body[line_start:line_end]
         if _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(line_str):
             continue
-        lookup_key = tok_raw.lstrip("$").upper()
-        if lookup_key not in pct_map:
-            continue
-        canon_sym, actual = pct_map[lookup_key]
+        canon_sym, actual = resolved
         claimed = float(num_str.replace(",", "."))
         tol = max(0.85, abs(actual) * 0.25)
-        if (actual > 0.25 and claimed < -0.10) or (actual < -0.25 and claimed > 0.10):
+        if (actual > 0.20 and claimed < -0.05) or (actual < -0.20 and claimed > 0.05):
             issues.append(
                 f"CRITICAL: Inversione di segno sul titolo {canon_sym}: il testo riporta {claimed:+.2f}% "
                 f"mentre la variazione reale certificata Yahoo Finance è {actual:+.2f}%."
@@ -1029,28 +1272,80 @@ def _verify_stock_ground_truth(
                 f"contro {actual:+.2f}% reale (Yahoo Finance)."
             )
 
-    # 3. Direction-only contradiction without explicit % (e.g. '$TSM ha chiuso in calo' when actual is +6.24%)
-    pat_dir = re.compile(
-        r'(\$?[A-Z]{2,6}(?:\.[A-Z]{1,4})?)\b([^\n\.;!?]{0,40}?)\b'
-        r'(ha\s+chiuso\s+(?:la\s+seduta\s+|la\s+settimana\s+)?in\s+(?:forte\s+)?(?:calo|flessione|ribasso|rosso|rialzo|progresso))'
+    # 3A. Qualitative direction contradiction AFTER ticker (e.g. '$TSM cede terreno' or '$MRVL guida i rialzi')
+    pat_dir_post = re.compile(
+        rf'({tok_pat})((?:(?!{tok_pat})(?!\.(?:\s|$))[^\n;!?\$]){{0,65}}?)\b({_QUAL_POST_PREDICATE_PATTERN})',
+        flags=re.IGNORECASE,
     )
-    for m in pat_dir.finditer(narrative_body):
+    for m in pat_dir_post.finditer(narrative_body):
         tok_raw, mid, dir_phrase = m.group(1), m.group(2), m.group(3)
-        if "$" in mid or _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(mid):
+        after_slice = narrative_body[m.end(): m.end() + 28]
+        resolved = _lookup_stock_pct(tok_raw, pct_map)
+        if not resolved:
             continue
-        lookup_key = tok_raw.lstrip("$").upper()
-        if lookup_key not in pct_map:
+        if (
+            _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(mid)
+            or _POST_DIR_METRIC_EXCLUSION_RE.search(after_slice)
+            or _CONTRAST_CLAUSE_RE.search(mid)
+            or _OTHER_SUBJECT_EXCLUSION_RE.search(mid)
+            or re.search(r'\bnon\s+$', mid, flags=re.IGNORECASE)
+        ):
             continue
-        canon_sym, actual = pct_map[lookup_key]
-        if actual > 0.50 and _NEGATIVE_MOVE_WORDS_RE.search(dir_phrase):
+        canon_sym, actual = resolved
+        if actual > 0.30 and _NEGATIVE_MOVE_WORDS_RE.search(dir_phrase):
             issues.append(
                 f"CRITICAL: Contraddizione direzionale sul titolo {canon_sym}: descritto in calo/flessione "
                 f"quando ha chiuso a {actual:+.2f}% (Yahoo Finance)."
             )
-        elif actual < -0.50 and _POSITIVE_MOVE_WORDS_RE.search(dir_phrase):
+        elif actual < -0.30 and _POSITIVE_MOVE_WORDS_RE.search(dir_phrase):
             issues.append(
-                f"CRITICAL: Contraddizione direzionale sul titolo {canon_sym}: descritto in rialzo "
+                f"CRITICAL: Contraddizione direzionale sul titolo {canon_sym}: descritto in rialzo/positivo "
                 f"quando ha chiuso a {actual:+.2f}% (Yahoo Finance)."
+            )
+
+    # 3B. Qualitative direction contradiction BEFORE ticker (e.g. 'In calo $TSM' or 'Ottima seduta per $MRVL')
+    pat_dir_pre = re.compile(
+        rf'\b({_QUAL_PRE_PHRASE_PATTERN})\s+((?:(?!{tok_pat})(?!\.(?:\s|$))[^\n;!?\$,]){{0,45}}?)({tok_pat})',
+        flags=re.IGNORECASE,
+    )
+    for m in pat_dir_pre.finditer(narrative_body):
+        dir_phrase, pre_mid, tok_raw = m.group(1), m.group(2), m.group(3)
+        resolved = _lookup_stock_pct(tok_raw, pct_map)
+        if not resolved:
+            continue
+        # Ensure the pre-phrase is not governed by a preceding negation/contrast or post-modifying noun ('tassi in calo')
+        sent_start = max(
+            narrative_body.rfind(".", 0, m.start()),
+            narrative_body.rfind("!", 0, m.start()),
+            narrative_body.rfind("?", 0, m.start()),
+            narrative_body.rfind("\n", 0, m.start()),
+        ) + 1
+        before_phrase = narrative_body[max(sent_start, m.start() - 32): m.start()]
+        if (
+            _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(pre_mid)
+            or _CONTRAST_CLAUSE_RE.search(before_phrase)
+            or _CONTRAST_CLAUSE_RE.search(pre_mid)
+            or re.search(r'\bnon\s+$', before_phrase, flags=re.IGNORECASE)
+            or (
+                dir_phrase.strip().lower().startswith("in ")
+                and _PRE_IN_NOUN_EXCLUSION_RE.search(before_phrase)
+            )
+            or (
+                not re.match(r'^tra\s+i\b', dir_phrase.strip(), flags=re.IGNORECASE)
+                and _OTHER_SUBJECT_EXCLUSION_RE.search(pre_mid)
+            )
+        ):
+            continue
+        canon_sym, actual = resolved
+        if actual > 0.30 and _NEGATIVE_MOVE_WORDS_RE.search(dir_phrase):
+            issues.append(
+                f"CRITICAL: Contraddizione direzionale sul titolo {canon_sym}: descritto in calo/flessione "
+                f"('{dir_phrase.strip()}') quando ha chiuso a {actual:+.2f}% (Yahoo Finance)."
+            )
+        elif actual < -0.30 and _POSITIVE_MOVE_WORDS_RE.search(dir_phrase):
+            issues.append(
+                f"CRITICAL: Contraddizione direzionale sul titolo {canon_sym}: descritto in rialzo/positivo "
+                f"('{dir_phrase.strip()}') quando ha chiuso a {actual:+.2f}% (Yahoo Finance)."
             )
 
     return issues
@@ -1489,13 +1784,19 @@ def sanitize_or_prune_post_content(
 
     # 1a. Strip subordinate auditor meta-commentary clauses (e.g. ', sebbene la performance specifica non sia stata confermata nelle fonti principali')
     cleaned = re.sub(
-        r',?\s*(?:sebbene|benché|nonostante)\s+[^\.\n!?]{0,120}?\b(?:nelle|dalle)\s+fonti\s+(?:principali|disponibili|fornite|live|ufficiali)[^\.\n!?]*',
+        rf',?\s*(?:sebbene|benché|nonostante)\s+{_SENT_CHAR}{{0,120}}?\b(?:nelle|dalle)\s+fonti\s+(?:principali|disponibili|fornite|live|ufficiali){_SENT_CHAR}*',
         '',
         cleaned,
         flags=re.IGNORECASE,
     )
     cleaned = re.sub(
-        r',?\s*(?:sebbene|benché)\s+le\s+fonti\s+(?:disponibili\s+|fornite\s+|principali\s+)?non\s+conferm[^\.\n!?]*',
+        rf',?\s*(?:sebbene|benché)\s+le\s+fonti\s+(?:disponibili\s+|fornite\s+|principali\s+)?non\s+conferm{_SENT_CHAR}*',
+        '',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r',?\s*(?:secondo\s+quanto\s+(?:riportato|emerge)\s+)?\b(?:nelle|dalle)\s+fonti\s+(?:principali|disponibili|fornite|live|ufficiali)\b',
         '',
         cleaned,
         flags=re.IGNORECASE,
@@ -1834,12 +2135,14 @@ def verify_and_clean_post(
                 tickers.append(primary_ticker.upper())
             meta_summary = []
             for t in tickers:
-                if t in PORTFOLIO_ASSETS_METADATA:
-                    m = PORTFOLIO_ASSETS_METADATA[t]
+                meta_key = t if t in PORTFOLIO_ASSETS_METADATA else (t.split(".")[0] if t.split(".")[0] in PORTFOLIO_ASSETS_METADATA else None)
+                if meta_key:
+                    m = PORTFOLIO_ASSETS_METADATA[meta_key]
+                    cats = ", ".join(m.get("upside_catalysts", [])[:4])
                     meta_summary.append(
                         f"• ${t}: {m.get('name')} | Settore: {m.get('sector')} | "
                         f"Paga Dividendi: {'SÌ' if m.get('is_dividend_paying') else 'NO (ACCUMULAZIONE)'} | "
-                        f"Politica: {m.get('dividend_policy')}"
+                        f"Politica: {m.get('dividend_policy')} | Tesi: {m.get('thesis', '')} | Catalizzatori: {cats}"
                     )
             meta_str = "\n".join(meta_summary)
 
@@ -1891,7 +2194,7 @@ def verify_and_clean_post(
                     print(f"      • Fixed hallucination: {h}")
                 for t_err in audit_data.get("temporal_issues", []):
                     print(f"      • Fixed temporal issue: {t_err}")
-                final_text = limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4)
+                final_text = verified_text
                 if benchmark_daily or stock_data:
                     final_text, _, _ = sanitize_or_prune_post_content(
                         final_text,
@@ -1900,6 +2203,7 @@ def verify_and_clean_post(
                         benchmark_daily=benchmark_daily,
                         stock_data=stock_data,
                     )
+                final_text = limit_cashtags(clean_etoro_formatting(final_text), max_tags=4)
                 # Re-verify deterministic gate on post-audit text
                 is_clean_final, final_issues, _ = verify_post_deterministic(
                     final_text,
@@ -1918,7 +2222,7 @@ def verify_and_clean_post(
 
             # APPROVE
             print(f"   ✅ POST APPROVED BY AUDITOR ({auditor_name}).")
-            final_text = limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4)
+            final_text = verified_text
             if benchmark_daily or stock_data:
                 final_text, _, _ = sanitize_or_prune_post_content(
                     final_text,
@@ -1927,6 +2231,7 @@ def verify_and_clean_post(
                     benchmark_daily=benchmark_daily,
                     stock_data=stock_data,
                 )
+            final_text = limit_cashtags(clean_etoro_formatting(final_text), max_tags=4)
             # Re-verify deterministic gate on post-audit text
             is_clean_final, final_issues, _ = verify_post_deterministic(
                 final_text,

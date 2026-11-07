@@ -621,9 +621,21 @@ def ensure_thematic_emojis(text: str, session_name: Optional[str] = None) -> str
             return True
         return False
 
+    in_why_copy_footer = False
     for idx, block in enumerate(blocks):
-        # 1. Skip footers / disclaimer / hashtags / links
-        if block.startswith(('📌', '👤', '#', 'http')):
+        if (
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━" in block
+            or "💡 PERCHÈ COPIARE QUESTO PORTAFOGLIO" in block
+            or "💡 PERCHÉ COPIARE QUESTO PORTAFOGLIO" in block
+        ):
+            in_why_copy_footer = True
+
+        # 1. Skip footers / disclaimer / hashtags / links / deterministic MIGLIORI ranking tables
+        if (
+            in_why_copy_footer
+            or block.startswith(('📌', '👤', '#', 'http', '🏔️', '📊 PERFORMANCE DEL PORTAFOGLIO'))
+            or re.match(r'^(?:🏆\s*)?MIGLIORI\s+\d+\s+', block, flags=re.IGNORECASE)
+        ):
             formatted_blocks.append(block)
             continue
 
@@ -679,6 +691,44 @@ def ensure_thematic_emojis(text: str, session_name: Optional[str] = None) -> str
     return '\n\n'.join(formatted_blocks)
 
 
+def _format_us_close_stock_microtopic_instruction(rank: int, g: dict) -> str:
+    """
+    Formats direction-safe Italian prompt instructions for a US_CLOSE portfolio stock micro-topic.
+    Prevents labeling negative stocks as 'variazione positiva' on deep red days when <3 holdings closed green.
+    """
+    chg = float(g.get('daily_change', g.get('change_pct', 0.0)) or 0.0)
+    snippet = g.get('news_snippet', '')
+    rank_labels = {1: "Primo", 2: "Secondo", 3: "Terzo"}
+    ord_lbl = rank_labels.get(rank, f"{rank}°")
+    if chg > 0.05:
+        lead = (
+            f"Titolo del portafoglio con la maggiore variazione positiva di oggi ({chg:+.2f}%, RIALZO CERTIFICATO)."
+            if rank == 1
+            else f"{ord_lbl} titolo per variazione positiva di oggi ({chg:+.2f}%, RIALZO CERTIFICATO)."
+        )
+        dir_guard = (
+            f"REGOLA TASSATIVA DI SEGNO: ${g['ticker']} ha chiuso IN RIALZO ({chg:+.2f}%). "
+            f"Descrivilo esclusivamente in positivo/rialzo; è VIETATO dire che è sceso/in calo o usare il segno meno."
+        )
+    elif chg < -0.05:
+        lead = (
+            f"{ord_lbl} titolo in evidenza del portafoglio nella seduta odierna, che ha chiuso IN CALO ({chg:+.2f}%, RIBASSO CERTIFICATO)."
+        )
+        dir_guard = (
+            f"REGOLA TASSATIVA DI SEGNO: ${g['ticker']} ha chiuso IN CALO ({chg:+.2f}%). "
+            f"Descrivilo coerentemente in flessione/calo riportando il segno meno ({chg:+.2f}%); "
+            f"è SEVERAMENTE VIETATO definirlo in rialzo, positivo, brillante o attribuirgli guadagni di giornata!"
+        )
+    else:
+        lead = f"{ord_lbl} titolo in evidenza del portafoglio, sostanzialmente stabile/invariato oggi ({chg:+.2f}%)."
+        dir_guard = f"Descrivi ${g['ticker']} come sostanzialmente stabile ({chg:+.2f}%), senza inventare forti rialzi o crolli."
+
+    return (
+        f"{lead} {dir_guard} Spiega la news del giorno o il catalizzatore reale che lo ha mosso: {snippet}. "
+        f"Privilegia news fresche (accordi, partnership, rating, contratti) ed evita di citare vecchie trimestrali a meno che non siano uscite oggi."
+    )
+
+
 def _run_post_verification(
     text: str,
     primary_ticker: str = None,
@@ -688,6 +738,7 @@ def _run_post_verification(
     max_tags: int = MAX_TAGS_PER_POST,
     allowed_tickers: list = None,
     benchmark_daily: dict = None,
+    stock_data: dict = None,
 ) -> tuple[bool, str]:
     """Helper to run pre-publication verification and auto-correction on generated content."""
     try:
@@ -699,6 +750,7 @@ def _run_post_verification(
             generator_model=generator_model,
             run_ai_review=run_ai_review,
             benchmark_daily=benchmark_daily,
+            stock_data=stock_data,
         )
         if not approved:
             print(f"⚠️ Post rejected by verifier: {audit.get('explanation')}")
@@ -1679,9 +1731,9 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             
             gainers_filtered = [g for g in top_gainers if g['ticker'] != macro_heavy]
             selected_gainers = gainers_filtered[:3] if len(gainers_filtered) >= 3 else top_gainers[:3]
-            g1 = selected_gainers[0] if len(selected_gainers) > 0 else {'ticker': 'NVDA', 'company_name': 'NVIDIA', 'change_pct': 0.0, 'news_snippet': 'NVIDIA guida il sentiment del mercato.'}
-            g2 = selected_gainers[1] if len(selected_gainers) > 1 else {'ticker': 'MSFT', 'company_name': 'Microsoft', 'change_pct': 0.0, 'news_snippet': 'Microsoft consolida le posizioni.'}
-            g3 = selected_gainers[2] if len(selected_gainers) > 2 else {'ticker': 'PLTR', 'company_name': 'Palantir', 'change_pct': 0.0, 'news_snippet': 'Palantir registra volumi importanti.'}
+            g1 = selected_gainers[0] if len(selected_gainers) > 0 else {'ticker': 'NVDA', 'company_name': 'NVIDIA', 'daily_change': 0.0, 'news_snippet': 'NVIDIA guida il sentiment del mercato.'}
+            g2 = selected_gainers[1] if len(selected_gainers) > 1 else {'ticker': 'MSFT', 'company_name': 'Microsoft', 'daily_change': 0.0, 'news_snippet': 'Microsoft consolida le posizioni.'}
+            g3 = selected_gainers[2] if len(selected_gainers) > 2 else {'ticker': 'PLTR', 'company_name': 'Palantir', 'daily_change': 0.0, 'news_snippet': 'Palantir registra volumi importanti.'}
             
             emoji_g1 = EMOJI_MAP.get(g1['ticker']) or EMOJI_MAP.get(g1['ticker'].split('.')[0]) or '🔹'
             emoji_g2 = EMOJI_MAP.get(g2['ticker']) or EMOJI_MAP.get(g2['ticker'].split('.')[0]) or '🔹'
@@ -2071,13 +2123,13 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
             - MAI presentare una notizia di 3-5 giorni fa come se fosse il catalizzatore della sessione odierna.
 
             {emoji_g1} MICRO-TEMA 2: ${g1['ticker']} ({g1['daily_change']:+.2f}%)
-               Titolo del portafoglio con la maggiore variazione positiva di oggi. Spiega la news del giorno o il catalizzatore reale che lo ha mosso: {g1['news_snippet']}. Privilegia news fresche (accordi, partnership, rating, contratti) ed evita di citare vecchie trimestrali a meno che non siano uscite oggi.
+               {_format_us_close_stock_microtopic_instruction(1, g1)}
 
             {emoji_g2} MICRO-TEMA 3: ${g2['ticker']} ({g2['daily_change']:+.2f}%)
-               Secondo titolo per variazione positiva. Spiega la news del giorno o il catalizzatore del movimento: {g2['news_snippet']}. Privilegia news fresche ed evita trimestrali vecchie.
+               {_format_us_close_stock_microtopic_instruction(2, g2)}
 
             {emoji_g3} MICRO-TEMA 4: ${g3['ticker']} ({g3['daily_change']:+.2f}%)
-               Terzo titolo per variazione positiva. Spiega la news del giorno o il catalizzatore del movimento: {g3['news_snippet']}. Privilegia news fresche ed evita trimestrali vecchie.
+               {_format_us_close_stock_microtopic_instruction(3, g3)}
 
             🔮 MICRO-TEMA 5: Sguardo alla prossima seduta ({next_timing_short}) & Catalizzatori
                Guarda in avanti verso {next_timing_phrase}.
@@ -2193,6 +2245,7 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                         max_tags=max_tags,
                         allowed_tickers=all_allowed_for_validation,
                         benchmark_daily=benchmark_daily_data,
+                        stock_data=stock_data,
                     )
                     if not approved or not verified_text:
                         print(f"⚠️ Market news recap rejected by verifier ({model_name}), trying next model...")
@@ -2241,6 +2294,7 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                                 recap_text = _remove_market_section_tags(recap_text)
                                 recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
                                 recap_text = _clean_robotic_phrases(recap_text)
+                                recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
                                 approved, verified_text = _run_post_verification(
                                     recap_text,
                                     session_name=market_session or "Daily recap",
@@ -2248,6 +2302,7 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                                     max_tags=max_tags,
                                     allowed_tickers=all_allowed_for_validation,
                                     benchmark_daily=benchmark_daily_data,
+                                    stock_data=stock_data,
                                 )
                                 if approved and verified_text:
                                     recap_text = _limit_tags_in_text(verified_text, all_allowed_for_validation, max_tags)
@@ -2294,6 +2349,10 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                                     primary_ticker=selected_tags[0] if selected_tags else None,
                                     session_name=market_session or "Daily recap",
                                     generator_model=model_name,
+                                    max_tags=max_tags,
+                                    allowed_tickers=all_allowed_for_validation,
+                                    benchmark_daily=benchmark_daily_data,
+                                    stock_data=stock_data,
                                 )
                                 if not approved or not verified_recap:
                                     print(f"   ⚠️ Draft from {model_name} rejected by verification gate after 503 retry.")
@@ -2341,6 +2400,10 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                                 primary_ticker=selected_tags[0] if selected_tags else None,
                                 session_name=market_session or "Daily recap",
                                 generator_model=model_name,
+                                max_tags=max_tags,
+                                allowed_tickers=all_allowed_for_validation,
+                                benchmark_daily=benchmark_daily_data,
+                                stock_data=stock_data,
                             )
                             if not approved or not verified_recap:
                                 print(f"   ⚠️ Draft from {model_name} (without tools) rejected by verification gate.")

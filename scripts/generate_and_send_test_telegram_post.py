@@ -188,6 +188,7 @@ def generate_and_send_test(session_name: str = "US_CLOSE") -> bool:
         primary_ticker=primary_ticker,
         session_name=session_name,
         run_ai_review=True,
+        stock_data=simulated_stock_data,
     )
 
     print("\n" + "=" * 65)
