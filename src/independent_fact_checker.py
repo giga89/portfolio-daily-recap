@@ -50,10 +50,14 @@ except ImportError:
     REQUESTS_AVAILABLE = False
 
 try:
-    from tavily_search import get_live_market_news_context, is_tavily_available
+    from tavily_search import get_live_market_news_context, is_tavily_available, filter_live_news_for_topic
 except ImportError:
-    get_live_market_news_context = None
-    is_tavily_available = lambda: False
+    try:
+        from src.tavily_search import get_live_market_news_context, is_tavily_available, filter_live_news_for_topic
+    except ImportError:
+        get_live_market_news_context = None
+        is_tavily_available = lambda: False
+        filter_live_news_for_topic = lambda ctx, txt, topic_type="full_post": ctx
 
 
 # Tested, verified working models on Groq LPUs

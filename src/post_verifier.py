@@ -184,6 +184,34 @@ PLATITUDE_FORBIDDEN_PATTERNS = [
     ),
 ]
 
+# Meta-commentary leaked by AI auditors (Groq / Mistral / Gemini) into public verified_text
+AUDITOR_META_COMMENTARY_PATTERNS = [
+    (
+        r'\b(?:nelle|dalle|sulle)\s+fonti\s+(?:principali|disponibili|fornite|live|ufficiali|consultate)\b',
+        "Meta-commento interno dell'auditor trapelato nel testo ('nelle/dalle fonti principali/disponibili')"
+    ),
+    (
+        r'\bnon\s+(?:sia\s+stat[oaie]\s+|è\s+stat[oaie]\s+)?confermat[oaie]\s+(?:come\s+\w+\s+)?(?:nelle|dalle)\s+fonti\b',
+        "Meta-commento interno dell'auditor trapelato nel testo ('non confermata nelle fonti')"
+    ),
+    (
+        r'\ble\s+fonti\s+(?:disponibili\s+|fornite\s+|live\s+|principali\s+)?non\s+conferman',
+        "Meta-commento interno dell'auditor trapelato nel testo ('le fonti non confermano')"
+    ),
+    (
+        r'\b(?:ground\s+truth|testo\s+da\s+(?:auditare|revisionare|verificare)|nel\s+prompt|secondo\s+i\s+metadati\s+forniti)\b',
+        "Terminologia interna di prompt/audit trapelata nel testo pubblico"
+    ),
+]
+
+# Semantic oxymorons within a single stock sentence (e.g., bullish superlative paired with a negative close without contrast)
+SEMANTIC_STOCK_OXYMORON_PATTERNS = [
+    (
+        r'\b(?:tra\s+i\s+titoli\s+più\s+brillanti|tra\s+i\s+migliori\s+(?:di\s+oggi|della\s+seduta|del\s+portafoglio)|ottima\s+(?:seduta|giornata|chiusura|prova)\s+per|eccellente\s+(?:seduta|giornata|performance)\s+per|spicca\s+in\s+positivo)(?!(?:[^\n\.!?]{0,90}?\b(?:nonostante|malgrado|sebbene|mentre|invece|ma)\b))[^\n\.!?]{0,90}?\b(?:ha\s+chiuso\s+in\s+(?:calo|flessione|ribasso|rosso)|in\s+(?:calo|flessione|ribasso)\s+del\s+-|cedendo\s+il\s+-|sces[oa]\s+del\s+-)',
+        "Ossimoro semantico sul titolo: esordio elogiativo/rialzista abbinato a chiusura in calo nella stessa proposizione"
+    ),
+]
+
 # Patterns indicating tone/sentiment contradictions for market index closing (e.g. positive tone when index dropped)
 # NOTE: Must target ONLY the overall market / Wall Street / major indices, NEVER individual portfolio stocks/ETFs!
 SENTIMENT_MISMATCH_PATTERNS = [
@@ -196,19 +224,19 @@ SENTIMENT_MISMATCH_PATTERNS = [
         "Definisce il tono generale o la seduta complessiva come positiva quando i listini hanno chiuso in calo"
     ),
     (
-        r'\b(?:wall\s+street|i\s+listini|i\s+mercati|la\s+borsa\s+usa)\b.{0,40}\b(?:chius(?:a|ura)|seduta|giornata)\s+(?:in\s+territorio\s+)?positiv[ao]\b',
+        r'\b(?:wall\s+street|i\s+listini|i\s+mercati(?:\s+usa)?|la\s+borsa\s+usa)\b.{0,40}\b(?:chius(?:a|ura)|seduta|giornata)\s+(?:in\s+territorio\s+)?positiv[ao]\b',
         "Definisce Wall Street o i mercati con seduta positiva su mercato in calo"
     ),
     (
-        r'\b(?:wall\s+street|i\s+listini|i\s+mercati)\s+in\s+(?:forte\s+)?territorio\s+positivo\b',
+        r'\b(?:wall\s+street|i\s+listini|i\s+mercati(?:\s+usa)?)\s+in\s+(?:forte\s+)?territorio\s+positivo\b',
         "Afferma territorio positivo per Wall Street o i listini su mercato in calo"
     ),
     (
-        r'\b(?:listini|indici|mercati|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+rialzo\b',
+        r'\b(?:listini|indici|mercati(?:\s+usa)?|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+rialzo\b',
         "Afferma chiusura in rialzo quando i listini hanno chiuso in calo"
     ),
     (
-        r'\b(?:l\'indice|indice)\s+\$?(?:SPX500|NSDQ100|GER40|DJ30)\b.{0,40}\b(?:ha\s+chiuso\s+in\s+rialzo|chiude\s+in\s+rialzo|ha\s+guadagnato|registra\s+guadagni)\b',
+        r'\b(?:(?:l[\'’]indice|indice)\s+\$?(?:SPX500|NSDQ100|GER40|DJ30)|(?:l[\'’]|il\s+)?(?:S&P\s*500|Nasdaq(?:\s*100)?|Dow\s+Jones))\b[^\n\.;!?]{0,40}\b(?:ha\s+chiuso\s+in\s+rialzo|chiude\s+in\s+rialzo|ha\s+guadagnato|registra\s+guadagni)\b',
         "Afferma rialzo/guadagni per indice che ha chiuso in calo"
     ),
 ]
@@ -225,28 +253,28 @@ SENTIMENT_POSITIVE_MARKET_MISMATCH_PATTERNS = [
         "Definisce il tono generale o la seduta complessiva come negativa quando i listini hanno chiuso in rialzo"
     ),
     (
-        r'\b(?:wall\s+street|i\s+listini|i\s+mercati|la\s+borsa\s+usa)\b.{0,50}\b(?:chius(?:a|ura)|seduta|giornata)\s+(?:in\s+flessione|in\s+calo|negativa|in\s+rosso|in\s+territorio\s+negativo)\b',
+        r'\b(?:wall\s+street|i\s+listini|i\s+mercati(?:\s+usa)?|la\s+borsa\s+usa)\b.{0,50}\b(?:chius(?:a|ura)|seduta|giornata)\s+(?:in\s+(?:forte\s+)?flessione|in\s+(?:forte\s+)?calo|negativa|in\s+rosso|in\s+territorio\s+negativo)\b',
         "Definisce Wall Street o i mercati con seduta negativa/in flessione su mercato in rialzo"
     ),
     (
-        r'\b(?:wall\s+street|i\s+listini|i\s+mercati)\s+in\s+(?:territorio\s+negativo|forte\s+calo|rosso)\b',
+        r'\b(?:la\s+)?(?:seduta|sessione|giornata)\s+si\s+è\s+chiusa\s+in\s+(?:forte\s+)?(?:flessione|calo|ribasso|rosso)\s+per\s+i\s+(?:mercati|listini)\b',
+        "Definisce la seduta chiusa in flessione/calo per i mercati quando i listini hanno chiuso in rialzo"
+    ),
+    (
+        r'\b(?:wall\s+street|i\s+listini|i\s+mercati(?:\s+usa)?)\s+in\s+(?:territorio\s+negativo|forte\s+calo|rosso)\b',
         "Afferma territorio negativo per Wall Street o i listini su mercato in rialzo"
     ),
     (
-        r'\b(?:listini|indici|mercati|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+(?:flessione|calo|ribasso|rosso)\b',
+        r'\b(?:listini|indici|mercati(?:\s+usa)?|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+(?:forte\s+)?(?:flessione|calo|ribasso|rosso)\b',
         "Afferma chiusura in flessione/calo quando i listini hanno chiuso in rialzo"
     ),
     (
-        r'\b(?:la\s+prima\s+sessione|la\s+sessione|la\s+seduta|la\s+giornata)\s+d\'oltreoceano\b.{0,40}\bsi\s+è\s+chiusa\s+in\s+(?:flessione|calo|ribasso|rosso)\b',
+        r'\b(?:la\s+prima\s+sessione|la\s+sessione|la\s+seduta|la\s+giornata)\s+d\'oltreoceano\b.{0,40}\bsi\s+è\s+chiusa\s+in\s+(?:forte\s+)?(?:flessione|calo|ribasso|rosso)\b',
         "Definisce la sessione USA chiusa in flessione/calo quando i listini hanno chiuso in rialzo"
     ),
     (
-        r'\b(?:l\'indice|indice)\s+\$?(?:SPX500|NSDQ100|GER40|DJ30)\b.{0,50}\b(?:ha\s+chiuso\s+in\s+(?:flessione|calo|ribasso)|ha\s+perso|chiudendo\s+a\s+-|mostrato\s+una\s+performance\s+negativa)\b',
+        r'\b(?:(?:l[\'’]indice|indice)\s+\$?(?:SPX500|NSDQ100|GER40|DJ30)|(?:l[\'’]|il\s+)?(?:S&P\s*500|Nasdaq(?:\s*100)?))\b[^\n\.;!?]{0,50}\b(?:ha\s+chiuso\s+in\s+(?:forte\s+)?(?:flessione|calo|ribasso)|(?:che\s+)?ha\s+(?:perso|ceduto)\b|chiudendo\s+a\s+-|mostrato\s+una\s+performance\s+negativa)\b',
         "Afferma flessione/perdite/segno meno per indice che ha chiuso in rialzo"
-    ),
-    (
-        r'\b(?:l\'indice|indice)\s+\$?(?:SPX500|NSDQ100|GER40|DJ30)\s+che\s+ha\s+perso\b',
-        "Afferma che l'indice ha perso quando invece ha chiuso in rialzo"
     ),
     (
         r'\b(?:a\s+guidare|a\s+trainare)\s+questa\s+seduta\s+negativa\b',
@@ -379,6 +407,49 @@ def fix_sign_sentiment_oxymorons(text: str) -> str:
     return cleaned
 
 
+def _split_narrative_and_footer(text: str) -> Tuple[str, str]:
+    """
+    Splits a post into (narrative_part, footer_part) so daily ground-truth rules
+    never alter or misinterpret the static 'PERCHÈ COPIARE QUESTO PORTAFOGLIO' multi-year footer.
+    """
+    if not text:
+        return "", ""
+    markers = [
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        "💡 PERCHÈ COPIARE QUESTO PORTAFOGLIO?",
+        "💡 PERCHÉ COPIARE QUESTO PORTAFOGLIO?",
+        "📊 DIFFERENZIALE RISPETTO AI BENCHMARK",
+    ]
+    cut_idx = len(text)
+    for mk in markers:
+        pos = text.find(mk)
+        if pos != -1 and pos < cut_idx:
+            cut_idx = pos
+    if cut_idx < len(text):
+        return text[:cut_idx], text[cut_idx:]
+    return text, ""
+
+
+def _extract_narrative_body_for_daily_checks(text: str) -> str:
+    """
+    Extracts only the prose/narrative body of a post for daily/weekly ground-truth verification,
+    stripping out MTD/YTD ranking tables and the multi-year 'PERCHÈ COPIARE' footer.
+    """
+    narrative, _ = _split_narrative_and_footer(text)
+    if not narrative:
+        return ""
+    # Strip ranking tables (e.g. MIGLIORI 5 DI OGGI / PERFORMANCE MENSILI / DI SEMPRE (YTD))
+    cleaned = re.sub(
+        r'MIGLIORI\s+\d+\s+[^\n]+📈\n(?:[^\n]+\n)+',
+        '\n',
+        narrative,
+        flags=re.IGNORECASE,
+    )
+    # Strip ATH distance banner line so ATH % is never mistaken for daily stock/index %
+    cleaned = re.sub(r'^🏔️[^\n]*\n?', '', cleaned, flags=re.MULTILINE)
+    return cleaned.strip()
+
+
 def enforce_benchmark_ground_truth(
     text: str,
     benchmark_daily: Optional[Dict[str, float]] = None,
@@ -406,10 +477,12 @@ def enforce_benchmark_ground_truth(
 
     spx_perf = benchmark_daily.get('SPX500')
     ndx_perf = benchmark_daily.get('NSDQ100')
+    dj_perf = benchmark_daily.get('DJ30')
     if spx_perf is None and ndx_perf is None:
         return text, False
 
-    cleaned = text
+    narrative_part, footer_part = _split_narrative_and_footer(text)
+    cleaned = narrative_part
     orig = text
 
     is_market_positive = (
@@ -423,24 +496,35 @@ def enforce_benchmark_ground_truth(
 
     if is_market_positive:
         # Case A: Market closed POSITIVE (e.g. SPX +0.67%, Nasdaq +1.21%)
-        # 1. Correct explicit benchmark loss phrases & sign flips:
+        # 1. Correct explicit benchmark loss phrases & sign flips (both $SPX500 and plain S&P 500):
         if spx_perf is not None and spx_perf > 0:
             cleaned = re.sub(
-                r'(\$?SPX500\b[^\n\.,;]{0,40}?\b(?:che\s+)?ha\s+perso\s+)(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%',
+                r'(\$?SPX500\b[^\n\.,;]{0,40}?\b(?:che\s+)?ha\s+(?:perso|ceduto)\s+)(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%',
                 f"$SPX500 che ha guadagnato +{spx_perf:.2f}%",
                 cleaned,
                 flags=re.IGNORECASE,
             )
             cleaned = re.sub(
-                r'(\b(?:che\s+)?ha\s+perso\s+(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%\s+[^\n\.,;]{0,40}?\b\$?SPX500\b)',
+                r'((?:l[\'’]|il\s+)?S&P\s*500\b[^\n\.,;]{0,40}?\b(?:che\s+)?ha\s+(?:perso|ceduto)\s+)(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%',
+                f"l'S&P 500 che ha guadagnato +{spx_perf:.2f}%",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            cleaned = re.sub(
+                r'(\b(?:che\s+)?ha\s+(?:perso|ceduto)\s+(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%\s+[^\n\.,;]{0,40}?\b\$?SPX500\b)',
                 f"ha guadagnato +{spx_perf:.2f}% per l'indice $SPX500",
                 cleaned,
                 flags=re.IGNORECASE,
             )
-            # Correct if SPX500 is mentioned followed by negative percentage like "-0.66%"
             cleaned = re.sub(
                 r'(\$?SPX500\b[^\n\.,;]{0,30}?\b(?:chiuso\s+a|chiudendo\s+a|a)\s+)-(?:\d+[\.,]?\d*%)',
                 rf"\1+{spx_perf:.2f}%",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            cleaned = re.sub(
+                r'((?:l[\'’]|il\s+)?S&P\s*500\b[^\n\.,;]{0,30}?\b(?:in\s+(?:forte\s+)?(?:calo|flessione|ribasso)\s+(?:del|di)\s+|chiuso\s+a\s+|chiudendo\s+a\s+))(?:\+|-)?\d+[\.,]?\d*%',
+                f"l'S&P 500 in rialzo del +{spx_perf:.2f}%",
                 cleaned,
                 flags=re.IGNORECASE,
             )
@@ -448,17 +532,24 @@ def enforce_benchmark_ground_truth(
         if ndx_perf is not None and ndx_perf > 0:
             cleaned = re.sub(
                 r'((?:il\s+)?(?:Nasdaq(?:\s*100)?|\$NSDQ100)\b[^\n\.,;]{0,50}?\b(?:ha\s+mostrato\s+una\s+)?performance\s+negativa,?\s*(?:chiudendo\s+a\s+)?)(?:\+|-)?\d+[\.,]?\d*%',
-                f"il Nasdaq 100 ($NSDQ100) ha chiuso in rialzo a +{ndx_perf:.2f}%",
+                lambda m: (
+                    f"il Nasdaq 100 ($NSDQ100) ha chiuso in rialzo a +{ndx_perf:.2f}%"
+                    if "$" in m.group(1)
+                    else f"il Nasdaq 100 ha chiuso in rialzo a +{ndx_perf:.2f}%"
+                ),
                 cleaned,
                 flags=re.IGNORECASE,
             )
             cleaned = re.sub(
-                r'((?:il\s+)?(?:Nasdaq(?:\s*100)?|\$NSDQ100)\b[^\n\.,;]{0,40}?\b(?:che\s+)?ha\s+perso\s+)(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%',
-                f"il Nasdaq 100 ($NSDQ100) che ha guadagnato +{ndx_perf:.2f}%",
+                r'((?:il\s+)?(?:Nasdaq(?:\s*100)?|\$NSDQ100)\b[^\n\.,;]{0,40}?\b(?:che\s+)?ha\s+(?:perso|ceduto)\s+)(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%',
+                lambda m: (
+                    f"il Nasdaq 100 ($NSDQ100) che ha guadagnato +{ndx_perf:.2f}%"
+                    if "$" in m.group(1)
+                    else f"il Nasdaq 100 che ha guadagnato +{ndx_perf:.2f}%"
+                ),
                 cleaned,
                 flags=re.IGNORECASE,
             )
-            # Correct if Nasdaq/NSDQ100 is followed by negative percentage like "-1.21%"
             cleaned = re.sub(
                 r'((?:il\s+)?(?:Nasdaq(?:\s*100)?|\$NSDQ100)\b[^\n\.,;]{0,30}?\b(?:chiuso\s+a|chiudendo\s+a|a)\s+)-(?:\d+[\.,]?\d*%)',
                 rf"\1+{ndx_perf:.2f}%",
@@ -466,15 +557,25 @@ def enforce_benchmark_ground_truth(
                 flags=re.IGNORECASE,
             )
 
-        # 2. Correct general market opening / wrap-up sentences:
+        if dj_perf is None or dj_perf >= -0.25:
+            dj_repl = f"il Dow Jones in progresso del +{dj_perf:.2f}%" if (dj_perf is not None and dj_perf > 0.05) else "il Dow Jones sostanzialmente stabile"
+            cleaned = re.sub(
+                r'(?:il\s+)?(?:Dow\s+Jones|\$?DJ30)\b[^\n\.,;]{0,30}?\bin\s+(?:forte\s+)?(?:calo|flessione|ribasso|crollo)\s+di\s+(?:circa\s+|oltre\s+)?[\d\.,]+\s+punti',
+                dj_repl,
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            if dj_perf is not None and dj_perf > 0.05:
+                cleaned = re.sub(
+                    r'(?:il\s+)?(?:Dow\s+Jones|\$?DJ30)\b[^\n\.,;]{0,35}?\b(?:(?:che\s+)?ha\s+(?:perso|ceduto)\s+(?:il\s+)?|in\s+(?:forte\s+)?(?:calo|flessione|ribasso)\s+(?:del\s+)?)(?:\+|-)?\d+[\.,]?\d*%',
+                    f"il Dow Jones in rialzo del +{dj_perf:.2f}%",
+                    cleaned,
+                    flags=re.IGNORECASE,
+                )
+
+        # 2. Correct general market opening / wrap-up sentences (preserving verbs grammatically):
         cleaned = re.sub(
-            r'\b(sessione\s+d\'oltreoceano\b[^\n\.,;]{0,40}?\bsi\s+è\s+chiusa\s+in\s+)(?:flessione|calo|ribasso|rosso)\b',
-            r'\1rialzo',
-            cleaned,
-            flags=re.IGNORECASE,
-        )
-        cleaned = re.sub(
-            r'\b(seduta\s+a\s+Wall\s+Street\b[^\n\.,;]{0,40}?\bsi\s+è\s+chiusa\s+in\s+)(?:flessione|calo|ribasso|rosso)\b',
+            r'\b((?:la\s+)?(?:prima\s+)?(?:sessione|seduta|giornata)(?:\s+d\'oltreoceano|\s+a\s+Wall\s+Street)?\b[^\n\.,;]{0,40}?\bsi\s+è\s+chiusa\s+in\s+)(?:forte\s+)?(?:flessione|calo|ribasso|rosso)\b',
             r'\1rialzo',
             cleaned,
             flags=re.IGNORECASE,
@@ -486,8 +587,8 @@ def enforce_benchmark_ground_truth(
             flags=re.IGNORECASE,
         )
         cleaned = re.sub(
-            r'\b(?:tono|chiusura|seduta|giornata)\s+complessivamente\s+negativ[ao]\b',
-            'seduta complessivamente positiva',
+            r'\b(tono|chiusura|seduta|giornata)\s+complessivamente\s+negativ([ao])\b',
+            lambda m: f"{m.group(1)} complessivamente positiv{m.group(2)}",
             cleaned,
             flags=re.IGNORECASE,
         )
@@ -498,13 +599,13 @@ def enforce_benchmark_ground_truth(
             flags=re.IGNORECASE,
         )
         cleaned = re.sub(
-            r'\b(?:i\s+)?(?:listini|indici|mercati|wall\s+street)\s+(?:hanno\s+chiuso|chiudono)\s+in\s+(?:flessione|calo|ribasso|rosso)\b',
+            r'\b(?:i\s+)?(?:listini|indici|mercati(?:\s+usa)?|wall\s+street)\s+(?:hanno\s+chiuso|chiudono)\s+in\s+(?:forte\s+)?(?:flessione|calo|ribasso|rosso)\b',
             'i listini hanno chiuso in rialzo',
             cleaned,
             flags=re.IGNORECASE,
         )
         cleaned = re.sub(
-            r'\b(?:wall\s+street|i\s+listini|i\s+mercati)\s+in\s+(?:territorio\s+negativo|forte\s+calo|rosso)\b',
+            r'\b(?:wall\s+street|i\s+listini|i\s+mercati(?:\s+usa)?)\s+in\s+(?:territorio\s+negativo|forte\s+calo|rosso)\b',
             'listini in territorio positivo',
             cleaned,
             flags=re.IGNORECASE,
@@ -531,13 +632,13 @@ def enforce_benchmark_ground_truth(
             flags=re.IGNORECASE,
         )
         cleaned = re.sub(
-            r'\b(?:i\s+)?(?:listini|indici|mercati|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+rialzo\b',
+            r'\b(?:i\s+)?(?:listini|indici|mercati(?:\s+usa)?|wall\s+street)\s+(?:chiudono|hanno\s+chiuso)\s+in\s+rialzo\b',
             'i listini hanno chiuso in flessione',
             cleaned,
             flags=re.IGNORECASE,
         )
         cleaned = re.sub(
-            r'\b(?:wall\s+street|i\s+listini|i\s+mercati)\s+in\s+(?:forte\s+)?territorio\s+positivo\b',
+            r'\b(?:wall\s+street|i\s+listini|i\s+mercati(?:\s+usa)?)\s+in\s+(?:forte\s+)?territorio\s+positivo\b',
             'listini in territorio negativo',
             cleaned,
             flags=re.IGNORECASE,
@@ -549,16 +650,410 @@ def enforce_benchmark_ground_truth(
                 cleaned,
                 flags=re.IGNORECASE,
             )
+            cleaned = re.sub(
+                r'((?:l[\'’]|il\s+)?S&P\s*500\b[^\n\.,;]{0,40}?\b(?:che\s+)?ha\s+(?:guadagnato|chiuso\s+in\s+rialzo)\s+)(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%',
+                f"l'S&P 500 che ha ceduto {spx_perf:.2f}%",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
         if ndx_perf is not None and ndx_perf < 0:
             cleaned = re.sub(
                 r'((?:il\s+)?(?:Nasdaq(?:\s*100)?|\$NSDQ100)\b[^\n\.,;]{0,40}?\b(?:che\s+)?ha\s+(?:guadagnato|chiuso\s+in\s+rialzo)\s+)(?:il\s+)?(?:\+|-)?\d+[\.,]?\d*%',
-                f"il Nasdaq 100 ($NSDQ100) che ha ceduto {ndx_perf:.2f}%",
+                lambda m: (
+                    f"il Nasdaq 100 ($NSDQ100) che ha ceduto {ndx_perf:.2f}%"
+                    if "$" in m.group(1)
+                    else f"il Nasdaq 100 che ha ceduto {ndx_perf:.2f}%"
+                ),
                 cleaned,
                 flags=re.IGNORECASE,
             )
 
     cleaned = fix_sign_sentiment_oxymorons(cleaned)
-    return cleaned, (cleaned != orig)
+    full_out = cleaned + footer_part
+    return full_out, (full_out != orig)
+
+
+_FUNDAMENTAL_METRIC_EXCLUSION_RE = re.compile(
+    r'\b(?:ricavi|fatturato|utili|eps|margine|margini|ebitda|cash\s*flow|guidance|dividendo|dividendi|cedola|cedole|'
+    r'peso|allocazione|target|upside|cagr|yoy|a/a|su\s+base\s+annua|trimestr\w*|semestr\w*|annual\w*|dal\s+20\d\d|ytd|nel\s+mese)\b',
+    flags=re.IGNORECASE,
+)
+
+_SESSION_MOVE_VERB_PATTERN = (
+    r'(?:ha\s+chiuso\s+(?:la\s+seduta\s+|la\s+giornata\s+|la\s+settimana\s+)?(?:in\s+(?:forte\s+|netto\s+|lieve\s+)?'
+    r'(?:rialzo|calo|flessione|ribasso|progresso|territorio\s+positivo|territorio\s+negativo)\s+(?:del|dell[\'’]|di|a)|a)|'
+    r'chiude\s+(?:la\s+seduta\s+)?(?:in\s+(?:forte\s+|lieve\s+)?(?:rialzo|calo|flessione|ribasso|progresso)\s+(?:del|dell[\'’]|a)|a)|'
+    r'chiudendo\s+(?:in\s+(?:forte\s+|lieve\s+)?(?:rialzo|calo|flessione|ribasso)\s+(?:del|dell[\'’]|a)|a)|'
+    r'(?:è\s+)?(?:salit[oa]|sces[oa]|balzat[oa]|crollat[oa]|arretrat[oa]|avanzat[oa])\s+(?:del|dell[\'’]|di)|'
+    r'(?:sale|scende|balza|cede|perde|guadagna|avanza|arretra)\s+(?:del|dell[\'’]|il|l[\'’])|'
+    r'ha\s+(?:ceduto|perso|guadagnato|registrato\s+un[a]?\s+(?:rialzo|calo|flessione|balzo|progresso)|'
+    r'subito\s+un[a]?\s+(?:calo|flessione|ribasso)|messo\s+a\s+segno\s+un\s+(?:rialzo|progresso|balzo))\s+(?:il|l[\'’]|del|dell[\'’])|'
+    r'(?:cedendo|perdendo|guadagnando|avanzando)\s+(?:il|l[\'’]|del|dell[\'’])|'
+    r'in\s+(?:forte\s+|lieve\s+|netto\s+)?(?:rialzo|calo|flessione|ribasso|progresso)\s+(?:del|dell[\'’]|di))'
+)
+
+_NEGATIVE_MOVE_WORDS_RE = re.compile(
+    r'\b(?:calo|flessione|ribasso|negativo|rosso|sces[oa]|scende|cede|perde|ceduto|perso|crollat[oa]|arretrat[oa]|arretra|cedendo|perdendo)\b',
+    flags=re.IGNORECASE,
+)
+
+_POSITIVE_MOVE_WORDS_RE = re.compile(
+    r'\b(?:rialzo|progresso|positivo|salit[oa]|sale|balzat[oa]|balza|guadagna|guadagnato|avanzat[oa]|avanza|guadagnando|avanzando)\b',
+    flags=re.IGNORECASE,
+)
+
+
+def _resolve_stock_pct_map(
+    stock_data: Optional[Dict[str, Any]],
+    session_name: Optional[str] = None,
+) -> Dict[str, Tuple[str, float]]:
+    """
+    Builds a lookup map {UPPERCASE_TOKEN: (canonical_symbol, certified_pct)} from stock_data.
+    Uses weekly_change on WEEKLY sessions and daily_change on daily sessions (skipping untraded assets).
+    """
+    if not stock_data or not isinstance(stock_data, dict):
+        return {}
+    session_upper = (session_name or "").upper()
+    if "MONTHLY" in session_upper:
+        return {}
+    is_weekly = "WEEKLY" in session_upper
+
+    pct_map: Dict[str, Tuple[str, float]] = {}
+    for raw_sym, info in stock_data.items():
+        if not raw_sym:
+            continue
+        val: Optional[float] = None
+        if isinstance(info, (int, float)):
+            val = float(info)
+        elif isinstance(info, dict):
+            if not is_weekly and info.get("has_traded_today") is False:
+                continue
+            key = "weekly_change" if is_weekly else "daily_change"
+            if key in info and info[key] is not None:
+                val = float(info[key])
+            elif "daily_change" in info and info["daily_change"] is not None and not is_weekly:
+                val = float(info["daily_change"])
+        if val is None:
+            continue
+
+        sym_clean = str(raw_sym).strip().lstrip("$").upper()
+        pct_map[sym_clean] = (sym_clean, val)
+        base = sym_clean.split(".")[0]
+        if len(base) >= 2 and not base.isdigit() and base not in pct_map:
+            pct_map[base] = (sym_clean, val)
+    return pct_map
+
+
+def _parse_signed_move(verb_phrase: str, num_str: str) -> float:
+    val = float(num_str.replace(",", "."))
+    if num_str.strip().startswith("-"):
+        return -abs(val)
+    if num_str.strip().startswith("+"):
+        return abs(val)
+    if _NEGATIVE_MOVE_WORDS_RE.search(verb_phrase or ""):
+        return -abs(val)
+    return abs(val)
+
+
+def enforce_stock_ground_truth(
+    text: str,
+    stock_data: Optional[Dict[str, Any]] = None,
+    session_name: Optional[str] = None,
+) -> Tuple[str, bool]:
+    """
+    Enforces certified Yahoo Finance daily/weekly % moves for portfolio stocks in the narrative body.
+    Prevents AI auditors (Groq/Mistral) from overwriting today's stock performance (e.g. $TSM +6.24%)
+    with stale percentages from previous days' news articles (e.g. -9.8%).
+    """
+    pct_map = _resolve_stock_pct_map(stock_data, session_name=session_name)
+    if not text or not pct_map:
+        return text, False
+
+    narrative_part, footer_part = _split_narrative_and_footer(text)
+    orig = text
+    cleaned = narrative_part
+
+    # Pattern A: $TICKER / TICKER followed in same clause by session move verb + %
+    pat_a = re.compile(
+        rf'(\$?[A-Za-z0-9]{{2,8}}(?:\.[A-Za-z]{{1,4}})?)\b([^\n\.;!?]{{0,55}}?)({_SESSION_MOVE_VERB_PATTERN}\s*)([+\-]?\d+(?:[\.,]\d+)?)\s*%',
+        flags=re.IGNORECASE,
+    )
+
+    def _repl_a(match: re.Match) -> str:
+        tok_raw = match.group(1)
+        mid = match.group(2)
+        verb_str = match.group(3)
+        num_str = match.group(4)
+        after_slice = cleaned[match.end(): match.end() + 18]
+
+        lookup_key = tok_raw.lstrip("$").upper()
+        if lookup_key not in pct_map:
+            return match.group(0)
+        # Skip bare lowercase common words if not $cashtag and not uppercase in text
+        if not tok_raw.startswith("$") and tok_raw != tok_raw.upper():
+            return match.group(0)
+        # Do not cross into another ticker or fundamental metric
+        if "$" in mid or _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(mid) or _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(after_slice):
+            return match.group(0)
+        for other_k in pct_map:
+            if other_k != lookup_key and other_k != lookup_key.split(".")[0] and re.search(rf'\b{re.escape(other_k)}\b', mid):
+                return match.group(0)
+
+        _, actual = pct_map[lookup_key]
+        claimed = _parse_signed_move(verb_str, num_str)
+        tol = max(0.85, abs(actual) * 0.25)
+        sign_flip = (actual > 0.25 and claimed < -0.10) or (actual < -0.25 and claimed > 0.10)
+        if not sign_flip and abs(claimed - actual) <= tol:
+            return match.group(0)
+
+        verb_trim = verb_str.strip().lower()
+        if actual >= 0:
+            if verb_trim.startswith("in "):
+                new_verb = "in rialzo del "
+            elif verb_trim.startswith(("cedendo", "perdendo", "guadagnando", "avanzando")):
+                new_verb = "guadagnando il "
+            else:
+                new_verb = "ha chiuso in rialzo del "
+            return f"{tok_raw}{mid}{new_verb}+{actual:.2f}%"
+        else:
+            if verb_trim.startswith("in "):
+                new_verb = "in calo del "
+            elif verb_trim.startswith(("cedendo", "perdendo", "guadagnando", "avanzando")):
+                new_verb = "cedendo il "
+            else:
+                new_verb = "ha chiuso in calo del "
+            return f"{tok_raw}{mid}{new_verb}{actual:.2f}%"
+
+    cleaned = pat_a.sub(_repl_a, cleaned)
+
+    # Pattern B: Shorthand '$TICKER (+X.X%)' or 'TICKER +X.X%' in prose (excluding ranking tables)
+    pat_b = re.compile(
+        r'(\$?[A-Z]{2,6}(?:\.[A-Z]{1,4})?)(\s*\(\s*|\s+)([+\-]\d+(?:[\.,]\d+)?)\s*%(\s*\))?'
+    )
+
+    def _repl_b(match: re.Match) -> str:
+        tok_raw = match.group(1)
+        sep_open = match.group(2)
+        num_str = match.group(3)
+        sep_close = match.group(4) or ""
+        # Skip ranking table lines like '🥇 TSM +6.24%' or '💻 MSFT +12.30%' if they are monthly/YTD tables
+        line_start = cleaned.rfind("\n", 0, match.start()) + 1
+        line_end = cleaned.find("\n", match.end())
+        if line_end == -1:
+            line_end = len(cleaned)
+        line_str = cleaned[line_start:line_end]
+        if _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(line_str):
+            return match.group(0)
+        # Check if inside a monthly/YTD ranking section
+        before_block = cleaned[max(0, match.start() - 220): match.start()]
+        if re.search(r'MIGLIORI\s+\d+\s+(?:PERFORMANCE\s+MENSILI|DI\s+SEMPRE|YTD|DELL\'ANNO)', before_block, flags=re.IGNORECASE):
+            return match.group(0)
+
+        lookup_key = tok_raw.lstrip("$").upper()
+        if lookup_key not in pct_map:
+            return match.group(0)
+        _, actual = pct_map[lookup_key]
+        claimed = float(num_str.replace(",", "."))
+        tol = max(0.85, abs(actual) * 0.25)
+        sign_flip = (actual > 0.25 and claimed < -0.10) or (actual < -0.25 and claimed > 0.10)
+        if not sign_flip and abs(claimed - actual) <= tol:
+            return match.group(0)
+        return f"{tok_raw}{sep_open}{actual:+.2f}%{sep_close}"
+
+    cleaned = pat_b.sub(_repl_b, cleaned)
+    cleaned = fix_sign_sentiment_oxymorons(cleaned)
+    full_out = cleaned + footer_part
+    return full_out, (full_out != orig)
+
+
+def _verify_index_ground_truth(
+    narrative_body: str,
+    benchmark_daily: Dict[str, float],
+) -> List[str]:
+    """
+    Deterministic per-index direction and numerical verification against certified benchmark_daily.
+    Catches plain index names ('S&P 500', 'Nasdaq', 'Dow Jones', 'DAX') as well as cashtags.
+    """
+    issues: List[str] = []
+    if not narrative_body or not benchmark_daily:
+        return issues
+
+    index_specs = [
+        ("SPX500", r"(?:\$?SPX500|S&P\s*500)", benchmark_daily.get("SPX500")),
+        ("NSDQ100", r"(?:\$?NSDQ100|Nasdaq(?:\s*100)?)", benchmark_daily.get("NSDQ100")),
+        ("DJ30", r"(?:\$?DJ30|Dow\s+Jones)", benchmark_daily.get("DJ30")),
+        ("GER40", r"(?:\$?GER40|DAX(?:\s*40)?)", benchmark_daily.get("GER40")),
+    ]
+
+    for sym, alias_pat, actual in index_specs:
+        if actual is None:
+            continue
+        # 1. Directional contradiction per index
+        if actual > 0.15:
+            neg_idx_pat = (
+                rf"(?<!VS\s)(?:{alias_pat})\b[^\n\.;!?]{{0,45}}?\b"
+                r"(?:ha\s+chiuso\s+in\s+(?:forte\s+)?(?:calo|flessione|ribasso|rosso)|"
+                r"(?:che\s+)?ha\s+(?:perso|ceduto)\b|"
+                r"in\s+(?:forte\s+)?(?:calo|flessione|ribasso)\s+(?:del|dell['’]|di)\b|"
+                r"chiudendo\s+a\s+-\d)"
+            )
+            if re.search(neg_idx_pat, narrative_body, flags=re.IGNORECASE):
+                issues.append(
+                    f"CRITICAL: Incongruenza di tono/sentiment di mercato su indice {sym} "
+                    f"({actual:+.2f}% certificato Yahoo Finance), descritto erroneamente in calo/perdita nel testo."
+                )
+        elif actual < -0.15:
+            pos_idx_pat = (
+                rf"(?<!VS\s)(?:{alias_pat})\b[^\n\.;!?]{{0,45}}?\b"
+                r"(?:ha\s+chiuso\s+in\s+(?:forte\s+)?rialzo|"
+                r"(?:che\s+)?ha\s+guadagnato\b|"
+                r"in\s+(?:forte\s+)?rialzo\s+(?:del|dell['’])\b|"
+                r"chiudendo\s+a\s+\+\d)"
+            )
+            if re.search(pos_idx_pat, narrative_body, flags=re.IGNORECASE):
+                issues.append(
+                    f"CRITICAL: Incongruenza di tono/sentiment di mercato su indice {sym} "
+                    f"({actual:+.2f}% certificato Yahoo Finance), descritto erroneamente in rialzo/guadagno nel testo."
+                )
+
+        # 2. Numerical % check per index
+        num_idx_pat = re.compile(
+            rf"(?<!VS\s)({alias_pat})\b([^\n\.;!?]{{0,40}}?\b"
+            r"(?:ha\s+(?:perso|ceduto|guadagnato|chiuso\s+a)|chiudendo\s+a|"
+            r"in\s+(?:forte\s+|lieve\s+)?(?:rialzo|calo|flessione|progresso|ribasso)\s+(?:del|dell['’]|di))\s*(?:il\s+|l['’])?)"
+            r"([+\-]?\d+(?:[\.,]\d+)?)\s*%",
+            flags=re.IGNORECASE,
+        )
+        for m in num_idx_pat.finditer(narrative_body):
+            verb_ctx = m.group(2)
+            num_raw = m.group(3)
+            if _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(verb_ctx):
+                continue
+            claimed = _parse_signed_move(verb_ctx, num_raw)
+            if abs(claimed - actual) > 0.65:
+                issues.append(
+                    f"CRITICAL: Incongruenza numerica certificata su indice {sym}: "
+                    f"il testo riporta {claimed:+.2f}% contro {actual:+.2f}% reale (Yahoo Finance)."
+                )
+                break
+
+    # 3. Stale Dow Jones crash points check (e.g. 'Dow Jones in calo di circa 1.200 punti')
+    spx_val = benchmark_daily.get("SPX500")
+    dj_val = benchmark_daily.get("DJ30")
+    if (dj_val is not None and dj_val > -0.8) or (dj_val is None and spx_val is not None and spx_val > -0.5):
+        if re.search(
+            r'\b(?:Dow\s+Jones|\$?DJ30)\b[^\n\.;!?]{0,35}?\bin\s+(?:forte\s+)?(?:calo|flessione|ribasso|crollo)\s+di\s+(?:circa\s+|oltre\s+)?(?:[5-9]\d{2}|\d[\.,]\d{3})\s+punti',
+            narrative_body,
+            flags=re.IGNORECASE,
+        ):
+            issues.append(
+                "CRITICAL: Incongruenza di tono/sentiment di mercato: crollo in punti attribuito al Dow Jones incompatibile con la seduta odierna."
+            )
+
+    return issues
+
+
+def _verify_stock_ground_truth(
+    narrative_body: str,
+    stock_data: Optional[Dict[str, Any]],
+    session_name: Optional[str] = None,
+) -> List[str]:
+    """
+    Deterministic per-stock direction and numerical verification against certified stock_data.
+    Ensures no stock is published with an inverted sign or stale-day crash/rally percentage.
+    """
+    issues: List[str] = []
+    pct_map = _resolve_stock_pct_map(stock_data, session_name=session_name)
+    if not narrative_body or not pct_map:
+        return issues
+
+    # 1. Clause-level session move + percentage
+    pat_a = re.compile(
+        rf'(\$?[A-Za-z0-9]{{2,8}}(?:\.[A-Za-z]{{1,4}})?)\b([^\n\.;!?]{{0,55}}?)({_SESSION_MOVE_VERB_PATTERN}\s*)([+\-]?\d+(?:[\.,]\d+)?)\s*%',
+        flags=re.IGNORECASE,
+    )
+    for m in pat_a.finditer(narrative_body):
+        tok_raw, mid, verb_str, num_str = m.group(1), m.group(2), m.group(3), m.group(4)
+        after_slice = narrative_body[m.end(): m.end() + 18]
+        lookup_key = tok_raw.lstrip("$").upper()
+        if lookup_key not in pct_map:
+            continue
+        if not tok_raw.startswith("$") and tok_raw != tok_raw.upper():
+            continue
+        if "$" in mid or _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(mid) or _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(after_slice):
+            continue
+        if any(
+            other_k != lookup_key and other_k != lookup_key.split(".")[0] and re.search(rf'\b{re.escape(other_k)}\b', mid)
+            for other_k in pct_map
+        ):
+            continue
+        canon_sym, actual = pct_map[lookup_key]
+        claimed = _parse_signed_move(verb_str, num_str)
+        tol = max(0.85, abs(actual) * 0.25)
+        if (actual > 0.25 and claimed < -0.10) or (actual < -0.25 and claimed > 0.10):
+            issues.append(
+                f"CRITICAL: Inversione di segno sul titolo {canon_sym}: il testo riporta {claimed:+.2f}% "
+                f"mentre la variazione reale certificata Yahoo Finance è {actual:+.2f}%."
+            )
+        elif abs(claimed - actual) > tol:
+            issues.append(
+                f"CRITICAL: Incongruenza numerica certificata sul titolo {canon_sym}: il testo riporta {claimed:+.2f}% "
+                f"contro {actual:+.2f}% reale (Yahoo Finance)."
+            )
+
+    # 2. Shorthand '$TICKER (+X.X%)' or 'TICKER +X.X%' in narrative body
+    pat_b = re.compile(r'(\$?[A-Z]{2,6}(?:\.[A-Z]{1,4})?)(\s*\(\s*|\s+)([+\-]\d+(?:[\.,]\d+)?)\s*%(\s*\))?')
+    for m in pat_b.finditer(narrative_body):
+        tok_raw, num_str = m.group(1), m.group(3)
+        line_start = narrative_body.rfind("\n", 0, m.start()) + 1
+        line_end = narrative_body.find("\n", m.end())
+        if line_end == -1:
+            line_end = len(narrative_body)
+        line_str = narrative_body[line_start:line_end]
+        if _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(line_str):
+            continue
+        lookup_key = tok_raw.lstrip("$").upper()
+        if lookup_key not in pct_map:
+            continue
+        canon_sym, actual = pct_map[lookup_key]
+        claimed = float(num_str.replace(",", "."))
+        tol = max(0.85, abs(actual) * 0.25)
+        if (actual > 0.25 and claimed < -0.10) or (actual < -0.25 and claimed > 0.10):
+            issues.append(
+                f"CRITICAL: Inversione di segno sul titolo {canon_sym}: il testo riporta {claimed:+.2f}% "
+                f"mentre la variazione reale certificata Yahoo Finance è {actual:+.2f}%."
+            )
+        elif abs(claimed - actual) > tol:
+            issues.append(
+                f"CRITICAL: Incongruenza numerica certificata sul titolo {canon_sym}: il testo riporta {claimed:+.2f}% "
+                f"contro {actual:+.2f}% reale (Yahoo Finance)."
+            )
+
+    # 3. Direction-only contradiction without explicit % (e.g. '$TSM ha chiuso in calo' when actual is +6.24%)
+    pat_dir = re.compile(
+        r'(\$?[A-Z]{2,6}(?:\.[A-Z]{1,4})?)\b([^\n\.;!?]{0,40}?)\b'
+        r'(ha\s+chiuso\s+(?:la\s+seduta\s+|la\s+settimana\s+)?in\s+(?:forte\s+)?(?:calo|flessione|ribasso|rosso|rialzo|progresso))'
+    )
+    for m in pat_dir.finditer(narrative_body):
+        tok_raw, mid, dir_phrase = m.group(1), m.group(2), m.group(3)
+        if "$" in mid or _FUNDAMENTAL_METRIC_EXCLUSION_RE.search(mid):
+            continue
+        lookup_key = tok_raw.lstrip("$").upper()
+        if lookup_key not in pct_map:
+            continue
+        canon_sym, actual = pct_map[lookup_key]
+        if actual > 0.50 and _NEGATIVE_MOVE_WORDS_RE.search(dir_phrase):
+            issues.append(
+                f"CRITICAL: Contraddizione direzionale sul titolo {canon_sym}: descritto in calo/flessione "
+                f"quando ha chiuso a {actual:+.2f}% (Yahoo Finance)."
+            )
+        elif actual < -0.50 and _POSITIVE_MOVE_WORDS_RE.search(dir_phrase):
+            issues.append(
+                f"CRITICAL: Contraddizione direzionale sul titolo {canon_sym}: descritto in rialzo "
+                f"quando ha chiuso a {actual:+.2f}% (Yahoo Finance)."
+            )
+
+    return issues
 
 
 def clean_etoro_formatting(text: str) -> str:
@@ -567,6 +1062,7 @@ def clean_etoro_formatting(text: str) -> str:
     - Markdown asterisks `**bold**`, `*italic*`, `__bold__`
     - Parentheses wrapping cashtags e.g. '($NVDA)' -> ' $NVDA '
     - Auto-sanitizes common LLM hallucinations regarding asset identities (e.g. WDEF -> Defence, not Income)
+    - Strips orphaned emoji/bullet-only lines (e.g. '📅 🔹')
     - Fixes signed percentage / sentiment oxymorons
     """
     if not text:
@@ -607,6 +1103,17 @@ def clean_etoro_formatting(text: str) -> str:
         cleaned,
         flags=re.IGNORECASE
     )
+
+    # Remove orphaned bullet/emoji-only lines (e.g. '📅 🔹', '🔹 ') while preserving blank lines and '━━━' dividers
+    cleaned_lines = []
+    for ln in cleaned.split("\n"):
+        ln_strip = ln.strip()
+        if ln_strip and not re.search(r'[A-Za-z0-9À-ÿ]', ln_strip) and not re.match(r'^[━─═\-]{4,}$', ln_strip):
+            # Line has symbols/emojis/bullets only and zero letters/digits -> drop it
+            continue
+        cleaned_lines.append(ln)
+    cleaned = "\n".join(cleaned_lines)
+    cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
 
     # Fix sign/sentiment oxymorons (e.g. 'in flessione del +2.26%')
     cleaned = fix_sign_sentiment_oxymorons(cleaned)
@@ -679,9 +1186,11 @@ def verify_post_deterministic(
     primary_ticker: Optional[str] = None,
     session_name: Optional[str] = None,
     benchmark_daily: Optional[Dict[str, float]] = None,
+    stock_data: Optional[Dict[str, Any]] = None,
 ) -> Tuple[bool, List[str], str]:
     """
-    Fast, rule-based verification against PORTFOLIO_ASSETS_METADATA and temporal rules.
+    Fast, rule-based verification against PORTFOLIO_ASSETS_METADATA, temporal rules,
+    and certified Yahoo Finance benchmark/stock ground truth.
     
     Returns:
         tuple: (is_clean, issues_list, cleaned_text)
@@ -716,6 +1225,14 @@ def verify_post_deterministic(
         if re.search(pattern, text, flags=re.IGNORECASE) or re.search(pattern, cleaned_text, flags=re.IGNORECASE):
             issues.append(f"CRITICAL: {reason}.")
 
+    # 0a. Auditor meta-commentary leak check & semantic stock oxymoron check
+    for pattern, reason in AUDITOR_META_COMMENTARY_PATTERNS:
+        if re.search(pattern, cleaned_text, flags=re.IGNORECASE):
+            issues.append(f"CRITICAL: {reason}.")
+    for pattern, reason in SEMANTIC_STOCK_OXYMORON_PATTERNS:
+        if re.search(pattern, cleaned_text, flags=re.IGNORECASE):
+            issues.append(f"CRITICAL: {reason}.")
+
     # 0b. Temporal paradox and institutional figures check for close/evening sessions
     session_upper = (session_name or "").upper()
     is_close_session = (
@@ -736,30 +1253,41 @@ def verify_post_deterministic(
         if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
             issues.append(f"CRITICAL: BANALITÀ VIETATA: {reason}.")
 
-    # 0d. Check for market sentiment mismatch (claiming positive tone when market is down, or negative tone when market is up)
+    narrative_body = _extract_narrative_body_for_daily_checks(cleaned_text)
+    raw_narrative_body = _extract_narrative_body_for_daily_checks(text)
+
+    # 0d. Check for market sentiment & per-index ground truth mismatch
     if is_close_session and benchmark_daily:
         spx_perf = benchmark_daily.get('SPX500')
         ndx_perf = benchmark_daily.get('NSDQ100')
+        spx_disp = f"{spx_perf:+.2f}%" if spx_perf is not None else "N/A"
+        ndx_disp = f"{ndx_perf:+.2f}%" if ndx_perf is not None else "N/A"
         is_market_negative = (spx_perf is not None and spx_perf < -0.15) or (ndx_perf is not None and ndx_perf < -0.15)
         is_market_positive = (spx_perf is not None and spx_perf > 0.15) or (ndx_perf is not None and ndx_perf > 0.15)
         if is_market_negative:
             for pattern, reason in SENTIMENT_MISMATCH_PATTERNS:
-                if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
+                if re.search(pattern, narrative_body, flags=re.IGNORECASE) or re.search(pattern, raw_narrative_body, flags=re.IGNORECASE):
                     issues.append(
                         f"CRITICAL: Incongruenza di tono/sentiment di mercato: i listini hanno chiuso in calo "
-                        f"(SPX500: {spx_perf:+.2f}%, NSDQ100: {ndx_perf:+.2f}%), ma il testo descrive la seduta "
+                        f"(SPX500: {spx_disp}, NSDQ100: {ndx_disp}), ma il testo descrive la seduta "
                         f"con toni positivi o rialzisti ({reason}). Sostituire con chiusura in calo o flessione."
                     )
                     break
         elif is_market_positive:
             for pattern, reason in SENTIMENT_POSITIVE_MARKET_MISMATCH_PATTERNS:
-                if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
+                if re.search(pattern, narrative_body, flags=re.IGNORECASE) or re.search(pattern, raw_narrative_body, flags=re.IGNORECASE):
                     issues.append(
                         f"CRITICAL: Incongruenza di tono/sentiment di mercato: i listini hanno chiuso in rialzo "
-                        f"(SPX500: {spx_perf:+.2f}%, NSDQ100: {ndx_perf:+.2f}%), ma il testo descrive la seduta "
+                        f"(SPX500: {spx_disp}, NSDQ100: {ndx_disp}), ma il testo descrive la seduta "
                         f"con toni negativi o ribassisti ({reason}). Sostituire con chiusura in rialzo o positiva."
                     )
                     break
+
+        issues.extend(_verify_index_ground_truth(narrative_body, benchmark_daily))
+
+    # 0d-bis. Individual stock ground-truth verification (blocks inverted signs / stale-day % moves)
+    if stock_data:
+        issues.extend(_verify_stock_ground_truth(narrative_body, stock_data, session_name=session_name))
 
     # 0e. Next-session temporal and earnings verification for close/evening sessions
     if is_close_session:
@@ -923,15 +1451,15 @@ def sanitize_or_prune_post_content(
     primary_ticker: Optional[str] = None,
     session_name: Optional[str] = None,
     benchmark_daily: Optional[Dict[str, float]] = None,
+    stock_data: Optional[Dict[str, Any]] = None,
 ) -> Tuple[str, bool, List[str]]:
     """
     Sanitizes or prunes problematic content from a post instead of dropping it entirely.
 
     1. Depura claims non conformi (es. '100% dei copiatori in profitto' -> 'oltre l'80% delle posizioni storiche in profitto').
-    1b. Depura paradossi di sentiment di mercato (es. 'tono positivo' su seduta in calo -> 'listini in flessione e prese di beneficio').
-    2. Depura o Epura paragrafi con allucinazioni sui dividendi per asset ad accumulazione:
-       - Tenta prima la sostituzione chirurgica di parole vietate (dividendo/cedola -> rendimento/proventi capitalizzati).
-       - Se il paragrafo continua a fallire la verifica, EPURA (rimuove) il singolo paragrafo difettoso.
+    1b. Depura paradossi di sentiment di mercato e inversioni di segno sui singoli titoli (ground truth Yahoo Finance).
+    1c. Rimuove meta-commenti accidentali degli auditor ('sebbene non confermato nelle fonti principali').
+    2. Depura o Epura paragrafi con allucinazioni sui dividendi o asset dismessi.
     3. Re-esegue verify_post_deterministic(). Se pulito, ritorna (testo_pulito, True, []).
     """
     if not text:
@@ -959,15 +1487,37 @@ def sanitize_or_prune_post_content(
         flags=re.IGNORECASE,
     )
 
-    # 1b. Enforce benchmark ground truth (direction and numbers for both positive and negative markets)
+    # 1a. Strip subordinate auditor meta-commentary clauses (e.g. ', sebbene la performance specifica non sia stata confermata nelle fonti principali')
+    cleaned = re.sub(
+        r',?\s*(?:sebbene|benché|nonostante)\s+[^\.\n!?]{0,120}?\b(?:nelle|dalle)\s+fonti\s+(?:principali|disponibili|fornite|live|ufficiali)[^\.\n!?]*',
+        '',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r',?\s*(?:sebbene|benché)\s+le\s+fonti\s+(?:disponibili\s+|fornite\s+|principali\s+)?non\s+conferm[^\.\n!?]*',
+        '',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+
+    # 1b. Enforce benchmark & individual stock ground truth (direction and numbers)
     if benchmark_daily:
         cleaned, _ = enforce_benchmark_ground_truth(cleaned, benchmark_daily=benchmark_daily, session_name=session_name)
+    if stock_data:
+        cleaned, _ = enforce_stock_ground_truth(cleaned, stock_data=stock_data, session_name=session_name)
 
     # 1c. Risoluzione automatica di ossimori matematici segno/tono (es. 'chiuso in flessione del +2.26%')
-    cleaned = fix_sign_sentiment_oxymorons(cleaned)
+    cleaned = clean_etoro_formatting(cleaned)
 
     # Verifica preliminare sul testo depurato dai claim generali e dal sentiment
-    is_clean, issues, _ = verify_post_deterministic(cleaned, primary_ticker=primary_ticker, session_name=session_name, benchmark_daily=benchmark_daily)
+    is_clean, issues, _ = verify_post_deterministic(
+        cleaned,
+        primary_ticker=primary_ticker,
+        session_name=session_name,
+        benchmark_daily=benchmark_daily,
+        stock_data=stock_data,
+    )
     if is_clean:
         return cleaned, True, []
 
@@ -987,6 +1537,15 @@ def sanitize_or_prune_post_content(
         )
         if contains_purged:
             print(f"⚠️ [EPURAZIONE PARAGRAFO]: Rimosso paragrafo contenente asset dismesso: {para[:80]}...")
+            continue
+
+        # Check if paragraph still contains auditor meta-commentary or semantic stock oxymoron
+        has_meta_or_oxymoron = any(
+            re.search(pat, para, flags=re.IGNORECASE)
+            for pat, _ in (AUDITOR_META_COMMENTARY_PATTERNS + SEMANTIC_STOCK_OXYMORON_PATTERNS)
+        )
+        if has_meta_or_oxymoron:
+            print(f"⚠️ [EPURAZIONE PARAGRAFO]: Rimosso paragrafo con meta-commento/ossimoro irrisolvibile: {para[:80]}...")
             continue
 
         has_non_div_conflict = False
@@ -1029,7 +1588,13 @@ def sanitize_or_prune_post_content(
 
     # Se l'epurazione ha lasciato almeno 2 paragrafi e lunghezza sufficiente, verifica
     if len(cleaned_paras) >= 2 and len(candidate_text) >= 200:
-        is_now_clean, final_issues, _ = verify_post_deterministic(candidate_text, primary_ticker=primary_ticker, session_name=session_name, benchmark_daily=benchmark_daily)
+        is_now_clean, final_issues, _ = verify_post_deterministic(
+            candidate_text,
+            primary_ticker=primary_ticker,
+            session_name=session_name,
+            benchmark_daily=benchmark_daily,
+            stock_data=stock_data,
+        )
         if is_now_clean:
             return candidate_text, True, []
         else:
@@ -1043,6 +1608,8 @@ def audit_post_with_ai_reviewer(
     primary_ticker: Optional[str] = None,
     session_name: Optional[str] = None,
     generator_model: Optional[str] = None,
+    benchmark_daily: Optional[Dict[str, float]] = None,
+    stock_data: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Invokes an adversarial AI reviewer (or self-critic) to audit the post.
@@ -1090,6 +1657,21 @@ def audit_post_with_ai_reviewer(
 
     metadata_context = "\n\n".join(metadata_context_lines) if metadata_context_lines else "Nessun asset specifico di portafoglio identificato."
 
+    pct_map = _resolve_stock_pct_map(stock_data, session_name=session_name)
+    stock_gt_lines = []
+    seen_canon = set()
+    for _, (canon_sym, pct_val) in sorted(pct_map.items()):
+        if canon_sym not in seen_canon:
+            seen_canon.add(canon_sym)
+            stock_gt_lines.append(f"• {canon_sym}: {pct_val:+.2f}% (DATO REALE YAHOO FINANCE - INVIOLABILE)")
+    stock_gt_section = ""
+    if stock_gt_lines:
+        stock_gt_section = (
+            "\n=========================\n"
+            "PERFORMANCE CERTIFICATE TITOLI (YAHOO FINANCE GROUND TRUTH - NON MODIFICARE MAI SEGNO O NUMERO):\n"
+            "=========================\n" + "\n".join(stock_gt_lines) + "\n"
+        )
+
     # Pick reviewer model (prefer an alternative model if generator_model is specified)
     reviewer_model = REVIEWER_MODELS[0]
     if generator_model and len(REVIEWER_MODELS) > 1:
@@ -1101,7 +1683,7 @@ def audit_post_with_ai_reviewer(
 
     try:
         from independent_fact_checker import get_current_temporal_context
-        temporal_ctx = get_current_temporal_context(session_name)
+        temporal_ctx = get_current_temporal_context(session_name, benchmark_daily_data=benchmark_daily)
         temporal_section = f"""
 =========================
 INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
@@ -1110,13 +1692,14 @@ INFORMAZIONI TEMPORALI TASSATIVE (GROUND TRUTH):
 • Ora Locale Italiana: {temporal_ctx.get('rome_time')}
 • Ora Wall Street: {temporal_ctx.get('ny_time')}
 • Stato Sessione: {temporal_ctx.get('market_state')}
+• Indici Certificati: {temporal_ctx.get('benchmarks_daily')}
 """
     except Exception:
         temporal_section = ""
 
     audit_prompt = f"""Sei il Lead Financial Fact-Checker & Compliance Auditor per un portfolio pubblico su eToro.
 Il tuo compito è analizzare con estremo rigore critico il seguente POST generato per i social/eToro e verificare che NON contenga alcuna allucinazione o inesattezza finanziaria rispetto alla SINGLE SOURCE OF TRUTH dei dati ufficiali.
-{temporal_section}
+{temporal_section}{stock_gt_section}
 =========================
 METADATI UFFICIALI DEGLI ASSET COINVOLTI (SINGLE SOURCE OF TRUTH):
 =========================
@@ -1132,10 +1715,11 @@ REGOLE DI VERIFICA TASSATIVE:
 =========================
 1. VERIFICA DIVIDENDI (CRITICA): Se un asset ha 'Paga Dividendi: NO (ACCUMULAZIONE / ZERO CEDOLE DISTRIBUITE)' (come ad esempio $WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), il post NON DEVE IN ALCUN MODO attribuirgli dividendi, cedole, rendimenti da dividendo o considerarlo un asset di "income/reddito da dividendo". Se questa allucinazione è presente, DEVI CORREGGERLA spiegando che l'asset capitalizza tutti i proventi nel NAV ad accumulazione, oppure rimuovere ogni riferimento ai dividendi.
 2. VERIFICA IDENTITÀ & SETTORE: Il nome dell'azienda o dell'ETF e il settore devono corrispondere esattamente ai dati ufficiali. (Es: $WDEF.L è WisdomTree Europe Defence UCITS ETF, settore Difesa e Aerospazio europeo ad accumulazione, MAI Equity Income o 'Windows Europe'; $IQQL.DE è iShares Listed Private Equity UCITS ETF, settore Private Equity, NON MSCI World Quality).
-3. FORMATTAZIONE ETORO: Rimuovi qualsiasi markdown bold '**' o '__' perché eToro non lo supporta. I cashtag devono avere lo spazio prima e dopo (es. ' $NVDA ').
-4. REGOLA ASSOLUTA SUI CASHTAG ($TICKER): Nel post finale possono esserci al MASSIMO 4 cashtag in totale. Se un'azienda o ETF è citata nel testo SENZA il simbolo $, NON trasformarla in cashtag (NON aggiungere il prefisso $). NON aggiungere MAI nuovi cashtag che non erano già presenti con il prefisso $ nel testo da revisionare.
-5. COERENZA TEMPORALE & ISTITUZIONALE: Se la sessione è serale o di chiusura mercati (US_CLOSE), la seduta odierna è CONCLUSA e tutti gli eventi odierni sono GIÀ AVVENUTI. È tassativamente vietato usare il futuro per eventi di oggi ('oggi deciderà', 'in attesa della decisione di oggi'). Correggi al passato ('ha deciso') oppure, se l'esito reale non è certo, rimuovi l'affermazione per non spacciare speculazioni per fatti. Bonifica eventuali cariche non attuali.
-6. DECISIONE:
+3. GERARCHIA INVIOLABILE DEI NUMERI: I numeri di performance indici e titoli riportati in 'GROUND TRUTH YAHOO FINANCE' sono certificati al 100%. NON sovrascriverli MAI con numeri diversi e NON inserire MAI meta-commenti come 'nelle fonti principali' o 'le fonti non confermano' dentro verified_text.
+4. FORMATTAZIONE ETORO: Rimuovi qualsiasi markdown bold '**' o '__' perché eToro non lo supporta. I cashtag devono avere lo spazio prima e dopo (es. ' $NVDA ').
+5. REGOLA ASSOLUTA SUI CASHTAG ($TICKER): Nel post finale possono esserci al MASSIMO 4 cashtag in totale. Se un'azienda o ETF è citata nel testo SENZA il simbolo $, NON trasformarla in cashtag (NON aggiungere il prefisso $). NON aggiungere MAI nuovi cashtag che non erano già presenti con il prefisso $ nel testo da revisionare.
+6. COERENZA TEMPORALE & ISTITUZIONALE: Se la sessione è serale o di chiusura mercati (US_CLOSE), la seduta odierna è CONCLUSA e tutti gli eventi odierni sono GIÀ AVVENUTI (salvo il paragrafo finale 🔮 sulle prospettive della prossima seduta, che DEVE restare al futuro!). Bonifica eventuali cariche non attuali.
+7. DECISIONE:
    - Se il post è perfetto e veritiero -> decision: "APPROVE", verified_text: il testo originale pulito.
    - Se il post contiene inesattezze o allucinazioni ma è correggibile preservando struttura e stile -> decision: "AUTO_CORRECT", verified_text: il testo integralmente corretto e bonificato.
    - Se il post è totalmente fuorviante, incoerente o dannoso -> decision: "REJECT", verified_text: "".
@@ -1197,6 +1781,7 @@ def verify_and_clean_post(
     generator_model: Optional[str] = None,
     run_ai_review: bool = True,
     benchmark_daily: Optional[Dict[str, float]] = None,
+    stock_data: Optional[Dict[str, Any]] = None,
 ) -> Tuple[bool, str, Dict[str, Any]]:
     """
     Complete pre-publication verification pipeline.
@@ -1221,12 +1806,13 @@ def verify_and_clean_post(
         except Exception:
             benchmark_daily = {}
 
-    # Stage 1: Deterministic check (structural, asset compliance, temporal rules, sentiment consistency)
+    # Stage 1: Deterministic check (structural, asset compliance, temporal rules, sentiment & stock consistency)
     is_clean, issues, cleaned_text = verify_post_deterministic(
         text,
         primary_ticker=primary_ticker,
         session_name=session_name,
-        benchmark_daily=benchmark_daily
+        benchmark_daily=benchmark_daily,
+        stock_data=stock_data,
     )
 
     if issues:
@@ -1263,6 +1849,7 @@ def verify_and_clean_post(
                     session_name=session_name,
                     portfolio_metadata_summary=meta_str,
                     benchmark_daily_data=benchmark_daily,
+                    stock_data=stock_data,
                 )
             else:
                 ext_audit = run_independent_fact_check(
@@ -1270,6 +1857,7 @@ def verify_and_clean_post(
                     session_name=session_name,
                     portfolio_metadata_summary=meta_str,
                     benchmark_daily_data=benchmark_daily,
+                    stock_data=stock_data,
                 )
             if ext_audit and "decision" in ext_audit:
                 audit_data = ext_audit
@@ -1283,6 +1871,8 @@ def verify_and_clean_post(
                 primary_ticker=primary_ticker,
                 session_name=session_name,
                 generator_model=generator_model,
+                benchmark_daily=benchmark_daily,
+                stock_data=stock_data,
             )
 
         if audit_data:
@@ -1302,12 +1892,13 @@ def verify_and_clean_post(
                 for t_err in audit_data.get("temporal_issues", []):
                     print(f"      • Fixed temporal issue: {t_err}")
                 final_text = limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4)
-                if benchmark_daily:
+                if benchmark_daily or stock_data:
                     final_text, _, _ = sanitize_or_prune_post_content(
                         final_text,
                         primary_ticker=primary_ticker,
                         session_name=session_name,
-                        benchmark_daily=benchmark_daily
+                        benchmark_daily=benchmark_daily,
+                        stock_data=stock_data,
                     )
                 # Re-verify deterministic gate on post-audit text
                 is_clean_final, final_issues, _ = verify_post_deterministic(
@@ -1315,6 +1906,7 @@ def verify_and_clean_post(
                     primary_ticker=primary_ticker,
                     session_name=session_name,
                     benchmark_daily=benchmark_daily,
+                    stock_data=stock_data,
                 )
                 critical_final = [i for i in final_issues if i.startswith("CRITICAL")]
                 if critical_final:
@@ -1327,12 +1919,13 @@ def verify_and_clean_post(
             # APPROVE
             print(f"   ✅ POST APPROVED BY AUDITOR ({auditor_name}).")
             final_text = limit_cashtags(clean_etoro_formatting(verified_text), max_tags=4)
-            if benchmark_daily:
+            if benchmark_daily or stock_data:
                 final_text, _, _ = sanitize_or_prune_post_content(
                     final_text,
                     primary_ticker=primary_ticker,
                     session_name=session_name,
-                    benchmark_daily=benchmark_daily
+                    benchmark_daily=benchmark_daily,
+                    stock_data=stock_data,
                 )
             # Re-verify deterministic gate on post-audit text
             is_clean_final, final_issues, _ = verify_post_deterministic(
@@ -1340,6 +1933,7 @@ def verify_and_clean_post(
                 primary_ticker=primary_ticker,
                 session_name=session_name,
                 benchmark_daily=benchmark_daily,
+                stock_data=stock_data,
             )
             critical_final = [i for i in final_issues if i.startswith("CRITICAL")]
             if critical_final:

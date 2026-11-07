@@ -220,6 +220,82 @@ def search_tavily(
     return []
 
 
+def filter_live_news_for_topic(
+    live_news_context: str,
+    topic_text: str,
+    topic_type: str = "full_post",
+) -> str:
+    """
+    Filters Tavily live news context according to the micro-topic type so that
+    single-stock paragraphs do not get cross-contaminated by global macro headlines
+    (e.g. a previous day's index drop being injected into an individual stock paragraph).
+    """
+    if not live_news_context or topic_type not in ("stock_paragraph", "stock_bullet"):
+        return live_news_context
+
+    import re
+    raw_tags = re.findall(r'\$([A-Za-z0-9\-\.]+)', topic_text or "")
+    target_bases = {t.split(".")[0].upper() for t in raw_tags if t}
+    if not target_bases:
+        # Check plain uppercase ticker tokens or company names if $ was stripped
+        for known_base, comp_desc in TICKER_NAME_MAP.items():
+            first_word = comp_desc.split()[0] if comp_desc else ""
+            if re.search(rf'\b{re.escape(known_base)}\b', topic_text or ""):
+                target_bases.add(known_base)
+            elif len(first_word) >= 4 and re.search(rf'\b{re.escape(first_word)}\b', topic_text or "", flags=re.IGNORECASE):
+                target_bases.add(known_base)
+
+    if not target_bases:
+        return ""
+
+    # Extract only matching "📊 NOTIZIE E DATI REALI PER $<TAG>" blocks
+    blocks = re.split(r'(?=\n?📊 NOTIZIE E DATI REALI PER \$)', live_news_context)
+    matched_blocks = []
+    for blk in blocks:
+        blk_strip = blk.strip()
+        if not blk_strip.startswith("📊 NOTIZIE E DATI REALI PER $"):
+            continue
+        m = re.match(r'^📊 NOTIZIE E DATI REALI PER \$([A-Za-z0-9\-\.]+)', blk_strip)
+        if m and m.group(1).split(".")[0].upper() in target_bases:
+            matched_blocks.append(blk_strip)
+
+    if not matched_blocks:
+        return ""
+    return "🏢 CATALIZZATORI E NOTIZIE SOCIETARIE SUL TITOLO IN ESAME:\n" + "\n\n".join(matched_blocks)
+
+
+def _format_pub_date_label(pub_raw: Optional[str], today_iso: str, default_label: str = "Recente") -> str:
+    """
+    Formats article publication date and adds an explicit warning if the article
+    is from a previous calendar day so LLMs/auditors never mistake stale price % moves for today's close.
+    """
+    if not pub_raw:
+        return default_label
+    pub_str = str(pub_raw).strip()
+    # Try to parse YYYY-MM-DD or RFC-2822 / ISO date
+    iso_match = None
+    import re
+    m = re.search(r'(\d{4}-\d{2}-\d{2})', pub_str)
+    if m:
+        iso_match = m.group(1)
+    else:
+        try:
+            from email.utils import parsedate_to_datetime
+            dt = parsedate_to_datetime(pub_str)
+            iso_match = dt.strftime("%Y-%m-%d")
+        except Exception:
+            iso_match = None
+
+    if iso_match and iso_match < today_iso:
+        return (
+            f"DATA ARTICOLO PRECEDENTE: {iso_match} — NON È OGGI ({today_iso}): "
+            f"usa SOLO fatti societari strutturali, IGNORA variazioni % di prezzo/indici di quella seduta!"
+        )
+    if iso_match == today_iso:
+        return f"OGGI {iso_match}"
+    return pub_str
+
+
 def get_live_market_news_context(
     session_name: Optional[str] = None,
     tickers: Optional[List[str]] = None,
@@ -232,7 +308,7 @@ def get_live_market_news_context(
     
     Executes parallel queries:
     1. One macro session query (e.g. Wall Street open/close, European open)
-    2. Targeted individual queries for up to 3 specific portfolio tickers to fetch
+    2. Targeted individual queries for up to 4 specific portfolio tickers to fetch
        genuine catalysts, quarterly earnings, orders, analyst upgrades, or operational figures.
     
     Returns:
@@ -241,23 +317,31 @@ def get_live_market_news_context(
     if not is_tavily_available():
         return ""
 
+    from datetime import datetime as _dt, timezone as _tz
+    try:
+        from zoneinfo import ZoneInfo as _ZI
+        today_iso = _dt.now(_ZI("America/New_York")).strftime("%Y-%m-%d")
+    except Exception:
+        today_iso = _dt.now(_tz.utc).strftime("%Y-%m-%d")
+
     session_str = (session_name or "Wall Street market close").lower()
 
-    # 1. Determine macro query
+    # 1. Determine macro query (use days=1 for close sessions to avoid yesterday's market crash/rally headlines)
+    is_close_macro = False
     if "monthly" in session_str:
-        from datetime import datetime as _dt
         current_month = _dt.now().strftime('%B %Y')
         macro_query = f"{current_month} stock market monthly recap Federal Reserve inflation ECB interest rates Wall Street"
         days = 30
     elif "open" in session_str and "eu" in session_str:
         macro_query = "European stock market open Stoxx 600 DAX today"
-        days = 2
+        days = 1
     elif "open" in session_str:
         macro_query = "Wall Street stock market opening futures today S&P 500"
-        days = 2
+        days = 1
     elif "close" in session_str:
         macro_query = "Wall Street stock market close today S&P 500 Nasdaq"
-        days = 2
+        days = 1
+        is_close_macro = True
     elif "weekly" in session_str:
         macro_query = "weekly stock market recap Wall Street S&P 500"
         days = 5
@@ -283,6 +367,8 @@ def get_live_market_news_context(
     def _execute_search(task):
         tag, query, d, m = task
         res = search_tavily(query=query, topic="news", days=d, max_results=m)
+        if not res and tag == "macro" and d == 1:
+            res = search_tavily(query=query, topic="news", days=2, max_results=m)
         return tag, res
 
     try:
@@ -302,28 +388,39 @@ def get_live_market_news_context(
             for r in results:
                 title = r.get("title", "News")
                 content = r.get("content", "").strip().replace("\n", " ")
-                pub = r.get("published_date") or "Oggi"
+                pub_raw = r.get("published_date")
+                # On daily close sessions, skip macro index articles explicitly dated from previous days
+                # so yesterday's Wall Street close never masquerades as today's session!
+                pub_label = _format_pub_date_label(pub_raw, today_iso, default_label="Oggi")
+                if is_close_macro and "DATA ARTICOLO PRECEDENTE:" in pub_label:
+                    continue
                 url = r.get("url", "")
                 source_str = f" ({url})" if url else ""
                 snippet = content[:250] + "..." if len(content) > 250 else content
-                macro_items.append(f"• [{pub}] {title}{source_str}\n  Sintesi: {snippet}")
+                macro_items.append(f"• [{pub_label}] {title}{source_str}\n  Sintesi: {snippet}")
         else:
             company_name = TICKER_NAME_MAP.get(tag, tag)
             sub_items = [f"\n📊 NOTIZIE E DATI REALI PER ${tag} ({company_name}):"]
             for r in results:
                 title = r.get("title", "News")
                 content = r.get("content", "").strip().replace("\n", " ")
-                pub = r.get("published_date") or "Recente"
+                pub_label = _format_pub_date_label(r.get("published_date"), today_iso, default_label="Recente")
                 url = r.get("url", "")
                 source_str = f" ({url})" if url else ""
                 snippet = content[:280] + "..." if len(content) > 280 else content
-                sub_items.append(f"• [{pub}] {title}{source_str}\n  Fatto/Dato concreto: {snippet}")
+                sub_items.append(f"• [{pub_label}] {title}{source_str}\n  Fatto/Dato concreto: {snippet}")
             ticker_items.append("\n".join(sub_items))
 
     output_sections = []
     if macro_items:
-        output_sections.append("🌍 CONTESTO MACRO E APERTURA/CHIUSURA MERCATI:\n" + "\n".join(macro_items))
+        output_sections.append(
+            "🌍 CONTESTO MACRO E APERTURA/CHIUSURA MERCATI (solo per contesto qualitativo; per i numeri % di chiusura valgono SOLO i Ground Truth Yahoo Finance):\n"
+            + "\n".join(macro_items)
+        )
     if ticker_items:
-        output_sections.append("🏢 CATALIZZATORI E NOTIZIE SOCIETARIE SUI NOSTRI TITOLI:\n" + "\n".join(ticker_items))
+        output_sections.append(
+            "🏢 CATALIZZATORI E NOTIZIE SOCIETARIE SUI NOSTRI TITOLI (solo per catalizzatori qualitativi; per la variazione % odierna del titolo vale SOLO il Ground Truth Yahoo Finance):\n"
+            + "\n".join(ticker_items)
+        )
 
     return "\n\n".join(output_sections)
