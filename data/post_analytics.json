@@ -1,6 +1,24 @@
 {
-  "last_updated": "2026-11-10T15:37:06.306521+00:00",
+  "last_updated": "2026-11-10T16:07:48.623304+00:00",
   "posts": [
+    {
+      "id": "df70f550-dd20-11f1-8080-80010b41bb1b",
+      "platform": "etoro",
+      "session": "Earnings Release: $ETOR Q3 2026",
+      "published_at": "2026-11-10T16:07:48Z",
+      "day_of_week": "Tuesday",
+      "hour_utc": 16,
+      "hour_local": 18,
+      "title": "📊 EARNINGS FLASH: RISULTATI TRIMESTRALI Q3 2026  eToro Group Ltd $ETOR ha appena...",
+      "tickers": [
+        "ETOR"
+      ],
+      "image_type": "earnings_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
     {
       "id": "da86f1f0-dd13-11f1-8080-800154f85ba2",
       "platform": "etoro",
