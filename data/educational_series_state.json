@@ -1,7 +1,7 @@
 {
-  "last_published_episode": 5,
-  "last_published_date": "2026-11-04",
-  "total_published_count": 5,
+  "last_published_episode": 6,
+  "last_published_date": "2026-11-11",
+  "total_published_count": 6,
   "history": [
     {
       "episode": 1,
@@ -32,6 +32,12 @@
       "title": "CHARLIE MUNGER E I PRIMI 100.000$",
       "date": "2026-11-04T19:56:59.664445",
       "post_id": "e5457690-d889-11f1-8080-80017250337e"
+    },
+    {
+      "episode": 6,
+      "title": "IL SANTO GRAAL DI RAY DALIO",
+      "date": "2026-11-11T19:46:16.424642",
+      "post_id": "8ebe0b00-de08-11f1-8080-80000844db5b"
     }
   ]
 }
