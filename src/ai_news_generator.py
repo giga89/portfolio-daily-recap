@@ -2705,6 +2705,18 @@ COPY_TRADING_ETORO_THEMES = [
             "e gestendo attivamente il rischio per attutire le correzioni."
         ),
         "fallback_angle": "Confronto attivo con l'indice $SPX500 e selezione disciplinata di leader come $NVDA e $MSFT.",
+        "header_prefix": "💡 ALPHA & GESTIONE ATTIVA SU eToro:",
+        "hook": (
+            "Molti investitori scelgono la replica passiva dell'indice $SPX500 come base del portafoglio. "
+            "Ma nei cicli di mercato complessi, la vera differenza la fa la gestione attiva: "
+            "selezionare campioni con moat insormontabili come $NVDA e $MSFT e gestire la liquidità per attutire i ribassi genera un Alpha concreto."
+        ),
+        "body": (
+            "Attraverso il Copy Trading su eToro puoi replicare in tempo reale e in proporzione ogni nostra operazione. "
+            "Un'opportunità per agganciare la crescita a un metodo che punta a sovraperformare il mercato nel medio-lungo termine, "
+            "con zero commissioni di gestione e piena libertà di avviare o fermare la copia con il capitale desiderato."
+        ),
+        "cta": "Preferisci una strategia totalmente passiva su indici o credi che la gestione attiva di qualità crei valore aggiunto nel tempo? Parliamone nei commenti! 👇",
     },
     {
         "id": "ai_secular_megatrend",
@@ -2715,6 +2727,17 @@ COPY_TRADING_ETORO_THEMES = [
             "fonderie avanzate ($TSM) e software enterprise ($PLTR), mantenendo equilibrio e diversificazione rispetto a $SPX500."
         ),
         "fallback_angle": "Esposizione strategica ai leader dell'infrastruttura AI ($NVDA, $PLTR, $TSM) bilanciata rispetto all'indice $SPX500.",
+        "header_prefix": "🌐 MEGATREND & INNOVAZIONE SU eToro:",
+        "hook": (
+            "L'Intelligenza Artificiale non è una moda passeggera, ma una rivoluzione infrastrutturale che trasformerà l'economia per i prossimi decenni. "
+            "Invece di rincorrere speculazioni effimere, la nostra allocazione punta sui veri nodi della filiera: "
+            "il computing di $NVDA, le fonderie avanzate di $TSM e le soluzioni enterprise di $PLTR, mantenendo un sano equilibrio rispetto a $SPX500."
+        ),
+        "body": (
+            "Grazie al Copy Trading su eToro puoi esporti a questo megatrend tecnologico in modo ponderato e professionale a leva zero. "
+            "I ribilanciamenti e la gestione delle posizioni avvengono automaticamente sul tuo conto in proporzione esatta al budget scelto."
+        ),
+        "cta": "Quale tra hardware, fonderie o software enterprise consideri il segmento più insostituibile nei prossimi 5 anni? Dì la tua qui sotto 👇",
     },
     {
         "id": "risk_management_score3",
@@ -2725,6 +2748,16 @@ COPY_TRADING_ETORO_THEMES = [
             "Risk Score 3/10 su eToro, Beta difensivo 0.84 vs $SPX500, zero leva speculativa, e colossi dai flussi di cassa enormi come $MSFT e $AMZN."
         ),
         "fallback_angle": "Protezione del capitale, Risk Score 3/10 e 100% zero leva con campioni dai bilanci solidi come $MSFT e $AMZN rispetto a $SPX500.",
+        "header_prefix": "🛡️ GESTIONE DEL RISCHIO SU eToro:",
+        "hook": (
+            "La prima regola per far correre l'interesse composto non è cercare il colpo a breve termine, ma evitare perdite rovinose nei momenti di turbolenza. "
+            "Con un Risk Score certificato di 3/10 su eToro, un Beta difensivo (~0.84 vs $SPX500) e il 100% di posizioni senza leva finanziaria, la priorità è la conservazione del capitale."
+        ),
+        "body": (
+            "Ancoriamo il portafoglio a fortezze con flussi di cassa solidissimi come $MSFT e $AMZN. "
+            "Replicando la strategia con il Copy Trading su eToro ottieni una copertura bilanciata e trasparente, con liquidità immediata e pieno controllo sul tuo capitale."
+        ),
+        "cta": "Quanto pesa per te la protezione del capitale e la gestione del drawdown rispetto alla ricerca del massimo rendimento volatile? Scrivimelo nei commenti 👇",
     },
     {
         "id": "real_track_record_consistency",
@@ -2735,6 +2768,17 @@ COPY_TRADING_ETORO_THEMES = [
             "in anticipo rispetto alla media dell'indice $SPX500. Metodo, disciplina e trasparenza totale con posizioni di convinzione come $PLTR e $CCJ."
         ),
         "fallback_angle": "Oltre 8 anni di storico reale su eToro, win rate solido e recupero rapido dei drawdown rispetto a $SPX500 con $PLTR e $CCJ.",
+        "header_prefix": "🎯 TRASPARENZA & STORICO REALE SU eToro:",
+        "hook": (
+            "Sui mercati finanziari le promesse non contano: contano solo i dati pubblici, verificabili e testati nel tempo. "
+            "Da oltre 8 anni opero come Popular Investor su eToro con la massima trasparenza: storico mensile aperto, "
+            "win rate solido e una comprovata capacità di superare le fasi orso e recuperare con forza rispetto all'indice $SPX500."
+        ),
+        "body": (
+            "Le posizioni di convinzione su driver strategici come $PLTR e l'energia di $CCJ sono frutto di anni di disciplina e analisi approfondita. "
+            "Con il Copy Trading su eToro puoi replicare con un semplice clic una gestione rodata sul campo nel lungo termine."
+        ),
+        "cta": "Cosa guardi per prima cosa quando analizzi un portafoglio: la performance degli ultimi 30 giorni o la solidità dello storico pluriennale? 👇",
     },
     {
         "id": "diversification_energy_pharma",
@@ -2746,6 +2790,17 @@ COPY_TRADING_ETORO_THEMES = [
             "e innovazione farmaceutica anticiclica con $LLY per generare sovraperformance in ogni fase del ciclo."
         ),
         "fallback_angle": "Diversificazione concreta tra energia nucleare ($CCJ) e pharma difensivo ($LLY) per superare l'indice $SPX500.",
+        "header_prefix": "⚖️ DECORRELAZIONE INTELLIGENTE SU eToro:",
+        "hook": (
+            "Concentrare tutto il capitale solo su titoli tech o sull'indice passivo $SPX500 può costare caro nei cambi di ciclo economico. "
+            "La vera resilienza richiede decorrelazione: affiancare all'innovazione pilastri insostituibili come l'energia nucleare con $CCJ per alimentare i datacenter, "
+            "e la stabilità anticiclica dell'innovazione farmaceutica con $LLY."
+        ),
+        "body": (
+            "Questa ripartizione multisettoriale permette di proteggere e accrescere il valore in qualsiasi contesto macroeconomico. "
+            "Tramite il Copy Trading su eToro replichi questa diversificazione globale professionale in proporzione al capitale che decidi di allocare."
+        ),
+        "cta": "Quali settori utilizzi per decorrelare il tuo portafoglio dalla tecnologia? Condividi i tuoi preferiti nei commenti! 👇",
     },
     {
         "id": "how_copy_trading_works",
@@ -2756,6 +2811,16 @@ COPY_TRADING_ETORO_THEMES = [
             "Zero commissioni di gestione, azioni frazionate a partire da cifre contenute, e libertà assoluta di fermare o prelevare in qualunque istante rispetto a fondi o $SPX500."
         ),
         "fallback_angle": "Funzionamento pratico del Copy Trading: zero costi di gestione, piena liquidità e replica automatica su $AMZN e $MSFT.",
+        "header_prefix": "🚀 GUIDA PRATICA AL COPY TRADING SU eToro:",
+        "hook": (
+            "Come funziona davvero il Copy Trading su eToro? Molti credono servano grandi cifre o competenze avanzate, ma il principio è semplice e intuitivo: "
+            "con un clic sul profilo puoi replicare automaticamente ogni ordine aperto e futuro su asset come $AMZN, $MSFT e la componente difensiva legata a $SPX500."
+        ),
+        "body": (
+            "Le operazioni vengono ripartite in proporzione esatta al tuo budget grazie alle azioni frazionate. "
+            "Non ci sono commissioni di gestione patrimoniale, il capitale resta sempre interamente tuo e puoi mettere in pausa o interrompere la copia in qualsiasi momento."
+        ),
+        "cta": "Hai dubbi o curiosità pratiche sul funzionamento del Copy Trading o sulla gestione automatica dei ribilanciamenti? Scrivimi pure nei commenti 👇",
     },
     {
         "id": "multi_ai_quant_edge",
@@ -2767,6 +2832,17 @@ COPY_TRADING_ETORO_THEMES = [
             "e battere la volatilità di $SPX500."
         ),
         "fallback_angle": "Approccio razionale Multi-AI e notizie verificate live per gestire titoli volatili come $PLTR e $NVDA battendo l'emotività.",
+        "header_prefix": "🔬 METODO QUANTITATIVO MULTI-AI SU eToro:",
+        "hook": (
+            "L'emotività e il rumore mediatico sono i peggiori nemici degli investitori. Nel nostro portafoglio le decisioni non nascono da opinioni estemporanee, "
+            "ma da un metodo Multi-AI quantitativo: verifica delle notizie in tempo reale alla fonte (Tavily), monitoraggio dei catalizzatori societari su $PLTR e $NVDA, "
+            "e gestione del rischio orientata a superare la volatilità di $SPX500."
+        ),
+        "body": (
+            "Eliminare bias cognitivi e FOMO consente di prendere decisioni razionali e basate sui fatti. "
+            "Con il Copy Trading su eToro hai accesso diretto ai benefici di questo approccio strutturato senza dover passare ore ad analizzare bilanci e dati di mercato."
+        ),
+        "cta": "Credi che l'intelligenza artificiale e l'analisi quantitativa dei dati daranno un vantaggio decisivo agli investitori nei prossimi anni? 👇",
     },
     {
         "id": "digital_backbone_cashflow",
@@ -2777,6 +2853,17 @@ COPY_TRADING_ETORO_THEMES = [
             "Investire in aziende con moat inscalfibili genera flussi di cassa stabili che battono l'inflazione e sovraperformano $SPX500."
         ),
         "fallback_angle": "Infrastruttura del cloud e semiconduttori con $MSFT, $AMZN e $TSM per una crescita composta superiore a $SPX500.",
+        "header_prefix": "🏢 INFRASTRUTTURA & CASH FLOW SU eToro:",
+        "hook": (
+            "I migliori investimenti sono quelli in aziende con moat competitivi quasi impossibili da scalfire e flussi di cassa operativi imponenti. "
+            "La spina dorsale del nostro portafoglio poggia su campioni come $MSFT e $AMZN per il cloud computing globale e $TSM per la produzione avanzata di semiconduttori, "
+            "fornendo una qualità di bilancio superiore alla media di $SPX500."
+        ),
+        "body": (
+            "Investire in leader con elevato potere di prezzo è la miglior difesa contro l'inflazione. "
+            "Attraverso il Copy Trading su eToro partecipi alla crescita di queste eccellenze mondiali a leva zero, con un profilo di rischio contenuto e monitorato costantemente."
+        ),
+        "cta": "Quale tra cloud, semiconduttori o piattaforme enterprise ritieni genererà i flussi di cassa più resilienti nel prossimo ciclo economico? 👇",
     },
     {
         "id": "crypto_asymmetric_allocation",
@@ -2787,6 +2874,78 @@ COPY_TRADING_ETORO_THEMES = [
             "zero leva finanziaria, decorrelazione e asimmetria positiva a lungo termine senza rischiare la stabilità complessiva rispetto a $SPX500."
         ),
         "fallback_angle": "Presenza mirata e prudente di $BTC ed $ETH a leva zero come motore asimmetrico integrato al benchmark $SPX500.",
+        "header_prefix": "🪙 ALLOCAZIONE ASIMMETRICA CRYPTO SU eToro:",
+        "hook": (
+            "Integrare asset digitali in una strategia patrimoniale non deve mai trasformarsi in azzardo o trading frenetico. "
+            "La nostra allocazione prevede una quota dosata di $BTC ed $ETH gestita con logica asimmetrica: "
+            "100% a leva zero, con un peso calibrato per catturare la crescita dell'ecosistema digitale senza mettere a repentaglio la stabilità rispetto a $SPX500 e il nostro Risk Score 3/10."
+        ),
+        "body": (
+            "Questo approccio permette di beneficiare dell'asimmetria positiva mantenendo un profilo prudente e disciplinato. "
+            "Tramite il Copy Trading su eToro replichi esattamente questa ponderazione senza dover gestire chiavi private o complessità tecniche."
+        ),
+        "cta": "Che percentuale del portafoglio consideri equilibrata per un'allocazione in asset digitali senza alterare il profilo di rischio complessivo? Scrivilo sotto 👇",
+    },
+    {
+        "id": "pac_dca_compound_discipline",
+        "title": "Strategia PAC & Piano d'Accumulo con Copy Trading",
+        "tickers": ["SPX500", "AMZN", "MSFT"],
+        "angle": (
+            "Come sfruttare il Copy Trading per impostare un piano di accumulo del capitale (PAC/DCA) costante nel tempo, "
+            "mediando i prezzi di ingresso su asset come $AMZN e $MSFT e superando l'ansia da market timing su $SPX500."
+        ),
+        "fallback_angle": "Piano di accumulo periodico (PAC/DCA) disciplinato su leader di mercato come $AMZN e $MSFT senza lo stress del market timing.",
+        "header_prefix": "📈 STRATEGIA PAC & ACCUMULO SU eToro:",
+        "hook": (
+            "Cercare di prevedere i massimi e i minimi di mercato (il cosiddetto market timing) è una delle trappole più costose per gli investitori. "
+            "Un piano di accumulo del capitale (PAC/DCA) costante nel tempo, abbinato a pilastri solidi come $AMZN e $MSFT, abbatte la componente emotiva e batte la volatilità passiva dell'indice $SPX500."
+        ),
+        "body": (
+            "Il Copy Trading su eToro rende il PAC semplicissimo: puoi impostare depositi periodici ricorrenti che vengono spalmati automaticamente in proporzione su tutte le posizioni aperte, "
+            "sfruttando la magia dell'interesse composto mese dopo mese."
+        ),
+        "cta": "Utilizzi già un piano di accumulo mensile (PAC) o preferisci investire somme più consistenti in momenti specifici? Parliamone nei commenti 👇",
+    },
+    {
+        "id": "dividends_cash_compound",
+        "title": "Dividendi Crescenti & Flusso di Cassa Reinvestito",
+        "tickers": ["SPX500", "MSFT", "ENEL.MI"],
+        "angle": (
+            "L'importanza dei dividendi solidi e del flusso di cassa reale nel nostro portafoglio. "
+            "Come il reinvestimento composto di distribuzioni stabili come $ENEL.MI e colossi con dividendi in crescita come $MSFT rafforza il rendimento rispetto a $SPX500."
+        ),
+        "fallback_angle": "Flussi di cassa solidi da dividendi e reinvestimento automatico con $MSFT ed $ENEL.MI a supporto della crescita rispetto a $SPX500.",
+        "header_prefix": "💰 DIVIDENDI & CRESCITA COMPOSTA SU eToro:",
+        "hook": (
+            "Un portafoglio equilibrato non vive solo di aspettative di crescita, ma anche di rendimenti tangibili e flussi di cassa regolari. "
+            "La combinazione tra utility difensive ad alto dividendo come $ENEL.MI, colossi con dividendi in crescita costante come $MSFT e il benchmark $SPX500 "
+            "crea un motore di cassa continuo che sostiene la performance in ogni fase di mercato."
+        ),
+        "body": (
+            "Con il Copy Trading su eToro tutti i dividendi staccati dalle società in portafoglio vengono automaticamente accreditati sul tuo conto di copia e reinvestiti, "
+            "accelerando la crescita del capitale in modo del tutto trasparente e a zero commissioni di gestione."
+        ),
+        "cta": "Quanto peso dai ai dividendi nella tua strategia personale rispetto alle plusvalenze in conto capitale? Fammelo sapere nei commenti 👇",
+    },
+    {
+        "id": "european_global_moats",
+        "title": "Campioni Globali & Moat Difensivi Europei",
+        "tickers": ["SPX500", "SX7PEX.DE", "NVDA"],
+        "angle": (
+            "Perché una vera diversificazione non può limitarsi agli indici USA come $SPX500 o solo al tech di $NVDA: "
+            "il ruolo strategico dei campioni bancari e industriali europei come $SX7PEX.DE per bilanciare la crescita con dividendi elevati e valutazioni a sconto."
+        ),
+        "fallback_angle": "Integrazione strategica di campioni bancari europei ($SX7PEX.DE) e colossi USA ($NVDA) per una diversificazione globale bilanciata rispetto a $SPX500.",
+        "header_prefix": "🌍 DIVERSIFICAZIONE GLOBALE SU eToro:",
+        "hook": (
+            "Una reale diversificazione internazionale non può limitarsi al solo mercato statunitense come $SPX500 o ai campioni del silicio come $NVDA. "
+            "Integrare leader bancari e industriali europei solidi come $SX7PEX.DE offre valutazioni attraenti, ottimi flussi di dividendi e una preziosa decorrelazione geografica e valutaria."
+        ),
+        "body": (
+            "Questa sintesi tra crescita tecnologica USA e valore fondamentale europeo crea un'architettura resiliente e bilanciata. "
+            "Attraverso il Copy Trading su eToro replichi questa visione macro globale in un unico portafoglio gestito con disciplina e senza leva speculativa."
+        ),
+        "cta": "Quale bilanciamento geografico preferisci attualmente tra mercati USA ed eccellenze europee? Scrivilo nei commenti qui sotto 👇",
     },
 ]
 
@@ -2884,13 +3043,15 @@ LINEE GUIDA E REGOLE OBBLIGATORIE:
 - NO promesse di rendimento futuro ("i rendimenti passati non garantiscono risultati futuri")
 - Usa 2-4 emoji in modo armonioso all'inizio dei punti o paragrafi
 - Testo discorsivo suddiviso in 3-4 brevi paragrafi separati da riga vuota
+- VARIETÀ STILISTICA ED ATTACCO (CRUCIALE): Evita tassativamente formule di apertura stereotipate o banali (NON iniziare mai con "Cari amici della community", "Oggi parliamo di...", "Nel mondo degli investimenti..."). Inizia in modo diretto e accattivante: una domanda stimolante, un paradosso di mercato, un dato concreto o un confronto tra replica passiva e gestione attiva.
+- NON usare titoli prefissati o rigidi come "Perché copiare il mio portafoglio": il testo deve essere un racconto fluido e naturale dove la proposta di valore del Copy Trading emerge dai numeri, dalla gestione del rischio e dal metodo.
 - Concludi con una domanda aperta stimolante per invitare i lettori a commentare
 
 Output format (ONLY return the plain Italian post text, no greetings to the system or markdown fences):
 """
 
     try:
-        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        http_opts = types.HttpOptions(timeout=50.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config = types.GenerateContentConfig(temperature=0.85)
 
@@ -2934,9 +3095,12 @@ def _copy_trading_fallback(
     rankings_data: dict = None,
     theme: dict = None,
 ) -> str:
-    """Fallback copy trading post when Gemini is unavailable — uses real stats data and current rotated theme."""
+    """Fallback copy trading post when Gemini is unavailable — uses real stats data and dynamic theme architecture."""
     if not theme:
         theme = COPY_TRADING_ETORO_THEMES[0]
+
+    header_prefix = theme.get("header_prefix", "💡 PERCHÉ COPIARE IL MIO PORTAFOGLIO SU eToro:")
+    header = f"{header_prefix} {theme['title'].upper()}"
 
     perf_line = ""
     if portfolio_perf is not None:
@@ -2949,6 +3113,10 @@ def _copy_trading_fallback(
         risk = rankings_data.get("riskScore", 3)
         if copiers > 0:
             copier_line = f"\n👥 {copiers} copiatori attivi | 🛡️ Risk Score {risk}/10 (basso rischio)"
+        else:
+            copier_line = f"\n🛡️ Risk Score {risk}/10 (basso rischio)"
+    else:
+        copier_line = "\n🛡️ Risk Score 3/10 (basso rischio)"
 
     win_line = ""
     if rankings_data and rankings_data.get("winRatio"):
@@ -2959,18 +3127,35 @@ def _copy_trading_fallback(
                 win_line = f"\n🎯 {line.strip()}"
                 break
 
-    tickers_str = " ".join([f"${t}" for t in theme["tickers"]])
+    tickers = theme.get("tickers", [])
+    tickers_str = " ".join([f"${t}" for t in tickers])
+    hook = theme.get("hook")
+    body = theme.get("body")
+    cta = theme.get("cta", "Hai curiosità o dubbi sul funzionamento della copia o sulla strategia? Scrivimelo nei commenti qui sotto 👇")
 
-    return (
-        f"💡 PERCHÉ COPIARE IL MIO PORTAFOGLIO SU eToro: {theme['title'].upper()}\n\n"
-        f"Con il Copy Trading puoi replicare in tempo reale e in proporzione tutte le mie operazioni su asset come {tickers_str}, "
-        "con il capitale che scegli tu — mantenendo sempre il pieno controllo e potendo fermare la copia in qualsiasi momento.\n\n"
-        f"La mia strategia punta su fondamentali solidi, diversificazione globale e zero leva speculativa.{perf_line}{copier_line}{win_line}\n\n"
-        f"🎯 Focus Strategico: {theme['fallback_angle']}\n\n"
-        "Investire con metodo, disciplina e trasparenza nel lungo periodo fa la differenza per costruire valore composto.\n\n"
-        "⚠️ Ricorda: i rendimenti passati non sono garanzia di risultati futuri. Investire comporta rischi.\n\n"
-        "Hai curiosità o dubbi sul funzionamento della copia o sulla strategia? Scrivimelo nei commenti qui sotto 👇"
-    )
+    if hook and body:
+        missing_tickers = [f"${t}" for t in tickers if f"${t}" not in hook and f"${t}" not in body]
+        extra_tickers_line = f"\n\n📌 Focus Asset: {' '.join(missing_tickers)}" if missing_tickers else ""
+        
+        return (
+            f"{header}\n\n"
+            f"{hook}\n\n"
+            f"{body}{extra_tickers_line}\n\n"
+            f"📊 Metriche e Profilo di Rischio eToro:{perf_line}{copier_line}{win_line}\n\n"
+            f"⚠️ Ricorda: i rendimenti passati non sono garanzia di risultati futuri. Investire comporta rischi.\n\n"
+            f"{cta}"
+        )
+    else:
+        return (
+            f"{header}\n\n"
+            f"Con il Copy Trading puoi replicare in tempo reale e in proporzione tutte le mie operazioni su asset come {tickers_str}, "
+            "con il capitale che scegli tu — mantenendo sempre il pieno controllo e potendo fermare la copia in qualsiasi momento.\n\n"
+            f"La mia strategia punta su fondamentali solidi, diversificazione globale e zero leva speculativa.{perf_line}{copier_line}{win_line}\n\n"
+            f"🎯 Focus Strategico: {theme.get('fallback_angle', '')}\n\n"
+            "Investire con metodo, disciplina e trasparenza nel lungo periodo fa la differenza per costruire valore composto.\n\n"
+            "⚠️ Ricorda: i rendimenti passati non sono garanzia di risultati futuri. Investire comporta rischi.\n\n"
+            f"{cta}"
+        )
 
 
 # ── 1. Daily Stock Focus Deep-Dive Post ────────────────────────────────────────
