@@ -5,6 +5,7 @@
         "2318.HK": "🏦",
         "ABBV": "💉",
         "ABT.US": "🏥",
+        "AMD": "💻",
         "AMZN": "📦",
         "AVGO": "🔌",
         "AZN.L": "🧬",
@@ -56,6 +57,10 @@
         "ABT.US": [
             "ABT",
             "Abbott Laboratories"
+        ],
+        "AMD": [
+            "AMD",
+            "Advanced Micro Devices Inc"
         ],
         "AMZN": [
             "AMZN",

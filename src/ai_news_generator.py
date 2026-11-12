@@ -82,7 +82,7 @@ def _get_all_portfolio_tags():
 
 HEAVY_ANCHOR_TICKERS = {
     "SPX500", "NSDQ100", "GER40",
-    "NVDA", "PLTR", "MSFT", "AMZN", "TSM", "GOOG", "GOOGL",
+    "NVDA", "AMD", "PLTR", "MSFT", "AMZN", "TSM", "GOOG", "GOOGL",
     "BTC", "ETH", "SOL", "CCJ", "LLY", "PRYMI", "ENIMI"
 }
 
@@ -1652,7 +1652,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         'PPFB.DE', '1211.HK', '1919.HK', '2318.HK', 'INDO.PA', 'VOF.L'
     ]
     US_TICKERS = [
-        'NVDA', 'MSFT', 'AMZN', 'GOOG', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY',
+        'NVDA', 'AMD', 'MSFT', 'AMZN', 'GOOG', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY',
         'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'IB01.L'
     ]
     
@@ -1701,7 +1701,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
 """
         elif is_us_open:
             favs, niche = _select_rotation_favorites_and_niche(US_TICKERS, excluded_tags, count_favorites=2, count_niche=1)
-            heavy_us_titans = ['NVDA', 'PLTR', 'MSFT', 'AMZN', 'TSM', 'CCJ', 'LLY']
+            heavy_us_titans = ['NVDA', 'AMD', 'PLTR', 'MSFT', 'AMZN', 'TSM', 'CCJ', 'LLY']
             fav1 = favs[0] if len(favs) > 0 else 'NVDA'
             fav2 = favs[1] if len(favs) > 1 else 'MSFT'
             # Guarantee at least one heavy titan in US Open

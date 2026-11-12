@@ -332,7 +332,7 @@ MONTH_IT = [
 
 PORTFOLIO_EARNINGS_TICKERS = [
     # Core US holdings and Mega-cap Tech Titans
-    "NVDA", "MSFT", "AMZN", "GOOG", "PLTR", "AVGO", "TSM", "MRVL",
+    "NVDA", "AMD", "MSFT", "AMZN", "GOOG", "PLTR", "AVGO", "TSM", "MRVL",
     "LLY", "ABBV", "ABT", "HUM", "CCJ", "WMT", "AAPL", "META",
     # European corporate holdings
     "AZN.L", "ENEL.MI", "ENI.MI", "PRY.MI", "BESI.NV", "GLEN.L", "ULVR.L"

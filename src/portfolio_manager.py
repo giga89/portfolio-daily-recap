@@ -28,6 +28,7 @@ DEFAULT_TICKERS = {
     'LLY': ('LLY', 'Eli Lilly and Co'),
     
     # Tech, AI & Semiconductors
+    'AMD': ('AMD', 'Advanced Micro Devices Inc'),
     'AMZN': ('AMZN', 'Amazon.com Inc'),
     'MRVL': ('MRVL', 'Marvell Technology Inc'),
     'MSFT': ('MSFT', 'Microsoft Corporation'),
@@ -80,6 +81,7 @@ DEFAULT_EMOJIS = {
     
     # Technology & Semiconductors
     'AVGO': '🔌',
+    'AMD': '💻',
     'NVDA': '🤖',
     'TSM': '🏭',
     'MSFT': '💻',
@@ -438,12 +440,14 @@ MULTI_TAG_MAP = {
     'ENEL.MI': ['$ENEL.MI'],
     'WMT': ['$WMT'],
     'MRVL': ['$MRVL'],
+    'AMD': ['$AMD'],
     'BESI.NV': ['$BESI.NV', '$BESI', '$BESI.AS'],
     'BESI': ['$BESI.NV', '$BESI', '$BESI.AS'],
 }
 
 RELATED_TICKERS_MAP = {
     'NVDA': ['$AMD', '$AVGO', '$TSM'],
+    'AMD': ['$NVDA', '$TSM', '$AVGO'],
     'MSFT': ['$GOOG', '$AMZN', '$AAPL'],
     'AMZN': ['$WMT', '$MSFT', '$GOOG'],
     'WMT': ['$AMZN', '$COST', '$TGT'],
@@ -506,6 +510,26 @@ PORTFOLIO_ASSETS_METADATA = {
             "Concorrenza emergente su chip custom ASIC per carichi di sola inferenza"
         ],
         "related_tickers": ["$AMD", "$AVGO", "$TSM"], "primary_tags": ["$NVDA"]
+    },
+    "AMD": {
+        "ticker": "AMD", "yahoo_ticker": "AMD", "name": "Advanced Micro Devices Inc", "emoji": "💻",
+        "asset_class": "Stock", "sector": "AI & Semiconduttori", "geo": "USA", "tier": "Core Growth",
+        "is_dividend_paying": False, "dividend_policy": "Nessun dividendo distribuito; reinvestimento totale in R&D su acceleratori AI Instinct e architetture Zen/CDNA", "annual_yield_pct": 0.0, "frequency": "Nessuna",
+        "domain": "amd.com", "color": (237, 28, 36),
+        "desc": "Leading innovator in high-performance CPUs, data center GPUs (Instinct MI300/MI325 series), and adaptive computing (Xilinx).",
+        "thesis": "Principale sfidante credibile di NVIDIA nel computing accelerato per data center (acceleratori Instinct MI300X/MI325X/MI350X), leadership consolidata nei processori server x86 (EPYC) a spese di Intel, e diversificazione strategica tramite FPGA e semiconduttori adattivi (Xilinx).",
+        "upside_catalysts": [
+            "Accelerazione dell'adozione degli acceleratori AI Instinct MI300X/MI325X/MI350X presso i top hyperscaler cloud (Microsoft Azure, Meta, Oracle Cloud)",
+            "Guadagno continuo di quota di mercato nei processori server per data center (EPYC) rispetto a Intel",
+            "Maturazione rapida dello stack software open-source ROCm che abbassa la barriera d'ingresso per i carichi di lavoro AI",
+            "Posizionamento leader nei processori client con NPU integrata (Ryzen AI per PC di nuova generazione)"
+        ],
+        "downside_risks": [
+            "Fossato software e inerzia dell'ecosistema proprietario CUDA di NVIDIA",
+            "Allocazione e colli di bottiglia della capacità di packaging avanzato CoWoS presso TSMC",
+            "Ciclicità della domanda nei segmenti gaming consumer e console"
+        ],
+        "related_tickers": ["$NVDA", "$TSM", "$AVGO"], "primary_tags": ["$AMD"]
     },
     "MSFT": {
         "ticker": "MSFT", "yahoo_ticker": "MSFT", "name": "Microsoft Corporation", "emoji": "💻",

@@ -107,7 +107,7 @@ CORE PROFILE & STRATEGY RULES:
    - Disciplined Dollar-Cost Averaging (DCA) and dividend reinvestment.
 
 2. Core Portfolio Pillars & Theses:
-   - AI & Hyperscale Tech (NVDA, PLTR, TSM, AVGO, MSFT, GOOGL, AMZN, MRVL): Secular compute demand, custom silicon, cloud AI infrastructure, software monetization (AIP). Short-term market rotation is noise.
+   - AI & Hyperscale Tech (NVDA, AMD, PLTR, TSM, AVGO, MSFT, GOOGL, AMZN, MRVL): Secular compute demand, custom silicon, cloud AI infrastructure, software monetization (AIP). Short-term market rotation is noise.
    - Healthcare & GLP-1 (LLY, ABBV, ABT, AZN): Demographic aging, blockbuster metabolic and immunology treatments, resilient pricing power.
    - Energy, Nuclear & Grid (CCJ, PRY, ENI, ENEL, GLEN, TRIG): Nuclear baseload 24/7 for AI data centers (Cameco), global electrification supercycle (Prysmian/Glencore).
    - Defense & Safe Havens (WDEF ETF, Physical Gold PPFB ETC, Cash/Treasuries IB01): Geopolitical hedging (NATO rearmament) and currency debasement protection.

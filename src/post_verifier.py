@@ -1600,7 +1600,7 @@ def verify_post_deterministic(
                     )
 
             # Strict verification of corporate earnings claims for the next session
-            names_pattern = r"NVIDIA|Microsoft|Alphabet|Google|Amazon|Apple|Palantir|Broadcom|Eli\s+Lilly|Lilly|AbbVie|Abbott|Cameco|Tesla|Meta|Enel|Eni|Prysmian"
+            names_pattern = r"NVIDIA|Microsoft|Alphabet|Google|Amazon|Apple|Palantir|Broadcom|Eli\s+Lilly|Lilly|AbbVie|Abbott|Cameco|Tesla|Meta|Enel|Eni|Prysmian|AMD|Advanced\s+Micro\s+Devices"
             pat_fwd = r"(?:\$([A-Za-z0-9\.\-]+)|\b(" + names_pattern + r")\b).{0,60}\b(?:pubblicherà|presenterà|rilascerà|attesa\s+per|in\s+attesa\s+dei)\b.{0,40}\b(?:trimestrale|conti|utili|risultati|earnings)\b"
             pat_rev = r"\b(?:trimestrale|conti|utili|risultati|earnings)\b.{0,60}(?:\$([A-Za-z0-9\.\-]+)|\b(" + names_pattern + r")\b)"
 
@@ -1611,7 +1611,8 @@ def verify_post_deterministic(
                 next_date_str = next_date.strftime("%Y-%m-%d")
                 name_to_sym = {
                     "MICROSOFT": "MSFT", "ALPHABET": "GOOG", "GOOGLE": "GOOG", "AMAZON": "AMZN",
-                    "APPLE": "AAPL", "NVIDIA": "NVDA", "PALANTIR": "PLTR", "BROADCOM": "AVGO",
+                    "APPLE": "AAPL", "NVIDIA": "NVDA", "AMD": "AMD", "ADVANCED MICRO DEVICES": "AMD",
+                    "PALANTIR": "PLTR", "BROADCOM": "AVGO",
                     "ELI LILLY": "LLY", "LILLY": "LLY", "ABBVIE": "ABBV", "ABBOTT": "ABT",
                     "CAMECO": "CCJ", "TESLA": "TSLA", "META": "META", "ENEL": "ENEL.MI",
                     "ENI": "ENI.MI", "PRYSMIAN": "PRY.MI"

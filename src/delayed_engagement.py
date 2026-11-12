@@ -79,7 +79,7 @@ def build_wave2_followup_comments(
     top_tickers = [t.replace("$", "").upper() for t in (top_tickers or [])]
 
     # Select primary asset for deep dive from available tickers or fallback list
-    candidate_tickers = top_tickers + ["PLTR", "NVDA", "LLY", "CCJ", "PPFB.DE", "TSM", "MRVL"]
+    candidate_tickers = top_tickers + ["PLTR", "NVDA", "AMD", "LLY", "CCJ", "PPFB.DE", "TSM", "MRVL"]
     primary_ticker = "PLTR"
     profile = None
 

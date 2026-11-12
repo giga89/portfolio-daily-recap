@@ -47,6 +47,7 @@ LOGO_SIZE = 120
 DOMAIN_MAP = {
     # ── USA stocks ──────────────────────────────────────────────────────────
     "NVDA":       "nvidia.com",
+    "AMD":        "amd.com",
     "MSFT":       "microsoft.com",
     "AMZN":       "amazon.com",
     "GOOG":       "google.com",
@@ -164,6 +165,7 @@ def download_logo(ticker: str, force: bool = False) -> bool:
     if domain:
         candidate_urls.append(f"{CDN_BASE}/{domain}")
     candidate_urls.append(f"https://assets.parqet.com/logos/symbol/{ticker}")
+    candidate_urls.append(f"https://financialmodelingprep.com/image-stock/{ticker}.png")
     if ticker.endswith(".NV"):
         candidate_urls.append(f"https://assets.parqet.com/logos/symbol/{ticker[:-3]}.AS")
     if domain:

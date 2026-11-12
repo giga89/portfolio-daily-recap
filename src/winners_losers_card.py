@@ -48,6 +48,7 @@ AUTHOR_TEXT = "Andrea Ravalli"
 
 SECTOR_TAGS = {
     "NVDA":      "Chip AI · semiconduttori",
+    "AMD":       "Chip AI · CPU e GPU Data Center",
     "MSFT":      "Software · cloud · AI",
     "AMZN":      "E-commerce · cloud AWS",
     "GOOG":      "Search · cloud · AI",
@@ -116,6 +117,7 @@ PERIOD_LABELS = {
 
 _TICKER_DOMAIN_MAP = {
     "NVDA":      "nvidia.com",
+    "AMD":       "amd.com",
     "MSFT":      "microsoft.com",
     "AMZN":      "amazon.com",
     "GOOG":      "google.com",

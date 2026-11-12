@@ -341,6 +341,7 @@ def compute_seasonality(monthly_data: Dict[str, Dict[str, Optional[float]]]) -> 
 HOLDINGS_DATA = [
     # ── US Tech & AI Megatrend ───────────────────────────────────────────────
     {"ticker": "NVDA", "name": "NVIDIA Corporation", "emoji": "🤖", "asset_class": "Stock", "curr": "USD", "sector": "AI & Semiconductors", "geo": "USA", "tier": "Core Growth", "desc": "Undisputed global leader in accelerated computing GPUs and full-stack AI enterprise infrastructure."},
+    {"ticker": "AMD", "name": "Advanced Micro Devices", "emoji": "💻", "asset_class": "Stock", "curr": "USD", "sector": "Semiconductors & AI Compute", "geo": "USA", "tier": "Core Growth", "desc": "High-performance server CPUs (EPYC) and Instinct AI accelerators (MI300X/MI325X) challenging NVIDIA in data center compute."},
     {"ticker": "MSFT", "name": "Microsoft Corporation", "emoji": "💻", "asset_class": "Stock", "curr": "USD", "sector": "Software & Cloud AI", "geo": "USA", "tier": "Core Holding", "desc": "Enterprise software titan, Azure hyperscale cloud, and exclusive foundational partnership with OpenAI."},
     {"ticker": "AMZN", "name": "Amazon.com Inc", "emoji": "📦", "asset_class": "Stock", "curr": "USD", "sector": "E-Commerce & AWS Cloud", "geo": "USA", "tier": "Core Holding", "desc": "Global e-commerce monopoly, cloud computing infrastructure leader (AWS), and high-margin digital advertising."},
     {"ticker": "GOOG", "name": "Alphabet Inc (Google)", "emoji": "🔍", "asset_class": "Stock", "curr": "USD", "sector": "Search, Cloud & AI", "geo": "USA", "tier": "Core Holding", "desc": "Unrivaled global search monopoly, YouTube streaming ecosystem, Android OS, and Gemini multimodal AI."},
@@ -394,7 +395,8 @@ PORTFOLIO_WEIGHTS_FILE = os.path.join(os.path.dirname(ANALYTICS_FILE), "portfoli
 
 BASELINE_WEIGHTS: Dict[str, float] = {
     # US Tech & AI Megatrend (30.0%)
-    "NVDA": 5.5,
+    "NVDA": 4.0,
+    "AMD": 1.5,
     "MSFT": 4.5,
     "AMZN": 4.0,
     "GOOG": 4.0,

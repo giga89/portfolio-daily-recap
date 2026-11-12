@@ -76,6 +76,28 @@ COMPANY_INFOGRAPHICS = {
         "color": (118, 185, 0),
         "domain": "nvidia.com"
     },
+    "AMD": {
+        "name": "AMD",
+        "tagline": "AI Data Center Compute & Server Processors",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "AMD è il principale sfidante di NVIDIA nelle GPU per data center (Instinct) e il leader dei processori server ad alte prestazioni (EPYC).",
+        "kpis": [
+            {"label": "REVENUE AI DATA CENTER", "val": "$5B+", "sub": "Crescita esponenziale serie Instinct"},
+            {"label": "QUOTA SERVER CPU (EPYC)", "val": ">30%", "sub": "Guadagno continuo contro Intel"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Diversificazione hardware compute"},
+            {"label": "PORTAFOGLIO COMPLETO", "val": "CPU+GPU+FPGA", "sub": "Integrazione architettura Xilinx"},
+        ],
+        "pillars": [
+            ("Alternativa Reale a NVIDIA:", "Gli acceleratori Instinct MI300X/MI325X offrono memoria e larghezza di banda superiori per l'inferenza AI."),
+            ("Dominio nei Server EPYC:", "I processori per data center continuano a sottrarre quote di mercato a Intel con margini elevati."),
+            ("Stack Software ROCm Aperto:", "L'adozione open-source di ROCm e PyTorch riduce la dipendenza dall'ecosistema chiuso di CUDA."),
+            ("Copertura dal Rischio Monopolio:", "Gli hyperscaler (Microsoft, Meta, Oracle) incentivano attivamente un secondo fornitore per abbattere i costi."),
+        ],
+        "quote": "Nel computing accelerato, nessun grande cliente vuole un solo fornitore: AMD è il pilastro indispensabile dell'equilibrio AI.",
+        "tags": ["#AMD", "#Semiconductors", "#ArtificialIntelligence", "#Instinct", "#EPYC"],
+        "color": (237, 28, 36),
+        "domain": "amd.com"
+    },
     "CCJ": {
         "name": "CAMECO",
         "tagline": "Uranium & Global Nuclear Clean Energy",

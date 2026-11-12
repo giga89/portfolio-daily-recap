@@ -134,6 +134,7 @@ class TestCooldownAndWeekendStrategy(unittest.TestCase):
         self.assertNotIn("SPCX", holdings_sub, "SPCX must not be present in active holdingsData.")
         self.assertNotIn("MAU.PA", holdings_sub, "MAU.PA must not be present in active holdingsData.")
         self.assertIn("BESI.NV", holdings_sub, "BESI.NV must be present in active holdingsData.")
+        self.assertIn("AMD", holdings_sub, "AMD must be present in active holdingsData.")
 
     def test_dynamic_portfolio_weights_and_allocations(self):
         """Verify that weights normalize to 100% and dynamic allocation distributions sum to 100%."""

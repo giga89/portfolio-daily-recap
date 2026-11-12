@@ -52,6 +52,14 @@ AI_TECH_PROFILES = {
         "driver": "Margini lordi superiori al 75% e domanda multi-annuale garantita dagli investimenti dei principali hyperscaler mondiali.",
         "question": "Ritenete che gli investimenti in compute e infrastrutture AI continueranno a battere le stime anche nei prossimi trimestri?"
     },
+    "AMD": {
+        "name": "Advanced Micro Devices",
+        "emoji": "💻",
+        "role": "Acceleratori Instinct AI & Processori Server EPYC",
+        "thesis": "Principale sfidante credibile di NVIDIA nel calcolo accelerato con gli acceleratori Instinct MI300X/MI325X e leadership crescente nei server EPYC.",
+        "driver": "Adozione cloud da parte di Microsoft, Meta e Oracle e maturazione della piattaforma open source ROCm.",
+        "question": "Credete che AMD riuscirà a erodere quote significative a NVIDIA nel mercato dei chip per l'inferenza AI?"
+    },
     "MRVL": {
         "name": "Marvell Technology",
         "emoji": "📊",

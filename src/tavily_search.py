@@ -25,6 +25,7 @@ TICKER_NAME_MAP = {
     'TSM': 'Taiwan Semiconductor TSMC TSM',
     'CCJ': 'Cameco CCJ uranium',
     'NVDA': 'NVIDIA',
+    'AMD': 'AMD Advanced Micro Devices semiconductor',
     'MSFT': 'Microsoft',
     'AMZN': 'Amazon',
     'PLTR': 'Palantir',

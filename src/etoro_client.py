@@ -28,6 +28,7 @@ MARKET_IDS = {
     # Tech, AI & Semiconductors
     "PLTR": 7991,
     "NVDA": 1137,
+    "AMD": 1832,
     "MSFT": 1004,
     "AMZN": 1005,
     "GOOG": 1002,
