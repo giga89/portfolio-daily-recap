@@ -1,6 +1,24 @@
 {
-  "last_updated": "2026-11-13T15:21:23.439414+00:00",
+  "last_updated": "2026-11-13T15:55:56.865536+00:00",
   "posts": [
+    {
+      "id": "b6774530-df7a-11f1-8080-80015feb43a5",
+      "platform": "etoro",
+      "session": "Earnings Release: $ENEL.MI Q3 2026",
+      "published_at": "2026-11-13T15:55:56Z",
+      "day_of_week": "Friday",
+      "hour_utc": 15,
+      "hour_local": 17,
+      "title": "📊 EARNINGS FLASH: RISULTATI TRIMESTRALI Q3 2026  Enel S.p.A. $ENEL.MI ha appena...",
+      "tickers": [
+        "ENEL.MI"
+      ],
+      "image_type": "earnings_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
     {
       "id": "fcf737a0-df6f-11f1-8080-80004f019b89",
       "platform": "etoro",
