@@ -53,21 +53,24 @@ except ImportError:
 
 
 try:
-    from ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options
+    from ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
 except ImportError:
     try:
-        from src.ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options
+        from src.ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
     except ImportError:
         DEFAULT_GEMINI_MODELS = [
-            'gemini-3.6-flash',
-            'gemini-3.5-flash',
             'gemini-4-hydrogen',
+            'gemini-3.6-flash',
+            'gemini-3-flash-preview',
+            'gemini-3.5-flash',
             'gemini-3.5-flash-lite',
             'gemini-3.1-flash-lite',
             'gemini-2.5-flash',
         ]
-        def build_http_options(tm, timeout_seconds=45.0, api_version="v1beta"):
+        def build_http_options(tm, timeout_seconds=55.0, api_version="v1beta"):
             return tm.HttpOptions(timeout=int(timeout_seconds * 1000), api_version=api_version) if hasattr(tm, "HttpOptions") else None
+        def build_thinking_config(tm, m, fast_mode=False, budget=None):
+            return None
 
 
 # Baseline dividend profiles for portfolio holdings
@@ -550,18 +553,21 @@ REGOLE PER IL POST:
 Output ONLY the post text in Italian."""
 
     try:
-        http_opts = build_http_options(types, timeout_seconds=45.0)
+        http_opts = build_http_options(types, timeout_seconds=55.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
-        config_gen = types.GenerateContentConfig(temperature=0.5, max_output_tokens=2048)
 
         for idx, model_name in enumerate(DEFAULT_GEMINI_MODELS):
             for attempt in range(2):
                 try:
                     print(f"   🤖 Trying dividend model ({idx+1}/{len(DEFAULT_GEMINI_MODELS)}): {model_name}...")
+                    cfg_kwargs = {"temperature": 0.5, "max_output_tokens": 4096}
+                    t_cfg = build_thinking_config(types, model_name, fast_mode=True)
+                    if t_cfg is not None:
+                        cfg_kwargs["thinking_config"] = t_cfg
                     response = client.models.generate_content(
                         model=model_name,
                         contents=prompt,
-                        config=config_gen,
+                        config=types.GenerateContentConfig(**cfg_kwargs),
                     )
                     if response and response.text:
                         if API_TRACKER_AVAILABLE:

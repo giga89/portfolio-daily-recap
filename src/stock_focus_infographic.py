@@ -809,10 +809,11 @@ def fetch_dynamic_company_infographic_data(ticker: str) -> dict:
                     from src.ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
                 except ImportError:
                     DEFAULT_GEMINI_MODELS = [
-                        'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-4-hydrogen',
-                        'gemini-3.5-flash-lite', 'gemini-2.5-flash',
+                        'gemini-4-hydrogen', 'gemini-3.6-flash', 'gemini-3-flash-preview',
+                        'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite',
+                        'gemini-2.5-flash',
                     ]
-                    def build_http_options(tm, timeout_seconds=45.0, api_version="v1beta"):
+                    def build_http_options(tm, timeout_seconds=55.0, api_version="v1beta"):
                         return tm.HttpOptions(timeout=int(timeout_seconds * 1000), api_version=api_version) if hasattr(tm, "HttpOptions") else None
                     def build_thinking_config(tm, m, fast_mode=False, budget=None):
                         return None
@@ -832,7 +833,7 @@ def fetch_dynamic_company_infographic_data(ticker: str) -> dict:
             )
 
             kpi4_label = "KPI 4 (es. GENERAZIONE CASSA)" if not is_div_paying else "KPI 4 (es. DIVIDENDI / CASSA)"
-            http_opts = build_http_options(types, timeout_seconds=45.0)
+            http_opts = build_http_options(types, timeout_seconds=55.0)
             client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
             prompt = f"""Analizza in profondità l'azienda o ETF {company_name} (${clean_ticker}).
 Settore ufficiale: {meta.get('sector', 'N/A')}.
@@ -870,7 +871,7 @@ Fornisci in formato JSON strutturato (senza markdown extra):
                         print(f"   🤖 Trying infographic model ({idx+1}/{len(models_to_try)}): {model_name}...")
                         cfg_kwargs = {
                             "temperature": 0.2,
-                            "max_output_tokens": 2048,
+                            "max_output_tokens": 4096,
                             "response_mime_type": "application/json",
                         }
                         t_cfg = build_thinking_config(types, model_name, budget=256)

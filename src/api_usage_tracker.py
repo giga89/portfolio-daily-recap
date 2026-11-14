@@ -194,15 +194,16 @@ def generate_usage_report():
     report += """└──────────────────────────────────────────────────────────────┘
 
 📝 NOTES:
-• Verified active Free Tier cascade: gemini-3.6-flash, gemini-3.5-flash, gemini-4-hydrogen,
-  gemini-3.5-flash-lite, gemini-3.1-flash-lite, gemini-2.5-flash (via v1beta)
+• Verified active Free Tier cascade: gemini-4-hydrogen, gemini-3.6-flash (20 RPD),
+  gemini-3-flash-preview, gemini-3.5-flash (20 RPD), gemini-3.5-flash-lite,
+  gemini-3.1-flash-lite, gemini-2.5-flash (via v1beta)
 • Each model family maintains its own separate daily quota bucket
 • For exact real-time quotas, check: https://aistudio.google.com/
 
 💡 RECOMMENDATIONS:
-  1. Use Lite models (gemini-3.5-flash-lite / gemini-3.1-flash-lite) for fast comment replies
-  2. Reserve Flagship Flash / Gemini 4 (gemini-3.6-flash, gemini-4-hydrogen) for full recap posts
-  3. Set up Pay-as-you-go billing on AI Studio if higher Search Grounding / Pro quotas are needed
+  1. Flagship quality-first (gemini-4-hydrogen w/ ThinkingLevel.LOW, gemini-3.6-flash, gemini-3-flash-preview) is used for posts, comments & reviews
+  2. Lite tier (gemini-3.5-flash-lite / gemini-3.1-flash-lite) serves utility/health checks and high-quota safety net
+  3. Groq (openai/gpt-oss-120b w/ reasoning_effort=low) & Mistral (ministral-14b-latest) handle independent 3x auditing
 """
     
     return report

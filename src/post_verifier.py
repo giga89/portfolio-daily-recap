@@ -45,10 +45,11 @@ except ImportError:
         REVIEWER_MODELS = list(REVIEWER_GEMINI_MODELS)
     except ImportError:
         REVIEWER_MODELS = [
-            'gemini-3.5-flash',
             'gemini-3.6-flash',
-            'gemini-3.5-flash-lite',
             'gemini-4-hydrogen',
+            'gemini-3-flash-preview',
+            'gemini-3.5-flash',
+            'gemini-3.5-flash-lite',
             'gemini-2.5-flash',
         ]
         def build_http_options(tm, timeout_seconds=45.0, api_version="v1beta"):
@@ -2368,7 +2369,7 @@ Restituisci SOLO un JSON valido:
             print(f"   🔍 AI Comment Fact-Checker running on model: {model_name}...")
             cfg_kwargs = {
                 "temperature": 0.1,
-                "max_output_tokens": 2048,
+                "max_output_tokens": 3072,
                 "response_mime_type": "application/json",
             }
             t_cfg = build_thinking_config(types, model_name, budget=256)

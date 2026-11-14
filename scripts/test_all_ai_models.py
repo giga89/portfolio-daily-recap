@@ -29,6 +29,7 @@ except ImportError:
 
 from ai_model_cascade import (
     DEFAULT_GEMINI_MODELS,
+    COMMENT_GEMINI_MODELS,
     FAST_GEMINI_MODELS,
     REVIEWER_GEMINI_MODELS,
     build_http_options,
@@ -53,7 +54,8 @@ def run_tests():
     print("=" * 70)
     print(f"🚀 COMPREHENSIVE AI MODEL TEST SUITE — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"📋 Post Cascade ({len(DEFAULT_GEMINI_MODELS)}): {', '.join(DEFAULT_GEMINI_MODELS)}")
-    print(f"⚡ Fast Cascade ({len(FAST_GEMINI_MODELS)}): {', '.join(FAST_GEMINI_MODELS)}")
+    print(f"💬 Comment Cascade ({len(COMMENT_GEMINI_MODELS)}): {', '.join(COMMENT_GEMINI_MODELS)}")
+    print(f"⚡ Fast Utility Cascade ({len(FAST_GEMINI_MODELS)}): {', '.join(FAST_GEMINI_MODELS)}")
     print(f"🔍 Reviewer Cascade ({len(REVIEWER_GEMINI_MODELS)}): {', '.join(REVIEWER_GEMINI_MODELS)}")
     print("=" * 70)
 
@@ -76,7 +78,7 @@ def run_tests():
         try:
             cfg_kwargs = {
                 "temperature": 0.3,
-                "max_output_tokens": 1024,
+                "max_output_tokens": 2048,
             }
             think_cfg = build_thinking_config(types, model_name, budget=256)
             if think_cfg is not None:
@@ -152,7 +154,7 @@ def run_tests():
             json_kwargs = {
                 "temperature": 0.1,
                 "response_mime_type": "application/json",
-                "max_output_tokens": 1024,
+                "max_output_tokens": 2048,
             }
             think_cfg_json = build_thinking_config(types, model_name, budget=256)
             if think_cfg_json is not None:
@@ -188,7 +190,8 @@ def run_tests():
 
     tier_checks = [
         ("post_cascade", DEFAULT_GEMINI_MODELS, "Spiega brevemente la differenza tra ETF ad accumulazione ed ETF a distribuzione in 2 punti.", False),
-        ("fast_comment_cascade", FAST_GEMINI_MODELS, "Rispondi in italiano in 2 frasi cordiali a chi chiede come diversificare un portafoglio azionario.", True),
+        ("comment_cascade", COMMENT_GEMINI_MODELS, "Rispondi in italiano in 2 frasi cordiali a chi chiede come diversificare un portafoglio azionario.", True),
+        ("fast_utility_cascade", FAST_GEMINI_MODELS, "Rispondi SOLO 'OK' se un portafoglio diversificato riduce il rischio specifico.", True),
         ("reviewer_cascade", REVIEWER_GEMINI_MODELS, "Verifica se questa frase ha errori logici: 'L'interesse composto fa crescere i rendimenti nel tempo.' Rispondi OK.", True),
     ]
     tier_results = {}
@@ -197,7 +200,7 @@ def run_tests():
         first_model = t_models[0]
         cfg_t = {
             "temperature": 0.3,
-            "max_output_tokens": 1500,
+            "max_output_tokens": 2048,
         }
         think_t = build_thinking_config(types, first_model, fast_mode=t_fast)
         if think_t is not None:

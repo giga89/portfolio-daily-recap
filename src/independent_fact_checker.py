@@ -62,17 +62,20 @@ except ImportError:
 
 
 # Tested, verified working models on Groq LPUs (1000 RPD / 8000 TPM per model)
+# Quality-first order: 120B flagship (0.7-1.1s, 4/4 traps with reasoning_effort='low') -> 27B -> 20B
 GROQ_MODELS = [
-    "qwen/qwen3.8-27b",
     "openai/gpt-oss-120b",
+    "qwen/qwen3.8-27b",
     "openai/gpt-oss-20b",
 ]
 
 # Tested, verified working models on Mistral API (Free Tier: 2 RPM / 40K TPM per model)
+# Accuracy-first order: Ministral 14B & 8B scored 4/4 traps vs 3/4 on code-specialized Codestral;
+# medium/small/magistral series currently return 0 RPM on Free Tier.
 MISTRAL_MODELS = [
-    "codestral-latest",
     "ministral-14b-latest",
     "ministral-8b-latest",
+    "codestral-latest",
     "ministral-3b-latest",
 ]
 

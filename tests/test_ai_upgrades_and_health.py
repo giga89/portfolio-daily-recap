@@ -60,9 +60,10 @@ class TestAIUpgradesAndHealth(unittest.TestCase):
         self.assertEqual(offenders, [], f"Found HttpOptions millisecond bugs: {offenders}")
 
     def test_active_model_lists_exclude_deprecated_models(self):
-        """All active Gemini/Groq/Mistral cascades must use verified working models."""
+        """All active Gemini/Groq/Mistral cascades must use verified working quality-first models."""
         all_gemini = (
             list(ai_model_cascade.DEFAULT_GEMINI_MODELS)
+            + list(ai_model_cascade.COMMENT_GEMINI_MODELS)
             + list(ai_model_cascade.FAST_GEMINI_MODELS)
             + list(ai_model_cascade.REVIEWER_GEMINI_MODELS)
             + [m for m, _ in gemini_health_monitor.ACTIVE_MODELS]
@@ -70,12 +71,18 @@ class TestAIUpgradesAndHealth(unittest.TestCase):
         for model in all_gemini:
             self.assertNotIn(model, DEPRECATED_MODELS, f"Deprecated model {model} found in cascade")
 
+        self.assertEqual(ai_model_cascade.DEFAULT_GEMINI_MODELS[0], "gemini-4-hydrogen")
+        self.assertEqual(ai_model_cascade.COMMENT_GEMINI_MODELS[0], "gemini-4-hydrogen")
         self.assertIn("gemini-3.6-flash", ai_model_cascade.DEFAULT_GEMINI_MODELS)
-        self.assertIn("gemini-4-hydrogen", ai_model_cascade.DEFAULT_GEMINI_MODELS)
+        self.assertIn("gemini-3-flash-preview", ai_model_cascade.DEFAULT_GEMINI_MODELS)
         self.assertEqual(ai_model_cascade.FAST_GEMINI_MODELS[0], "gemini-3.5-flash-lite")
+        self.assertEqual(ai_model_cascade.REVIEWER_GEMINI_MODELS[0], "gemini-3.6-flash")
 
+        self.assertEqual(independent_fact_checker.GROQ_MODELS[0], "openai/gpt-oss-120b")
+        self.assertIn("qwen/qwen3.8-27b", independent_fact_checker.GROQ_MODELS)
         self.assertIn("openai/gpt-oss-20b", independent_fact_checker.GROQ_MODELS)
-        self.assertIn("ministral-14b-latest", independent_fact_checker.MISTRAL_MODELS)
+        self.assertEqual(independent_fact_checker.MISTRAL_MODELS[0], "ministral-14b-latest")
+        self.assertEqual(independent_fact_checker.MISTRAL_MODELS[1], "ministral-8b-latest")
         self.assertIn("codestral-latest", independent_fact_checker.MISTRAL_MODELS)
 
     def test_build_http_options_converts_seconds_to_ms_and_sets_v1beta(self):
@@ -97,6 +104,18 @@ class TestAIUpgradesAndHealth(unittest.TestCase):
                 self.kwargs = kwargs
 
         fake_types = SimpleNamespace(ThinkingConfig=FakeThinkingConfig)
+
+        g4_fast_cfg = ai_model_cascade.build_thinking_config(fake_types, "gemini-4-hydrogen", fast_mode=True)
+        self.assertEqual(g4_fast_cfg.kwargs, {"thinking_level": "LOW"})
+
+        g4_budget_cfg = ai_model_cascade.build_thinking_config(fake_types, "gemini-4-hydrogen", budget=256)
+        self.assertEqual(g4_budget_cfg.kwargs, {"thinking_level": "LOW"})
+
+        g4_default_cfg = ai_model_cascade.build_thinking_config(fake_types, "gemini-4-hydrogen", fast_mode=False)
+        self.assertIsNone(g4_default_cfg)
+
+        g3_prev_fast_cfg = ai_model_cascade.build_thinking_config(fake_types, "gemini-3-flash-preview", fast_mode=True)
+        self.assertIsNone(g3_prev_fast_cfg)
 
         flash35_cfg = ai_model_cascade.build_thinking_config(fake_types, "gemini-3.5-flash", fast_mode=True)
         self.assertEqual(flash35_cfg.kwargs["thinking_budget"], 0)
@@ -186,7 +205,8 @@ class TestAIUpgradesAndHealth(unittest.TestCase):
         )
         self.assertIsNotNone(res)
         self.assertEqual(res["decision"], "APPROVE")
-        self.assertEqual(res["auditor"], "mistral:ministral-14b-latest")
+        self.assertEqual(mock_post.call_args_list[0].kwargs["json"]["model"], "ministral-14b-latest")
+        self.assertEqual(res["auditor"], "mistral:ministral-8b-latest")
         self.assertTrue(independent_fact_checker._MISTRAL_AVAILABLE)
 
     @patch("independent_fact_checker.requests.post")
@@ -211,7 +231,7 @@ class TestAIUpgradesAndHealth(unittest.TestCase):
 
     @patch("independent_fact_checker.requests.post")
     def test_groq_sends_low_reasoning_effort_for_gpt_oss(self, mock_post):
-        resp_429 = MagicMock(status_code=429, text="TPM limit")
+        independent_fact_checker._GROQ_COOLDOWN.clear()
         resp_200 = MagicMock(status_code=200)
         resp_200.json.return_value = {
             "choices": [{
@@ -220,14 +240,15 @@ class TestAIUpgradesAndHealth(unittest.TestCase):
                 }
             }]
         }
-        mock_post.side_effect = [resp_429, resp_200]
+        mock_post.return_value = resp_200
 
         res = independent_fact_checker.audit_with_groq(
             "Testo OK", session_name="US_CLOSE", api_key="test-groq-key"
         )
         self.assertIsNotNone(res)
         self.assertEqual(res["auditor"], "groq:openai/gpt-oss-120b")
-        sent_payload = mock_post.call_args_list[1].kwargs["json"]
+        sent_payload = mock_post.call_args_list[0].kwargs["json"]
+        self.assertEqual(sent_payload.get("model"), "openai/gpt-oss-120b")
         self.assertEqual(sent_payload.get("reasoning_effort"), "low")
         self.assertEqual(sent_payload.get("max_tokens"), 1500)
 

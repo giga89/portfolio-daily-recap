@@ -80,6 +80,7 @@ ANSWERED_COMMENTS_FILE = os.path.join(DATA_DIR, "answered_comments.json")
 try:
     from ai_model_cascade import (
         DEFAULT_GEMINI_MODELS,
+        COMMENT_GEMINI_MODELS,
         FAST_GEMINI_MODELS,
         REVIEWER_GEMINI_MODELS,
         build_http_options,
@@ -89,6 +90,7 @@ except ImportError:
     try:
         from src.ai_model_cascade import (
             DEFAULT_GEMINI_MODELS,
+            COMMENT_GEMINI_MODELS,
             FAST_GEMINI_MODELS,
             REVIEWER_GEMINI_MODELS,
             build_http_options,
@@ -96,25 +98,29 @@ except ImportError:
         )
     except ImportError:
         DEFAULT_GEMINI_MODELS = [
-            'gemini-3.6-flash',
-            'gemini-3.5-flash',
             'gemini-4-hydrogen',
+            'gemini-3.6-flash',
+            'gemini-3-flash-preview',
+            'gemini-3.5-flash',
             'gemini-3.5-flash-lite',
             'gemini-3.1-flash-lite',
             'gemini-2.5-flash',
         ]
+        COMMENT_GEMINI_MODELS = list(DEFAULT_GEMINI_MODELS)
         FAST_GEMINI_MODELS = [
             'gemini-3.5-flash-lite',
-            'gemini-3.5-flash',
             'gemini-3.1-flash-lite',
+            'gemini-3.5-flash',
+            'gemini-4-hydrogen',
             'gemini-3.6-flash',
             'gemini-2.5-flash',
         ]
         REVIEWER_GEMINI_MODELS = [
-            'gemini-3.5-flash',
             'gemini-3.6-flash',
-            'gemini-3.5-flash-lite',
             'gemini-4-hydrogen',
+            'gemini-3-flash-preview',
+            'gemini-3.5-flash',
+            'gemini-3.5-flash-lite',
             'gemini-2.5-flash',
         ]
         def build_http_options(types_module, timeout_seconds=45.0, api_version="v1beta"):
@@ -562,11 +568,11 @@ Provide your verdict in exact JSON format:
 Output ONLY valid JSON.
 """
 
-    http_opts = build_http_options(types, timeout_seconds=30.0) if HAS_GENAI else None
+    http_opts = build_http_options(types, timeout_seconds=45.0) if HAS_GENAI else None
     client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
 
-    # Prefer a distinct fast/reviewer model for true dual-model verification
-    base_reviewers = list(dict.fromkeys(FAST_GEMINI_MODELS + REVIEWER_GEMINI_MODELS))
+    # Prefer a distinct flagship/reviewer model for true dual-model verification
+    base_reviewers = list(dict.fromkeys(REVIEWER_GEMINI_MODELS + FAST_GEMINI_MODELS))
     if generator_model and len(base_reviewers) > 1:
         reviewers = [m for m in base_reviewers if m != generator_model] + [generator_model]
     else:
@@ -577,7 +583,7 @@ Output ONLY valid JSON.
             print(f"   🔍 Community Reply Auditor running on model: {model_name}...")
             cfg_kwargs: Dict[str, Any] = {
                 "temperature": 0.1,
-                "max_output_tokens": 1500,
+                "max_output_tokens": 3072,
             }
             think_cfg = build_thinking_config(types, model_name, fast_mode=True)
             if think_cfg is not None:
@@ -635,21 +641,29 @@ def _generate_reply_with_groq_or_mistral(prompt: str) -> Tuple[Optional[str], Op
     if not HAS_REQUESTS:
         return None, None
 
+    try:
+        from independent_fact_checker import GROQ_MODELS as _GROQ_LIST, MISTRAL_MODELS as _MISTRAL_LIST
+    except ImportError:
+        _GROQ_LIST = ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"]
+        _MISTRAL_LIST = ["ministral-14b-latest", "ministral-8b-latest", "codestral-latest"]
+
     providers = []
     groq_key = os.environ.get("GROQ_API_KEY", "").strip()
     if groq_key:
-        providers.append(("Groq", "https://api.groq.com/openai/v1/chat/completions", groq_key, [
-            ("qwen/qwen3.8-27b", {}),
-            ("openai/gpt-oss-120b", {"reasoning_effort": "low"}),
-            ("openai/gpt-oss-20b", {"reasoning_effort": "low"}),
-        ]))
+        providers.append((
+            "Groq",
+            "https://api.groq.com/openai/v1/chat/completions",
+            groq_key,
+            [(m, {"reasoning_effort": "low"} if "gpt-oss" in m else {}) for m in _GROQ_LIST],
+        ))
     mistral_key = os.environ.get("MISTRAL_API_KEY", "").strip()
     if mistral_key:
-        providers.append(("Mistral", "https://api.mistral.ai/v1/chat/completions", mistral_key, [
-            ("codestral-latest", {}),
-            ("ministral-14b-latest", {}),
-            ("ministral-8b-latest", {}),
-        ]))
+        providers.append((
+            "Mistral",
+            "https://api.mistral.ai/v1/chat/completions",
+            mistral_key,
+            [(m, {}) for m in _MISTRAL_LIST[:3]],
+        ))
 
     for pname, url, key, model_specs in providers:
         for idx, (model_id, extra) in enumerate(model_specs):
@@ -926,17 +940,17 @@ CRITICAL RULES:
 """
 
     if HAS_GENAI and api_key:
-        http_opts = build_http_options(types, timeout_seconds=35.0)
+        http_opts = build_http_options(types, timeout_seconds=45.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
 
         for attempt in range(2):
-            for model_name in FAST_GEMINI_MODELS:
+            for model_name in COMMENT_GEMINI_MODELS:
                 try:
                     # Pass 1: Draft Generation
                     print(f"   🤖 [Pass 1/Tentativo {attempt+1}] Interrogazione {model_name}...")
                     cfg_kwargs: Dict[str, Any] = {
                         "temperature": 0.35,
-                        "max_output_tokens": 1500,  # Generous token budget to prevent thinking token choke
+                        "max_output_tokens": 3072,  # Generous token budget + ThinkingLevel.LOW prevents thinking choke
                     }
                     think_cfg = build_thinking_config(types, model_name, fast_mode=True)
                     if think_cfg is not None:

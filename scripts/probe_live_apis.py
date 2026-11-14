@@ -757,10 +757,11 @@ REGOLE TASSATIVE: Zero markdown (**), usa solo i 4 cashtag autorizzati con spazi
     )
     print("\n💬 ITALIAN COMMENT REPLY BENCHMARK (Quality + Rule Compliance):")
     if api_key:
-        for gm, t_budget in [
-            ("gemini-4-hydrogen", None),
-            ("gemini-3.6-flash", 256),
-            ("gemini-3.5-flash", 256),
+        for gm, t_cfg_spec in [
+            ("gemini-4-hydrogen", ("level", "LOW")),
+            ("gemini-3.6-flash", ("budget", 256)),
+            ("gemini-3-flash-preview", None),
+            ("gemini-3.5-flash", ("budget", 256)),
             ("gemini-3.5-flash-lite", None),
             ("gemini-3.1-flash-lite", None),
         ]:
@@ -769,10 +770,14 @@ REGOLE TASSATIVE: Zero markdown (**), usa solo i 4 cashtag autorizzati con spazi
                 cfg_args: Dict[str, Any] = {
                     "system_instruction": reply_system,
                     "temperature": 0.35,
-                    "max_output_tokens": 1200,
+                    "max_output_tokens": 3072,
                 }
-                if t_budget is not None and hasattr(types, "ThinkingConfig"):
-                    cfg_args["thinking_config"] = types.ThinkingConfig(thinking_budget=t_budget)
+                if t_cfg_spec is not None and hasattr(types, "ThinkingConfig"):
+                    kind, val = t_cfg_spec
+                    if kind == "level":
+                        cfg_args["thinking_config"] = types.ThinkingConfig(thinking_level=val)
+                    else:
+                        cfg_args["thinking_config"] = types.ThinkingConfig(thinking_budget=val)
                 r = client.models.generate_content(
                     model=gm, contents=reply_user, config=types.GenerateContentConfig(**cfg_args)
                 )
@@ -784,8 +789,8 @@ REGOLE TASSATIVE: Zero markdown (**), usa solo i 4 cashtag autorizzati con spazi
     groq_key = os.environ.get("GROQ_API_KEY", "").strip()
     if groq_key:
         for gmodel, extra_body in [
-            ("qwen/qwen3.8-27b", {}),
             ("openai/gpt-oss-120b", {"reasoning_effort": "low"}),
+            ("qwen/qwen3.8-27b", {}),
         ]:
             try:
                 t0 = time.monotonic()
@@ -816,7 +821,7 @@ REGOLE TASSATIVE: Zero markdown (**), usa solo i 4 cashtag autorizzati con spazi
 
     mistral_key = os.environ.get("MISTRAL_API_KEY", "").strip()
     if mistral_key:
-        for idx, mmodel in enumerate(("codestral-latest", "ministral-14b-latest", "ministral-8b-latest")):
+        for idx, mmodel in enumerate(("ministral-14b-latest", "ministral-8b-latest", "codestral-latest")):
             if idx > 0:
                 time.sleep(2.2)
             try:

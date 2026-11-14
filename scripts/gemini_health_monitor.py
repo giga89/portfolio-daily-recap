@@ -59,24 +59,25 @@ import urllib.request
 import urllib.error
 
 ACTIVE_MODELS = [
-    ("gemini-3.6-flash", "3.6 Flash - Primary Flagship (Free Tier)"),
-    ("gemini-3.5-flash", "3.5 Flash - Fast General & Reviewer (Free Tier)"),
-    ("gemini-4-hydrogen", "4 Hydrogen - Deep Quality Cascade (Free Tier)"),
-    ("gemini-3.5-flash-lite", "3.5 Flash-Lite - Fast Comment & Support (Free Tier)"),
-    ("gemini-3.1-flash-lite", "3.1 Flash-Lite - High-Quota Reserve (Free Tier)"),
-    ("gemini-2.5-flash", "2.5 Flash - Legacy Fallback v1beta (Free Tier)"),
+    ("gemini-4-hydrogen", "4 Hydrogen - Gemini 4 Flagship (Free Tier)"),
+    ("gemini-3.6-flash", "3.6 Flash - 3.x Flagship & Cross-Reviewer (20 RPD Free Tier)"),
+    ("gemini-3-flash-preview", "3 Flash Preview - 3.x Flagship Reserve (Free Tier)"),
+    ("gemini-3.5-flash", "3.5 Flash - Fast General Fallback (20 RPD Free Tier)"),
+    ("gemini-3.5-flash-lite", "3.5 Flash-Lite - High-Quota Utility Reserve (Free Tier)"),
+    ("gemini-3.1-flash-lite", "3.1 Flash-Lite - Secondary Utility Reserve (Free Tier)"),
+    ("gemini-2.5-flash", "2.5 Flash - Legacy Fallback & Search (Free Tier)"),
 ]
 
 ACTIVE_GROQ_MODELS = [
-    ("qwen/qwen3.8-27b", "Qwen 3.8 27B - Fact-Checking Principale LPUs (8K TPM / 1K RPD)"),
-    ("openai/gpt-oss-120b", "GPT-OSS 120B - Deep Reasoning Fallback (8K TPM / 1K RPD)"),
+    ("openai/gpt-oss-120b", "GPT-OSS 120B - Flagship Fact-Checker LPUs (8K TPM / 1K RPD)"),
+    ("qwen/qwen3.8-27b", "Qwen 3.8 27B - Fast Reasoning Secondary (8K TPM / 1K RPD)"),
     ("openai/gpt-oss-20b", "GPT-OSS 20B - Fast LPU Reserve (8K TPM / 1K RPD)"),
 ]
 
 ACTIVE_MISTRAL_MODELS = [
-    ("codestral-latest", "Codestral - Primary Auditor (2 RPM / 40K TPM Free Tier)"),
-    ("ministral-14b-latest", "Ministral 14B - Secondary Auditor (2 RPM / 40K TPM Free Tier)"),
-    ("ministral-8b-latest", "Ministral 8B - Tertiary Auditor (2 RPM / 40K TPM Free Tier)"),
+    ("ministral-14b-latest", "Ministral 14B - Primary Auditor 4/4 (2 RPM / 40K TPM Free Tier)"),
+    ("ministral-8b-latest", "Ministral 8B - Secondary Auditor 4/4 (2 RPM / 40K TPM Free Tier)"),
+    ("codestral-latest", "Codestral - Code/JSON Reserve (2 RPM / 40K TPM Free Tier)"),
     ("ministral-3b-latest", "Ministral 3B - Fast Reserve (2 RPM / 40K TPM Free Tier)"),
 ]
 

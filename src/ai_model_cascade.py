@@ -8,12 +8,13 @@ exhaustion (429), deadlines (504), or temporary outages (503) by cascading
 across tiers.
 
 Verified Hierarchy (Live GitHub Actions Probe):
-  1. gemini-3.6-flash      - High-capability 3.x Flash flagship (reliable & accurate)
-  2. gemini-3.5-flash      - Fast 3.5 series (strong Italian & JSON structured output)
-  3. gemini-4-hydrogen     - Newest Gemini 4 Free Tier model (needs >=45s HTTP timeout)
-  4. gemini-3.5-flash-lite - Sub-second Lite tier (high reliability & separate RPD)
-  5. gemini-3.1-flash-lite - Sub-second 3.1 Lite fallback
-  6. gemini-2.5-flash      - Stable baseline fallback (explicit v1beta)
+  1. gemini-4-hydrogen      - Gemini 4 Free Tier flagship (9-20s, separate RPD bucket; needs >=45s HTTP timeout and ThinkingLevel.LOW for bounded budgets)
+  2. gemini-3.6-flash       - High-capability 3.x Flash flagship (20 RPD Free Tier, strong Italian)
+  3. gemini-3-flash-preview - 3.x preview flagship (2-13s, rich narrative, separate Free Tier quota)
+  4. gemini-3.5-flash       - Fast 3.5 series (20 RPD Free Tier, strong JSON structured output)
+  5. gemini-3.5-flash-lite  - Sub-second Lite tier (high reliability & high RPD bucket)
+  6. gemini-3.1-flash-lite  - Sub-second 3.1 Lite fallback
+  7. gemini-2.5-flash       - Stable baseline fallback (explicit v1beta, supports google_search)
 """
 
 import time
@@ -36,31 +37,45 @@ except ImportError:
     except ImportError:
         API_TRACKER_AVAILABLE = False
 
-# Prioritized cascade for long-form posts and rich synthesis (verified operational on Free Tier)
+# Prioritized quality-first cascade for long-form posts and rich synthesis (verified operational on Free Tier)
 DEFAULT_GEMINI_MODELS: List[str] = [
-    'gemini-3.6-flash',        # Reliable 3.x flagship (5-19s, verified Italian accuracy)
-    'gemini-3.5-flash',        # Fast 3.5 series (2-8s with sufficient output budget)
-    'gemini-4-hydrogen',       # Google Gemini 4 Free Tier flagship (18-30s, requires >=45s timeout)
-    'gemini-3.5-flash-lite',   # Sub-second Lite tier (high reliability & separate RPD bucket)
+    'gemini-4-hydrogen',       # Google Gemini 4 Free Tier flagship (9-20s, crispest Italian & separate RPD bucket)
+    'gemini-3.6-flash',        # Reliable 3.x flagship (5-19s, 20 RPD Free Tier)
+    'gemini-3-flash-preview',  # 3.x preview flagship (2-13s, rich narrative, separate Free Tier quota)
+    'gemini-3.5-flash',        # Fast 3.5 series (2-8s with bounded thinking, 20 RPD Free Tier)
+    'gemini-3.5-flash-lite',   # Sub-second Lite tier (high-quota reliability safety net)
     'gemini-3.1-flash-lite',   # Sub-second 3.1 Lite fallback
-    'gemini-2.5-flash',        # High reliability baseline fallback (via v1beta)
+    'gemini-2.5-flash',        # Legacy baseline fallback (via v1beta)
 ]
 
-# Prioritized cascade for low-latency tasks (comment replies, catalyst notes, JSON extraction)
+# Prioritized quality-first cascade for community comment replies and catalyst notes (uses ThinkingLevel.LOW on G4)
+COMMENT_GEMINI_MODELS: List[str] = [
+    'gemini-4-hydrogen',       # Gemini 4 flagship with ThinkingLevel.LOW (3-6s, richest compliant Italian)
+    'gemini-3.6-flash',        # Verified 3.6 flagship (5-8s, nuanced portfolio explanations)
+    'gemini-3-flash-preview',  # 3.x preview flagship (separate Free Tier quota)
+    'gemini-3.5-flash',        # 3.5 Flash fallback
+    'gemini-3.5-flash-lite',   # High-quota sub-second Lite safety net
+    'gemini-3.1-flash-lite',   # Sub-second 3.1 Lite reserve
+    'gemini-2.5-flash',        # Legacy baseline fallback
+]
+
+# Prioritized cascade for low-latency / high-RPD utility tasks (health checks, rigid JSON extraction)
 FAST_GEMINI_MODELS: List[str] = [
     'gemini-3.5-flash-lite',   # Sub-second natural Italian & JSON
-    'gemini-3.5-flash',        # ~2s when thinking budget is bounded
     'gemini-3.1-flash-lite',   # Sub-second 3.1 Lite
+    'gemini-3.5-flash',        # ~2s when thinking budget is bounded
+    'gemini-4-hydrogen',       # Gemini 4 with ThinkingLevel.LOW (~2.5-4s)
     'gemini-3.6-flash',        # High intelligence fallback
     'gemini-2.5-flash',        # Baseline fallback
 ]
 
-# Models for the adversarial reviewer / double-check judge (ensures dual-model diversity)
+# Models for the adversarial reviewer / double-check judge (flagship accuracy first + dual-model diversity)
 REVIEWER_GEMINI_MODELS: List[str] = [
-    'gemini-3.5-flash',        # Distinct cross-check reviewer when 3.6-flash generates
-    'gemini-3.6-flash',        # High precision 3.6 verifier
-    'gemini-3.5-flash-lite',   # Fast verified JSON auditor
-    'gemini-4-hydrogen',       # Deep Gemini 4 reviewer
+    'gemini-3.6-flash',        # Primary cross-check reviewer when gemini-4-hydrogen generates
+    'gemini-4-hydrogen',       # Gemini 4 deep reviewer (4/4 hard traps at 2.5s with ThinkingLevel.LOW)
+    'gemini-3-flash-preview',  # 3.x preview flagship (4/4 traps in 2.1s, separate Free Tier quota)
+    'gemini-3.5-flash',        # Fast 3.5 series (4/4 traps in 2.1s, 20 RPD)
+    'gemini-3.5-flash-lite',   # High-quota verified JSON auditor fallback
     'gemini-2.5-flash',        # Baseline reviewer fallback
 ]
 
@@ -108,6 +123,22 @@ def build_thinking_config(
     low = (model_name or "").lower()
     if "lite" in low or "gemma" in low:
         return None
+
+    # Gemini 4 ignores thinking_budget=0; use ThinkingLevel.LOW whenever a fast or
+    # bounded budget is requested so thinking does not consume 2000+ output tokens.
+    if "gemini-4" in low or "hydrogen" in low:
+        if fast_mode or budget is not None:
+            try:
+                return tmod.ThinkingConfig(thinking_level="LOW")
+            except Exception:
+                return None
+        return None
+
+    # Preview 3-flash models already stay compact (~380 think tokens on audit) and
+    # may reject unverified thinking_budget=0; only configure when budget is explicit.
+    if "3-flash" in low or "gemini-3-flash" in low:
+        if budget is None:
+            return None
 
     if budget is not None:
         target_budget = budget

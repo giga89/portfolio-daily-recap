@@ -231,33 +231,40 @@ Restituisci SOLO il blocco JSON nel seguente formato:
 """
 
     try:
-        from ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options
+        from ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
     except ImportError:
         try:
-            from src.ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options
+            from src.ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
         except ImportError:
             DEFAULT_GEMINI_MODELS = [
-                "gemini-3.6-flash",
-                "gemini-3.5-flash",
                 "gemini-4-hydrogen",
+                "gemini-3.6-flash",
+                "gemini-3-flash-preview",
+                "gemini-3.5-flash",
                 "gemini-3.5-flash-lite",
+                "gemini-3.1-flash-lite",
                 "gemini-2.5-flash",
             ]
-            def build_http_options(tm, timeout_seconds=45.0, api_version="v1beta"):
+            def build_http_options(tm, timeout_seconds=55.0, api_version="v1beta"):
                 return tm.HttpOptions(timeout=int(timeout_seconds * 1000), api_version=api_version) if hasattr(tm, "HttpOptions") else None
+            def build_thinking_config(tm, m, fast_mode=False, budget=None):
+                return None
 
     try:
-        http_opts = build_http_options(types, timeout_seconds=45.0)
+        http_opts = build_http_options(types, timeout_seconds=55.0)
         client = genai.Client(api_key=gemini_key, http_options=http_opts) if http_opts else genai.Client(api_key=gemini_key)
         use_search_tool = True
         models_to_try = list(DEFAULT_GEMINI_MODELS)
 
         for model in models_to_try:
+            t_cfg = build_thinking_config(types, model, fast_mode=True)
+            cfg_base = {"temperature": 0.3, "max_output_tokens": 3072}
+            if t_cfg is not None:
+                cfg_base["thinking_config"] = t_cfg
             try:
                 cfg = types.GenerateContentConfig(
                     tools=[types.Tool(google_search=types.GoogleSearch())] if use_search_tool else None,
-                    temperature=0.3,
-                    max_output_tokens=1500,
+                    **cfg_base,
                 )
                 resp = client.models.generate_content(
                     model=model,
@@ -271,7 +278,7 @@ Restituisci SOLO il blocco JSON nel seguente formato:
                         resp = client.models.generate_content(
                             model=model,
                             contents=prompt,
-                            config=types.GenerateContentConfig(temperature=0.3, max_output_tokens=1500),
+                            config=types.GenerateContentConfig(**cfg_base),
                         )
                     except Exception as e2:
                         print(f"⚠️ Gemini model {model} attempt failed: {e2}")

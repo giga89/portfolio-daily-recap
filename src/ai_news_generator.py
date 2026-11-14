@@ -47,9 +47,10 @@ except ImportError:
         from src.ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options
     except ImportError:
         DEFAULT_GEMINI_MODELS = [
-            'gemini-3.6-flash',
-            'gemini-3.5-flash',
             'gemini-4-hydrogen',
+            'gemini-3.6-flash',
+            'gemini-3-flash-preview',
+            'gemini-3.5-flash',
             'gemini-3.5-flash-lite',
             'gemini-3.1-flash-lite',
             'gemini-2.5-flash',
@@ -63,6 +64,22 @@ except ImportError:
             except TypeError:
                 return types_module.HttpOptions(timeout=ms)
 
+
+
+def _get_external_fallback_models():
+    """Return synchronized (groq_models, mistral_models) lists without duplicating definitions."""
+    try:
+        from independent_fact_checker import GROQ_MODELS, MISTRAL_MODELS
+        return list(GROQ_MODELS), list(MISTRAL_MODELS[:3])
+    except ImportError:
+        try:
+            from src.independent_fact_checker import GROQ_MODELS, MISTRAL_MODELS
+            return list(GROQ_MODELS), list(MISTRAL_MODELS[:3])
+        except ImportError:
+            return (
+                ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"],
+                ["ministral-14b-latest", "ministral-8b-latest", "codestral-latest"],
+            )
 
 
 def _throttle_request(delay: float = 2.0):
@@ -1076,10 +1093,12 @@ TEXT TO TRANSLATE:
 
     import requests as _requests
 
+    _ext_groq_models, _ext_mistral_models = _get_external_fallback_models()
+
     # ── Provider 1: Groq (free tier, ultra-fast LPUs) ────────────────────────
     groq_key = os.environ.get("GROQ_API_KEY")
     if groq_key:
-        groq_models = ["qwen/qwen3.8-27b", "openai/gpt-oss-120b", "openai/gpt-oss-20b"]
+        groq_models = _ext_groq_models
         groq_url = "https://api.groq.com/openai/v1/chat/completions"
         groq_headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
         for model in groq_models:
@@ -1118,7 +1137,7 @@ TEXT TO TRANSLATE:
     # ── Provider 2: Mistral ───────────────────────────────────────────────────
     mistral_key = os.environ.get("MISTRAL_API_KEY")
     if mistral_key:
-        mistral_models = ["codestral-latest", "ministral-14b-latest", "ministral-8b-latest"]
+        mistral_models = _ext_mistral_models
         mistral_url = "https://api.mistral.ai/v1/chat/completions"
         mistral_headers = {"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"}
         for idx, model in enumerate(mistral_models):
@@ -1189,11 +1208,12 @@ def _generate_text_with_groq_or_mistral(prompt: str, system_prompt: str = "") ->
     Fallback generator using Groq or Mistral when Gemini is rate-limited (429) or unavailable (503).
     """
     import requests as _requests
+    _ext_groq_models, _ext_mistral_models = _get_external_fallback_models()
 
     # 1. Try Groq (LPU inference, ultra-fast)
     groq_key = os.environ.get("GROQ_API_KEY")
     if groq_key:
-        groq_models = ["qwen/qwen3.8-27b", "openai/gpt-oss-120b", "openai/gpt-oss-20b"]
+        groq_models = _ext_groq_models
         groq_url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
         for model in groq_models:
@@ -1228,7 +1248,7 @@ def _generate_text_with_groq_or_mistral(prompt: str, system_prompt: str = "") ->
     # 2. Try Mistral
     mistral_key = os.environ.get("MISTRAL_API_KEY")
     if mistral_key:
-        mistral_models = ["codestral-latest", "ministral-14b-latest", "ministral-8b-latest"]
+        mistral_models = _ext_mistral_models
         mistral_url = "https://api.mistral.ai/v1/chat/completions"
         headers = {"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"}
         for idx, model in enumerate(mistral_models):

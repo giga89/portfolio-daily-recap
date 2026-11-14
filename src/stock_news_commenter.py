@@ -61,19 +61,21 @@ except ImportError:
 
 
 try:
-    from ai_model_cascade import FAST_GEMINI_MODELS, DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
+    from ai_model_cascade import COMMENT_GEMINI_MODELS, DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
 except ImportError:
     try:
-        from src.ai_model_cascade import FAST_GEMINI_MODELS, DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
+        from src.ai_model_cascade import COMMENT_GEMINI_MODELS, DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
     except ImportError:
-        FAST_GEMINI_MODELS = [
-            'gemini-3.5-flash-lite',
-            'gemini-3.5-flash',
-            'gemini-3.1-flash-lite',
+        COMMENT_GEMINI_MODELS = [
+            'gemini-4-hydrogen',
             'gemini-3.6-flash',
+            'gemini-3-flash-preview',
+            'gemini-3.5-flash',
+            'gemini-3.5-flash-lite',
+            'gemini-3.1-flash-lite',
             'gemini-2.5-flash',
         ]
-        DEFAULT_GEMINI_MODELS = list(FAST_GEMINI_MODELS)
+        DEFAULT_GEMINI_MODELS = list(COMMENT_GEMINI_MODELS)
         def build_http_options(tm, timeout_seconds=35.0, api_version="v1beta"):
             return tm.HttpOptions(timeout=int(timeout_seconds * 1000), api_version=api_version) if hasattr(tm, "HttpOptions") else None
         def build_thinking_config(tm, m, fast_mode=False, budget=None):
@@ -239,15 +241,15 @@ REGOLE OBBLIGATORIE:
 Output SOLO il testo del commento in italiano."""
 
     try:
-        http_opts = build_http_options(types, timeout_seconds=35.0)
+        http_opts = build_http_options(types, timeout_seconds=45.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
-        catalyst_models = FAST_GEMINI_MODELS if FAST_GEMINI_MODELS else DEFAULT_GEMINI_MODELS
+        catalyst_models = COMMENT_GEMINI_MODELS if COMMENT_GEMINI_MODELS else DEFAULT_GEMINI_MODELS
 
         for idx, model_name in enumerate(catalyst_models):
             for attempt in range(2):
                 try:
                     print(f"   🤖 Trying model for catalyst comment ({idx+1}/{len(catalyst_models)}): {model_name}...")
-                    cfg_kwargs = {"temperature": 0.4, "max_output_tokens": 800}
+                    cfg_kwargs = {"temperature": 0.4, "max_output_tokens": 3072}
                     t_cfg = build_thinking_config(types, model_name, fast_mode=True)
                     if t_cfg is not None:
                         cfg_kwargs["thinking_config"] = t_cfg
