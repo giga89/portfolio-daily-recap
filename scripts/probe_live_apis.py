@@ -466,31 +466,27 @@ def probe_deep() -> None:
         if hasattr(types, "ThinkingLevel"):
             print(f"  - ThinkingLevel values: {[e.value for e in types.ThinkingLevel]}")
 
-        http_opts = types.HttpOptions(timeout=60000) if hasattr(types, "HttpOptions") else None
+        http_opts = types.HttpOptions(timeout=90000, api_version="v1beta") if hasattr(types, "HttpOptions") else None
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
 
         deep_tests = [
             # (model, kwargs_for_GenerateContentConfig, label, is_gemma)
-            ("gemini-4-hydrogen", {"max_output_tokens": 2048}, "4-hydrogen default 60s", False),
-            ("gemini-4-hydrogen", {"max_output_tokens": 2048, "thinking_budget": 0}, "4-hydrogen think=0", False),
+            ("gemini-4-hydrogen", {"max_output_tokens": 2048}, "4-hydrogen v1beta def", False),
             ("gemini-4-hydrogen", {"max_output_tokens": 2048, "thinking_level": "LOW"}, "4-hydrogen think=LOW", False),
-            ("gemini-3.8-flash", {"max_output_tokens": 2048, "thinking_budget": 0}, "3.8-flash think=0", False),
-            ("gemini-3.7-flash", {"max_output_tokens": 2048, "thinking_budget": 0}, "3.7-flash think=0", False),
-            ("gemini-3.7-flash", {"max_output_tokens": 2048, "thinking_budget": 256}, "3.7-flash think=256", False),
-            ("gemini-3.6-flash", {"max_output_tokens": 2048, "thinking_budget": 0}, "3.6-flash think=0", False),
+            ("gemini-3.8-flash", {"max_output_tokens": 2048}, "3.8-flash v1beta def", False),
+            ("gemini-3.8-flash", {"max_output_tokens": 2048, "thinking_level": "MINIMAL"}, "3.8-flash MINIMAL", False),
+            ("gemini-3.7-flash", {"max_output_tokens": 2048, "thinking_level": "MINIMAL"}, "3.7-flash MINIMAL", False),
+            ("gemini-3.6-flash", {"max_output_tokens": 2048}, "3.6-flash v1beta def", False),
             ("gemini-3.6-flash", {"max_output_tokens": 2048, "thinking_budget": 256}, "3.6-flash think=256", False),
-            ("gemini-3.5-flash", {"max_output_tokens": 2048}, "3.5-flash default 2048tok", False),
             ("gemini-3.5-flash", {"max_output_tokens": 2048, "thinking_budget": 0}, "3.5-flash think=0", False),
-            ("gemini-3.5-flash-lite", {"max_output_tokens": 2048}, "3.5-flash-lite default", False),
-            ("gemini-3.1-flash-lite", {"max_output_tokens": 2048}, "3.1-flash-lite default", False),
-            ("gemini-3.1-flash-lite-preview", {"max_output_tokens": 2048}, "3.1-flash-lite-preview", False),
-            ("gemini-omni-1.2-flash", {"max_output_tokens": 2048}, "omni-1.2-flash", False),
-            ("gemini-2.5-flash", {"max_output_tokens": 2048, "thinking_budget": 0}, "2.5-flash think=0", False),
-            ("gemma-4-26b-a4b-it", {"max_output_tokens": 2048}, "gemma-4-26b 2048tok", True),
-            ("gemma-4-31b-it", {"max_output_tokens": 2048}, "gemma-4-31b 2048tok", True),
+            ("gemini-3.5-flash", {"max_output_tokens": 2048}, "3.5-flash default", False),
+            ("gemini-4-argon", {"max_output_tokens": 512}, "4-argon quota check", False),
+            ("gemini-4-carbon", {"max_output_tokens": 512}, "4-carbon quota check", False),
+            ("gemini-3.1-pro-preview", {"max_output_tokens": 512}, "3.1-pro quota check", False),
+            ("gemini-3-flash-preview", {"max_output_tokens": 512}, "3-flash-prev check", False),
         ]
 
-        print("\n🧪 Deep Gemini/Gemma Matrix (60s HttpOptions, 2048 max_output_tokens):")
+        print("\n🧪 Deep Gemini v1beta Matrix (90s HttpOptions, 2048 max_output_tokens):")
         for model_name, extra, label, is_gemma in deep_tests:
             t0 = time.monotonic()
             try:
@@ -528,15 +524,195 @@ def probe_deep() -> None:
                 out_t = getattr(usage, "candidates_token_count", "?") if usage else "?"
                 th_t = getattr(usage, "thoughts_token_count", None) if usage else None
                 print(
-                    f"  ✅ {label:<26} | {elapsed:5.2f}s | json={'OK' if parsed else 'BAD'} | "
+                    f"  ✅ {label:<24} | {elapsed:5.2f}s | json={'OK' if parsed else 'BAD'} | "
                     f"verdict={parsed.get('verdict') if isinstance(parsed, dict) else None} "
                     f"caught={parsed.get('caught_error') if isinstance(parsed, dict) else None} | "
                     f"tok(in={in_t},out={out_t},think={th_t})"
                 )
             except Exception as exc:
                 elapsed = time.monotonic() - t0
-                print(f"  ❌ {label:<26} | {elapsed:5.2f}s | ERR: {str(exc).replace(chr(10), ' ')[:260]}")
-            time.sleep(1.2)
+                print(f"  ❌ {label:<24} | {elapsed:5.2f}s | ERR: {str(exc).replace(chr(10), ' ')[:420]}")
+            time.sleep(1.5)
+
+        # Head-to-head REAL Long-Form Italian Financial Recap Benchmark (quality & rule adherence)
+        long_prompt = """Sei Andrea Ravalli, Popular Investor italiano su eToro.
+Scrivi un post US CLOSE in italiano (~1500 caratteri) basato SOLO su questi dati certi:
+- SESSIONE: U.S. Market Close conclusa (22:00 CET). La riunione Fed delle 20:00 si è GIA' conclusa con tassi invariati al 4.00%.
+- INDICI GROUND TRUTH: S&P 500 -0.40%, Nasdaq 100 -1.22%, Dow Jones +0.18%.
+- TITOLI PORTAFOGLIO AUTORIZZATI (usa AL MASSIMO 4 cashtag in tutto il post):
+  • $NVDA (-0.45%): prese di profitto moderate dopo trimestrale forte e domanda Blackwell sostenuta.
+  • $AVGO (+2.35%): inserito nella Conviction List da Goldman Sachs su domini custom chip AI e networking Ethernet.
+  • $WDEF.L (+1.10%): WisdomTree Europe Defence UCITS ETF (ACCUMULAZIONE, zero cedole distribuite), sostenuto da commesse difesa UE.
+  • $MSFT (+0.60%): crescita cloud Azure AI e backlog enterprise.
+REGOLE TASSATIVE: Zero markdown (**), usa solo i 4 cashtag autorizzati con spazio prima e dopo, NON inventare dividendi per $WDEF.L (è ad accumulazione), parla della Fed solo al passato, niente frasi fatte generiche, chiudi con una domanda alla community."""
+        print("\n📝 REAL LONG-FORM RECAP BENCHMARK (90s v1beta):")
+        for gm, gm_cfg_kw in [
+            ("gemini-4-hydrogen", {"temperature": 0.6, "max_output_tokens": 2048}),
+            ("gemini-3.6-flash", {"temperature": 0.6, "max_output_tokens": 2048}),
+            ("gemini-3.5-flash", {"temperature": 0.6, "max_output_tokens": 2048}),
+        ]:
+            t0 = time.monotonic()
+            try:
+                resp = client.models.generate_content(
+                    model=gm,
+                    contents=long_prompt,
+                    config=types.GenerateContentConfig(**gm_cfg_kw),
+                )
+                elapsed = time.monotonic() - t0
+                txt = (getattr(resp, "text", None) or "").strip()
+                has_md = "**" in txt
+                wdef_div = ("dividendo" in txt.lower() or "cedol" in txt.lower()) and "zero" not in txt.lower() and "accumul" not in txt.lower()
+                tags = re.findall(r"\$[A-Z0-9.]+", txt)
+                usage = getattr(resp, "usage_metadata", None)
+                th_t = getattr(usage, "thoughts_token_count", None) if usage else None
+                out_t = getattr(usage, "candidates_token_count", "?") if usage else "?"
+                print(
+                    f"  ✅ {gm:<20} | {elapsed:5.2f}s | len={len(txt)} | md_bold={has_md} | "
+                    f"tags={len(tags)} {tags} | wdef_div_bug={wdef_div} | tok(out={out_t},think={th_t})"
+                )
+                print(f"     PREVIEW: {txt.replace(chr(10), ' ')[:450]}...")
+            except Exception as exc:
+                print(f"  ❌ {gm:<20} | {time.monotonic()-t0:5.2f}s | ERR: {str(exc).replace(chr(10), ' ')[:300]}")
+            time.sleep(2.0)
+
+        # Multi-trap Financial & Temporal Hallucination Detection Benchmark
+        hard_audit_system = (
+            "Sei un auditor finanziario severo. Trova TUTTI gli errori nel testo rispetto ai fatti certificati. "
+            'Rispondi SOLO in JSON: {"decision": "REJECT"|"APPROVE", "errors_found": ["..."], '
+            '"caught_wdef_div": true|false, "caught_nvda_sign": true|false, '
+            '"caught_iqql_identity": true|false, "caught_fed_tense": true|false}.'
+        )
+        hard_audit_user = (
+            "FATTI CERTIFICATI:\n"
+            "- Data/Ora: Venerdì sera 22:15 CET (U.S. Close già conclusa; decisione Fed avvenuta 2 ore fa alle 20:00).\n"
+            "- $NVDA: -0.45% (chiusura negativa).\n"
+            "- $WDEF.L: WisdomTree Europe Defence UCITS ETF (Settore Difesa UE, AD ACCUMULAZIONE — NON paga dividendi).\n"
+            "- $IQQL.DE: iShares Listed Private Equity UCITS ETF (Private Equity, NON MSCI World Quality).\n\n"
+            "TESTO DA AUDITARE:\n"
+            "Stasera nella chiusura USA brilla $NVDA che chiude in netto rialzo nonostante le tensioni di settore (-0.45% nel finale), "
+            "mentre in Europa ottimi gli stacchi cedola dell'ETF difensivo $WDEF.L e la stabilità di $IQQL.DE sul MSCI World Quality. "
+            "Domani sera la Fed prenderà la decisione odierna sui tassi."
+        )
+        print("\n🕵️ HARD 4-TRAP AUDIT BENCHMARK (Gemini vs Groq vs Mistral):")
+        for gm in ("gemini-4-hydrogen", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"):
+            t0 = time.monotonic()
+            try:
+                cfg_h: Dict[str, Any] = {
+                    "system_instruction": hard_audit_system,
+                    "response_mime_type": "application/json",
+                    "temperature": 0.0,
+                    "max_output_tokens": 1500,
+                }
+                if gm == "gemini-3.5-flash" and hasattr(types, "ThinkingConfig"):
+                    cfg_h["thinking_config"] = types.ThinkingConfig(thinking_budget=256)
+                r = client.models.generate_content(
+                    model=gm, contents=hard_audit_user, config=types.GenerateContentConfig(**cfg_h)
+                )
+                elapsed = time.monotonic() - t0
+                p = _extract_json(r.text or "") or {}
+                score = sum(bool(p.get(k)) for k in ("caught_wdef_div", "caught_nvda_sign", "caught_iqql_identity", "caught_fed_tense"))
+                print(
+                    f"  • gemini:{gm:<21} | {elapsed:5.2f}s | traps={score}/4 "
+                    f"(div={p.get('caught_wdef_div')}, sign={p.get('caught_nvda_sign')}, "
+                    f"iqql={p.get('caught_iqql_identity')}, fed={p.get('caught_fed_tense')}) | dec={p.get('decision')}"
+                )
+            except Exception as exc:
+                print(f"  ❌ gemini:{gm:<21} | {time.monotonic()-t0:5.2f}s | ERR: {str(exc)[:180]}")
+            time.sleep(1.5)
+
+        groq_key = os.environ.get("GROQ_API_KEY", "").strip()
+        if groq_key:
+            for gmodel, g_extra in [
+                ("openai/gpt-oss-120b", {"reasoning_effort": "low"}),
+                ("openai/gpt-oss-120b", {"reasoning_effort": "medium"}),
+                ("qwen/qwen3.8-27b", {}),
+                ("openai/gpt-oss-20b", {"reasoning_effort": "low"}),
+            ]:
+                t0 = time.monotonic()
+                try:
+                    resp = requests.post(
+                        "https://api.groq.com/openai/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+                        json={
+                            "model": gmodel,
+                            "messages": [
+                                {"role": "system", "content": hard_audit_system},
+                                {"role": "user", "content": hard_audit_user},
+                            ],
+                            "temperature": 0.0,
+                            "max_tokens": 1500,
+                            "response_format": {"type": "json_object"},
+                            **g_extra,
+                        },
+                        timeout=25,
+                    )
+                    elapsed = time.monotonic() - t0
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        txt = (data["choices"][0]["message"].get("content") or "")
+                        p = _extract_json(txt) or {}
+                        score = sum(bool(p.get(k)) for k in ("caught_wdef_div", "caught_nvda_sign", "caught_iqql_identity", "caught_fed_tense"))
+                        u = data.get("usage", {})
+                        print(
+                            f"  • groq:{gmodel} {g_extra or ''}".ljust(34) +
+                            f"| {elapsed:5.2f}s | traps={score}/4 "
+                            f"(div={p.get('caught_wdef_div')}, sign={p.get('caught_nvda_sign')}, "
+                            f"iqql={p.get('caught_iqql_identity')}, fed={p.get('caught_fed_tense')}) | "
+                            f"tok_out={u.get('completion_tokens')}"
+                        )
+                    else:
+                        print(f"  ❌ groq:{gmodel} {g_extra}: HTTP {resp.status_code} {resp.text[:160]}")
+                except Exception as exc:
+                    print(f"  ❌ groq:{gmodel}: ERR {exc}")
+                time.sleep(1.5)
+
+        mistral_key = os.environ.get("MISTRAL_API_KEY", "").strip()
+        if mistral_key:
+            mistral_probe_list = [
+                "mistral-medium-2604",
+                "mistral-medium-3-5",
+                "mistral-small-2603",
+                "mistral-code-latest",
+                "ministral-14b-latest",
+                "codestral-latest",
+                "ministral-8b-latest",
+            ]
+            for idx, mmodel in enumerate(mistral_probe_list):
+                if idx > 0:
+                    time.sleep(2.2)
+                t0 = time.monotonic()
+                try:
+                    resp = requests.post(
+                        "https://api.mistral.ai/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"},
+                        json={
+                            "model": mmodel,
+                            "messages": [
+                                {"role": "system", "content": hard_audit_system},
+                                {"role": "user", "content": hard_audit_user},
+                            ],
+                            "temperature": 0.0,
+                            "max_tokens": 1200,
+                            "response_format": {"type": "json_object"},
+                        },
+                        timeout=25,
+                    )
+                    elapsed = time.monotonic() - t0
+                    rl = {k: v for k, v in resp.headers.items() if "ratelimit" in k.lower()}
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        txt = (data["choices"][0]["message"].get("content") or "")
+                        p = _extract_json(txt) or {}
+                        score = sum(bool(p.get(k)) for k in ("caught_wdef_div", "caught_nvda_sign", "caught_iqql_identity", "caught_fed_tense"))
+                        print(
+                            f"  • mistral:{mmodel:<21} | {elapsed:5.2f}s | traps={score}/4 "
+                            f"(div={p.get('caught_wdef_div')}, sign={p.get('caught_nvda_sign')}, "
+                            f"iqql={p.get('caught_iqql_identity')}, fed={p.get('caught_fed_tense')}) | rl={rl}"
+                        )
+                    else:
+                        print(f"  ❌ mistral:{mmodel:<21} | {elapsed:5.2f}s | HTTP {resp.status_code} | rl={rl} | {resp.text[:140]}")
+                except Exception as exc:
+                    print(f"  ❌ mistral:{mmodel:<21} | ERR {exc}")
 
         print("\n🔎 Inspect full 429 error for google_search & image quota:")
         for m in ("gemini-3.5-flash-lite", "gemini-2.5-flash"):
@@ -567,33 +743,41 @@ def probe_deep() -> None:
 
     # Realistic Italian comment-reply quality benchmark across top candidates
     reply_system = (
-        "Sei Andrea Ravalli, Popular Investor su eToro. Rispondi in italiano naturale, competente e sobrio "
-        "(max 2-3 frasi, niente consigli finanziari personalizzati, nessuna promessa di rendimenti)."
+        "Sei Andrea Ravalli, Popular Investor su eToro (Risk Score 3/10, zero leva, orizzonte 3-5 anni). "
+        "Rispondi in italiano naturale, competente e specifico (max 3-4 frasi, zero markdown **, "
+        "ricorda che $WDEF.L è un ETF ad accumulazione senza cedole, nessun consiglio finanziario personalizzato)."
     )
     reply_user = (
-        "Mio post originale: 'Chiusura USA mista: Nasdaq in lieve calo (-0.4%) con prese di profitto sui semiconduttori ($NVDA -1.8%), "
-        "mentre il comparto difesa e utilities tiene bene il portafoglio.'\n"
-        "Commento utente (@Marco88): 'Ciao Andrea, pensi che convenga entrare su NVDA adesso dopo questo -1.8% o aspettare la trimestrale?'"
+        "Mio post originale: 'Chiusura USA mista: Nasdaq -0.4% con prese di profitto sui chip ($NVDA -1.8%), "
+        "mentre in Europa $WDEF.L sostiene la componente difensiva del portafoglio.'\n"
+        "Commento utente (@Marco88): 'Ciao Andrea, conviene entrare su NVDA adesso o aspettare la trimestrale? "
+        "Inoltre che dividendo stacca WDEF.L?'"
     )
-    print("\n💬 ITALIAN COMMENT REPLY BENCHMARK:")
+    print("\n💬 ITALIAN COMMENT REPLY BENCHMARK (Quality + Rule Compliance):")
     if api_key:
-        for gm in ("gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.6-flash"):
+        for gm, t_budget in [
+            ("gemini-4-hydrogen", None),
+            ("gemini-3.6-flash", 256),
+            ("gemini-3.5-flash", 256),
+            ("gemini-3.5-flash-lite", None),
+            ("gemini-3.1-flash-lite", None),
+        ]:
             try:
                 t0 = time.monotonic()
                 cfg_args: Dict[str, Any] = {
                     "system_instruction": reply_system,
-                    "temperature": 0.4,
-                    "max_output_tokens": 400,
+                    "temperature": 0.35,
+                    "max_output_tokens": 1200,
                 }
-                if gm == "gemini-3.6-flash" and hasattr(types, "ThinkingConfig"):
-                    cfg_args["thinking_config"] = types.ThinkingConfig(thinking_budget=0)
+                if t_budget is not None and hasattr(types, "ThinkingConfig"):
+                    cfg_args["thinking_config"] = types.ThinkingConfig(thinking_budget=t_budget)
                 r = client.models.generate_content(
                     model=gm, contents=reply_user, config=types.GenerateContentConfig(**cfg_args)
                 )
                 print(f"  • {gm:<24} ({time.monotonic()-t0:.2f}s): {(r.text or '').strip()}")
             except Exception as exc:
                 print(f"  • {gm:<24} ERR: {str(exc)[:180]}")
-            time.sleep(1.0)
+            time.sleep(1.5)
 
     groq_key = os.environ.get("GROQ_API_KEY", "").strip()
     if groq_key:
