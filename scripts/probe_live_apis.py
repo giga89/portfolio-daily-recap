@@ -470,20 +470,12 @@ def probe_deep() -> None:
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
 
         deep_tests = [
-            # (model, kwargs_for_GenerateContentConfig, label, is_gemma)
-            ("gemini-4-hydrogen", {"max_output_tokens": 2048}, "4-hydrogen v1beta def", False),
+            # Quick check of quota limits + new thinking/model variants
             ("gemini-4-hydrogen", {"max_output_tokens": 2048, "thinking_level": "LOW"}, "4-hydrogen think=LOW", False),
-            ("gemini-3.8-flash", {"max_output_tokens": 2048}, "3.8-flash v1beta def", False),
-            ("gemini-3.8-flash", {"max_output_tokens": 2048, "thinking_level": "MINIMAL"}, "3.8-flash MINIMAL", False),
-            ("gemini-3.7-flash", {"max_output_tokens": 2048, "thinking_level": "MINIMAL"}, "3.7-flash MINIMAL", False),
-            ("gemini-3.6-flash", {"max_output_tokens": 2048}, "3.6-flash v1beta def", False),
-            ("gemini-3.6-flash", {"max_output_tokens": 2048, "thinking_budget": 256}, "3.6-flash think=256", False),
-            ("gemini-3.5-flash", {"max_output_tokens": 2048, "thinking_budget": 0}, "3.5-flash think=0", False),
-            ("gemini-3.5-flash", {"max_output_tokens": 2048}, "3.5-flash default", False),
-            ("gemini-4-argon", {"max_output_tokens": 512}, "4-argon quota check", False),
-            ("gemini-4-carbon", {"max_output_tokens": 512}, "4-carbon quota check", False),
-            ("gemini-3.1-pro-preview", {"max_output_tokens": 512}, "3.1-pro quota check", False),
-            ("gemini-3-flash-preview", {"max_output_tokens": 512}, "3-flash-prev check", False),
+            ("gemini-3-flash-preview", {"max_output_tokens": 2048}, "3-flash-prev default", False),
+            ("gemini-3.6-flash", {"max_output_tokens": 512, "thinking_budget": 128}, "3.6-flash quota check", False),
+            ("gemini-3.5-flash", {"max_output_tokens": 512, "thinking_budget": 0}, "3.5-flash quota check", False),
+            ("gemma-4-26b-a4b-it", {"max_output_tokens": 2048}, "gemma-4-26b v1beta", True),
         ]
 
         print("\n🧪 Deep Gemini v1beta Matrix (90s HttpOptions, 2048 max_output_tokens):")
@@ -531,7 +523,7 @@ def probe_deep() -> None:
                 )
             except Exception as exc:
                 elapsed = time.monotonic() - t0
-                print(f"  ❌ {label:<24} | {elapsed:5.2f}s | ERR: {str(exc).replace(chr(10), ' ')[:420]}")
+                print(f"  ❌ {label:<24} | {elapsed:5.2f}s | ERR: {str(exc).replace(chr(10), ' ')[:650]}")
             time.sleep(1.5)
 
         # Head-to-head REAL Long-Form Italian Financial Recap Benchmark (quality & rule adherence)
@@ -545,18 +537,28 @@ Scrivi un post US CLOSE in italiano (~1500 caratteri) basato SOLO su questi dati
   • $WDEF.L (+1.10%): WisdomTree Europe Defence UCITS ETF (ACCUMULAZIONE, zero cedole distribuite), sostenuto da commesse difesa UE.
   • $MSFT (+0.60%): crescita cloud Azure AI e backlog enterprise.
 REGOLE TASSATIVE: Zero markdown (**), usa solo i 4 cashtag autorizzati con spazio prima e dopo, NON inventare dividendi per $WDEF.L (è ad accumulazione), parla della Fed solo al passato, niente frasi fatte generiche, chiudi con una domanda alla community."""
-        print("\n📝 REAL LONG-FORM RECAP BENCHMARK (90s v1beta):")
+        print("\n📝 REAL LONG-FORM RECAP BENCHMARK (90s v1beta, max_output_tokens=8192):")
         for gm, gm_cfg_kw in [
-            ("gemini-4-hydrogen", {"temperature": 0.6, "max_output_tokens": 2048}),
-            ("gemini-3.6-flash", {"temperature": 0.6, "max_output_tokens": 2048}),
-            ("gemini-3.5-flash", {"temperature": 0.6, "max_output_tokens": 2048}),
+            ("gemini-4-hydrogen", {"temperature": 0.6, "max_output_tokens": 8192}),
+            ("gemini-4-hydrogen", {"temperature": 0.6, "max_output_tokens": 8192, "thinking_level": "LOW"}),
+            ("gemini-3-flash-preview", {"temperature": 0.6, "max_output_tokens": 8192}),
+            ("gemini-3.6-flash", {"temperature": 0.6, "max_output_tokens": 8192}),
+            ("gemini-3.5-flash-lite", {"temperature": 0.6, "max_output_tokens": 8192}),
         ]:
             t0 = time.monotonic()
             try:
+                cfg_l: Dict[str, Any] = {
+                    "temperature": gm_cfg_kw["temperature"],
+                    "max_output_tokens": gm_cfg_kw["max_output_tokens"],
+                }
+                if "thinking_level" in gm_cfg_kw and hasattr(types, "ThinkingLevel"):
+                    lvl = gm_cfg_kw["thinking_level"]
+                    if hasattr(types.ThinkingLevel, lvl):
+                        cfg_l["thinking_config"] = types.ThinkingConfig(thinking_level=getattr(types.ThinkingLevel, lvl))
                 resp = client.models.generate_content(
                     model=gm,
                     contents=long_prompt,
-                    config=types.GenerateContentConfig(**gm_cfg_kw),
+                    config=types.GenerateContentConfig(**cfg_l),
                 )
                 elapsed = time.monotonic() - t0
                 txt = (getattr(resp, "text", None) or "").strip()
@@ -567,12 +569,12 @@ REGOLE TASSATIVE: Zero markdown (**), usa solo i 4 cashtag autorizzati con spazi
                 th_t = getattr(usage, "thoughts_token_count", None) if usage else None
                 out_t = getattr(usage, "candidates_token_count", "?") if usage else "?"
                 print(
-                    f"  ✅ {gm:<20} | {elapsed:5.2f}s | len={len(txt)} | md_bold={has_md} | "
+                    f"  ✅ {gm:<22} ({gm_cfg_kw.get('thinking_level', 'def')}) | {elapsed:5.2f}s | len={len(txt)} | md_bold={has_md} | "
                     f"tags={len(tags)} {tags} | wdef_div_bug={wdef_div} | tok(out={out_t},think={th_t})"
                 )
-                print(f"     PREVIEW: {txt.replace(chr(10), ' ')[:450]}...")
+                print(f"     PREVIEW: {txt.replace(chr(10), ' ')[:500]}...")
             except Exception as exc:
-                print(f"  ❌ {gm:<20} | {time.monotonic()-t0:5.2f}s | ERR: {str(exc).replace(chr(10), ' ')[:300]}")
+                print(f"  ❌ {gm:<22} | {time.monotonic()-t0:5.2f}s | ERR: {str(exc).replace(chr(10), ' ')[:550]}")
             time.sleep(2.0)
 
         # Multi-trap Financial & Temporal Hallucination Detection Benchmark
