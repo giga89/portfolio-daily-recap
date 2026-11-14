@@ -2,6 +2,16 @@ name: AI Model Cascade Test Suite
 
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Execution mode (both, probe_only, cascade_only)'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - probe_only
+          - cascade_only
 
 jobs:
   test-ai-models:
@@ -23,7 +33,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Probe Live API Catalogs, Quotas & Capabilities
+        if: ${{ inputs.mode != 'cascade_only' }}
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          TAVILY_API_KEY_SECONDARY: ${{ secrets.TAVILY_API_KEY_SECONDARY }}
+        run: |
+          python scripts/probe_live_apis.py
+
       - name: Run Comprehensive AI Model Test Suite
+        if: ${{ inputs.mode != 'probe_only' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
