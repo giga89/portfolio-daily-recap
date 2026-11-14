@@ -221,6 +221,124 @@ def search_tavily(
     return []
 
 
+_TAVILY_USAGE_URL = "https://api.tavily.com/usage"
+
+
+def _mask_tavily_key(key: str) -> str:
+    return (key[:8] + "..." + key[-4:]) if len(key) > 12 else "***"
+
+
+def _resolve_tavily_env_names() -> Dict[str, str]:
+    """Map configured Tavily API key values to their environment variable names."""
+    mapping: Dict[str, str] = {}
+    ordered_vars = [
+        "TAVILY_API_KEY",
+        "TAVILY_API_KEY_SECONDARY",
+        "TAVILY_API_KEY_FALLBACK",
+        "TAVILY_API_KEY_2",
+        "TAVILY_API_KEY_BACKUP",
+    ]
+    for env_name in sorted(k for k in os.environ if k.startswith("TAVILY_API_KEY_")):
+        if env_name not in ordered_vars:
+            ordered_vars.append(env_name)
+
+    for var in ordered_vars:
+        val = (os.environ.get(var) or "").strip()
+        if val and val not in mapping:
+            mapping[val] = var
+    return mapping
+
+
+def inspect_tavily_accounts_usage(timeout: int = 10) -> List[Dict[str, Any]]:
+    """
+    Query GET https://api.tavily.com/usage (0 credits consumed) for every configured
+    Tavily account (`TAVILY_API_KEY`, `TAVILY_API_KEY_SECONDARY`, etc.).
+
+    Returns one structured dict per configured key in the same order as get_tavily_api_keys().
+    Never exposes raw API keys.
+    """
+    keys = get_tavily_api_keys()
+    if not keys or not REQUESTS_AVAILABLE:
+        return []
+
+    env_map = _resolve_tavily_env_names()
+    now = time.time()
+    accounts: List[Dict[str, Any]] = []
+
+    for idx, key in enumerate(keys, start=1):
+        env_name = env_map.get(key, f"TAVILY_API_KEYS #{idx}")
+        masked = _mask_tavily_key(key)
+        entry: Dict[str, Any] = {
+            "index": idx,
+            "env_var": env_name,
+            "masked_key": masked,
+            "status": "unknown",
+            "latency_ms": 0,
+            "plan": None,
+            "usage": None,
+            "limit": None,
+            "remaining": None,
+            "detail": "",
+        }
+        t0 = time.time()
+        try:
+            resp = requests.get(
+                _TAVILY_USAGE_URL,
+                headers={"Authorization": f"Bearer {key}"},
+                timeout=timeout,
+            )
+            entry["latency_ms"] = round((time.time() - t0) * 1000)
+
+            if resp.status_code == 200:
+                data = resp.json() if resp.text else {}
+                acct = data.get("account") or {}
+                key_meta = data.get("key") or {}
+                plan = acct.get("current_plan")
+                usage = acct.get("plan_usage")
+                limit = acct.get("plan_limit")
+                if usage is None:
+                    usage = key_meta.get("usage")
+                if limit is None:
+                    limit = key_meta.get("limit")
+
+                entry["plan"] = plan
+                entry["usage"] = usage
+                entry["limit"] = limit
+
+                if isinstance(usage, (int, float)) and isinstance(limit, (int, float)) and limit > 0:
+                    remaining = max(0, int(limit) - int(usage))
+                    entry["remaining"] = remaining
+                    if int(usage) >= int(limit):
+                        _EXHAUSTED_KEYS[key] = now + 3600
+                        entry["status"] = "quota_exceeded"
+                        entry["detail"] = f"Crediti esauriti ({int(usage)}/{int(limit)} usati, {plan or 'Plan'})"
+                    else:
+                        entry["status"] = "ok"
+                        entry["detail"] = f"{int(usage)}/{int(limit)} usati ({remaining} rimanenti, {plan or 'Plan'})"
+                else:
+                    entry["status"] = "ok"
+                    entry["detail"] = f"Attivo ({plan or 'Plan'}, usage={usage})"
+            elif resp.status_code in (401, 403):
+                _EXHAUSTED_KEYS[key] = now + 3600
+                entry["status"] = "error"
+                entry["detail"] = f"HTTP {resp.status_code} (Chiave non valida o revocata)"
+            elif resp.status_code in (429, 432):
+                _EXHAUSTED_KEYS[key] = now + 3600
+                entry["status"] = "quota_exceeded"
+                entry["detail"] = f"HTTP {resp.status_code} (Quota esaurita)"
+            else:
+                entry["status"] = "error"
+                entry["detail"] = f"HTTP {resp.status_code}"
+        except Exception as exc:
+            entry["latency_ms"] = round((time.time() - t0) * 1000)
+            entry["status"] = "error"
+            entry["detail"] = str(exc)[:80]
+
+        accounts.append(entry)
+
+    return accounts
+
+
 def filter_live_news_for_topic(
     live_news_context: str,
     topic_text: str,

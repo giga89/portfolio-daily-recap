@@ -75,11 +75,11 @@ SESSION_STYLES = {
     },
 }
 
-# Models to try for image generation (in order of preference)
+# Models to try for image generation (in order of preference, verified against live models.list)
 IMAGE_MODELS = [
-    "gemini-2.0-flash-preview-image-generation",
-    "gemini-2.0-flash-exp",
-    "gemini-2.0-flash",          # might support image output in newer SDK
+    "gemini-3.1-flash-lite-image",
+    "gemini-3.1-flash-image",
+    "gemini-2.5-flash-image",
 ]
 
 
@@ -389,7 +389,12 @@ The overall feeling should be a premium financial news publication cover that co
     print(f"   Performance: {portfolio_daily:+.2f}%")
 
     try:
-        client = genai.Client(api_key=api_key)
+        try:
+            from ai_model_cascade import build_http_options
+            http_opts = build_http_options(types, timeout_seconds=30.0)
+        except Exception:
+            http_opts = types.HttpOptions(timeout=30000, api_version="v1beta") if hasattr(types, "HttpOptions") else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
 
         bg_image = None
         for model_name in IMAGE_MODELS:
@@ -421,9 +426,12 @@ The overall feeling should be a premium financial news publication cover that co
                 error_msg = str(model_error).lower()
                 print(f"   ⚠️ Model {model_name} failed: {model_error}")
 
+                if "limit: 0" in error_msg or "limit:0" in error_msg:
+                    print("   ℹ️ Free Tier quota for Gemini image generation is 0 — switching directly to PIL gradient fallback.")
+                    break
                 if "quota" in error_msg or "429" in error_msg:
-                    print("   Rate limited, waiting 5s...")
-                    time.sleep(5)
+                    print("   Rate limited, waiting 2s...")
+                    time.sleep(2)
                 continue
 
         if bg_image is None:

@@ -319,8 +319,22 @@ def auto_ingest_earnings_via_search(
     try:
         from google import genai
         from google.genai import types
+        try:
+            from ai_model_cascade import FAST_GEMINI_MODELS, build_http_options, build_thinking_config
+        except ImportError:
+            try:
+                from src.ai_model_cascade import FAST_GEMINI_MODELS, build_http_options, build_thinking_config
+            except ImportError:
+                FAST_GEMINI_MODELS = [
+                    "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite",
+                    "gemini-3.6-flash", "gemini-2.5-flash",
+                ]
+                def build_http_options(tm, timeout_seconds=45.0, api_version="v1beta"):
+                    return tm.HttpOptions(timeout=int(timeout_seconds * 1000), api_version=api_version) if hasattr(tm, "HttpOptions") else None
+                def build_thinking_config(tm, m, fast_mode=False, budget=None):
+                    return None
 
-        http_opts = types.HttpOptions(timeout=25.0) if hasattr(types, "HttpOptions") else None
+        http_opts = build_http_options(types, timeout_seconds=45.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
 
         prompt = f"""Sei un revisore finanziario istituzionale rigoroso.
@@ -360,16 +374,42 @@ Rispondi ESCLUSIVAMENTE con un oggetto JSON valido (nessun commento markdown o t
 }}
 """
         tools = [types.Tool(google_search=types.GoogleSearch())] if not news_context else None
-        config = types.GenerateContentConfig(
-            temperature=0.1,
-            tools=tools,
-        )
-
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=config,
-        )
+        response = None
+        for model_name in FAST_GEMINI_MODELS:
+            try:
+                cfg_kwargs = {
+                    "temperature": 0.1,
+                    "max_output_tokens": 1500,
+                }
+                if tools:
+                    cfg_kwargs["tools"] = tools
+                t_cfg = build_thinking_config(types, model_name, fast_mode=True)
+                if t_cfg is not None:
+                    cfg_kwargs["thinking_config"] = t_cfg
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(**cfg_kwargs),
+                )
+                if response and getattr(response, "text", None):
+                    break
+            except Exception as m_err:
+                err_s = str(m_err).lower()
+                if tools and ("429" in err_s or "quota" in err_s or "search" in err_s or "tool" in err_s):
+                    tools = None
+                    try:
+                        cfg_kwargs.pop("tools", None)
+                        response = client.models.generate_content(
+                            model=model_name,
+                            contents=prompt,
+                            config=types.GenerateContentConfig(**cfg_kwargs),
+                        )
+                        if response and getattr(response, "text", None):
+                            break
+                    except Exception:
+                        pass
+                print(f"⚠️ Option 2 verification model {model_name} failed: {m_err}")
+                continue
 
         if not response or not response.text:
             return None
@@ -670,7 +710,22 @@ def extract_option_c_bullets(ticker: str, quarter: str, raw_news: Optional[str] 
     try:
         from google import genai
         from google.genai import types
-        http_opts = types.HttpOptions(timeout=25.0) if hasattr(types, "HttpOptions") else None
+        try:
+            from ai_model_cascade import FAST_GEMINI_MODELS, build_http_options, build_thinking_config
+        except ImportError:
+            try:
+                from src.ai_model_cascade import FAST_GEMINI_MODELS, build_http_options, build_thinking_config
+            except ImportError:
+                FAST_GEMINI_MODELS = [
+                    "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite",
+                    "gemini-3.6-flash", "gemini-2.5-flash",
+                ]
+                def build_http_options(tm, timeout_seconds=45.0, api_version="v1beta"):
+                    return tm.HttpOptions(timeout=int(timeout_seconds * 1000), api_version=api_version) if hasattr(tm, "HttpOptions") else None
+                def build_thinking_config(tm, m, fast_mode=False, budget=None):
+                    return None
+
+        http_opts = build_http_options(types, timeout_seconds=45.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         prompt = f"""Sei un analista finanziario istituzionale. Estrai ESATTAMENTE 2 sintetici punti elenco operativi sui risultati trimestrali appena pubblicati per ${ticker} ({quarter}).
 News / Contesto: {raw_news or 'Trimestrale appena pubblicata'}
@@ -682,17 +737,28 @@ REGOLE TASSATIVE:
 - ZERO opinioni, ZERO frasi vaghe, ZERO 'commenti del management'.
 - DEVI citare o un numero/percentuale o il nome specifico di un prodotto/divisione.
 - Rispondi SOLO con 2 righe, ciascuna che inizia con '• '."""
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-        )
-        if response and response.text:
-            raw_lines = [l.strip() for l in response.text.strip().split("\n") if l.strip()]
-            ok, verified, reason = verify_option_c_highlights(ticker, raw_lines)
-            if ok:
-                return verified
-            else:
-                print(f"⚠️ Option C candidate rejected by rigid gate: {reason}")
+        for model_name in FAST_GEMINI_MODELS:
+            try:
+                cfg_kwargs = {"temperature": 0.1, "max_output_tokens": 500}
+                t_cfg = build_thinking_config(types, model_name, fast_mode=True)
+                if t_cfg is not None:
+                    cfg_kwargs["thinking_config"] = t_cfg
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(**cfg_kwargs),
+                )
+                if response and getattr(response, "text", None):
+                    raw_lines = [l.strip() for l in response.text.strip().split("\n") if l.strip()]
+                    ok, verified, reason = verify_option_c_highlights(ticker, raw_lines)
+                    if ok:
+                        return verified
+                    else:
+                        print(f"⚠️ Option C candidate ({model_name}) rejected by rigid gate: {reason}")
+                        break
+            except Exception as m_err:
+                print(f"⚠️ Option C extraction note ({model_name}): {m_err}")
+                continue
     except Exception as e:
         print(f"⚠️ Option C extraction note: {e}")
     return None

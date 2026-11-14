@@ -21,6 +21,7 @@ import os
 import re
 import json
 import time
+import threading
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List, Tuple
 
@@ -60,21 +61,62 @@ except ImportError:
         filter_live_news_for_topic = lambda ctx, txt, topic_type="full_post": ctx
 
 
-# Tested, verified working models on Groq LPUs
+# Tested, verified working models on Groq LPUs (1000 RPD / 8000 TPM per model)
 GROQ_MODELS = [
     "qwen/qwen3.8-27b",
     "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
 ]
 
-# Tested, verified working models on Mistral API (Free/Dev tier grants 125 RPM on Codestral, 188 RPM on Ministral 8B)
+# Tested, verified working models on Mistral API (Free Tier: 2 RPM / 40K TPM per model)
 MISTRAL_MODELS = [
     "codestral-latest",
+    "ministral-14b-latest",
     "ministral-8b-latest",
     "ministral-3b-latest",
 ]
 
-# Circuit breaker: avoids wasting time with HTTP calls if Mistral account has 0 RPM quota
+# Circuit breaker: disables Mistral for the session ONLY on auth failure (401/403)
+# or when every configured model reports explicit 0 RPM account-wide disablement.
 _MISTRAL_AVAILABLE: Optional[bool] = None
+
+# Thread-safe pacing & temporary per-model cooldowns across parallel ThreadPoolExecutor calls
+_GROQ_LOCK = threading.Lock()
+_GROQ_PACE_STATE: Dict[str, float] = {"last_ts": 0.0, "last_elapsed": 0.0}
+_GROQ_COOLDOWN: Dict[str, float] = {}
+
+_MISTRAL_LOCK = threading.Lock()
+_MISTRAL_PACE_STATE: Dict[str, float] = {"last_ts": 0.0, "last_elapsed": 0.0}
+_MISTRAL_COOLDOWN: Dict[str, float] = {}
+
+
+def _pace_provider_call(lock: threading.Lock, state: Dict[str, float], min_interval: float) -> None:
+    """Ensure concurrent threads space out real network calls cleanly without delaying instant mocks."""
+    if min_interval <= 0:
+        return
+    with lock:
+        now = time.monotonic()
+        last_ts = state.get("last_ts", 0.0)
+        last_elapsed = state.get("last_elapsed", 0.0)
+        if last_ts > 0.0 and last_elapsed >= 0.05:
+            wait = min_interval - (now - last_ts)
+            if wait > 0:
+                time.sleep(wait)
+        state["last_ts"] = time.monotonic()
+
+
+def _ordered_models_by_cooldown(models: List[str], cooldowns: Dict[str, float], lock: threading.Lock) -> List[str]:
+    """Return models with non-cooled-down candidates first, preserving fallback order."""
+    now = time.time()
+    with lock:
+        active = [m for m in models if cooldowns.get(m, 0.0) <= now]
+        cooled = [m for m in models if cooldowns.get(m, 0.0) > now]
+    return active + cooled
+
+
+def _mark_model_cooldown(model: str, cooldowns: Dict[str, float], lock: threading.Lock, seconds: float) -> None:
+    with lock:
+        cooldowns[model] = time.time() + seconds
 
 
 def get_current_temporal_context(
@@ -446,8 +488,9 @@ def audit_with_groq(
         "Content-Type": "application/json",
     }
 
-    for model in GROQ_MODELS:
-        payload = {
+    for model in _ordered_models_by_cooldown(GROQ_MODELS, _GROQ_COOLDOWN, _GROQ_LOCK):
+        _pace_provider_call(_GROQ_LOCK, _GROQ_PACE_STATE, min_interval=0.45)
+        payload: Dict[str, Any] = {
             "model": model,
             "messages": [
                 {
@@ -457,17 +500,25 @@ def audit_with_groq(
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.1,
+            "max_tokens": 1500,
             "response_format": {"type": "json_object"},
         }
+        if "gpt-oss" in model:
+            payload["reasoning_effort"] = "low"
 
         try:
             t0 = time.time()
-            resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
+            resp = requests.post(url, headers=headers, json=payload, timeout=max(timeout, 15))
             elapsed = time.time() - t0
+            with _GROQ_LOCK:
+                _GROQ_PACE_STATE["last_elapsed"] = elapsed
 
             if resp.status_code == 200:
                 data = resp.json()
-                content = data["choices"][0]["message"]["content"]
+                content = ((data.get("choices") or [{}])[0].get("message", {}).get("content") or "").strip()
+                if not content:
+                    print(f"   ⚠️ Groq {model} returned empty content, trying next model...")
+                    continue
                 parsed = json.loads(content)
                 if "decision" in parsed and "verified_text" in parsed:
                     if parsed.get("verified_text"):
@@ -483,7 +534,8 @@ def audit_with_groq(
                     print(f"   ⚡ Groq Independent Audit ({model}) succeeded in {elapsed:.2f}s — Decision: {parsed.get('decision')}")
                     return parsed
             elif resp.status_code == 429:
-                print(f"   ⚠️ Groq {model} rate limited (429), trying next Groq model...")
+                _mark_model_cooldown(model, _GROQ_COOLDOWN, _GROQ_LOCK, seconds=20.0)
+                print(f"   ⚠️ Groq {model} rate limited (429/TPM), rotating to next Groq model...")
                 continue
             else:
                 print(f"   ⚠️ Groq {model} returned HTTP {resp.status_code}: {resp.text[:120]}")
@@ -500,13 +552,15 @@ def audit_with_mistral(
     portfolio_metadata_summary: str = "",
     live_news_context: str = "",
     api_key: Optional[str] = None,
-    timeout: int = 10,
+    timeout: int = 15,
     temporal_ctx: Optional[Dict[str, Any]] = None,
     benchmark_daily_data: Optional[Dict[str, float]] = None,
     stock_data: Optional[Dict[str, Any]] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Runs fact-checking audit via Mistral API.
+    Rotates across enabled Free Tier models (2 RPM / 40K TPM per model) with thread-safe
+    RPS pacing instead of disabling Mistral permanently on transient 429 bursts.
     """
     global _MISTRAL_AVAILABLE
     if _MISTRAL_AVAILABLE is False:
@@ -536,7 +590,11 @@ def audit_with_mistral(
         "Content-Type": "application/json",
     }
 
-    for model in MISTRAL_MODELS:
+    ordered_models = _ordered_models_by_cooldown(MISTRAL_MODELS, _MISTRAL_COOLDOWN, _MISTRAL_LOCK)
+    zero_rpm_models = 0
+
+    for model in ordered_models:
+        _pace_provider_call(_MISTRAL_LOCK, _MISTRAL_PACE_STATE, min_interval=1.25)
         payload = {
             "model": model,
             "messages": [
@@ -547,17 +605,23 @@ def audit_with_mistral(
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.1,
+            "max_tokens": 1500,
             "response_format": {"type": "json_object"},
         }
 
         try:
             t0 = time.time()
-            resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
+            resp = requests.post(url, headers=headers, json=payload, timeout=max(timeout, 15))
             elapsed = time.time() - t0
+            with _MISTRAL_LOCK:
+                _MISTRAL_PACE_STATE["last_elapsed"] = elapsed
 
             if resp.status_code == 200:
                 data = resp.json()
-                content = data["choices"][0]["message"]["content"]
+                content = ((data.get("choices") or [{}])[0].get("message", {}).get("content") or "").strip()
+                if not content:
+                    print(f"   ⚠️ Mistral {model} returned empty content, trying next model...")
+                    continue
                 parsed = json.loads(content)
                 if "decision" in parsed and "verified_text" in parsed:
                     if parsed.get("verified_text"):
@@ -573,15 +637,30 @@ def audit_with_mistral(
                     parsed["latency_sec"] = round(elapsed, 2)
                     print(f"   ⚡ Mistral Independent Audit ({model}) succeeded in {elapsed:.2f}s — Decision: {parsed.get('decision')}")
                     return parsed
-            elif resp.status_code == 429:
+            elif resp.status_code in (401, 403):
                 _MISTRAL_AVAILABLE = False
-                print(f"   ℹ️ Mistral {model} non abilitato (0 RPM / 429). Disattivato per questa sessione per azzerare i tempi.")
+                print(f"   ❌ Mistral {model} auth failed (HTTP {resp.status_code}). Disabilitato per questa sessione.")
                 return None
+            elif resp.status_code == 429:
+                hdrs = getattr(resp, "headers", None)
+                limit_rpm = str(hdrs.get("x-ratelimit-limit-req-minute", "")).strip() if hasattr(hdrs, "get") else ""
+                if limit_rpm == "0":
+                    zero_rpm_models += 1
+                    _mark_model_cooldown(model, _MISTRAL_COOLDOWN, _MISTRAL_LOCK, seconds=3600.0)
+                    print(f"   ℹ️ Mistral {model} segnala 0 RPM su account, passo al modello successivo...")
+                else:
+                    _mark_model_cooldown(model, _MISTRAL_COOLDOWN, _MISTRAL_LOCK, seconds=62.0)
+                    print(f"   ⚠️ Mistral {model} rate limited (429), rotazione automatica su modello successivo...")
+                continue
             else:
                 print(f"   ⚠️ Mistral {model} returned HTTP {resp.status_code}: {resp.text[:120]}")
         except Exception as exc:
             print(f"   ⚠️ Mistral {model} exception: {exc}")
             continue
+
+    if zero_rpm_models == len(ordered_models) and ordered_models:
+        _MISTRAL_AVAILABLE = False
+        print("   ℹ️ Tutti i modelli Mistral segnalano 0 RPM. Disattivato per questa sessione.")
 
     return None
 

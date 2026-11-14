@@ -55,6 +55,12 @@ import gist_storage
 import telegram_sender
 
 try:
+    import requests
+    HAS_REQUESTS = True
+except ImportError:
+    HAS_REQUESTS = False
+
+try:
     from google import genai
     from google.genai import types
     HAS_GENAI = True
@@ -70,28 +76,57 @@ except ImportError:
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 ANSWERED_COMMENTS_FILE = os.path.join(DATA_DIR, "answered_comments.json")
 
-# Multi-model priority hierarchy
-DEFAULT_GEMINI_MODELS = [
-    'gemini-3.7-flash',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
-    'gemini-2.5-flash',
-]
-# Multi-model priority hierarchy starting from the best reasoning model
+# Multi-model priority hierarchy imported cleanly from centralized cascade
 try:
-    from ai_model_cascade import DEFAULT_GEMINI_MODELS, REVIEWER_GEMINI_MODELS
+    from ai_model_cascade import (
+        DEFAULT_GEMINI_MODELS,
+        FAST_GEMINI_MODELS,
+        REVIEWER_GEMINI_MODELS,
+        build_http_options,
+        build_thinking_config,
+    )
 except ImportError:
     try:
-        from src.ai_model_cascade import DEFAULT_GEMINI_MODELS, REVIEWER_GEMINI_MODELS
+        from src.ai_model_cascade import (
+            DEFAULT_GEMINI_MODELS,
+            FAST_GEMINI_MODELS,
+            REVIEWER_GEMINI_MODELS,
+            build_http_options,
+            build_thinking_config,
+        )
     except ImportError:
         DEFAULT_GEMINI_MODELS = [
-            'gemini-3.8-flash',
-            'gemini-3.7-flash',
             'gemini-3.6-flash',
             'gemini-3.5-flash',
+            'gemini-4-hydrogen',
+            'gemini-3.5-flash-lite',
+            'gemini-3.1-flash-lite',
             'gemini-2.5-flash',
         ]
-        REVIEWER_GEMINI_MODELS = list(DEFAULT_GEMINI_MODELS)
+        FAST_GEMINI_MODELS = [
+            'gemini-3.5-flash-lite',
+            'gemini-3.5-flash',
+            'gemini-3.1-flash-lite',
+            'gemini-3.6-flash',
+            'gemini-2.5-flash',
+        ]
+        REVIEWER_GEMINI_MODELS = [
+            'gemini-3.5-flash',
+            'gemini-3.6-flash',
+            'gemini-3.5-flash-lite',
+            'gemini-4-hydrogen',
+            'gemini-2.5-flash',
+        ]
+        def build_http_options(types_module, timeout_seconds=45.0, api_version="v1beta"):
+            if types_module is None or not hasattr(types_module, "HttpOptions"):
+                return None
+            ms = int(max(1000, round(float(timeout_seconds) * 1000)))
+            try:
+                return types_module.HttpOptions(timeout=ms, api_version=api_version)
+            except TypeError:
+                return types_module.HttpOptions(timeout=ms)
+        def build_thinking_config(types_module, model_name, fast_mode=False, budget=None):
+            return None
 
 
 PORTFOLIO_SYSTEM_PROMPT = """
@@ -443,7 +478,8 @@ def verify_and_refine_reply(
     candidate_reply: str,
     post_context: Optional[str] = None,
     lang: str = "it",
-    api_key: Optional[str] = None
+    api_key: Optional[str] = None,
+    generator_model: Optional[str] = None,
 ) -> Tuple[bool, str, str]:
     """
     Pass 2: Double-Verification Judge (Independent Editorial & Compliance Review).
@@ -526,22 +562,30 @@ Provide your verdict in exact JSON format:
 Output ONLY valid JSON.
 """
 
-    http_opts = types.HttpOptions(timeout=20.0) if (HAS_GENAI and hasattr(types, "HttpOptions")) else None
+    http_opts = build_http_options(types, timeout_seconds=30.0) if HAS_GENAI else None
     client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
 
-    # Use prioritized reviewer models starting with the best reasoning model
-    reviewers = [m for m in REVIEWER_GEMINI_MODELS if m in DEFAULT_GEMINI_MODELS] or DEFAULT_GEMINI_MODELS
+    # Prefer a distinct fast/reviewer model for true dual-model verification
+    base_reviewers = list(dict.fromkeys(FAST_GEMINI_MODELS + REVIEWER_GEMINI_MODELS))
+    if generator_model and len(base_reviewers) > 1:
+        reviewers = [m for m in base_reviewers if m != generator_model] + [generator_model]
+    else:
+        reviewers = base_reviewers
 
     for model_name in reviewers:
         try:
             print(f"   🔍 Community Reply Auditor running on model: {model_name}...")
+            cfg_kwargs: Dict[str, Any] = {
+                "temperature": 0.1,
+                "max_output_tokens": 1500,
+            }
+            think_cfg = build_thinking_config(types, model_name, fast_mode=True)
+            if think_cfg is not None:
+                cfg_kwargs["thinking_config"] = think_cfg
             response = client.models.generate_content(
                 model=model_name,
                 contents=judge_prompt,
-                config=types.GenerateContentConfig(
-                    temperature=0.1,
-                    max_output_tokens=1500,
-                )
+                config=types.GenerateContentConfig(**cfg_kwargs),
             )
             if API_TRACKER_AVAILABLE:
                 log_api_request(model_name, True, "comment_validator_judge")
@@ -578,12 +622,61 @@ Output ONLY valid JSON.
         except Exception as e:
             print(f"⚠️ Pass 2 Validator error with {model_name}: {e}")
             err_s = str(e).lower()
-            if "429" in err_s or "quota" in err_s:
+            if ("429" in err_s or "quota" in err_s or "resource_exhausted" in err_s) and "limit: 0" not in err_s:
                 print(f"   ⏳ Reviewer {model_name} quota/rate limit (429). Pausing 2s...")
                 time.sleep(2.0)
             continue
 
     return True, candidate_reply, "Pass 2 fallback (validator model timeout)"
+
+
+def _generate_reply_with_groq_or_mistral(prompt: str) -> Tuple[Optional[str], Optional[str]]:
+    """Resilient fallback reply generator via Groq LPUs or Mistral when Gemini is unavailable."""
+    if not HAS_REQUESTS:
+        return None, None
+
+    providers = []
+    groq_key = os.environ.get("GROQ_API_KEY", "").strip()
+    if groq_key:
+        providers.append(("Groq", "https://api.groq.com/openai/v1/chat/completions", groq_key, [
+            ("qwen/qwen3.8-27b", {}),
+            ("openai/gpt-oss-120b", {"reasoning_effort": "low"}),
+            ("openai/gpt-oss-20b", {"reasoning_effort": "low"}),
+        ]))
+    mistral_key = os.environ.get("MISTRAL_API_KEY", "").strip()
+    if mistral_key:
+        providers.append(("Mistral", "https://api.mistral.ai/v1/chat/completions", mistral_key, [
+            ("codestral-latest", {}),
+            ("ministral-14b-latest", {}),
+            ("ministral-8b-latest", {}),
+        ]))
+
+    for pname, url, key, model_specs in providers:
+        for idx, (model_id, extra) in enumerate(model_specs):
+            if pname == "Mistral" and idx > 0:
+                time.sleep(1.1)
+            try:
+                payload = {
+                    "model": model_id,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.3,
+                    "max_tokens": 700,
+                    **extra,
+                }
+                resp = requests.post(
+                    url,
+                    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                    json=payload,
+                    timeout=20,
+                )
+                if resp.status_code == 200:
+                    text = (resp.json()["choices"][0]["message"].get("content") or "").strip()
+                    if text:
+                        print(f"   ✅ Fallback Pass 1 generated via {pname}/{model_id}")
+                        return text, f"{pname.lower()}:{model_id}"
+            except Exception as exc:
+                print(f"   ⚠️ {pname}/{model_id} fallback reply error: {exc}")
+    return None, None
 
 
 
@@ -833,21 +926,26 @@ CRITICAL RULES:
 """
 
     if HAS_GENAI and api_key:
-        http_opts = types.HttpOptions(timeout=25.0) if (HAS_GENAI and hasattr(types, "HttpOptions")) else None
+        http_opts = build_http_options(types, timeout_seconds=35.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
 
         for attempt in range(2):
-            for model_name in DEFAULT_GEMINI_MODELS:
+            for model_name in FAST_GEMINI_MODELS:
                 try:
                     # Pass 1: Draft Generation
                     print(f"   🤖 [Pass 1/Tentativo {attempt+1}] Interrogazione {model_name}...")
+                    cfg_kwargs: Dict[str, Any] = {
+                        "temperature": 0.35,
+                        "max_output_tokens": 1500,  # Generous token budget to prevent thinking token choke
+                    }
+                    think_cfg = build_thinking_config(types, model_name, fast_mode=True)
+                    if think_cfg is not None:
+                        cfg_kwargs["thinking_config"] = think_cfg
+
                     response = client.models.generate_content(
                         model=model_name,
                         contents=prompt,
-                        config=types.GenerateContentConfig(
-                            temperature=0.35,
-                            max_output_tokens=1500,  # Generous token budget to prevent thinking token choke
-                        )
+                        config=types.GenerateContentConfig(**cfg_kwargs),
                     )
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "comment_reply_draft")
@@ -868,7 +966,8 @@ CRITICAL RULES:
                             candidate_reply=cleaned_draft,
                             post_context=post_context,
                             lang=lang,
-                            api_key=api_key
+                            api_key=api_key,
+                            generator_model=model_name,
                         )
 
                         if is_approved:
@@ -881,11 +980,24 @@ CRITICAL RULES:
                 except Exception as e:
                     print(f"⚠️ Gemini API attempt failed with {model_name}: {e}")
                     err_s = str(e).lower()
-                    if "429" in err_s or "quota" in err_s or "resource_exhausted" in err_s:
+                    if ("429" in err_s or "quota" in err_s or "resource_exhausted" in err_s) and "limit: 0" not in err_s:
                         wait_t = 3.0 * (attempt + 1)
                         print(f"   ⏳ Model {model_name} quota/rate limit (429). Pausing {wait_t:.1f}s before trying next...")
                         time.sleep(wait_t)
                     continue
+
+    # Secondary AI fallback (Groq / Mistral) if Gemini quota/API failed, before static template
+    fallback_draft, _ = _generate_reply_with_groq_or_mistral(prompt)
+    if fallback_draft:
+        is_valid, cleaned_draft, _ = validate_response_syntax(fallback_draft, user_author)
+        if is_valid:
+            try:
+                from post_verifier import verify_post_deterministic
+                det_ok, _, cleaned_draft = verify_post_deterministic(cleaned_draft)
+                if det_ok:
+                    return cleaned_draft
+            except Exception:
+                return cleaned_draft
 
     print("🛡️ Falling back to certified topic-aware contextual template...")
     return _build_contextual_fallback(clean_text, user_author, relevant_tickers or [], lang, is_follow_up=is_follow_up)

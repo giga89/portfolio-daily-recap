@@ -803,9 +803,19 @@ def fetch_dynamic_company_infographic_data(ticker: str) -> dict:
             from google.genai import types
 
             try:
-                from ai_model_cascade import DEFAULT_GEMINI_MODELS
+                from ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
             except ImportError:
-                from src.ai_model_cascade import DEFAULT_GEMINI_MODELS
+                try:
+                    from src.ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
+                except ImportError:
+                    DEFAULT_GEMINI_MODELS = [
+                        'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-4-hydrogen',
+                        'gemini-3.5-flash-lite', 'gemini-2.5-flash',
+                    ]
+                    def build_http_options(tm, timeout_seconds=45.0, api_version="v1beta"):
+                        return tm.HttpOptions(timeout=int(timeout_seconds * 1000), api_version=api_version) if hasattr(tm, "HttpOptions") else None
+                    def build_thinking_config(tm, m, fast_mode=False, budget=None):
+                        return None
 
             try:
                 from portfolio_manager import PORTFOLIO_ASSETS_METADATA
@@ -822,7 +832,8 @@ def fetch_dynamic_company_infographic_data(ticker: str) -> dict:
             )
 
             kpi4_label = "KPI 4 (es. GENERAZIONE CASSA)" if not is_div_paying else "KPI 4 (es. DIVIDENDI / CASSA)"
-            client = genai.Client(api_key=api_key)
+            http_opts = build_http_options(types, timeout_seconds=45.0)
+            client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
             prompt = f"""Analizza in profondità l'azienda o ETF {company_name} (${clean_ticker}).
 Settore ufficiale: {meta.get('sector', 'N/A')}.
 Tesi core: {meta.get('thesis', 'N/A')}.
@@ -852,20 +863,23 @@ Fornisci in formato JSON strutturato (senza markdown extra):
   "color": [20, 100, 200]
 }}"""
 
-            config_gen = types.GenerateContentConfig(
-                temperature=0.2,
-                response_mime_type="application/json"
-            )
-
             models_to_try = list(DEFAULT_GEMINI_MODELS)
             for idx, model_name in enumerate(models_to_try):
                 for attempt in range(2):
                     try:
                         print(f"   🤖 Trying infographic model ({idx+1}/{len(models_to_try)}): {model_name}...")
+                        cfg_kwargs = {
+                            "temperature": 0.2,
+                            "max_output_tokens": 2048,
+                            "response_mime_type": "application/json",
+                        }
+                        t_cfg = build_thinking_config(types, model_name, budget=256)
+                        if t_cfg is not None:
+                            cfg_kwargs["thinking_config"] = t_cfg
                         res = client.models.generate_content(
                             model=model_name,
                             contents=prompt,
-                            config=config_gen,
+                            config=types.GenerateContentConfig(**cfg_kwargs),
                         )
                         if res and res.text:
                             parsed = json.loads(res.text)

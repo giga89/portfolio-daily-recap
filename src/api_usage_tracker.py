@@ -194,13 +194,15 @@ def generate_usage_report():
     report += """└──────────────────────────────────────────────────────────────┘
 
 📝 NOTES:
-• Free Tier limits: 10 RPM / 20 RPD for gemini-2.5-flash-lite, 5 RPM / 20 RPD for 3.5/2.5/3.6/3.7 flash
-• Each model has its OWN separate 20 RPD quota bucket
+• Verified active Free Tier cascade: gemini-3.6-flash, gemini-3.5-flash, gemini-4-hydrogen,
+  gemini-3.5-flash-lite, gemini-3.1-flash-lite, gemini-2.5-flash (via v1beta)
+• Each model family maintains its own separate daily quota bucket
 • For exact real-time quotas, check: https://aistudio.google.com/
 
 💡 RECOMMENDATIONS:
-  1. Distribute tasks across models (gemini-2.5-flash-lite, 3.5-flash, 2.5-flash)
-  2. Set up billing on AI Studio ($0.05 - $0.20/month) to unblock all daily limits
+  1. Use Lite models (gemini-3.5-flash-lite / gemini-3.1-flash-lite) for fast comment replies
+  2. Reserve Flagship Flash / Gemini 4 (gemini-3.6-flash, gemini-4-hydrogen) for full recap posts
+  3. Set up Pay-as-you-go billing on AI Studio if higher Search Grounding / Pro quotas are needed
 """
     
     return report

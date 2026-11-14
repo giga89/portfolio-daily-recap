@@ -231,29 +231,56 @@ Restituisci SOLO il blocco JSON nel seguente formato:
 """
 
     try:
-        from ai_model_cascade import DEFAULT_GEMINI_MODELS
+        from ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options
     except ImportError:
-        DEFAULT_GEMINI_MODELS = [
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
-        ]
+        try:
+            from src.ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options
+        except ImportError:
+            DEFAULT_GEMINI_MODELS = [
+                "gemini-3.6-flash",
+                "gemini-3.5-flash",
+                "gemini-4-hydrogen",
+                "gemini-3.5-flash-lite",
+                "gemini-2.5-flash",
+            ]
+            def build_http_options(tm, timeout_seconds=45.0, api_version="v1beta"):
+                return tm.HttpOptions(timeout=int(timeout_seconds * 1000), api_version=api_version) if hasattr(tm, "HttpOptions") else None
 
     try:
-        client = genai.Client(api_key=gemini_key)
-        config = types.GenerateContentConfig(
-            tools=[types.Tool(google_search=types.GoogleSearch())],
-            temperature=0.3,
-        )
-
-        models_to_try = DEFAULT_GEMINI_MODELS
+        http_opts = build_http_options(types, timeout_seconds=45.0)
+        client = genai.Client(api_key=gemini_key, http_options=http_opts) if http_opts else genai.Client(api_key=gemini_key)
+        use_search_tool = True
+        models_to_try = list(DEFAULT_GEMINI_MODELS)
 
         for model in models_to_try:
             try:
+                cfg = types.GenerateContentConfig(
+                    tools=[types.Tool(google_search=types.GoogleSearch())] if use_search_tool else None,
+                    temperature=0.3,
+                    max_output_tokens=1500,
+                )
                 resp = client.models.generate_content(
                     model=model,
                     contents=prompt,
-                    config=config,
+                    config=cfg,
                 )
+            except Exception as inner_err:
+                if use_search_tool and ("429" in str(inner_err) or "quota" in str(inner_err).lower() or "search" in str(inner_err).lower()):
+                    use_search_tool = False
+                    try:
+                        resp = client.models.generate_content(
+                            model=model,
+                            contents=prompt,
+                            config=types.GenerateContentConfig(temperature=0.3, max_output_tokens=1500),
+                        )
+                    except Exception as e2:
+                        print(f"⚠️ Gemini model {model} attempt failed: {e2}")
+                        continue
+                else:
+                    print(f"⚠️ Gemini model {model} attempt failed: {inner_err}")
+                    continue
+
+            try:
                 if resp and resp.text:
                     text = resp.text.strip()
                     json_match = re.search(r"\{.*\}", text, re.DOTALL)
@@ -266,10 +293,10 @@ Restituisci SOLO il blocco JSON nel seguente formato:
                             "tickers": parsed.get("tickers") or ["SPX500", "NSDQ100", "EURUSD"],
                         }
                         sanitized = _sanitize_macro_poll(poll_data)
-                        print(f"✅ Successfully generated Macro Calendar poll via Gemini ({model}) with Live Search!")
+                        print(f"✅ Successfully generated Macro Calendar poll via Gemini ({model})!")
                         return sanitized
             except Exception as e:
-                print(f"⚠️ Gemini model {model} attempt failed: {e}")
+                print(f"⚠️ Gemini model {model} parse failed: {e}")
                 continue
 
     except Exception as e:

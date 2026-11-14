@@ -32,17 +32,27 @@ def check_api_quota():
     print(f"🔐 API Key: {api_key[:10]}...{api_key[-5:]}")
     print()
     
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
     try:
-        client = genai.Client(api_key=api_key)
-        
+        from ai_model_cascade import FAST_GEMINI_MODELS, build_http_options
+        test_model = FAST_GEMINI_MODELS[0]
+        http_opts = build_http_options(types, timeout_seconds=30.0)
+    except Exception:
+        test_model = 'gemini-3.5-flash-lite'
+        http_opts = types.HttpOptions(timeout=30000, api_version='v1beta') if hasattr(types, 'HttpOptions') else None
+
+    try:
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
+
         # Try a minimal API call to check if the key works
-        print("🧪 Testing API key with a minimal request...")
-        
+        print(f"🧪 Testing API key with a minimal request ({test_model})...")
+
         response = client.models.generate_content(
-            model='gemini-2.0-flash-lite',
+            model=test_model,
             contents='Say "OK" if you can read this.',
             config=types.GenerateContentConfig(
-                max_output_tokens=10,
+                max_output_tokens=64,
                 temperature=0.0
             )
         )
@@ -63,22 +73,17 @@ def check_api_quota():
         print("🔗 https://console.cloud.google.com/apis/dashboard")
         print()
         
-        print("📋 Free Tier Limits (Typical):")
-        print("   • Gemini 2.0 Flash Lite:")
-        print("     - 15 RPM (Requests Per Minute)")
-        print("     - 1,500 RPD (Requests Per Day)")
-        print("     - 1M TPM (Tokens Per Minute)")
-        print()
-        print("   • Gemini 2.0 Flash:")
-        print("     - 10 RPM")
-        print("     - 1,500 RPD")
-        print("     - 4M TPM")
+        print("📋 Active Free Tier Roster (verified on runner):")
+        print("   • Gemini 3.5 / 3.1 Flash Lite: sub-second responses for replies & quick checks")
+        print("   • Gemini 3.6 / 3.5 Flash: full Italian financial recap & dual-check reviews")
+        print("   • Gemini 4 Hydrogen: Free Tier Gemini 4 model (needs >=45s HTTP timeout)")
+        print("   • Gemini 2.5 Flash: stable baseline fallback (via v1beta)")
         print()
         
         print("💡 TIP: If you're hitting limits, consider:")
         print("   1. Adding delays between requests (time.sleep)")
-        print("   2. Using Flash Lite instead of Flash")
-        print("   3. Upgrading to a paid plan")
+        print("   2. Using Flash Lite (3.5/3.1) for fast interactive replies")
+        print("   3. Upgrading to Pay-as-you-go for Search Grounding & Gemini 4 Argon/Carbon")
         print()
         
     except Exception as e:

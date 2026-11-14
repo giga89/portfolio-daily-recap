@@ -39,27 +39,29 @@ except ImportError:
 # Maximum number of $ tags per post
 MAX_TAGS_PER_POST = 4
 
-# Default Gemini models in priority order (Smartest -> Standard fallback).
-# Each model belongs to an independent Free Tier quota bucket (20 RPD each).
-DEFAULT_GEMINI_MODELS = [
-    'gemini-3.7-flash',       # Most intelligent & capable (5 RPM, 20 RPD)
-    'gemini-3.6-flash',       # High capability 3.x series (5 RPM, 20 RPD)
-    'gemini-3.5-flash',       # Advanced financial context & reasoning (5 RPM, 20 RPD)
-    'gemini-2.5-flash',       # Robust standard model (5 RPM, 20 RPD)
-]
+# Default Gemini models imported cleanly from centralized cascade (verified Free Tier order).
 try:
-    from ai_model_cascade import DEFAULT_GEMINI_MODELS
+    from ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options
 except ImportError:
     try:
-        from src.ai_model_cascade import DEFAULT_GEMINI_MODELS
+        from src.ai_model_cascade import DEFAULT_GEMINI_MODELS, build_http_options
     except ImportError:
         DEFAULT_GEMINI_MODELS = [
-            'gemini-3.8-flash',       # Newest Flagship Flash model
-            'gemini-3.7-flash',       # Most intelligent & capable
-            'gemini-3.6-flash',       # High capability 3.x series
-            'gemini-3.5-flash',       # Advanced financial context & reasoning
-            'gemini-2.5-flash',       # Robust standard model
+            'gemini-3.6-flash',
+            'gemini-3.5-flash',
+            'gemini-4-hydrogen',
+            'gemini-3.5-flash-lite',
+            'gemini-3.1-flash-lite',
+            'gemini-2.5-flash',
         ]
+        def build_http_options(types_module, timeout_seconds=55.0, api_version="v1beta"):
+            if types_module is None or not hasattr(types_module, "HttpOptions"):
+                return None
+            ms = int(max(1000, round(float(timeout_seconds) * 1000)))
+            try:
+                return types_module.HttpOptions(timeout=ms, api_version=api_version)
+            except TypeError:
+                return types_module.HttpOptions(timeout=ms)
 
 
 
@@ -1077,7 +1079,7 @@ TEXT TO TRANSLATE:
     # ── Provider 1: Groq (free tier, ultra-fast LPUs) ────────────────────────
     groq_key = os.environ.get("GROQ_API_KEY")
     if groq_key:
-        groq_models = ["qwen/qwen3.8-27b", "openai/gpt-oss-120b"]
+        groq_models = ["qwen/qwen3.8-27b", "openai/gpt-oss-120b", "openai/gpt-oss-20b"]
         groq_url = "https://api.groq.com/openai/v1/chat/completions"
         groq_headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
         for model in groq_models:
@@ -1089,11 +1091,13 @@ TEXT TO TRANSLATE:
                         {"role": "user", "content": translate_prompt},
                     ],
                     "temperature": 0.2,
-                    "max_tokens": 2000,
+                    "max_tokens": 2500,
                 }
-                resp = _requests.post(groq_url, headers=groq_headers, json=payload, timeout=15)
+                if "gpt-oss" in model:
+                    payload["reasoning_effort"] = "low"
+                resp = _requests.post(groq_url, headers=groq_headers, json=payload, timeout=20)
                 if resp.status_code == 200:
-                    translated = resp.json()["choices"][0]["message"]["content"].strip()
+                    translated = (resp.json()["choices"][0]["message"].get("content") or "").strip()
                     if _validate_translation(translated):
                         print(f"🌐 Monthly recap translated to Italian via Groq ({model})")
                         if API_TRACKER_AVAILABLE:
@@ -1101,6 +1105,7 @@ TEXT TO TRANSLATE:
                         return translated
                 elif resp.status_code == 429:
                     print(f"   ⚠️ Groq {model} rate limited (429), trying next...")
+                    time.sleep(1.0)
                     continue
                 else:
                     print(f"   ⚠️ Groq {model} HTTP {resp.status_code}")
@@ -1113,10 +1118,12 @@ TEXT TO TRANSLATE:
     # ── Provider 2: Mistral ───────────────────────────────────────────────────
     mistral_key = os.environ.get("MISTRAL_API_KEY")
     if mistral_key:
-        mistral_models = ["codestral-latest", "ministral-8b-latest"]
+        mistral_models = ["codestral-latest", "ministral-14b-latest", "ministral-8b-latest"]
         mistral_url = "https://api.mistral.ai/v1/chat/completions"
         mistral_headers = {"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"}
-        for model in mistral_models:
+        for idx, model in enumerate(mistral_models):
+            if idx > 0:
+                time.sleep(1.2)
             try:
                 payload = {
                     "model": model,
@@ -1125,18 +1132,20 @@ TEXT TO TRANSLATE:
                         {"role": "user", "content": translate_prompt},
                     ],
                     "temperature": 0.2,
+                    "max_tokens": 2000,
                 }
-                resp = _requests.post(mistral_url, headers=mistral_headers, json=payload, timeout=15)
+                resp = _requests.post(mistral_url, headers=mistral_headers, json=payload, timeout=20)
                 if resp.status_code == 200:
-                    translated = resp.json()["choices"][0]["message"]["content"].strip()
+                    translated = (resp.json()["choices"][0]["message"].get("content") or "").strip()
                     if _validate_translation(translated):
                         print(f"🌐 Monthly recap translated to Italian via Mistral ({model})")
                         if API_TRACKER_AVAILABLE:
                             log_api_request(f"mistral:{model}", True, "monthly_recap_translate")
                         return translated
                 elif resp.status_code == 429:
-                    print(f"   ⚠️ Mistral {model} rate limited (429), skipping Mistral.")
-                    break
+                    print(f"   ⚠️ Mistral {model} rate limited (429), cooling down 1.5s...")
+                    time.sleep(1.5)
+                    continue
                 else:
                     print(f"   ⚠️ Mistral {model} HTTP {resp.status_code}")
             except Exception as e:
@@ -1184,7 +1193,7 @@ def _generate_text_with_groq_or_mistral(prompt: str, system_prompt: str = "") ->
     # 1. Try Groq (LPU inference, ultra-fast)
     groq_key = os.environ.get("GROQ_API_KEY")
     if groq_key:
-        groq_models = ["openai/gpt-oss-120b", "qwen/qwen3.8-27b"]
+        groq_models = ["qwen/qwen3.8-27b", "openai/gpt-oss-120b", "openai/gpt-oss-20b"]
         groq_url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
         for model in groq_models:
@@ -1196,18 +1205,21 @@ def _generate_text_with_groq_or_mistral(prompt: str, system_prompt: str = "") ->
                         {"role": "user", "content": prompt}
                     ],
                     "temperature": 0.3,
-                    "max_tokens": 2000,
+                    "max_tokens": 2500,
                 }
-                resp = _requests.post(groq_url, headers=headers, json=payload, timeout=20)
+                if "gpt-oss" in model:
+                    payload["reasoning_effort"] = "low"
+                resp = _requests.post(groq_url, headers=headers, json=payload, timeout=25)
                 if resp.status_code == 200:
-                    text = resp.json()["choices"][0]["message"]["content"].strip()
+                    text = (resp.json()["choices"][0]["message"].get("content") or "").strip()
                     if text and len(text) > 100:
-                        print(f"✅ Monthly recap generated via Groq ({model})!")
+                        print(f"✅ Recap generated via Groq ({model})!")
                         if API_TRACKER_AVAILABLE:
                             log_api_request(f"groq:{model}", True, "monthly_recap")
                         return text
                 elif resp.status_code == 429:
                     print(f"   ⚠️ Groq {model} rate limited (429), trying next...")
+                    time.sleep(1.0)
                 else:
                     print(f"   ⚠️ Groq {model} HTTP {resp.status_code}")
             except Exception as e:
@@ -1216,10 +1228,12 @@ def _generate_text_with_groq_or_mistral(prompt: str, system_prompt: str = "") ->
     # 2. Try Mistral
     mistral_key = os.environ.get("MISTRAL_API_KEY")
     if mistral_key:
-        mistral_models = ["codestral-latest", "ministral-8b-latest"]
+        mistral_models = ["codestral-latest", "ministral-14b-latest", "ministral-8b-latest"]
         mistral_url = "https://api.mistral.ai/v1/chat/completions"
         headers = {"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"}
-        for model in mistral_models:
+        for idx, model in enumerate(mistral_models):
+            if idx > 0:
+                time.sleep(1.2)
             try:
                 payload = {
                     "model": model,
@@ -1230,16 +1244,17 @@ def _generate_text_with_groq_or_mistral(prompt: str, system_prompt: str = "") ->
                     "temperature": 0.3,
                     "max_tokens": 2000,
                 }
-                resp = _requests.post(mistral_url, headers=headers, json=payload, timeout=20)
+                resp = _requests.post(mistral_url, headers=headers, json=payload, timeout=25)
                 if resp.status_code == 200:
-                    text = resp.json()["choices"][0]["message"]["content"].strip()
+                    text = (resp.json()["choices"][0]["message"].get("content") or "").strip()
                     if text and len(text) > 100:
-                        print(f"✅ Monthly recap generated via Mistral ({model})!")
+                        print(f"✅ Recap generated via Mistral ({model})!")
                         if API_TRACKER_AVAILABLE:
                             log_api_request(f"mistral:{model}", True, "monthly_recap")
                         return text
                 elif resp.status_code == 429:
-                    print(f"   ⚠️ Mistral {model} rate limited (429), trying next...")
+                    print(f"   ⚠️ Mistral {model} rate limited (429), cooling down 1.5s...")
+                    time.sleep(1.5)
                 else:
                     print(f"   ⚠️ Mistral {model} HTTP {resp.status_code}")
             except Exception as e:
@@ -1516,7 +1531,8 @@ Factual impact and outlook summary...
     if GENAI_AVAILABLE and api_key:
         client = None
         try:
-            client = genai.Client(api_key=api_key)
+            http_opts = build_http_options(types, timeout_seconds=55.0)
+            client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         except Exception as e:
             print(f"⚠️ Could not initialize Gemini client: {e}")
 
@@ -1673,7 +1689,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
     
     try:
         from config import EMOJI_MAP
-        client = genai.Client(api_key=api_key)
+        http_opts = build_http_options(types, timeout_seconds=55.0)
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         all_allowed_for_validation = list(PORTFOLIO_TICKERS.keys()) + ["SPX500", "NSDQ100", "GER40", "DJ30", "EURUSD"]
         
         selected_tags = []
@@ -2197,16 +2214,20 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
         print("🤖 Generating AI market news recap...")
         print(f"   Selected tags for this post: {selected_tags_str}")
         
-        # Configure search tool if available in the SDK
-        config = None
-        try:
-            config = types.GenerateContentConfig(
-                tools=[types.Tool(google_search=types.GoogleSearch())],
-                temperature=0.7
-            )
-        except Exception as config_err:
-            print(f"⚠️ Could not initialize Google Search tool: {config_err}")
+        # Skip Google Search tool when Tavily live grounding is already present (avoids Free Tier 429 tool churn)
+        if tavily_grounding_section:
+            print("   🌐 Using Tavily Live Grounding directly (skipping redundant Google Search tool calls).")
             config = types.GenerateContentConfig(temperature=0.7)
+        else:
+            config = None
+            try:
+                config = types.GenerateContentConfig(
+                    tools=[types.Tool(google_search=types.GoogleSearch())],
+                    temperature=0.7
+                )
+            except Exception as config_err:
+                print(f"⚠️ Could not initialize Google Search tool: {config_err}")
+                config = types.GenerateContentConfig(temperature=0.7)
 
         # Try each model until one works
         last_error = None
@@ -2555,7 +2576,7 @@ FORMAT: Plain text, no HTML. Use emojis naturally (2-3 max). No bullet lists.
 Output ONLY the post text, no introduction or explanation."""
 
     try:
-        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        http_opts = build_http_options(types, timeout_seconds=55.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config = types.GenerateContentConfig(temperature=0.85)
 
@@ -2657,7 +2678,7 @@ FORMAT: Plain text. 2-4 natural emojis. No bullet lists. Conversational paragrap
 Output ONLY the post text, no introduction or explanation."""
 
     try:
-        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        http_opts = build_http_options(types, timeout_seconds=55.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config = types.GenerateContentConfig(temperature=0.90)
 
@@ -3051,7 +3072,7 @@ Output format (ONLY return the plain Italian post text, no greetings to the syst
 """
 
     try:
-        http_opts = types.HttpOptions(timeout=50.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        http_opts = build_http_options(types, timeout_seconds=55.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config = types.GenerateContentConfig(temperature=0.85)
 
@@ -3290,7 +3311,7 @@ REGOLE MANDATARIE PER IL TESTO (in ITALIANO):
 Output ONLY the post text in Italian, no extra conversational preamble."""
 
     try:
-        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        http_opts = build_http_options(types, timeout_seconds=55.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.7)
 
@@ -3373,7 +3394,7 @@ REGOLE PER IL TESTO (in ITALIANO):
 Output ONLY the post text in Italian."""
 
     try:
-        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        http_opts = build_http_options(types, timeout_seconds=55.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.85)
 
@@ -3458,7 +3479,7 @@ REGOLE PER IL TESTO (in ITALIANO):
 Output ONLY the post text in Italian."""
 
     try:
-        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        http_opts = build_http_options(types, timeout_seconds=55.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.85)
 
@@ -3598,7 +3619,7 @@ REGOLE PER IL POST:
 Output ONLY the post text in Italian."""
 
     try:
-        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        http_opts = build_http_options(types, timeout_seconds=55.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config_gen = types.GenerateContentConfig(temperature=0.8)
 
@@ -3728,7 +3749,7 @@ REGOLE TASSATIVE:
 Output ONLY the final Italian post text, with no introductory meta-comments."""
 
     try:
-        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        http_opts = build_http_options(types, timeout_seconds=55.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config = types.GenerateContentConfig(temperature=0.75)
         for model_name in DEFAULT_GEMINI_MODELS:
@@ -3887,7 +3908,7 @@ REGOLE TASSATIVE:
 Output ONLY the final Italian post text, with no introductory meta-comments."""
 
     try:
-        http_opts = types.HttpOptions(timeout=25.0) if (GENAI_AVAILABLE and hasattr(types, "HttpOptions")) else None
+        http_opts = build_http_options(types, timeout_seconds=55.0)
         client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
         config = types.GenerateContentConfig(temperature=0.75)
         for model_name in DEFAULT_GEMINI_MODELS:

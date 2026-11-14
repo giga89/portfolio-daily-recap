@@ -60,25 +60,24 @@ except ImportError:
     API_TRACKER_AVAILABLE = False
 
 
-DEFAULT_GEMINI_MODELS = [
-    'gemini-3.7-flash',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
-    'gemini-2.5-flash',
-]
 try:
-    from ai_model_cascade import DEFAULT_GEMINI_MODELS
+    from ai_model_cascade import FAST_GEMINI_MODELS, DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
 except ImportError:
     try:
-        from src.ai_model_cascade import DEFAULT_GEMINI_MODELS
+        from src.ai_model_cascade import FAST_GEMINI_MODELS, DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
     except ImportError:
-        DEFAULT_GEMINI_MODELS = [
-            'gemini-3.8-flash',
-            'gemini-3.7-flash',
-            'gemini-3.6-flash',
+        FAST_GEMINI_MODELS = [
+            'gemini-3.5-flash-lite',
             'gemini-3.5-flash',
+            'gemini-3.1-flash-lite',
+            'gemini-3.6-flash',
             'gemini-2.5-flash',
         ]
+        DEFAULT_GEMINI_MODELS = list(FAST_GEMINI_MODELS)
+        def build_http_options(tm, timeout_seconds=35.0, api_version="v1beta"):
+            return tm.HttpOptions(timeout=int(timeout_seconds * 1000), api_version=api_version) if hasattr(tm, "HttpOptions") else None
+        def build_thinking_config(tm, m, fast_mode=False, budget=None):
+            return None
 
 
 # Keywords indicating operational, financial, or strategic catalysts
@@ -240,17 +239,22 @@ REGOLE OBBLIGATORIE:
 Output SOLO il testo del commento in italiano."""
 
     try:
-        client = genai.Client(api_key=api_key)
-        config_gen = types.GenerateContentConfig(temperature=0.4)
+        http_opts = build_http_options(types, timeout_seconds=35.0)
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
+        catalyst_models = FAST_GEMINI_MODELS if FAST_GEMINI_MODELS else DEFAULT_GEMINI_MODELS
 
-        for idx, model_name in enumerate(DEFAULT_GEMINI_MODELS):
+        for idx, model_name in enumerate(catalyst_models):
             for attempt in range(2):
                 try:
-                    print(f"   🤖 Trying model for catalyst comment ({idx+1}/{len(DEFAULT_GEMINI_MODELS)}): {model_name}...")
+                    print(f"   🤖 Trying model for catalyst comment ({idx+1}/{len(catalyst_models)}): {model_name}...")
+                    cfg_kwargs = {"temperature": 0.4, "max_output_tokens": 800}
+                    t_cfg = build_thinking_config(types, model_name, fast_mode=True)
+                    if t_cfg is not None:
+                        cfg_kwargs["thinking_config"] = t_cfg
                     response = client.models.generate_content(
                         model=model_name,
                         contents=prompt,
-                        config=config_gen,
+                        config=types.GenerateContentConfig(**cfg_kwargs),
                     )
                     if response and response.text:
                         out = response.text.strip()

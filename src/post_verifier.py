@@ -36,27 +36,25 @@ except ImportError:
     from src.portfolio_manager import PORTFOLIO_ASSETS_METADATA, get_asset_metadata
 
 # Models for the adversarial reviewer (high reasoning, low hallucination)
-REVIEWER_MODELS = [
-    'gemini-3.7-flash',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
-    'gemini-2.5-flash',
-]
 try:
-    from ai_model_cascade import REVIEWER_GEMINI_MODELS, DEFAULT_GEMINI_MODELS
+    from ai_model_cascade import REVIEWER_GEMINI_MODELS, DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
     REVIEWER_MODELS = list(REVIEWER_GEMINI_MODELS)
 except ImportError:
     try:
-        from src.ai_model_cascade import REVIEWER_GEMINI_MODELS, DEFAULT_GEMINI_MODELS
+        from src.ai_model_cascade import REVIEWER_GEMINI_MODELS, DEFAULT_GEMINI_MODELS, build_http_options, build_thinking_config
         REVIEWER_MODELS = list(REVIEWER_GEMINI_MODELS)
     except ImportError:
         REVIEWER_MODELS = [
-            'gemini-3.8-flash',
-            'gemini-3.7-flash',
-            'gemini-3.6-flash',
             'gemini-3.5-flash',
+            'gemini-3.6-flash',
+            'gemini-3.5-flash-lite',
+            'gemini-4-hydrogen',
             'gemini-2.5-flash',
         ]
+        def build_http_options(tm, timeout_seconds=45.0, api_version="v1beta"):
+            return tm.HttpOptions(timeout=int(timeout_seconds * 1000), api_version=api_version) if hasattr(tm, "HttpOptions") else None
+        def build_thinking_config(tm, m, fast_mode=False, budget=None):
+            return None
 
 
 # Claims that assert a positive dividend/yield payout
@@ -2037,15 +2035,21 @@ Restituisci SOLO un oggetto JSON valido con il seguente schema:
 }}
 """
 
-    client = genai.Client(api_key=api_key)
+    http_opts = build_http_options(types, timeout_seconds=45.0)
+    client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
 
     for model_name in [reviewer_model] + [m for m in REVIEWER_MODELS if m != reviewer_model]:
         try:
             print(f"   🔍 AI Fact-Checker Reviewer running on model: {model_name}...")
-            config = types.GenerateContentConfig(
-                temperature=0.1,
-                response_mime_type="application/json"
-            )
+            cfg_kwargs = {
+                "temperature": 0.1,
+                "max_output_tokens": 3072,
+                "response_mime_type": "application/json",
+            }
+            t_cfg = build_thinking_config(types, model_name, budget=256)
+            if t_cfg is not None:
+                cfg_kwargs["thinking_config"] = t_cfg
+            config = types.GenerateContentConfig(**cfg_kwargs)
             response = client.models.generate_content(
                 model=model_name,
                 contents=audit_prompt,
@@ -2357,14 +2361,20 @@ Restituisci SOLO un JSON valido:
   "explanation": "breve motivazione in italiano"
 }}"""
 
-    client = genai.Client(api_key=api_key)
+    http_opts = build_http_options(types, timeout_seconds=45.0)
+    client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
     for model_name in [reviewer_model] + [m for m in REVIEWER_MODELS if m != reviewer_model]:
         try:
             print(f"   🔍 AI Comment Fact-Checker running on model: {model_name}...")
-            config = types.GenerateContentConfig(
-                temperature=0.1,
-                response_mime_type="application/json"
-            )
+            cfg_kwargs = {
+                "temperature": 0.1,
+                "max_output_tokens": 2048,
+                "response_mime_type": "application/json",
+            }
+            t_cfg = build_thinking_config(types, model_name, budget=256)
+            if t_cfg is not None:
+                cfg_kwargs["thinking_config"] = t_cfg
+            config = types.GenerateContentConfig(**cfg_kwargs)
             response = client.models.generate_content(
                 model=model_name,
                 contents=prompt,

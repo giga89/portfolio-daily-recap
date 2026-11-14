@@ -3,17 +3,17 @@
 Centralized AI Model Cascade & Rate-Limit Resilience
 =====================================================
 Ensures that all AI generators across the system always attempt generation
-with the BEST / MOST INTELLIGENT model first, and gracefully handle
-quota exhaustion, rate limits (429), or temporary outages (503) by
-waiting (exponential backoff) and cascading to next-tier models.
+with verified high-reliability models first, and gracefully handle quota
+exhaustion (429), deadlines (504), or temporary outages (503) by cascading
+across tiers.
 
-Hierarchy:
-  1. gemini-3.1-pro-preview - Flagship Deep Reasoning model (Best intelligence & financial synthesis)
-  2. gemini-3.8-flash       - Newest Flagship Flash model (Ultra-fast, top intelligence)
-  3. gemini-3.7-flash       - High-capability 3.x series
-  4. gemini-3.6-flash       - Advanced reasoning & workflow
-  5. gemini-3.5-flash       - High throughput financial context
-  6. gemini-2.5-flash       - High reliability baseline fallback
+Verified Hierarchy (Live GitHub Actions Probe):
+  1. gemini-3.6-flash      - High-capability 3.x Flash flagship (reliable & accurate)
+  2. gemini-3.5-flash      - Fast 3.5 series (strong Italian & JSON structured output)
+  3. gemini-4-hydrogen     - Newest Gemini 4 Free Tier model (needs >=45s HTTP timeout)
+  4. gemini-3.5-flash-lite - Sub-second Lite tier (high reliability & separate RPD)
+  5. gemini-3.1-flash-lite - Sub-second 3.1 Lite fallback
+  6. gemini-2.5-flash      - Stable baseline fallback (explicit v1beta)
 """
 
 import time
@@ -36,23 +36,92 @@ except ImportError:
     except ImportError:
         API_TRACKER_AVAILABLE = False
 
-# Prioritized cascade: Smartest -> Standard fallback (Free tier compatible: 5-10 RPM / 20 RPD each)
+# Prioritized cascade for long-form posts and rich synthesis (verified operational on Free Tier)
 DEFAULT_GEMINI_MODELS: List[str] = [
-    'gemini-3.8-flash',        # Newest Flash flagship (Fast & state-of-the-art)
-    'gemini-3.7-flash',        # High-intelligence 3.x series
-    'gemini-3.6-flash',        # Advanced reasoning & agentic workflow
-    'gemini-3.5-flash',        # Financial context & reasoning
-    'gemini-2.5-flash',        # High reliability baseline
+    'gemini-3.6-flash',        # Reliable 3.x flagship (5-19s, verified Italian accuracy)
+    'gemini-3.5-flash',        # Fast 3.5 series (2-8s with sufficient output budget)
+    'gemini-4-hydrogen',       # Google Gemini 4 Free Tier flagship (18-30s, requires >=45s timeout)
+    'gemini-3.5-flash-lite',   # Sub-second Lite tier (high reliability & separate RPD bucket)
+    'gemini-3.1-flash-lite',   # Sub-second 3.1 Lite fallback
+    'gemini-2.5-flash',        # High reliability baseline fallback (via v1beta)
+]
+
+# Prioritized cascade for low-latency tasks (comment replies, catalyst notes, JSON extraction)
+FAST_GEMINI_MODELS: List[str] = [
+    'gemini-3.5-flash-lite',   # Sub-second natural Italian & JSON
+    'gemini-3.5-flash',        # ~2s when thinking budget is bounded
+    'gemini-3.1-flash-lite',   # Sub-second 3.1 Lite
+    'gemini-3.6-flash',        # High intelligence fallback
+    'gemini-2.5-flash',        # Baseline fallback
 ]
 
 # Models for the adversarial reviewer / double-check judge (ensures dual-model diversity)
 REVIEWER_GEMINI_MODELS: List[str] = [
-    'gemini-3.8-flash',
-    'gemini-3.7-flash',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
-    'gemini-2.5-flash',
+    'gemini-3.5-flash',        # Distinct cross-check reviewer when 3.6-flash generates
+    'gemini-3.6-flash',        # High precision 3.6 verifier
+    'gemini-3.5-flash-lite',   # Fast verified JSON auditor
+    'gemini-4-hydrogen',       # Deep Gemini 4 reviewer
+    'gemini-2.5-flash',        # Baseline reviewer fallback
 ]
+
+# google.genai.types.HttpOptions expects MILLISECONDS (passing seconds causes immediate TLS timeouts).
+DEFAULT_HTTP_TIMEOUT_SECONDS: float = 45.0
+
+
+def build_http_options(
+    types_module: Any = None,
+    timeout_seconds: float = DEFAULT_HTTP_TIMEOUT_SECONDS,
+    api_version: Optional[str] = "v1beta",
+) -> Any:
+    """Build ``google.genai.types.HttpOptions`` safely with millisecond timeout.
+
+    `google.genai.types.HttpOptions.timeout` expects an integer in milliseconds.
+    Explicit ``api_version="v1beta"`` ensures system instructions, tools, and
+    2.5/3.x/4.x features remain consistent across SDK 1.x and 3.x.
+    """
+    tmod = types_module or (types if GENAI_AVAILABLE else None)
+    if tmod is None or not hasattr(tmod, "HttpOptions"):
+        return None
+    timeout_ms = int(max(1000, round(float(timeout_seconds) * 1000)))
+    kwargs: dict = {"timeout": timeout_ms}
+    if api_version:
+        kwargs["api_version"] = api_version
+    try:
+        return tmod.HttpOptions(**kwargs)
+    except TypeError:
+        try:
+            return tmod.HttpOptions(timeout=timeout_ms)
+        except Exception:
+            return None
+
+
+def build_thinking_config(
+    types_module: Any,
+    model_name: str,
+    fast_mode: bool = False,
+    budget: Optional[int] = None,
+) -> Any:
+    """Return a safe ``ThinkingConfig`` preventing thinking overhead/choking, or ``None``."""
+    tmod = types_module or (types if GENAI_AVAILABLE else None)
+    if tmod is None or not hasattr(tmod, "ThinkingConfig"):
+        return None
+    low = (model_name or "").lower()
+    if "lite" in low or "gemma" in low:
+        return None
+
+    if budget is not None:
+        target_budget = budget
+    elif fast_mode:
+        target_budget = 128 if "3.6" in low else 0
+    else:
+        target_budget = None
+    if target_budget is None:
+        return None
+
+    try:
+        return tmod.ThinkingConfig(thinking_budget=int(target_budget))
+    except Exception:
+        return None
 
 
 def execute_with_model_cascade(
@@ -61,15 +130,15 @@ def execute_with_model_cascade(
     config: Optional[Any] = None,
     task_name: str = "ai_task",
     preferred_models: Optional[List[str]] = None,
-    max_quota_retries: int = 2,
-    base_backoff_seconds: float = 5.0,
+    max_quota_retries: int = 1,
+    base_backoff_seconds: float = 3.0,
 ) -> Tuple[Optional[str], Optional[str]]:
     """
     Executes a prompt against the Gemini API using the prioritized model cascade.
     Always starts with the best model available.
-    
-    If a rate limit (429) or temporary error (503) occurs:
-      - Pauses with backoff
+
+    If a rate limit (429), timeout (504), or temporary error (503) occurs:
+      - Pauses briefly when retryable
       - Tries the next tier in the cascade
       - Returns (response_text, model_name) on success, or (None, None) if all fail.
     """
@@ -85,7 +154,7 @@ def execute_with_model_cascade(
                     config=config,
                 )
 
-                if response and response.text:
+                if response and getattr(response, "text", None):
                     out = response.text.strip()
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, task_name)
@@ -99,12 +168,16 @@ def execute_with_model_cascade(
                 err_str = str(exc).lower()
                 is_quota = "429" in err_str or "resource_exhausted" in err_str or "quota" in err_str
                 is_503 = "503" in err_str or "unavailable" in err_str or "overloaded" in err_str
+                is_zero_quota = (
+                    "pro" in model_name.lower()
+                    or "limit: 0" in err_str
+                    or "limit:0" in err_str
+                )
 
                 if is_quota:
-                    if 'pro' in model_name.lower():
-                        # Pro preview models require Pay-as-you-go billing. On Free Tier, quota is 0.
-                        # Fail-fast immediately to Flash flagship instead of wasting 30s in backoff retries.
-                        print(f"   ℹ️ Model {model_name} (Pro) returned 429 (requires paid tier / 0 RPM on Free Tier). Cascading immediately to Flash...")
+                    if is_zero_quota:
+                        # Zero-quota models on Free Tier (Pro previews / limit: 0 features) fail immediately
+                        print(f"   ℹ️ Model {model_name} returned 429 (0 quota on Free Tier). Cascading immediately...")
                         if API_TRACKER_AVAILABLE:
                             log_api_request(model_name, False, task_name)
                         break
@@ -115,23 +188,25 @@ def execute_with_model_cascade(
                     if attempt < max_quota_retries:
                         print(f"   🔄 Retrying {model_name} (attempt {attempt+2}/{max_quota_retries+1})...")
                         continue
-                    else:
-                        print(f"   ⏭️ Moving to next tier model in cascade...")
-                        break
-
-                elif is_503:
-                    wait_time = base_backoff_seconds * 2
-                    print(f"   ⚠️ Model {model_name} temporarily unavailable (503). Waiting {wait_time:.1f}s...")
-                    time.sleep(wait_time)
-                    if attempt < max_quota_retries:
-                        continue
-                    break
-
-                else:
-                    print(f"   ⚠️ Model {model_name} failed: {exc}")
+                    print("   ⏭️ Moving to next tier model in cascade...")
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, False, task_name)
                     break
+
+                if is_503:
+                    if attempt < max_quota_retries:
+                        wait_time = base_backoff_seconds * 2
+                        print(f"   ⚠️ Model {model_name} temporarily unavailable (503). Waiting {wait_time:.1f}s...")
+                        time.sleep(wait_time)
+                        continue
+                    if API_TRACKER_AVAILABLE:
+                        log_api_request(model_name, False, task_name)
+                    break
+
+                print(f"   ⚠️ Model {model_name} failed: {exc}")
+                if API_TRACKER_AVAILABLE:
+                    log_api_request(model_name, False, task_name)
+                break
 
     return None, None
 
