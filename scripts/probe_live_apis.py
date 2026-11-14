@@ -452,7 +452,216 @@ def probe_tavily() -> None:
             print(f"  POST /search ERR: {exc}")
 
 
+def probe_deep() -> None:
+    print("=" * 72)
+    print("DEEP PROBE: THINKING CONFIG, LATENCY, NEW LITE MODELS, COMMENT QUALITY & ERRORS")
+    print("=" * 72)
+    probe_environment()
+
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if api_key:
+        from google import genai
+        from google.genai import types
+
+        if hasattr(types, "ThinkingLevel"):
+            print(f"  - ThinkingLevel values: {[e.value for e in types.ThinkingLevel]}")
+
+        http_opts = types.HttpOptions(timeout=60000) if hasattr(types, "HttpOptions") else None
+        client = genai.Client(api_key=api_key, http_options=http_opts) if http_opts else genai.Client(api_key=api_key)
+
+        deep_tests = [
+            # (model, kwargs_for_GenerateContentConfig, label, is_gemma)
+            ("gemini-4-hydrogen", {"max_output_tokens": 2048}, "4-hydrogen default 60s", False),
+            ("gemini-4-hydrogen", {"max_output_tokens": 2048, "thinking_budget": 0}, "4-hydrogen think=0", False),
+            ("gemini-4-hydrogen", {"max_output_tokens": 2048, "thinking_level": "LOW"}, "4-hydrogen think=LOW", False),
+            ("gemini-3.8-flash", {"max_output_tokens": 2048, "thinking_budget": 0}, "3.8-flash think=0", False),
+            ("gemini-3.7-flash", {"max_output_tokens": 2048, "thinking_budget": 0}, "3.7-flash think=0", False),
+            ("gemini-3.7-flash", {"max_output_tokens": 2048, "thinking_budget": 256}, "3.7-flash think=256", False),
+            ("gemini-3.6-flash", {"max_output_tokens": 2048, "thinking_budget": 0}, "3.6-flash think=0", False),
+            ("gemini-3.6-flash", {"max_output_tokens": 2048, "thinking_budget": 256}, "3.6-flash think=256", False),
+            ("gemini-3.5-flash", {"max_output_tokens": 2048}, "3.5-flash default 2048tok", False),
+            ("gemini-3.5-flash", {"max_output_tokens": 2048, "thinking_budget": 0}, "3.5-flash think=0", False),
+            ("gemini-3.5-flash-lite", {"max_output_tokens": 2048}, "3.5-flash-lite default", False),
+            ("gemini-3.1-flash-lite", {"max_output_tokens": 2048}, "3.1-flash-lite default", False),
+            ("gemini-3.1-flash-lite-preview", {"max_output_tokens": 2048}, "3.1-flash-lite-preview", False),
+            ("gemini-omni-1.2-flash", {"max_output_tokens": 2048}, "omni-1.2-flash", False),
+            ("gemini-2.5-flash", {"max_output_tokens": 2048, "thinking_budget": 0}, "2.5-flash think=0", False),
+            ("gemma-4-26b-a4b-it", {"max_output_tokens": 2048}, "gemma-4-26b 2048tok", True),
+            ("gemma-4-31b-it", {"max_output_tokens": 2048}, "gemma-4-31b 2048tok", True),
+        ]
+
+        print("\n🧪 Deep Gemini/Gemma Matrix (60s HttpOptions, 2048 max_output_tokens):")
+        for model_name, extra, label, is_gemma in deep_tests:
+            t0 = time.monotonic()
+            try:
+                cfg: Dict[str, Any] = {
+                    "temperature": 0.0,
+                    "max_output_tokens": extra["max_output_tokens"],
+                }
+                if not is_gemma:
+                    cfg["system_instruction"] = AUDIT_SYSTEM_PROMPT
+                    cfg["response_mime_type"] = "application/json"
+                    prompt_text = AUDIT_USER_PROMPT
+                else:
+                    prompt_text = f"{AUDIT_SYSTEM_PROMPT}\n\n{AUDIT_USER_PROMPT}"
+
+                t_cfg = {}
+                if "thinking_budget" in extra:
+                    t_cfg["thinking_budget"] = extra["thinking_budget"]
+                if "thinking_level" in extra and hasattr(types, "ThinkingLevel"):
+                    lvl = extra["thinking_level"]
+                    if hasattr(types.ThinkingLevel, lvl):
+                        t_cfg["thinking_level"] = getattr(types.ThinkingLevel, lvl)
+                if t_cfg and hasattr(types, "ThinkingConfig"):
+                    cfg["thinking_config"] = types.ThinkingConfig(**t_cfg)
+
+                resp = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt_text,
+                    config=types.GenerateContentConfig(**cfg),
+                )
+                elapsed = time.monotonic() - t0
+                txt = (getattr(resp, "text", None) or "").strip()
+                parsed = _extract_json(txt)
+                usage = getattr(resp, "usage_metadata", None)
+                in_t = getattr(usage, "prompt_token_count", "?") if usage else "?"
+                out_t = getattr(usage, "candidates_token_count", "?") if usage else "?"
+                th_t = getattr(usage, "thoughts_token_count", None) if usage else None
+                print(
+                    f"  ✅ {label:<26} | {elapsed:5.2f}s | json={'OK' if parsed else 'BAD'} | "
+                    f"verdict={parsed.get('verdict') if isinstance(parsed, dict) else None} "
+                    f"caught={parsed.get('caught_error') if isinstance(parsed, dict) else None} | "
+                    f"tok(in={in_t},out={out_t},think={th_t})"
+                )
+            except Exception as exc:
+                elapsed = time.monotonic() - t0
+                print(f"  ❌ {label:<26} | {elapsed:5.2f}s | ERR: {str(exc).replace(chr(10), ' ')[:260]}")
+            time.sleep(1.2)
+
+        print("\n🔎 Inspect full 429 error for google_search & image quota:")
+        for m in ("gemini-3.5-flash-lite", "gemini-2.5-flash"):
+            try:
+                client.models.generate_content(
+                    model=m,
+                    contents="Latest NVDA news today in 1 sentence.",
+                    config=types.GenerateContentConfig(
+                        tools=[types.Tool(google_search=types.GoogleSearch())],
+                        max_output_tokens=150,
+                    ),
+                )
+                print(f"  ✅ google_search on {m}: SUCCEEDED!")
+            except Exception as exc:
+                print(f"  ❌ google_search on {m}: {str(exc)[:600]}")
+            time.sleep(1.0)
+
+        try:
+            r_img = client.models.generate_content(
+                model="gemini-3.1-flash-lite-image",
+                contents="Minimalist dark navy abstract geometric background, no text.",
+                config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"]),
+            )
+            has_img = any(getattr(p, "inline_data", None) for p in (r_img.candidates[0].content.parts if r_img.candidates else []))
+            print(f"  ✅ img gemini-3.1-flash-lite-image: has_image={has_img}")
+        except Exception as exc:
+            print(f"  ❌ img gemini-3.1-flash-lite-image: {str(exc)[:450]}")
+
+    # Realistic Italian comment-reply quality benchmark across top candidates
+    reply_system = (
+        "Sei Andrea Ravalli, Popular Investor su eToro. Rispondi in italiano naturale, competente e sobrio "
+        "(max 2-3 frasi, niente consigli finanziari personalizzati, nessuna promessa di rendimenti)."
+    )
+    reply_user = (
+        "Mio post originale: 'Chiusura USA mista: Nasdaq in lieve calo (-0.4%) con prese di profitto sui semiconduttori ($NVDA -1.8%), "
+        "mentre il comparto difesa e utilities tiene bene il portafoglio.'\n"
+        "Commento utente (@Marco88): 'Ciao Andrea, pensi che convenga entrare su NVDA adesso dopo questo -1.8% o aspettare la trimestrale?'"
+    )
+    print("\n💬 ITALIAN COMMENT REPLY BENCHMARK:")
+    if api_key:
+        for gm in ("gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.6-flash"):
+            try:
+                t0 = time.monotonic()
+                cfg_args: Dict[str, Any] = {
+                    "system_instruction": reply_system,
+                    "temperature": 0.4,
+                    "max_output_tokens": 400,
+                }
+                if gm == "gemini-3.6-flash" and hasattr(types, "ThinkingConfig"):
+                    cfg_args["thinking_config"] = types.ThinkingConfig(thinking_budget=0)
+                r = client.models.generate_content(
+                    model=gm, contents=reply_user, config=types.GenerateContentConfig(**cfg_args)
+                )
+                print(f"  • {gm:<24} ({time.monotonic()-t0:.2f}s): {(r.text or '').strip()}")
+            except Exception as exc:
+                print(f"  • {gm:<24} ERR: {str(exc)[:180]}")
+            time.sleep(1.0)
+
+    groq_key = os.environ.get("GROQ_API_KEY", "").strip()
+    if groq_key:
+        for gmodel, extra_body in [
+            ("qwen/qwen3.8-27b", {}),
+            ("openai/gpt-oss-120b", {"reasoning_effort": "low"}),
+        ]:
+            try:
+                t0 = time.monotonic()
+                body = {
+                    "model": gmodel,
+                    "messages": [
+                        {"role": "system", "content": reply_system},
+                        {"role": "user", "content": reply_user},
+                    ],
+                    "temperature": 0.4,
+                    "max_tokens": 500,
+                    **extra_body,
+                }
+                resp = requests.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+                    json=body,
+                    timeout=20,
+                )
+                if resp.status_code == 200:
+                    msg = resp.json()["choices"][0]["message"]
+                    print(f"  • groq:{gmodel:<19} ({time.monotonic()-t0:.2f}s): {(msg.get('content') or '').strip()}")
+                else:
+                    print(f"  • groq:{gmodel:<19} HTTP {resp.status_code}: {resp.text[:220]}")
+            except Exception as exc:
+                print(f"  • groq:{gmodel:<19} ERR: {exc}")
+            time.sleep(0.8)
+
+    mistral_key = os.environ.get("MISTRAL_API_KEY", "").strip()
+    if mistral_key:
+        for idx, mmodel in enumerate(("codestral-latest", "ministral-14b-latest", "ministral-8b-latest")):
+            if idx > 0:
+                time.sleep(2.2)
+            try:
+                t0 = time.monotonic()
+                resp = requests.post(
+                    "https://api.mistral.ai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"},
+                    json={
+                        "model": mmodel,
+                        "messages": [
+                            {"role": "system", "content": reply_system},
+                            {"role": "user", "content": reply_user},
+                        ],
+                        "temperature": 0.4,
+                        "max_tokens": 400,
+                    },
+                    timeout=20,
+                )
+                if resp.status_code == 200:
+                    msg = resp.json()["choices"][0]["message"]
+                    print(f"  • mistral:{mmodel:<16} ({time.monotonic()-t0:.2f}s): {(msg.get('content') or '').strip()}")
+                else:
+                    print(f"  • mistral:{mmodel:<16} HTTP {resp.status_code}: {resp.text[:220]}")
+            except Exception as exc:
+                print(f"  • mistral:{mmodel:<16} ERR: {exc}")
+
+
 def main() -> int:
+    if "--deep" in sys.argv:
+        probe_deep()
+        return 0
     probe_environment()
     probe_gemini()
     _probe_openai_compat(
