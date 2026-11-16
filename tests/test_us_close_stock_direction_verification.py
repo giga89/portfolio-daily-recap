@@ -466,6 +466,66 @@ class TestUSCloseStockDirectionVerification(unittest.TestCase):
         self.assertNotIn("deciso rialzo", healed.lower())
         self.assertNotIn("ottima intonazione per $nvda", healed.lower())
 
+    def test_2026_11_16_us_close_regressions_outlook_bloat_suffix_and_us_priority(self):
+        """Regression test for 2026-11-16 US_CLOSE issues: outlook tense flip, $ULVR.L suffix/emoji/bloat, $VOF.L drop, and US ticker priority."""
+        from independent_fact_checker import split_into_micro_topics, sanitize_verified_text
+        import ai_news_generator
+
+        # 1. Outlook paragraph (🔮) must be classified as 'outlook' and protected from past-tense corruption
+        orig_outlook = (
+            "🔮 Nella seduta di domani (martedì 17 novembre) i riflettori saranno puntati "
+            "sui conti di NVIDIA Corporation. Il mercato valuterà con attenzione la solidità della domanda AI."
+        )
+        corrupted_outlook = (
+            "🔮 Nella seduta di oggi (lunedì 16 novembre) i riflettori sono stati puntati "
+            "sui conti di NVIDIA Corporation. Il mercato ha valutato con attenzione la solidità della domanda AI."
+        )
+        sanitized_outlook = sanitize_verified_text(orig_outlook, corrupted_outlook, session_name="U.S. market close", topic_type="outlook")
+        self.assertIn("Nella seduta di domani", sanitized_outlook)
+        self.assertIn("saranno puntati", sanitized_outlook)
+        self.assertNotIn("Nella seduta di oggi", sanitized_outlook)
+
+        # 2. Single-stock paragraph must restore .L suffix, restore 🧼 emoji, and strip prompt jargon / index parentheticals
+        orig_ulvr = (
+            "🧼 Buona tenuta per $ULVR.L , che ha chiuso in rialzo del +1.21% grazie alla domanda sui Power Brands "
+            "e al vaglio CMA sull'acquisizione di McCormick."
+        )
+        corrupted_ulvr = (
+            "🔹 $ULVR ha chiuso in rialzo di +1.21% oggi (SPX500: -1.91%, NSDQ100: -2.67%), "
+            "un catalizzatore operativo fresco che ha mantenuto l'attenzione degli investitori."
+        )
+        sanitized_ulvr = sanitize_verified_text(orig_ulvr, corrupted_ulvr, session_name="U.S. market close", topic_type="stock_paragraph")
+        self.assertTrue(sanitized_ulvr.startswith("🧼"))
+        self.assertIn("$ULVR.L", sanitized_ulvr)
+        self.assertNotIn("catalizzatore operativo fresco", sanitized_ulvr)
+        self.assertNotIn("SPX500: -1.91%", sanitized_ulvr)
+
+        # 3. Closing question without exact 'commenti' keyword must still be recognized as engagement_question (needs_audit=False)
+        sample_with_q = (
+            "Lunedì sera: Wall Street ha chiuso i battenti...\n\n"
+            "🌆 Seduta pesante a Wall Street con $SPX500 a -1.91%.\n\n"
+            "🔮 Nella seduta di domani riflettori puntati su NVIDIA.\n\n"
+            "Come avete vissuto questo lunedì? I vostri titoli difensivi hanno retto la seduta?"
+        )
+        topics = split_into_micro_topics(sample_with_q)
+        self.assertEqual(topics[2]["type"], "outlook")
+        self.assertEqual(topics[3]["type"], "engagement_question")
+        self.assertFalse(topics[3]["needs_audit"])
+
+        # 4. US_CLOSE preferred_tickers must prioritize US holdings over European holdings
+        with patch("tavily_search.search_tavily", return_value=[{"title": "News", "content": "Operational catalyst verified today"}]):
+            mixed_data = {
+                "HUM": {"daily_change": 2.52, "has_traded_today": True},
+                "VOF.L": {"daily_change": 1.76, "has_traded_today": True},
+                "ULVR.L": {"daily_change": 1.21, "has_traded_today": True},
+                "WMT": {"daily_change": 0.25, "has_traded_today": True},
+                "ABBV": {"daily_change": -0.14, "has_traded_today": True},
+            }
+            selected = ai_news_generator._get_top_gainers_with_news(
+                mixed_data, count=3, preferred_tickers=["HUM", "WMT", "ABBV"]
+            )
+            self.assertEqual([s["ticker"] for s in selected], ["HUM", "WMT", "ABBV"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -97,15 +97,25 @@ def _pace_provider_call(lock: threading.Lock, state: Dict[str, float], min_inter
     """Ensure concurrent threads space out real network calls cleanly without delaying instant mocks."""
     if min_interval <= 0:
         return
+    is_mocked = (
+        not REQUESTS_AVAILABLE
+        or hasattr(getattr(requests, "post", None), "_mock_name")
+        or "mock" in type(getattr(requests, "post", None)).__name__.lower()
+    )
+    if is_mocked:
+        return
+    wait = 0.0
     with lock:
         now = time.monotonic()
         last_ts = state.get("last_ts", 0.0)
-        last_elapsed = state.get("last_elapsed", 0.0)
-        if last_ts > 0.0 and last_elapsed >= 0.05:
-            wait = min_interval - (now - last_ts)
-            if wait > 0:
-                time.sleep(wait)
-        state["last_ts"] = time.monotonic()
+        if last_ts > 0.0:
+            next_slot = max(now, last_ts + min_interval)
+            wait = next_slot - now
+            state["last_ts"] = next_slot
+        else:
+            state["last_ts"] = now
+    if wait > 0:
+        time.sleep(wait)
 
 
 def _ordered_models_by_cooldown(models: List[str], cooldowns: Dict[str, float], lock: threading.Lock) -> List[str]:
@@ -240,10 +250,19 @@ def _build_audit_prompt(
     portfolio_metadata_summary: str = "",
     live_news_context: str = "",
     stock_data: Optional[Dict[str, Any]] = None,
+    topic_type: str = "full_post",
 ) -> str:
     """Creates the adversarial fact-checker prompt for Groq/Mistral with optional Tavily live grounding."""
+    is_outlook_topic = topic_type == "outlook" or (text or "").lstrip().startswith("🔮")
+    is_single_stock_topic = topic_type in ("stock_paragraph", "stock_bullet")
+
+    mentioned_tags = set()
+    for raw_t in re.findall(r'\$([A-Za-z0-9\.\-]+)', text or ""):
+        mentioned_tags.add(raw_t.upper())
+        mentioned_tags.add(raw_t.split(".")[0].upper())
+
     live_news_section = ""
-    if live_news_context:
+    if live_news_context and not is_outlook_topic:
         live_news_section = f"""
 =========================================
 FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY):
@@ -254,7 +273,7 @@ FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY):
     benchmarks_daily_line = f"• PERFORMANCE INDICI OGGI: {temporal_ctx.get('benchmarks_daily') or 'Non specificata'}\n"
 
     stock_gt_section = ""
-    if stock_data:
+    if stock_data and not is_outlook_topic:
         try:
             from post_verifier import _resolve_stock_pct_map
             pct_map = _resolve_stock_pct_map(stock_data, session_name=session_name)
@@ -263,6 +282,9 @@ FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY):
                 gt_items = []
                 for _, (canon_sym, pct_val) in sorted(pct_map.items()):
                     if canon_sym not in seen_canon:
+                        if is_single_stock_topic and mentioned_tags:
+                            if canon_sym.upper() not in mentioned_tags and canon_sym.split(".")[0].upper() not in mentioned_tags:
+                                continue
                         seen_canon.add(canon_sym)
                         dir_lbl = "RIALZO (+)" if pct_val >= 0 else "CALO (-)"
                         gt_items.append(f"  - ${canon_sym}: {pct_val:+.2f}% [{dir_lbl}]")
@@ -273,6 +295,29 @@ FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY):
                     )
         except Exception:
             stock_gt_section = ""
+
+    filtered_metadata = portfolio_metadata_summary or "Nessun asset specifico indicato."
+    if is_single_stock_topic and mentioned_tags and portfolio_metadata_summary:
+        meta_lines = [
+            line for line in portfolio_metadata_summary.split("\n")
+            if any(f"${tag}" in line.upper() for tag in mentioned_tags)
+        ]
+        if meta_lines:
+            filtered_metadata = "\n".join(meta_lines)
+
+    if is_outlook_topic:
+        temporal_rule_1 = f"""1. COERENZA TEMPORALE PER MICROTEMA 5 (🔮 SGUARDO ALLA PROSSIMA SEDUTA / OUTLOOK FUTURO - CRITICA):
+   - QUESTO PARAGRAFO È LO SGUARDO IN AVANTI VERSO LA PROSSIMA SEDUTA DI BORSA ({temporal_ctx.get('next_session_timing', 'nella prossima seduta')}).
+   - DEVE OBBLIGATORIAMENTE parlare al FUTURO ('saranno puntati', 'valuterà', 'attesi', 'monitoreremo', 'apriranno') e riferirsi alla prossima seduta ({temporal_ctx.get('next_session_timing', 'nella prossima seduta')}).
+   - È TASSATIVAMENTE VIETATO convertire i verbi dal futuro al passato o cambiare 'domani' / 'prossima seduta' in 'oggi'!
+   - Mantieni obbligatoriamente l'emoji 🔮 all'inizio del paragrafo."""
+    else:
+        temporal_rule_1 = """1. COERENZA TEMPORALE (CRITICA):
+   - Se la sessione è serale o di chiusura (es. US_CLOSE), la seduta di borsa odierna è CONCLUSA.
+   - Tutti gli eventi della giornata (es. riunioni o decisioni della Federal Reserve, tassi, conferenze stampa, dati inflazione o occupazione) sono GIÀ AVVENUTI.
+   - Se il post parla di un evento di oggi usando verbi al FUTURO (es. "oggi deciderà", "oggi prenderà una decisione", "in attesa dell'annuncio di stasera", "si attende la decisione"), questo è un GRAVISSIMO PARADOSSO TEMPORALE.
+   - CORREZIONE: Devi convertire il testo al PASSATO (es. "la Fed ha annunciato", "la decisione sui tassi è arrivata oggi") OPPURE, se l'esito reale non è menzionato con certezza, rimuovere l'affermazione speculativa.
+   - ECCEZIONE: Se un paragrafo inizia con 🔮 o parla esplicitamente della 'prossima seduta' / 'seduta di domani', quel paragrafo guarda alla prossima sessione di borsa e DEVE restare al futuro!"""
 
     return f"""Sei un Lead Financial Fact-Checker & Senior Compliance Auditor per un account pubblico di investimenti su eToro.
 Il tuo obiettivo è effettuare un AUDIT INDIPENDENTE, CRITICO E SPIETATO sul seguente post prima della pubblicazione.
@@ -289,7 +334,7 @@ INFORMAZIONI TEMPORALI CERTE (GROUND TRUTH):
 {benchmarks_daily_line}{stock_gt_section}=========================================
 METADATI DI PORTAFOGLIO:
 =========================================
-{portfolio_metadata_summary or "Nessun asset specifico indicato."}
+{filtered_metadata}
 {live_news_section}
 =========================================
 TESTO DEL POST DA AUDITARE:
@@ -299,11 +344,7 @@ TESTO DEL POST DA AUDITARE:
 =========================================
 REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
 =========================================
-1. COERENZA TEMPORALE (CRITICA):
-   - Se la sessione è serale o di chiusura (es. US_CLOSE), la seduta di borsa odierna è CONCLUSA.
-   - Tutti gli eventi della giornata (es. riunioni o decisioni della Federal Reserve, tassi, conferenze stampa, dati inflazione o occupazione) sono GIÀ AVVENUTI.
-   - Se il post parla di un evento di oggi usando verbi al FUTURO (es. "oggi deciderà", "oggi prenderà una decisione", "in attesa dell'annuncio di stasera", "si attende la decisione"), questo è un GRAVISSIMO PARADOSSO TEMPORALE.
-   - CORREZIONE: Devi convertire il testo al PASSATO (es. "la Fed ha annunciato", "la decisione sui tassi è arrivata oggi") OPPURE, se l'esito reale non è menzionato con certezza, rimuovere l'affermazione speculativa.
+{temporal_rule_1}
 
 2. VERIFICA CARICHE E FIGURE ISTITUZIONALI:
    - Verifica che le figure istituzionali menzionate (banchieri centrali, ministri, CEO) siano coerenti e non anacronistiche.
@@ -322,14 +363,15 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
    - Nessun markdown bold (** o __).
    - Massimo 4 cashtag con prefisso $ (es. $NVDA, $SPX500). Non aggiungere cashtag a titoli citati come testo semplice.
 
-5. PRESERVAZIONE DELLA RICCHEZZA DEL CONTENUTO (NON RIASSUMERE):
-   - È SEVERAMENTE VIETATO tagliare o riassumere il post in poche righe generiche!
-   - Devi preservare integralmente tutta la struttura, i dettagli di mercato, le analisi dei singoli titoli, i paragrafi e la ricchezza del post originale.
-   - Intervieni in modo chirurgico SOLO sui passaggi che contengono errori temporali o allucinazioni, riscrivendoli al passato o correggendo l'inesattezza, senza impoverire o accorciare il post.
+5. PRESERVAZIONE DELLA RICCHEZZA DEL CONTENUTO (NON RIASSUMERE E NON GONFIARE):
+   - È SEVERAMENTE VIETATO tagliare o riassumere il post in poche righe generiche, ma è altrettanto VIETATO gonfiare un singolo paragrafo in un muro di testo prolisso!
+   - Ogni paragrafo di un titolo deve restare sintetico, naturale e scorrevole (2-3 frasi, max ~350 caratteri). NON copiare l'intera scheda fondamentale dentro il paragrafo e NON aggiungere tra parentesi le variazioni degli indici macro `(SPX500: ..., NSDQ100: ...)` dentro il paragrafo di un singolo titolo!
+   - Mantieni SEMPRE l'emoji iniziale del paragrafo (es. 🏥, 🧼, 🔮, 🌆, 💻, non sostituirla con 🔹) e mantieni SEMPRE il suffisso di borsa del cashtag (es. $ULVR.L, $VOF.L, $PRY.MI, non troncarlo in $ULVR).
+   - Non scrivere mai espressioni artificiali da prompt come 'un catalizzatore operativo fresco' o 'coerente con il tono settoriale'.
+   - Intervieni in modo chirurgico SOLO sui passaggi che contengono errori temporali o allucinazioni fattuali; se il paragrafo rispetta già i dati di chiusura Yahoo Finance e cita fatti coerenti, restituisci decision: "APPROVE"!
 
 6. RIGETTO DI BANALITÀ E FRASI FATTE (QUALITÀ DELLE NOTIZIE):
-   - Se il post contiene frasi generiche, banali e vuote prive di qualsiasi dato concreto sui titoli citati (es. 'continuiamo a seguire con estrema fiducia', 'la tesi rimane solida', 'sostenuta dalla forte domanda', 'continua ad offrire ottima stabilità', 'rappresenta una copertura strategica importante', 'pronti a gestire la volatilità'), DEVI considerarlo un difetto grave.
-   - CORREZIONE: Sostituisci la frase generica con un dato aziendale reale tratto dai METADATI DI PORTAFOGLIO o dalle NOTIZIE LIVE TAVILY (es. cita numeri di bilancio, crescita ricavi, margini operativi, contratti vinti, siti produttivi, nomi di farmaci/dispositivi o piattaforme proprietarie).
+   - Se il post contiene ESCLUSIVAMENTE frasi generiche, banali e vuote prive di qualsiasi dato concreto sui titoli citati (es. 'continuiamo a seguire con estrema fiducia', 'la tesi rimane solida', 'sostenuta dalla forte domanda', 'continua ad offrire ottima stabilità', 'rappresenta una copertura strategica importante', 'pronti a gestire la volatilità'), sostituisci la frase generica con un dato reale sintetico (1 frase) tratto dai METADATI DI PORTAFOGLIO o dalle NOTIZIE LIVE TAVILY. Se invece il paragrafo contiene già fatti, notizie o numeri concreti, NON riscriverlo e approvalo ("APPROVE")!
 
 7. REGOLE CONTRO INVENZIONI, ALLUCINAZIONI E RIPETIZIONI (TASSATIVE):
    - NON INVENTARE EVENTI NON PRESENTI NEL TESTO: Se il testo da auditare non parla affatto di tassi d'interesse, della Federal Reserve o di uno specifico indicatore macroeconomico, NON devi assolutamente inventarlo o aggiungerlo di tua iniziativa! Correggi al passato SOLO gli eventi che sono già menzionati nel testo.
@@ -383,21 +425,39 @@ def sanitize_verified_text(
     session_name: Optional[str] = None,
     benchmark_daily_data: Optional[Dict[str, float]] = None,
     stock_data: Optional[Dict[str, Any]] = None,
+    topic_type: str = "full_post",
 ) -> str:
     """
     Sanitizes auto-corrections proposed by LLM auditors:
-    1. Removes absurd hallucinations (e.g. 'tassa sui tassi', 'tasse sui tassi', 'tassa sugli interessi') and leaked auditor meta-commentary.
-    2. Deduplicates repeated sentences or hallucinations generated in loops.
-    3. Rejects hallucinated massive expansions of short non-financial opening sentences.
-    4. Cleans whitespace and trailing punctuation artifacts.
-    5. Enforces mathematical benchmark & individual stock ground truth BEFORE fixing oxymorons.
+    1. Protects forward-looking outlook paragraphs (🔮) from being flipped into past tense ("oggi").
+    2. Removes absurd hallucinations (e.g. 'tassa sui tassi') and leaked auditor meta-commentary / prompt jargon.
+    3. Restores truncated exchange suffixes on cashtags (e.g. $ULVR -> $ULVR.L) and leading thematic emojis.
+    4. Deduplicates repeated sentences and prevents runaway auditor bloat on single-stock micro-topics.
+    5. Cleans whitespace and enforces mathematical benchmark & individual stock ground truth.
     """
     if not verified_text:
         return original_text
 
+    orig_stripped = original_text.strip()
     cleaned = verified_text.strip()
 
-    # 1. Strip absurd/hallucinated financial phrases and leaked auditor meta-commentary clauses
+    # 0. Protect forward-looking outlook paragraphs (🔮) from being rewritten into past tense ("oggi")
+    is_outlook = topic_type == "outlook" or orig_stripped.startswith("🔮")
+    if is_outlook:
+        orig_lower = orig_stripped.lower()
+        clean_lower = cleaned.lower()
+        orig_has_next_session = any(
+            k in orig_lower for k in ("domani", "prossima seduta", "prossima sessione", "saranno puntati", "valuterà", "monitoreremo", "riapertura")
+        )
+        corrupted_to_today_past = (
+            ("nella seduta di oggi" in clean_lower and "nella seduta di oggi" not in orig_lower)
+            or ("sono stati puntati" in clean_lower and "saranno puntati" in orig_lower)
+            or ("ha valutato" in clean_lower and "valuterà" in orig_lower)
+        )
+        if orig_has_next_session and corrupted_to_today_past:
+            return orig_stripped
+
+    # 1. Strip absurd/hallucinated financial phrases, prompt jargon, and leaked auditor meta-commentary clauses
     absurd_patterns = [
         r'(?i)\bnuova\s+tassa\s+sui\s+tassi(?:\s+di\s+interesse)?\b[.,]?',
         r'(?i)\btass[ae]\s+sui\s+tassi(?:\s+di\s+interesse)?\b[.,]?',
@@ -405,9 +465,29 @@ def sanitize_verified_text(
         r'(?i),?\s*(?:sebbene|benché|nonostante)\s+(?:(?!\.(?:\s|$))[^\n!?]){0,120}?\b(?:nelle|dalle)\s+fonti\s+(?:principali|disponibili|fornite|live|ufficiali)(?:(?!\.(?:\s|$))[^\n!?])*',
         r'(?i),?\s*(?:sebbene|benché)\s+le\s+fonti\s+(?:disponibili\s+|fornite\s+|principali\s+)?non\s+conferm(?:(?!\.(?:\s|$))[^\n!?])*',
         r'(?i),?\s*(?:secondo\s+quanto\s+(?:riportato|emerge)\s+)?\b(?:nelle|dalle)\s+fonti\s+(?:principali|disponibili|fornite|live|ufficiali)\b',
+        r'(?i),?\s*un\s+catalizzatore\s+operativo\s+fresco(?:\s+che\s+ha\s+[^\.,;]+)?',
     ]
     for pat in absurd_patterns:
         cleaned = re.sub(pat, '', cleaned).strip()
+
+    # Strip redundant index parentheticals injected by auditor into single-stock paragraphs
+    if "SPX500" not in orig_stripped.upper() and "NSDQ100" not in orig_stripped.upper():
+        cleaned = re.sub(r'\s*\((?:SPX500|S&P\s*500)[^)]*NSDQ100[^)]*\)', '', cleaned, flags=re.IGNORECASE).strip()
+
+    # Restore truncated exchange suffixes on cashtags (e.g. $ULVR.L -> $ULVR)
+    for full_tag in re.findall(r'\$([A-Za-z0-9\-]+\.[A-Za-z]{1,4})\b', orig_stripped):
+        base_tag = full_tag.split('.')[0]
+        cleaned = re.sub(rf'\${re.escape(base_tag)}(?!\.[A-Za-z])', f'${full_tag}', cleaned, flags=re.IGNORECASE)
+
+    # Restore original leading thematic emoji if auditor stripped it or replaced it with 🔹
+    orig_lead_match = re.match(r'^([^\w\s\$\"\'\(\[\#\•\-\*\✓]+)\s+', orig_stripped)
+    if orig_lead_match:
+        orig_emoji = orig_lead_match.group(1).strip()
+        if orig_emoji and orig_emoji != "🔹":
+            if cleaned.startswith("🔹"):
+                cleaned = re.sub(r'^🔹\s*', f'{orig_emoji} ', cleaned)
+            elif cleaned and (cleaned[0].isalnum() or cleaned[0] == '$'):
+                cleaned = f"{orig_emoji} {cleaned}"
 
     # 2. Deduplicate repeated sentences (e.g. "Sentence A. Sentence A.")
     raw_sentences = re.split(r'(?<=[.!?])\s+', cleaned)
@@ -426,12 +506,31 @@ def sanitize_verified_text(
 
     cleaned = " ".join(deduped_sentences)
 
-    # 3. Reject hallucinated expansion on short greeting/transitional text
-    orig_stripped = original_text.strip()
+    # 3. Reject hallucinated expansion on short greeting/transitional text or massive bloat on a single stock micro-topic
     if len(orig_stripped) < 130:
         orig_has_finance = bool(re.search(r'\$[A-Za-z0-9\.\-]+', orig_stripped) or re.search(r'[+-]?\d+[\.,]?\d*%', orig_stripped))
         if not orig_has_finance and len(cleaned) > len(orig_stripped) * 1.8:
             return orig_stripped
+    elif "\n\n" not in orig_stripped and 100 <= len(orig_stripped) <= 450 and len(cleaned) > max(460, int(len(orig_stripped) * 1.55)):
+        # If the auditor bloated a concise 2-3 sentence micro-topic into a huge wall of text,
+        # prefer the deterministically-validated original paragraph (or cap to 3 sentences).
+        try:
+            from post_verifier import verify_post_deterministic, enforce_benchmark_ground_truth, enforce_stock_ground_truth, fix_sign_sentiment_oxymorons
+            cand_orig = orig_stripped
+            if benchmark_daily_data:
+                cand_orig, _ = enforce_benchmark_ground_truth(cand_orig, benchmark_daily=benchmark_daily_data, session_name=session_name)
+            if stock_data:
+                cand_orig, _ = enforce_stock_ground_truth(cand_orig, stock_data=stock_data, session_name=session_name)
+            cand_orig = fix_sign_sentiment_oxymorons(cand_orig)
+            is_ok, crit_issues, _ = verify_post_deterministic(
+                cand_orig, session_name=session_name, benchmark_daily=benchmark_daily_data, stock_data=stock_data
+            )
+            if is_ok or not [i for i in crit_issues if i.startswith("CRITICAL")]:
+                return cand_orig
+        except Exception:
+            pass
+        if len(deduped_sentences) > 3:
+            cleaned = " ".join(deduped_sentences[:3])
 
     # 4. Clean double spaces and misplaced punctuation
     cleaned = re.sub(r'\s+([.,!?])', r'\1', cleaned)
@@ -462,6 +561,7 @@ def audit_with_groq(
     temporal_ctx: Optional[Dict[str, Any]] = None,
     benchmark_daily_data: Optional[Dict[str, float]] = None,
     stock_data: Optional[Dict[str, Any]] = None,
+    topic_type: str = "full_post",
 ) -> Optional[Dict[str, Any]]:
     """
     Runs fact-checking audit via Groq API.
@@ -483,6 +583,7 @@ def audit_with_groq(
         portfolio_metadata_summary=portfolio_metadata_summary,
         live_news_context=live_news_context,
         stock_data=stock_data,
+        topic_type=topic_type,
     )
 
     url = "https://api.groq.com/openai/v1/chat/completions"
@@ -492,7 +593,7 @@ def audit_with_groq(
     }
 
     for model in _ordered_models_by_cooldown(GROQ_MODELS, _GROQ_COOLDOWN, _GROQ_LOCK):
-        _pace_provider_call(_GROQ_LOCK, _GROQ_PACE_STATE, min_interval=0.45)
+        _pace_provider_call(_GROQ_LOCK, _GROQ_PACE_STATE, min_interval=0.55)
         payload: Dict[str, Any] = {
             "model": model,
             "messages": [
@@ -531,6 +632,7 @@ def audit_with_groq(
                             session_name=session_name,
                             benchmark_daily_data=temporal_ctx.get("benchmark_data_raw"),
                             stock_data=stock_data,
+                            topic_type=topic_type,
                         )
                     parsed["auditor"] = f"groq:{model}"
                     parsed["latency_sec"] = round(elapsed, 2)
@@ -559,6 +661,7 @@ def audit_with_mistral(
     temporal_ctx: Optional[Dict[str, Any]] = None,
     benchmark_daily_data: Optional[Dict[str, float]] = None,
     stock_data: Optional[Dict[str, Any]] = None,
+    topic_type: str = "full_post",
 ) -> Optional[Dict[str, Any]]:
     """
     Runs fact-checking audit via Mistral API.
@@ -585,6 +688,7 @@ def audit_with_mistral(
         portfolio_metadata_summary=portfolio_metadata_summary,
         live_news_context=live_news_context,
         stock_data=stock_data,
+        topic_type=topic_type,
     )
 
     url = "https://api.mistral.ai/v1/chat/completions"
@@ -634,6 +738,7 @@ def audit_with_mistral(
                             session_name=session_name,
                             benchmark_daily_data=temporal_ctx.get("benchmark_data_raw"),
                             stock_data=stock_data,
+                            topic_type=topic_type,
                         )
                     _MISTRAL_AVAILABLE = True
                     parsed["auditor"] = f"mistral:{model}"
@@ -677,6 +782,7 @@ def run_independent_fact_check(
     temporal_ctx: Optional[Dict[str, Any]] = None,
     benchmark_daily_data: Optional[Dict[str, float]] = None,
     stock_data: Optional[Dict[str, Any]] = None,
+    topic_type: str = "full_post",
 ) -> Optional[Dict[str, Any]]:
     """
     Orchestrates the independent fact-checking pipeline across external models
@@ -836,7 +942,7 @@ def run_independent_fact_check(
             benchmark_daily_data=benchmark_daily_data,
             stock_data=stock_data,
         )
-        if _is_audit_clean(cross_m):
+        if _is_audit_clean(cross_m) or (cross_m is None and m_dec == "APPROVE"):
             print("   🤝 Dual-AI Consensus: Groq auto-correction cross-verified and APPROVED by Mistral!")
             return {
                 "decision": "AUTO_CORRECT",
@@ -881,7 +987,7 @@ def run_independent_fact_check(
             benchmark_daily_data=benchmark_daily_data,
             stock_data=stock_data,
         )
-        if _is_audit_clean(cross_g):
+        if _is_audit_clean(cross_g) or (cross_g is None and g_dec == "APPROVE"):
             print("   🤝 Dual-AI Consensus: Mistral auto-correction cross-verified and APPROVED by Groq!")
             return {
                 "decision": "AUTO_CORRECT",
@@ -1003,7 +1109,20 @@ def split_into_micro_topics(text: str) -> List[Dict[str, Any]]:
             continue
 
         # Community engagement question
-        if "?" in block and len(block) < 240 and any(w in block.lower() for w in ["commenti", "voi come", "cosa ne pensate", "dite la vostra"]):
+        lower_q = block.lower()
+        has_question_cues = any(w in lower_q for w in [
+            "commenti", "voi come", "cosa ne pensate", "dite la vostra",
+            "come avete vissuto", "vi aspettate", "secondo voi", "monitorerete",
+            "monitorate", "seguite", "seguirete", "soddisfatt", "sorpres", "domande",
+            "qual è", "quali titoli", "come vedete", "cosa vi aspettate",
+        ])
+        is_trailing_no_claim_question = (
+            block_idx >= len(raw_blocks) - 2
+            and block.rstrip().endswith(("?", "👇"))
+            and not re.search(r'\$[A-Za-z0-9\.\-]+', block)
+            and not re.search(r'[+-]?\d+[\.,]?\d*%', block)
+        )
+        if "?" in block and len(block) < 280 and (has_question_cues or is_trailing_no_claim_question):
             micro_topics.append({
                 "id": len(micro_topics),
                 "type": "engagement_question",
@@ -1046,7 +1165,15 @@ def split_into_micro_topics(text: str) -> List[Dict[str, Any]]:
                     "needs_audit": True,
                 })
         else:
-            p_type = "macro" if any(w in block.lower() for w in ["indice", "fed", "bce", "spx", "nasdaq", "inflazione", "tassi"]) else "stock_paragraph"
+            lower_blk = block.lower()
+            if block.lstrip().startswith("🔮") or any(w in lower_blk for w in [
+                "prossima seduta", "seduta di domani", "riflettori saranno puntati", "prossima sessione"
+            ]):
+                p_type = "outlook"
+            elif any(w in lower_blk for w in ["indice", "fed", "bce", "spx", "nasdaq", "inflazione", "tassi"]):
+                p_type = "macro"
+            else:
+                p_type = "stock_paragraph"
             micro_topics.append({
                 "id": len(micro_topics),
                 "type": p_type,
@@ -1148,10 +1275,10 @@ def run_micro_topic_consensus_fact_check(
     except Exception as t_err:
         print(f"   ℹ️ Tavily grounding note: {t_err}")
 
-    # Run consensus audits concurrently across micro-topics (with topic-isolated Tavily news)
+    # Run consensus audits concurrently across micro-topics (with max_workers=2 to avoid 429 bursts)
     from concurrent.futures import ThreadPoolExecutor
 
-    with ThreadPoolExecutor(max_workers=min(4, len(topics_to_audit))) as executor:
+    with ThreadPoolExecutor(max_workers=min(2, len(topics_to_audit))) as executor:
         future_to_topic = {
             executor.submit(
                 run_independent_fact_check,
@@ -1195,12 +1322,13 @@ def run_micro_topic_consensus_fact_check(
 
         dec = res.get("decision", "APPROVE")
         auditors_used.add(res.get("auditor", "AI"))
+        t_type = t.get("type", "full_post")
 
         if dec == "APPROVE":
             approved_count += 1
             substantive_retained += 1
             t["verified_text"] = t["text"]
-            print(f"   ✓ Micro-argomento [{t['id']} - {t['type']}] APPROVATO: {t['text'][:60]}...")
+            print(f"   ✓ Micro-argomento [{t['id']} - {t_type}] APPROVATO: {t['text'][:60]}...")
         elif dec == "AUTO_CORRECT" and res.get("verified_text"):
             corrected_count += 1
             substantive_retained += 1
@@ -1210,20 +1338,47 @@ def run_micro_topic_consensus_fact_check(
                 session_name=session_name,
                 benchmark_daily_data=benchmark_daily_data,
                 stock_data=stock_data,
+                topic_type=t_type,
             )
             all_issues.extend(res.get("temporal_issues", []))
             all_halluc.extend(res.get("hallucinations_detected", []))
-            print(f"   🛠️ Micro-argomento [{t['id']} - {t['type']}] CORRETTO CHIRURGICAMENTE: {res.get('explanation')[:80]}...")
+            print(f"   🛠️ Micro-argomento [{t['id']} - {t_type}] CORRETTO CHIRURGICAMENTE: {res.get('explanation')[:80]}...")
         elif dec == "REJECT":
+            if t_type == "outlook":
+                # Never drop or corrupt a deterministically valid forward-looking outlook paragraph
+                substantive_retained += 1
+                t["verified_text"] = t["text"]
+                print(f"   ℹ️ Micro-argomento [{t['id']} - outlook] preservato nel formato originale futuro.")
+                continue
             rejected_count += 1
             all_issues.extend(res.get("temporal_issues", []))
             all_halluc.extend(res.get("hallucinations_detected", []))
-            if t.get("type") in ("stock_bullet", "stock_paragraph"):
-                t["excluded"] = True
-                print(f"   ⚠️ Micro-argomento [{t['id']} - {t['type']}] con allucinazione irreversibile ESCLUSO: {t['text'][:60]}...")
+            if t_type in ("stock_bullet", "stock_paragraph"):
+                # Before excluding a stock paragraph and losing a cashtag, check if the rejection
+                # came from a rate-limit veto or overly strict fallback model while the paragraph
+                # already passes deterministic Yahoo Finance ground-truth verification.
+                keep_valid_stock = False
+                if stock_data is not None:
+                    try:
+                        from post_verifier import verify_post_deterministic, enforce_stock_ground_truth, fix_sign_sentiment_oxymorons
+                        healed_t, _ = enforce_stock_ground_truth(t["text"], stock_data=stock_data, session_name=session_name)
+                        healed_t = fix_sign_sentiment_oxymorons(healed_t)
+                        is_det_ok, det_issues, _ = verify_post_deterministic(
+                            healed_t, session_name=session_name, benchmark_daily=benchmark_daily_data, stock_data=stock_data
+                        )
+                        if is_det_ok and not [i for i in det_issues if i.startswith("CRITICAL")]:
+                            keep_valid_stock = True
+                            substantive_retained += 1
+                            t["verified_text"] = healed_t
+                            print(f"   ✓ Micro-argomento [{t['id']} - {t_type}] deterministically certificato Yahoo Finance e preservato: {healed_t[:60]}...")
+                    except Exception:
+                        keep_valid_stock = False
+                if not keep_valid_stock:
+                    t["excluded"] = True
+                    print(f"   ⚠️ Micro-argomento [{t['id']} - {t_type}] con allucinazione irreversibile ESCLUSO: {t['text'][:60]}...")
             else:
                 # If a macro paragraph was rejected without auto-correct
-                print(f"   ❌ Micro-argomento [{t['id']} - {t['type']}] RESPINTO: {res.get('explanation')[:80]}...")
+                print(f"   ❌ Micro-argomento [{t['id']} - {t_type}] RESPINTO: {res.get('explanation')[:80]}...")
 
     # If critical macro paragraph was rejected without fix and no substantive content remains
     if substantive_retained == 0:

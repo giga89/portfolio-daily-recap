@@ -349,9 +349,12 @@ def filter_live_news_for_topic(
     single-stock paragraphs do not get cross-contaminated by global macro headlines
     (e.g. a previous day's index drop being injected into an individual stock paragraph).
     """
+    if not live_news_context:
+        return ""
+    if topic_type == "outlook":
+        return ""
     if (
-        not live_news_context
-        or topic_type not in ("stock_paragraph", "stock_bullet")
+        topic_type not in ("stock_paragraph", "stock_bullet")
         or ("📊 NOTIZIE E DATI REALI PER $" not in live_news_context and "🌍 CONTESTO MACRO" not in live_news_context)
     ):
         return live_news_context
@@ -482,11 +485,13 @@ def get_live_market_news_context(
 
     ticker_days = 2 if ("monthly" not in session_str and "weekly" not in session_str) else min(days, 7)
     clean_tickers = []
+    clean_to_raw: Dict[str, str] = {}
     for t in (tickers or [])[:4]:
-        raw_t = t.replace("$", "").strip()
+        raw_t = t.replace("$", "").strip().upper()
         clean_t = raw_t.split(".")[0].upper()
         if clean_t not in clean_tickers:
             clean_tickers.append(clean_t)
+            clean_to_raw[clean_t] = raw_t
             company_name = TICKER_NAME_MAP.get(clean_t, clean_t)
             # Prioritize live breaking news of the day (contracts, deals, ratings, catalysts) instead of hardcoding stale earnings
             t_query = f"{company_name} stock latest news today" if clean_t in company_name else f"{company_name} {clean_t} stock news today"
@@ -528,7 +533,8 @@ def get_live_market_news_context(
                 macro_items.append(f"• [{pub_label}] {title}{source_str}\n  Sintesi: {snippet}")
         else:
             company_name = TICKER_NAME_MAP.get(tag, tag)
-            sub_items = [f"\n📊 NOTIZIE E DATI REALI PER ${tag} ({company_name}):"]
+            display_tag = clean_to_raw.get(tag, tag)
+            sub_items = [f"\n📊 NOTIZIE E DATI REALI PER ${display_tag} ({company_name}):"]
             for r in results:
                 title = r.get("title", "News")
                 content = r.get("content", "").strip().replace("\n", " ")

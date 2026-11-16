@@ -300,9 +300,17 @@ def _select_rotation_favorites_and_niche(allowed_tickers, excluded_tags=None, co
     return selected_favorites, selected_niche
 
 
-def _get_top_gainers_with_news(stock_data: dict = None, count: int = 4, max_check: int = 12) -> list[dict]:
+def _get_top_gainers_with_news(
+    stock_data: dict = None,
+    count: int = 4,
+    max_check: int = 12,
+    preferred_tickers: list = None,
+) -> list[dict]:
     """
     Selects up to `count` portfolio holdings with the largest positive daily movement.
+    When `preferred_tickers` is provided (e.g. US_TICKERS in US_CLOSE), prioritizes
+    those holdings first (positive movers descending, then remaining preferred movers)
+    before falling back to other regions.
     For each candidate, queries Tavily search or company metadata for verified news/catalysts.
     If no news or catalyst is found for a candidate, skips to the next gainer (user requirement).
     """
@@ -310,9 +318,14 @@ def _get_top_gainers_with_news(stock_data: dict = None, count: int = 4, max_chec
     from portfolio_manager import PORTFOLIO_ASSETS_METADATA
     
     candidates = []
+    pref_set = set()
+    if preferred_tickers:
+        pref_set = {t.upper() for t in preferred_tickers} | {t.split('.')[0].upper() for t in preferred_tickers}
     
     if stock_data:
         excluded_gainers = _EXCLUDED_FROM_TAGS | {'IB01.L', 'XEON.DE', 'SPCX.RTH', 'MAU.PA', 'MELI', 'WCLD.L', 'WCLD'}
+        pref_positive = []
+        pref_other = []
         positive_candidates = []
         other_candidates = []
         for sym, data in stock_data.items():
@@ -328,13 +341,27 @@ def _get_top_gainers_with_news(stock_data: dict = None, count: int = 4, max_chec
                     'company_name': data.get('company_name', sym),
                     'emoji': EMOJI_MAP.get(sym, '📊')
                 }
-                if float(d_chg) > 0:
-                    positive_candidates.append(entry)
+                is_pref = bool(pref_set) and (sym.upper() in pref_set or sym.split('.')[0].upper() in pref_set)
+                if is_pref:
+                    if float(d_chg) > 0:
+                        pref_positive.append(entry)
+                    else:
+                        pref_other.append(entry)
                 else:
-                    other_candidates.append(entry)
+                    if float(d_chg) > 0:
+                        positive_candidates.append(entry)
+                    else:
+                        other_candidates.append(entry)
+        pref_positive.sort(key=lambda x: x['daily_change'], reverse=True)
+        pref_other.sort(key=lambda x: x['daily_change'], reverse=True)
         positive_candidates.sort(key=lambda x: x['daily_change'], reverse=True)
         other_candidates.sort(key=lambda x: x['daily_change'], reverse=True)
-        candidates = positive_candidates if len(positive_candidates) >= count else (positive_candidates + other_candidates)
+        if pref_set and (pref_positive or pref_other):
+            pref_pool = pref_positive if len(pref_positive) >= count else (pref_positive + pref_other)
+            fallback_pool = positive_candidates if len(positive_candidates) >= count else (positive_candidates + other_candidates)
+            candidates = pref_pool + fallback_pool
+        else:
+            candidates = positive_candidates if len(positive_candidates) >= count else (positive_candidates + other_candidates)
     
     # Fallback to key portfolio movers if stock_data is empty or simulated
     if not candidates:
@@ -619,6 +646,7 @@ def ensure_thematic_emojis(text: str, session_name: Optional[str] = None) -> str
         from config import EMOJI_MAP
     except Exception:
         EMOJI_MAP = {}
+    base_emoji_map = {k.split('.')[0].upper(): v for k, v in EMOJI_MAP.items()}
 
     session_upper = (session_name or "").upper()
     is_eu = "EUROPEAN" in session_upper or "EU" in session_upper
@@ -670,38 +698,58 @@ def ensure_thematic_emojis(text: str, session_name: Optional[str] = None) -> str
 
         # 3. Community engagement question (last or second-to-last block, ends with ?)
         is_question = (
-            idx >= len(blocks) - 2 and '?' in block and len(block) < 240 and
-            any(w in block.lower() for w in ['commenti', 'voi come', 'cosa ne pensate', 'dite la vostra', 'come avete vissuto'])
+            idx >= len(blocks) - 2 and '?' in block and len(block) < 280 and (
+                any(w in block.lower() for w in [
+                    'commenti', 'voi come', 'cosa ne pensate', 'dite la vostra',
+                    'come avete vissuto', 'vi aspettate', 'secondo voi', 'monitorerete',
+                    'monitorate', 'seguite', 'soddisfatt', 'sorpres', 'domande',
+                ]) or (
+                    not re.search(r'\$[A-Za-z0-9\.\-]+', block) and
+                    not re.search(r'[+-]?\d+[\.,]?\d*%', block)
+                )
+            )
         )
         if is_question:
             formatted_blocks.append(block)
             continue
 
         # 4. Body paragraph: check if it already has an emoji or bullet
+        macro_index_tags = {'NSDQ100', 'SPX500', 'SX7PEX.DE', 'EUSTX50', 'CHINA50', 'SWDA.L', 'GER40', 'DJ30'}
         lines = [l.strip() for l in block.split('\n') if l.strip()]
         new_lines = []
         for line in lines:
-            if _starts_with_emoji_or_bullet(line):
+            stock_match = re.search(r'\$([A-Za-z0-9\.\-]+)', line)
+            matched_ticker = stock_match.group(1).upper() if stock_match else ""
+            stk_emoji = (
+                EMOJI_MAP.get(matched_ticker)
+                or base_emoji_map.get(matched_ticker.split('.')[0])
+            ) if matched_ticker and matched_ticker not in macro_index_tags else None
+
+            if line.startswith('🔹') and stk_emoji:
+                # Upgrade generic bullet 🔹 to the holding's dedicated thematic emoji
+                rest = re.sub(r'^🔹\s*', '', line)
+                new_lines.append(f"{stk_emoji} {rest}")
+            elif _starts_with_emoji_or_bullet(line):
                 new_lines.append(line)
             else:
                 # Need to determine appropriate emoji or bullet
-                macro_index_tags = {'NSDQ100', 'SPX500', 'SX7PEX.DE', 'EUSTX50', 'CHINA50', 'SWDA.L'}
-                stock_match = re.search(r'\$([A-Za-z0-9\.\-]+)', line)
-                matched_ticker = stock_match.group(1).upper() if stock_match else ""
-
+                is_outlook = any(w in line.lower() for w in ['prossima seduta', 'seduta di domani', 'riflettori saranno puntati', 'prossima sessione'])
                 is_agenda = any(w in line.lower() for w in ['agenda', 'appuntamenti', 'dati macro', 'calendario', 'market movers', 'sussidi', 'disoccupazione'])
                 is_macro = (
                     matched_ticker in macro_index_tags or
                     any(w in line.lower() for w in ['futures', 'wall street', 'listini', 's&p', 'nasdaq', 'stoxx', 'sentiment', 'seduta americana', 'seduta europea', 'vecchio continente'])
                 )
 
-                if is_agenda:
+                if is_outlook:
+                    new_lines.append(f"🔮 {line}")
+                elif is_agenda:
                     new_lines.append(f"📅 {line}")
+                elif stk_emoji:
+                    new_lines.append(f"{stk_emoji} {line}")
                 elif is_macro:
                     new_lines.append(f"{macro_default_emoji} {line}")
                 elif matched_ticker:
-                    stk_emoji = EMOJI_MAP.get(matched_ticker) or EMOJI_MAP.get(matched_ticker.split('.')[0]) or '🔹'
-                    new_lines.append(f"{stk_emoji} {line}")
+                    new_lines.append(f"🔹 {line}")
                 else:
                     new_lines.append(f"🔹 {line}")
 
@@ -1688,8 +1736,8 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         'PPFB.DE', '1211.HK', '1919.HK', '2318.HK', 'INDO.PA', 'VOF.L'
     ]
     US_TICKERS = [
-        'NVDA', 'AMD', 'MSFT', 'AMZN', 'GOOG', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY',
-        'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'IB01.L'
+        'NVDA', 'AMD', 'MSFT', 'AMZN', 'GOOG', 'GOOGL', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY',
+        'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'ETOR', 'IB01.L'
     ]
     
     session_upper = market_session.upper()
@@ -1760,7 +1808,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
 - Inserisci ${fav1}, ${fav2} e ${niche1} nei rispettivi microtemi dedicati con approfondimenti ricchi di cifre e catalizzatori operativi.
 """
         elif is_us_close:
-            top_gainers = _get_top_gainers_with_news(stock_data=stock_data, count=4)
+            top_gainers = _get_top_gainers_with_news(stock_data=stock_data, count=4, preferred_tickers=US_TICKERS)
             macro_heavy = "SPX500" if (_dt.utcnow().day % 2 == 0) else "NSDQ100"
             macro_change = benchmark_daily_data.get(macro_heavy, 0.0) if benchmark_daily_data else 0.0
             spx_change = benchmark_daily_data.get('SPX500', 0.0) if benchmark_daily_data else 0.0

@@ -2,29 +2,6 @@
   "last_updated": "2026-11-16T21:12:01.887214+00:00",
   "posts": [
     {
-      "id": "4fc6cf70-e201-11f1-8080-80014711ca9f",
-      "platform": "etoro",
-      "session": "U.S. market close",
-      "published_at": "2026-11-16T21:04:29Z",
-      "day_of_week": "Monday",
-      "hour_utc": 21,
-      "hour_local": 23,
-      "title": "🌆 CHIUSURA DEI MERCATI 📈  🩸 🩸 🩸 GIORNATA DIFFICILE 🩸: -1.20% 🩸 🩸 🩸 🏔️ Distanza d...",
-      "tickers": [
-        "HUM",
-        "VOF.L",
-        "ULVR.L",
-        "TRIG.L",
-        "INDO.PA"
-      ],
-      "image_type": "meme_card",
-      "likes": 0,
-      "comments": 0,
-      "shares": 0,
-      "url": "https://www.etoro.com/people/AndreaRavalli",
-      "last_synced": "2026-11-16T21:04:44.273347+00:00"
-    },
-    {
       "id": "cc841e50-e1ca-11f1-8080-80017720bf51",
       "platform": "etoro",
       "session": "U.S. market open",
