@@ -320,6 +320,7 @@ jobs:
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           IMGBB_API_KEY: ${{ secrets.IMGBB_API_KEY }}
           MARKET_SESSION: ${{ steps.market_session.outputs.session }}
+          FORCE_RUN: ${{ inputs.force_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}

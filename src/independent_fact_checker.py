@@ -253,13 +253,28 @@ def _build_audit_prompt(
     topic_type: str = "full_post",
 ) -> str:
     """Creates the adversarial fact-checker prompt for Groq/Mistral with optional Tavily live grounding."""
-    is_outlook_topic = topic_type == "outlook" or (text or "").lstrip().startswith("🔮")
-    is_single_stock_topic = topic_type in ("stock_paragraph", "stock_bullet")
-
+    text_stripped = (text or "").strip()
+    text_lower = text_stripped.lower()
+    is_outlook_topic = (
+        topic_type == "outlook"
+        or text_stripped.startswith("🔮")
+        or any(w in text_lower for w in ("nella seduta di domani", "prossima seduta", "riflettori saranno puntati"))
+    )
     mentioned_tags = set()
-    for raw_t in re.findall(r'\$([A-Za-z0-9\.\-]+)', text or ""):
+    for raw_t in re.findall(r'\$([A-Za-z0-9\.\-]+)', text_stripped):
         mentioned_tags.add(raw_t.upper())
         mentioned_tags.add(raw_t.split(".")[0].upper())
+
+    macro_tags = {"SPX500", "NSDQ100", "DJ30", "GER40", "EUSTX50", "CHINA50", "SWDA", "SX7PEX"}
+    is_single_stock_topic = (
+        topic_type in ("stock_paragraph", "stock_bullet")
+        or (
+            not is_outlook_topic
+            and "\n\n" not in text_stripped
+            and bool(mentioned_tags)
+            and not (mentioned_tags & macro_tags)
+        )
+    )
 
     live_news_section = ""
     if live_news_context and not is_outlook_topic:
@@ -287,7 +302,7 @@ FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY):
                                 continue
                         seen_canon.add(canon_sym)
                         dir_lbl = "RIALZO (+)" if pct_val >= 0 else "CALO (-)"
-                        gt_items.append(f"  - ${canon_sym}: {pct_val:+.2f}% [{dir_lbl}]")
+                        gt_items.append(f"  • ${canon_sym}: {pct_val:+.2f}% [{dir_lbl}]")
                 if gt_items:
                     stock_gt_section = (
                         "• PERFORMANCE CERTIFICATA SINGOLI TITOLI OGGI (YAHOO FINANCE GROUND TRUTH - INVIOLABILE):\n"
@@ -473,6 +488,16 @@ def sanitize_verified_text(
     # Strip redundant index parentheticals injected by auditor into single-stock paragraphs
     if "SPX500" not in orig_stripped.upper() and "NSDQ100" not in orig_stripped.upper():
         cleaned = re.sub(r'\s*\((?:SPX500|S&P\s*500)[^)]*NSDQ100[^)]*\)', '', cleaned, flags=re.IGNORECASE).strip()
+
+    # Fix contradiction if auditor wrote 'in linea con la performance generale dei mercati' on a counter-trend stock
+    if benchmark_daily_data and isinstance(benchmark_daily_data, dict):
+        spx_v = benchmark_daily_data.get("SPX500", 0.0) or 0.0
+        if spx_v < -0.3 and re.search(r'\+\d+[\.,]\d+%', cleaned):
+            cleaned = re.sub(
+                r'(?i),?\s*in\s+linea\s+con\s+(?:la\s+performance\s+generale|l\'andamento)\s+dei\s+mercati',
+                ', in controtendenza rispetto alla flessione dei mercati',
+                cleaned,
+            )
 
     # Restore truncated exchange suffixes on cashtags (e.g. $ULVR.L -> $ULVR)
     for full_tag in re.findall(r'\$([A-Za-z0-9\-]+\.[A-Za-z]{1,4})\b', orig_stripped):
