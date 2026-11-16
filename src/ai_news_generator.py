@@ -1808,7 +1808,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
 - Inserisci ${fav1}, ${fav2} e ${niche1} nei rispettivi microtemi dedicati con approfondimenti ricchi di cifre e catalizzatori operativi.
 """
         elif is_us_close:
-            top_gainers = _get_top_gainers_with_news(stock_data=stock_data, count=4, preferred_tickers=US_TICKERS)
+            top_gainers = _get_top_gainers_with_news(stock_data=stock_data, count=4)
             macro_heavy = "SPX500" if (_dt.utcnow().day % 2 == 0) else "NSDQ100"
             macro_change = benchmark_daily_data.get(macro_heavy, 0.0) if benchmark_daily_data else 0.0
             spx_change = benchmark_daily_data.get('SPX500', 0.0) if benchmark_daily_data else 0.0
