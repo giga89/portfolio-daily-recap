@@ -178,10 +178,16 @@ def get_current_temporal_context(
             "La seduta americana deve ancora iniziare."
         )
     elif "OPEN" in session_clean and "EUROPEAN" in session_clean:
-        market_state = (
-            "PRE-APERTURA MERCATI EUROPEI (prima delle 9:00 CET). "
-            "La seduta europea deve ancora iniziare."
-        )
+        if now_rome.hour < 9:
+            market_state = (
+                "PRE-APERTURA MERCATI EUROPEI (prima delle 09:00 CET/CEST). "
+                "La seduta europea deve ancora iniziare; Wall Street ieri ha chiuso."
+            )
+        else:
+            market_state = (
+                "APERTURA MERCATI EUROPEI (dopo le 09:00 CET/CEST — borse europee Milano, Francoforte, Parigi e Londra aperte; "
+                "la seduta USA precedente è conclusa e Wall Street riaprirà alle 15:30 italiane)."
+            )
     elif "WEEKLY" in session_clean or "SAT" in session_clean or "SUN" in session_clean:
         market_state = (
             "FINE SETTIMANA (MERCATI CHIUSI). "
@@ -227,6 +233,15 @@ def get_current_temporal_context(
     except Exception:
         pass
 
+    daily_macro_calendar = ""
+    if "OPEN" in session_clean:
+        try:
+            import economic_calendar
+            cal_focus = "EU" if "EUROPEAN" in session_clean else "US"
+            daily_macro_calendar = economic_calendar.get_daily_macro_events_context(focus=cal_focus, target_date=now_rome.date())
+        except Exception:
+            daily_macro_calendar = ""
+
     return {
         "formatted_date": formatted_date,
         "iso_date": now_rome.strftime("%Y-%m-%d"),
@@ -235,6 +250,7 @@ def get_current_temporal_context(
         "market_state": market_state,
         "benchmarks_daily": benchmarks_summary,
         "benchmark_data_raw": benchmark_daily_data,
+        "daily_macro_calendar": daily_macro_calendar,
         "year": str(now_rome.year),
         "next_session_timing": next_session_timing,
         "next_session_short": next_session_short,
@@ -320,6 +336,10 @@ FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY):
         if meta_lines:
             filtered_metadata = "\n".join(meta_lines)
 
+    daily_cal_section = ""
+    if not is_single_stock_topic and not is_outlook_topic and temporal_ctx.get("daily_macro_calendar"):
+        daily_cal_section = f"{temporal_ctx['daily_macro_calendar']}\n"
+
     if is_outlook_topic:
         temporal_rule_1 = f"""1. COERENZA TEMPORALE PER MICROTEMA 5 (🔮 SGUARDO ALLA PROSSIMA SEDUTA / OUTLOOK FUTURO - CRITICA):
    - QUESTO PARAGRAFO È LO SGUARDO IN AVANTI VERSO LA PROSSIMA SEDUTA DI BORSA ({temporal_ctx.get('next_session_timing', 'nella prossima seduta')}).
@@ -332,7 +352,8 @@ FONTI NOTIZIE FINANZIARIE REALI RECENTI (LIVE WEB - TAVILY):
    - Tutti gli eventi della giornata (es. riunioni o decisioni della Federal Reserve, tassi, conferenze stampa, dati inflazione o occupazione) sono GIÀ AVVENUTI.
    - Se il post parla di un evento di oggi usando verbi al FUTURO (es. "oggi deciderà", "oggi prenderà una decisione", "in attesa dell'annuncio di stasera", "si attende la decisione"), questo è un GRAVISSIMO PARADOSSO TEMPORALE.
    - CORREZIONE: Devi convertire il testo al PASSATO (es. "la Fed ha annunciato", "la decisione sui tassi è arrivata oggi") OPPURE, se l'esito reale non è menzionato con certezza, rimuovere l'affermazione speculativa.
-   - ECCEZIONE: Se un paragrafo inizia con 🔮 o parla esplicitamente della 'prossima seduta' / 'seduta di domani', quel paragrafo guarda alla prossima sessione di borsa e DEVE restare al futuro!"""
+   - ECCEZIONE 1 (OUTLOOK): Se un paragrafo inizia con 🔮 o parla esplicitamente della 'prossima seduta' / 'seduta di domani', quel paragrafo guarda alla prossima sessione di borsa e DEVE restare al futuro!
+   - ECCEZIONE 2 (SESSIONI DI APERTURA EU_OPEN / US_OPEN): Nelle sessioni di apertura, i dati macroeconomici previsti più tardi nella giornata odierna (marcati [IN AGENDA] nel CALENDARIO MACRO ODIERNO) sono legittimamente espressi al futuro ('sono attesi oggi alle 11:00', 'nel pomeriggio arriveranno'). Non riscriverli al passato!"""
 
     return f"""Sei un Lead Financial Fact-Checker & Senior Compliance Auditor per un account pubblico di investimenti su eToro.
 Il tuo obiettivo è effettuare un AUDIT INDIPENDENTE, CRITICO E SPIETATO sul seguente post prima della pubblicazione.
@@ -346,7 +367,7 @@ INFORMAZIONI TEMPORALI CERTE (GROUND TRUTH):
 • STATO DELLA SESSIONE: {temporal_ctx.get('market_state')}
 • PROSSIMA SEDUTA DI BORSA (CALENDARIO UFFICIALE): {temporal_ctx.get('next_session_timing', 'nella prossima seduta')}
 • TRIMESTRALI CONFERMATE PROSSIMA SEDUTA: {temporal_ctx.get('next_session_earnings', 'Nessuna trimestrale prevista per il portafoglio')}
-{benchmarks_daily_line}{stock_gt_section}=========================================
+{benchmarks_daily_line}{stock_gt_section}{daily_cal_section}=========================================
 METADATI DI PORTAFOGLIO:
 =========================================
 {filtered_metadata}
@@ -376,7 +397,7 @@ REGOLE DI AUDIT INDIPENDENTE (TASSATIVE):
 
 4. FORMATTAZIONE ETORO:
    - Nessun markdown bold (** o __).
-   - Massimo 4 cashtag con prefisso $ (es. $NVDA, $SPX500). Non aggiungere cashtag a titoli citati come testo semplice.
+   - Massimo 4 cashtag con prefisso $ (es. $NVDA, $SPX500). Non aggiungere MAI nuovi cashtag con '$' che non erano già presenti nel testo da auditare (es. non scrivere $NSDQ100 o $DJ30 se non hanno già il '$'; usa solo il nome semplice senza '$').
 
 5. PRESERVAZIONE DELLA RICCHEZZA DEL CONTENUTO (NON RIASSUMERE E NON GONFIARE):
    - È SEVERAMENTE VIETATO tagliare o riassumere il post in poche righe generiche, ma è altrettanto VIETATO gonfiare un singolo paragrafo in un muro di testo prolisso!
@@ -503,6 +524,38 @@ def sanitize_verified_text(
     for full_tag in re.findall(r'\$([A-Za-z0-9\-]+\.[A-Za-z]{1,4})\b', orig_stripped):
         base_tag = full_tag.split('.')[0]
         cleaned = re.sub(rf'\${re.escape(base_tag)}(?!\.[A-Za-z])', f'${full_tag}', cleaned, flags=re.IGNORECASE)
+
+    # Canonicalize BYD HK ticker ($1211.HK -> $01211.HK) before cashtag guard
+    cleaned = re.sub(r'(?<![0-9])\$1211\.HK\b', '$01211.HK', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'(?<![0-9$.])1211\.HK\b', '01211.HK', cleaned, flags=re.IGNORECASE)
+
+    # Strip '$' from any cashtags newly injected by auditor that were NOT present in original_text
+    # so macro rewrites (e.g. adding $NSDQ100 and $DJ30) never hijack the 4-tag budget from stocks.
+    orig_cashtag_set = set()
+    for raw_ot in re.findall(r'\$([A-Za-z0-9\.\-]+)', orig_stripped):
+        if re.match(r'^\d+(?:[.,]\d+)*$', raw_ot):
+            continue
+        ot_clean = raw_ot.rstrip('.,:;!?').upper()
+        if ot_clean == "1211.HK":
+            ot_clean = "01211.HK"
+        if ot_clean:
+            orig_cashtag_set.add(ot_clean)
+
+    def _strip_injected_cashtag(m: re.Match) -> str:
+        raw_t = m.group(1)
+        if re.match(r'^\d+(?:[.,]\d+)*$', raw_t):
+            return m.group(0)
+        t_body = raw_t.rstrip('.,:;!?')
+        trail = raw_t[len(t_body):]
+        t_up = t_body.upper()
+        if t_up == "1211.HK":
+            t_up = "01211.HK"
+            t_body = "01211.HK"
+        if t_up in orig_cashtag_set:
+            return f"${t_body}{trail}"
+        return f"{t_body}{trail}"
+
+    cleaned = re.sub(r'\$([A-Za-z0-9\.\-]+)', _strip_injected_cashtag, cleaned)
 
     # Restore original leading thematic emoji if auditor stripped it or replaced it with 🔹
     orig_lead_match = re.match(r'^([^\w\s\$\"\'\(\[\#\•\-\*\✓]+)\s+', orig_stripped)

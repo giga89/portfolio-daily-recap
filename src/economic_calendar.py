@@ -446,6 +446,147 @@ def fetch_macro_calendar_feed() -> Optional[Dict[str, Any]]:
     return None
 
 
+_DAILY_FEED_CACHE: Dict[str, Any] = {"ts": 0.0, "events": None}
+
+
+def _fetch_raw_calendar_events() -> List[Dict[str, Any]]:
+    """Fetch weekly economic calendar JSON from FairEconomy with a short in-memory cache."""
+    import time
+    import urllib.request
+
+    now_ts = time.time()
+    if _DAILY_FEED_CACHE["events"] is not None and (now_ts - _DAILY_FEED_CACHE["ts"]) < 900.0:
+        return _DAILY_FEED_CACHE["events"]
+
+    url = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json",
+    }
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            if resp.status == 200:
+                data = json.loads(resp.read().decode("utf-8"))
+                if isinstance(data, list):
+                    _DAILY_FEED_CACHE["ts"] = now_ts
+                    _DAILY_FEED_CACHE["events"] = data
+                    return data
+    except Exception as e:
+        print(f"ℹ️ Daily economic calendar feed unavailable: {e}")
+        # Brief negative cache (120s) on rate-limit/errors to avoid hammering upstream in the same run
+        _DAILY_FEED_CACHE["ts"] = now_ts - 780.0
+        _DAILY_FEED_CACHE["events"] = []
+    return []
+
+
+def get_daily_macro_events_context(focus: str = "EU", target_date: Optional[Any] = None, max_events: int = 8) -> str:
+    """
+    Returns a grounded summary of today's scheduled macroeconomic releases (EUR/GBP/USD)
+    with Italian local times (Europe/Rome), forecast/previous/actual figures, and today's
+    confirmed portfolio earnings so Micro-Topic 2 (📅) and independent auditors rely on real data.
+    """
+    try:
+        from zoneinfo import ZoneInfo
+        rome_tz = ZoneInfo("Europe/Rome")
+    except Exception:
+        try:
+            import pytz
+            rome_tz = pytz.timezone("Europe/Rome")
+        except Exception:
+            rome_tz = timezone(timedelta(hours=1))
+
+    now_rome = datetime.now(rome_tz)
+    t_date = target_date if target_date is not None else now_rome.date()
+    focus_upper = (focus or "EU").upper()
+
+    raw_events = _fetch_raw_calendar_events()
+    impact_rank = {"High": 0, "Medium": 1, "Low": 2, "Holiday": 3}
+
+    todays_events = []
+    for e in raw_events:
+        country = str(e.get("country", "")).upper()
+        if country not in ("EUR", "GBP", "USD"):
+            continue
+        dt_str = e.get("date", "")
+        if not dt_str:
+            continue
+        try:
+            dt_obj = datetime.fromisoformat(dt_str)
+            if dt_obj.tzinfo is None:
+                dt_obj = dt_obj.replace(tzinfo=timezone.utc)
+            dt_rome = dt_obj.astimezone(rome_tz)
+        except Exception:
+            continue
+        if dt_rome.date() != t_date:
+            continue
+        # Skip overnight pre-06:00 CET timestamps (previous US afternoon/evening speeches)
+        if dt_rome.hour < 6:
+            continue
+
+        impact = str(e.get("impact", "Low"))
+        if impact == "Holiday":
+            continue
+        # Priority scoring: lower is higher priority
+        imp_score = impact_rank.get(impact, 3)
+        if focus_upper == "EU":
+            region_score = 0 if country in ("EUR", "GBP") else (1 if imp_score <= 1 else 2)
+        else:
+            region_score = 0 if country == "USD" else (1 if imp_score <= 1 else 2)
+
+        tz_abbr = dt_rome.tzname() or "CET"
+        timing_status = "GIÀ TRASCORSO" if (target_date is None and dt_rome <= now_rome) else "IN AGENDA"
+
+        todays_events.append({
+            "sort_key": (imp_score, region_score, dt_rome),
+            "time_str": dt_rome.strftime("%H:%M"),
+            "tz_abbr": tz_abbr,
+            "timing_status": timing_status,
+            "country": country,
+            "impact": impact,
+            "title": str(e.get("title", "")).strip(),
+            "forecast": str(e.get("forecast", "") or "").strip(),
+            "previous": str(e.get("previous", "") or "").strip(),
+            "actual": str(e.get("actual", "") or "").strip(),
+        })
+
+    todays_events.sort(key=lambda x: x["sort_key"])
+    selected = sorted(todays_events[:max_events], key=lambda x: x["time_str"])
+
+    lines = []
+    for ev in selected:
+        details = []
+        if ev["actual"]:
+            details.append(f"uscito: {ev['actual']}")
+        if ev["forecast"]:
+            details.append(f"atteso: {ev['forecast']}")
+        if ev["previous"]:
+            details.append(f"prec: {ev['previous']}")
+        det_str = f" ({', '.join(details)})" if details else ""
+        lines.append(
+            f"• {ev['time_str']} {ev['tz_abbr']} [{ev['timing_status']} | {ev['country']} | {ev['impact']}]: {ev['title']}{det_str}"
+        )
+
+    # Also check portfolio earnings today
+    earnings_str = "Nessuna trimestrale del portafoglio prevista oggi."
+    try:
+        import market_calendar
+        todays_earnings = market_calendar.get_earnings_for_session(t_date)
+        if todays_earnings:
+            earnings_str = "Trimestrali portafoglio oggi: " + ", ".join(
+                f"{e['name']} ({e['ticker']})" for e in todays_earnings
+            )
+    except Exception:
+        pass
+
+    if not lines and earnings_str == "Nessuna trimestrale del portafoglio prevista oggi.":
+        return ""
+
+    header = f"CALENDARIO MACRO ODIERNO ({t_date.strftime('%d/%m/%Y')}, orari italiani CET/CEST):"
+    body = "\n".join(lines) if lines else "• Nessun dato macro ad alto impatto schedulato per oggi su EUR/GBP/USD."
+    return f"{header}\n{body}\n• {earnings_str}"
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. Public Orchestrator
 # ─────────────────────────────────────────────────────────────────────────────

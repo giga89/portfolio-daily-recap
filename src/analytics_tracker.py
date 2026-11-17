@@ -372,7 +372,7 @@ HOLDINGS_DATA = [
     {"ticker": "ULVR.L", "name": "Unilever PLC", "emoji": "🧼", "asset_class": "Stock", "curr": "GBP", "sector": "Consumer Staples & Household", "geo": "Europe", "tier": "Core Defensive", "desc": "Portfolio of 400+ household consumer staple brands used daily by over 3.4 billion people worldwide."},
 
     # ── Asia & Emerging Markets ───────────────────────────────────────────────
-    {"ticker": "1211.HK", "name": "BYD Co Ltd", "emoji": "🔋", "asset_class": "Stock", "curr": "HKD", "sector": "Electric Vehicles & Batteries", "geo": "Asia", "tier": "Global EV Leader", "desc": "Worldwide leader in EV production and vertical integration, proprietary Blade Battery safety architecture."},
+    {"ticker": "01211.HK", "name": "BYD Co Ltd", "emoji": "🔋", "asset_class": "Stock", "curr": "HKD", "sector": "Electric Vehicles & Batteries", "geo": "Asia", "tier": "Global EV Leader", "desc": "Worldwide leader in EV production and vertical integration, proprietary Blade Battery safety architecture."},
     {"ticker": "1919.HK", "name": "COSCO SHIPPING Holdings", "emoji": "🚢", "asset_class": "Stock", "curr": "HKD", "sector": "Marine Shipping & Logistics", "geo": "Asia", "tier": "Cyclical / High Yield", "desc": "Global maritime shipping conglomerate operating premier container vessel fleets and critical terminal ports."},
     {"ticker": "2318.HK", "name": "Ping An Insurance Group", "emoji": "🏦", "asset_class": "Stock", "curr": "HKD", "sector": "Insurance & Digital Finance", "geo": "Asia", "tier": "Asia Value", "desc": "China's leading tech-driven financial services and insurance conglomerate with deep value fundamentals."},
     {"ticker": "VOF.L", "name": "VinaCapital Vietnam Fund", "emoji": "🌏", "asset_class": "Fund / Closed-End", "curr": "GBP", "sector": "Vietnam Frontier Growth", "geo": "Asia / Frontier", "tier": "High Growth Explorer", "desc": "Specialist fund capturing the secular industrialization and consumption boom in Vietnam's high-growth economy."},
@@ -426,7 +426,7 @@ BASELINE_WEIGHTS: Dict[str, float] = {
     "WDEF.L": 3.0,
     "IQQL.DE": 2.0,
     # Asia & Emerging Markets (8.0%)
-    "1211.HK": 2.0,
+    "01211.HK": 2.0,
     "1919.HK": 1.5,
     "2318.HK": 1.5,
     "VOF.L": 1.5,
@@ -468,8 +468,18 @@ def load_portfolio_weights() -> Dict[str, float]:
         except Exception as e:
             print(f"⚠️ Error reading {PORTFOLIO_WEIGHTS_FILE}: {e}")
 
-    PURGED_ASSETS = {"XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD", "WCLD.L", "ANT.24-7", "ANT", "MELI", "RACE"}
-    weights = {k: v for k, v in weights.items() if k not in PURGED_ASSETS}
+    ALIAS_MAP = {
+        "1211.HK": "01211.HK",
+        "BESI": "BESI.NV",
+        "GOOGL": "GOOG",
+        "ABT": "ABT.US",
+    }
+    PURGED_ASSETS = {"XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX", "VWCE.L", "IEMG", "NET", "ENI", "DB1.DE", "PYPL", "WCLD", "WCLD.L", "ANT.24-7", "ANT", "MELI", "RACE", "MNODL.L", "NVTKL.L"}
+    weights = {
+        ALIAS_MAP.get(k, k): v
+        for k, v in weights.items()
+        if ALIAS_MAP.get(k, k) not in PURGED_ASSETS and (not isinstance(v, (int, float)) or v > 0.0)
+    }
 
     if weights:
         try:

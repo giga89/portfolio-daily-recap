@@ -49,7 +49,7 @@ DEFAULT_TICKERS = {
     'PRY.MI': ('PRY.MI', 'Prysmian S.p.A.'),
     '1919.HK': ('1919.HK', 'COSCO SHIPPING Holdings Co Ltd'),
     'VOW3.DE': ('VOW3.DE', 'Volkswagen AG'),
-    '1211.HK': ('1211.HK', 'BYD Co Ltd'),
+    '01211.HK': ('1211.HK', 'BYD Co Ltd'),
     'ULVR.L': ('ULVR.L', 'Unilever PLC'),
     
     # E-Commerce, Fintech, Pre-IPO, Retail & Crypto
@@ -104,7 +104,8 @@ DEFAULT_EMOJIS = {
     # Automotive, Luxury & Industrials
     'VOW3.DE': '🚗',
     '1919.HK': '🚢',
-    '1211.HK': '🔋',   # BYD
+    '01211.HK': '🔋',  # BYD (canonical eToro ticker)
+    '1211.HK': '🔋',   # BYD (Yahoo Finance alias)
     'ULVR.L': '🧼',    # Unilever
     
     # E-Commerce, Fintech, Pre-IPO, Retail & Crypto
@@ -128,7 +129,7 @@ def load_config():
     2. Try Local File: If Gist empty/fail, load local JSON.
     3. Fallback: Use Defaults.
     
-    If loaded from local/defaults but Gist was empty, we SAVE to Gist to sync it.
+    If loaded from local/defaults but Gist was empty, we SAVE to Gist to initialize it.
     """
     # 1. Try Gist
     try:
@@ -157,16 +158,41 @@ def load_config():
             if config["tickers"].get("ABT.US", [""])[0] == "ABT.US":
                 config["tickers"]["ABT.US"] = ["ABT", "Abbott Laboratories"]
                 needs_save = True
-            # Fix 01211.HK (BYD HK): leading zero not valid on Yahoo Finance, correct symbol is 1211.HK
-            if "01211.HK" in config["tickers"]:
-                config["tickers"].pop("01211.HK")
-                config["tickers"]["1211.HK"] = ["1211.HK", "BYD Company"]
-                if "01211.HK" in config.get("emojis", {}):
-                    config["emojis"]["1211.HK"] = config["emojis"].pop("01211.HK")
+
+            # Fix BYD HK: on eToro the canonical ticker is 01211.HK, while Yahoo Finance uses 1211.HK
+            if "1211.HK" in config["tickers"]:
+                config["tickers"].pop("1211.HK", None)
+                config["tickers"]["01211.HK"] = ["1211.HK", "BYD Co Ltd"]
+                if "1211.HK" in config.get("emojis", {}):
+                    config["emojis"]["01211.HK"] = config["emojis"].pop("1211.HK")
                 else:
-                    config.setdefault("emojis", {}).setdefault("1211.HK", "🔋")
-                if "01211.HK" in config.get("added_dates", {}):
-                    config["added_dates"]["1211.HK"] = config["added_dates"].pop("01211.HK")
+                    config.setdefault("emojis", {})["01211.HK"] = "🔋"
+                if "1211.HK" in config.get("added_dates", {}):
+                    config["added_dates"]["01211.HK"] = config["added_dates"].pop("1211.HK")
+                needs_save = True
+            if "01211.HK" in config["tickers"] and config["tickers"]["01211.HK"][0] != "1211.HK":
+                config["tickers"]["01211.HK"] = ["1211.HK", "BYD Co Ltd"]
+                config.setdefault("emojis", {}).setdefault("01211.HK", "🔋")
+                needs_save = True
+
+            # Fix BESI.NV (BE Semiconductor): eToro key is BESI.NV, Yahoo ticker is BESI.AS
+            if "BESI" in config["tickers"]:
+                config["tickers"].pop("BESI", None)
+                config["tickers"]["BESI.NV"] = ["BESI.AS", "BE Semiconductor Industries N.V."]
+                config.get("emojis", {}).pop("BESI", None)
+                config.setdefault("emojis", {})["BESI.NV"] = "🔬"
+                needs_save = True
+            if "BESI.NV" not in config["tickers"] or config["tickers"].get("BESI.NV", [""])[0] != "BESI.AS":
+                config["tickers"]["BESI.NV"] = ["BESI.AS", "BE Semiconductor Industries N.V."]
+                config.setdefault("emojis", {})["BESI.NV"] = "🔬"
+                needs_save = True
+
+            # Fix GOOG vs GOOGL: eToro key is GOOG, Yahoo ticker is GOOGL
+            if "GOOGL" in config["tickers"]:
+                config["tickers"].pop("GOOGL", None)
+                config["tickers"]["GOOG"] = ["GOOGL", "Alphabet Inc"]
+                config.get("emojis", {}).pop("GOOGL", None)
+                config.setdefault("emojis", {})["GOOG"] = "🔍"
                 needs_save = True
             
             # Fix ENI emoji
@@ -363,15 +389,30 @@ def lookup_ticker_info(symbol):
 
 def sync_portfolio(bullaware_weights):
     """
-    Synchronize the local configuration with the weights fetched from BullAware.
-    - Adds new tickers found in BullAware
-    - Removes tickers no longer in BullAware
+    Synchronize the local configuration with the weights fetched from BullAware/eToro.
+    - Adds new tickers found in BullAware/eToro
+    - Removes tickers no longer in BullAware/eToro
     """
     if not bullaware_weights:
         return {}
 
-    PURGED_ASSETS = {"XEON.DE", "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "WCLD.L", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI"}
-    bullaware_weights = {k: v for k, v in bullaware_weights.items() if k not in PURGED_ASSETS}
+    ALIAS_NORMALIZATION = {
+        "1211.HK": "01211.HK",
+        "BESI": "BESI.NV",
+        "GOOGL": "GOOG",
+        "ABT": "ABT.US",
+    }
+    PURGED_ASSETS = {"XEON.DE", "VWCE.L", "IEMG", "NET", "ENI", "DB1.DE", "PYPL", "MAU.PA", "WCLD", "WCLD.L", "SPCX.RTH", "SPCX", "ANT.24-7", "ANT", "MELI", "MNODL.L", "NVTKL.L"}
+    normalized_weights = {}
+    for k, v in bullaware_weights.items():
+        if k in PURGED_ASSETS:
+            continue
+        if isinstance(v, (int, float)) and v <= 0.0:
+            continue
+        canon_k = ALIAS_NORMALIZATION.get(k, k)
+        if canon_k not in PURGED_ASSETS:
+            normalized_weights[canon_k] = v
+    bullaware_weights = normalized_weights
 
     current_config = load_config()
     current_tickers = current_config.get('tickers', {})
@@ -400,10 +441,13 @@ def sync_portfolio(bullaware_weights):
             current_config['added_dates'] = {}
             
         for k in to_add:
-            yahoo_ticker, name = lookup_ticker_info(k)
+            if k in DEFAULT_TICKERS:
+                yahoo_ticker, name = DEFAULT_TICKERS[k]
+            else:
+                yahoo_ticker, name = lookup_ticker_info(k)
             current_tickers[k] = [yahoo_ticker, name] # Use list for JSON compatibility
             # Try to assign a default emoji
-            current_emojis[k] = "🆕" 
+            current_emojis[k] = DEFAULT_EMOJIS.get(k, "🆕")
             current_config['added_dates'][k] = today_iso
             
     # 3. MAINTENANCE: expire '🆕' badges older than 7 days
@@ -429,13 +473,14 @@ MULTI_TAG_MAP = {
     'ENI.MI': ['$ENI.MI', '$E'],
     'ENI': ['$ENI.MI', '$E'],
     'AZN.L': ['$AZN.L', '$AZN'],
-    '1211.HK': ['$1211.HK'],
+    '01211.HK': ['$01211.HK'],
+    '1211.HK': ['$01211.HK'],
     '1919.HK': ['$1919.HK'],
     '2318.HK': ['$2318.HK'],
     'ULVR.L': ['$ULVR.L', '$UL'],
     'VOW3.DE': ['$VOW3.DE'],
-    'ABT.US': ['$ABT'],
-    'ABT': ['$ABT'],
+    'ABT.US': ['$ABT.US', '$ABT'],
+    'ABT': ['$ABT.US', '$ABT'],
     'PRY.MI': ['$PRY.MI'],
     'ENEL.MI': ['$ENEL.MI'],
     'WMT': ['$WMT'],
@@ -470,6 +515,7 @@ RELATED_TICKERS_MAP = {
     'PRY.MI': ['$NEX.PA', '$NKT.CO', '$ENEL.MI'],
     'VOW3.DE': ['$MBG.DE', '$BMW.DE', '$P911.DE'],
     'ULVR.L': ['$PG', '$NESN.SW', '$KO'],
+    '01211.HK': ['$TSLA', '$NIO', '$XPEV'],
     '1211.HK': ['$TSLA', '$NIO', '$XPEV'],
     '1919.HK': ['$ZIM', '$MATX', '$1138.HK'],
     '2318.HK': ['$2628.HK', '$3968.HK', '$939.HK'],
@@ -957,8 +1003,8 @@ PORTFOLIO_ASSETS_METADATA = {
     },
 
     # ── Asia & Emerging Markets ───────────────────────────────────────────────
-    "1211.HK": {
-        "ticker": "1211.HK", "yahoo_ticker": "1211.HK", "name": "BYD Co Ltd", "emoji": "🔋",
+    "01211.HK": {
+        "ticker": "01211.HK", "yahoo_ticker": "1211.HK", "name": "BYD Co Ltd", "emoji": "🔋",
         "asset_class": "Stock", "sector": "Veicoli Elettrici & Batterie Blade", "geo": "Asia", "tier": "Global EV Leader",
         "is_dividend_paying": True, "dividend_policy": "Distribuzione annuale con dividend yield moderato (~1.1%) e priorità su espansione globale", "annual_yield_pct": 1.1, "frequency": "Annuale (Giugno)",
         "domain": "byd.com", "color": (30, 144, 255),
@@ -974,7 +1020,26 @@ PORTFOLIO_ASSETS_METADATA = {
             "Guerra dei prezzi feroce nel mercato automobilistico domestico cinese",
             "Fluttuazioni nei costi delle materie prime per accumulatori (litio, cobalto)"
         ],
-        "related_tickers": ["$TSLA", "$NIO", "$XPEV"], "primary_tags": ["$1211.HK", "$BYDDF"]
+        "related_tickers": ["$TSLA", "$NIO", "$XPEV"], "primary_tags": ["$01211.HK", "$BYDDF"]
+    },
+    "1211.HK": {
+        "ticker": "01211.HK", "yahoo_ticker": "1211.HK", "name": "BYD Co Ltd", "emoji": "🔋",
+        "asset_class": "Stock", "sector": "Veicoli Elettrici & Batterie Blade", "geo": "Asia", "tier": "Global EV Leader",
+        "is_dividend_paying": True, "dividend_policy": "Distribuzione annuale con dividend yield moderato (~1.1%) e priorità su espansione globale", "annual_yield_pct": 1.1, "frequency": "Annuale (Giugno)",
+        "domain": "byd.com", "color": (30, 144, 255),
+        "desc": "Worldwide leader in EV production and vertical integration, proprietary Blade Battery safety architecture.",
+        "thesis": "Leader mondiale assoluto per volumi di produzione di veicoli elettrici e ibridi plug-in (NEV), dotato di un'integrazione verticale totale (batterie proprietarie Blade, semiconduttori, motori) e forte espansione nei mercati internazionali.",
+        "upside_catalysts": [
+            "Espansione delle esportazioni e impianti produttivi locali in Europa (Ungheria), Sud-est asiatico e Brasile",
+            "Lancio di modelli premium (Yangwang, Denza, Fangchengbao) ad altissima marginalità",
+            "Leadership tecnologica nella chimica delle batterie LFP ad altissima sicurezza e densità energetica"
+        ],
+        "downside_risks": [
+            "Dazi doganali e barriere commerciali imposte da Unione Europea e USA sui veicoli cinesi",
+            "Guerra dei prezzi feroce nel mercato automobilistico domestico cinese",
+            "Fluttuazioni nei costi delle materie prime per accumulatori (litio, cobalto)"
+        ],
+        "related_tickers": ["$TSLA", "$NIO", "$XPEV"], "primary_tags": ["$01211.HK", "$BYDDF"]
     },
     "1919.HK": {
         "ticker": "1919.HK", "yahoo_ticker": "1919.HK", "name": "COSCO SHIPPING Holdings Co Ltd", "emoji": "🚢",

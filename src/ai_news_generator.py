@@ -450,64 +450,99 @@ def _is_valid_ticker(tag):
     return bool(re.match(r'^[A-Z0-9\-\.]+$', tag_upper))
 
 
-def _limit_tags_in_text(text, allowed_tags, max_tags=MAX_TAGS_PER_POST):
+def _limit_tags_in_text(text, allowed_tags, max_tags=MAX_TAGS_PER_POST, preferred_tags=None):
     """
     Ensure text has at most max_tags $ symbols, and only uses allowed tags.
+    If preferred_tags is given, reserves slots for those tags present in text
+    so upstream index tags never displace selected portfolio holdings.
     Allows at most 1 dynamic trending stock/index tag not in allowed_tags,
     as long as it looks like a valid ticker and fits in the total tag budget.
-    
-    Args:
-        text: The generated text
-        allowed_tags: List of allowed portfolio tag symbols (without $)
-        max_tags: Maximum number of tags to keep
-    
-    Returns:
-        str: Text with limited and validated tags
+    Preserves currency amounts like $100, $5.000 untouched.
     """
-    # Find all $ tags in the text
     tag_pattern = r'\$([A-Za-z0-9\-\.]+)'
-    
+    alias_norm_map = {
+        "1211HK": "01211.HK",
+        "BESI": "BESI.NV",
+        "GOOGL": "GOOG",
+        "ABT": "ABT.US",
+    }
+
+    def _resolve_allowed(raw_body):
+        norm = raw_body.replace('.', '').replace('-', '').upper()
+        canon_alias = alias_norm_map.get(norm)
+        if canon_alias:
+            canon_norm = canon_alias.replace('.', '').replace('-', '').upper()
+            for t in allowed_tags:
+                if t.replace('.', '').replace('-', '').upper() == canon_norm:
+                    return t
+        for t in allowed_tags:
+            if t.replace('.', '').replace('-', '').upper() == norm:
+                return t
+        return None
+
+    reserved_tags = None
+    if preferred_tags:
+        present_canon = []
+        for raw_m in re.findall(tag_pattern, text):
+            body = raw_m.rstrip('.,:;!?')
+            if not body or re.match(r'^\d+(?:[.,]\d+)*$', body):
+                continue
+            matched = _resolve_allowed(body)
+            key = matched if matched else body.upper()
+            if key not in present_canon:
+                present_canon.append(key)
+        pref_canon = []
+        for p in preferred_tags:
+            p_clean = str(p).lstrip("$").strip()
+            matched_p = _resolve_allowed(p_clean)
+            p_key = matched_p if matched_p else p_clean.upper()
+            if p_key and p_key not in pref_canon:
+                pref_canon.append(p_key)
+        reserved_tags = set([t for t in pref_canon if t in present_canon][:max_tags])
+
     tags_found = []
     trending_found = False
-    
+
     def tag_replacer(match):
         nonlocal trending_found
-        tag = match.group(1)
-        # Normalize tag (remove dots and hyphens for comparison)
-        tag_normalized = tag.replace('.', '').replace('-', '').upper()
-        
-        # 1. Check if it's an allowed portfolio tag
-        matched_portfolio_tag = None
-        for t in allowed_tags:
-            if t.replace('.', '').replace('-', '').upper() == tag_normalized:
-                matched_portfolio_tag = t
-                break
-                
+        raw_full = match.group(1)
+        tag = raw_full.rstrip('.,:;!?')
+        trail = raw_full[len(tag):]
+        # Skip pure numerical / currency values (e.g. $100, $5.000)
+        if not tag or re.match(r'^\d+(?:[.,]\d+)*$', tag):
+            return match.group(0)
+
+        matched_portfolio_tag = _resolve_allowed(tag)
         if matched_portfolio_tag:
-            # Avoid duplicate tagging of the same symbol in a single post
-            if matched_portfolio_tag not in tags_found and len(tags_found) < max_tags:
+            if matched_portfolio_tag in tags_found:
+                return f'{matched_portfolio_tag}{trail}'
+            if reserved_tags is not None and matched_portfolio_tag not in reserved_tags:
+                non_reserved_budget = max(0, max_tags - len(reserved_tags))
+                used_non_reserved = sum(1 for x in tags_found if x not in reserved_tags)
+                if used_non_reserved >= non_reserved_budget:
+                    return f'{matched_portfolio_tag}{trail}'
+            if len(tags_found) < max_tags:
                 tags_found.append(matched_portfolio_tag)
-                # Ensure a space before and after the tag as requested by the user
-                return f' ${matched_portfolio_tag} '
-            else:
-                # Exceeded max tags or duplicate, remove the $ prefix
-                return matched_portfolio_tag
-                
+                return f' ${matched_portfolio_tag}{trail} '
+            return f'{matched_portfolio_tag}{trail}'
+
         # 2. Check if it's a valid trending index/stock tag (allow at most 1)
         if not trending_found and _is_valid_ticker(tag):
             tag_upper = tag.upper()
+            if reserved_tags is not None and tag_upper not in reserved_tags:
+                non_reserved_budget = max(0, max_tags - len(reserved_tags))
+                used_non_reserved = sum(1 for x in tags_found if x not in reserved_tags)
+                if used_non_reserved >= non_reserved_budget:
+                    return f'{tag_upper}{trail}'
             if tag_upper not in tags_found and len(tags_found) < max_tags:
                 tags_found.append(tag_upper)
                 trending_found = True
-                return f' ${tag_upper} '
-            else:
-                return tag_upper
-                
-        # Not allowed, remove the $ prefix
-        return tag
-            
+                return f' ${tag_upper}{trail} '
+            return f'{tag_upper}{trail}'
+
+        return f'{tag}{trail}'
+
     result = re.sub(tag_pattern, tag_replacer, text)
-    # Collapse multiple spaces created by padding tags into a single space
     result = re.sub(r' +', ' ', result)
     return result
 
@@ -806,6 +841,7 @@ def _run_post_verification(
     allowed_tickers: list = None,
     benchmark_daily: dict = None,
     stock_data: dict = None,
+    preferred_tags: list = None,
 ) -> tuple[bool, str]:
     """Helper to run pre-publication verification and auto-correction on generated content."""
     try:
@@ -818,15 +854,16 @@ def _run_post_verification(
             run_ai_review=run_ai_review,
             benchmark_daily=benchmark_daily,
             stock_data=stock_data,
+            preferred_tags=preferred_tags,
         )
         if not approved:
             print(f"⚠️ Post rejected by verifier: {audit.get('explanation')}")
             return False, ""
         # Defensive safeguard: strictly re-enforce tag budget post-verification
         if allowed_tickers:
-            final_text = _limit_tags_in_text(final_text, allowed_tickers, max_tags)
+            final_text = _limit_tags_in_text(final_text, allowed_tickers, max_tags, preferred_tags=preferred_tags)
         else:
-            final_text = limit_cashtags(final_text, max_tags=max_tags)
+            final_text = limit_cashtags(final_text, max_tags=max_tags, preferred_tags=preferred_tags)
         return True, final_text
     except Exception as exc:
         print(f"⚠️ Post verification warning: {exc}")
@@ -1730,11 +1767,15 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
     if not market_session:
         market_session = os.environ.get('MARKET_SESSION', 'Daily recap')
         
-    EU_ASIA_TICKERS = [
-        'AZN.L', 'ENEL.MI', 'ENI.MI', 'PRY.MI', 'VOW3.DE',
+    EU_TICKERS = [
+        'AZN.L', 'ENEL.MI', 'ENI.MI', 'PRY.MI', 'VOW3.DE', 'BESI.NV',
         'GLEN.L', 'TRIG.L', 'ULVR.L', 'WDEF.L', 'IQQL.DE', 'SX7PEX.DE', 'IEUR',
-        'PPFB.DE', '1211.HK', '1919.HK', '2318.HK', 'INDO.PA', 'VOF.L'
+        'PPFB.DE'
     ]
+    ASIA_EM_TICKERS = [
+        '01211.HK', '1919.HK', '2318.HK', 'INDO.PA', 'VOF.L'
+    ]
+    EU_ASIA_TICKERS = EU_TICKERS + ASIA_EM_TICKERS
     US_TICKERS = [
         'NVDA', 'AMD', 'MSFT', 'AMZN', 'GOOG', 'GOOGL', 'PLTR', 'AVGO', 'TSM', 'MRVL', 'LLY',
         'ABBV', 'ABT.US', 'HUM', 'CCJ', 'WMT', 'ETOR', 'IB01.L'
@@ -1762,26 +1803,31 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
         all_allowed_for_validation = list(PORTFOLIO_TICKERS.keys()) + ["SPX500", "NSDQ100", "GER40", "DJ30", "EURUSD"]
         
         selected_tags = []
+        post_preferred_tags = None
         selected_tags_str = "None"
         tag_instruction = ""
         from datetime import datetime as _dt
         
         # Determine selection and tags based on session
         if is_eu_open:
-            favs, niche = _select_rotation_favorites_and_niche(EU_ASIA_TICKERS, excluded_tags, count_favorites=2, count_niche=1)
+            # Guarantee 2 pure European holdings in slots 1-2, and rotate niche across EU/Asia-EM in slot 3
+            favs, _ = _select_rotation_favorites_and_niche(EU_TICKERS, excluded_tags, count_favorites=2, count_niche=0)
             fav1 = favs[0] if len(favs) > 0 else 'AZN.L'
             fav2 = favs[1] if len(favs) > 1 else 'ENEL.MI'
-            niche1 = niche[0] if len(niche) > 0 else '1919.HK'
+            niche_excluded = list(excluded_tags or []) + [fav1, fav2]
+            _, niche = _select_rotation_favorites_and_niche(EU_ASIA_TICKERS, niche_excluded, count_favorites=0, count_niche=1)
+            niche1 = niche[0] if len(niche) > 0 else 'WDEF.L'
             # Use heavy European benchmark GER40 (DAX) or SPX500 instead of illiquid ETF
             macro_tag = 'GER40' if (_dt.utcnow().day % 2 == 0) else 'SPX500'
             selected_tags = [fav1, fav2, niche1]
+            post_preferred_tags = [fav1, fav2, niche1, macro_tag]
             emoji_fav1 = EMOJI_MAP.get(fav1) or EMOJI_MAP.get(fav1.split('.')[0]) or '🔹'
             emoji_fav2 = EMOJI_MAP.get(fav2) or EMOJI_MAP.get(fav2.split('.')[0]) or '🔹'
             emoji_niche = EMOJI_MAP.get(niche1) or EMOJI_MAP.get(niche1.split('.')[0]) or '🔹'
             selected_tags_str = f"${fav1}, ${fav2}, ${niche1}, ${macro_tag}"
             tag_instruction = f"""
 - REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE 4 tag con il simbolo $ nel testo: ${fav1}, ${fav2}, ${niche1}, ${macro_tag}. Non uno di meno, non uno di più.
-- Inserisci ${macro_tag} nel Microtema 1 sul quadro macroeconomico.
+- Inserisci ${macro_tag} nel Microtema 1 sul quadro macroeconomico. NON aggiungere il simbolo '$' a nessun altro indice (scrivi S&P 500, Nasdaq 100, DAX o Euro Stoxx 50 come testo semplice senza '$').
 - Inserisci ${fav1}, ${fav2} e ${niche1} nei rispettivi microtemi dedicati con approfondimenti ricchi di cifre e catalizzatori operativi.
 """
         elif is_us_open:
@@ -1798,13 +1844,14 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             niche1 = niche[0] if len(niche) > 0 else 'CCJ'
             macro_tag = 'SPX500' if (_dt.utcnow().day % 2 != 0) else 'NSDQ100'
             selected_tags = [fav1, fav2, niche1]
+            post_preferred_tags = [fav1, fav2, niche1, macro_tag]
             emoji_fav1 = EMOJI_MAP.get(fav1) or EMOJI_MAP.get(fav1.split('.')[0]) or '🔹'
             emoji_fav2 = EMOJI_MAP.get(fav2) or EMOJI_MAP.get(fav2.split('.')[0]) or '🔹'
             emoji_niche = EMOJI_MAP.get(niche1) or EMOJI_MAP.get(niche1.split('.')[0]) or '🔹'
             selected_tags_str = f"${fav1}, ${fav2}, ${niche1}, ${macro_tag}"
             tag_instruction = f"""
 - REGOLA ASSOLUTA SUI TAG: devi usare ESATTAMENTE 4 tag con il simbolo $ nel testo: ${fav1}, ${fav2}, ${niche1}, ${macro_tag}. Non uno di meno, non uno di più.
-- Inserisci ${macro_tag} nel Microtema 1 sul sentiment di Wall Street.
+- Inserisci ${macro_tag} nel Microtema 1 sul sentiment di Wall Street. NON aggiungere il simbolo '$' a nessun altro indice nel Microtema 1.
 - Inserisci ${fav1}, ${fav2} e ${niche1} nei rispettivi microtemi dedicati con approfondimenti ricchi di cifre e catalizzatori operativi.
 """
         elif is_us_close:
@@ -1825,6 +1872,7 @@ def generate_market_news_recap(max_tags=MAX_TAGS_PER_POST, excluded_tags=None, m
             emoji_g3 = EMOJI_MAP.get(g3['ticker']) or EMOJI_MAP.get(g3['ticker'].split('.')[0]) or '🔹'
             
             selected_tags = [macro_heavy, g1['ticker'], g2['ticker'], g3['ticker']]
+            post_preferred_tags = list(selected_tags)
             selected_tags_str = f"${macro_heavy}, ${g1['ticker']}, ${g2['ticker']}, ${g3['ticker']}"
             g_descrs = f"${g1['ticker']} ({g1.get('daily_change', 0.0):+.2f}%), ${g2['ticker']} ({g2.get('daily_change', 0.0):+.2f}%), ${g3['ticker']} ({g3.get('daily_change', 0.0):+.2f}%)"
             tag_instruction = f"""
@@ -2062,10 +2110,50 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
             "  * Se scrivi anche solo una frase generica o ovvia senza dati o fatti, il post risulterà inaccettabile e verrà bloccato dai filtri di conformità."
         )
 
+        daily_cal_str = temporal_ctx.get("daily_macro_calendar") or ""
+        daily_calendar_ground_truth = (
+            f"\n=====================================================\n"
+            f"AGENDA MACRO & TRIMESTRALI ODIERNA (GROUND TRUTH VERIFICATA):\n"
+            f"=====================================================\n"
+            f"{daily_cal_str}\n"
+            f"REGOLA AGENDA: Cita SOLO eventi reali, orari italiani e stime presenti qui sopra. Se usi eventi marcati [GIÀ TRASCORSO], parlane al passato; se usi eventi marcati [IN AGENDA], parlane al futuro.\n"
+            f"=====================================================\n"
+        ) if (daily_cal_str and (is_eu_open or is_us_open)) else ""
+
+        open_benchmarks_gt = ""
+        if (is_eu_open or is_us_open) and benchmark_daily_data:
+            b_lines = []
+            if is_eu_open:
+                if "GER40" in benchmark_daily_data:
+                    b_lines.append(f"- DAX tedesco (GER40): {benchmark_daily_data['GER40']:+.2f}%")
+                if "EUSTX50" in benchmark_daily_data:
+                    b_lines.append(f"- Euro Stoxx 50 (EUSTX50): {benchmark_daily_data['EUSTX50']:+.2f}%")
+                if "SPX500" in benchmark_daily_data:
+                    b_lines.append(f"- S&P 500 chiusura USA precedente: {benchmark_daily_data['SPX500']:+.2f}%")
+                if "NSDQ100" in benchmark_daily_data:
+                    b_lines.append(f"- Nasdaq 100 chiusura USA precedente: {benchmark_daily_data['NSDQ100']:+.2f}%")
+                if "CHINA50" in benchmark_daily_data:
+                    b_lines.append(f"- China A50 / HK: {benchmark_daily_data['CHINA50']:+.2f}%")
+            else:
+                for k_sym, k_lbl in [("SPX500", "S&P 500"), ("NSDQ100", "Nasdaq 100"), ("DJ30", "Dow Jones"), ("GER40", "DAX europeo")]:
+                    if k_sym in benchmark_daily_data:
+                        b_lines.append(f"- {k_lbl}: {benchmark_daily_data[k_sym]:+.2f}%")
+            if b_lines:
+                open_benchmarks_gt = (
+                    "\n=====================================================\n"
+                    "DATI REALI INDICI DI RIFERIMENTO (GROUND TRUTH — NON INVERTIRE I SEGNI):\n"
+                    "=====================================================\n"
+                    + "\n".join(b_lines) + "\n"
+                    + "Usa il simbolo '$' SOLO per il singolo indice autorizzato ($" + macro_tag + "); scrivi gli altri indici senza '$'.\n"
+                    + "=====================================================\n"
+                )
+
         # Build prompt for each specific session
         if is_eu_open:
-            prompt = f"""Sei Andrea Ravalli, investitore privato italiano su eToro. Scrivi un post di buongiorno caldo, professionale e naturale prima dell'apertura dei mercati europei.
+            prompt = f"""Sei Andrea Ravalli, investitore privato italiano su eToro. Scrivi un post di buongiorno caldo, professionale e naturale sull'apertura dei mercati europei.
             {temporal_ground_truth_header}
+            {open_benchmarks_gt}
+            {daily_calendar_ground_truth}
             {tavily_grounding_section}
             {holdings_fundamental_section}
             Usa lo strumento Google Search per notizie finanziarie ed eventi delle ultime 12-24 ore sui mercati europei/asiatici e sui nostri titoli.
@@ -2090,20 +2178,20 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
             - Se per qualsiasi motivo non sai cosa mettere, usa il simbolo di elenco '🔹'.
             - NON omettere mai l'emoticon a inizio riga per nessun microtema.
 
-            🌍 MICRO-TEMA 1: Sentiment generale con macro news (globali)
-               Panoramica sintetica sui mercati asiatici ed europei in apertura, materie prime (petrolio, gas) o tassi. Includi il tag ${macro_tag}.
+            🌍 MICRO-TEMA 1: Sentiment generale e avvio dei mercati europei
+               Panoramica sintetica su apertura europea (DAX/Euro Stoxx 50), chiusura USA di ieri (S&P 500, Nasdaq) e listini asiatici. Includi ESCLUSIVAMENTE il tag ${macro_tag} con il simbolo '$' (nessun altro '$' in questo paragrafo).
 
-            📅 MICRO-TEMA 2: Appuntamenti del giorno che possono far variare l'indice
-               Principali catalizzatori e dati macro della mattinata europea (inflazione, PIL, PMI, decisioni BCE) che possono muovere i listini.
+            📅 MICRO-TEMA 2: Appuntamenti macroeconomici di oggi
+               Cita gli appuntamenti concreti dall'AGENDA MACRO ODIERNA (es. dati EUR/GBP di stamattina, ZEW, vendite al dettaglio USA, banche centrali) con gli orari italiani e le stime reali, evitando frasi vaghe generiche.
 
             {emoji_fav1} MICRO-TEMA 3: ${fav1}
-               Titolo EU/Asia a rotazione tra i più interessanti per i follower. Riporta news del giorno, contratti, numeri di bilancio o catalizzatori industriali concreti.
+               Titolo europeo del portafoglio a rotazione. Riporta news fresche, contratti, rating o catalizzatori industriali concreti.
 
             {emoji_fav2} MICRO-TEMA 4: ${fav2}
-               Secondo titolo EU/Asia a rotazione tra i più interessanti per i follower. Notizie concrete e sviluppi operativi verificati.
+               Secondo titolo europeo del portafoglio a rotazione. Notizie concrete e sviluppi operativi verificati.
 
             {emoji_niche} MICRO-TEMA 5: ${niche1}
-               Titolo EU/Asia tra quelli più di nicchia e diversificazione. Spiega catalizzatori reali e prospettive operative del giorno.
+               Titolo di diversificazione (EU o Asia/Emergenti) in portafoglio. Spiega catalizzatori reali e prospettive operative del giorno.
 
             {tag_instruction}
             - {closing_question_instruction}
@@ -2116,6 +2204,8 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
         elif is_us_open:
             prompt = f"""Sei Andrea Ravalli, investitore privato italiano su eToro. Scrivi un post caldo, professionale e naturale prima dell'apertura di Wall Street (U.S. market open).
             {temporal_ground_truth_header}
+            {open_benchmarks_gt}
+            {daily_calendar_ground_truth}
             {tavily_grounding_section}
             {holdings_fundamental_section}
             Usa lo strumento Google Search per notizie finanziarie ed eventi delle ultime 12-24 ore sui mercati americani e sui nostri titoli.
@@ -2141,10 +2231,10 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
             - NON omettere mai l'emoticon a inizio riga per nessun microtema.
 
             🗽 MICRO-TEMA 1: Sentiment generale con macro news
-               Panoramica su futures di Wall Street, rendimenti obbligazionari Treasury a 10 anni e rotazione settoriale. Includi il tag ${macro_tag}.
+               Panoramica su futures di Wall Street, rendimenti obbligazionari Treasury a 10 anni e rotazione settoriale. Includi ESCLUSIVAMENTE il tag ${macro_tag} con '$'.
 
             📅 MICRO-TEMA 2: Appuntamenti del giorno che possono far variare l'indice
-               Agenda e market movers della sessione americana (dati macro ore 14:30/16:00 italiane come CPI, PPI, sussidi disoccupazione, discorsi Fed).
+               Agenda e market movers della sessione americana usando i dati reali dell'AGENDA MACRO ODIERNA (orari CET e stime reali).
 
             {emoji_fav1} MICRO-TEMA 3: ${fav1}
                Titolo USA a rotazione tra i più interessanti per i follower. Approfondimento concreto con novità del giorno, partnership, chip AI, contratti cloud o guidance.
@@ -2297,6 +2387,45 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                 print(f"⚠️ Could not initialize Google Search tool: {config_err}")
                 config = types.GenerateContentConfig(temperature=0.7)
 
+        def _finalize_recap_candidate(raw_text: str, model_name_used: str) -> Optional[str]:
+            recap_text = _remove_intro_text(raw_text.strip())
+            recap_text = _remove_market_section_tags(recap_text)
+            recap_text = _limit_tags_in_text(
+                recap_text,
+                all_allowed_for_validation,
+                max_tags,
+                preferred_tags=post_preferred_tags,
+            )
+            recap_text = _clean_robotic_phrases(recap_text)
+            recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
+
+            approved, verified_text = _run_post_verification(
+                recap_text,
+                primary_ticker=selected_tags[0] if selected_tags else None,
+                session_name=market_session or "Daily recap",
+                generator_model=model_name_used,
+                max_tags=max_tags,
+                allowed_tickers=all_allowed_for_validation,
+                benchmark_daily=benchmark_daily_data,
+                stock_data=stock_data,
+                preferred_tags=post_preferred_tags,
+            )
+            if not approved or not verified_text:
+                return None
+
+            recap_text = _limit_tags_in_text(
+                verified_text,
+                all_allowed_for_validation,
+                max_tags,
+                preferred_tags=post_preferred_tags,
+            )
+            recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
+            if selected_tags:
+                update_rotation_history(selected_tags)
+            if GIST_STORAGE_AVAILABLE:
+                save_to_history(recap_text)
+            return "\n" + recap_text + "\n"
+
         # Try each model until one works
         last_error = None
         for model_name in models_to_try:
@@ -2311,46 +2440,13 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                 
                 if response and response.text:
                     print(f"✅ AI news recap generated successfully using {model_name}!")
-                    recap_text = response.text.strip()
-                    
-                    # Log successful API usage
                     if API_TRACKER_AVAILABLE:
                         log_api_request(model_name, True, "daily_recap")
-                    
-                    # Post-process: remove intro text and any $ tags from market section
-                    recap_text = _remove_intro_text(recap_text)
-                    recap_text = _remove_market_section_tags(recap_text)
-                    
-                    # Post-process: ensure only valid portfolio tags are used and limit count
-                    recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
-                    recap_text = _clean_robotic_phrases(recap_text)
-                    recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
-
-                    # Pre-publication double-check
-                    approved, verified_text = _run_post_verification(
-                        recap_text,
-                        session_name=market_session or "Daily recap",
-                        generator_model=model_name,
-                        max_tags=max_tags,
-                        allowed_tickers=all_allowed_for_validation,
-                        benchmark_daily=benchmark_daily_data,
-                        stock_data=stock_data,
-                    )
-                    if not approved or not verified_text:
+                    finalized = _finalize_recap_candidate(response.text, model_name)
+                    if finalized is None:
                         print(f"⚠️ Market news recap rejected by verifier ({model_name}), trying next model...")
                         continue
-                    recap_text = _limit_tags_in_text(verified_text, all_allowed_for_validation, max_tags)
-                    recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
-
-                    # Update rotation history with the tags actually selected for the post
-                    if selected_tags:
-                        update_rotation_history(selected_tags)
-                    
-                    # Save to history (using Gist storage)
-                    if GIST_STORAGE_AVAILABLE:
-                        save_to_history(recap_text)
-                    
-                    return "\n" + recap_text + "\n"
+                    return finalized
                 else:
                     print(f"⚠️  Empty response from {model_name}, trying next model...")
                     continue
@@ -2363,8 +2459,6 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                 
                 # 429 QUOTA / RATE LIMIT — pause before cascading
                 if '429' in error_msg or 'quota' in error_msg or 'resource_exhausted' in error_msg:
-                    # If search tools were active, the 429 quota exhaustion could be on the Google Search Tool.
-                    # Attempt direct generation with this same high-intelligence model without search tool.
                     if config and getattr(config, 'tools', None):
                         print(f"   ℹ️ Model {model_name} search tool rate-limited (429), trying without search tool...")
                         try:
@@ -2378,28 +2472,9 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                                 print(f"✅ AI news recap generated successfully using {model_name} (direct, no tools)!")
                                 if API_TRACKER_AVAILABLE:
                                     log_api_request(model_name, True, "daily_recap")
-                                recap_text = response.text.strip()
-                                recap_text = _remove_intro_text(recap_text)
-                                recap_text = _remove_market_section_tags(recap_text)
-                                recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
-                                recap_text = _clean_robotic_phrases(recap_text)
-                                recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
-                                approved, verified_text = _run_post_verification(
-                                    recap_text,
-                                    session_name=market_session or "Daily recap",
-                                    generator_model=model_name,
-                                    max_tags=max_tags,
-                                    allowed_tickers=all_allowed_for_validation,
-                                    benchmark_daily=benchmark_daily_data,
-                                    stock_data=stock_data,
-                                )
-                                if approved and verified_text:
-                                    recap_text = _limit_tags_in_text(verified_text, all_allowed_for_validation, max_tags)
-                                    if selected_tags:
-                                        update_rotation_history(selected_tags)
-                                    if GIST_STORAGE_AVAILABLE:
-                                        save_to_history(recap_text)
-                                    return "\n" + recap_text + "\n"
+                                finalized = _finalize_recap_candidate(response.text, model_name)
+                                if finalized is not None:
+                                    return finalized
                         except Exception as e_notools:
                             print(f"   Direct attempt without tools for {model_name} also failed: {e_notools}")
 
@@ -2408,9 +2483,6 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                     last_error = model_error
                     continue
 
-                # 503 UNAVAILABLE at EU open (07:00 UTC) on gemini-2.5-flash typically
-                # lasts 30-50 minutes. Retry with 10-minute intervals (up to 5 times = 50 min
-                # max) before giving up and trying the next model.
                 if '503' in error_msg or 'unavailable' in error_msg:
                     max_503_retries = 2
                     retry_wait_secs = 5
@@ -2427,31 +2499,11 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                                 print(f"✅ AI news recap generated (after 503 retry {attempt}) using {model_name}!")
                                 if API_TRACKER_AVAILABLE:
                                     log_api_request(model_name, True, "daily_recap")
-                                recap_text = response.text.strip()
-                                recap_text = _remove_intro_text(recap_text)
-                                recap_text = _clean_robotic_phrases(recap_text)
-                                recap_text = _remove_market_section_tags(recap_text)
-                                recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
-                                recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
-                                approved, verified_recap = _run_post_verification(
-                                    recap_text,
-                                    primary_ticker=selected_tags[0] if selected_tags else None,
-                                    session_name=market_session or "Daily recap",
-                                    generator_model=model_name,
-                                    max_tags=max_tags,
-                                    allowed_tickers=all_allowed_for_validation,
-                                    benchmark_daily=benchmark_daily_data,
-                                    stock_data=stock_data,
-                                )
-                                if not approved or not verified_recap:
+                                finalized = _finalize_recap_candidate(response.text, model_name)
+                                if finalized is None:
                                     print(f"   ⚠️ Draft from {model_name} rejected by verification gate after 503 retry.")
                                     break
-                                recap_text = verified_recap
-                                if selected_tags:
-                                    update_rotation_history(selected_tags)
-                                if GIST_STORAGE_AVAILABLE:
-                                    save_to_history(recap_text)
-                                return "\n" + recap_text + "\n"
+                                return finalized
                         except Exception as e2:
                             retry_msg = str(e2).lower()
                             if '503' not in retry_msg and 'unavailable' not in retry_msg:
@@ -2476,36 +2528,11 @@ REGOLA TASSATIVA SULLE TRIMESTRALI:
                             print(f"✅ AI news recap generated successfully (without tools) using {model_name}!")
                             if API_TRACKER_AVAILABLE:
                                 log_api_request(model_name, True, "daily_recap")
-                            recap_text = response.text.strip()
-                            
-                            # Post-process
-                            recap_text = _remove_intro_text(recap_text)
-                            recap_text = _clean_robotic_phrases(recap_text)
-                            recap_text = _remove_market_section_tags(recap_text)
-                            recap_text = _limit_tags_in_text(recap_text, all_allowed_for_validation, max_tags)
-                            recap_text = ensure_thematic_emojis(recap_text, session_name=market_session)
-                            approved, verified_recap = _run_post_verification(
-                                recap_text,
-                                primary_ticker=selected_tags[0] if selected_tags else None,
-                                session_name=market_session or "Daily recap",
-                                generator_model=model_name,
-                                max_tags=max_tags,
-                                allowed_tickers=all_allowed_for_validation,
-                                benchmark_daily=benchmark_daily_data,
-                                stock_data=stock_data,
-                            )
-                            if not approved or not verified_recap:
+                            finalized = _finalize_recap_candidate(response.text, model_name)
+                            if finalized is None:
                                 print(f"   ⚠️ Draft from {model_name} (without tools) rejected by verification gate.")
                                 continue
-                            recap_text = verified_recap
-                            
-                            # Update rotation history with the tags actually selected for the post
-                            if selected_tags:
-                                update_rotation_history(selected_tags)
-                                
-                            if GIST_STORAGE_AVAILABLE:
-                                save_to_history(recap_text)
-                            return "\n" + recap_text + "\n"
+                            return finalized
                     except Exception as e2:
                         print(f"   Retry failed: {e2}")
                 

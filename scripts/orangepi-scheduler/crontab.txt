@@ -9,9 +9,10 @@
 # ============================================================================
 CRON_TZ=Europe/Rome
 
-# ── European Market Open (Mon-Fri 09:02 ITA) ──────────────────────────────────
-# Milan/Frankfurt open at 09:00 local; London opens at 08:00 GMT/BST (09:00 ITA)
-2 9 * * 1-5       /opt/portfolio-dispatch/dispatch.sh eu_open >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+# ── European Market Open (Mon-Fri 09:20 ITA) ──────────────────────────────────
+# Milan/Frankfurt open at 09:00 local; London opens at 08:00 GMT/BST (09:00 ITA).
+# Trigger at 09:20 ITA to clear the 15-minute Yahoo Finance intraday/quote delay.
+20 9 * * 1-5      /opt/portfolio-dispatch/dispatch.sh eu_open >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
 # ── Dividend Announcement Check (Mon & Thu 09:45 ITA) ─────────────────────────
 45 9 * * 1,4      /opt/portfolio-dispatch/dispatch.sh dividend_post >> /opt/portfolio-dispatch/logs/cron.log 2>&1

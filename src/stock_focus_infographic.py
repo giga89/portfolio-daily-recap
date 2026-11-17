@@ -208,6 +208,28 @@ COMPANY_INFOGRAPHICS = {
         "color": (200, 30, 30),
         "domain": "tsmc.com"
     },
+    "01211.HK": {
+        "name": "BYD",
+        "tagline": "Electric Vehicles & Blade Battery Leader",
+        "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+        "subtitle": "BYD è il maggiore produttore mondiale di veicoli elettrici e ibridi con integrazione verticale completa.",
+        "kpis": [
+            {"label": "CONSEGNE VEICOLI", "val": "3M+", "sub": "Leader globale per volumi"},
+            {"label": "TECNOLOGIA BATTERIE", "val": "Blade", "sub": "Sicurezza e durata da record"},
+            {"label": "PESO IN PORTAFOGLIO", "val": "{weight}", "sub": "Transizione mobilità sostenibile"},
+            {"label": "ESPANSIONE EXPORT", "val": "+100%", "sub": "Crescita rapida in Europa e Sud America"},
+        ],
+        "pillars": [
+            ("Integrazione Verticale Totale:", "Produce internamente batterie, chip, motori e telai, riducendo i costi."),
+            ("Vantaggio di Costo Ineguagliato:", "Capacità di offrire veicoli tecnologicamente avanzati a prezzi competitivi."),
+            ("Leadership nelle Batterie LFP:", "La tecnologia Blade Battery è adottata anche da costruttori concorrenti."),
+            ("Espansione Globale nei Trasporti:", "Presenza crescente anche in autobus, camion e treni a emissioni zero."),
+        ],
+        "quote": "L'elettrificazione della mobilità premia chi controlla l'intera filiera produttiva.",
+        "tags": ["#BYD", "#ElectricVehicles", "#CleanEnergy", "#Batteries", "#Mobility"],
+        "color": (180, 0, 0),
+        "domain": "byd.com"
+    },
     "1211.HK": {
         "name": "BYD",
         "tagline": "Electric Vehicles & Blade Battery Leader",

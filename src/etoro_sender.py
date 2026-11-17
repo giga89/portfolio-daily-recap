@@ -136,23 +136,24 @@ def send_etoro_post(
     except Exception as e_ver:
         print(f"⚠️ Pre-publication verifier check in etoro_sender: {e_ver}")
 
-    # Automatically resolve all mentioned cashtags to eToro market IDs (strictly max 4, unique)
-    found_tickers = re.findall(r"\$([A-Za-z0-9\.\-]+)", clean_content)
-    unique_tickers = []
-    for t in found_tickers:
-        tu = t.upper()
-        if tu in etoro_client.MARKET_IDS and tu not in [x.upper() for x in unique_tickers]:
-            unique_tickers.append(t)
-    valid_tickers = unique_tickers[:4]
-    market_ids = etoro_client.get_market_ids_for_tickers(valid_tickers)
-    if market_ids:
-        print(f"   🏷️ Tagged eToro markets (max 4): {valid_tickers} -> IDs {market_ids}")
-
     try:
         from ai_news_generator import sanitize_etoro_cashtags
         clean_content = sanitize_etoro_cashtags(clean_content)
     except Exception:
         pass
+
+    # Automatically resolve all mentioned cashtags to eToro market IDs (strictly max 4, unique)
+    found_tickers = re.findall(r"\$([A-Za-z0-9\.\-]+)", clean_content)
+    unique_tickers = []
+    for t in found_tickers:
+        t_clean = t.rstrip(".,:;!?")
+        tu = t_clean.upper()
+        if tu in etoro_client.MARKET_IDS and tu not in [x.upper() for x in unique_tickers]:
+            unique_tickers.append(t_clean)
+    valid_tickers = unique_tickers[:4]
+    market_ids = etoro_client.get_market_ids_for_tickers(valid_tickers)
+    if market_ids:
+        print(f"   🏷️ Tagged eToro markets (max 4): {valid_tickers} -> IDs {market_ids}")
 
     res = etoro_client.create_post(
         content=clean_content,

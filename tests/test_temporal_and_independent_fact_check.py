@@ -44,7 +44,19 @@ class TestTemporalAndIndependentFactCheck(unittest.TestCase):
         self.assertIn("CONCLUSA", ctx["market_state"])
 
         ctx_eu = get_current_temporal_context(session_name="EUROPEAN MARKET OPEN")
-        self.assertIn("PRE-APERTURA", ctx_eu["market_state"])
+        self.assertIn("MERCATI EUROPEI", ctx_eu["market_state"])
+
+        # Verify time-of-day awareness: pre-09:00 returns PRE-APERTURA, post-09:00 returns APERTURA MERCATI EUROPEI
+        from datetime import datetime as real_datetime
+        with patch("independent_fact_checker.datetime") as mock_dt:
+            mock_dt.now.side_effect = lambda tz=None: real_datetime(2026, 11, 17, 8, 30, tzinfo=tz)
+            ctx_pre = get_current_temporal_context(session_name="EUROPEAN MARKET OPEN")
+            self.assertIn("PRE-APERTURA", ctx_pre["market_state"])
+
+            mock_dt.now.side_effect = lambda tz=None: real_datetime(2026, 11, 17, 9, 20, tzinfo=tz)
+            ctx_open = get_current_temporal_context(session_name="EUROPEAN MARKET OPEN")
+            self.assertIn("APERTURA MERCATI EUROPEI", ctx_open["market_state"])
+            self.assertNotIn("PRE-APERTURA", ctx_open["market_state"])
 
     def test_deterministic_temporal_gate_blocks_future_on_us_close(self):
         """Evening US_CLOSE recap using future tense for today's decisions must be blocked deterministically."""

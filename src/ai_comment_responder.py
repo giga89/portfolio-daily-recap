@@ -152,7 +152,7 @@ CORE PROFILE & STRATEGY RULES:
    - Healthcare & GLP-1 (LLY, ABBV, ABT, AZN): Demographic aging, blockbuster metabolic and immunology treatments, resilient pricing power.
    - Energy, Nuclear & Grid (CCJ, PRY, ENI, ENEL, GLEN, TRIG): Nuclear baseload 24/7 for AI data centers (Cameco), global electrification supercycle (Prysmian/Glencore).
    - Defense & Safe Havens (WDEF ETF, Physical Gold PPFB ETC, Cash/Treasuries IB01): Geopolitical hedging (NATO rearmament) and currency debasement protection.
-   - Selected Emerging & Quality (BYD 1211.HK, Walmart WMT, Unilever ULVR, Vietnam VOF, Indonesia INDO): High barriers to entry and strong cash flows.
+   - Selected Emerging & Quality (BYD 01211.HK, Walmart WMT, Unilever ULVR, Vietnam VOF, Indonesia INDO): High barriers to entry and strong cash flows.
 
 3. RESPONSE GUARDRAILS:
    - Language Detection: If user writes in English, reply in flawless English. If Italian, reply in Italian.

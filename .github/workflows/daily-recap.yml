@@ -6,7 +6,7 @@ on:
     types: [eu_open, stock_focus, crypto_recap, us_open, us_close, weekly_sat, weekly_sun, copy_trading, monthly]
   # ── Fallback: GitHub Actions cron (1 per session, Orange Pi is primary) ─────
   schedule:
-    - cron: '45 7 * * 1-5'    # EU open fallback:    07:45 UTC (08:45 ITA winter -> waits for 08:05 UTC / 09:05 ITA)
+    - cron: '55 7 * * 1-5'    # EU open fallback:    07:55 UTC (08:55 ITA winter -> waits for 09:20 ITA / 08:20 UTC after 15m Yahoo EU feed delay)
     - cron: '30 12 * * 1-5'   # Stock focus:         12:30 UTC (13:30 ITA winter)
     - cron: '15 14 * * 1-5'   # US open fallback:    14:15 UTC (15:15 ITA winter -> waits for 14:35 UTC / 15:35 ITA)
     - cron: '20 16 * * *'     # Daily crypto recap:  16:20 UTC (17:20 ITA winter)
@@ -106,7 +106,7 @@ jobs:
           elif [ -n "$SCHEDULE" ]; then
             # Map each cron expression to its session name (1 cron per session)
             case "$SCHEDULE" in
-              "45 7 * * 1-5")
+              "55 7 * * 1-5")
                 SESSION_NAME="European market open" ;;
               "30 12 * * 1-5")
                 SESSION_NAME="Stock focus" ;;
@@ -182,26 +182,28 @@ jobs:
           SESSION="${{ steps.market_session.outputs.session }}"
           FORCE_RUN="${{ inputs.force_run }}"
 
-          # Skip sleep for repository_dispatch — Orange Pi already triggered at the right time
-          if [ "$TRIGGER" = "repository_dispatch" ]; then
-            echo "Triggered by Orange Pi 5 — skipping sleep, proceeding immediately."
-            exit 0
-          fi
-
           # Skip sleep for forced manual runs (testing)
           if [ "$FORCE_RUN" = "true" ]; then
             echo "Force run — skipping wait, proceeding immediately."
             exit 0
           fi
 
+          # Skip sleep for repository_dispatch except EU Open early-trigger bridge:
+          # while Orange Pi still fires at 09:02 Europe/Rome, wait until 09:20 Europe/Rome
+          # so Yahoo Finance's 15-min intraday delay has cleared. Once Orange Pi is updated
+          # to 09:20 Europe/Rome, NOW >= TARGET_EPOCH and it proceeds with 0 sleep.
+          if [ "$TRIGGER" = "repository_dispatch" ] && [ "$SESSION" != "European market open" ]; then
+            echo "Triggered by Orange Pi 5 — skipping sleep, proceeding immediately."
+            exit 0
+          fi
+
           NOW=$(date -u +%s)
           TODAY=$(date -u +%Y-%m-%d)
+          ROME_TODAY=$(TZ=Europe/Rome date +%Y-%m-%d)
           TARGET_EPOCH=0
 
-          # Single cron per session → sleep ~20min to the target time.
-          # These are winter-biased times; in summer the Orange Pi handles it.
           if [ "$SESSION" = "European market open" ]; then
-            TARGET_EPOCH=$(date -u -d "$TODAY 08:05:00" +%s)
+            TARGET_EPOCH=$(TZ=Europe/Rome date -d "$ROME_TODAY 09:20:00" +%s)
           elif [ "$SESSION" = "U.S. market open" ]; then
             TARGET_EPOCH=$(date -u -d "$TODAY 14:35:00" +%s)
           elif [ "$SESSION" = "U.S. market close" ]; then
@@ -210,8 +212,19 @@ jobs:
 
           if [ "$TARGET_EPOCH" -gt "$NOW" ]; then
             SLEEP_SECS=$((TARGET_EPOCH - NOW))
-            echo "Sleeping ${SLEEP_SECS}s until $(date -u -d "@$TARGET_EPOCH") ..."
-            sleep "$SLEEP_SECS"
+            if [ "$TRIGGER" = "repository_dispatch" ]; then
+              if [ "$SLEEP_SECS" -le 1500 ]; then
+                echo "Orange Pi triggered early (${SLEEP_SECS}s before 09:20 Europe/Rome) — waiting until $(TZ=Europe/Rome date -d "@$TARGET_EPOCH") ..."
+                sleep "$SLEEP_SECS"
+              else
+                echo "Triggered by Orange Pi 5 (${SLEEP_SECS}s delta) — proceeding immediately."
+              fi
+            elif [ "$SLEEP_SECS" -le 2700 ]; then
+              echo "Sleeping ${SLEEP_SECS}s until $(date -u -d "@$TARGET_EPOCH") ..."
+              sleep "$SLEEP_SECS"
+            else
+              echo "Target time is ${SLEEP_SECS}s away (>45m, likely delayed cron) — skipping extended sleep."
+            fi
           else
             echo "Non-market session or already past target time, proceeding immediately."
           fi

@@ -31,20 +31,20 @@ MARKET_IDS = {
     "AMD": 1832,
     "MSFT": 1004,
     "AMZN": 1005,
-    "GOOG": 1002,
     "GOOGL": 1002,
+    "GOOG": 1002,
     "TSM": 4481,
     "AVGO": 4236,
     "MRVL": 4358,
-    "BESI.NV": 4513,
     "BESI": 4513,
+    "BESI.NV": 4513,
 
     # Healthcare & Pharma
     "LLY": 1567,
     "HUM": 1512,
     "ABBV": 1452,
-    "ABT.US": 1552,
     "ABT": 1552,
+    "ABT.US": 1552,
     "AZN.L": 2010,
 
     # Energy, Utilities, Commodities & Nuclear
@@ -71,6 +71,7 @@ MARKET_IDS = {
     "PRY.MI": 1296,
     "VOW3.DE": 1210,
     "1211.HK": 2380,
+    "01211.HK": 2380,
     "1919.HK": 13669,
     "ULVR.L": 2093,
 
@@ -241,14 +242,20 @@ def fetch_portfolio_weights() -> Dict[str, float]:
                 print(f"   ⚠️ Dynamic instrument resolution error: {res_err}")
 
         weights = {}
+        FROZEN_OR_PURGED = {"MNODL.L", "NVTKL.L", "XEON.DE", "MAU.PA", "SPCX.RTH", "ANT.24-7", "MELI", "WCLD.L"}
         for iid, cur in current_val_by_inst.items():
             ticker = ID_TO_TICKER.get(iid)
             if not ticker:
                 print(f"   ⚠️ Skipping unresolved numeric ID {iid} to prevent phantom assets.")
                 continue
+            if ticker in FROZEN_OR_PURGED:
+                continue
 
             w = (cur / total_val) * 100.0 if total_val > 0 else invested_by_inst[iid]
-            weights[ticker] = round(w, 2)
+            w_rounded = round(w, 2)
+            if w_rounded <= 0.0:
+                continue
+            weights[ticker] = w_rounded
 
         if weights:
             print(f"✓ Fetched {len(weights)} exact live portfolio weights directly from official eToro API")

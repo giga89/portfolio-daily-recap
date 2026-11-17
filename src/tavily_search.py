@@ -50,9 +50,11 @@ TICKER_NAME_MAP = {
     'MRVL': 'Marvell Technology',
     'HUM': 'Humana',
     'WMT': 'Walmart',
+    '01211': 'BYD electric vehicles',
     '1211': 'BYD electric vehicles',
     '1919': 'COSCO Shipping Holdings',
     '2318': 'Ping An Insurance',
+    'BESI': 'BE Semiconductor BESI',
     'TRIG': 'Greencoat UK Wind',
     'ULVR': 'Unilever',
     'VOF': 'VinaCapital Vietnam',
@@ -363,10 +365,12 @@ def filter_live_news_for_topic(
     raw_tags = re.findall(r'\$([A-Za-z0-9\-\.]+)', topic_text or "")
     target_bases = {t.split(".")[0].upper() for t in raw_tags if t}
     if not target_bases:
-        # Also detect exchange-suffixed tickers when '$' was stripped (e.g. 1919.HK, PRY.MI, VOW3.DE)
-        suffixed = re.findall(r'\b([0-9]{4}\.HK|[A-Z0-9]{2,8}\.[A-Z]{1,4})\b', topic_text or "")
+        # Also detect exchange-suffixed tickers when '$' was stripped (e.g. 01211.HK, 1919.HK, PRY.MI, VOW3.DE)
+        suffixed = re.findall(r'\b([0-9]{4,5}\.HK|[A-Z0-9]{2,8}\.[A-Z]{1,4})\b', topic_text or "")
         for s_tok in suffixed:
             target_bases.add(s_tok.split(".")[0].upper())
+    if "01211" in target_bases or "1211" in target_bases:
+        target_bases.update({"01211", "1211"})
     if not target_bases:
         # Check plain uppercase ticker tokens or company names if $ was stripped
         for known_base, comp_desc in TICKER_NAME_MAP.items():

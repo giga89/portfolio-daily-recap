@@ -17,7 +17,7 @@ All cron entries are scheduled directly in Italian local time (`Europe/Rome` - C
 
 | Session | Cron Trigger (ITA) | Real Market Time | Description |
 |---|---|---|---|
-| **EU Open** | Mon–Fri 09:02 | 09:00 Milan/Frankfurt, 08:00 London | European market open recap |
+| **EU Open** | Mon–Fri 09:20 | 09:00 Milan/Frankfurt, 08:00 London (+20m feed delay) | European market open recap |
 | **Dividend Post** | Mon, Thu 09:45 | — | Dividend announcements check |
 | **Event Monitor** | Mon–Fri 10:00 & 15:15/16:15 | — / 10:15 New York | Corporate earnings (prior-day AMC morning & BMO post-US open) + dividend pay days |
 | **Weekly (Sat)** | Sat 10:00 | — | Saturday weekly portfolio recap |

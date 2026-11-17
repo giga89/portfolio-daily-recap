@@ -86,8 +86,8 @@ fi
 if [ "$FORCE" != "true" ]; then
     if [ "$SESSION" = "eu_open" ]; then
         EU_TIME=$(TZ=Europe/Rome date +%H%M)
-        if [[ "$EU_TIME" < "0900" || "$EU_TIME" > "1030" ]]; then
-            echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP eu_open — Rome time is $EU_TIME, market not open (waiting for 09:00 CET/CEST)" >> "$LOG_DIR/dispatch.log"
+        if [[ "$EU_TIME" < "0918" || "$EU_TIME" > "1030" ]]; then
+            echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP eu_open — Rome time is $EU_TIME, waiting for 09:20 CET/CEST (post 15m data delay)" >> "$LOG_DIR/dispatch.log"
             exit 0
         fi
     elif [ "$SESSION" = "us_open" ]; then

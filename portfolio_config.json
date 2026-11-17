@@ -1,6 +1,6 @@
 {
     "emojis": {
-        "1211.HK": "🔋",
+        "01211.HK": "🔋",
         "1919.HK": "🚢",
         "2318.HK": "🏦",
         "ABBV": "💉",
@@ -9,6 +9,7 @@
         "AMZN": "📦",
         "AVGO": "🔌",
         "AZN.L": "🧬",
+        "BESI.NV": "🔬",
         "CCJ": "⚡",
         "ENEL.MI": "🔋",
         "ENI.MI": "⛽",
@@ -38,7 +39,7 @@
         "WMT": "🛒"
     },
     "tickers": {
-        "1211.HK": [
+        "01211.HK": [
             "1211.HK",
             "BYD Co Ltd"
         ],
@@ -73,6 +74,10 @@
         "AZN.L": [
             "AZN.L",
             "AstraZeneca PLC"
+        ],
+        "BESI.NV": [
+            "BESI.AS",
+            "BE Semiconductor Industries N.V."
         ],
         "CCJ": [
             "CCJ",

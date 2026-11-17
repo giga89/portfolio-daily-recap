@@ -75,9 +75,11 @@ SECTOR_TAGS = {
     "IB01.L":    "Treasury USA 0-1yr",
     "IQQL.DE":   "Private Equity ETF",
     "IEMG":      "ETF mercati emergenti",
+    "01211.HK":  "Auto elettriche · BYD",
     "1211.HK":   "Auto elettriche · BYD",
     "1919.HK":   "Shipping · COSCO",
     "2318.HK":   "Assicurazioni · Cina",
+    "BESI.NV":   "Packaging avanzato · chip AI",
     "TRX":       "Crypto · TRON",
     "ETOR":      "eToro Group",
     "PPFB.DE":   "Oro fisico ETC",
@@ -138,9 +140,11 @@ _TICKER_DOMAIN_MAP = {
     "PRY.MI":    "prysmiangroup.com",
     "VOW3.DE":   "volkswagenag.com",
     "GLEN.L":    "glencore.com",
+    "01211.HK":  "byd.com",
     "1211.HK":   "byd.com",
     "1919.HK":   "lines.coscoshipping.com",
     "2318.HK":   "pingan.com",
+    "BESI.NV":   "besi.com",
     "WMT":       "walmart.com",
     "MRVL":      "marvell.com",
     "ULVR.L":    "unilever.com",
@@ -525,12 +529,13 @@ def build_card_from_stock_data(
                 continue
 
             # Session-specific market protection:
-            # At European Market Open (09:00 CET), US stocks are pre-market and must never appear
+            # At European Market Open, US stocks are pre-market and HK stocks must not crowd out EU movers
             if is_eu_open:
-                if d.get("is_us_stock", False):
+                if d.get("is_us_stock", False) or t.endswith(".HK"):
                     continue
 
-        candidates[t] = d
+        canon_t = "01211.HK" if t == "1211.HK" else t
+        candidates[canon_t] = d
 
     if len(candidates) < 2:
         print(f"⚠️ [TOP/FLOP CARD] Not enough actively traded candidates for '{session_name}' ({len(candidates)} found). Skipping card to avoid displaying stale/unopened prices.")

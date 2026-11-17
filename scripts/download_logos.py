@@ -75,6 +75,7 @@ DOMAIN_MAP = {
     "TRIG.L":     "trig-ltd.com",
     "ULVR.L":     "unilever.com",
     # ── Asia ────────────────────────────────────────────────────────────────
+    "01211.HK":   "byd.com",
     "1211.HK":    "byd.com",
     "1919.HK":    "lines.coscoshipping.com",
     "2318.HK":    "pingan.com",

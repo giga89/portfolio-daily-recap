@@ -273,23 +273,25 @@ def fetch_portfolio_weights_from_bullaware():
                             continue
                             
                 if weights:
-                    # Normalize HK tickers: BullAware may pad to 5 digits (e.g., 01211.HK)
-                    # but Yahoo Finance uses the standard HKEX code without extra leading zeros
-                    # (e.g., 1211.HK for BYD). Strip one leading zero from 5-digit HK codes.
+                    # Normalize ticker aliases to canonical eToro symbols:
+                    # BYD on eToro is 01211.HK (Yahoo Finance is 1211.HK, mapped in portfolio_config.json)
+                    ALIAS_MAP = {
+                        "1211.HK": "01211.HK",
+                        "BESI": "BESI.NV",
+                        "GOOGL": "GOOG",
+                        "ABT": "ABT.US",
+                    }
                     normalized_weights = {}
                     for sym, w in weights.items():
-                        if sym.endswith('.HK'):
-                            numeric_part = sym[:-3]
-                            if len(numeric_part) == 5 and numeric_part[0] == '0':
-                                sym = numeric_part[1:] + '.HK'
-                        normalized_weights[sym] = w
-                    # Exclude purged positions that BullAware may lag in updating
+                        canon_sym = ALIAS_MAP.get(sym, sym)
+                        normalized_weights[canon_sym] = w
+                    # Exclude purged or frozen positions that BullAware may lag in updating
                     PURGED_ASSETS = {
                         "XEON.DE", "XEON", "MAU.PA", "MAU", "SPCX.RTH", "SPCX",
-                        "VWCE.L", "IEMG", "ABT", "NET", "ENI", "DB1.DE", "PYPL", "WCLD", "WCLD.L",
-                        "ANT.24-7", "ANT", "MELI"
+                        "VWCE.L", "IEMG", "NET", "ENI", "DB1.DE", "PYPL", "WCLD", "WCLD.L",
+                        "ANT.24-7", "ANT", "MELI", "MNODL.L", "NVTKL.L"
                     }
-                    weights = {k: v for k, v in normalized_weights.items() if k not in PURGED_ASSETS}
+                    weights = {k: v for k, v in normalized_weights.items() if k not in PURGED_ASSETS and v > 0.001}
 
                     print(f"✓ Successfully extracted {len(weights)} portfolio weights")
                     
@@ -365,10 +367,10 @@ def fetch_stock_data():
             try:
                 # Use the existing hist data instead of making another API call
                 if not hist.empty:
-                    # Normalize timezone - handle both tz-aware and tz-naive indices
+                    # Normalize timezone - preserve local calendar date via tz_localize(None)
                     hist_copy = hist.copy()
                     if hist_copy.index.tz is not None:
-                        hist_copy.index = hist_copy.index.tz_convert(None)
+                        hist_copy.index = hist_copy.index.tz_localize(None)
                     hist_copy.index = pd.to_datetime(hist_copy.index).normalize()
                     
                     current_month_start = pd.Timestamp(f'{current_year}-{current_month:02d}-01')
@@ -432,7 +434,7 @@ def fetch_stock_data():
             else:
                 if yahoo_ticker.endswith('.L'):
                     tz = pytz.timezone('Europe/London') if pytz else None
-                elif any(yahoo_ticker.endswith(ext) for ext in ['.PA', '.MI', '.DE', '.CO']):
+                elif any(yahoo_ticker.endswith(ext) for ext in ['.PA', '.MI', '.DE', '.CO', '.AS']):
                     tz = pytz.timezone('Europe/Paris') if pytz else None
                 elif yahoo_ticker.endswith('.HK'):
                     tz = pytz.timezone('Asia/Hong_Kong') if pytz else None
@@ -448,27 +450,18 @@ def fetch_stock_data():
             has_traded_today = True
             untraded_reason = ""
             last_volume = hist['Volume'].iloc[-1] if 'Volume' in hist.columns else 0
+            intraday_current_close = None
 
             # 1. Weekend check (Saturday=5, Sunday=6) - stock exchanges closed
             if local_weekday >= 5 and etoro_symbol != 'TRX':
                 has_traded_today = False
                 untraded_reason = f"Weekend ({now_local.strftime('%A')})"
 
-            # 2. Historical bar date check: latest bar MUST belong to today in local exchange time
-            elif last_bar_date < today_local:
-                has_traded_today = False
-                untraded_reason = f"Last bar date ({last_bar_date}) is prior to today ({today_local})"
-
-            # 3. Volume check: zero volume indicates no executed trades today (unopened / placeholder bar)
-            elif ('Volume' in hist.columns and (pd.isna(last_volume) or last_volume <= 0)) and etoro_symbol != 'TRX':
-                has_traded_today = False
-                untraded_reason = "Zero or NaN trading volume today"
-
-            # 4. Exchange market opening hours (Pre-market filter)
+            # 2. Exchange market opening hours (Pre-market filter)
             elif is_us_stock and (now_ny.hour < US_OPEN_HOUR or (now_ny.hour == US_OPEN_HOUR and now_ny.minute < US_OPEN_MINUTE)):
                 has_traded_today = False
                 untraded_reason = f"US pre-market ({now_ny.strftime('%H:%M')} ET < 09:30)"
-            elif any(yahoo_ticker.endswith(ext) for ext in ['.PA', '.MI', '.DE', '.CO']) and local_hour < 9:
+            elif any(yahoo_ticker.endswith(ext) for ext in ['.PA', '.MI', '.DE', '.CO', '.AS']) and local_hour < 9:
                 has_traded_today = False
                 untraded_reason = f"European pre-market ({now_local.strftime('%H:%M')} < 09:00 CET)"
             elif yahoo_ticker.endswith('.L') and local_hour < 8:
@@ -478,8 +471,37 @@ def fetch_stock_data():
                 has_traded_today = False
                 untraded_reason = f"Hong Kong pre-market ({now_local.strftime('%H:%M')} < 09:30 HKT)"
 
+            # 3. Historical bar date check: latest bar MUST belong to today in local exchange time
+            elif last_bar_date < today_local:
+                # Fallback: if market is open today, check 5m intraday bars in case 1d bar hasn't rolled over yet
+                recovered_intraday = False
+                try:
+                    intraday = stock.history(period='1d', interval='5m')
+                    if not intraday.empty:
+                        intra_ts = intraday.index[-1]
+                        if intra_ts.tzinfo is not None and now_local.tzinfo is not None:
+                            intra_date = intra_ts.tz_convert(now_local.tzinfo).date()
+                        else:
+                            intra_date = intra_ts.date()
+                        if intra_date == today_local:
+                            ivol = intraday['Volume'].sum() if 'Volume' in intraday.columns else 1
+                            if pd.isna(ivol) or ivol > 0:
+                                intraday_current_close = float(intraday['Close'].iloc[-1])
+                                last_bar_date = today_local
+                                recovered_intraday = True
+                except Exception:
+                    pass
+                if not recovered_intraday:
+                    has_traded_today = False
+                    untraded_reason = f"Last bar date ({last_bar_date}) is prior to today ({today_local})"
+
+            # 4. Volume check: zero volume indicates no executed trades today (unopened / placeholder bar)
+            elif ('Volume' in hist.columns and (pd.isna(last_volume) or last_volume <= 0)) and etoro_symbol != 'TRX':
+                has_traded_today = False
+                untraded_reason = "Zero or NaN trading volume today"
+
             # 5. Market Holidays (deterministic check via market_calendar)
-            else:
+            if has_traded_today:
                 try:
                     import market_calendar
                     if is_us_stock:
@@ -487,7 +509,7 @@ def fetch_stock_data():
                         if is_h:
                             has_traded_today = False
                             untraded_reason = f"US Market Holiday ({h_name})"
-                    elif any(yahoo_ticker.endswith(ext) for ext in ['.PA', '.MI', '.DE']):
+                    elif any(yahoo_ticker.endswith(ext) for ext in ['.PA', '.MI', '.DE', '.AS']):
                         is_eu_h, eu_h_name = market_calendar.is_all_eu_markets_closed(today_local)
                         if is_eu_h:
                             has_traded_today = False
@@ -497,8 +519,12 @@ def fetch_stock_data():
 
             # Calculate daily change ONLY if the asset has genuinely traded today
             if has_traded_today and len(hist) >= 2:
-                current = hist['Close'].iloc[-1]
-                previous = hist['Close'].iloc[-2]
+                if intraday_current_close is not None:
+                    current = intraday_current_close
+                    previous = hist['Close'].iloc[-1]
+                else:
+                    current = hist['Close'].iloc[-1]
+                    previous = hist['Close'].iloc[-2]
                 if previous and previous > 0:
                     daily_change = ((current - previous) / previous) * 100
                 else:
@@ -885,6 +911,21 @@ def fetch_benchmarks_daily_performance(benchmarks_map=None):
             if not hist.empty and len(hist) >= 2:
                 prev_p = hist['Close'].iloc[-2]
                 curr_p = hist['Close'].iloc[-1]
+                # Check if exchange is open today and 1d bar hasn't rolled over yet
+                if hist.index.tz is not None:
+                    now_idx_local = datetime.now(hist.index.tz)
+                    last_idx_date = hist.index[-1].date()
+                    if last_idx_date < now_idx_local.date() and now_idx_local.weekday() < 5:
+                        try:
+                            intraday = stock.history(period='1d', interval='5m')
+                            if not intraday.empty:
+                                intra_ts = intraday.index[-1]
+                                intra_date = intra_ts.tz_convert(now_idx_local.tzinfo).date() if intra_ts.tzinfo is not None else intra_ts.date()
+                                if intra_date == now_idx_local.date():
+                                    prev_p = hist['Close'].iloc[-1]
+                                    curr_p = float(intraday['Close'].iloc[-1])
+                        except Exception:
+                            pass
                 chg = ((curr_p - prev_p) / prev_p) * 100
                 bench_data[symbol] = round(float(chg), 2)
                 print(f"   {symbol} ({yahoo_ticker}) Daily: {bench_data[symbol]:+.2f}%")

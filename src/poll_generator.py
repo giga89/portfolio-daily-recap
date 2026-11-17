@@ -201,17 +201,17 @@ POLL_TEMPLATES = [
         "title": "Mercati Emergenti: Dove vedete la maggiore opportunità? 🌏",
         "options": [
             "Finanza Cina ($2318.HK)",
-            "Cina & EV leader ($1211.HK)",
+            "Cina & EV ($01211.HK)",
             "Vietnam & Frontiera ($VOF.L)",
             "Indonesia ETF ($INDO.PA)"
         ],
         "tickers": [
             "2318.HK",
-            "1211.HK",
+            "01211.HK",
             "VOF.L",
             "INDO.PA"
         ],
-        "message": "🗳️ SONDAGGIO MERCATI EMERGENTI: CRESCITA E DEMOGRAFIA\n\nDalla leadership fintech e assicurativa di Ping An $2318.HK e il dominio EV di BYD $1211.HK, fino al boom manifatturiero del Vietnam $VOF.L e alle materie prime critiche dell'Indonesia $INDO.PA, cerchiamo alpha selettivo globale.\n\nQuale area emergente offre il miglior potenziale?\n\nVotate e commentate la vostra scelta! 👇"
+        "message": "🗳️ SONDAGGIO MERCATI EMERGENTI: CRESCITA E DEMOGRAFIA\n\nDalla leadership fintech e assicurativa di Ping An $2318.HK e il dominio EV di BYD $01211.HK, fino al boom manifatturiero del Vietnam $VOF.L e alle materie prime critiche dell'Indonesia $INDO.PA, cerchiamo alpha selettivo globale.\n\nQuale area emergente offre il miglior potenziale?\n\nVotate e commentate la vostra scelta! 👇"
     },
     {
         "id": "luxury_vs_defensive_consumer",
@@ -264,7 +264,7 @@ POLL_TEMPLATES = [
     },
     {
         "id": "ev_revolution_byd",
-        "title": "Auto Elettriche e Mobilità: BYD $1211.HK guiderà il mercato globale? 🔋",
+        "title": "Auto Elettriche e Mobilità: BYD $01211.HK guiderà il mercato globale? 🔋",
         "options": [
             "Sì, integrazione verticale",
             "Sì, anche con fabbriche UE",
@@ -272,10 +272,10 @@ POLL_TEMPLATES = [
             "Crescita EV più selettiva"
         ],
         "tickers": [
-            "1211.HK",
+            "01211.HK",
             "VOW3.DE"
         ],
-        "message": "🗳️ SONDAGGIO MOBILITÀ: LA SCALA INDUSTRIALE DI BYD $1211.HK\n\nGrazie a batterie Blade, ibridi plug-in DM-i di quinta generazione e nuovi stabilimenti produttivi in Europa (Ungheria) per superare le barriere doganali UE, BYD $1211.HK continua a guadagnare quote di mercato globali sfidando i gruppi storici come $VOW3.DE.\n\nQual è la vostra visione sul futuro del settore auto?\n\nVotate il sondaggio! 👇"
+        "message": "🗳️ SONDAGGIO MOBILITÀ: LA SCALA INDUSTRIALE DI BYD $01211.HK\n\nGrazie a batterie Blade, ibridi plug-in DM-i di quinta generazione e nuovi stabilimenti produttivi in Europa (Ungheria) per superare le barriere doganali UE, BYD $01211.HK continua a guadagnare quote di mercato globali sfidando i gruppi storici come $VOW3.DE.\n\nQual è la vostra visione sul futuro del settore auto?\n\nVotate il sondaggio! 👇"
     },
     {
         "id": "alternative_assets_frontier",

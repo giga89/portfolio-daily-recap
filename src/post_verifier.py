@@ -832,6 +832,19 @@ def _resolve_stock_pct_map(
 
         sym_clean = str(raw_sym).strip().lstrip("$").upper()
         pct_map[sym_clean] = (sym_clean, val)
+        # Register canonical eToro / Yahoo Finance symbol aliases so ground truth matches regardless of form
+        alias_pairs = {
+            "01211.HK": ("1211.HK", "$1211", "$01211"),
+            "1211.HK": ("01211.HK", "$1211", "$01211"),
+            "BESI.NV": ("BESI.AS", "BESI"),
+            "BESI.AS": ("BESI.NV", "BESI"),
+            "ABT.US": ("ABT",),
+            "GOOGL": ("GOOG",),
+            "GOOG": ("GOOGL",),
+        }
+        for alias_tok in alias_pairs.get(sym_clean, ()):
+            if alias_tok not in pct_map:
+                pct_map[alias_tok] = (sym_clean, val)
         base = sym_clean.split(".")[0]
         if len(base) >= 2:
             if not base.isdigit() and base not in pct_map:
@@ -1371,6 +1384,10 @@ def clean_etoro_formatting(text: str) -> str:
     # Fix parenthesized cashtags: '($TICKER)' -> ' $TICKER '
     cleaned = re.sub(r'\(\$([A-Za-z0-9\.\-]+)\)', r' $\1 ', cleaned)
 
+    # Canonicalize BYD HK ticker to eToro's 5-digit symbol ($01211.HK) so non-existent $1211.HK never leaks
+    cleaned = re.sub(r'(?<![0-9])\$1211\.HK\b', '$01211.HK', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'(?<![0-9$.])1211\.HK\b', '01211.HK', cleaned, flags=re.IGNORECASE)
+
     # Auto-sanitize frequent LLM identity hallucinations
     # $WDEF.L is WisdomTree Europe Defence UCITS ETF (EU Defense & Aerospace), NEVER Europe Equity Income or "Windows"!
     cleaned = re.sub(
@@ -1440,9 +1457,14 @@ def extract_cashtags(text: str) -> List[str]:
     return unique_tags
 
 
-def limit_cashtags(text: str, max_tags: int = 4) -> str:
+def limit_cashtags(
+    text: str,
+    max_tags: int = 4,
+    preferred_tags: Optional[List[str]] = None,
+) -> str:
     """
     Strictly enforce a maximum of max_tags unique cashtags ($TICKER) in text.
+    If preferred_tags is given, reserves slots for those tags present in text before keeping others.
     For any ticker beyond max_tags, strips the '$' leaving it as plain text.
     Preserves currency amounts like $100, $5.000 untouched.
     """
@@ -1450,6 +1472,20 @@ def limit_cashtags(text: str, max_tags: int = 4) -> str:
         return text
     if max_tags <= 0:
         return re.sub(r'\$([A-Za-z][A-Za-z0-9\.\-]*)', r'\1', text)
+
+    allowed_set = None
+    if preferred_tags:
+        present_tags = extract_cashtags(text)
+        pref_norm = []
+        for p in preferred_tags:
+            pu = str(p).lstrip("$").strip().upper()
+            if pu == "1211.HK":
+                pu = "01211.HK"
+            if pu and pu not in pref_norm:
+                pref_norm.append(pu)
+        reserved = [t for t in pref_norm if t in present_tags][:max_tags]
+        remaining = [t for t in present_tags if t not in reserved][: max(0, max_tags - len(reserved))]
+        allowed_set = set(reserved + remaining)
 
     seen_unique = []
 
@@ -1459,16 +1495,22 @@ def limit_cashtags(text: str, max_tags: int = 4) -> str:
         if re.match(r'^\d+(?:[.,]\d+)*$', raw_ticker):
             return match.group(0)
 
-        t_upper = raw_ticker.upper()
+        t_body = raw_ticker.rstrip('.,:;!?')
+        trail = raw_ticker[len(t_body):]
+        t_upper = t_body.upper()
+
+        if allowed_set is not None:
+            return f"${t_body}{trail}" if t_upper in allowed_set else f"{t_body}{trail}"
+
         if t_upper in seen_unique:
-            return f"${raw_ticker}"
+            return f"${t_body}{trail}"
 
         if len(seen_unique) < max_tags:
             seen_unique.append(t_upper)
-            return f"${raw_ticker}"
+            return f"${t_body}{trail}"
 
         # Exceeded limit: strip '$' and keep ticker as plain text
-        return raw_ticker
+        return f"{t_body}{trail}"
 
     cleaned = re.sub(r'\$([A-Za-z0-9\.\-]+)', repl, text)
     cleaned = re.sub(r' +', ' ', cleaned)
@@ -1481,6 +1523,7 @@ def verify_post_deterministic(
     session_name: Optional[str] = None,
     benchmark_daily: Optional[Dict[str, float]] = None,
     stock_data: Optional[Dict[str, Any]] = None,
+    preferred_tags: Optional[List[str]] = None,
 ) -> Tuple[bool, List[str], str]:
     """
     Fast, rule-based verification against PORTFOLIO_ASSETS_METADATA, temporal rules,
@@ -1499,7 +1542,7 @@ def verify_post_deterministic(
     raw_tickers = extract_cashtags(cleaned_text)
     if len(raw_tickers) > 4:
         issues.append(f"WARNING: Il post conteneva {len(raw_tickers)} cashtag (superiore al limite di 4). Ridotti a 4.")
-        cleaned_text = limit_cashtags(cleaned_text, max_tags=4)
+        cleaned_text = limit_cashtags(cleaned_text, max_tags=4, preferred_tags=preferred_tags)
 
     # Collect tickers to verify
     tickers_to_check = extract_cashtags(cleaned_text)
@@ -2089,6 +2132,7 @@ def verify_and_clean_post(
     run_ai_review: bool = True,
     benchmark_daily: Optional[Dict[str, float]] = None,
     stock_data: Optional[Dict[str, Any]] = None,
+    preferred_tags: Optional[List[str]] = None,
 ) -> Tuple[bool, str, Dict[str, Any]]:
     """
     Complete pre-publication verification pipeline.
@@ -2120,6 +2164,7 @@ def verify_and_clean_post(
         session_name=session_name,
         benchmark_daily=benchmark_daily,
         stock_data=stock_data,
+        preferred_tags=preferred_tags,
     )
 
     if issues:
@@ -2200,34 +2245,9 @@ def verify_and_clean_post(
                     print(f"      • Fixed hallucination: {h}")
                 for t_err in audit_data.get("temporal_issues", []):
                     print(f"      • Fixed temporal issue: {t_err}")
-                final_text = verified_text
-                if benchmark_daily or stock_data:
-                    final_text, _, _ = sanitize_or_prune_post_content(
-                        final_text,
-                        primary_ticker=primary_ticker,
-                        session_name=session_name,
-                        benchmark_daily=benchmark_daily,
-                        stock_data=stock_data,
-                    )
-                final_text = limit_cashtags(clean_etoro_formatting(final_text), max_tags=4)
-                # Re-verify deterministic gate on post-audit text
-                is_clean_final, final_issues, _ = verify_post_deterministic(
-                    final_text,
-                    primary_ticker=primary_ticker,
-                    session_name=session_name,
-                    benchmark_daily=benchmark_daily,
-                    stock_data=stock_data,
-                )
-                critical_final = [i for i in final_issues if i.startswith("CRITICAL")]
-                if critical_final:
-                    print(f"   ❌ POST BLOCKED after auto-correct due to remaining critical issues: {critical_final[0]}")
-                    rejection_dict = dict(audit_data)
-                    rejection_dict.update({"decision": "REJECT", "issues": final_issues, "auditor": auditor_name, "explanation": critical_final[0]})
-                    return False, "", rejection_dict
-                return True, final_text, audit_data
+            else:
+                print(f"   ✅ POST APPROVED BY AUDITOR ({auditor_name}).")
 
-            # APPROVE
-            print(f"   ✅ POST APPROVED BY AUDITOR ({auditor_name}).")
             final_text = verified_text
             if benchmark_daily or stock_data:
                 final_text, _, _ = sanitize_or_prune_post_content(
@@ -2237,7 +2257,7 @@ def verify_and_clean_post(
                     benchmark_daily=benchmark_daily,
                     stock_data=stock_data,
                 )
-            final_text = limit_cashtags(clean_etoro_formatting(final_text), max_tags=4)
+            final_text = limit_cashtags(clean_etoro_formatting(final_text), max_tags=4, preferred_tags=preferred_tags)
             # Re-verify deterministic gate on post-audit text
             is_clean_final, final_issues, _ = verify_post_deterministic(
                 final_text,
@@ -2245,10 +2265,12 @@ def verify_and_clean_post(
                 session_name=session_name,
                 benchmark_daily=benchmark_daily,
                 stock_data=stock_data,
+                preferred_tags=preferred_tags,
             )
             critical_final = [i for i in final_issues if i.startswith("CRITICAL")]
             if critical_final:
-                print(f"   ❌ POST BLOCKED after audit approval due to critical issues: {critical_final[0]}")
+                stage_lbl = "auto-correct" if decision == "AUTO_CORRECT" else "audit approval"
+                print(f"   ❌ POST BLOCKED after {stage_lbl} due to critical issues: {critical_final[0]}")
                 rejection_dict = dict(audit_data)
                 rejection_dict.update({"decision": "REJECT", "issues": final_issues, "auditor": auditor_name, "explanation": critical_final[0]})
                 return False, "", rejection_dict
@@ -2262,7 +2284,7 @@ def verify_and_clean_post(
             print(f"   ❌ POST BLOCKED by Deterministic Gate (Critical rule violation without AI corrector): {critical_issues[0]}")
             return False, "", {"decision": "REJECT", "issues": issues}
 
-    return True, limit_cashtags(cleaned_text, max_tags=4), {"decision": "APPROVE", "issues": issues}
+    return True, limit_cashtags(cleaned_text, max_tags=4, preferred_tags=preferred_tags), {"decision": "APPROVE", "issues": issues}
 
 
 def audit_comment_with_ai_reviewer(
