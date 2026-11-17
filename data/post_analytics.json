@@ -1,6 +1,24 @@
 {
-  "last_updated": "2026-11-17T21:12:11.683113+00:00",
+  "last_updated": "2026-11-17T22:52:16.142141+00:00",
   "posts": [
+    {
+      "id": "88ec8aa0-e2d9-11f1-8080-80006ae3957f",
+      "platform": "etoro",
+      "session": "Earnings Release: $NVDA Q3 FY2027",
+      "published_at": "2026-11-17T22:52:16Z",
+      "day_of_week": "Tuesday",
+      "hour_utc": 22,
+      "hour_local": 0,
+      "title": "Appena pubblicati i risultati del Q3 FY2027 di $NVDA (peso in portafoglio: 3,51%...",
+      "tickers": [
+        "NVDA"
+      ],
+      "image_type": "earnings_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
     {
       "id": "80914030-e2ca-11f1-8080-800177f5bd16",
       "platform": "etoro",
