@@ -1,6 +1,24 @@
 {
-  "last_updated": "2026-11-18T08:30:27.022356+00:00",
+  "last_updated": "2026-11-18T09:01:45.051248+00:00",
   "posts": [
+    {
+      "id": "ad98f780-e32e-11f1-8080-8001071191e3",
+      "platform": "etoro",
+      "session": "Dividend Pay Day: $1919.HK",
+      "published_at": "2026-11-18T09:01:45Z",
+      "day_of_week": "Wednesday",
+      "hour_utc": 9,
+      "hour_local": 11,
+      "title": "Ciao a tutti! Oggi, 18 novembre 2026, è un giorno di festa per la cassa del nost...",
+      "tickers": [
+        "1919.HK"
+      ],
+      "image_type": "dividend_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
     {
       "id": "3a2cb9d0-e329-11f1-8080-800032c59338",
       "platform": "etoro",
