@@ -1,7 +1,7 @@
 {
-  "last_published_episode": 6,
-  "last_published_date": "2026-11-11",
-  "total_published_count": 6,
+  "last_published_episode": 7,
+  "last_published_date": "2026-11-18",
+  "total_published_count": 7,
   "history": [
     {
       "episode": 1,
@@ -38,6 +38,12 @@
       "title": "IL SANTO GRAAL DI RAY DALIO",
       "date": "2026-11-11T19:46:16.424642",
       "post_id": "8ebe0b00-de08-11f1-8080-80000844db5b"
+    },
+    {
+      "episode": 7,
+      "title": "IL PREZZO DEL PANICO: PERDERE I 10 GIORNI MIGLIORI",
+      "date": "2026-11-18T20:47:19.535803",
+      "post_id": "3ef988e0-e391-11f1-8080-80007cc16b37"
     }
   ]
 }
