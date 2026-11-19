@@ -1,6 +1,24 @@
 {
-  "last_updated": "2026-11-19T14:43:23.433971+00:00",
+  "last_updated": "2026-11-19T15:17:31.584413+00:00",
   "posts": [
+    {
+      "id": "56e8b020-e42c-11f1-8080-800045ff3058",
+      "platform": "etoro",
+      "session": "Earnings Release: $WMT Q3 2026",
+      "published_at": "2026-11-19T15:17:31Z",
+      "day_of_week": "Thursday",
+      "hour_utc": 15,
+      "hour_local": 17,
+      "title": "Walmart $WMT ha appena rilasciato i risultati del Q3 2026, confermando la solidi...",
+      "tickers": [
+        "WMT"
+      ],
+      "image_type": "earnings_card",
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "url": "https://www.etoro.com/people/AndreaRavalli"
+    },
     {
       "id": "7e23c680-e426-11f1-8080-80016cc3b784",
       "platform": "etoro",
