@@ -14,8 +14,9 @@ except ImportError:
     BeautifulSoup = None
 import os
 import re
+import math
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 try:
     import pytz
@@ -320,6 +321,62 @@ def fetch_portfolio_weights_from_bullaware():
         return {}
 
 
+def _sanitize_history_close(hist, info=None, symbol=""):
+    """
+    Ensure yfinance history DataFrame has finite Close values.
+    If the trailing Close is NaN (common during Yahoo Finance overnight settlement),
+    attempt a safe repair using info['regularMarketPrice'] / info['currentPrice']
+    only when both the market timestamp date and price scale match; otherwise drop
+    NaN Close rows cleanly.
+    """
+    if pd is None or hist is None or hist.empty or 'Close' not in hist.columns:
+        return hist
+
+    if pd.isna(hist['Close'].iloc[-1]):
+        hist = hist.copy()
+        prev_valid = hist['Close'].dropna()
+        if isinstance(info, dict):
+            rmp = info.get('regularMarketPrice') or info.get('currentPrice')
+            rmp_val = None
+            if rmp is not None and not isinstance(rmp, bool):
+                try:
+                    candidate = float(rmp)
+                    if math.isfinite(candidate) and candidate > 0:
+                        rmp_val = candidate
+                except (TypeError, ValueError):
+                    rmp_val = None
+
+            if rmp_val is not None:
+                date_ok = True
+                if hasattr(hist.index[-1], 'date'):
+                    rmt = info.get('regularMarketTime')
+                    if isinstance(rmt, (int, float)) and not isinstance(rmt, bool) and rmt > 0:
+                        rmt_dt = datetime.fromtimestamp(rmt, tz=timezone.utc)
+                        idx_tz = getattr(hist.index, 'tz', None)
+                        if idx_tz is not None:
+                            rmt_dt = rmt_dt.astimezone(idx_tz)
+                        date_ok = (rmt_dt.date() == hist.index[-1].date())
+                    else:
+                        date_ok = False
+
+                scale_ok = True
+                if not prev_valid.empty:
+                    last_valid_val = float(prev_valid.iloc[-1])
+                    if last_valid_val > 0:
+                        ratio = rmp_val / last_valid_val
+                        scale_ok = (0.2 <= ratio <= 5.0)
+
+                if date_ok and scale_ok:
+                    hist.iloc[-1, hist.columns.get_loc('Close')] = rmp_val
+                    print(f"   🔧 [{symbol}] Repaired trailing NaN Close using regularMarketPrice={rmp_val}")
+
+        hist = hist.dropna(subset=['Close'])
+    elif hist['Close'].isna().any():
+        hist = hist.dropna(subset=['Close'])
+
+    return hist
+
+
 def fetch_stock_data():
     """
     Fetch daily, monthly, and YTD data for all portfolio tickers using yfinance
@@ -352,6 +409,7 @@ def fetch_stock_data():
             
             # Fetch historical data for daily and monthly calculations
             hist = stock.history(period='1y')
+            hist = _sanitize_history_close(hist, info=info, symbol=etoro_symbol)
             
             if hist.empty:
                 print(f"No historical data for {etoro_symbol}")
@@ -403,6 +461,7 @@ def fetch_stock_data():
             current_year = datetime.now().year
             try:
                 ytd_hist = stock.history(start=f'{current_year}-01-01')
+                ytd_hist = _sanitize_history_close(ytd_hist, info=info, symbol=etoro_symbol)
                 if len(ytd_hist) >= 2:
                     ytd_start = ytd_hist['Close'].iloc[0]
                     ytd_current = ytd_hist['Close'].iloc[-1]
@@ -477,6 +536,8 @@ def fetch_stock_data():
                 recovered_intraday = False
                 try:
                     intraday = stock.history(period='1d', interval='5m')
+                    if not intraday.empty and 'Close' in intraday.columns:
+                        intraday = intraday.dropna(subset=['Close'])
                     if not intraday.empty:
                         intra_ts = intraday.index[-1]
                         if intra_ts.tzinfo is not None and now_local.tzinfo is not None:
@@ -534,17 +595,21 @@ def fetch_stock_data():
                 if untraded_reason:
                     print(f"  ℹ️ [{etoro_symbol}] Day not yet started / untraded ({untraded_reason}) -> daily_change=0.0%")
 
-            # Sanitize NaN values
-            import math
-            if math.isnan(daily_change):
-                print(f"⚠️  {etoro_symbol}: daily_change is NaN, setting to 0.0")
+            # Sanitize non-finite (NaN / Inf) values
+            data_degraded = False
+            if not math.isfinite(daily_change):
+                print(f"⚠️  {etoro_symbol}: daily_change is NaN/non-finite, setting to 0.0")
                 daily_change = 0.0
-            if math.isnan(monthly_change):
-                print(f"⚠️  {etoro_symbol}: monthly_change is NaN, setting to 0.0")
+                has_traded_today = False
+                data_degraded = True
+            if not math.isfinite(monthly_change):
+                print(f"⚠️  {etoro_symbol}: monthly_change is NaN/non-finite, setting to 0.0")
                 monthly_change = 0.0
-            if math.isnan(yearly_change):
-                print(f"⚠️  {etoro_symbol}: yearly_change is NaN, setting to 0.0")
+                data_degraded = True
+            if not math.isfinite(yearly_change):
+                print(f"⚠️  {etoro_symbol}: yearly_change is NaN/non-finite, setting to 0.0")
                 yearly_change = 0.0
+                data_degraded = True
 
             stock_data[etoro_symbol] = {
                 'yahoo_ticker': yahoo_ticker,
@@ -557,6 +622,7 @@ def fetch_stock_data():
                 'has_traded_today': has_traded_today,
                 'is_us_stock': is_us_stock,
                 'last_trade_date': str(last_bar_date),
+                'data_degraded': data_degraded,
             }
 
             # Calculate weekly change (5 full trading days from previous Friday close)
@@ -571,10 +637,12 @@ def fetch_stock_data():
             else:
                 weekly_change = 0.0
 
-            if math.isnan(weekly_change):
-                print(f"⚠️  {etoro_symbol}: weekly_change is NaN, setting to 0.0")
+            if not math.isfinite(weekly_change):
+                print(f"⚠️  {etoro_symbol}: weekly_change is NaN/non-finite, setting to 0.0")
                 weekly_change = 0.0
+                data_degraded = True
             stock_data[etoro_symbol]['weekly_change'] = weekly_change
+            stock_data[etoro_symbol]['data_degraded'] = data_degraded
             
             print(f"{etoro_symbol} ({yahoo_ticker}): Daily {daily_change:.2f}%, Monthly {monthly_change:.2f}%, Yearly {yearly_change:.2f}%")
             
@@ -799,6 +867,7 @@ def fetch_benchmarks_history(start_date='2020-01-01'):
         try:
             stock = yf.Ticker(yahoo_ticker)
             hist = stock.history(start=start_date)
+            hist = _sanitize_history_close(hist, symbol=etoro_ticker)
             
             if not hist.empty:
                 # Normalize index to be timezone-naive for alignment across markets
@@ -860,10 +929,13 @@ def fetch_benchmarks_monthly_performance():
         try:
             stock = yf.Ticker(yahoo_ticker)
             hist = stock.history(start=month_start)
+            hist = _sanitize_history_close(hist, symbol=etoro_ticker)
             if not hist.empty and len(hist) >= 2:
                 start_p = hist['Close'].iloc[0]
                 end_p = hist['Close'].iloc[-1]
-                mtd_return = ((end_p - start_p) / start_p) * 100
+                mtd_return = ((end_p - start_p) / start_p) * 100 if start_p else 0.0
+                if not math.isfinite(mtd_return):
+                    mtd_return = 0.0
                 bench_data[etoro_ticker] = round(float(mtd_return), 2)
                 print(f"   {etoro_ticker} MTD: {bench_data[etoro_ticker]:+.2f}%")
             elif not hist.empty and len(hist) == 1:
@@ -908,16 +980,28 @@ def fetch_benchmarks_daily_performance(benchmarks_map=None):
             stock = yf.Ticker(yahoo_ticker)
             # Use period='5d' to ensure at least 2 closing bars are available
             hist = stock.history(period='5d')
+            if not hist.empty and 'Close' in hist.columns and pd.isna(hist['Close'].iloc[-1]):
+                info = None
+                try:
+                    info = stock.info
+                except Exception:
+                    info = None
+                hist = _sanitize_history_close(hist, info=info, symbol=symbol)
+            else:
+                hist = _sanitize_history_close(hist, info=None, symbol=symbol)
             if not hist.empty and len(hist) >= 2:
                 prev_p = hist['Close'].iloc[-2]
                 curr_p = hist['Close'].iloc[-1]
                 # Check if exchange is open today and 1d bar hasn't rolled over yet
-                if hist.index.tz is not None:
-                    now_idx_local = datetime.now(hist.index.tz)
+                idx_tz = getattr(hist.index, 'tz', None)
+                if idx_tz is not None:
+                    now_idx_local = datetime.now(idx_tz)
                     last_idx_date = hist.index[-1].date()
                     if last_idx_date < now_idx_local.date() and now_idx_local.weekday() < 5:
                         try:
                             intraday = stock.history(period='1d', interval='5m')
+                            if not intraday.empty and 'Close' in intraday.columns:
+                                intraday = intraday.dropna(subset=['Close'])
                             if not intraday.empty:
                                 intra_ts = intraday.index[-1]
                                 intra_date = intra_ts.tz_convert(now_idx_local.tzinfo).date() if intra_ts.tzinfo is not None else intra_ts.date()
@@ -926,7 +1010,9 @@ def fetch_benchmarks_daily_performance(benchmarks_map=None):
                                     curr_p = float(intraday['Close'].iloc[-1])
                         except Exception:
                             pass
-                chg = ((curr_p - prev_p) / prev_p) * 100
+                chg = ((curr_p - prev_p) / prev_p) * 100 if prev_p else 0.0
+                if not math.isfinite(chg):
+                    chg = 0.0
                 bench_data[symbol] = round(float(chg), 2)
                 print(f"   {symbol} ({yahoo_ticker}) Daily: {bench_data[symbol]:+.2f}%")
             elif not hist.empty and len(hist) == 1:

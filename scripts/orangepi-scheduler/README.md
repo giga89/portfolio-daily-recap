@@ -101,9 +101,9 @@ All logs are in `/opt/portfolio-dispatch/logs/`:
 
 ## Features
 
-- ✅ **Precise timing** — cron fires at exact UTC times (no GitHub queue delay)
+- ✅ **Precise timing** — cron fires at exact market times (no GitHub queue delay)
 - ✅ **DST handling** — dual entries cover both summer/winter; dedup prevents double sends
 - ✅ **Weekend skip** — market sessions auto-skip on Saturday/Sunday
-- ✅ **Deduplication** — same session won't dispatch twice in one day
+- ✅ **Deduplication** — uses canonical market trading-day dates (`America/New_York` for US/Monthly, `Europe/Rome` for EU/general) so cross-midnight UTC runs never poison next-day dispatches
 - ✅ **Logging** — full audit trail with auto-rotation
-- ✅ **Fallback** — GitHub cron schedules still exist as backup if Orange Pi is offline
+- ✅ **Fallback** — GitHub cron schedules still exist as backup if Orange Pi is offline, protected by a strict stale-cron window guard (`src/schedule_guard.py`) so delayed fallback crons skip cleanly without publishing or poisoning next-day dedup

@@ -6,6 +6,8 @@ Collects data from yfinance and Google Sheets to generate daily performance reca
 
 import os
 import sys
+import math
+from typing import Tuple
 
 # Add src directory to path
 sys.path.insert(0, os.path.dirname(__file__))
@@ -73,6 +75,93 @@ def _fetch_etoro_current_month_gain():
 
 
 
+def _is_symbol_degraded(info: dict) -> bool:
+    """Return True if a symbol's metrics were marked degraded or are all zero/non-finite."""
+    if not isinstance(info, dict):
+        return True
+    if info.get('data_degraded') is True:
+        return True
+    metrics = ('daily_change', 'weekly_change', 'monthly_change', 'yearly_change')
+    for m in metrics:
+        val = info.get(m, 0.0)
+        try:
+            fval = float(val)
+        except (TypeError, ValueError):
+            return True
+        if not math.isfinite(fval):
+            return True
+        if abs(fval) >= 1e-9:
+            return False
+    return True
+
+
+def validate_session_market_data(stock_data: dict, market_session: str) -> Tuple[bool, str]:
+    """
+    Pre-publication circuit breaker checking that fetched market data is not
+    degraded (e.g., Yahoo Finance overnight Close=NaN collapsed to 0.0) and
+    matches the expected active exchange for live US/EU market sessions.
+    """
+    if not stock_data:
+        return False, "No stock data fetched (0 symbols)"
+
+    total_symbols = len(stock_data)
+    degraded_count = sum(1 for info in stock_data.values() if _is_symbol_degraded(info))
+    if total_symbols >= 10 and (degraded_count / total_symbols) >= 0.50:
+        return (
+            False,
+            f"Catastrophic market data degradation: {degraded_count}/{total_symbols} "
+            f"symbols have degraded/all-zero metrics",
+        )
+
+    session_upper = (market_session or "").upper()
+    if "U.S. MARKET" in session_upper and ("CLOSE" in session_upper or "OPEN" in session_upper):
+        us_stocks = {
+            k: v for k, v in stock_data.items()
+            if isinstance(v, dict) and v.get("is_us_stock") and k != "TRX"
+        }
+        if len(us_stocks) >= 5:
+            active_us = [
+                k for k, v in us_stocks.items()
+                if v.get("has_traded_today") and not v.get("data_degraded")
+            ]
+            non_zero_us = [
+                k for k in active_us
+                if abs(float(us_stocks[k].get("daily_change", 0.0))) > 1e-6
+            ]
+            min_active = max(3, int(len(us_stocks) * 0.30))
+            if len(active_us) < min_active or len(non_zero_us) < 3:
+                return (
+                    False,
+                    f"Insufficient active US market data for '{market_session}': "
+                    f"{len(active_us)}/{len(us_stocks)} active, {len(non_zero_us)} non-zero",
+                )
+
+    if "EUROPEAN" in session_upper and "OPEN" in session_upper:
+        eu_exts = (".L", ".PA", ".MI", ".DE", ".AS", ".CO")
+        eu_stocks = {
+            k: v for k, v in stock_data.items()
+            if isinstance(v, dict)
+            and any(str(v.get("yahoo_ticker", k)).endswith(ext) for ext in eu_exts)
+        }
+        if len(eu_stocks) >= 5:
+            active_eu = [
+                k for k, v in eu_stocks.items()
+                if v.get("has_traded_today") and not v.get("data_degraded")
+            ]
+            non_zero_eu = [
+                k for k in active_eu
+                if abs(float(eu_stocks[k].get("daily_change", 0.0))) > 1e-6
+            ]
+            if len(non_zero_eu) < 2:
+                return (
+                    False,
+                    f"Insufficient active EU market data for '{market_session}': "
+                    f"{len(non_zero_eu)}/{len(eu_stocks)} non-zero",
+                )
+
+    return True, "OK"
+
+
 def main():
 
     """
@@ -111,6 +200,15 @@ def main():
     # Step 1: Get yfinance data for all symbols
     stock_data = finance_fetcher.fetch_stock_data()
     print(f"Successfully fetched data for {len(stock_data)} symbols")
+
+    data_ok, data_reason = validate_session_market_data(stock_data, market_session)
+    if not data_ok:
+        if os.getenv('FORCE_RUN', '').lower() == 'true':
+            print(f"⚠️ FORCE_RUN active: bypassing data-quality circuit breaker ({data_reason})")
+        else:
+            print(f"🛑 DATA QUALITY CIRCUIT BREAKER TRIGGERED: {data_reason}")
+            sys.exit(1)
+
     print("=" * 50)
     
     # Step 2: Calculate portfolio daily performance (will auto-fetch weights from BullAware)

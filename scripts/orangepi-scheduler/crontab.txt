@@ -68,7 +68,7 @@ CRON_TZ=Europe/Rome
 
 # ── Monthly Market & Portfolio Recap (Last calendar day of each month) ────────
 # Automatically replaces normal US close on the final calendar day of each month
-2 21,22 28-31 * * [ "$(date -u -d '+1 day' +%d)" = "01" ] && /opt/portfolio-dispatch/dispatch.sh monthly >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+2 21,22 28-31 * * [ "$(TZ=America/New_York date -d '+1 day' +%d)" = "01" ] && /opt/portfolio-dispatch/dispatch.sh monthly >> /opt/portfolio-dispatch/logs/cron.log 2>&1
 
 # ── Stock News & Catalyst Follow-up Check - Evening (Daily 23:30 ITA) ─────────
 30 23 * * *       /opt/portfolio-dispatch/dispatch.sh stock_news >> /opt/portfolio-dispatch/logs/cron.log 2>&1

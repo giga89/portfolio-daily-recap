@@ -337,28 +337,102 @@ def seed_perf_history(records):
     print(f"✅ Seeded {len(records)} records into Gist perf_history.")
 
 
-def has_session_run_today(session_name):
-    """Return True if the given market session has already completed today (UTC date)."""
-    from datetime import datetime, timezone
-    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
-    data = load_data()
-    return f"{today}:{session_name}" in data.get('session_runs', {})
+DEFAULT_SESSION_COOLDOWN_HOURS = 14.0
+WEEKLY_SESSION_COOLDOWN_HOURS = 48.0
 
 
-def mark_session_run(session_name):
-    """Record that the given market session completed today (UTC date)."""
+def _ensure_utc_datetime(now_utc=None):
+    """Return a timezone-aware UTC datetime."""
     from datetime import datetime, timezone
-    now = datetime.now(timezone.utc)
-    today = now.strftime('%Y-%m-%d')
+    if now_utc is None:
+        return datetime.now(timezone.utc)
+    if now_utc.tzinfo is None:
+        return now_utc.replace(tzinfo=timezone.utc)
+    return now_utc.astimezone(timezone.utc)
+
+
+def _session_date_key(session_name, now_utc=None):
+    """Return canonical market/community trading date (YYYY-MM-DD) for deduplication."""
+    now = _ensure_utc_datetime(now_utc)
+    try:
+        import schedule_guard
+        return schedule_guard.get_session_trading_date(session_name, now_utc=now)
+    except ImportError:
+        try:
+            from . import schedule_guard
+            return schedule_guard.get_session_trading_date(session_name, now_utc=now)
+        except ImportError:
+            return now.strftime('%Y-%m-%d')
+
+
+def has_session_run_today(session_name, now_utc=None, min_cooldown_hours=None):
+    """Return True if the session already ran on its canonical trading day or within cooldown."""
+    from datetime import datetime, timezone
+    now = _ensure_utc_datetime(now_utc)
+    canonical_date = _session_date_key(session_name, now)
     data = load_data()
     runs = data.get('session_runs', {})
-    # Discard entries older than the current month to prevent unbounded growth
-    month_start = now.strftime('%Y-%m-01')
-    runs = {k: v for k, v in runs.items() if k[:10] >= month_start}
-    runs[f"{today}:{session_name}"] = now.isoformat()
+
+    if f"{canonical_date}:{session_name}" in runs:
+        return True
+
+    cooldown = (
+        float(min_cooldown_hours)
+        if min_cooldown_hours is not None
+        else (
+            WEEKLY_SESSION_COOLDOWN_HOURS
+            if str(session_name).startswith("Weekly")
+            else DEFAULT_SESSION_COOLDOWN_HOURS
+        )
+    )
+    suffix = f":{session_name}"
+    for key, ts_val in runs.items():
+        if not str(key).endswith(suffix) or not ts_val:
+            continue
+        try:
+            prev_dt = datetime.fromisoformat(str(ts_val).replace("Z", "+00:00"))
+            if prev_dt.tzinfo is None:
+                prev_dt = prev_dt.replace(tzinfo=timezone.utc)
+            else:
+                prev_dt = prev_dt.astimezone(timezone.utc)
+        except (ValueError, TypeError):
+            continue
+        elapsed_hours = (now - prev_dt).total_seconds() / 3600.0
+        if 0 <= elapsed_hours < cooldown:
+            return True
+
+    return False
+
+
+def mark_session_run(session_name, now_utc=None):
+    """Record that the given market session completed on its canonical trading date."""
+    from datetime import timedelta
+    now = _ensure_utc_datetime(now_utc)
+    canonical_date = _session_date_key(session_name, now)
+    data = load_data()
+    runs = data.get('session_runs', {})
+    # Keep a rolling 35-day window so month boundaries never drop recent cooldown entries
+    cutoff = (now - timedelta(days=35)).strftime('%Y-%m-%d')
+    runs = {k: v for k, v in runs.items() if str(k)[:10] >= cutoff}
+    runs[f"{canonical_date}:{session_name}"] = now.isoformat()
     data['session_runs'] = runs
     _invalidate_cache()
     save_data(data)
+
+
+def clear_session_run(session_name, date_str=None):
+    """Remove a recorded session_runs entry for the given date (or today's canonical date)."""
+    target_date = date_str or _session_date_key(session_name)
+    key = f"{target_date}:{session_name}"
+    data = load_data()
+    runs = data.get('session_runs', {})
+    if key in runs:
+        del runs[key]
+        data['session_runs'] = runs
+        _invalidate_cache()
+        save_data(data)
+        return True
+    return False
 
 
 # ---------------------------------------------------------------------------

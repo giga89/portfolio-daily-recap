@@ -63,17 +63,28 @@ jobs:
         env:
           GIST_ACCESS_TOKEN: ${{ secrets.GIST_ACCESS_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
+          TRIGGER: ${{ github.event_name }}
           FORCE_RUN: ${{ inputs.force_run }}
         run: |
           python - <<'PYEOF'
           import os, sys
           sys.path.insert(0, 'src')
           import gist_storage
+          import schedule_guard
 
+          trigger = os.environ.get('TRIGGER', '')
           force_run = os.environ.get('FORCE_RUN', 'false').lower() == 'true'
+          ok, reason = schedule_guard.is_schedule_within_window(
+              session_name="Community Poll",
+              trigger=trigger,
+              force_run=force_run,
+          )
           if force_run:
-              print("FORCE RUN: dedup check bypassed for Community Poll.")
+              print("FORCE RUN: dedup and schedule window checks bypassed for Community Poll.")
               skip = 'false'
+          elif not ok:
+              print(f"🛑 STALE FALLBACK CRON: {reason} — skipping Community Poll.")
+              skip = 'true'
           elif gist_storage.has_session_run_today("Community Poll"):
               print("DUPLICATE: Community Poll already ran today. Skipping.")
               skip = 'true'

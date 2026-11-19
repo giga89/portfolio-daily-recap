@@ -61,13 +61,18 @@ def generate_recap(stock_data, portfolio_daily, sheets_data, benchmark_data=None
     current_month = datetime.now().month
     is_january = (current_month == 1)
     
-    # Filter out assets with NaN values in any performance metric (safety net)
+    # Filter out assets with NaN values or degraded Yahoo Finance data (safety net)
     import math
-    nan_tickers = [k for k, v in stock_data.items()
-                   if any(isinstance(v.get(m), float) and math.isnan(v.get(m, 0))
-                          for m in ('daily_change', 'weekly_change', 'monthly_change', 'yearly_change'))]
+    nan_tickers = [
+        k for k, v in stock_data.items()
+        if v.get('data_degraded') is True
+        or any(
+            isinstance(v.get(m), float) and not math.isfinite(v.get(m, 0))
+            for m in ('daily_change', 'weekly_change', 'monthly_change', 'yearly_change')
+        )
+    ]
     if nan_tickers:
-        print(f"⚠️  Filtering out {len(nan_tickers)} assets with NaN values: {nan_tickers}")
+        print(f"⚠️  Filtering out {len(nan_tickers)} assets with NaN/degraded values: {nan_tickers}")
         stock_data = {k: v for k, v in stock_data.items() if k not in nan_tickers}
 
     # Filter out excluded tickers (e.g. Russian stocks) from all rankings and news

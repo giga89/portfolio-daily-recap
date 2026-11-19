@@ -70,7 +70,7 @@ fi
 
 # On the last day of the month, us_close is skipped because monthly recap handles the close
 if [ "$SESSION" = "us_close" ]; then
-    TOMORROW=$(date -u -d "+1 day" +%d)
+    TOMORROW=$(TZ=America/New_York date -d "+1 day" +%d)
     if [ "$TOMORROW" = "01" ]; then
         echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') SKIP us_close — last day of the month (handled by monthly recap)" >> "$LOG_DIR/dispatch.log"
         exit 0
@@ -117,11 +117,16 @@ fi
 
 # ---------------------------------------------------------------------------
 # Dedup: prevent duplicate dispatches for the same session on the same day.
+# - Use market trading-day timezone (America/New_York for US/Monthly, Europe/Rome otherwise).
 # - stock_news runs 3x daily (morning, afternoon, evening); deduplicates by hour bucket.
 # - event_monitor runs 2x daily (European morning & post-US-open); deduplicates by window bucket.
 # - all other sessions run once daily; deduplicates strictly once per day.
 # ---------------------------------------------------------------------------
-TODAY=$(date -u +%Y-%m-%d)
+if [[ "$SESSION" =~ ^(us_open|us_close|monthly)$ ]]; then
+    TODAY=$(TZ=America/New_York date +%Y-%m-%d)
+else
+    TODAY=$(TZ=Europe/Rome date +%Y-%m-%d)
+fi
 CURRENT_HOUR=$(date -u +%H)
 if [ "$SESSION" = "stock_news" ]; then
     DEDUP_KEY="stock_news:${CURRENT_HOUR}"

@@ -115,7 +115,7 @@ jobs:
               "20 16 * * *")
                 SESSION_NAME="Daily crypto recap" ;;
               "0 20 28-31 * *")
-                TOMORROW=$(date -u -d "+1 day" +%d)
+                TOMORROW=$(TZ=America/New_York date -d "+1 day" +%d)
                 if [ "$TOMORROW" == "01" ]; then
                   SESSION_NAME="Monthly recap"
                 else
@@ -124,7 +124,7 @@ jobs:
                 fi
                 ;;
               "45 20 * * 1-5")
-                TOMORROW=$(date -u -d "+1 day" +%d)
+                TOMORROW=$(TZ=America/New_York date -d "+1 day" +%d)
                 if [ "$TOMORROW" == "01" ]; then
                   SESSION_NAME="Monthly recap"
                 else
@@ -152,7 +152,7 @@ jobs:
             MINUTE=${MINUTE#0}
             MINUTE=${MINUTE:-0}
             if [ "$HOUR" -eq 20 ]; then
-              TOMORROW=$(date -u -d "+1 day" +%d)
+              TOMORROW=$(TZ=America/New_York date -d "+1 day" +%d)
               if [ "$TOMORROW" == "01" ]; then
                 SESSION_NAME="Monthly recap"
               elif [ "$DAY" -ge 1 ] && [ "$DAY" -le 5 ]; then
@@ -176,7 +176,41 @@ jobs:
           echo "trigger=$TRIGGER" >> "$GITHUB_OUTPUT"
           echo "Market Session detected: $SESSION_NAME (trigger: ${TRIGGER}, cron: '${SCHEDULE:-n/a}', actual UTC Hour: $HOUR)"
 
+      - name: Check fallback cron schedule window
+        id: window_check
+        env:
+          MARKET_SESSION: ${{ steps.market_session.outputs.session }}
+          TRIGGER: ${{ steps.market_session.outputs.trigger }}
+          FORCE_RUN: ${{ inputs.force_run }}
+        run: |
+          python - <<'PYEOF'
+          import os, sys
+          sys.path.insert(0, 'src')
+          import schedule_guard
+
+          session = os.environ.get('MARKET_SESSION', '')
+          trigger = os.environ.get('TRIGGER', '')
+          force_run = os.environ.get('FORCE_RUN', 'false').lower() == 'true'
+
+          ok, reason = schedule_guard.is_schedule_within_window(
+              session_name=session,
+              trigger=trigger,
+              force_run=force_run,
+          )
+          if ok:
+              print(f"✓ Schedule window check passed: {reason}")
+              stale = 'false'
+          else:
+              print(f"🛑 STALE FALLBACK CRON: {reason} — skipping run to avoid out-of-hours recap and next-day dedup poisoning.")
+              stale = 'true'
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'stale={stale}\n')
+          PYEOF
+
       - name: Wait until target time
+        id: wait_target
+        if: steps.window_check.outputs.stale != 'true'
         run: |
           TRIGGER="${{ steps.market_session.outputs.trigger }}"
           SESSION="${{ steps.market_session.outputs.session }}"
@@ -185,6 +219,7 @@ jobs:
           # Skip sleep for forced manual runs (testing)
           if [ "$FORCE_RUN" = "true" ]; then
             echo "Force run — skipping wait, proceeding immediately."
+            echo "stale=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -194,20 +229,22 @@ jobs:
           # to 09:20 Europe/Rome, NOW >= TARGET_EPOCH and it proceeds with 0 sleep.
           if [ "$TRIGGER" = "repository_dispatch" ] && [ "$SESSION" != "European market open" ]; then
             echo "Triggered by Orange Pi 5 — skipping sleep, proceeding immediately."
+            echo "stale=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           NOW=$(date -u +%s)
-          TODAY=$(date -u +%Y-%m-%d)
           ROME_TODAY=$(TZ=Europe/Rome date +%Y-%m-%d)
+          NY_TODAY=$(TZ=America/New_York date +%Y-%m-%d)
           TARGET_EPOCH=0
+          STALE="false"
 
           if [ "$SESSION" = "European market open" ]; then
             TARGET_EPOCH=$(TZ=Europe/Rome date -d "$ROME_TODAY 09:20:00" +%s)
           elif [ "$SESSION" = "U.S. market open" ]; then
-            TARGET_EPOCH=$(date -u -d "$TODAY 14:35:00" +%s)
+            TARGET_EPOCH=$(TZ=America/New_York date -d "$NY_TODAY 09:35:00" +%s)
           elif [ "$SESSION" = "U.S. market close" ]; then
-            TARGET_EPOCH=$(date -u -d "$TODAY 21:05:00" +%s)
+            TARGET_EPOCH=$(TZ=America/New_York date -d "$NY_TODAY 16:05:00" +%s)
           fi
 
           if [ "$TARGET_EPOCH" -gt "$NOW" ]; then
@@ -222,12 +259,16 @@ jobs:
             elif [ "$SLEEP_SECS" -le 2700 ]; then
               echo "Sleeping ${SLEEP_SECS}s until $(date -u -d "@$TARGET_EPOCH") ..."
               sleep "$SLEEP_SECS"
+            elif [ "$TRIGGER" = "schedule" ]; then
+              echo "🛑 STALE CRON: Target time is ${SLEEP_SECS}s away (>45m) — aborting delayed fallback cron."
+              STALE="true"
             else
-              echo "Target time is ${SLEEP_SECS}s away (>45m, likely delayed cron) — skipping extended sleep."
+              echo "Target time is ${SLEEP_SECS}s away (>45m) — skipping extended sleep for manual trigger."
             fi
           else
             echo "Non-market session or already past target time, proceeding immediately."
           fi
+          echo "stale=${STALE}" >> "$GITHUB_OUTPUT"
 
       - name: Check for duplicate session run
         id: dedup_check
@@ -236,6 +277,8 @@ jobs:
           GIST_ID: ${{ secrets.GIST_ID }}
           MARKET_SESSION: ${{ steps.market_session.outputs.session }}
           FORCE_RUN: ${{ inputs.force_run }}
+          WINDOW_STALE: ${{ steps.window_check.outputs.stale }}
+          WAIT_STALE: ${{ steps.wait_target.outputs.stale }}
         run: |
           python - <<'PYEOF'
           import os, sys
@@ -244,6 +287,8 @@ jobs:
 
           session = os.environ.get('MARKET_SESSION', '')
           force_run = os.environ.get('FORCE_RUN', 'false').lower() == 'true'
+          window_stale = os.environ.get('WINDOW_STALE', 'false').lower() == 'true'
+          wait_stale = os.environ.get('WAIT_STALE', 'false').lower() == 'true'
 
           def get_dedup_key(s):
               if not s:
@@ -266,7 +311,10 @@ jobs:
               return s if s in known else None
 
           dedup_key = get_dedup_key(session)
-          if force_run:
+          if window_stale or wait_stale:
+              print(f"STALE CRON SKIPPED: skipping '{session}' without touching Gist dedup state (window_stale={window_stale}, wait_stale={wait_stale}).")
+              skip = 'true'
+          elif force_run:
               print(f"FORCE RUN: dedup check bypassed for '{session}'.")
               skip = 'false'
           elif not dedup_key:
