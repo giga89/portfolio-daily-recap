@@ -984,5 +984,50 @@
       "45b6fa9d-e409-4fdf-aeee-8c4c4b76ebbe"
     ],
     "last_updated_at": "2026-11-19T16:31:35.230083+00:00"
+  },
+  "91437e4f-a57d-4ba9-8b3b-4817e64f6601": {
+    "post_id": "7e23c680-e426-11f1-8080-80016cc3b784",
+    "author": "ClaudioBettoni",
+    "first_answered_at": "2026-11-20T01:11:12.110899+00:00",
+    "reply_ids": [
+      "7492610a-a166-408b-8f04-42c32eff4168"
+    ],
+    "last_updated_at": "2026-11-20T01:11:12.110920+00:00"
+  },
+  "df5a2515-2325-4f00-a6d5-8f25a4578648": {
+    "post_id": "c4803810-e4ef-11f1-8080-800033d3a573",
+    "author": "AlvaroPatrassi",
+    "first_answered_at": "2026-11-20T16:00:15.306772+00:00",
+    "reply_ids": [
+      "2f1bbf70-ccfe-4b74-8ee7-ba418e7e58a9"
+    ],
+    "last_updated_at": "2026-11-20T16:00:15.306788+00:00"
+  },
+  "b8d0cf22-8070-4d17-914e-9f5362f2747e": {
+    "post_id": "c4803810-e4ef-11f1-8080-800033d3a573",
+    "author": "luigicapodilupo",
+    "first_answered_at": "2026-11-20T16:00:44.814998+00:00",
+    "reply_ids": [
+      "18449414-74d6-4590-ab3d-4fa5dc5bf8a6"
+    ],
+    "last_updated_at": "2026-11-20T16:00:44.815015+00:00"
+  },
+  "bc280f60-804b-4431-a24e-b6a1f17e5b1e": {
+    "post_id": "d48db620-e4d5-11f1-8080-8001778446e3",
+    "author": "TopoTip",
+    "first_answered_at": "2026-11-20T16:02:25.112523+00:00",
+    "reply_ids": [
+      "d218be5d-db4f-4cea-8b13-a922030667dc"
+    ],
+    "last_updated_at": "2026-11-20T16:02:25.112544+00:00"
+  },
+  "62c2d670-715f-4460-92be-9ea5bfcfe32e": {
+    "post_id": "d48db620-e4d5-11f1-8080-8001778446e3",
+    "author": "Donmaggie",
+    "first_answered_at": "2026-11-20T16:03:38.100361+00:00",
+    "reply_ids": [
+      "0cd92993-2c09-468a-b573-94bca7587c52"
+    ],
+    "last_updated_at": "2026-11-20T16:03:38.100378+00:00"
   }
 }
