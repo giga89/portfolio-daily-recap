@@ -11,7 +11,7 @@ and generates a state-of-the-art dual-hub portal for GitHub Pages (in full Engli
      • Dividends Suite (Overview KPI, Breakdown Table, Upcoming Ex-Dates & Pay Days)
      • Historical Drawdowns Table (Post-2020 Strategy Era: Depth, Start, End, Recovery Months)
      • Cross-Asset Correlation & Cluster Resilience Heatmap Matrix
-     • Interactive DCA (PAC) & Compound Growth Simulator with real-time sliders & projection chart
+     • Interactive Compound Growth Simulator with real-time sliders & projection chart
      • Stress Test & Historical Resilience Matrix (Covid 2020, Rate Shock 2022, AI Wave 2023-2024)
      • Monthly Seasonality Radar & Historical Pattern Analysis
      • Multi-Dimension Asset Allocation (Asset Class, Geography, Sectors, Currencies)
@@ -1309,7 +1309,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
     .cell-na {{ color: rgba(255, 255, 255, 0.15); }}
     .cell-total {{ font-weight: 900; font-size: 0.95rem; border-left: 2px solid var(--surface-border); }}
 
-    /* ── Interactive DCA & Compound Simulator ─────────────────────────────── */
+    /* ── Interactive Compound Growth Simulator ─────────────────────────────── */
     .simulator-card {{
       background: var(--surface); border: 1px solid var(--surface-border-bright);
       border-radius: var(--radius-lg); padding: 30px; margin-bottom: 36px; box-shadow: var(--shadow);
@@ -1956,10 +1956,10 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
         </div>
       </section>
 
-      <!-- Interactive DCA & Compound Growth Simulator -->
+      <!-- Interactive Compound Growth Simulator -->
       <section class="simulator-card">
         <div class="section-title">
-          <span>🚀 Interactive DCA & Compound Growth Simulator</span>
+          <span>🚀 Interactive Compound Growth Simulator</span>
           <span class="tag">Projection Engine</span>
         </div>
 
@@ -1968,10 +1968,6 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
             <div class="sim-field">
               <label>Initial Capital: <span class="val" id="lblSimInit">$1,000</span></label>
               <input type="range" id="simInit" class="sim-range" min="200" max="20000" step="100" value="1000" oninput="updateSimulator()">
-            </div>
-            <div class="sim-field">
-              <label>Monthly Contribution (DCA): <span class="val" id="lblSimMonthly">$200 / mo</span></label>
-              <input type="range" id="simMonthly" class="sim-range" min="0" max="2000" step="50" value="200" oninput="updateSimulator()">
             </div>
             <div class="sim-field">
               <label>Time Horizon: <span class="val" id="lblSimYears">5 Years</span></label>
@@ -1984,16 +1980,16 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
             <div class="sim-kpis">
               <div class="sim-kpi-box">
-                <div class="lbl">Total Capital Contributed</div>
-                <div class="num" id="simTotalInvested" style="color: #CBD5E1;">$13,000</div>
+                <div class="lbl">Initial Capital</div>
+                <div class="num" id="simTotalInvested" style="color: #CBD5E1;">$1,000</div>
               </div>
               <div class="sim-kpi-box">
                 <div class="lbl">Projected Portfolio Value</div>
-                <div class="num" id="simFinalValue" style="color: var(--green);">$22,840</div>
+                <div class="num" id="simFinalValue" style="color: var(--green);">$2,213</div>
               </div>
               <div class="sim-kpi-box" style="grid-column: 1 / -1;">
-                <div class="lbl">Compound Interest Generated</div>
-                <div class="num" id="simInterestEarned" style="color: var(--gold);">+$9,840 (+75.7%)</div>
+                <div class="lbl">Compound Gain Generated</div>
+                <div class="num" id="simInterestEarned" style="color: var(--gold);">+$1,213 (+121.3%)</div>
               </div>
             </div>
           </div>
@@ -2335,11 +2331,11 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
 
         <div class="faq-item" onclick="toggleFaq(this)">
           <div class="faq-question">
-            <span>How does adding recurring monthly funds (DCA / PAC) work?</span>
+            <span>How is portfolio risk managed during market pullbacks?</span>
             <span class="arrow">▼</span>
           </div>
           <div class="faq-answer">
-            You can add funds to your active copy at any time. Any newly deposited capital is automatically distributed proportionally across all current holdings, executing an effortless Dollar-Cost Averaging (DCA) compounding process.
+            The strategy relies on active long-term capital allocation with zero leverage (1x only), a certified Risk Score of 3/10, and calibrated position sizing across uncorrelated pillars — pairing secular growth holdings with physical gold (<code>$PPFB.DE</code>) and ultra-short U.S. Treasury cash reserves (<code>$IB01.L</code>) for discretionary rebalancing rather than automated periodic buying.
           </div>
         </div>
       </section>
@@ -2884,44 +2880,32 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
       }});
     }}
 
-    // ── Interactive DCA & Compound Simulator ───────────────────────────────
+    // ── Interactive Compound Growth Simulator ───────────────────────────────
     let simChartInstance = null;
 
     function updateSimulator() {{
       const p0 = parseFloat(document.getElementById('simInit').value);
-      const pMonthly = parseFloat(document.getElementById('simMonthly').value);
       const years = parseInt(document.getElementById('simYears').value);
       const annualRate = parseFloat(document.getElementById('simRate').value) / 100;
 
       document.getElementById('lblSimInit').textContent = '$' + p0.toLocaleString('en-US');
-      document.getElementById('lblSimMonthly').textContent = '$' + pMonthly.toLocaleString('en-US') + ' / mo';
       document.getElementById('lblSimYears').textContent = years + (years === 1 ? ' Year' : ' Years');
       document.getElementById('lblSimRate').textContent = (annualRate * 100).toFixed(1) + '%';
-
-      const totalMonths = years * 12;
-      const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
 
       let labels = ['Start'];
       let investedData = [p0];
       let portfolioData = [p0];
 
-      let currentPortfolio = p0;
-      let currentInvested = p0;
-
       for (let y = 1; y <= years; y++) {{
         labels.push('Year ' + y);
-        for (let m = 1; m <= 12; m++) {{
-          currentInvested += pMonthly;
-          currentPortfolio = (currentPortfolio + pMonthly) * (1 + monthlyRate);
-        }}
-        investedData.push(Math.round(currentInvested));
-        portfolioData.push(Math.round(currentPortfolio));
+        investedData.push(Math.round(p0));
+        portfolioData.push(Math.round(p0 * Math.pow(1 + annualRate, y)));
       }}
 
       const finalInvested = investedData[investedData.length - 1];
       const finalPortfolio = portfolioData[portfolioData.length - 1];
       const interestEarned = finalPortfolio - finalInvested;
-      const profitPct = ((interestEarned / finalInvested) * 100).toFixed(1);
+      const profitPct = finalInvested > 0 ? ((interestEarned / finalInvested) * 100).toFixed(1) : '0.0';
 
       document.getElementById('simTotalInvested').textContent = '$' + finalInvested.toLocaleString('en-US');
       document.getElementById('simFinalValue').textContent = '$' + finalPortfolio.toLocaleString('en-US');
@@ -2947,7 +2931,7 @@ def generate_html_dashboard(output_path: str = DOCS_INDEX_HTML) -> str:
               pointBackgroundColor: '#13C636'
             }},
             {{
-              label: 'Total Capital Contributed',
+              label: 'Initial Capital',
               data: investedData,
               borderColor: '#00D4FF',
               borderWidth: 2,

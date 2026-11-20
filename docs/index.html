@@ -8,6 +8,7 @@
   <meta http-equiv="Expires" content="0">
   <title>Andrea Ravalli · Portfolio Hub & Popular Investor Analytics</title>
   <meta name="description" content="Official portfolio hub of Andrea Ravalli (eToro Popular Investor): track record (+167.6% since 2020), monthly returns heatmap, quantitative risk metrics, dividends breakdown, drawdown analysis, and copier guide.">
+  <meta name="description" content="Official portfolio hub of Andrea Ravalli (eToro Popular Investor): track record (+167.6% since 2020), monthly returns heatmap, quantitative risk metrics, dividends breakdown, drawdown analysis, and copier guide.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -390,7 +391,7 @@
     .cell-na { color: rgba(255, 255, 255, 0.15); }
     .cell-total { font-weight: 900; font-size: 0.95rem; border-left: 2px solid var(--surface-border); }
 
-    /* ── Interactive DCA & Compound Simulator ─────────────────────────────── */
+    /* ── Interactive Compound Growth Simulator ─────────────────────────────── */
     .simulator-card {
       background: var(--surface); border: 1px solid var(--surface-border-bright);
       border-radius: var(--radius-lg); padding: 30px; margin-bottom: 36px; box-shadow: var(--shadow);
@@ -853,15 +854,18 @@
           <div class="kpi-card">
             <div class="kpi-label">Total Return (Since 2020)</div>
             <div class="kpi-val green" id="heroTotalReturn">+167.6%</div>
+            <div class="kpi-val green" id="heroTotalReturn">+167.6%</div>
             <div class="kpi-sub">Since strategy inception</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Compound Annual Growth (CAGR)</div>
             <div class="kpi-val gold" id="heroCagr">~15.3%</div>
+            <div class="kpi-val gold" id="heroCagr">~15.3%</div>
             <div class="kpi-sub">Annual compounded rate</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Capital Doubling Time</div>
+            <div class="kpi-val cyan" id="heroDoubling">~4.7 Years</div>
             <div class="kpi-val cyan" id="heroDoubling">~4.7 Years</div>
             <div class="kpi-sub">Estimated (Rule of 72)</div>
           </div>
@@ -1037,10 +1041,10 @@
         </div>
       </section>
 
-      <!-- Interactive DCA & Compound Growth Simulator -->
+      <!-- Interactive Compound Growth Simulator -->
       <section class="simulator-card">
         <div class="section-title">
-          <span>🚀 Interactive DCA & Compound Growth Simulator</span>
+          <span>🚀 Interactive Compound Growth Simulator</span>
           <span class="tag">Projection Engine</span>
         </div>
 
@@ -1051,30 +1055,28 @@
               <input type="range" id="simInit" class="sim-range" min="200" max="20000" step="100" value="1000" oninput="updateSimulator()">
             </div>
             <div class="sim-field">
-              <label>Monthly Contribution (DCA): <span class="val" id="lblSimMonthly">$200 / mo</span></label>
-              <input type="range" id="simMonthly" class="sim-range" min="0" max="2000" step="50" value="200" oninput="updateSimulator()">
-            </div>
-            <div class="sim-field">
               <label>Time Horizon: <span class="val" id="lblSimYears">5 Years</span></label>
               <input type="range" id="simYears" class="sim-range" min="1" max="20" step="1" value="5" oninput="updateSimulator()">
             </div>
             <div class="sim-field">
               <label>Estimated Annual Return: <span class="val" id="lblSimRate">15.3% (Andrea Ravalli)</span></label>
               <input type="range" id="simRate" class="sim-range" min="3" max="25" step="0.1" value="15.3" oninput="updateSimulator()">
+              <label>Estimated Annual Return: <span class="val" id="lblSimRate">15.3% (Andrea Ravalli)</span></label>
+              <input type="range" id="simRate" class="sim-range" min="3" max="25" step="0.1" value="15.3" oninput="updateSimulator()">
             </div>
 
             <div class="sim-kpis">
               <div class="sim-kpi-box">
-                <div class="lbl">Total Capital Contributed</div>
-                <div class="num" id="simTotalInvested" style="color: #CBD5E1;">$13,000</div>
+                <div class="lbl">Initial Capital</div>
+                <div class="num" id="simTotalInvested" style="color: #CBD5E1;">$1,000</div>
               </div>
               <div class="sim-kpi-box">
                 <div class="lbl">Projected Portfolio Value</div>
-                <div class="num" id="simFinalValue" style="color: var(--green);">$22,840</div>
+                <div class="num" id="simFinalValue" style="color: var(--green);">$2,213</div>
               </div>
               <div class="sim-kpi-box" style="grid-column: 1 / -1;">
-                <div class="lbl">Compound Interest Generated</div>
-                <div class="num" id="simInterestEarned" style="color: var(--gold);">+$9,840 (+75.7%)</div>
+                <div class="lbl">Compound Gain Generated</div>
+                <div class="num" id="simInterestEarned" style="color: var(--gold);">+$1,213 (+121.3%)</div>
               </div>
             </div>
           </div>
@@ -1416,11 +1418,11 @@
 
         <div class="faq-item" onclick="toggleFaq(this)">
           <div class="faq-question">
-            <span>How does adding recurring monthly funds (DCA / PAC) work?</span>
+            <span>How is portfolio risk managed during market pullbacks?</span>
             <span class="arrow">▼</span>
           </div>
           <div class="faq-answer">
-            You can add funds to your active copy at any time. Any newly deposited capital is automatically distributed proportionally across all current holdings, executing an effortless Dollar-Cost Averaging (DCA) compounding process.
+            The strategy relies on active long-term capital allocation with zero leverage (1x only), a certified Risk Score of 3/10, and calibrated position sizing across uncorrelated pillars — pairing secular growth holdings with physical gold (<code>$PPFB.DE</code>) and ultra-short U.S. Treasury cash reserves (<code>$IB01.L</code>) for discretionary rebalancing rather than automated periodic buying.
           </div>
         </div>
       </section>
@@ -1690,6 +1692,7 @@
     const nextDivsData = [{"ticker": "WMT", "type": "Ex-Dividend", "date": "Dec 04, 2026", "pay": "$0.25"}, {"ticker": "MSFT", "type": "Pay Day", "date": "Dec 10, 2026", "pay": "$0.75"}, {"ticker": "WMT", "type": "Pay Day", "date": "Jan 04, 2027", "pay": "$0.25"}];
     const drawdownsData = [{"depth": "-18.72%", "start": "Jan 2022", "end": "Dec 2022", "months": "12", "context": "Global Rate Hike & Inflation Bear Market (Contained vs Nasdaq -33.1%)"}, {"depth": "-18.05%", "start": "Feb 2020", "end": "Mar 2020", "months": "2", "context": "Covid-19 Global Panic Crash (Swiftly recovered by May 2020)"}, {"depth": "-9.45%", "start": "May 2021", "end": "Jun 2021", "months": "1", "context": "Post-Pandemic Growth to Value Rotation"}, {"depth": "-4.04%", "start": "Jun 2026", "end": "Jul 2026", "months": "1", "context": "Summer FX & Multiples Consolidation"}, {"depth": "-3.52%", "start": "Mar 2026", "end": "Apr 2026", "months": "1", "context": "Mid-Cycle Technology Sector Pullback"}];
     const correlationData = [{"cluster": "AI & Tech", "tech": 1.0, "pharma": 0.28, "energy": 0.14, "consumer": 0.42, "safe_haven": -0.15}, {"cluster": "Pharma & GLP-1", "tech": 0.28, "pharma": 1.0, "energy": 0.18, "consumer": 0.35, "safe_haven": 0.05}, {"cluster": "Energy & Nuclear", "tech": 0.14, "pharma": 0.18, "energy": 1.0, "consumer": 0.22, "safe_haven": 0.24}, {"cluster": "Consumer & Luxury", "tech": 0.42, "pharma": 0.35, "energy": 0.22, "consumer": 1.0, "safe_haven": -0.08}, {"cluster": "Safe Haven & Cash", "tech": -0.15, "pharma": 0.05, "energy": 0.24, "consumer": -0.08, "safe_haven": 1.0}];
+    const seasonalityData = {"Jan": 3.62, "Feb": -1.79, "Mar": -1.07, "Apr": 3.96, "May": 1.7, "Jun": 0.29, "Jul": 3.01, "Aug": 3.54, "Sep": -2.49, "Oct": 0.24, "Nov": 4.74, "Dec": 0.88};
     const seasonalityData = {"Jan": 3.62, "Feb": -1.79, "Mar": -1.07, "Apr": 3.96, "May": 1.7, "Jun": 0.29, "Jul": 3.01, "Aug": 3.54, "Sep": -2.49, "Oct": 0.24, "Nov": 4.74, "Dec": 0.88};
 
     // ── Nomadz Modal Handlers ───────────────────────────────────────────────
@@ -1965,44 +1968,32 @@
       });
     }
 
-    // ── Interactive DCA & Compound Simulator ───────────────────────────────
+    // ── Interactive Compound Growth Simulator ───────────────────────────────
     let simChartInstance = null;
 
     function updateSimulator() {
       const p0 = parseFloat(document.getElementById('simInit').value);
-      const pMonthly = parseFloat(document.getElementById('simMonthly').value);
       const years = parseInt(document.getElementById('simYears').value);
       const annualRate = parseFloat(document.getElementById('simRate').value) / 100;
 
       document.getElementById('lblSimInit').textContent = '$' + p0.toLocaleString('en-US');
-      document.getElementById('lblSimMonthly').textContent = '$' + pMonthly.toLocaleString('en-US') + ' / mo';
       document.getElementById('lblSimYears').textContent = years + (years === 1 ? ' Year' : ' Years');
       document.getElementById('lblSimRate').textContent = (annualRate * 100).toFixed(1) + '%';
-
-      const totalMonths = years * 12;
-      const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
 
       let labels = ['Start'];
       let investedData = [p0];
       let portfolioData = [p0];
 
-      let currentPortfolio = p0;
-      let currentInvested = p0;
-
       for (let y = 1; y <= years; y++) {
         labels.push('Year ' + y);
-        for (let m = 1; m <= 12; m++) {
-          currentInvested += pMonthly;
-          currentPortfolio = (currentPortfolio + pMonthly) * (1 + monthlyRate);
-        }
-        investedData.push(Math.round(currentInvested));
-        portfolioData.push(Math.round(currentPortfolio));
+        investedData.push(Math.round(p0));
+        portfolioData.push(Math.round(p0 * Math.pow(1 + annualRate, y)));
       }
 
       const finalInvested = investedData[investedData.length - 1];
       const finalPortfolio = portfolioData[portfolioData.length - 1];
       const interestEarned = finalPortfolio - finalInvested;
-      const profitPct = ((interestEarned / finalInvested) * 100).toFixed(1);
+      const profitPct = finalInvested > 0 ? ((interestEarned / finalInvested) * 100).toFixed(1) : '0.0';
 
       document.getElementById('simTotalInvested').textContent = '$' + finalInvested.toLocaleString('en-US');
       document.getElementById('simFinalValue').textContent = '$' + finalPortfolio.toLocaleString('en-US');
@@ -2028,7 +2019,7 @@
               pointBackgroundColor: '#13C636'
             },
             {
-              label: 'Total Capital Contributed',
+              label: 'Initial Capital',
               data: investedData,
               borderColor: '#00D4FF',
               borderWidth: 2,
@@ -2134,6 +2125,7 @@
             labels: perfYears,
             datasets: [
               {
+                label: 'Andrea Ravalli (+167.6%)',
                 label: 'Andrea Ravalli (+167.6%)',
                 data: getArAnnual(),
                 backgroundColor: 'rgba(19, 198, 54, 0.85)',

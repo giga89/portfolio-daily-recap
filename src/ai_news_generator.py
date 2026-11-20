@@ -3003,24 +3003,24 @@ COPY_TRADING_ETORO_THEMES = [
         "cta": "Che percentuale del portafoglio consideri equilibrata per un'allocazione in asset digitali senza alterare il profilo di rischio complessivo? Scrivilo sotto 👇",
     },
     {
-        "id": "pac_dca_compound_discipline",
-        "title": "Strategia PAC & Piano d'Accumulo con Copy Trading",
+        "id": "active_allocation_conviction",
+        "title": "Allocazione Attiva, Selezione Fondamentale & Gestione del Rischio",
         "tickers": ["SPX500", "AMZN", "MSFT"],
         "angle": (
-            "Come sfruttare il Copy Trading per impostare un piano di accumulo del capitale (PAC/DCA) costante nel tempo, "
-            "mediando i prezzi di ingresso su asset come $AMZN e $MSFT e superando l'ansia da market timing su $SPX500."
+            "Come la gestione attiva su eToro combina convinzione fondamentale su leader come $AMZN e $MSFT, "
+            "dimensionamento disciplinato dei pesi, zero leva e riserve tattiche di liquidità per sovraperformare nel lungo periodo rispetto a $SPX500."
         ),
-        "fallback_angle": "Piano di accumulo periodico (PAC/DCA) disciplinato su leader di mercato come $AMZN e $MSFT senza lo stress del market timing.",
-        "header_prefix": "📈 STRATEGIA PAC & ACCUMULO SU eToro:",
+        "fallback_angle": "Gestione attiva basata su selezione fondamentale di leader come $AMZN e $MSFT, pesi calibrati e controllo del rischio rispetto a $SPX500.",
+        "header_prefix": "📈 ALLOCAZIONE ATTIVA & GESTIONE DEL RISCHIO SU eToro:",
         "hook": (
-            "Cercare di prevedere i massimi e i minimi di mercato (il cosiddetto market timing) è una delle trappole più costose per gli investitori. "
-            "Un piano di accumulo del capitale (PAC/DCA) costante nel tempo, abbinato a pilastri solidi come $AMZN e $MSFT, abbatte la componente emotiva e batte la volatilità passiva dell'indice $SPX500."
+            "Battere gli indici passivi nel lungo periodo richiede selezione attiva e gestione rigorosa del capitale, non automatismi ciechi. "
+            "Concentrare la ricerca sui fondamentali di leader ad alta generazione di cassa come $AMZN e $MSFT, calibrandone il peso nel portafoglio, permette di puntare a extra-rendimenti rispetto a $SPX500."
         ),
         "body": (
-            "Il Copy Trading su eToro rende il PAC semplicissimo: puoi impostare depositi periodici ricorrenti che vengono spalmati automaticamente in proporzione su tutte le posizioni aperte, "
-            "sfruttando la magia dell'interesse composto mese dopo mese."
+            "Con il Copy Trading su eToro ogni movimento, ribilanciamento tattico e gestione delle coperture difensive viene replicato automaticamente in proporzione, "
+            "unendo gestione attiva professionale e zero commissioni di gestione."
         ),
-        "cta": "Utilizzi già un piano di accumulo mensile (PAC) o preferisci investire somme più consistenti in momenti specifici? Parliamone nei commenti 👇",
+        "cta": "Quali criteri fondamentali guardi per primi quando valuti il peso di una società in portafoglio? Parliamone nei commenti 👇",
     },
     {
         "id": "dividends_cash_compound",

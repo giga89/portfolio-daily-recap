@@ -87,6 +87,7 @@ DIVIDEND_NEGATIONS = [
     r'nessuna\s+cedola',
     r'non\s+paga\s+(un\s+)?dividendo',
     r'non\s+offre\s+(un\s+)?dividendo',
+    r'senza\s+staccare\s+(?:alcun[ao]?\s+)?(?:dividendo|dividendi|cedol[ae])',
     r'ad\s+accumulazione\s+senza\s+dividendi',
 ]
 
@@ -101,6 +102,8 @@ ASSET_IDENTITY_FORBIDDEN_TERMS = {
         (r'\bdividendi\s+europa\b', "Dividendi Europa (WDEF.L è ad accumulazione, settore Difesa)"),
         (r'\bdividendi\s+europei\b', "Dividendi Europei (WDEF.L è ad accumulazione, settore Difesa)"),
         (r'\bincome\s+etf\b', "Income ETF (WDEF.L è ad accumulazione, settore Difesa)"),
+        (r'(?:\$?wdef(?:\.l)?|europe\s+defence)(?:(?!\.(?:\s|$))[^\n]){0,60}\b(?:titol[oi]\s+difensiv[oi]|asset\s+difensiv[oi]|copertur[ae]\s+difensiv[ae]|bene\s+rifugio|safe\s+haven)\b', "WDEF.L è un ETF settoriale Difesa & Aerospazio (riarmo militare), NON un titolo difensivo o bene rifugio"),
+        (r'\b(?:titol[oi]\s+difensiv[oi]|asset\s+difensiv[oi]|copertur[ae]\s+difensiv[ae]|bene\s+rifugio|safe\s+haven)\b(?:(?!\.(?:\s|$))[^\n]){0,60}(?:\$?wdef(?:\.l)?|europe\s+defence)', "WDEF.L è un ETF settoriale Difesa & Aerospazio (riarmo militare), NON un titolo difensivo o bene rifugio"),
     ],
     "WDEF": [
         (r'\b(?:wisdomtree\s+)?europe\s+equity\s+income\b', "WisdomTree Europe Equity Income (WDEF è WisdomTree Europe Defence UCITS ETF)"),
@@ -111,6 +114,8 @@ ASSET_IDENTITY_FORBIDDEN_TERMS = {
         (r'\bdividendi\s+europa\b', "Dividendi Europa (WDEF è ad accumulazione, settore Difesa)"),
         (r'\bdividendi\s+europei\b', "Dividendi Europei (WDEF è ad accumulazione, settore Difesa)"),
         (r'\bincome\s+etf\b', "Income ETF (WDEF è ad accumulazione, settore Difesa)"),
+        (r'(?:\$?wdef(?:\.l)?|europe\s+defence)(?:(?!\.(?:\s|$))[^\n]){0,60}\b(?:titol[oi]\s+difensiv[oi]|asset\s+difensiv[oi]|copertur[ae]\s+difensiv[ae]|bene\s+rifugio|safe\s+haven)\b', "WDEF.L è un ETF settoriale Difesa & Aerospazio (riarmo militare), NON un titolo difensivo o bene rifugio"),
+        (r'\b(?:titol[oi]\s+difensiv[oi]|asset\s+difensiv[oi]|copertur[ae]\s+difensiv[ae]|bene\s+rifugio|safe\s+haven)\b(?:(?!\.(?:\s|$))[^\n]){0,60}(?:\$?wdef(?:\.l)?|europe\s+defence)', "WDEF.L è un ETF settoriale Difesa & Aerospazio (riarmo militare), NON un titolo difensivo o bene rifugio"),
     ],
     "IQQL.DE": [
         (r'\bworld\s+quality\b', "World Quality (IQQL.DE è Listed Private Equity, non World Quality)"),
@@ -180,6 +185,38 @@ PLATITUDE_FORBIDDEN_PATTERNS = [
     (
         r'\bpronti\s+a\s+gestire\s+la\s+volatilità\b',
         "Frase vuota/banale vietata: 'pronti a gestire la volatilità'. Sostituire con considerazioni analitiche concrete"
+    ),
+]
+
+# Patterns referencing DCA / PAC / periodic recurring accumulation strategies (strictly banned)
+FORBIDDEN_DCA_STRATEGY_PATTERNS = [
+    (
+        r'\bdca\b',
+        "Riferimento vietato a 'DCA' (il portafoglio non applica Dollar-Cost Averaging)"
+    ),
+    (
+        r'\bdollar[- ]cost\s+averag\w*\b',
+        "Riferimento vietato a 'Dollar-Cost Averaging'"
+    ),
+    (
+        r'(?<![a-zA-Z0-9-])pac\b(?!-)',
+        "Riferimento vietato a 'PAC' (il portafoglio non applica piani di accumulo)"
+    ),
+    (
+        r'\bpian[oi]\s+d[i\'\u2019]\s*accumul\w*\b',
+        "Riferimento vietato a 'piano di accumulo'"
+    ),
+    (
+        r'\bingress[oi]\s+(?:periodici|frazionati|programmati|ricorrenti)\b',
+        "Riferimento vietato a 'ingressi periodici/frazionati' (logica DCA/PAC)"
+    ),
+    (
+        r'\bversament[oi]\s+(?:periodici|mensili|ricorrenti|costanti)\b',
+        "Riferimento vietato a 'versamenti periodici/ricorrenti' (logica DCA/PAC)"
+    ),
+    (
+        r'\b(?:monthly|periodic|recurring)\s+(?:contribution|contributions|deposits|purchases)\b',
+        "Riferimento vietato a versamenti/contributi periodici (logica DCA)"
     ),
 ]
 
@@ -1590,6 +1627,11 @@ def verify_post_deterministic(
         if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
             issues.append(f"CRITICAL: BANALITÀ VIETATA: {reason}.")
 
+    # 0c-bis. Strict ban on DCA / PAC / periodic recurring purchase claims
+    for pattern, reason in FORBIDDEN_DCA_STRATEGY_PATTERNS:
+        if re.search(pattern, cleaned_text, flags=re.IGNORECASE) or re.search(pattern, text, flags=re.IGNORECASE):
+            issues.append(f"CRITICAL: STRATEGIA VIETATA: {reason}.")
+
     narrative_body = _extract_narrative_body_for_daily_checks(cleaned_text)
     raw_narrative_body = _extract_narrative_body_for_daily_checks(text)
 
@@ -2366,14 +2408,17 @@ TESTO DA REVISIONARE:
 "{text}"
 
 REGOLE DI AUDIT:
-1. DIVIETO ASSOLUTO DI CEDOLE SU ASSET AD ACCUMULAZIONE: Se un asset è ad accumulazione ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), non deve mai essere citato come fonte di dividendi o reddito.
-2. DIVIETO ASSET DISMESSI: Nessuna menzione di XEON, MAU, SPCX, MELI, WCLD, RACE / Ferrari o ANT.24-7 / Anthropic (completamente dismessi dal portafoglio).
-3. TONO & COMPLIANCE: Rispettoso, pacato, nessun consiglio finanziario sollecitatore ("non è un consiglio finanziario", focus sulla strategia a lungo termine e gestione del rischio 3/10).
-4. COMPLETEZZA: Nessuna frase troncata, nessuna interruzione a metà parola o senza punteggiatura/emoji finale. NO markdown con asterischi (**).
-5. VERDETTO:
-   - "APPROVE": testo eccellente e privo di inesattezze.
+1. DIVIETO ASSOLUTO DI DCA / PAC: Rifiuta o rimuovi qualsiasi menzione di DCA, Dollar-Cost Averaging, PAC, piani di accumulo o ingressi periodici/frazionati (non facciamo mai DCA/PAC).
+2. DIVIETO ASSOLUTO DI CEDOLE SU ASSET AD ACCUMULAZIONE: Se un asset è ad accumulazione ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), non deve mai essere citato come fonte di dividendi o reddito.
+3. CLASSIFICAZIONE $WDEF.L: $WDEF.L è un ETF settoriale Difesa & Aerospazio europeo (industria militare/riarmo), MAI un titolo difensivo o bene rifugio. I veri cuscinetti difensivi/safe-haven sono $PPFB.DE (oro fisico) e $IB01.L (liquidità/T-Bills), oltre ai settori consumer staples/healthcare.
+4. DIVIETO ASSET DISMESSI: Nessuna menzione di XEON, MAU, SPCX, MELI, WCLD, RACE / Ferrari o ANT.24-7 / Anthropic (completamente dismessi dal portafoglio).
+5. PERTINENZA SPECIFICA: La risposta deve rispondere nel merito al punto specifico espresso dall'utente, evitando formule PR generiche e intercambiabili.
+6. TONO & COMPLIANCE: Rispettoso, pacato, nessun consiglio finanziario sollecitatore ("non è un consiglio finanziario", gestione attiva di lungo periodo e controllo del rischio 3/10 quando pertinente).
+7. COMPLETEZZA: Nessuna frase troncata, nessuna interruzione a metà parola o senza punteggiatura/emoji finale. NO markdown con asterischi (**).
+8. VERDETTO:
+   - "APPROVE": testo eccellente, pertinente e privo di inesattezze.
    - "AUTO_CORRECT": se ci sono lievi inesattezze o refusi ma è correggibile, fornisci in verified_text la versione corretta completa e pronta per eToro.
-   - "REJECT": se inaccettabile o fuorviante.
+   - "REJECT": se generico/evasivo, se contiene DCA/PAC, o se è inaccettabile/fuorviante.
 
 Restituisci SOLO un JSON valido:
 {{

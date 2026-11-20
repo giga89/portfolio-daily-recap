@@ -426,28 +426,28 @@
   },
   {
     "episode": 18,
-    "title": "LA MATEMATICA DEL PAC: TIMING VS DISCIPLINA",
-    "subtitle": "Perché investire a intervalli regolari (DCA) batte matematicamente l'illusione di indovinare i minimi.",
+    "title": "GESTIONE ATTIVA DEL RISCHIO: LIQUIDITÀ E ORO NEI RIBASSI",
+    "subtitle": "Perché riserve tattiche, pesi calibrati e zero leva proteggono il capitale nelle fasi di volatilità.",
     "palette": "blue",
-    "tickers": ["ETOR", "IEUR"],
+    "tickers": ["IB01.L", "PPFB.DE", "ETOR"],
     "pillars": [
       {
-        "label": "LA SIMULAZIONE CLASSICA",
-        "highlight": "IL TIMING PERFETTO NON ESISTE",
-        "text": "Studi di Charles Schwab dimostrano che anche chi avesse avuto la fortuna impossibile di comprare sui minimi batte di poco chi ha fatto un PAC automatico."
+        "label": "RISERVA TATTICA DI CASSA",
+        "highlight": "TREASURY USA A BREVE TERMINE",
+        "text": "Una quota liquida su $IB01.L remunera l'attesa senza rischio di duration, offrendo flessibilità immediata quando il mercato prezza a sconto."
       },
       {
-        "label": "VOLATILITÀ COME AMICA",
-        "highlight": "PIÙ QUOTE A SCONTO",
-        "text": "Con il Dollar-Cost Averaging, quando i mercati scendono il tuo versamento mensile acquista automaticamente più quote a prezzi stracciati."
+        "label": "SCUDO ANTICICLICO",
+        "highlight": "ORO FISICO CONTRO GLI SHOCK",
+        "text": "L'allocazione in oro fisico tramite $PPFB.DE bilancia i cali dell'azionario e protegge il potere d'acquisto nelle fasi di tensione macro."
       },
       {
         "label": "NEL NOSTRO PORTAFOGLIO",
-        "highlight": "COPY TRADING CONTINUO",
-        "text": "La replica automatica su $ETOR con apporti periodici sfrutta la matematica del PAC senza richiedere tempo o stress operativo."
+        "highlight": "PESI CALIBRATI A LEVA ZERO",
+        "text": "Su $ETOR gestiamo attivamente ogni singola posizione senza leva, modulando i pesi in base a fondamentali, valutazioni e Risk Score 3/10."
       }
     ],
-    "post_content": "C'è chi passa ore ogni giorno a fissare i grafici di borsa cercando \"il momento perfetto\" per entrare.\n\nE poi c'è chi imposta un Piano di Accumulo Capitale (PAC / Dollar-Cost Averaging) e lascia che la matematica lavori per lui.\n\nUno studio celebre di Charles Schwab ha confrontato 5 tipologie di investitori su 20 anni:\n1. Quello con una fortuna soprannaturale che indovina il punto di minimo perfetto ogni singolo anno.\n2. Quello che investe immediatamente all'inizio di ogni anno.\n3. Quello che divide la somma in versamenti mensili costanti (PAC).\n4. Quello sfortunato che compra sempre sui massimi dell'anno.\n5. Quello che aspetta sempre a bordo campo e non entra mai per paura.\n\nI risultati? L'investitore PAC ha ottenuto quasi lo stesso identico patrimonio finale di chi aveva la palla di cristallo sui minimi! E chi è rimasto fuori ad aspettare è finito drammaticamente all'ultimo posto.\n\nQuando il mercato scende, il tuo versamento periodico compra quote a sconto. Quando risale, il tuo capitale si rivaluta.\n\n⚙️ COME SFRUTTARLO CON IL COPY TRADING:\nImpostare la copia del mio portafoglio su $ETOR e aggiungere un piccolo importo periodico ogni mese è il modo più efficiente per mettere il pilota automatico ai propri risparmi su un portafoglio diversificato ($IEUR e leader globali), azzerando lo stress e l'emotività.\n\n💬 VOI COME FATE?\nInvestite con una strategia periodica automatica (mensile o trimestrale) oppure cercate ancora di indovinare il momento propizio per entrare?\nCondividete le vostre abitudini qui sotto! 👇\n\n👉 Scopri come impostare la copia periodica: etoro.com/people/andrearavalli"
+    "post_content": "Quando i mercati attraversano settimane turbolente, la differenza tra subire la volatilità e governarla non dipende dalla fortuna, ma dalla struttura del portafoglio.\n\nInvece di restare esposti al 100% su un solo settore o affidarsi ad automatismi ciechi, una gestione attiva disciplinata prepara le difese prima che arrivino le tempeste.\n\nNel nostro approccio combiniamo tre leve operative concrete:\n1️⃣ Riserva di liquidità remunerata ($IB01.L): titoli di Stato USA a brevissima scadenza che proteggono il capitale e offrono flessibilità per interventi discrezionali e mirati quando emergono valutazioni interessanti.\n2️⃣ Copertura reale decorrelata ($PPFB.DE): oro fisico custodito nei caveau, pensato per attenuare gli shock azionari e la svalutazione valutaria.\n3️⃣ Dimensionamento attivo dei pesi e zero leva (1x): nessuna esposizione a margine e ribilanciamenti mirati sui fondamentali delle società in portafoglio, mantenendo un Risk Score 3/10.\n\n⚙️ TRASPARENZA SU $ETOR:\nChi copia la strategia su $ETOR eredita in automatico questo equilibrio tra crescita secolare e cuscinetti di protezione, senza costi di gestione aggiuntivi.\n\n💬 E VOI COME GESTITE I RIBASSI?\nPreferite tenere una quota di liquidità e oro per riequilibrare il portafoglio oppure restate sempre investiti al 100% sull'azionario?\nRaccontatelo nei commenti! 👇\n\n👉 Scopri la strategia e i pesi attuali: etoro.com/people/andrearavalli"
   },
   {
     "episode": 19,

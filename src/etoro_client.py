@@ -698,6 +698,25 @@ def get_user_gcid() -> int:
     return _cached_gcid
 
 
+def _normalize_valid_cashtag(sym: str) -> Optional[str]:
+    """Return uppercase ticker symbol if valid, else None (filters currency amounts like $440, $115.23M)."""
+    if not sym:
+        return None
+    clean = str(sym).strip().rstrip(".,;:!?").upper()
+    if not clean or clean in ("M", "B", "K"):
+        return None
+    # Reject numeric figures and currency amounts with scale/percent suffixes (e.g. 440, 0.3085, 115.23M, 70K, 4B)
+    if re.match(r'^\d+(?:[.,]\d+)?[KMBT%]?$', clean):
+        return None
+    # Accept Hong Kong / numeric exchange tickers (e.g. 1919.HK, 2318.HK, 01211.HK, 1211.HK)
+    if re.match(r'^\d{4,5}\.[A-Z]{2}$', clean):
+        return clean
+    # Accept standard symbols starting with an ASCII letter
+    if re.match(r'^[A-Z][A-Z0-9.-]{0,11}$', clean):
+        return clean
+    return None
+
+
 def get_user_feed_posts(days_back: int = 7, max_posts: int = 60) -> List[Dict[str, Any]]:
     """
     Fetches the live feed of posts from the user's profile (/api/v1/feeds/users/{gcid}).
@@ -754,12 +773,12 @@ def get_user_feed_posts(days_back: int = 7, max_posts: int = 60) -> List[Dict[st
 
                 tickers = []
                 for tag in p.get("tags", []):
-                    sym = tag.get("market", {}).get("symbolName")
+                    sym = _normalize_valid_cashtag(tag.get("market", {}).get("symbolName"))
                     if sym and sym not in tickers:
                         tickers.append(sym)
                 for m in re.findall(r"\$([A-Za-z0-9_.-]+)", content):
-                    clean_m = m.strip().upper()
-                    if clean_m not in tickers:
+                    clean_m = _normalize_valid_cashtag(m)
+                    if clean_m and clean_m not in tickers:
                         tickers.append(clean_m)
 
                 cd = d.get("commentsData", {})

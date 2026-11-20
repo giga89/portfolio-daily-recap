@@ -3,23 +3,22 @@
 AI Community Comment Responder for eToro (Auto-Pilot & High Conviction)
 =====================================================================
 Scans recent eToro posts (up to 7 days back) for genuine community comments without a reply,
-and generates balanced, high-conviction, disciplined responses aligned with
-Andrea Ravalli's Popular Investor strategy and portfolio theses.
+and generates point-first, portfolio-grounded responses aligned with
+Andrea Ravalli's Popular Investor strategy and real holdings.
 
 Features & Strict Quality Control:
   • Two-Pass Generation Architecture:
-      - Pass 1 (Drafting): Contextual draft generation via Gemini Flash models.
-      - Pass 2 (Validator / Judge): Independent editorial & compliance evaluation.
-  • Strict Deterministic Syntax Guardrails:
-      - Rejects truncated / cut-off sentences (stops words, trailing prepositions/conjunctions).
-      - Enforces terminal punctuation/emojis and minimum substantive length.
-      - Strips unwanted markdown (**bold**) or AI meta-commentary.
-  • Anti-Duplication Persistence (100% Guaranteed):
+      - Pass 1 (Drafting): Contextual draft generation grounded in full post text,
+        verified portfolio metadata/weights, and authentic non-DCA voice.
+      - Pass 2 (Validator / Judge): Adversarial editorial, specificity & compliance evaluation.
+  • Strict Deterministic Guardrails:
+      - Categorically blocks any mention of DCA, Dollar-Cost Averaging, PAC, or periodic buying.
+      - Enforces accurate classification of $WDEF.L (European Defence sector ETF, NOT defensive).
+      - Rejects truncated / cut-off sentences, trailing prepositions, and markdown bold (**).
+  • Anti-Duplication & Safe Skip-on-Failure:
       - Uses Gist & local answered_comments.json state.
-      - Categorically prevents re-answering already addressed comments.
-  • Enhanced Topic-Aware Fallback Engine:
-      - Flawless, domain-specific templates covering Tech/AMZN/GPUs, NVDA, PLTR,
-        GLP-1/Healthcare, Nuclear/Energy, Gold/Defense, DCA, and Copy Trading.
+      - If all AI providers fail or fail verification, safely skips without publishing
+        generic static templates so the comment is retried cleanly on the next cycle.
   • Rich Telegram Notifications:
       - Sends instant alerts with post URL, comment snippet, and verified response.
 """
@@ -137,31 +136,27 @@ except ImportError:
 
 PORTFOLIO_SYSTEM_PROMPT = """
 You are Andrea Ravalli's Official AI Co-Pilot for the eToro Popular Investor Program.
-Your job is to draft balanced, highly professional, disciplined, and appreciative replies to user comments on eToro posts.
+Your job is to draft specific, grounded, authentic, and disciplined replies to user comments on eToro posts.
 
-CORE PROFILE & STRATEGY RULES:
-1. Track Record & Philosophy:
+CORE PROFILE & OPERATIONAL PHILOSOPHY:
+1. Track Record & Active Management Style:
    - +200% cumulative gain since 2020.
-   - Long-term compound investing (3-5+ years time horizon).
-   - Certified eToro Risk Score 3/10 (conservative/moderate risk).
-   - Zero leverage (1x only, no CFD leverage gambling, no shorting).
-   - Disciplined Dollar-Cost Averaging (DCA) and dividend reinvestment.
+   - Active long-term investing (3-5+ years time horizon) based on fundamental conviction, calibrated position sizing, discretionary rebalancing, and dividend reinvestment.
+   - Certified eToro Risk Score 3/10 (conservative/moderate risk) and zero leverage (1x real stocks/ETFs only, no CFD leverage gambling, no shorting).
+   - Risk buffers & cash reserves: short-term US Treasury reserve ($IB01.L) for liquidity/dry powder, Physical Gold ETC ($PPFB.DE) as a safe-haven hedge, plus defensive sectors in Healthcare ($LLY, $ABBV, $ABT.US, $AZN.L, $HUM) and Consumer Staples ($WMT, $ULVR.L).
 
-2. Core Portfolio Pillars & Theses:
-   - AI & Hyperscale Tech (NVDA, AMD, PLTR, TSM, AVGO, MSFT, GOOGL, AMZN, MRVL): Secular compute demand, custom silicon, cloud AI infrastructure, software monetization (AIP). Short-term market rotation is noise.
-   - Healthcare & GLP-1 (LLY, ABBV, ABT, AZN): Demographic aging, blockbuster metabolic and immunology treatments, resilient pricing power.
-   - Energy, Nuclear & Grid (CCJ, PRY, ENI, ENEL, GLEN, TRIG): Nuclear baseload 24/7 for AI data centers (Cameco), global electrification supercycle (Prysmian/Glencore).
-   - Defense & Safe Havens (WDEF ETF, Physical Gold PPFB ETC, Cash/Treasuries IB01): Geopolitical hedging (NATO rearmament) and currency debasement protection.
-   - Selected Emerging & Quality (BYD 01211.HK, Walmart WMT, Unilever ULVR, Vietnam VOF, Indonesia INDO): High barriers to entry and strong cash flows.
+2. STRICT PROHIBITIONS (ZERO TOLERANCE):
+   - NEVER mention, suggest, or imply DCA, Dollar-Cost Averaging, PAC, "piano di accumulo", "ingressi periodici", "ingressi frazionati", or recurring deposits. We do NOT practice DCA/PAC and NEVER will. If a user asks about PAC or periodic buying, state plainly (without using those forbidden terms) that we do not follow automated periodic buying schedules, but manage positions actively based on fundamentals, valuations, and risk balance.
+   - NEVER call $WDEF.L (WisdomTree Europe Defence UCITS ETF) a defensive stock, defensive hedge, or safe haven: it is a thematic European Defence & Aerospace sector ETF (accumulating, zero dividends), NOT a defensive/safe-haven cushion.
+   - NEVER mention purged assets (XEON, MAU, SPCX, MELI, WCLD, RACE/Ferrari, ANT.24-7/Anthropic).
+   - NEVER attribute dividends to accumulating assets ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE) or non-dividend holdings ($ETOR, $TRX, $PLTR, $AMZN, $01211.HK).
 
-3. RESPONSE GUARDRAILS:
-   - Language Detection: If user writes in English, reply in flawless English. If Italian, reply in Italian.
-   - Tone: Warm, humble, appreciative, polite, yet intellectually rigorous and confident as a seasoned Popular Investor.
-   - Never give individual financial advice, never promise guaranteed profits, never encourage short-term day trading or CFD leverage.
-   - Always address the user's specific questions or mentioned companies (e.g. AMZN, NVDA, PLTR, GPUs, tech sentiment, DCA) with concrete reasoning.
-   - Formatting: Do NOT use markdown bold with asterisks (**text**). Use plain clean text. Include 1-2 relevant emojis (e.g. 📈, 🤝, 🚀, 🛡️).
-   - Length: 1 to 2 short paragraphs (60-120 words), concise and punchy for mobile feed reading.
-   - Always conclude cleanly with warm greetings and best wishes for their life and trading journey.
+3. ANTI-GENERICITY & POINT-FIRST RULES:
+   - FIRST SUBSTANTIVE SENTENCE: Directly address the exact point, company, figure, timeframe, or criticism raised by the user, grounded in the actual post content provided below.
+   - OWNED HOLDINGS: When a ticker/company is marked IN PORTAFOGLIO in the grounding context, write from the perspective of an active shareholder (e.g. referencing its real role/weight in the portfolio). NEVER say "monitoriamo realtà come..." as if we didn't own it. If an asset is marked NON IN PORTAFOGLIO, never claim we hold it.
+   - NO CANNED PR LITANY: Do NOT repeat "Risk Score 3/10 + zero leva + 3-5+ anni + rumore di breve termine" in every reply. Cite risk/horizon ONLY when directly relevant to the user's point (e.g. drawdown anxiety, volatility, leverage, copying).
+   - HANDLING CRITICISM OR SARCASM: Stay calm, respectful, and address the substance of the critique directly without robotic praise like "Grazie mille per il riscontro!".
+   - LANGUAGE & FORMATTING: Match the user's language (Italian or English). Keep to 1-2 crisp paragraphs (55-120 words for substantive comments). Plain clean text only: NO markdown bold (**). Use 1-2 natural emojis. Never give individualized financial advice or guarantee returns. Vary openings and closings naturally.
 """
 
 # Incomplete trailing words/prepositions indicating truncation
@@ -183,7 +178,11 @@ DANGLING_STOP_WORDS = {
 }
 
 VALID_TERMINAL_PUNCTUATION = ('.', '!', '?')
-VALID_TERMINAL_EMOJIS = ('🤝', '📈', '🚀', '✨', '💼', '🎯', '📊', '🛡️', '👋', '🙏', '🔥', '💡')
+VALID_TERMINAL_EMOJIS = (
+    '🤝', '📈', '🚀', '✨', '💼', '🎯', '📊', '🛡️', '👋', '🙏', '🔥', '💡',
+    '🥇', '🚢', '💵', '🪙', '🌍', '🔋', '⛽', '💊', '💉', '🏥', '🧬', '🔬',
+    '⚡', '⛏️', '🔍', '🌬️', '🛒', '🚗', '📦', '🔌', '🏛️', '🏦', '🌏', '🤖', '💻',
+)
 
 
 def _extract_text(obj: Any) -> str:
@@ -204,13 +203,319 @@ def _detect_language(text: str) -> str:
     return "en" if matches >= 2 else "it"
 
 
-def _is_simple_gratitude(text: str) -> bool:
-    """Check if message is just a simple thanks or acknowledgment."""
-    msg = text.lower().strip()
-    if any(q in msg for q in ["?", "cosa", "come", "quanto", "perch", "target", "prezzo", "consigli", "chiuso", "aperto", "entr", "view on"]):
+def _normalize_ticker_alias(raw_ticker: str) -> str:
+    """Normalize ticker variants and aliases to canonical portfolio keys."""
+    clean = str(raw_ticker or "").replace("$", "").strip().rstrip(".,;:!?").upper()
+    alias_map = {
+        "GOOGL": "GOOG",
+        "ABT": "ABT.US",
+        "1211.HK": "01211.HK",
+        "BESI": "BESI.NV",
+        "WDEF": "WDEF.L",
+        "PPFB": "PPFB.DE",
+        "IB01": "IB01.L",
+        "PRY": "PRY.MI",
+        "ENI": "ENI.MI",
+        "ENEL": "ENEL.MI",
+        "TRIG": "TRIG.L",
+        "AZN": "AZN.L",
+        "GLEN": "GLEN.L",
+        "ULVR": "ULVR.L",
+        "VOF": "VOF.L",
+        "VOW3": "VOW3.DE",
+        "INDO": "INDO.PA",
+        "IQQL": "IQQL.DE",
+        "SX7PEX": "SX7PEX.DE",
+        "EXV1.DE": "SX7PEX.DE",
+        "TSMC": "TSM",
+    }
+    return alias_map.get(clean, clean)
+
+
+def _is_valid_ticker_token(sym: str) -> bool:
+    """Filter out numeric currency tokens like 440, 0.3085, 115.23M, 70K."""
+    clean = str(sym or "").replace("$", "").strip().rstrip(".,;:!?").upper()
+    if not clean or clean in ("M", "B", "K"):
         return False
-    courtesy_words = ["grazie", "grazie mille", "thanks", "thank you", "ok", "chiaro", "perfetto", "top", "good luck", "buona giornata", "complimenti", "ottimo", "capito", "d'accordo", "condivido", "a presto", "buon trading", "👍", "🙏", "🤝"]
-    if len(msg) < 45 and any(cw in msg for cw in courtesy_words):
+    if re.match(r'^\d+(?:[.,]\d+)?[KMBT%]?$', clean):
+        return False
+    if re.match(r'^\d{4,5}\.[A-Z]{2}$', clean):
+        return True
+    return bool(re.match(r'^[A-Z][A-Z0-9.-]{0,11}$', clean))
+
+
+_PORTFOLIO_WEIGHTS_CACHE: Optional[Dict[str, float]] = None
+_PORTFOLIO_METADATA_CACHE: Optional[Dict[str, Dict[str, Any]]] = None
+
+
+def _get_portfolio_metadata_and_weights() -> Tuple[Dict[str, Dict[str, Any]], Dict[str, float]]:
+    """Load and cache PORTFOLIO_ASSETS_METADATA and data/portfolio_weights.json."""
+    global _PORTFOLIO_WEIGHTS_CACHE, _PORTFOLIO_METADATA_CACHE
+    if _PORTFOLIO_METADATA_CACHE is None:
+        try:
+            from portfolio_manager import PORTFOLIO_ASSETS_METADATA
+            _PORTFOLIO_METADATA_CACHE = dict(PORTFOLIO_ASSETS_METADATA)
+        except ImportError:
+            try:
+                from src.portfolio_manager import PORTFOLIO_ASSETS_METADATA
+                _PORTFOLIO_METADATA_CACHE = dict(PORTFOLIO_ASSETS_METADATA)
+            except ImportError:
+                _PORTFOLIO_METADATA_CACHE = {}
+
+    if _PORTFOLIO_WEIGHTS_CACHE is None:
+        weights_path = os.path.join(DATA_DIR, "portfolio_weights.json")
+        loaded: Dict[str, float] = {}
+        if os.path.exists(weights_path):
+            try:
+                with open(weights_path, "r", encoding="utf-8") as f:
+                    raw_w = json.load(f)
+                    if isinstance(raw_w, dict):
+                        for k, v in raw_w.items():
+                            try:
+                                loaded[_normalize_ticker_alias(k)] = float(v)
+                            except (TypeError, ValueError):
+                                pass
+            except Exception:
+                pass
+        _PORTFOLIO_WEIGHTS_CACHE = loaded
+
+    return _PORTFOLIO_METADATA_CACHE, _PORTFOLIO_WEIGHTS_CACHE
+
+
+_NAME_TO_PORTFOLIO_TICKER: List[Tuple[str, str]] = [
+    (r'\bnvidia\b', 'NVDA'),
+    (r'\bamd\b|advanced\s+micro\s+devices', 'AMD'),
+    (r'\bmicrosoft\b', 'MSFT'),
+    (r'\bamazon\b|\baws\b', 'AMZN'),
+    (r'\balphabet\b|\bgoogle\b', 'GOOG'),
+    (r'\bpalantir\b', 'PLTR'),
+    (r'\bbroadcom\b', 'AVGO'),
+    (r'\btsmc\b|taiwan\s+semiconductor', 'TSM'),
+    (r'\bmarvell\b', 'MRVL'),
+    (r'\bbesi\b|be\s+semiconductor', 'BESI.NV'),
+    (r'\beli\s+lilly\b|\blilly\b', 'LLY'),
+    (r'\babbvie\b', 'ABBV'),
+    (r'\babbott\b', 'ABT.US'),
+    (r'\bhumana\b', 'HUM'),
+    (r'\bastrazeneca\b', 'AZN.L'),
+    (r'\bcameco\b', 'CCJ'),
+    (r'\benel\b', 'ENEL.MI'),
+    (r'\beni\b', 'ENI.MI'),
+    (r'\bprysmian\b', 'PRY.MI'),
+    (r'\bglencore\b', 'GLEN.L'),
+    (r'\btrig\b|renewables\s+infrastructure', 'TRIG.L'),
+    (r'\bwalmart\b', 'WMT'),
+    (r'\bvolkswagen\b', 'VOW3.DE'),
+    (r'\bunilever\b', 'ULVR.L'),
+    (r'\bbyd\b', '01211.HK'),
+    (r'\bcosco(?:\s+shipping)?\b', '1919.HK'),
+    (r'\bping\s+an\b', '2318.HK'),
+    (r'\bvinacapital\b|\bvietnam\b', 'VOF.L'),
+    (r'\bindonesia\b', 'INDO.PA'),
+    (r'\bwisdomtree\s+europe\s+defence\b|\bwdef\b', 'WDEF.L'),
+    (r'\bphysical\s+gold\b|\bppfb\b', 'PPFB.DE'),
+    (r'\bib01\b|treasury\s+bond\s+0-1', 'IB01.L'),
+    (r'\bieur\b', 'IEUR'),
+    (r'\biqql\b|listed\s+private\s+equity', 'IQQL.DE'),
+    (r'\bsx7pex\b|stoxx\s+europe\s+600\s+banks', 'SX7PEX.DE'),
+    (r'\btron\b', 'TRX'),
+    (r'\betoro\s+group\b', 'ETOR'),
+]
+
+
+def _extract_portfolio_and_external_tickers(
+    texts: List[str],
+    seed_tickers: Optional[List[str]] = None,
+) -> Tuple[List[str], List[str]]:
+    """
+    Resolve all portfolio holdings and external market tickers mentioned across texts
+    (via $cashtags, seed tickers, and company/ETF names without '$').
+    Returns: (in_portfolio_tickers, external_tickers)
+    """
+    metadata, _ = _get_portfolio_metadata_and_weights()
+    ordered_candidates: List[str] = []
+
+    def _add_candidate(raw_sym: str) -> None:
+        if not _is_valid_ticker_token(raw_sym):
+            return
+        canon = _normalize_ticker_alias(raw_sym)
+        if canon and canon not in ordered_candidates:
+            ordered_candidates.append(canon)
+
+    for t in (seed_tickers or []):
+        _add_candidate(t)
+
+    combined = "\n".join(str(x or "") for x in texts)
+    for m in re.findall(r'\$([A-Za-z0-9_.-]+)', combined):
+        _add_candidate(m)
+
+    for pattern, canon in _NAME_TO_PORTFOLIO_TICKER:
+        if re.search(pattern, combined, flags=re.IGNORECASE):
+            if canon not in ordered_candidates:
+                ordered_candidates.append(canon)
+
+    in_portfolio: List[str] = []
+    external: List[str] = []
+    for sym in ordered_candidates:
+        if sym in metadata:
+            if sym not in in_portfolio:
+                in_portfolio.append(sym)
+        else:
+            if sym not in external:
+                external.append(sym)
+    return in_portfolio, external
+
+
+def _build_portfolio_grounding_context(
+    user_comment: str,
+    post_context: str = "",
+    relevant_tickers: Optional[List[str]] = None,
+    candidate_reply: str = "",
+) -> str:
+    """
+    Build verified grounding metadata (ownership status, real weights, sector,
+    dividend policy, thesis, and catalysts) across comment, post, and draft reply.
+    """
+    metadata, weights = _get_portfolio_metadata_and_weights()
+    # Prioritize tickers explicitly mentioned in user_comment first, then post_context/reply
+    in_comment, ext_comment = _extract_portfolio_and_external_tickers([user_comment], [])
+    in_other, ext_other = _extract_portfolio_and_external_tickers(
+        [post_context, candidate_reply],
+        relevant_tickers or [],
+    )
+    in_portfolio = in_comment + [t for t in in_other if t not in in_comment]
+    external = ext_comment + [t for t in ext_other if t not in ext_comment]
+
+    lines: List[str] = []
+    for t in in_portfolio[:8]:
+        meta = metadata.get(t, {})
+        w_val = weights.get(t)
+        weight_str = f"peso: {w_val:.2f}%" if w_val is not None else "posizione attiva"
+        div_str = "SÌ" if meta.get("is_dividend_paying") else "NO (ACCUMULAZIONE / ZERO CEDOLE DISTRIBUITE)"
+        catalysts = meta.get("upside_catalysts") or []
+        top_cat = catalysts[0] if catalysts else ""
+        entry = (
+            f"• ${t} ({meta.get('name', t)}) — IN PORTAFOGLIO ({weight_str})\n"
+            f"  - Settore: {meta.get('sector', 'N/D')}\n"
+            f"  - Dividendi: {div_str}\n"
+            f"  - Tesi: {meta.get('thesis', '')}"
+        )
+        if top_cat:
+            entry += f"\n  - Driver/Catalyst: {top_cat}"
+        if t == "WDEF.L":
+            entry += "\n  - NOTA CRITICA: ETF settoriale Difesa & Aerospazio (NON definirlo mai 'titolo difensivo' o 'bene rifugio')."
+        lines.append(entry)
+
+    if external:
+        ext_list = ", ".join(f"${t}" for t in external[:6])
+        lines.append(
+            f"• Riferimenti esterni / benchmark ({ext_list}): NON IN PORTAFOGLIO "
+            f"(non descriverli mai come posizioni detenute)."
+        )
+
+    ib01_w = weights.get("IB01.L")
+    ppfb_w = weights.get("PPFB.DE")
+    ib01_str = f"~{ib01_w:.1f}%" if ib01_w is not None else "quota dedicata"
+    ppfb_str = f"~{ppfb_w:.1f}%" if ppfb_w is not None else "quota dedicata"
+    baseline_note = (
+        f"Riepilogo portafoglio reale ({len(weights) or 37} posizioni, 100% 1x zero leva): "
+        f"riserva di liquidità in $IB01.L (Treasury USA 0-1yr, {ib01_str}) e scudo safe-haven in $PPFB.DE "
+        f"(Oro fisico, {ppfb_str}), affiancati da settori difensivi (Healthcare, Consumer Staples) e pilastri AI/Tech, Energia/Nucleare e Difesa ($WDEF.L)."
+    )
+
+    if not lines:
+        return (
+            "Contesto generale/macro sul portafoglio (nessun singolo titolo obbligatorio; "
+            "citare titoli reali del portafoglio o del post è consentito quando pertinente al commento).\n"
+            + baseline_note
+        )
+
+    lines.append(baseline_note)
+    return "\n".join(lines)
+
+
+_FALLBACK_DCA_PATTERNS: List[Tuple[str, str]] = [
+    (r'\bdca\b', "Riferimento vietato a 'DCA'"),
+    (r'\bdollar[- ]cost\s+averag\w*\b', "Riferimento vietato a 'Dollar-Cost Averaging'"),
+    (r'(?<![a-zA-Z0-9-])pac\b(?!-)', "Riferimento vietato a 'PAC'"),
+    (r'\bpian[oi]\s+d[i\'\u2019]\s*accumul\w*\b', "Riferimento vietato a 'piano di accumulo'"),
+    (r'\bingress[oi]\s+(?:periodici|frazionati|programmati|ricorrenti)\b', "Riferimento vietato a ingressi periodici/frazionati"),
+    (r'\bversament[oi]\s+(?:periodici|mensili|ricorrenti|costanti)\b', "Riferimento vietato a versamenti periodici"),
+    (r'\b(?:monthly|periodic|recurring)\s+(?:contribution|contributions|deposits|purchases)\b', "Riferimento vietato a versamenti periodici"),
+]
+
+_FALLBACK_WDEF_PATTERNS: List[Tuple[str, str]] = [
+    (r'(?:\$?wdef(?:\.l)?|europe\s+defence)(?:(?!\.(?:\s|$))[^\n]){0,60}\b(?:titol[oi]\s+difensiv[oi]|asset\s+difensiv[oi]|copertur[ae]\s+difensiv[ae]|bene\s+rifugio|safe\s+haven)\b', "WDEF.L è Difesa & Aerospazio, NON difensivo o bene rifugio"),
+    (r'\b(?:titol[oi]\s+difensiv[oi]|asset\s+difensiv[oi]|copertur[ae]\s+difensiv[ae]|bene\s+rifugio|safe\s+haven)\b(?:(?!\.(?:\s|$))[^\n]){0,60}(?:\$?wdef(?:\.l)?|europe\s+defence)', "WDEF.L è Difesa & Aerospazio, NON difensivo o bene rifugio"),
+]
+
+
+def _contains_forbidden_dca(text: str) -> Tuple[bool, str]:
+    """Check whether text references forbidden DCA / PAC / periodic buying concepts."""
+    if not text:
+        return False, ""
+    try:
+        from post_verifier import FORBIDDEN_DCA_STRATEGY_PATTERNS as patterns
+    except ImportError:
+        try:
+            from src.post_verifier import FORBIDDEN_DCA_STRATEGY_PATTERNS as patterns
+        except ImportError:
+            patterns = _FALLBACK_DCA_PATTERNS
+    for pat, reason in patterns:
+        if re.search(pat, text, flags=re.IGNORECASE):
+            return True, reason
+    return False, ""
+
+
+def _contains_wdef_defensive_mislabel(text: str) -> Tuple[bool, str]:
+    """Check whether text mislabels WDEF.L as a defensive stock or safe haven."""
+    if not text:
+        return False, ""
+    try:
+        from post_verifier import ASSET_IDENTITY_FORBIDDEN_TERMS
+        patterns = ASSET_IDENTITY_FORBIDDEN_TERMS.get("WDEF.L", _FALLBACK_WDEF_PATTERNS)[-2:]
+    except ImportError:
+        try:
+            from src.post_verifier import ASSET_IDENTITY_FORBIDDEN_TERMS
+            patterns = ASSET_IDENTITY_FORBIDDEN_TERMS.get("WDEF.L", _FALLBACK_WDEF_PATTERNS)[-2:]
+        except ImportError:
+            patterns = _FALLBACK_WDEF_PATTERNS
+    for pat, reason in patterns:
+        if re.search(pat, text, flags=re.IGNORECASE):
+            return True, reason
+    return False, ""
+
+
+def _is_simple_gratitude(text: str) -> bool:
+    """Check if message is just a simple thanks, praise, or courtesy acknowledgment."""
+    msg = text.lower().strip()
+    if not msg or "?" in msg or "$" in msg:
+        return False
+    if "view on" in msg or "poco capac" in msg or "fino alle" in msg:
+        return False
+    topic_pattern = (
+        r'\b(?:'
+        r'cosa|come|quanto|perch\w*|target|prezzo|consigli\w*|chiuso|aperto|entr\w*|'
+        r'tenut[ae]|rally|mes[ei]|rosso|paura|sbagl\w*|pac|dca|copi\w*|leva|'
+        r'divid\w*|rimbalz\w*|croll\w*|volatil\w*|sangue|jensen|ceo|'
+        r'btc|eth|crypto|cripto|bitcoin|nvda|nvidia|pltr|palantir|ccj|cameco|'
+        r'lly|amzn|amazon|cosco|abbv|tsm|avgo|msft|goog|wdef|ppfb|ib01|trx|'
+        r'ritracci\w*|multipl\w*'
+        r')\b'
+    )
+    if re.search(topic_pattern, msg):
+        return False
+    in_p, ext_p = _extract_portfolio_and_external_tickers([text], [])
+    if in_p or ext_p:
+        return False
+    courtesy_words = [
+        "grazie", "grazie mille", "thanks", "thank you", "ok", "chiaro",
+        "perfetto", "top", "good luck", "buona giornata", "complimenti",
+        "ottimo", "capito", "d'accordo", "condivido", "a presto", "buon trading",
+        "valore aggiunto", "ben curat", "bel lavoro", "bravo", "ottimi contenuti",
+        "ottimo lavoro", "piacere leggere", "👍", "🙏", "🤝", "👌", "🌟", "👏",
+    ]
+    if len(msg) < 85 and any(cw in msg for cw in courtesy_words):
         return True
     return False
 
@@ -219,38 +524,38 @@ def _is_simple_gratitude(text: str) -> bool:
 
 DEFAULT_ANDREA_STYLE_SEEDS = [
     {
-        "id": "seed_dca_strategy_it",
-        "user_comment": "Ha senso entrare adesso con tutto il capitale o meglio fare un PAC?",
-        "andrea_reply": "Ciao @utente! Con la nostra strategia a Risk Score 3/10 e orizzonte pluriennale, suggerisco sempre un approccio graduale tramite Dollar-Cost Averaging (DCA). Dividere il capitale in ingressi periodici ti permette di non preoccuparti del timing di breve termine e di sfruttare la volatilità come alleata. Un caro saluto e buon trading! 📈🤝",
+        "id": "seed_drawdown_active_it",
+        "user_comment": "Secondo mese difficile sui mercati, ho paura che continui a scendere...",
+        "andrea_reply": "Ciao @utente, capisco la tensione dopo due mesi complicati. È proprio in queste fasi che lavorano le nostre difese reali in portafoglio: la riserva liquida in Treasury USA ($IB01.L) e l'oro fisico ($PPFB.DE) attenuano la volatilità azionaria, permettendoci di riequilibrare i pesi in modo attivo sulle società con fondamentali più solidi anziché reagire d'impulso. Un saluto e buon proseguimento! 🛡️📊",
         "language": "it",
         "source": "seed"
     },
     {
-        "id": "seed_nvda_blackwell_it",
-        "user_comment": "Cosa ne pensi del ritracciamento di NVIDIA? Conviene tenere?",
-        "andrea_reply": "Grazie per la domanda, @utente! Prese di profitto dopo rally importanti sono del tutto fisiologiche. La nostra tesi su $NVDA rimane intatta: la domanda per l'architettura Blackwell e i piani di Capex dei giganti del cloud rimangono solidissimi per i prossimi 3-5 anni. Manteniamo la posizione con disciplina senza farci condizionare dal rumore di breve termine. 🚀📊",
+        "id": "seed_cosco_holding_it",
+        "user_comment": "Cosco Shipping ($1919.HK) garantisce una posizione diretta sui flussi del commercio globale marittimo 🚢",
+        "andrea_reply": "Ottima sintesi @utente! Nel nostro portafoglio $1919.HK pesa intorno al 2,2% proprio per quel motivo: oltre all'esposizione diretta ai volumi container e ai terminal portuali globali, apprezziamo la solidissima posizione di cassa netta e la capacità di remunerare gli azionisti con dividendi generosi lungo il ciclo marittimo. Un caro saluto! 🚢📊",
+        "language": "it",
+        "source": "seed"
+    },
+    {
+        "id": "seed_criticism_calm_it",
+        "user_comment": "4 mesi fa tutti vedevate Nvidia come un super investimento e ora scende, sparate a caso!",
+        "andrea_reply": "Ciao @utente, capisco la frustrazione sulle oscillazioni di breve, ma la valutazione di un'azienda come $NVDA non si misura su 4 mesi di prezzo: contano l'adozione Blackwell, la domanda di calcolo nei data center e i margini operativi reali. Proprio per gestire i fisiologici ritracciamenti manteniamo un peso controllato (circa 3,5%), zero leva e riserve liquide per ribilanciare solo quando i fondamentali lo giustificano. Un saluto! 📊🤝",
         "language": "it",
         "source": "seed"
     },
     {
         "id": "seed_copy_minimum_it",
         "user_comment": "Quanto capitale consigli per iniziare a copiare il portafoglio?",
-        "andrea_reply": "Ciao @utente! Il minimo per copiare su eToro è di 200$, ma per replicare fedelmente tutti i 40 titoli del portafoglio e ricevere le quote frazionate di ogni dividendo suggerisco di partire da almeno 500$-1000$, impostando l'opzione di copiare i trade aperti. Un caro saluto e benvenuto a bordo! 🤝✨",
+        "andrea_reply": "Ciao @utente! Il minimo tecnico su eToro è 200$, ma per replicare in proporzione tutte le ~37 posizioni del portafoglio senza escludere i titoli più piccoli ti consiglio di partire da 500$-1000$, spuntando 'Copia operazioni aperte'. Benvenuto a bordo e un caro saluto! 🤝✨",
         "language": "it",
         "source": "seed"
     },
     {
         "id": "seed_cameco_energy_en",
         "user_comment": "Why are you holding Cameco and Prysmian in the portfolio?",
-        "andrea_reply": "Hi @user! Great question. Cameco ($CCJ) and Prysmian ($PRY.MI) represent two foundational pillars of our infrastructure thesis: 24/7 carbon-free nuclear baseload and global high-voltage grid electrification, both driven by massive datacenter energy demands. We are positioned for multi-year structural growth with 0 leverage. Wishing you the best in your trading! 📈🤝",
+        "andrea_reply": "Hi @user! Cameco ($CCJ) and Prysmian ($PRY.MI) target the physical bottleneck of AI expansion: data centers need 24/7 carbon-free nuclear baseload and high-voltage grid cabling to connect new capacity. Both hold strong market share and multi-year order visibility, which is why we keep them as active core positions in our portfolio. Best regards! 📈🤝",
         "language": "en",
-        "source": "seed"
-    },
-    {
-        "id": "seed_palantir_valuation_it",
-        "user_comment": "Palantir non ti sembra troppo cara a questi multipli?",
-        "andrea_reply": "Ottimo punto, @utente! I multipli di $PLTR sono certamente elevati se confrontati con il software tradizionale, ma la crescita di AIP (Artificial Intelligence Platform) e l'espansione dei contratti commerciali USA confermano un pricing power quasi monopolistico. Gestiamo la posizione con un peso ponderato per beneficiare del rialzo proteggendo il capitale con il nostro Risk 3/10. Un saluto cordiale! 🛡️📊",
-        "language": "it",
         "source": "seed"
     }
 ]
@@ -258,14 +563,23 @@ DEFAULT_ANDREA_STYLE_SEEDS = [
 
 def load_andrea_style_archive() -> List[Dict[str, Any]]:
     """
-    Loads authentic Andrea Ravalli replies from Gist storage.
-    If Gist is empty, returns the high-quality seed dataset.
+    Loads authentic Andrea Ravalli replies from Gist storage, filtering out any legacy
+    DCA/PAC or mislabeled WDEF entries. Falls back to clean seed dataset if empty.
     """
     archive = []
     try:
         gist_archive = gist_storage.get_andrea_style_archive()
         if gist_archive and isinstance(gist_archive, list):
-            archive.extend(gist_archive)
+            for item in gist_archive:
+                if not isinstance(item, dict):
+                    continue
+                q_txt = str(item.get("user_comment", ""))
+                a_txt = str(item.get("andrea_reply", ""))
+                if _contains_forbidden_dca(q_txt)[0] or _contains_forbidden_dca(a_txt)[0]:
+                    continue
+                if _contains_wdef_defensive_mislabel(a_txt)[0]:
+                    continue
+                archive.append(item)
     except Exception as e:
         print(f"⚠️ Warning loading style archive from Gist: {e}")
 
@@ -311,7 +625,7 @@ def format_style_examples_for_prompt(
                 score += 5
 
         # Check keyword matches
-        for kw in ["pac", "dca", "copi", "copy", "leva", "leverage", "blackwell", "capex", "divid", "multipl", "risk", "rischio", "cameco", "pltr", "nvda"]:
+        for kw in ["copi", "copy", "leva", "leverage", "drawdown", "rosso", "ribass", "mese", "divid", "multipl", "risk", "rischio", "cameco", "pltr", "nvda", "cosco", "oro", "cash", "critica", "blackwell", "capex"]:
             if kw in user_lower and (kw in q_text or kw in r_text):
                 score += 3
 
@@ -475,6 +789,16 @@ def validate_response_syntax(text: str, user_author: str, is_follow_up_or_short:
         if fm in cleaned.lower():
             return False, cleaned, f"Contains forbidden meta-phrase: '{fm}'"
 
+    # Strict deterministic block on DCA / PAC / periodic buying references
+    has_dca, dca_reason = _contains_forbidden_dca(cleaned)
+    if has_dca:
+        return False, cleaned, f"Contains forbidden DCA/PAC strategy reference: {dca_reason}"
+
+    # Strict deterministic block on mislabeling $WDEF.L as defensive / safe-haven
+    has_wdef_err, wdef_reason = _contains_wdef_defensive_mislabel(cleaned)
+    if has_wdef_err:
+        return False, cleaned, wdef_reason
+
     return True, cleaned, "OK"
 
 
@@ -486,27 +810,27 @@ def verify_and_refine_reply(
     lang: str = "it",
     api_key: Optional[str] = None,
     generator_model: Optional[str] = None,
+    relevant_tickers: Optional[List[str]] = None,
 ) -> Tuple[bool, str, str]:
     """
-    Pass 2: Double-Verification Judge (Independent Editorial & Compliance Review).
+    Pass 2: Double-Verification Judge (Independent Editorial, Specificity & Compliance Review).
     Evaluates:
-      1. Relevance & Substance: Does it specifically address what the user wrote?
-      2. Completeness & Fluent Ending: Is it a 100% complete text without abrupt cuts?
-      3. Compliance: Aligns with Andrea Ravalli's Risk 3/10, no CFD leverage, no financial advice.
+      1. Zero DCA / PAC: Hard rejection for any DCA / Dollar-Cost Averaging / PAC / periodic buying reference.
+      2. Point-First Specificity & Substance: Directly addresses the user's specific point using full post & portfolio grounding.
+      3. Factual Accuracy & Grounding: Respects ownership status, real weights, dividends, and $WDEF.L sector classification.
+      4. Authentic Tone & Completeness: No robotic PR litany, complete ending, no markdown bold.
     Returns: (is_approved, perfected_reply, reason)
     """
     if not HAS_GENAI or not api_key:
         return True, candidate_reply, "Pass 2 skipped (no API key/SDK)"
 
     try:
-        from post_verifier import verify_post_deterministic, extract_cashtags, PORTFOLIO_ASSETS_METADATA
+        from post_verifier import verify_post_deterministic
     except ImportError:
         try:
-            from src.post_verifier import verify_post_deterministic, extract_cashtags, PORTFOLIO_ASSETS_METADATA
+            from src.post_verifier import verify_post_deterministic
         except ImportError:
             verify_post_deterministic = None
-            extract_cashtags = lambda s: []
-            PORTFOLIO_ASSETS_METADATA = {}
 
     # Stage 1: Deterministic verification on candidate reply
     det_ok = True
@@ -514,48 +838,47 @@ def verify_and_refine_reply(
     if verify_post_deterministic:
         det_ok, det_issues, _ = verify_post_deterministic(candidate_reply)
 
-    # Collect metadata for any tickers mentioned by user or in reply
-    mentioned_tickers = set(extract_cashtags(user_comment) + extract_cashtags(candidate_reply))
-    meta_lines = []
-    for t in mentioned_tickers:
-        if t in PORTFOLIO_ASSETS_METADATA:
-            meta = PORTFOLIO_ASSETS_METADATA[t]
-            meta_lines.append(
-                f"• ${t} ({meta.get('name')}):\n"
-                f"  - Settore: {meta.get('sector')}\n"
-                f"  - Dividendi: {'SÌ' if meta.get('is_dividend_paying') else 'NO (ACCUMULAZIONE / ZERO CEDOLE DISTRIBUITE)'}\n"
-                f"  - Politica: {meta.get('dividend_policy')}\n"
-                f"  - Tesi: {meta.get('thesis')}"
-            )
-    meta_context = "\n".join(meta_lines) if meta_lines else "Nessun asset specifico di portafoglio coinvolto."
+    meta_context = _build_portfolio_grounding_context(
+        user_comment=user_comment,
+        post_context=post_context or "",
+        relevant_tickers=relevant_tickers or [],
+        candidate_reply=candidate_reply,
+    )
 
     criticism_note = ""
     if not det_ok:
         criticism_note = f"\n⚠️ CRITICAL WARNING FOR REVIEWER: Deterministic fast-gate flagged violations in candidate reply: {det_issues}. You MUST rectify these in 'perfected_reply' or reject."
 
+    full_post_snippet = (post_context or "General Portfolio Post")[:1500]
+
     judge_prompt = f"""
-You are the Senior Compliance and Editorial Director for Andrea Ravalli's official eToro Popular Investor Channel (+200% gain, Risk Score 3/10, long-term multi-asset investing, zero leverage).
+You are the Senior Compliance and Editorial Director for Andrea Ravalli's official eToro Popular Investor Channel (+200% gain, active long-term multi-asset investing, Risk Score 3/10, zero leverage).
 
 Review the following proposed reply to a community comment on eToro:
 
 USER COMMENT (from @{user_author}):
 "{user_comment}"
 
-ORIGINAL POST CONTEXT:
-"{post_context or 'General Portfolio Post'}"
+ORIGINAL POST CONTEXT (FULL TEXT):
+"{full_post_snippet}"
 
 PROPOSED CANDIDATE REPLY:
 "{candidate_reply}"
 
-OFFICIAL CERTIFIED METADATA (SINGLE SOURCE OF TRUTH):
+OFFICIAL CERTIFIED PORTFOLIO GROUNDING (SINGLE SOURCE OF TRUTH):
 {meta_context}
 {criticism_note}
 
 EVALUATION RUBRIC:
-1. Factual Accuracy: Strict adherence to certified metadata. If an asset is accumulating ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE), NEVER claim it pays dividends. NEVER mention purged assets like XEON, MAU, SPCX, MELI, WCLD, or ANT.24-7 / Anthropic.
-2. Relevance & Substance: Does the reply genuinely address the topics and questions raised by @{user_author} (e.g. specific tickers like AMZN/NVDA/PLTR, GPU additions, tech sentiment, valuation, DCA, pullback)?
-3. Completeness & Ending: 100% complete text, no truncated sentences, no dangling prepositions, natural closing with valid punctuation/emoji.
-4. Compliance & Tone: Polite, disciplined (Risk 3/10, 0 leverage, 3-5+ years horizon), no financial advice, NO markdown bold asterisks (**).
+1. ZERO DCA / PAC (HARD REJECT, score <= 2): Reject IMMEDIATELY if the reply mentions, suggests, or implies DCA, Dollar-Cost Averaging, PAC, "piano di accumulo", "ingressi periodici/frazionati", or recurring monthly deposits. We NEVER do DCA/PAC.
+2. Point-First Specificity & Substance (HARD REJECT, score <= 6): Does the first substantive sentence directly engage the exact point, company, metric, timeframe, or criticism raised by @{user_author}, grounded in the full post context? Reject generic, interchangeable PR replies that dodge the user's point!
+3. Factual Accuracy & Portfolio Grounding:
+   - Holdings marked IN PORTAFOGLIO must be referenced as active owned positions (never "monitoriamo" as if external). Mentioning real holdings from the post/portfolio is encouraged whenever relevant to the user's comment.
+   - Assets marked NON IN PORTAFOGLIO must never be described as owned.
+   - Accumulating ETFs ($WDEF.L, $INDO.PA, $IB01.L, $PPFB.DE) NEVER pay dividends.
+   - $WDEF.L is a thematic European Defence & Aerospace sector ETF, NEVER a "titolo difensivo" or "bene rifugio" / safe haven. True defensive/safe-haven cushions are $PPFB.DE (physical gold), $IB01.L (short-term US Treasuries), and Healthcare/Consumer Staples.
+   - Purged assets (XEON, MAU, SPCX, MELI, WCLD, RACE/Ferrari, ANT.24-7/Anthropic) are strictly forbidden.
+4. Authentic Tone & Completeness: Natural human tone without repeating the canned "Risk 3/10 + 3-5 anni + rumore di breve termine" mantra unless directly relevant; dignified handling of criticism/sarcasm (no robotic gratitude); 100% complete ending; NO markdown bold asterisks (**).
 
 TASK:
 Provide your verdict in exact JSON format:
@@ -621,6 +944,9 @@ Output ONLY valid JSON.
                                 print(f"⚠️ Pass 2 Perfected text failed deterministic gate: {f_issues}")
                                 return False, "", f"Deterministic rule violation: {f_issues}"
                         return True, clean_final, f"Validated by {model_name} (Score: {score}/10 - {reason})"
+                    else:
+                        print(f"⚠️ Pass 2 Perfected text failed syntax guardrails: {err}")
+                        return False, "", f"Syntax violation in perfected reply: {err}"
 
                 print(f"⚠️ Pass 2 Validator ({model_name}) rejected reply (Score {score}/10): {reason}")
                 return False, "", f"Validator rejected (Score {score}/10): {reason}"
@@ -633,6 +959,8 @@ Output ONLY valid JSON.
                 time.sleep(2.0)
             continue
 
+    if not det_ok:
+        return False, "", f"Deterministic rule violation on fallback: {det_issues}"
     return True, candidate_reply, "Pass 2 fallback (validator model timeout)"
 
 
@@ -838,20 +1166,18 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
                 "Un caro saluto e i migliori auguri per la tua vita e per i tuoi investimenti! 📊✨"
             )
 
-    # 4. Accumulo / Paura di ritracciamento / Volatilità / DCA
+    # 4. Gestione volatilità / paura di ritracciamenti (NO DCA/PAC, solo gestione attiva)
     elif "accumul" in msg_lower or "paura" in msg_lower or "rintracci" in msg_lower or "ritracci" in msg_lower or "drop" in msg_lower or "crash" in msg_lower or "fear" in msg_lower:
         if lang == "en":
             return (
-                f"Great discipline, @{user_author}! 📊\n\n"
-                "Accumulating gradually through Dollar-Cost Averaging (DCA) is the most effective approach to handle market anxiety. "
-                "In our portfolio, we maintain a certified Risk Score 3/10, zero leverage, and defensive allocations (Physical Gold, Cash reserves, Dividend ETFs) specifically designed to absorb pullbacks smoothly.\n\n"
+                f"I hear you on market volatility, @{user_author}! 📊\n\n"
+                "We handle pullbacks through active risk management rather than guesswork: keeping a certified Risk Score 3/10, zero leverage, physical gold ($PPFB.DE), and ultra-short Treasury cash reserves ($IB01.L) lets us rebalance selectively around company fundamentals.\n\n"
                 "Wishing you all the best in life and trading! 🚀🤝"
             )
         else:
             return (
-                f"Ottima disciplina, @{user_author}! 📊\n\n"
-                "Accumulare con ingressi frazionati (DCA) è la strategia migliore per gestire la paura dei ritracciamenti. "
-                "Nel nostro portafoglio manteniamo volutamente un Risk Score 3/10, zero leva e coperture (Oro fisico, riserve di liquidità ed ETF difensivi) proprio per attutire eventuali correzioni senza ansia.\n\n"
+                f"Capisco bene la preoccupazione nelle fasi di volatilità, @{user_author}! 📊\n\n"
+                "Affrontiamo i ritracciamenti con gestione attiva e controllo del rischio (Risk Score 3/10, zero leva): la riserva liquida in Treasury USA ($IB01.L) e l'oro fisico ($PPFB.DE) ci permettono di attenuare gli scossoni e riequilibrare i pesi in base ai fondamentali.\n\n"
                 "Un caro saluto e i migliori auguri per la tua vita e per il tuo percorso di investimenti! 📈🤝"
             )
 
@@ -860,15 +1186,15 @@ def _build_contextual_fallback(user_comment: str, user_author: str, tickers: Lis
         if lang == "en":
             return (
                 f"Hello @{user_author}, welcome to the community! 👋\n\n"
-                "To ensure proportional replication across all ~40 portfolio positions, eToro recommends $500–$1,000 with 'Copy Open Trades' selected. "
-                "Our focus is 100% on long-term compounding (+200% since 2020) with Risk Score 3/10 and zero leverage.\n\n"
+                "To ensure proportional replication across all ~37 portfolio positions, starting with $500–$1,000 and 'Copy Open Trades' selected is recommended (platform minimum is $200). "
+                "Our focus is active long-term compounding (+200% since 2020) with Risk Score 3/10 and zero leverage.\n\n"
                 "Wishing you great success in life and trading! 🚀💼"
             )
         else:
             return (
                 f"Ciao @{user_author} e benvenuto/a nella community! 👋\n\n"
-                "Per replicare al meglio tutte le circa 40 posizioni del portafoglio, il capitale ideale per iniziare è tra 500$ e 1.000$, con spunta su 'Copia operazioni aperte'. "
-                "La nostra strategia punta al lungo termine (+200% dal 2020) con Risk Score 3/10 e zero leva.\n\n"
+                "Per replicare proporzionalmente tutte le circa 37 posizioni del portafoglio, il capitale ideale per iniziare è tra 500$ e 1.000$ con spunta su 'Copia operazioni aperte' (il minimo tecnico è 200$). "
+                "La nostra è una gestione attiva di lungo termine (+200% dal 2020) con Risk Score 3/10 e zero leva.\n\n"
                 "Un caloroso saluto e i migliori auguri per il tuo percorso di investimenti! 🚀💼"
             )
 
@@ -893,50 +1219,75 @@ def generate_ai_comment_reply(
     post_context: Optional[str] = None,
     relevant_tickers: Optional[List[str]] = None,
     is_follow_up: bool = False,
-) -> str:
+) -> Optional[str]:
     """
-    Two-Pass Generation Engine with Ultra-Strict Guardrails & Quality Double-Check:
-      1. Short courtesy bypass for simple thank-yous.
-      2. Pass 1: Generates a tailored draft with generous token limits across Gemini models.
-      3. Strict Deterministic Syntax Check.
-      4. Pass 2: Validator Judge review.
-      5. Retry loop if validation fails; automatic fallback to certified template.
+    Two-Pass Generation Engine with Grounded Portfolio Context & Strict Guardrails:
+      1. Short courtesy bypass for simple thank-yous and pure feed compliments.
+      2. Pass 1: Generates a point-first, grounded draft across Gemini models using full post text & portfolio weights.
+      3. Strict Deterministic Guardrails (syntax, zero DCA/PAC, $WDEF.L sector accuracy).
+      4. Pass 2: Adversarial Validator Judge review.
+      5. Retry loop + Groq/Mistral fallback; if all AI models fail, returns None so the comment is safely retried later.
     """
     clean_text = _extract_text(user_comment_text)
     api_key = os.environ.get("GEMINI_API_KEY")
     lang = _detect_language(clean_text)
 
-    # Short courtesy check
+    # Short courtesy / pure compliment check
     if _is_simple_gratitude(clean_text):
+        msg_l = clean_text.lower()
+        is_feed_praise = any(
+            k in msg_l
+            for k in ["valore aggiunto", "ben curat", "complimenti", "bel lavoro", "bravo", "ottimi contenuti", "ottimo lavoro", "piacere leggere"]
+        )
         if lang == "en":
+            if is_feed_praise:
+                return f"Thank you for the kind words, @{user_author}! Glad you find the feed updates useful—wishing you all the best! 🤝✨"
             return f"You're very welcome, @{user_author}! Wishing you all the best in life and trading! 📈🤝"
         else:
+            if is_feed_praise:
+                return f"Grazie di cuore @{user_author}! Fa davvero piacere sapere che trovi utili gli aggiornamenti sul feed. Un caro saluto e buon proseguimento! 🤝✨"
             return f"Grazie a te, @{user_author}! Un caro saluto e i migliori auguri per la vita e per il tuo trading! 📈🤝"
 
-    tickers_str = ", ".join(relevant_tickers) if relevant_tickers else "General Tech & Multi-Asset"
-    context_snippet = f"Original Post Context: {post_context[:300]}..." if post_context else "General Portfolio Post"
+    clean_seed_tickers = [
+        _normalize_ticker_alias(t)
+        for t in (relevant_tickers or [])
+        if _is_valid_ticker_token(t)
+    ]
+    tickers_str = ", ".join(dict.fromkeys(clean_seed_tickers)) if clean_seed_tickers else "Multi-Asset Portfolio"
+    full_post_text = (post_context or "").strip()
+    context_snippet = full_post_text[:1500] if full_post_text else "General Portfolio Post"
 
-    few_shot_block = format_style_examples_for_prompt(clean_text, lang=lang, relevant_tickers=relevant_tickers)
+    grounding_block = _build_portfolio_grounding_context(
+        user_comment=clean_text,
+        post_context=full_post_text,
+        relevant_tickers=clean_seed_tickers,
+    )
+    few_shot_block = format_style_examples_for_prompt(clean_text, lang=lang, relevant_tickers=clean_seed_tickers)
 
     prompt = f"""
 {PORTFOLIO_SYSTEM_PROMPT}
 
 {few_shot_block}
 
+PORTFOLIO & ASSET GROUNDING (SINGLE SOURCE OF TRUTH):
+{grounding_block}
+
 TASK:
-Draft a professional, complete reply to this eToro community user comment:
+Draft a specific, point-first reply to this eToro community user comment:
 - User: @{user_author}
 - Comment: "{clean_text}"
 - Detected Language: {'English' if lang == 'en' else 'Italian'}
-- Related Tickers: {tickers_str}
-- Post Context: {context_snippet}
+- Post Tickers: {tickers_str}
+- Full Original Post Text:
+\"\"\"
+{context_snippet}
+\"\"\"
 
 CRITICAL RULES:
-1. Address the SPECIFIC questions or stocks mentioned in the comment (e.g. AMZN, GPUs, tech sentiment, valuation, DCA, etc.).
-2. Write 1 to 2 complete paragraphs (60-120 words). DO NOT cut off mid-sentence.
-3. Start with a greeting mentioning @{user_author}.
-4. Conclude with a complete sentence wishing them all the best in life and trading, followed by 1-2 emojis (e.g. 📈🤝).
-5. DO NOT use markdown bold with asterisks (**). Output clean plain text ready for eToro.
+1. Directly address the SPECIFIC point, question, holding, metric, timeframe, or criticism raised in the comment, using concrete facts from the Original Post and Portfolio Grounding above.
+2. NEVER mention DCA, Dollar-Cost Averaging, PAC, "piano di accumulo", or periodic/recurring buying. NEVER describe $WDEF.L as defensive or a safe haven.
+3. For any asset marked IN PORTAFOGLIO, speak as an active shareholder holding it (never "monitoriamo realtà come..."). Do NOT copy-paste generic PR slogans ("Risk 3/10 + 3-5 anni + rumore") unless directly relevant.
+4. Write 1 to 2 complete paragraphs (55-120 words). Start mentioning @{user_author}, conclude naturally with 1-2 emojis, and NEVER use markdown bold (**).
 """
 
     if HAS_GENAI and api_key:
@@ -967,7 +1318,7 @@ CRITICAL RULES:
                     if response and response.text:
                         raw_draft = response.text.strip()
 
-                        # Deterministic Syntax Check
+                        # Deterministic Syntax & Anti-DCA Check
                         is_valid, cleaned_draft, syntax_err = validate_response_syntax(raw_draft, user_author)
                         if not is_valid:
                             print(f"⚠️ Pass 1 Draft rejected by syntax guardrails ({model_name}): {syntax_err}")
@@ -978,10 +1329,11 @@ CRITICAL RULES:
                             user_comment=clean_text,
                             user_author=user_author,
                             candidate_reply=cleaned_draft,
-                            post_context=post_context,
+                            post_context=full_post_text,
                             lang=lang,
                             api_key=api_key,
                             generator_model=model_name,
+                            relevant_tickers=clean_seed_tickers,
                         )
 
                         if is_approved:
@@ -989,7 +1341,11 @@ CRITICAL RULES:
                             return final_reply
                         else:
                             print(f"⚠️ Pass 2 Double-Check Failed: {judge_reason}. Retrying...")
-                            prompt += f"\n\nPREVIOUS ATTEMPT WAS REJECTED: {judge_reason}. Make sure the answer is 100% complete and directly answers the user's specific questions."
+                            prompt += (
+                                f"\n\nPREVIOUS ATTEMPT WAS REJECTED: {judge_reason}. "
+                                "Make sure the answer is 100% specific to the user's point, strictly avoids DCA/PAC/periodic buying, "
+                                "uses real portfolio grounding, and contains no generic PR filler."
+                            )
 
                 except Exception as e:
                     print(f"⚠️ Gemini API attempt failed with {model_name}: {e}")
@@ -1000,21 +1356,31 @@ CRITICAL RULES:
                         time.sleep(wait_t)
                     continue
 
-    # Secondary AI fallback (Groq / Mistral) if Gemini quota/API failed, before static template
+    # Secondary AI fallback (Groq / Mistral) if Gemini quota/API failed
     fallback_draft, _ = _generate_reply_with_groq_or_mistral(prompt)
     if fallback_draft:
-        is_valid, cleaned_draft, _ = validate_response_syntax(fallback_draft, user_author)
+        is_valid, cleaned_draft, syntax_err = validate_response_syntax(fallback_draft, user_author)
         if is_valid:
             try:
                 from post_verifier import verify_post_deterministic
-                det_ok, _, cleaned_draft = verify_post_deterministic(cleaned_draft)
+            except ImportError:
+                try:
+                    from src.post_verifier import verify_post_deterministic
+                except ImportError:
+                    verify_post_deterministic = None
+
+            if verify_post_deterministic:
+                det_ok, det_issues, cleaned_draft = verify_post_deterministic(cleaned_draft)
                 if det_ok:
                     return cleaned_draft
-            except Exception:
+                print(f"⚠️ Groq/Mistral fallback blocked by deterministic gate: {det_issues}")
+            else:
                 return cleaned_draft
+        else:
+            print(f"⚠️ Groq/Mistral fallback failed syntax guardrails: {syntax_err}")
 
-    print("🛡️ Falling back to certified topic-aware contextual template...")
-    return _build_contextual_fallback(clean_text, user_author, relevant_tickers or [], lang, is_follow_up=is_follow_up)
+    print("⏭️ Tutti i modelli AI non disponibili o respinti dai guardrail: commento saltato (nessun template statico pubblicato, ritenteremo al prossimo ciclo).")
+    return None
 
 
 def is_third_party_mention(text: str, my_username: str = "AndreaRavalli") -> bool:
@@ -1265,6 +1631,9 @@ def find_unreplied_comments(
             # Preserve comments_count if present in one of them
             if "comments_count" in p and "comments_count" not in existing:
                 existing["comments_count"] = p["comments_count"]
+            # Preserve richer full post content when available
+            if p.get("content") and len(str(p.get("content"))) > len(str(existing.get("content") or "")):
+                existing["content"] = p["content"]
 
     # Filter to posts from last `days_back` days
     cutoff_time = datetime.now(timezone.utc) - timedelta(days=days_back)
@@ -1363,12 +1732,27 @@ def find_unreplied_comments(
 
             print(f"🎯 Trovato commento da rispondere! @{owner} su post {post_id[:8]}: \"{c_text[:50]}...\"")
 
+            post_content = str(p.get("content") or "").strip()
+            if not post_content and len(str(post_id)) >= 20 and p.get("source") != "etoro_live_feed":
+                try:
+                    p_metrics = etoro_client.get_post_metrics(post_id, exclude_author=False, fetch_comments=False)
+                    raw_post = (p_metrics or {}).get("raw", {}) if isinstance(p_metrics, dict) else {}
+                    raw_inner = raw_post.get("post", raw_post) if isinstance(raw_post, dict) else {}
+                    msg_obj = raw_inner.get("message", {}) if isinstance(raw_inner, dict) else {}
+                    extracted = msg_obj.get("text") if isinstance(msg_obj, dict) else str(msg_obj or "")
+                    if extracted and extracted.strip():
+                        post_content = extracted.strip()
+                        p["content"] = post_content
+                except Exception:
+                    pass
+
             unreplied.append({
                 "post_id": post_id,
                 "comment_id": c_id,
                 "author": owner,
                 "message": c_text,
                 "post_title": p.get("title") or p.get("session_name") or "Post Recap",
+                "post_content": post_content,
                 "session_name": p.get("session") or p.get("session_name") or "",
                 "tickers": p.get("tickers", []),
                 "published_at": p.get("published_at") or "",
@@ -1417,13 +1801,19 @@ def process_community_replies(
         print(f"🏷️ Titoli Coinvolti: {', '.join(item.get('tickers', [])) or 'Macro/Portafoglio'}")
         print(f"💬 Testo Utente: \"{item['message']}\"")
 
+        full_post_ctx = item.get('post_content') or item['post_title']
         reply_text = generate_ai_comment_reply(
             user_comment_text=item['message'],
             user_author=item['author'],
-            post_context=item['post_title'],
+            post_context=full_post_ctx,
             relevant_tickers=item.get('tickers', []),
             is_follow_up=item.get('is_follow_up', False)
         )
+
+        if not reply_text:
+            print(f"⏭️ Nessuna risposta AI valida generata per @{item['author']}: commento saltato, verrà riprovato al prossimo ciclo.")
+            results.append({"status": "skipped_ai_unavailable", "item": item})
+            continue
 
         print(f"\n💡 Risposta Verificata dall'IA:\n{reply_text}\n")
 

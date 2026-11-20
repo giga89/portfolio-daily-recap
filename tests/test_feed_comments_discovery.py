@@ -37,7 +37,7 @@ class TestFeedCommentsDiscovery(unittest.TestCase):
                     "post": {
                         "id": "post-manual-1",
                         "created": t1,
-                        "message": {"text": "Manual post by Andrea $MSFT $NVDA"},
+                        "message": {"text": "Manual post by Andrea $MSFT $NVDA $1919.HK $NSDQ100. at $440 and $0.3085 with $115.23M cap"},
                         "tags": [{"market": {"symbolName": "MSFT"}}]
                     },
                     "commentsData": {
@@ -73,6 +73,12 @@ class TestFeedCommentsDiscovery(unittest.TestCase):
         self.assertEqual(posts[0]["id"], "post-manual-1")
         self.assertIn("MSFT", posts[0]["tickers"])
         self.assertIn("NVDA", posts[0]["tickers"])
+        self.assertIn("1919.HK", posts[0]["tickers"])
+        self.assertIn("NSDQ100", posts[0]["tickers"])
+        self.assertNotIn("440", posts[0]["tickers"])
+        self.assertNotIn("0.3085", posts[0]["tickers"])
+        self.assertNotIn("115.23M", posts[0]["tickers"])
+        self.assertIn("Manual post by Andrea", posts[0]["content"])
         self.assertEqual(posts[0]["comments_count"], 1)
         self.assertEqual(posts[1]["comments_count"], 0)
 
@@ -103,6 +109,7 @@ class TestFeedCommentsDiscovery(unittest.TestCase):
                 "id": "post-manual-with-comment",
                 "published_at": t2,
                 "title": "Manual Post by Andrea",
+                "content": "Manual Post by Andrea\nFull body detailing $GOOG (5.1% weight) and Cloud AI growth.",
                 "session_name": "Manual Post",
                 "tickers": ["GOOGL"],
                 "comments_count": 1,
@@ -122,6 +129,7 @@ class TestFeedCommentsDiscovery(unittest.TestCase):
         found = next(u for u in unreplied if u["comment_id"] == "comm-ext-100")
         self.assertEqual(found["author"], "CommunityUser")
         self.assertEqual(found["post_id"], "post-manual-with-comment")
+        self.assertIn("5.1% weight", found["post_content"])
         # Ensure get_post_comments was NOT called for post-zero-comments or post-manual-with-comment (since embedded)
         from unittest.mock import call
         self.assertNotIn(call("post-zero-comments"), mock_get_comments.call_args_list)

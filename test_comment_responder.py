@@ -88,7 +88,9 @@ class TestCommentResponder(unittest.TestCase):
         print(f"✓ Upsert test returned: {added} new item(s)")
 
     def test_contextual_fallback_richness_and_follow_ups(self):
-        """Verify that fallback responses are articulate, complete, and not ultra-short even on follow-ups."""
+        """Verify fallback helper contains zero DCA/PAC and AI unavailable triggers clean None skip."""
+        from unittest.mock import patch
+
         test_cases = [
             ("Come vedi NVDA dopo l'ultimo ritracciamento?", "Marco", ["NVDA"], "it", False),
             ("Palantir è troppo cara a questi multipli?", "Luca", ["PLTR"], "it", False),
@@ -96,21 +98,35 @@ class TestCommentResponder(unittest.TestCase):
             ("Ho paura del crollo dei mercati, conviene uscire?", "Matteo", [], "it", False),
             ("What is your view on tech pullback?", "John", ["NVDA"], "en", False),
             ("How to start copy trading your strategy?", "Sarah", [], "en", False),
-            # Follow up turn with an actual question
             ("Grazie per la spiegazione, ma per NVDA conviene incrementare adesso?", "Paolo", ["NVDA"], "it", True),
         ]
 
         for comment, author, tickers, lang, is_follow_up in test_cases:
-            reply = ai_comment_responder.generate_ai_comment_reply(
-                user_comment_text=comment,
+            reply = ai_comment_responder._build_contextual_fallback(
+                user_comment=comment,
                 user_author=author,
-                post_context="Test Post Title",
-                relevant_tickers=tickers,
-                is_follow_up=is_follow_up
+                tickers=tickers,
+                lang=lang,
+                is_follow_up=is_follow_up,
             )
             self.assertGreater(len(reply), 100, f"Reply too short for comment: {comment}")
             self.assertIn(f"@{author}", reply)
-            print(f"✓ Verified rich response for @{author} [follow_up={is_follow_up}] ({len(reply)} chars)")
+            self.assertFalse(
+                ai_comment_responder._contains_forbidden_dca(reply)[0],
+                f"Fallback must never mention DCA/PAC: {reply}",
+            )
+            print(f"✓ Verified clean non-DCA helper output for @{author} [follow_up={is_follow_up}] ({len(reply)} chars)")
+
+        with patch.dict(os.environ, {"GEMINI_API_KEY": ""}, clear=False), \
+             patch("ai_comment_responder._generate_reply_with_groq_or_mistral", return_value=(None, None)):
+            skipped = ai_comment_responder.generate_ai_comment_reply(
+                user_comment_text="Ho paura del crollo dei mercati, conviene uscire?",
+                user_author="Matteo",
+                post_context="Apertura Wall Street",
+                relevant_tickers=["MSFT"],
+            )
+            self.assertIsNone(skipped, "Total AI outage must return None instead of publishing static template")
+            print("✓ Verified total AI failure safely skips (returns None)")
 
 
 if __name__ == "__main__":
