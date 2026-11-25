@@ -1,7 +1,7 @@
 {
-  "last_published_episode": 7,
-  "last_published_date": "2026-11-18",
-  "total_published_count": 7,
+  "last_published_episode": 8,
+  "last_published_date": "2026-11-25",
+  "total_published_count": 8,
   "history": [
     {
       "episode": 1,
@@ -44,6 +44,12 @@
       "title": "IL PREZZO DEL PANICO: PERDERE I 10 GIORNI MIGLIORI",
       "date": "2026-11-18T20:47:19.535803",
       "post_id": "3ef988e0-e391-11f1-8080-80007cc16b37"
+    },
+    {
+      "episode": 8,
+      "title": "JOHN BOGLE E LA RIVOLUZIONE DEGLI ETF",
+      "date": "2026-11-25T21:53:08.412986",
+      "post_id": "998d1ea0-e91a-11f1-8080-80011415c8a8"
     }
   ]
 }
