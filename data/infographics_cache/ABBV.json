@@ -1,0 +1,59 @@
+{
+  "name": "ABBVIE",
+  "tagline": "Leader globale nel biopharma innovativo",
+  "title": "TESI D'INVESTIMENTO & HIGHLIGHTS",
+  "subtitle": "Transizione post-Humira superata grazie a Skyrizi, Rinvoq e la stabilità dei dividendi da Dividend King.",
+  "kpis": [
+    {
+      "label": "COMBINED SKYRIZI & RINVOQ",
+      "val": "$15B+",
+      "sub": "run-rate ricavi annui"
+    },
+    {
+      "label": "DIVIDEND YIELD",
+      "val": "~3.7%",
+      "sub": "Dividend King (>50 anni)"
+    },
+    {
+      "label": "PESO IN PORTAFOGLIO",
+      "val": "3.90%",
+      "sub": "Allocazione gestita nel portafoglio"
+    },
+    {
+      "label": "FREE CASH FLOW",
+      "val": "$18B+",
+      "sub": "generazione di cassa annua"
+    }
+  ],
+  "pillars": [
+    [
+      "Fossato Competitivo:",
+      "Portafoglio brevettuale solido e posizionamento dominante in immunologia ed estetica medica (Botox)."
+    ],
+    [
+      "Catalizzatore di Crescita:",
+      "Espansione rapida delle indicazioni approvate per i nuovi blockbuster Skyrizi e Rinvoq."
+    ],
+    [
+      "Solidità e Finanze:",
+      "Flussi di cassa massicci e prevedibili che sostengono la riduzione del debito e la crescita della cedola."
+    ],
+    [
+      "Visione Decennale:",
+      "Pipeline R&D diversificata in oncologia e neuroscienze per garantire una crescita sostenibile multi-decennale."
+    ]
+  ],
+  "quote": "La forza di innovare ci ha permesso di superare il brevetto più grande della storia farmaceutica.",
+  "tags": [
+    "#ABBV",
+    "#Biopharma",
+    "#DividendKing",
+    "#Healthcare",
+    "#Value"
+  ],
+  "color": [
+    20,
+    70,
+    160
+  ]
+}
