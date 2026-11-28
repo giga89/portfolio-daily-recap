@@ -1016,6 +1016,9 @@ def _generate_reply_with_groq_or_mistral(prompt: str) -> Tuple[Optional[str], Op
                     if text:
                         print(f"   ✅ Fallback Pass 1 generated via {pname}/{model_id}")
                         return text, f"{pname.lower()}:{model_id}"
+                elif pname == "Mistral" and resp.status_code in (401, 402, 403):
+                    print(f"   ℹ️ Mistral {model_id} HTTP {resp.status_code} (API non attiva/non autorizzata), skip Mistral.")
+                    break
             except Exception as exc:
                 print(f"   ⚠️ {pname}/{model_id} fallback reply error: {exc}")
     return None, None
@@ -1681,13 +1684,110 @@ def find_unreplied_comments(
             continue
 
         total_comments_scanned += len(raw_comments)
+        self_names = {my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"}
+
+        def _resolve_post_content(post_obj: Dict[str, Any], pid: str) -> str:
+            content = str(post_obj.get("content") or "").strip()
+            if not content and len(str(pid)) >= 20 and post_obj.get("source") != "etoro_live_feed":
+                try:
+                    p_metrics = etoro_client.get_post_metrics(pid, exclude_author=False, fetch_comments=False)
+                    raw_post = (p_metrics or {}).get("raw", {}) if isinstance(p_metrics, dict) else {}
+                    raw_inner = raw_post.get("post", raw_post) if isinstance(raw_post, dict) else {}
+                    msg_obj = raw_inner.get("message", {}) if isinstance(raw_inner, dict) else {}
+                    extracted = msg_obj.get("text") if isinstance(msg_obj, dict) else str(msg_obj or "")
+                    if extracted and extracted.strip():
+                        content = extracted.strip()
+                        post_obj["content"] = content
+                except Exception:
+                    pass
+            return content
 
         for c in raw_comments:
             c_id, owner, c_text, is_self, replies = _extract_comment_details(c, my_username=my_username)
             print(f"🔎 Commento {c_id[:8]} su post {post_id[:8]}: autore='{owner}' | is_self={is_self} | testo='{c_text[:35]}...' | replies={len(replies)}")
 
-            # 1. Skip if this is Andrea's own root comment
-            if is_self or (owner and owner.lower() in [my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"]):
+            replies_cnt = int((c.get("repliesCount") or c.get("entity", {}).get("repliesCount") or 0)) if isinstance(c, dict) else 0
+
+            # 1. If this is Andrea's own root comment (e.g. 1/3, 2/3, 3/3 Focus), inspect external user sub-replies!
+            if is_self or (owner and owner.lower() in self_names):
+                if (not replies or len(replies) < replies_cnt) and replies_cnt > 0:
+                    live_replies = etoro_client.get_comment_replies(post_id, c_id)
+                    if live_replies:
+                        replies = live_replies
+
+                for r_idx, r in enumerate(replies):
+                    r_id, r_owner, r_text, r_is_self, _ = _extract_comment_details(r, my_username=my_username)
+                    if not r_id or r_is_self or (r_owner and r_owner.lower() in self_names):
+                        continue
+                    print(f"🔎 Sub-reply {r_id[:8]} sotto commento {c_id[:8]} su post {post_id[:8]}: autore='{r_owner}' | testo='{r_text[:35]}...'")
+
+                    if r_id in answered_db:
+                        print(f"ℹ️ Sub-reply {r_id[:8]} da @{r_owner} già evasa in memoria persistente.")
+                        continue
+
+                    # Check if Andrea already replied after this sub-reply in the same thread
+                    has_reply_after = False
+                    owner_tag = f"@{r_owner}".lower()
+                    seen_other_ext = False
+                    for later_r in replies[r_idx + 1:]:
+                        _, l_owner, l_text, l_is_self, _ = _extract_comment_details(later_r, my_username=my_username)
+                        if l_is_self or (l_owner and l_owner.lower() in self_names):
+                            if owner_tag in l_text.lower() or not seen_other_ext:
+                                has_reply_after = True
+                                break
+                        else:
+                            seen_other_ext = True
+
+                    if has_reply_after:
+                        record_answered_comment(r_id, post_id, r_owner)
+                        print(f"ℹ️ Sub-reply {r_id[:8]} da @{r_owner}: già presente una risposta di Andrea successiva. Skip.")
+                        continue
+
+                    if is_third_party_mention(r_text, my_username=my_username):
+                        record_answered_comment(r_id, post_id, r_owner)
+                        print(f"ℹ️ Sub-reply {r_id[:8]} da @{r_owner} rivolto a terzi. Skip.")
+                        continue
+
+                    if is_ignore_or_opt_out(r_text):
+                        record_answered_comment(r_id, post_id, r_owner)
+                        print(f"ℹ️ Sub-reply {r_id[:8]} da @{r_owner} è un'emoji o opt-out. Skip.")
+                        continue
+
+                    total_user_comments_found += 1
+                    print(f"🎯 Trovata sub-reply da rispondere! @{r_owner} sotto commento {c_id[:8]} su post {post_id[:8]}: \"{r_text[:50]}...\"")
+
+                    base_post_content = _resolve_post_content(p, post_id)
+                    sub_post_content = (
+                        f"{base_post_content}\n\n[Commento di Andrea a cui l'utente risponde]:\n{c_text}".strip()
+                        if c_text else base_post_content
+                    )
+                    merged_tickers = list(dict.fromkeys(
+                        list(p.get("tickers", []))
+                        + [
+                            _normalize_ticker_alias(tok)
+                            for tok in re.findall(r'\$([A-Za-z0-9._-]+)', c_text or "")
+                            if _is_valid_ticker_token(tok)
+                        ]
+                    ))
+                    r_created = (
+                        (r.get("created") or r.get("createdAt") or r.get("entity", {}).get("created") or "")
+                        if isinstance(r, dict) else ""
+                    )
+                    unreplied.append({
+                        "post_id": post_id,
+                        "comment_id": r_id,
+                        "reply_target_comment_id": c_id,
+                        "author": r_owner,
+                        "message": r_text,
+                        "post_title": p.get("title") or p.get("session_name") or "Post Recap",
+                        "post_content": sub_post_content,
+                        "session_name": p.get("session") or p.get("session_name") or "",
+                        "tickers": merged_tickers,
+                        "published_at": p.get("published_at") or "",
+                        "created_at": r_created,
+                        "is_follow_up": False,
+                        "turn": 1
+                    })
                 continue
 
             # 2. Strict check: already answered in persistent storage -> SKIP
@@ -1696,8 +1796,7 @@ def find_unreplied_comments(
                 continue
 
             # Fetch live replies if not embedded and replies exist
-            replies_cnt = c.get("repliesCount", c.get("entity", {}).get("repliesCount", 0)) if isinstance(c, dict) else 0
-            if not replies and replies_cnt > 0:
+            if (not replies or len(replies) < replies_cnt) and replies_cnt > 0:
                 live_replies = etoro_client.get_comment_replies(post_id, c_id)
                 if live_replies:
                     replies = live_replies
@@ -1706,7 +1805,7 @@ def find_unreplied_comments(
             has_my_reply = False
             for r in replies:
                 _, r_owner, _, r_is_self, _ = _extract_comment_details(r, my_username=my_username)
-                if r_is_self or (r_owner and r_owner.lower() in [my_username.lower(), "andrearavalli", "andrea ravalli", "andrea"]):
+                if r_is_self or (r_owner and r_owner.lower() in self_names):
                     has_my_reply = True
                     break
 
@@ -1732,19 +1831,7 @@ def find_unreplied_comments(
 
             print(f"🎯 Trovato commento da rispondere! @{owner} su post {post_id[:8]}: \"{c_text[:50]}...\"")
 
-            post_content = str(p.get("content") or "").strip()
-            if not post_content and len(str(post_id)) >= 20 and p.get("source") != "etoro_live_feed":
-                try:
-                    p_metrics = etoro_client.get_post_metrics(post_id, exclude_author=False, fetch_comments=False)
-                    raw_post = (p_metrics or {}).get("raw", {}) if isinstance(p_metrics, dict) else {}
-                    raw_inner = raw_post.get("post", raw_post) if isinstance(raw_post, dict) else {}
-                    msg_obj = raw_inner.get("message", {}) if isinstance(raw_inner, dict) else {}
-                    extracted = msg_obj.get("text") if isinstance(msg_obj, dict) else str(msg_obj or "")
-                    if extracted and extracted.strip():
-                        post_content = extracted.strip()
-                        p["content"] = post_content
-                except Exception:
-                    pass
+            post_content = _resolve_post_content(p, post_id)
 
             unreplied.append({
                 "post_id": post_id,
@@ -1835,9 +1922,10 @@ def process_community_replies(
                 print(f"⚠️ Pre-flight gatekeeper check warning: {gate_err}")
 
             print(f"🚀 Pubblicazione automatica in corso per @{item['author']}...")
+            target_comment_id = item.get('reply_target_comment_id') or item['comment_id']
             res = etoro_client.reply_to_comment(
                 post_id=item['post_id'],
-                comment_id=item['comment_id'],
+                comment_id=target_comment_id,
                 message=reply_text
             )
             if res.get("success"):

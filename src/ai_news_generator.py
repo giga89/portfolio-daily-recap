@@ -1250,6 +1250,9 @@ TEXT TO TRANSLATE:
                     print(f"   ⚠️ Mistral {model} rate limited (429), cooling down 1.5s...")
                     time.sleep(1.5)
                     continue
+                elif resp.status_code in (401, 402, 403):
+                    print(f"   ℹ️ Mistral {model} HTTP {resp.status_code} (API non attiva/non autorizzata), skip Mistral.")
+                    break
                 else:
                     print(f"   ⚠️ Mistral {model} HTTP {resp.status_code}")
             except Exception as e:
@@ -1360,6 +1363,9 @@ def _generate_text_with_groq_or_mistral(prompt: str, system_prompt: str = "") ->
                 elif resp.status_code == 429:
                     print(f"   ⚠️ Mistral {model} rate limited (429), cooling down 1.5s...")
                     time.sleep(1.5)
+                elif resp.status_code in (401, 402, 403):
+                    print(f"   ℹ️ Mistral {model} HTTP {resp.status_code} (API non attiva/non autorizzata), skip Mistral.")
+                    break
                 else:
                     print(f"   ⚠️ Mistral {model} HTTP {resp.status_code}")
             except Exception as e:

@@ -823,9 +823,12 @@ def audit_with_mistral(
                     parsed["latency_sec"] = round(elapsed, 2)
                     print(f"   ⚡ Mistral Independent Audit ({model}) succeeded in {elapsed:.2f}s — Decision: {parsed.get('decision')}")
                     return parsed
-            elif resp.status_code in (401, 403):
+            elif resp.status_code in (401, 402, 403):
                 _MISTRAL_AVAILABLE = False
-                print(f"   ❌ Mistral {model} auth failed (HTTP {resp.status_code}). Disabilitato per questa sessione.")
+                if resp.status_code == 402:
+                    print(f"   ℹ️ Mistral {model} HTTP 402 (piano/budget API non attivo su account). Disabilitato per questa sessione.")
+                else:
+                    print(f"   ❌ Mistral {model} auth failed (HTTP {resp.status_code}). Disabilitato per questa sessione.")
                 return None
             elif resp.status_code == 429:
                 hdrs = getattr(resp, "headers", None)

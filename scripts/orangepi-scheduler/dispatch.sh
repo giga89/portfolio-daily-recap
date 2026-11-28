@@ -29,7 +29,7 @@ source "$ENV_FILE"
 SESSION="${1:-}"
 FORCE_FLAG="${2:-}"
 if [ -z "$SESSION" ]; then
-    echo "Usage: $0 <eu_open|community_poll|stock_focus|us_open|stock_news|crypto_recap|us_close|weekly_sat|weekly_sun|monthly> [--force]" >&2
+    echo "Usage: $0 <eu_open|community_poll|stock_focus|us_open|stock_news|crypto_recap|us_close|weekly_sat|weekly_sun|monthly|comment_responder> [--force]" >&2
     exit 1
 fi
 
@@ -54,6 +54,7 @@ case "$SESSION" in
     dividend_post)         SESSION_NAME="Dividend Announcement" ;;
     dashboard_sync)        SESSION_NAME="Daily Dashboard Sync" ;;
     event_monitor)         SESSION_NAME="Event Monitor (Earnings & Dividends)" ;;
+    comment_responder)     SESSION_NAME="AI Community Comment Responder" ;;
     *)
 
         echo "ERROR: Unknown session '$SESSION'" >&2
@@ -130,6 +131,8 @@ fi
 CURRENT_HOUR=$(date -u +%H)
 if [ "$SESSION" = "stock_news" ]; then
     DEDUP_KEY="stock_news:${CURRENT_HOUR}"
+elif [ "$SESSION" = "comment_responder" ]; then
+    DEDUP_KEY="comment_responder:${CURRENT_HOUR}"
 elif [ "$SESSION" = "event_monitor" ]; then
     CURRENT_ITA_HOUR=$(TZ=Europe/Rome date +%H)
     if [ "$CURRENT_ITA_HOUR" -ge 14 ]; then

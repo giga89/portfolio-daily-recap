@@ -929,7 +929,7 @@ def get_comment_replies(post_id: str, comment_id: str) -> List[Dict[str, Any]]:
     if not headers:
         return []
     url = f"{BASE_URL}/api/v1/posts/{post_id}/comments/{comment_id}/replies"
-    params = {"pageSize": 50, "limit": 50, "count": 50, "page": 1}
+    params = {"take": 50, "offset": 0, "pageSize": 50}
     for attempt in range(3):
         try:
             resp = requests.get(url, headers=headers, params=params, timeout=20)

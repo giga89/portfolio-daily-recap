@@ -230,6 +230,58 @@ class TestAIUpgradesAndHealth(unittest.TestCase):
         independent_fact_checker._MISTRAL_AVAILABLE = None
 
     @patch("independent_fact_checker.requests.post")
+    def test_mistral_402_billing_inactive_disables_immediately_in_one_call(self, mock_post):
+        independent_fact_checker._MISTRAL_AVAILABLE = None
+        independent_fact_checker._MISTRAL_COOLDOWN.clear()
+
+        resp_402 = MagicMock(
+            status_code=402,
+            text='{"object":"error","message":"You need a subscription to access this API.","code":"2314"}',
+            headers={},
+        )
+        mock_post.return_value = resp_402
+
+        res = independent_fact_checker.audit_with_mistral(
+            "Mercato stabile.", session_name="US_CLOSE", api_key="test-mistral-key"
+        )
+        self.assertIsNone(res)
+        self.assertEqual(mock_post.call_count, 1)
+        self.assertFalse(independent_fact_checker._MISTRAL_AVAILABLE)
+        independent_fact_checker._MISTRAL_AVAILABLE = None
+
+    @patch("urllib.request.urlopen")
+    def test_health_monitor_mistral_402_returns_clean_billing_inactive_and_formats_single_line(self, mock_urlopen):
+        import io
+        import urllib.error
+
+        err = urllib.error.HTTPError(
+            url="https://api.mistral.ai/v1/chat/completions",
+            code=402,
+            msg="Payment Required",
+            hdrs=None,
+            fp=io.BytesIO(b'{"object":"error","message":"You need a subscription to access this API.","code":"2314"}'),
+        )
+        mock_urlopen.side_effect = err
+
+        res = gemini_health_monitor.test_mistral_model("test-mistral-key", "ministral-14b-latest")
+        self.assertEqual(res["status"], "billing_inactive")
+        self.assertIn("HTTP 402", res["detail"])
+        self.assertNotIn('{"object"', res["detail"])
+
+        mistral_results = {m: dict(res) for m, _ in gemini_health_monitor.ACTIVE_MISTRAL_MODELS}
+        msg = gemini_health_monitor.format_telegram_health_report(
+            results={m: {"status": "ok", "latency": 500, "detail": "OK"} for m, _ in gemini_health_monitor.ACTIVE_MODELS},
+            groq_results={m: {"status": "ok", "latency": 200, "detail": "OK"} for m, _ in gemini_health_monitor.ACTIVE_GROQ_MODELS},
+            mistral_results=mistral_results,
+            tavily_accounts=[],
+            is_alert=False,
+            ok_count=len(gemini_health_monitor.ACTIVE_MODELS),
+            flash_quota_exceeded_count=0,
+        )
+        self.assertIn("Piano/budget API non attivo su console.mistral.ai (HTTP 402)", msg)
+        self.assertNotIn("ministral-14b-latest", msg)
+
+    @patch("independent_fact_checker.requests.post")
     def test_groq_sends_low_reasoning_effort_for_gpt_oss(self, mock_post):
         independent_fact_checker._GROQ_COOLDOWN.clear()
         resp_200 = MagicMock(status_code=200)

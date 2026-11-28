@@ -1,9 +1,9 @@
 name: AI Community Comment Responder
 
 on:
-  # ── Automatic Scheduled Cron: Every 3 hours (09:00, 12:00, 15:00, 18:00, 21:00, 00:00 CET) ──
+  # ── Automatic Scheduled Cron: Every 3 hours off-:00 to avoid GH top-of-hour queue drops ──
   schedule:
-    - cron: '0 7,10,13,16,19,22 * * *'
+    - cron: '18 7,10,13,16,19,22 * * *'
   # ── Repository Dispatch (from local Orange Pi scheduler / API webhooks) ──
   repository_dispatch:
     types: [comment_responder, reply_comments]
@@ -88,5 +88,6 @@ jobs:
             echo "No changes to post metrics."
           else
             git commit -m "chore(analytics): sync live eToro likes and engagement metrics [skip ci]"
+            git pull --rebase -X theirs origin main || true
             git push origin main || echo "Git push skipped"
           fi

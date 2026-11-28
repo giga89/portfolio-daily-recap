@@ -213,6 +213,18 @@ def test_mistral_model(api_key: str, model_name: str) -> dict:
     except urllib.error.HTTPError as he:
         latency = round((time.time() - t0) * 1000)
         err_body = he.read().decode()
+        if he.code == 402:
+            return {
+                "status": "billing_inactive",
+                "latency": latency,
+                "detail": "HTTP 402 — Piano/budget API non attivo su console.mistral.ai",
+            }
+        if he.code in (401, 403):
+            return {
+                "status": "auth_error",
+                "latency": latency,
+                "detail": f"HTTP {he.code} — Chiave API non valida o revocata",
+            }
         if he.code == 429:
             limit_rpm = str(he.headers.get("x-ratelimit-limit-req-minute", "")).strip() if he.headers else ""
             if limit_rpm == "0":
@@ -336,18 +348,27 @@ def format_telegram_health_report(
         lines.append("• <b>Groq</b>: ⚠️ Non configurato")
 
     if mistral_results:
-        for m, _descr in ACTIVE_MISTRAL_MODELS:
-            r = mistral_results.get(m, {})
-            st = r.get("status")
-            detail = html.escape(str(r.get("detail", "N/D")))
-            if st == "ok":
-                lines.append(f"• <b>Mistral ({html.escape(m)})</b>: ✅ Attivo ({r['latency']}ms)")
-            elif st == "unverified":
-                lines.append(f"• <b>Mistral ({html.escape(m)})</b>: ℹ️ 0 RPM ({detail})")
-            elif st == "quota_exceeded":
-                lines.append(f"• <b>Mistral ({html.escape(m)})</b>: 🟡 {detail}")
-            else:
-                lines.append(f"• <b>Mistral ({html.escape(m)})</b>: ⚠️ {detail}")
+        all_billing_inactive = all(
+            mistral_results.get(m, {}).get("status") == "billing_inactive"
+            for m, _ in ACTIVE_MISTRAL_MODELS
+        )
+        if all_billing_inactive:
+            lines.append(
+                "• <b>Mistral API</b>: ℹ️ Piano/budget API non attivo su console.mistral.ai (HTTP 402) — audit attivo su Groq"
+            )
+        else:
+            for m, _descr in ACTIVE_MISTRAL_MODELS:
+                r = mistral_results.get(m, {})
+                st = r.get("status")
+                detail = html.escape(str(r.get("detail", "N/D")))
+                if st == "ok":
+                    lines.append(f"• <b>Mistral ({html.escape(m)})</b>: ✅ Attivo ({r['latency']}ms)")
+                elif st in ("unverified", "billing_inactive"):
+                    lines.append(f"• <b>Mistral ({html.escape(m)})</b>: ℹ️ {detail}")
+                elif st == "quota_exceeded":
+                    lines.append(f"• <b>Mistral ({html.escape(m)})</b>: 🟡 {detail}")
+                else:
+                    lines.append(f"• <b>Mistral ({html.escape(m)})</b>: ⚠️ {detail}")
     else:
         lines.append("• <b>Mistral</b>: ℹ️ Non configurato")
 
@@ -462,8 +483,16 @@ def run_health_check(notify_always: bool = False) -> int:
             print(f"🔍 Testing Mistral: {model_name} ({descr})...")
             res = test_mistral_model(mistral_key, model_name)
             mistral_results[model_name] = res
-            status_emoji = "✅" if res["status"] == "ok" else "ℹ️" if res["status"] == "unverified" else "⚠️"
+            status_emoji = (
+                "✅" if res["status"] == "ok"
+                else "ℹ️" if res["status"] in ("unverified", "billing_inactive")
+                else "⚠️"
+            )
             print(f"   {status_emoji} Status: {res['status']} ({res['latency']}ms) — {res['detail']}")
+            if res["status"] in ("billing_inactive", "auth_error"):
+                for rem_model, _ in ACTIVE_MISTRAL_MODELS[idx + 1:]:
+                    mistral_results[rem_model] = dict(res)
+                break
             # Free Tier enforces 1 RPS across Mistral endpoints
             if idx < len(ACTIVE_MISTRAL_MODELS) - 1:
                 time.sleep(1.3)

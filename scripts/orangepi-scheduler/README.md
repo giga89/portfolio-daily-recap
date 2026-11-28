@@ -31,6 +31,7 @@ All cron entries are scheduled directly in Italian local time (`Europe/Rome` - C
 | **Monthly Recap** | Month end 21:02 / 22:02 | 16:02 New York | Full month recap (replaces US close on final day) |
 | **Weekly (Sun)** | Sun 22:00 | — | Sunday macro & week ahead preview |
 | **Dashboard Sync** | Daily 02:00 | — | Nightly metrics & track record sync |
+| **Comment Responder** | Daily 08:15, 11:15, 14:15, 17:15, 20:15, 23:15 | — | AI community comment & sub-thread replies |
 
 ## Setup
 

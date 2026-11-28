@@ -81,3 +81,6 @@ CRON_TZ=Europe/Rome
 
 # ── Nightly Dashboard & Metrics Sync (Daily 02:00 ITA) ────────────────────────
 0 2 * * *         /opt/portfolio-dispatch/dispatch.sh dashboard_sync >> /opt/portfolio-dispatch/logs/cron.log 2>&1
+
+# ── AI Community Comment Responder (Daily every 3 hours, 08:15-23:15 ITA) ────
+15 8,11,14,17,20,23 * * * /opt/portfolio-dispatch/dispatch.sh comment_responder >> /opt/portfolio-dispatch/logs/cron.log 2>&1
